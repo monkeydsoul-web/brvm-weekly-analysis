@@ -13,7 +13,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":31111110,
-    "fetched_at":"2026-04-28T15:55:47.832671",
+    "fetched_at":"2026-04-28T16:21:19.634205",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -32,7 +32,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":10000000,
-    "fetched_at":"2026-04-28T15:55:48.778147",
+    "fetched_at":"2026-04-28T16:21:20.353939",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -51,7 +51,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":100000000,
-    "fetched_at":"2026-04-28T15:55:49.624968",
+    "fetched_at":"2026-04-28T16:21:21.129332",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -70,7 +70,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":20000000,
-    "fetched_at":"2026-04-28T15:55:50.406476",
+    "fetched_at":"2026-04-28T16:21:22.040049",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -89,7 +89,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":19232000,
-    "fetched_at":"2026-04-28T15:55:50.406526",
+    "fetched_at":"2026-04-28T16:21:22.040084",
     "div_yield":5.77,
     "market_cap_xof":300019200000.0,
     "eps_est":3120.0
@@ -108,7 +108,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":40600000,
-    "fetched_at":"2026-04-28T15:55:51.123585",
+    "fetched_at":"2026-04-28T16:21:22.959901",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -127,7 +127,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":23856000,
-    "fetched_at":"2026-04-28T15:55:51.884483",
+    "fetched_at":"2026-04-28T16:21:23.691273",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -146,7 +146,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":27500000,
-    "fetched_at":"2026-04-28T15:55:52.664227",
+    "fetched_at":"2026-04-28T16:21:24.486900",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -165,7 +165,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":12000000,
-    "fetched_at":"2026-04-28T15:55:53.387317",
+    "fetched_at":"2026-04-28T16:21:26.268117",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -184,7 +184,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":10000000,
-    "fetched_at":"2026-04-28T15:55:54.153617",
+    "fetched_at":"2026-04-28T16:21:27.005989",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -203,7 +203,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":15000000,
-    "fetched_at":"2026-04-28T15:55:54.933909",
+    "fetched_at":"2026-04-28T16:21:27.804346",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -222,7 +222,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":64788600,
-    "fetched_at":"2026-04-28T15:55:55.735283",
+    "fetched_at":"2026-04-28T16:21:28.622008",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -241,7 +241,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":9000000,
-    "fetched_at":"2026-04-28T15:55:56.468151",
+    "fetched_at":"2026-04-28T16:21:29.344816",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -260,7 +260,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":28000000000,
-    "fetched_at":"2026-04-28T15:55:57.260613",
+    "fetched_at":"2026-04-28T16:21:30.149934",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -279,7 +279,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":39200000,
-    "fetched_at":"2026-04-28T15:55:58.053051",
+    "fetched_at":"2026-04-28T16:21:30.900933",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -298,7 +298,7 @@
     "debt_level":"Faible",
     "earnings_stable":false,
     "shares_outstanding":5000000,
-    "fetched_at":"2026-04-28T15:55:58.807302",
+    "fetched_at":"2026-04-28T16:21:31.666864",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -317,7 +317,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":true,
     "shares_outstanding":141174476,
-    "fetched_at":"2026-04-28T15:55:58.807344",
+    "fetched_at":"2026-04-28T16:21:31.666916",
     "div_yield":4.59,
     "market_cap_xof":2152910759000.0,
     "eps_est":1017.0
@@ -336,7 +336,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":157500000,
-    "fetched_at":"2026-04-28T15:55:58.807374",
+    "fetched_at":"2026-04-28T16:21:31.666943",
     "div_yield":5.74,
     "market_cap_xof":425250000000.0,
     "eps_est":225.0
@@ -355,7 +355,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":36364848,
-    "fetched_at":"2026-04-28T15:55:58.807390",
+    "fetched_at":"2026-04-28T16:21:31.666957",
     "div_yield":3.57,
     "market_cap_xof":418195752000.0,
     "eps_est":639.0
@@ -374,7 +374,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":18000000,
-    "fetched_at":"2026-04-28T15:55:59.555359",
+    "fetched_at":"2026-04-28T16:21:32.401313",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -393,7 +393,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":6884660,
-    "fetched_at":"2026-04-28T15:55:59.555410",
+    "fetched_at":"2026-04-28T16:21:32.401365",
     "div_yield":1.53,
     "market_cap_xof":406194940000.0,
     "eps_est":2682.0
@@ -412,7 +412,7 @@
     "debt_level":"Faible",
     "earnings_stable":false,
     "shares_outstanding":11852972,
-    "fetched_at":"2026-04-28T15:56:00.320134",
+    "fetched_at":"2026-04-28T16:21:33.130934",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -431,7 +431,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":4900000,
-    "fetched_at":"2026-04-28T15:56:01.040319",
+    "fetched_at":"2026-04-28T16:21:33.855448",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -450,7 +450,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":12816480,
-    "fetched_at":"2026-04-28T15:56:01.040371",
+    "fetched_at":"2026-04-28T16:21:33.855502",
     "div_yield":10.13,
     "market_cap_xof":25312548000.0,
     "eps_est":90.0
@@ -469,7 +469,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":45000000,
-    "fetched_at":"2026-04-28T15:56:01.808194",
+    "fetched_at":"2026-04-28T16:21:34.624499",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -488,7 +488,7 @@
     "debt_level":"Faible",
     "earnings_stable":false,
     "shares_outstanding":18974000,
-    "fetched_at":"2026-04-28T15:56:01.808321",
+    "fetched_at":"2026-04-28T16:21:34.624552",
     "div_yield":2.75,
     "market_cap_xof":34532680000.0,
     "eps_est":101.0
@@ -507,7 +507,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":11021655,
-    "fetched_at":"2026-04-28T15:56:02.621117",
+    "fetched_at":"2026-04-28T16:21:35.411217",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -526,7 +526,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":23745000,
-    "fetched_at":"2026-04-28T15:56:03.361462",
+    "fetched_at":"2026-04-28T16:21:36.177491",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -545,7 +545,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":15000000,
-    "fetched_at":"2026-04-28T15:56:04.156979",
+    "fetched_at":"2026-04-28T16:21:36.958491",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -564,7 +564,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":27591750,
-    "fetched_at":"2026-04-28T15:56:04.914759",
+    "fetched_at":"2026-04-28T16:21:37.685267",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -583,7 +583,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":75676670,
-    "fetched_at":"2026-04-28T15:56:05.730405",
+    "fetched_at":"2026-04-28T16:21:38.422011",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -602,7 +602,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":38750000,
-    "fetched_at":"2026-04-28T15:56:06.542270",
+    "fetched_at":"2026-04-28T16:21:39.195702",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -621,7 +621,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":120000000,
-    "fetched_at":"2026-04-28T15:56:07.321466",
+    "fetched_at":"2026-04-28T16:21:39.954949",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -640,7 +640,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":10000000,
-    "fetched_at":"2026-04-28T15:56:08.122029",
+    "fetched_at":"2026-04-28T16:21:40.678299",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -659,7 +659,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":true,
     "shares_outstanding":65536000,
-    "fetched_at":"2026-04-28T15:56:08.122079",
+    "fetched_at":"2026-04-28T16:21:40.678331",
     "div_yield":3.77,
     "market_cap_xof":208404480000.0,
     "eps_est":227.0
@@ -678,7 +678,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":true,
     "shares_outstanding":12000000,
-    "fetched_at":"2026-04-28T15:56:08.122112",
+    "fetched_at":"2026-04-28T16:21:40.678353",
     "div_yield":3.21,
     "market_cap_xof":93480000000.0,
     "eps_est":556.0
@@ -697,7 +697,7 @@
     "debt_level":"Faible",
     "earnings_stable":false,
     "shares_outstanding":45294490,
-    "fetched_at":"2026-04-28T15:56:08.879961",
+    "fetched_at":"2026-04-28T16:21:41.450651",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -716,7 +716,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":33000000,
-    "fetched_at":"2026-04-28T15:56:09.644922",
+    "fetched_at":"2026-04-28T16:21:42.214516",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -735,7 +735,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":14000000,
-    "fetched_at":"2026-04-28T15:56:10.443888",
+    "fetched_at":"2026-04-28T16:21:42.939284",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -754,7 +754,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":35200000,
-    "fetched_at":"2026-04-28T15:56:11.156367",
+    "fetched_at":"2026-04-28T16:21:43.678211",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -773,7 +773,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":30000000,
-    "fetched_at":"2026-04-28T15:56:11.885120",
+    "fetched_at":"2026-04-28T16:21:44.445302",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -792,7 +792,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":18000000,
-    "fetched_at":"2026-04-28T15:56:12.643389",
+    "fetched_at":"2026-04-28T16:21:45.229044",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -811,7 +811,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":20000000,
-    "fetched_at":"2026-04-28T15:56:13.441441",
+    "fetched_at":"2026-04-28T16:21:46.006613",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -830,7 +830,7 @@
     "debt_level":"Mod\u00e9r\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":7000000,
-    "fetched_at":"2026-04-28T15:56:13.441501",
+    "fetched_at":"2026-04-28T16:21:46.006645",
     "div_yield":1.43,
     "market_cap_xof":24500000000.0,
     "eps_est":140.0
@@ -849,7 +849,7 @@
     "debt_level":"\u00c9lev\u00e9e",
     "earnings_stable":false,
     "shares_outstanding":17000000,
-    "fetched_at":"2026-04-28T15:56:14.212211",
+    "fetched_at":"2026-04-28T16:21:46.748604",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -868,7 +868,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":60000000,
-    "fetched_at":"2026-04-28T15:56:15.038057",
+    "fetched_at":"2026-04-28T16:21:47.465938",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null
@@ -887,7 +887,7 @@
     "debt_level":"Faible",
     "earnings_stable":true,
     "shares_outstanding":10000000,
-    "fetched_at":"2026-04-28T15:56:15.844192",
+    "fetched_at":"2026-04-28T16:21:48.238377",
     "div_yield":null,
     "market_cap_xof":null,
     "eps_est":null

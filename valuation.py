@@ -545,6 +545,11 @@ def compute_all_scores(df: pd.DataFrame) -> pd.DataFrame:
             "pb_ref": r.get("pb_ref"),
             "roe": r.get("roe"),
             "market_cap_xof": r.get("market_cap_xof"),
+            "div_per_share": r.get("div_per_share"),
+            "eps_est": r.get("eps_est"),
+            "book_value_per_share": r.get("book_value_per_share"),
+            "ex_div_date": r.get("ex_div_date", "N/D"),
+            "pay_div_date": r.get("pay_div_date", "N/D"),
             # Scores individuels
             "score_graham": g["score"],
             "score_dcf": dcf["score"],
