@@ -1,0 +1,23 @@
+{
+  "enabled": false,
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 587,
+  "sender_email": "TON_EMAIL@gmail.com",
+  "sender_password": "TON_MOT_DE_PASSE_APPLICATION",
+  "recipient_emails": [
+    "TON_EMAIL@gmail.com"
+  ],
+  "thresholds": {
+    "score_fort": 55,
+    "score_hausse": 5,
+    "score_baisse": -5,
+    "sentiment_alerte": 3
+  },
+  "alert_types": {
+    "rapport_hebdo": true,
+    "dividende_confirme": true,
+    "resultats_importants": true,
+    "score_franchissement": true,
+    "news_negative": true
+  }
+}

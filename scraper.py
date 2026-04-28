@@ -108,7 +108,7 @@ def fetch_brvm_prices() -> dict:
     return prices
 
 
-def fetch_kwayisi_price(ticker: str) -> dict | None:
+def fetch_kwayisi_price(ticker: str) :
     """Récupère les données d'un ticker depuis afx.kwayisi.org"""
     url = f"https://afx.kwayisi.org/brvm/{ticker.lower()}.html"
     try:
