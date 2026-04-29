@@ -319,6 +319,14 @@ def _cache_macro():
         logger.warning(f"Cache macro: {e}")
 
 
+
+try:
+    from features import register_routes
+    register_routes(app)
+    print('Features OK')
+except Exception as e:
+    print(f'Features error: {e}')
+
 if __name__ == "__main__":
     import socket
     os.makedirs("dashboard", exist_ok=True)
