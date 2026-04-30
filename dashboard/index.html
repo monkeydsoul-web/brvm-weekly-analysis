@@ -980,4 +980,112 @@ document.querySelectorAll('.ni').forEach(ni=>{
 });
 
 init();
-</script></body></html>
+</script>
+    <!-- ═══ PAGE BOUGIES (CANDLESTICK) ════════════════════════════════════════ -->
+    <div id="page-candlestick" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div>
+          <h1 style="font-size:24px;font-weight:600;color:var(--text-primary,#e2e8f0);margin:0">Graphiques Bougies</h1>
+          <p style="color:var(--text-secondary,#94a3b8);margin:4px 0 0;font-size:14px">Historique OHLC hebdomadaire — données 2016-2025</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="cs-ticker-select" onchange="loadCandlestick()" style="background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px 12px;font-size:13px">
+            <option value="SGBC">SGBC</option>
+            <option value="CBIBF">CBIBF</option>
+            <option value="SNTS">SNTS</option>
+            <option value="NSBC">NSBC</option>
+            <option value="ORAC">ORAC</option>
+            <option value="SIBC">SIBC</option>
+            <option value="NTLC">NTLC</option>
+            <option value="LNBB">LNBB</option>
+            <option value="BOAB">BOAB</option>
+            <option value="SMBC">SMBC</option>
+          </select>
+          <div style="display:flex;gap:4px">
+            <button onclick="setCsPeriod('1y')" id="btn-cs-1y" style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">1 an</button>
+            <button onclick="setCsPeriod('5y')" id="btn-cs-5y" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">5 ans</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte principale SVG candlestick -->
+      <div style="background:#0f172a;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #1e293b">
+        <div id="cs-chart-container" style="min-height:320px;display:flex;align-items:center;justify-content:center">
+          <div id="cs-loading" style="color:#64748b;font-size:14px">Sélectionnez une action…</div>
+        </div>
+      </div>
+
+      <!-- Métriques résumé -->
+      <div id="cs-metrics" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+
+      <!-- Table OHLC récente -->
+      <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
+        <h3 style="color:#e2e8f0;margin:0 0 16px;font-size:14px;font-weight:500">Dernières bougies hebdomadaires</h3>
+        <div style="overflow-x:auto">
+          <table id="cs-ohlc-table" style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="border-bottom:1px solid #334155">
+                <th style="padding:8px 12px;color:#64748b;text-align:left;font-weight:500">Semaine</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Ouv.</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Haut</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Bas</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Clôt.</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Var.</th>
+              </tr>
+            </thead>
+            <tbody id="cs-ohlc-tbody">
+              <tr><td colspan="6" style="padding:20px;text-align:center;color:#64748b">–</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ FIN PAGE BOUGIES ═══════════════════════════════════════════════════ -->
+
+    <!-- ═══ PAGE BACKTESTING ══════════════════════════════════════════════════ -->
+    <div id="page-backtesting" class="page" style="display:none">
+      <div class="page-header" style="margin-bottom:24px">
+        <h1 style="font-size:24px;font-weight:600;color:var(--text-primary,#e2e8f0);margin:0">Backtesting des Scores</h1>
+        <p style="color:var(--text-secondary,#94a3b8);margin:4px 0 0;font-size:14px">Validation empirique : est-ce qu'un score élevé prédit réellement la surperformance ?</p>
+      </div>
+
+      <!-- Bouton de lancement -->
+      <div style="margin-bottom:20px;display:flex;gap:12px;align-items:center">
+        <button onclick="runBacktesting(false)" id="btn-bt-run"
+          style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:500;cursor:pointer">
+          ▶ Lancer le backtesting
+        </button>
+        <button onclick="runBacktesting(true)"
+          style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer">
+          ↺ Recalculer
+        </button>
+        <span id="bt-status" style="color:#64748b;font-size:13px"></span>
+      </div>
+
+      <!-- Résumé validation -->
+      <div id="bt-validation-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px"></div>
+
+      <!-- Tableau détail par ticker -->
+      <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
+        <h3 style="color:#e2e8f0;margin:0 0 16px;font-size:14px;font-weight:500">Détail par action</h3>
+        <div style="overflow-x:auto">
+          <table id="bt-detail-table" style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="border-bottom:1px solid #334155">
+                <th style="padding:8px 12px;color:#64748b;text-align:left;font-weight:500">Action</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:center;font-weight:500">Score</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 3M</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 6M</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 12M</th>
+                <th style="padding:8px 12px;color:#64748b;text-align:center;font-weight:500">% Haussier</th>
+              </tr>
+            </thead>
+            <tbody id="bt-detail-tbody">
+              <tr><td colspan="6" style="padding:20px;text-align:center;color:#64748b">Lancez le backtesting pour voir les résultats</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ FIN PAGE BACKTESTING ═══════════════════════════════════════════════ -->
+</body></html>

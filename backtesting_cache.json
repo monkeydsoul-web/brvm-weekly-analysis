@@ -1,0 +1,418 @@
+{
+  "generated_at": "2026-04-30T12:13:33.045123",
+  "metrics": {
+    "strategy_annualized_return": 15.21,
+    "benchmark_annualized_return": 9.33,
+    "strategy_sharpe": 1.33,
+    "benchmark_sharpe": 0.909,
+    "strategy_max_drawdown": 6.4,
+    "benchmark_max_drawdown": 8.0,
+    "hit_rate_pct": 100.0,
+    "total_alpha_pct": 5.88,
+    "n_years": 9,
+    "top_n": 5
+  },
+  "results_by_year": [
+    {
+      "year": 2016,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 48
+        },
+        {
+          "ticker": "SNTS",
+          "score": 44
+        },
+        {
+          "ticker": "SGBC",
+          "score": 38
+        },
+        {
+          "ticker": "NSBC",
+          "score": 38
+        },
+        {
+          "ticker": "SIBC",
+          "score": 35
+        }
+      ],
+      "portfolio_return_pct": 13,
+      "benchmark_return_pct": 8,
+      "alpha_pct": 5,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2017,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 50
+        },
+        {
+          "ticker": "SNTS",
+          "score": 46
+        },
+        {
+          "ticker": "SGBC",
+          "score": 40
+        },
+        {
+          "ticker": "NSBC",
+          "score": 40
+        },
+        {
+          "ticker": "SIBC",
+          "score": 37
+        }
+      ],
+      "portfolio_return_pct": 18,
+      "benchmark_return_pct": 11,
+      "alpha_pct": 7,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2018,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 52
+        },
+        {
+          "ticker": "SNTS",
+          "score": 47
+        },
+        {
+          "ticker": "SGBC",
+          "score": 42
+        },
+        {
+          "ticker": "NSBC",
+          "score": 41
+        },
+        {
+          "ticker": "SIBC",
+          "score": 39
+        }
+      ],
+      "portfolio_return_pct": 17.6,
+      "benchmark_return_pct": 10,
+      "alpha_pct": 7.6,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2019,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 54
+        },
+        {
+          "ticker": "SNTS",
+          "score": 48
+        },
+        {
+          "ticker": "SGBC",
+          "score": 44
+        },
+        {
+          "ticker": "NSBC",
+          "score": 42
+        },
+        {
+          "ticker": "SIBC",
+          "score": 41
+        }
+      ],
+      "portfolio_return_pct": 16,
+      "benchmark_return_pct": 12,
+      "alpha_pct": 4,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2020,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 51
+        },
+        {
+          "ticker": "SNTS",
+          "score": 46
+        },
+        {
+          "ticker": "SGBC",
+          "score": 41
+        },
+        {
+          "ticker": "NSBC",
+          "score": 40
+        },
+        {
+          "ticker": "SIBC",
+          "score": 38
+        }
+      ],
+      "portfolio_return_pct": -6.4,
+      "benchmark_return_pct": -8,
+      "alpha_pct": 1.6,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2021,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 53
+        },
+        {
+          "ticker": "SNTS",
+          "score": 48
+        },
+        {
+          "ticker": "SGBC",
+          "score": 43
+        },
+        {
+          "ticker": "NSBC",
+          "score": 41
+        },
+        {
+          "ticker": "SIBC",
+          "score": 40
+        }
+      ],
+      "portfolio_return_pct": 22.6,
+      "benchmark_return_pct": 14,
+      "alpha_pct": 8.6,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2022,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 55
+        },
+        {
+          "ticker": "SNTS",
+          "score": 50
+        },
+        {
+          "ticker": "SGBC",
+          "score": 44
+        },
+        {
+          "ticker": "SIBC",
+          "score": 42
+        },
+        {
+          "ticker": "NSBC",
+          "score": 42
+        }
+      ],
+      "portfolio_return_pct": 28,
+      "benchmark_return_pct": 18,
+      "alpha_pct": 10,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2023,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 56
+        },
+        {
+          "ticker": "SNTS",
+          "score": 51
+        },
+        {
+          "ticker": "SGBC",
+          "score": 45
+        },
+        {
+          "ticker": "SIBC",
+          "score": 43
+        },
+        {
+          "ticker": "NSBC",
+          "score": 43
+        }
+      ],
+      "portfolio_return_pct": 18.2,
+      "benchmark_return_pct": 12,
+      "alpha_pct": 6.2,
+      "beat_benchmark": true
+    },
+    {
+      "year": 2024,
+      "top_picks": [
+        {
+          "ticker": "CBIBF",
+          "score": 56
+        },
+        {
+          "ticker": "SNTS",
+          "score": 51
+        },
+        {
+          "ticker": "SGBC",
+          "score": 44
+        },
+        {
+          "ticker": "SIBC",
+          "score": 42
+        },
+        {
+          "ticker": "NSBC",
+          "score": 42
+        }
+      ],
+      "portfolio_return_pct": 13.2,
+      "benchmark_return_pct": 9,
+      "alpha_pct": 4.2,
+      "beat_benchmark": true
+    }
+  ],
+  "growth_series": [
+    {
+      "year": 2016,
+      "strategy": 113.0,
+      "benchmark": 108.0
+    },
+    {
+      "year": 2017,
+      "strategy": 133.3,
+      "benchmark": 119.9
+    },
+    {
+      "year": 2018,
+      "strategy": 156.8,
+      "benchmark": 131.9
+    },
+    {
+      "year": 2019,
+      "strategy": 181.9,
+      "benchmark": 147.7
+    },
+    {
+      "year": 2020,
+      "strategy": 170.3,
+      "benchmark": 135.9
+    },
+    {
+      "year": 2021,
+      "strategy": 208.7,
+      "benchmark": 154.9
+    },
+    {
+      "year": 2022,
+      "strategy": 267.2,
+      "benchmark": 182.8
+    },
+    {
+      "year": 2023,
+      "strategy": 315.8,
+      "benchmark": 204.7
+    },
+    {
+      "year": 2024,
+      "strategy": 357.5,
+      "benchmark": 223.1
+    }
+  ],
+  "ticker_performance": {
+    "SGBC": {
+      "annualized_return": 15.45,
+      "sharpe": 1.247,
+      "max_drawdown": 8.0,
+      "avg_score": 42.5
+    },
+    "SIBC": {
+      "annualized_return": 15.73,
+      "sharpe": 1.384,
+      "max_drawdown": 5.0,
+      "avg_score": 39.9
+    },
+    "SNTS": {
+      "annualized_return": 11.1,
+      "sharpe": 1.195,
+      "max_drawdown": 3.0,
+      "avg_score": 48.2
+    },
+    "CBIBF": {
+      "annualized_return": 17.7,
+      "sharpe": 1.28,
+      "max_drawdown": 10.0,
+      "avg_score": 53.1
+    },
+    "NSBC": {
+      "annualized_return": 12.5,
+      "sharpe": 1.161,
+      "max_drawdown": 6.0,
+      "avg_score": 41.1
+    },
+    "ORAC": {
+      "annualized_return": 7.42,
+      "sharpe": 0.532,
+      "max_drawdown": 15.0,
+      "avg_score": 38.9
+    },
+    "BOAB": {
+      "annualized_return": 7.43,
+      "sharpe": 0.739,
+      "max_drawdown": 8.0,
+      "avg_score": 33
+    },
+    "ECOC": {
+      "annualized_return": 5.78,
+      "sharpe": 0.436,
+      "max_drawdown": 12.0,
+      "avg_score": 31
+    },
+    "BICC": {
+      "annualized_return": 8.43,
+      "sharpe": 0.9,
+      "max_drawdown": 7.0,
+      "avg_score": 35
+    },
+    "NTLC": {
+      "annualized_return": 7.58,
+      "sharpe": 0.892,
+      "max_drawdown": 5.0,
+      "avg_score": 32
+    },
+    "STBC": {
+      "annualized_return": 10.04,
+      "sharpe": 0.951,
+      "max_drawdown": 9.0,
+      "avg_score": 36
+    },
+    "UNLC": {
+      "annualized_return": 8.35,
+      "sharpe": 0.93,
+      "max_drawdown": 6.0,
+      "avg_score": 33
+    },
+    "SLBC": {
+      "annualized_return": 5.04,
+      "sharpe": 0.379,
+      "max_drawdown": 10.0,
+      "avg_score": 28
+    },
+    "PALC": {
+      "annualized_return": 3.93,
+      "sharpe": 0.18,
+      "max_drawdown": 12.0,
+      "avg_score": 25
+    },
+    "SPHC": {
+      "annualized_return": 3.7,
+      "sharpe": 0.173,
+      "max_drawdown": 8.0,
+      "avg_score": 23
+    }
+  },
+  "score_vs_return_correlation": 0.879
+}

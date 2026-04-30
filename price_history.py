@@ -73,7 +73,7 @@ def update_history(df_current: pd.DataFrame) -> dict:
     return history
 
 
-def compute_rsi(prices: list[float], period: int = 14) -> float | None:
+def compute_rsi(prices: list[float], period: int = 14) -> object:
     """Calcule le RSI sur une série de prix"""
     if len(prices) < period + 1:
         return None

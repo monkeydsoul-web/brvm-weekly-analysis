@@ -1,3 +1,10 @@
+import os
+import os as _os_fix
+try:
+    from dotenv import load_dotenv as _ld; _ld()
+except ImportError:
+    pass
+
 """
 BRVM Features — Modules additionnels
 Portfolio · Alertes prix · Score personnalisé · Export · Chat IA · Prévisions
@@ -270,35 +277,27 @@ def export_csv() -> str:
     return buf.getvalue()
 
 # ── AI Chat ────────────────────────────────────────────────────────────────
-def chat_with_ai(message: str, history: list) -> str:
-    api_key = os.environ.get("ANTHROPIC_API_KEY","")
-    if not api_key:
-        return "⚠️ Clé API Claude non configurée. Ajoute ANTHROPIC_API_KEY dans ton environnement."
-    import requests as req
-    scores = _load_scores()
-    top5 = sorted(scores, key=lambda x: x.get("composite_adj",0), reverse=True)[:5]
-    context = f"""Tu es un analyste financier expert de la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
-Tu as accès aux données d'analyse actuelles de 47 actions cotées.
-
-TOP 5 ACTIONS (scores actuels):
-{chr(10).join(f"- {s['ticker']} ({s.get('name','')}) : {s.get('composite_adj',0):.0f}/80 | P/E {s.get('pe_ref','?')}× | Div {s.get('div_yield',0):.1f}% | ROE {s.get('roe','?')}%" for s in top5)}
-
-Réponds en français, de façon concise et professionnelle. Si on te demande des données spécifiques sur une action, utilise les données ci-dessus ou indique que tu n'as pas l'information exacte."""
-    msgs = []
-    for h in history[-6:]:
-        if h.get("role") in ("user","assistant"):
-            msgs.append({"role":h["role"],"content":h["content"]})
-    msgs.append({"role":"user","content":message})
+def chat_with_ai(message, history):
+    import requests as _req
+    _key = os.environ.get("ANTHROPIC_API_KEY", "")
+    _scores = _load_scores()
+    _top = sorted(_scores, key=lambda x: x.get("composite_adj",0), reverse=True)[:5]
+    _ctx = "Tu es analyste BRVM. Top actions: " + ", ".join(s["ticker"] for s in _top)
+    _msgs = [{"role":"user","content":message}]
+    import sys
+    open("/tmp/brvm_chat_debug.log","a").write("CHAT_CALLED key=" + _key[:15] + "\n")
     try:
-        r = req.post("https://api.anthropic.com/v1/messages",
-            headers={"x-api-key":api_key,"anthropic-version":"2023-06-01","content-type":"application/json"},
-            json={"model":"claude-sonnet-4-20250514","max_tokens":600,"system":context,"messages":msgs},
+        _r = _req.post("https://api.anthropic.com/v1/messages",
+            headers={"x-api-key":_key,"anthropic-version":"2023-06-01","content-type":"application/json"},
+            json={"model":"claude-haiku-4-5-20251001","max_tokens":600,"system":_ctx,"messages":_msgs},
             timeout=30)
-        r.raise_for_status()
-        return r.json()["content"][0]["text"]
-    except Exception as e:
-        return f"Erreur: {e}"
-
+        print("CHAT_STATUS=" + str(_r.status_code), file=sys.stderr, flush=True)
+        print("CHAT_RESP=" + _r.text[:100], file=sys.stderr, flush=True)
+        _r.raise_for_status()
+        return _r.json()["content"][0]["text"]
+    except Exception as _e:
+        print("CHAT_ERROR:", str(_e), file=sys.stderr, flush=True)
+        return "Erreur: " + str(_e)
 
 def register_routes(app):
     """Enregistre toutes les routes additionnelles sur l'app Flask"""
@@ -385,9 +384,21 @@ def register_routes(app):
 
     @app.route("/api/chat", methods=["POST"])
     def api_chat():
+        import requests as _r2
         d = request.json or {}
-        reply = chat_with_ai(d.get("message",""), d.get("history",[]))
-        return jsonify({"reply": reply})
+        msg = d.get("message","")
+        _k = os.environ.get("ANTHROPIC_API_KEY", "")
+        try:
+            _resp = _r2.post("https://api.anthropic.com/v1/messages",
+                headers={"x-api-key":_k,"anthropic-version":"2023-06-01","content-type":"application/json"},
+                json={"model":"claude-haiku-4-5-20251001","max_tokens":600,
+                      "system":"Tu es analyste BRVM. Réponds en français.",
+                      "messages":[{"role":"user","content":msg}]},
+                timeout=30)
+            _resp.raise_for_status()
+            return jsonify({"reply": _resp.json()["content"][0]["text"]})
+        except Exception as _ex:
+            return jsonify({"reply": "Erreur: " + str(_ex)})
 
     @app.route("/api/search")
     def api_search():

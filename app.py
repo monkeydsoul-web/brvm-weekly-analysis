@@ -327,15 +327,73 @@ try:
 except Exception as e:
     print(f'Features error: {e}')
 
+
+
+# ─── ROUTES AJOUTÉES PAR install_improvements.py ─────────────────────────────
+
+@app.route("/api/candlestick/<ticker>")
+def api_candlestick(ticker):
+    """Données OHLC + SVG candlestick pour un ticker."""
+    try:
+        from candlestick import get_candlestick_data_for_ticker
+        data = get_candlestick_data_for_ticker(ticker.upper())
+        period = request.args.get("period", "1y")
+        return jsonify({
+            "ticker": data["ticker"],
+            "ohlc":   data.get(f"ohlc_{period}", data["ohlc_1y"]),
+            "svg":    data.get(f"svg_{period}",  data["svg_1y"]),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/backtesting")
+def api_backtesting():
+    """Lance ou retourne le backtesting des scores."""
+    from pathlib import Path
+    import json
+    cache_file = Path("backtesting_cache.json")
+    force = request.args.get("force", "0") == "1"
+
+    if not force and cache_file.exists():
+        try:
+            data = json.loads(cache_file.read_text())
+            data["from_cache"] = True
+            return jsonify(data)
+        except Exception:
+            pass
+
+    try:
+        from backtesting import run_backtesting
+        result = run_backtesting()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/backtesting/summary")
+def api_backtesting_summary():
+    """HTML résumé du backtesting pour le dashboard."""
+    try:
+        from backtesting import get_backtesting_summary_html
+        return get_backtesting_summary_html(), 200, {"Content-Type": "text/html"}
+    except Exception as e:
+        return f"<p>Erreur: {e}</p>", 500
+
+# ─── FIN ROUTES AJOUTÉES ──────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     import socket
-    os.makedirs("dashboard", exist_ok=True)
-    os.makedirs(DATA_DIR, exist_ok=True)
+    import os as _os
+    try:
+        from dotenv import load_dotenv as _ldenv
+        _ldenv()
+    except ImportError:
+        pass
     port = 5000
     for p in range(5000, 5010):
         try:
             s = socket.socket(); s.bind(("127.0.0.1", p)); s.close(); port = p; break
-        except: pass
+        except:
+            pass
     print("\n" + "="*50)
     print(f"  BRVM Dashboard — http://localhost:{port}")
     print("="*50 + "\n")

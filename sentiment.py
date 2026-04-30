@@ -1,3 +1,9 @@
+import os as _os_fix
+try:
+    from dotenv import load_dotenv as _ld; _ld()
+except ImportError:
+    pass
+
 """
 BRVM Sentiment Analyzer — Phase 3
 Analyse les news avec l'API Claude pour produire :
