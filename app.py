@@ -380,6 +380,27 @@ def api_backtesting_summary():
 
 # ─── FIN ROUTES AJOUTÉES ──────────────────────────────────────────────────────
 
+
+@app.route("/api/portfolio/optimize")
+def api_portfolio_optimize():
+    from portfolio_optimizer import optimize, load_cache
+    import json
+    force = request.args.get("force", "false").lower() == "true"
+    cache = load_cache()
+    if cache and not force:
+        cache["from_cache"] = True
+        return jsonify(cache)
+    result = optimize(n_sim=5000)
+    return jsonify(result)
+
+@app.route("/api/portfolio/optimize/summary")
+def api_portfolio_optimize_summary():
+    from portfolio_optimizer import get_optimizer_html, optimize, load_cache
+    cache = load_cache()
+    if not cache:
+        optimize(n_sim=3000)
+    return get_optimizer_html()
+
 if __name__ == "__main__":
     import socket
     import os as _os
