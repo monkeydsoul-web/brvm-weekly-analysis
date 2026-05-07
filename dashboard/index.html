@@ -196,6 +196,36 @@ input[type=range]{padding:0;height:20px}
     <button class="btn btn-g" onclick="showAddPosition()">+ Ajouter position</button>
   </div>
   <div id="portSummary" class="g4" style="margin-bottom:14px"></div>
+<div class="card" style="margin-bottom:12px" id="simPortCard">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="ct">Simulateur portefeuille live</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" style="font-size:10px" onclick="simAddTicker()">+ Action</button>
+      <button class="btn btn-o" style="font-size:10px" onclick="simReset()">Reset</button>
+    </div>
+  </div>
+  <div id="simSliders" style="margin-bottom:12px"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">Base simulation</div>
+      <div id="sim-value" style="font-size:13px;font-weight:700;color:var(--blue)">---</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">Rdt dividende</div>
+      <div id="sim-yield" style="font-size:13px;font-weight:700">---</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">Sharpe simule</div>
+      <div id="sim-sharpe" style="font-size:13px;font-weight:700">---</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">Div. annuel</div>
+      <div id="sim-div" style="font-size:13px;font-weight:700;color:var(--amber)">---</div>
+    </div>
+  </div>
+  <div id="sim-chart" style="width:100%;height:120px"></div>
+  <div id="sim-warning" style="font-size:10px;color:var(--red);margin-top:6px;display:none">Poids total doit etre 100%</div>
+</div>
   <div id="addPositionForm" style="display:none" class="card" style="margin-bottom:12px">
     <div class="ct">Ajouter / modifier une position</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
@@ -1083,7 +1113,7 @@ async function showStock(ticker){
           <div style="font-size:22px;font-weight:700">${s.price?s.price.toLocaleString('fr-FR'):'N/D'} <span style="font-size:12px;color:var(--t2)">XOF</span></div>
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
           <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
-          <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
+          <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
       <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         </div>
@@ -1222,4 +1252,5 @@ updateLiveStatus();
   fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
 setInterval(updateLiveStatus, 300000);
 </script>
+<script src="/simulator.js"></script>
 </body></html>

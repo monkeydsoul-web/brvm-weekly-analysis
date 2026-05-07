@@ -178,6 +178,12 @@ def fetch_commodity_prices():
 
 # ── Routes API ────────────────────────────────────────────────────────────────
 
+
+@app.route("/simulator.js")
+def serve_simulator():
+    return send_from_directory("dashboard", "simulator.js",
+                               mimetype="application/javascript")
+
 @app.route("/")
 def index():
     return send_from_directory("dashboard", "index.html")
