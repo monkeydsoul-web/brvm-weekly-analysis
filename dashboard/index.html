@@ -85,6 +85,10 @@ input[type=range]{padding:0;height:20px}
     <div>
       <h1>📈 BRVM</h1>
       <p>Dashboard · Analyse locale</p>
+      <div id="live-badge" style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:10px;font-weight:600;color:#6b7280">
+        <span id="live-dot" style="width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block"></span>
+        <span id="live-label">—</span>
+      </div>
     </div>
     <button class="btn-o btn" onclick="toggleTheme()" style="margin-left:auto;padding:4px 8px;font-size:11px" title="Thème">🌙</button>
   </div>
@@ -109,7 +113,10 @@ input[type=range]{padding:0;height:20px}
     </div>
     <div id="tlItems"></div>
   </div>
-  <div class="status" id="status">—</div>
+  <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
+  <div id="live-time" style="color:var(--t3)">MàJ : —</div>
+  <div id="live-src" style="color:var(--t3)">Source : —</div>
+</div>
 </aside>
 <main class="main">
 
@@ -998,5 +1005,56 @@ function navAnalyse(){
   fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
   fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
 }
+
+// ── Live status & auto-refresh ─────────────────────────────────────────────
+function updateLiveStatus() {
+  fetch('/api/status')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var open = d.market_open;
+      var dot   = document.getElementById('live-dot');
+      var label = document.getElementById('live-label');
+      var time  = document.getElementById('live-time');
+      var src   = document.getElementById('live-src');
+      if (dot) {
+        dot.style.background = open ? '#22c55e' : '#f59e0b';
+        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
+      }
+      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
+      if (time && d.updated_at) {
+        var dt = new Date(d.updated_at);
+        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+      }
+      if (src) {
+        var sources = d.sources || {};
+        var parts = [];
+        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
+        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
+        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
+      }
+      // Mettre a jour les prix dans la sidebar si disponible
+      fetch('/api/live')
+        .then(function(r){ return r.json(); })
+        .then(function(live) {
+          var prices = live.prices || {};
+          // Mettre a jour les items de la sidebar tlItems si present
+          var items = document.querySelectorAll('[data-ticker]');
+          items.forEach(function(el) {
+            var t = el.getAttribute('data-ticker');
+            if (prices[t] && prices[t].price) {
+              var priceEl = el.querySelector('.ti-score');
+              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
+              var chg = prices[t].change_pct || 0;
+              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
+            }
+          });
+        }).catch(function(){});
+    })
+    .catch(function(e){ console.warn('live status:', e); });
+}
+
+// Lancement au demarrage et toutes les 5 min
+updateLiveStatus();
+setInterval(updateLiveStatus, 300000);
 </script>
 </body></html>
