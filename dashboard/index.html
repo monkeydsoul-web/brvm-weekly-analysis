@@ -511,6 +511,93 @@ function svgLine(el,years,datasets,height=260){
   s+='</svg>';el.innerHTML=s;
 }
 
+
+// — Tooltip SVG —
+function showTooltip(evt,text){
+  var svg=evt.target.closest('svg');if(!svg)return;
+  var tt=svg.querySelector('[id^="tt-"]');
+  var bg=svg.querySelector('[id^="tt-bg-"]');
+  var tx=svg.querySelector('[id^="tt-txt-"]');
+  if(!tt||!bg||!tx)return;
+  tx.textContent=text;
+  tx.setAttribute('x',evt.offsetX+8);tx.setAttribute('y',evt.offsetY-4);
+  bg.setAttribute('x',evt.offsetX+4);bg.setAttribute('y',evt.offsetY-18);
+  bg.setAttribute('width',text.length*6+8);bg.setAttribute('height',16);
+  tt.setAttribute('opacity','1');
+}
+function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
+
+// — Alertes prix —
+var priceAlerts={};
+function loadAlerts(){try{priceAlerts=JSON.parse(localStorage.getItem('brvm_alerts')||'{}');}catch{priceAlerts={};}}
+function saveAlerts(){localStorage.setItem('brvm_alerts',JSON.stringify(priceAlerts));}
+function setAlert(ticker,threshold,direction){
+  if(!priceAlerts[ticker])priceAlerts[ticker]=[];
+  priceAlerts[ticker]=priceAlerts[ticker].filter(a=>a.direction!==direction);
+  priceAlerts[ticker].push({threshold:parseFloat(threshold),direction,active:true});
+  saveAlerts();
+  showNotif('Alerte '+(direction==='above'?'hausse':'baisse')+' creee pour '+ticker+' a '+threshold+' XOF','green');
+  updateAlertBadge();
+}
+function checkAlerts(prices){
+  if(!prices)return;
+  var triggered=[];
+  Object.entries(priceAlerts).forEach(function(e){
+    var ticker=e[0],alerts=e[1];
+    var p=prices[ticker];if(!p||!p.price)return;
+    alerts.forEach(function(a){
+      if(!a.active)return;
+      if(a.direction==='above'&&p.price>=a.threshold){triggered.push({ticker,price:p.price,threshold:a.threshold,dir:'UP'});a.active=false;}
+      if(a.direction==='below'&&p.price<=a.threshold){triggered.push({ticker,price:p.price,threshold:a.threshold,dir:'DOWN'});a.active=false;}
+    });
+  });
+  if(triggered.length){saveAlerts();triggered.forEach(function(t){showNotif('Alerte '+t.ticker+' '+t.dir+' '+t.price.toLocaleString('fr-FR')+' XOF',t.dir==='UP'?'green':'red');});updateAlertBadge();}
+}
+function updateAlertBadge(){
+  var n=Object.values(priceAlerts).flat().filter(function(a){return a.active;}).length;
+  var badge=document.getElementById('alert-badge');
+  if(badge)badge.textContent=n>0?n:'';
+}
+function showNotif(msg,color){
+  var n=document.createElement('div');
+  n.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+(color==='green'?'var(--green)':'var(--red)')+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+  n.textContent=msg;document.body.appendChild(n);setTimeout(function(){n.remove();},4000);
+}
+function showAlertModal(ticker){
+  var existing=document.getElementById('alert-modal');
+  if(existing)existing.remove();
+  var modal=document.createElement('div');
+  modal.id='alert-modal';
+  modal.style='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  modal.innerHTML=`<div style="font-weight:700;margin-bottom:12px">Alerte prix — ${ticker}</div>
+    <div style="margin-bottom:8px"><label style="font-size:11px;color:var(--t2)">Prix seuil (XOF)</label>
+    <input id="alert-price" type="number" style="width:100%;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);margin-top:4px"/></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="setAlert('${ticker}',document.getElementById('alert-price').value,'above');document.getElementById('alert-modal').remove()" style="flex:1;padding:8px;background:var(--green);border:none;border-radius:6px;color:#000;cursor:pointer;font-size:11px">Au-dessus</button>
+      <button onclick="setAlert('${ticker}',document.getElementById('alert-price').value,'below');document.getElementById('alert-modal').remove()" style="flex:1;padding:8px;background:var(--red);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:11px">En-dessous</button>
+    </div>
+    <button onclick="document.getElementById('alert-modal').remove()" style="width:100%;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t2);cursor:pointer;font-size:11px">Annuler</button>`;
+  document.body.appendChild(modal);
+}
+
+// — Comparaison multi-actions —
+var compareList=[];
+function toggleCompare(ticker){
+  if(compareList.includes(ticker)){
+    compareList=compareList.filter(function(t){return t!==ticker;});
+    showNotif(ticker+' retire de la comparaison','green');
+  } else {
+    if(compareList.length>=5){showNotif('Maximum 5 actions','red');return;}
+    compareList.push(ticker);
+    showNotif(ticker+' ajoute a la comparaison','green');
+  }
+  updateCompareBadge();
+}
+function updateCompareBadge(){
+  var b=document.getElementById('compare-badge');
+  if(b)b.textContent=compareList.length>0?'('+compareList.length+')':'';
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init(){
   try{
@@ -524,7 +611,7 @@ async function init(){
     ]);
     scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
     renderDash(m);renderRank();renderDiv();renderPerf();renderNews();renderComm();
-    renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadStatus();
+    renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadAlerts();updateAlertBadge();loadAlerts();updateAlertBadge();loadStatus();
     populateSelects();
   }catch(e){console.error(e)}
 }
@@ -997,6 +1084,8 @@ async function showStock(ticker){
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
           <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
+      <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
+      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         </div>
       </div>
       <div class="g4" style="margin-bottom:12px">
@@ -1038,7 +1127,7 @@ async function showStock(ticker){
     if((d.price_history||[]).length>1){
       const prices=d.price_history.map(p=>p.price),lbls=d.price_history.map(p=>(p.date||p.week||'').substring(0,10));
       const lc=prices[prices.length-1]>=prices[0]?'#4ADE80':'#F87171';
-      svgLine(document.getElementById('stockChartDiv'),lbls,[{label:ticker,data:prices}],150);
+      svgLineInteractive(document.getElementById('stockChartDiv'),lbls,[{label:ticker,data:prices}],180,ticker);
     }
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
@@ -1129,6 +1218,8 @@ function updateLiveStatus() {
 
 // Lancement au demarrage et toutes les 5 min
 updateLiveStatus();
+  fetch('/api/live').then(function(r){return r.json();}).then(function(d){checkAlerts(d.prices);}).catch(function(){});
+  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
 setInterval(updateLiveStatus, 300000);
 </script>
 </body></html>
