@@ -409,6 +409,17 @@ def api_portfolio_optimize_summary():
     return get_optimizer_html()
 
 
+
+@app.route("/api/market")
+def api_market():
+    """Donnees marche BRVM — indices, top5, flop5, secteurs"""
+    try:
+        from market_data import get_market_data
+        force = request.args.get("force","false").lower() == "true"
+        return jsonify(get_market_data(force_refresh=force))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/live")
 def api_live():
     """Cours live BRVM depuis brvm.org — cache 5 min"""

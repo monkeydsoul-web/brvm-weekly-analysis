@@ -137,7 +137,37 @@ input[type=range]{padding:0;height:20px}
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="cSectDiv" style="width:100%;height:170px"></div></div>
   </div>
-  <div class="card"><div class="ct">Contexte macro</div><div id="macroTxt" style="font-size:12px;color:var(--t2)">—</div></div>
+  <div class="card" style="margin-bottom:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="ct">📊 Marché BRVM — Aujourd'hui</div>
+    <span id="market-time" style="font-size:10px;color:var(--t3)">—</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px" id="market-indices">
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">BRVM-COMPOSITE</div>
+      <div id="idx-composite" style="font-size:15px;font-weight:700">—</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">BRVM-30</div>
+      <div id="idx-brvm30" style="font-size:15px;font-weight:700">—</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
+      <div style="font-size:10px;color:var(--t3)">Capitalisation</div>
+      <div id="idx-cap" style="font-size:13px;font-weight:700;color:var(--blue)">—</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:4px">🏆 Top 5 du jour</div>
+      <div id="market-top5" style="font-size:11px"></div>
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:4px">📉 Flop 5 du jour</div>
+      <div id="market-flop5" style="font-size:11px"></div>
+    </div>
+  </div>
+  <div id="macroTxt" style="font-size:11px;color:var(--t2);margin-top:8px;display:none">—</div>
+</div>
   <div class="card"><div class="ct">💡 Insights</div><div id="insights" style="font-size:12px;color:var(--t2);line-height:1.7">—</div></div>
 </div>
 
@@ -494,7 +524,7 @@ async function init(){
     ]);
     scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
     renderDash(m);renderRank();renderDiv();renderPerf();renderNews();renderComm();
-    renderTargets();loadCustomScores();loadSidebar();loadStatus();
+    renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadStatus();
     populateSelects();
   }catch(e){console.error(e)}
 }
@@ -553,6 +583,30 @@ function renderDash(m){
     highDiv.length?`💰 <strong style="color:var(--text)">Hauts rendements :</strong> ${highDiv.map(x=>x.ticker+' '+x.div_yield.toFixed(1)+'%').join(', ')}`:'',
     exSoon.length?`📅 <strong style="color:var(--text)">Prochains ex-div :</strong> ${exSoon.map(x=>x.ticker+' le '+x.ex_div_date).join(' · ')}`:'',
   ].filter(Boolean).join('<br>');
+}
+
+function loadMarketWidget(){
+  fetch('/api/market').then(r=>r.json()).then(d=>{
+    var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
+    var b30  = (d.indices||[]).find(i=>i.name==='BRVM-30');
+    var cap  = (d.market_activity||{})['Capitalisation Actions']||'—';
+    function fmt(v,chg){
+      var c=chg>=0?'var(--green)':'var(--red)';
+      var s=chg>=0?'+':'';
+      return `<span style="font-weight:700">${v}</span> <span style="color:${c};font-size:10px">${s}${chg.toFixed(2)}%</span>`;
+    }
+    if(comp) document.getElementById('idx-composite').innerHTML=fmt(comp.current,comp.change);
+    if(b30)  document.getElementById('idx-brvm30').innerHTML=fmt(b30.current,b30.change);
+    document.getElementById('idx-cap').textContent=cap;
+    if(d.updated_at){
+      var dt=new Date(d.updated_at);
+      document.getElementById('market-time').textContent='MàJ '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    }
+    var top5=document.getElementById('market-top5');
+    var flop5=document.getElementById('market-flop5');
+    if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="showStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
+    if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="showStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
+  }).catch(()=>{});
 }
 
 function loadSidebar(){
