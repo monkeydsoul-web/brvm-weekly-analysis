@@ -2,10 +2,10 @@
 <style>
 :root{--bg:#0F172A;--bg2:#1E293B;--bg3:#293548;--text:#F1F5F9;--t2:#94A3B8;--t3:#64748B;--border:#334155;--r:10px;--green:#4ADE80;--amber:#FBBF24;--red:#F87171;--blue:#60A5FA;--purple:#C084FC}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:auto}
 .app{display:flex;height:100vh}
 .sb{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.main{flex:1;overflow-y:auto}
+.main{flex:1;overflow-y:auto;min-height:0}
 .logo{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .logo h1{font-size:14px;font-weight:700;color:var(--green)}
 .logo p{font-size:9px;color:var(--t2)}
@@ -101,7 +101,7 @@ input[type=range]{padding:0;height:20px}
     <div class="ni" onclick="nav('news')"><span>📰</span> Actualités</div>
     <div class="ni" onclick="nav('comm')"><span>🌍</span> Commodités</div>
     <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
-    <div class="ni" onclick="nav('analyse')"><span>📊</span> Analyse &amp; Optim</div>
+    <div class="ni" onclick="navAnalyse()"><span>📊</span> Analyse &amp; Optim</div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -362,6 +362,11 @@ input[type=range]{padding:0;height:20px}
   <div id="stockDetail"><p style="color:var(--t2)">Sélectionne une action.</p></div>
 </div>
 
+<div class="page" id="page-analyse">
+<div class="ph"><h2>📊 Analyse &amp; Optimisation</h2></div>
+<div id="bt-box" style="margin-bottom:16px"><p style="text-align:center;color:var(--t2);padding:20px">Chargement backtesting...</p></div>
+<div id="mk-box"><p style="text-align:center;color:var(--t2);padding:20px">Chargement Markowitz...</p></div>
+</div>
 </main></div>
 <script>
 let scores=[],news=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
@@ -389,8 +394,8 @@ function nav(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+id)?.classList.add('on');
-  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')
-  if(id==='analyse') loadAnalyse();});
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')});
+  document.querySelector('.main').scrollTop=0;
 }
 
 // ── SVG Charts ─────────────────────────────────────────────────────────────
@@ -983,197 +988,15 @@ document.querySelectorAll('.ni').forEach(ni=>{
 
 init();
 </script>
-    <!-- ═══ PAGE BOUGIES (CANDLESTICK) ════════════════════════════════════════ -->
-    <div id="page-candlestick" class="page" style="display:none">
-      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-        <div>
-          <h1 style="font-size:24px;font-weight:600;color:var(--text-primary,#e2e8f0);margin:0">Graphiques Bougies</h1>
-          <p style="color:var(--text-secondary,#94a3b8);margin:4px 0 0;font-size:14px">Historique OHLC hebdomadaire — données 2016-2025</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="cs-ticker-select" onchange="loadCandlestick()" style="background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px 12px;font-size:13px">
-            <option value="SGBC">SGBC</option>
-            <option value="CBIBF">CBIBF</option>
-            <option value="SNTS">SNTS</option>
-            <option value="NSBC">NSBC</option>
-            <option value="ORAC">ORAC</option>
-            <option value="SIBC">SIBC</option>
-            <option value="NTLC">NTLC</option>
-            <option value="LNBB">LNBB</option>
-            <option value="BOAB">BOAB</option>
-            <option value="SMBC">SMBC</option>
-          </select>
-          <div style="display:flex;gap:4px">
-            <button onclick="setCsPeriod('1y')" id="btn-cs-1y" style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">1 an</button>
-            <button onclick="setCsPeriod('5y')" id="btn-cs-5y" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">5 ans</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Carte principale SVG candlestick -->
-      <div style="background:#0f172a;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #1e293b">
-        <div id="cs-chart-container" style="min-height:320px;display:flex;align-items:center;justify-content:center">
-          <div id="cs-loading" style="color:#64748b;font-size:14px">Sélectionnez une action…</div>
-        </div>
-      </div>
-
-      <!-- Métriques résumé -->
-      <div id="cs-metrics" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
-
-      <!-- Table OHLC récente -->
-      <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
-        <h3 style="color:#e2e8f0;margin:0 0 16px;font-size:14px;font-weight:500">Dernières bougies hebdomadaires</h3>
-        <div style="overflow-x:auto">
-          <table id="cs-ohlc-table" style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead>
-              <tr style="border-bottom:1px solid #334155">
-                <th style="padding:8px 12px;color:#64748b;text-align:left;font-weight:500">Semaine</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Ouv.</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Haut</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Bas</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Clôt.</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Var.</th>
-              </tr>
-            </thead>
-            <tbody id="cs-ohlc-tbody">
-              <tr><td colspan="6" style="padding:20px;text-align:center;color:#64748b">–</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- ═══ FIN PAGE BOUGIES ═══════════════════════════════════════════════════ -->
-
-    <!-- ═══ PAGE BACKTESTING ══════════════════════════════════════════════════ -->
-    <div id="page-backtesting" class="page" style="display:none">
-      <div class="page-header" style="margin-bottom:24px">
-        <h1 style="font-size:24px;font-weight:600;color:var(--text-primary,#e2e8f0);margin:0">Backtesting des Scores</h1>
-        <p style="color:var(--text-secondary,#94a3b8);margin:4px 0 0;font-size:14px">Validation empirique : est-ce qu'un score élevé prédit réellement la surperformance ?</p>
-      </div>
-
-      <!-- Bouton de lancement -->
-      <div style="margin-bottom:20px;display:flex;gap:12px;align-items:center">
-        <button onclick="runBacktesting(false)" id="btn-bt-run"
-          style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:500;cursor:pointer">
-          ▶ Lancer le backtesting
-        </button>
-        <button onclick="runBacktesting(true)"
-          style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer">
-          ↺ Recalculer
-        </button>
-        <span id="bt-status" style="color:#64748b;font-size:13px"></span>
-      </div>
-
-      <!-- Résumé validation -->
-      <div id="bt-validation-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px"></div>
-
-      <!-- Tableau détail par ticker -->
-      <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
-        <h3 style="color:#e2e8f0;margin:0 0 16px;font-size:14px;font-weight:500">Détail par action</h3>
-        <div style="overflow-x:auto">
-          <table id="bt-detail-table" style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead>
-              <tr style="border-bottom:1px solid #334155">
-                <th style="padding:8px 12px;color:#64748b;text-align:left;font-weight:500">Action</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:center;font-weight:500">Score</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 3M</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 6M</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:right;font-weight:500">Rend. 12M</th>
-                <th style="padding:8px 12px;color:#64748b;text-align:center;font-weight:500">% Haussier</th>
-              </tr>
-            </thead>
-            <tbody id="bt-detail-tbody">
-              <tr><td colspan="6" style="padding:20px;text-align:center;color:#64748b">Lancez le backtesting pour voir les résultats</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- ═══ FIN PAGE BACKTESTING ═══════════════════════════════════════════════ -->
-
-<div class="page" id="page-analyse">
-  <div class="ph"><h2>📊 Analyse & Optimisation</h2>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-g" onclick="runBacktest()">↺ Recalculer Backtesting</button>
-      <button class="btn btn-g" onclick="runOptimize()">↺ Recalculer Markowitz</button>
-    </div>
-  </div>
-
-  <!-- BACKTESTING -->
-  <div id="backtesting-container" style="margin-bottom:16px">
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;color:var(--t2)">
-      Chargement backtesting...
-    </div>
-  </div>
-
-  <!-- MARKOWITZ -->
-  <div id="markowitz-container">
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;color:var(--t2)">
-      Chargement optimisation...
-    </div>
-  </div>
-
-  <!-- CORRELATION MATRIX -->
-  <div id="corr-container" style="margin-top:16px"></div>
-</div>
 
 <script>
-function loadAnalyse() {
-  // Backtesting
-  fetch('/api/backtesting/summary')
-    .then(r => r.text())
-    .then(h => { document.getElementById('backtesting-container').innerHTML = h; })
-    .catch(e => { document.getElementById('backtesting-container').innerHTML = '<p style="color:var(--red)">Erreur backtesting: ' + e + '</p>'; });
-
-  // Markowitz
-  fetch('/api/portfolio/optimize/summary')
-    .then(r => r.text())
-    .then(h => { document.getElementById('markowitz-container').innerHTML = h; })
-    .catch(e => { document.getElementById('markowitz-container').innerHTML = '<p style="color:var(--red)">Erreur Markowitz: ' + e + '</p>'; });
-
-  // Matrice corrélation
-  fetch('/api/portfolio/optimize')
-    .then(r => r.json())
-    .then(d => {
-      const corr = d.correlation_matrix;
-      if (!corr) return;
-      const tickers = Object.keys(corr);
-      let rows = tickers.map(t1 =>
-        '<tr><td style="padding:4px 8px;color:var(--t2);font-weight:600;font-size:11px">' + t1 + '</td>' +
-        tickers.map(t2 => {
-          const v = corr[t1][t2];
-          const r = Math.round(Math.max(0, v) * 180);
-          const bg = t1===t2 ? '#334155' : v > 0.7 ? 'rgba(239,68,68,.3)' : v > 0.4 ? 'rgba(245,158,11,.2)' : 'rgba(34,197,94,.1)';
-          return '<td style="padding:3px 5px;text-align:center;font-size:10px;background:' + bg + ';color:var(--t2)">' + v.toFixed(2) + '</td>';
-        }).join('') + '</tr>'
-      ).join('');
-      document.getElementById('corr-container').innerHTML =
-        '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;overflow-x:auto">' +
-        '<h3 style="color:var(--t1);font-size:13px;margin:0 0 10px">🔗 Matrice de Corrélation</h3>' +
-        '<p style="color:var(--t2);font-size:11px;margin:0 0 8px">🟢 &lt;0.4 faible · 🟡 0.4-0.7 modérée · 🔴 &gt;0.7 forte</p>' +
-        '<table style="border-collapse:collapse"><thead><tr><th></th>' +
-        tickers.map(t => '<th style="padding:3px 5px;color:var(--t3);font-size:10px">' + t + '</th>').join('') +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div>';
-    });
-}
-
-function runBacktest() {
-  document.getElementById('backtesting-container').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2)">Calcul en cours...</div>';
-  fetch('/api/backtesting?force=true')
-    .then(r => r.json())
-    .then(() => fetch('/api/backtesting/summary'))
-    .then(r => r.text())
-    .then(h => { document.getElementById('backtesting-container').innerHTML = h; });
-}
-
-function runOptimize() {
-  document.getElementById('markowitz-container').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2)">Optimisation en cours (5000 simulations)...</div>';
-  fetch('/api/portfolio/optimize?force=true')
-    .then(r => r.json())
-    .then(() => fetch('/api/portfolio/optimize/summary'))
-    .then(r => r.text())
-    .then(h => { document.getElementById('markowitz-container').innerHTML = h; });
+function navAnalyse(){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
+  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
+  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
+  document.querySelector(".main").scrollTop=0;
+  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
+  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
 }
 </script>
-
 </body></html>
