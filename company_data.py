@@ -1,228 +1,70 @@
-"""
-BRVM Company Data — Données historiques et analyses fondamentales
-Sources vérifiées: RichBourse, SikaFinance, Dabafinance, Abidjan.net, ZoneBourse 2026
-"""
+"""company_data.py — Base données 47 sociétés BRVM"""
 
-# ── HISTORIQUE DES PRIX (cours annuels de clôture en XOF) ────────────────────
-PRICE_HISTORY = {
-    "SGBC": {
-        "prices": [3500, 3800, 5200, 5670, 7760, 9120, 11090, 19435, 33000, 34995],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "SIBC": {
-        "prices": [843,  900,  1100, 1350, 2000, 2500, 2700, 3300, 4800, 6950],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "SNTS": {
-        "prices": [14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "CBIBF": {
-        "prices": [8000, 8500, 9000, 9800, 9900, 9885, 9900, 10000,13500,16490],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "NSBC": {
-        "prices": [5000, 5200, 5350, 5400, 5350, 5350, 5500, 7500, 9000,13900],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "BOAB": {
-        "prices": [1800, 2000, 2200, 2400, 2600, 2800, 3000, 3600, 4300, 5335],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "SMBC": {
-        "prices": [5800, 7000, 8000,10000,12000,13700,13500,12000,11500,11535],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
-    "ECOC": {
-        "prices": [5000, 5200, 5500, 6000, 7000, 8000, 9000,11000,14000,16300],
-        "years":  [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-    },
+COMPANIES = {
+    "SGBC": {"name":"Société Générale CI","full_name":"Société Générale de Banques en Côte d'Ivoire","founded":1962,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.societegenerale.ci","description":"Filiale du groupe Société Générale, première banque privée de Côte d'Ivoire. Réseau de plus de 50 agences et 150 DAB. Services bancaires retail, corporate et investment banking.","products":["Banque de détail","Crédit immobilier","Banque d'entreprises","Gestion de patrimoine","Monétique"],"markets":["Côte d'Ivoire"],"employees_approx":1800,"reports_url":"https://www.societegenerale.ci/fr/investisseurs","brvm_page":"https://www.brvm.org/fr/valeurs/0/SGBC"},
+    "SIBC": {"name":"SIB CI","full_name":"Société Ivoirienne de Banque SA","founded":1962,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.sib.ci","description":"Banque universelle filiale du groupe Attijariwafa Bank (Maroc). Spécialisée dans le financement des PME/PMI et des particuliers en Côte d'Ivoire.","products":["Crédit PME","Banque de détail","Financement commerce","Mobile banking"],"markets":["Côte d'Ivoire"],"employees_approx":900,"reports_url":"https://www.sib.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/SIBC"},
+    "SNTS": {"name":"Sonatel","full_name":"Société Nationale des Télécommunications du Sénégal","founded":1985,"sector":"Télécommunications","country":"Sénégal","website":"https://www.sonatel.com","description":"Leader des télécommunications en Afrique de l'Ouest, filiale d'Orange SA. Opère sous la marque Orange au Sénégal, Mali, Guinée et Sierra Leone. Plus de 30 millions de clients.","products":["Téléphonie mobile","Internet fixe et mobile","Orange Money","Services entreprises","Fibre optique"],"markets":["Sénégal","Mali","Guinée","Guinée-Bissau","Sierra Leone"],"employees_approx":3500,"reports_url":"https://www.sonatel.com/investisseurs","brvm_page":"https://www.brvm.org/fr/valeurs/0/SNTS"},
+    "NSBC": {"name":"NSIA Banque CI","full_name":"NSIA Banque Côte d'Ivoire SA","founded":1997,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.nsiabanque.ci","description":"Banque universelle du groupe panafricain NSIA. Acteur majeur du financement des grandes entreprises et des projets d'infrastructure en Côte d'Ivoire.","products":["Banque corporative","Financement de projets","Banque de détail","Assurance bancaire"],"markets":["Côte d'Ivoire"],"employees_approx":600,"reports_url":"https://www.nsiabanque.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/NSBC"},
+    "CBIBF": {"name":"Coris Bank International","full_name":"Coris Bank International Burkina Faso SA","founded":2008,"sector":"Banque","country":"Burkina Faso","website":"https://www.corisbankinter.com","description":"Première banque privée burkinabè à capitaux nationaux. Groupe panafricain présent dans 8 pays d'Afrique de l'Ouest. Pionnier de la bancarisation des populations non desservies.","products":["Banque de détail","Microfinance","Banque d'entreprises","Coris Money"],"markets":["Burkina Faso","Mali","Sénégal","Togo","Niger","Côte d'Ivoire","Bénin","Guinée-Bissau"],"employees_approx":2000,"reports_url":"https://www.corisbankinter.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/CBIBF"},
+    "BOAB": {"name":"BOA Bénin","full_name":"Bank of Africa Bénin SA","founded":1982,"sector":"Banque","country":"Bénin","website":"https://www.boacgroup.com","description":"Filiale du groupe Bank of Africa (BMCE Group), l'une des premières banques du Bénin avec réseau solide et services digitaux en forte croissance.","products":["Banque de détail","Crédit agricole","Banque d'entreprises","BOA Mobile"],"markets":["Bénin"],"employees_approx":500,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOAB"},
+    "BOABF": {"name":"BOA Burkina Faso","full_name":"Bank of Africa Burkina Faso SA","founded":1998,"sector":"Banque","country":"Burkina Faso","website":"https://www.boacgroup.com","description":"Filiale burkinabè du groupe Bank of Africa. Banque universelle avec fort accent sur la digitalisation au Burkina Faso.","products":["Banque de détail","Financement PME","Banque corporative","BOA Mobile"],"markets":["Burkina Faso"],"employees_approx":450,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOABF"},
+    "BOAC": {"name":"BOA Côte d'Ivoire","full_name":"Bank of Africa Côte d'Ivoire SA","founded":1996,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.boacgroup.com","description":"Filiale ivoirienne du groupe Bank of Africa. Banque universelle retail et corporate dans les principales villes ivoiriennes.","products":["Banque de détail","Crédit immobilier","Banque d'entreprises","Services digitaux"],"markets":["Côte d'Ivoire"],"employees_approx":400,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOAC"},
+    "BOAM": {"name":"BOA Mali","full_name":"Bank of Africa Mali SA","founded":1982,"sector":"Banque","country":"Mali","website":"https://www.boacgroup.com","description":"L'une des premières banques privées du Mali, filiale Bank of Africa. Rôle clé dans le financement de l'économie malienne.","products":["Banque de détail","Financement commerce","Banque corporative"],"markets":["Mali"],"employees_approx":350,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOAM"},
+    "BOAN": {"name":"BOA Niger","full_name":"Bank of Africa Niger SA","founded":1994,"sector":"Banque","country":"Niger","website":"https://www.boacgroup.com","description":"Filiale nigérienne du groupe Bank of Africa. Banque universelle active dans le financement des entreprises et des ménages au Niger.","products":["Banque de détail","Crédit agricole","Banque d'entreprises"],"markets":["Niger"],"employees_approx":300,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOAN"},
+    "BOAS": {"name":"BOA Sénégal","full_name":"Bank of Africa Sénégal SA","founded":2002,"sector":"Banque","country":"Sénégal","website":"https://www.boacgroup.com","description":"Filiale sénégalaise du groupe Bank of Africa en forte croissance, profitant du dynamisme de l'économie sénégalaise boostée par les découvertes pétrolières.","products":["Banque de détail","Financement PME","Banque corporative","Mobile banking"],"markets":["Sénégal"],"employees_approx":380,"reports_url":"https://www.boacgroup.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/BOAS"},
+    "ECOC": {"name":"Ecobank CI","full_name":"Ecobank Côte d'Ivoire SA","founded":1989,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.ecobank.com/ci","description":"Filiale ivoirienne d'Ecobank Transnational, leader panafricain en 35 pays. Forte plateforme digitale Ecobank App et Ecobank Pay.","products":["Banque de détail","Ecobank Mobile","Banque corporative","Trade finance","Cash management"],"markets":["Côte d'Ivoire"],"employees_approx":800,"reports_url":"https://www.ecobank.com/ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/ECOC"},
+    "BICC": {"name":"BICI CI","full_name":"Banque Internationale pour le Commerce et l'Industrie de la Côte d'Ivoire","founded":1966,"sector":"Banque","country":"Côte d'Ivoire","website":"https://www.bici.ci","description":"Banque historique de Côte d'Ivoire, filiale BNP Paribas. Spécialisée dans le financement des grandes entreprises et du commerce international.","products":["Trade finance","Banque corporative","Financement de projets","Cash management"],"markets":["Côte d'Ivoire"],"employees_approx":700,"reports_url":"https://www.bici.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/BICC"},
+    "ORAC": {"name":"Orange CI","full_name":"Orange Côte d'Ivoire SA","founded":1996,"sector":"Télécommunications","country":"Côte d'Ivoire","website":"https://www.orange.ci","description":"Leader télécom en Côte d'Ivoire, filiale d'Orange SA. Plus de 15 millions de clients. Pionnier d'Orange Money qui domine le mobile money ivoirien.","products":["Téléphonie mobile 4G","Orange Money","Internet fixe et mobile","Services B2B","Orange TV"],"markets":["Côte d'Ivoire"],"employees_approx":2500,"reports_url":"https://www.orange.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/ORAC"},
+    "ONTBF": {"name":"Onatel BF","full_name":"Office National des Télécommunications du Burkina Faso","founded":1987,"sector":"Télécommunications","country":"Burkina Faso","website":"https://www.onatel.bf","description":"Opérateur historique télécom du Burkina Faso, contrôlé par l'État et Maroc Telecom. Exploite réseaux fixe et mobile Telmob.","products":["Téléphonie fixe","Réseau mobile Telmob","Internet ADSL/fibre","Services entreprises"],"markets":["Burkina Faso"],"employees_approx":1200,"reports_url":"https://www.onatel.bf","brvm_page":"https://www.brvm.org/fr/valeurs/0/ONTBF"},
+    "NTLC": {"name":"Nestlé CI","full_name":"Nestlé Côte d'Ivoire SA","founded":1959,"sector":"Consommation","country":"Côte d'Ivoire","website":"https://www.nestle.ci","description":"Filiale ivoirienne du géant suisse Nestlé. Fabrique et distribue produits alimentaires et boissons avec forte pénétration du marché ivoirien et régional.","products":["Nescafé","Lait Nido","Milo","Maggi","Céréales"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":800,"reports_url":"https://www.nestle.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/NTLC"},
+    "STBC": {"name":"SITAB CI","full_name":"Société Ivoirienne des Tabacs","founded":1960,"sector":"Consommation","country":"Côte d'Ivoire","website":"","description":"Fabricant et distributeur de produits du tabac en Côte d'Ivoire, filiale British American Tobacco. Monopole de production de cigarettes sur le marché ivoirien.","products":["Cigarettes","Tabac à rouler","Distribution tabac"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":300,"reports_url":"https://www.brvm.org/fr/valeurs/0/STBC","brvm_page":"https://www.brvm.org/fr/valeurs/0/STBC"},
+    "UNLC": {"name":"Unilever CI","full_name":"Unilever Côte d'Ivoire SA","founded":1960,"sector":"Consommation","country":"Côte d'Ivoire","website":"","description":"Filiale ivoirienne du groupe Unilever. Produit et distribue biens de consommation courante hygiène, beauté et alimentation.","products":["Omo","Lifebuoy","Knorr","Dove","Close Up","Vaseline"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":500,"reports_url":"https://www.brvm.org/fr/valeurs/0/UNLC","brvm_page":"https://www.brvm.org/fr/valeurs/0/UNLC"},
+    "SMBC": {"name":"SMB CI","full_name":"Société de Matériaux de Construction","founded":1975,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Producteur de matériaux de construction en Côte d'Ivoire profitant du boom des infrastructures ivoiriennes.","products":["Matériaux de construction","Ciment","Agrégats"],"markets":["Côte d'Ivoire"],"employees_approx":200,"reports_url":"https://www.brvm.org/fr/valeurs/0/SMBC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SMBC"},
+    "TTLC": {"name":"TotalEnergies CI","full_name":"TotalEnergies Marketing Côte d'Ivoire SA","founded":1954,"sector":"Énergie","country":"Côte d'Ivoire","website":"https://totalenergies.ci","description":"Filiale ivoirienne de TotalEnergies. Leader distribution carburants en Côte d'Ivoire avec réseau de stations-service et activités lubrifiants et gaz.","products":["Carburants","Lubrifiants Total","Gaz LPG","Bitume"],"markets":["Côte d'Ivoire"],"employees_approx":400,"reports_url":"https://totalenergies.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/TTLC"},
+    "TTLS": {"name":"TotalEnergies Sénégal","full_name":"TotalEnergies Marketing Sénégal SA","founded":1952,"sector":"Énergie","country":"Sénégal","website":"https://totalenergies.sn","description":"Filiale sénégalaise de TotalEnergies. Distribution carburants et gaz, profitant du boom pétrolier avec les découvertes offshore sénégalaises.","products":["Carburants","Lubrifiants","Gaz LPG","Bitume"],"markets":["Sénégal"],"employees_approx":300,"reports_url":"https://totalenergies.sn","brvm_page":"https://www.brvm.org/fr/valeurs/0/TTLS"},
+    "CIEC": {"name":"CIE CI","full_name":"Compagnie Ivoirienne d'Électricité","founded":1990,"sector":"Utilités","country":"Côte d'Ivoire","website":"https://www.cie.ci","description":"Concessionnaire distribution électricité en Côte d'Ivoire, filiale ERANOVE. Gère le réseau sur tout le territoire avec plus de 2 millions de clients.","products":["Distribution électricité","Réseau HTA/BT","Raccordement"],"markets":["Côte d'Ivoire"],"employees_approx":3500,"reports_url":"https://www.cie.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/CIEC"},
+    "SDCC": {"name":"SODECI CI","full_name":"Société de Distribution d'Eau de Côte d'Ivoire","founded":1960,"sector":"Utilités","country":"Côte d'Ivoire","website":"https://www.sodeci.ci","description":"Concessionnaire distribution eau potable en Côte d'Ivoire, filiale ERANOVE. Plus d'un million de clients en zones urbaines.","products":["Distribution eau potable","Traitement eau","Réseau hydraulique"],"markets":["Côte d'Ivoire"],"employees_approx":2800,"reports_url":"https://www.sodeci.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/SDCC"},
+    "PALC": {"name":"Palm CI","full_name":"Société Ivoirienne de Palmeraies et de Huileries","founded":1968,"sector":"Agriculture","country":"Côte d'Ivoire","website":"https://www.palmci.ci","description":"Premier producteur huile de palme de Côte d'Ivoire, filiale SIFCA. Exploite plantations industrielles et soutient les planteurs villageois.","products":["Huile de palme brute","Huile de palmiste","Tourteaux"],"markets":["Côte d'Ivoire","Export mondial"],"employees_approx":5000,"reports_url":"https://www.palmci.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/PALC"},
+    "SPHC": {"name":"SAPH CI","full_name":"Société Africaine de Plantations d'Hévéas","founded":1956,"sector":"Agriculture","country":"Côte d'Ivoire","website":"https://www.saph.ci","description":"Leader caoutchouc naturel en Côte d'Ivoire et premier producteur africain, filiale SOCFIN. Vaste réseau de planteurs villageois.","products":["Caoutchouc naturel RSS","TSR","Latex concentré"],"markets":["Côte d'Ivoire","Export Asie/Europe"],"employees_approx":4000,"reports_url":"https://www.saph.ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/SPHC"},
+    "SOGC": {"name":"SOGB CI","full_name":"Société des Caoutchoucs de Grand-Béréby","founded":1978,"sector":"Agriculture","country":"Côte d'Ivoire","website":"","description":"Producteur caoutchouc naturel dans l'Ouest de Côte d'Ivoire avec plantation d'hévéas et usine de transformation à Grand-Béréby.","products":["Caoutchouc naturel","Latex"],"markets":["Côte d'Ivoire","Export"],"employees_approx":1500,"reports_url":"https://www.brvm.org/fr/valeurs/0/SOGC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SOGC"},
+    "SIVC": {"name":"Erium CI","full_name":"Erium CI (Air Liquide Côte d'Ivoire)","founded":1960,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Producteur et distributeur de gaz industriels en Côte d'Ivoire, filiale Air Liquide. Fournit oxygène, azote et gaz spéciaux aux industries ivoiriennes.","products":["Oxygène industriel","Azote","Gaz rares","Acétylène","Gaz médicaux"],"markets":["Côte d'Ivoire"],"employees_approx":150,"reports_url":"https://www.brvm.org/fr/valeurs/0/SIVC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SIVC"},
+    "BICB": {"name":"BICB Bénin","full_name":"Banque Internationale du Commerce et de l'Industrie du Bénin","founded":1989,"sector":"Banque","country":"Bénin","website":"","description":"Banque universelle béninoise active dans le financement du commerce et de l'industrie au Bénin.","products":["Banque de détail","Financement commerce","Banque d'entreprises"],"markets":["Bénin"],"employees_approx":200,"reports_url":"https://www.brvm.org/fr/valeurs/0/BICB","brvm_page":"https://www.brvm.org/fr/valeurs/0/BICB"},
+    "LNBB": {"name":"Loterie Nationale Bénin","full_name":"Loterie Nationale du Bénin SA","founded":1974,"sector":"Consommation","country":"Bénin","website":"https://www.lonab.bj","description":"Opérateur national jeux de hasard au Bénin avec monopole légal sur la loterie. Redistribue une partie des revenus à des causes sociales.","products":["Loterie nationale","Jeux de grattage","Jeux en ligne"],"markets":["Bénin"],"employees_approx":250,"reports_url":"https://www.lonab.bj","brvm_page":"https://www.brvm.org/fr/valeurs/0/LNBB"},
+    "FTSC": {"name":"Filtisac CI","full_name":"Filtisac Côte d'Ivoire SA","founded":1969,"sector":"Industriel","country":"Côte d'Ivoire","website":"https://www.filtisac.com","description":"Leader africain emballage jute et polypropylène, filiale SIFCA. Fabrique sacs pour cacao, café, coton et autres matières premières agricoles.","products":["Sacs de jute","Sacs polypropylène","Big bags","Emballages industriels"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":600,"reports_url":"https://www.filtisac.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/FTSC"},
+    "SHEC": {"name":"Vivo Energy CI","full_name":"Vivo Energy Côte d'Ivoire SA","founded":2011,"sector":"Énergie","country":"Côte d'Ivoire","website":"https://www.vivoenergy.com/ci","description":"Distributeur carburants Shell en Côte d'Ivoire, filiale Vivo Energy (Vitol Group). Réseau stations-service Shell avec lubrifiants et gaz LPG.","products":["Carburants Shell","Lubrifiants Helix","Gaz LPG","Boutiques Shell"],"markets":["Côte d'Ivoire"],"employees_approx":200,"reports_url":"https://www.vivoenergy.com/ci","brvm_page":"https://www.brvm.org/fr/valeurs/0/SHEC"},
+    "CFAC": {"name":"CFAO Motors CI","full_name":"CFAO Motors Côte d'Ivoire SA","founded":1950,"sector":"Industriel","country":"Côte d'Ivoire","website":"https://www.cfao.com","description":"Distributeur automobile leader en Côte d'Ivoire, filiale CFAO. Distribue Toyota, Honda, Yamaha avec services après-vente.","products":["Distribution automobile","Toyota","Honda","Yamaha motos","Pièces de rechange"],"markets":["Côte d'Ivoire"],"employees_approx":400,"reports_url":"https://www.cfao.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/CFAC"},
+    "ETIT": {"name":"Ecobank Togo","full_name":"Ecobank Transnational Incorporated","founded":1985,"sector":"Banque","country":"Togo","website":"https://www.ecobank.com","description":"Holding de la première banque panafricaine présente dans 35 pays avec plus de 700 agences. Pionnier banque digitale en Afrique.","products":["Banque retail","Banque corporative","Investment banking","Ecobank Mobile"],"markets":["35 pays africains"],"employees_approx":15000,"reports_url":"https://www.ecobank.com/investor-relations","brvm_page":"https://www.brvm.org/fr/valeurs/0/ETIT"},
+    "SDSC": {"name":"Africa Global Logistics CI","full_name":"Africa Global Logistics Côte d'Ivoire SA","founded":1978,"sector":"Industriel","country":"Côte d'Ivoire","website":"https://www.africagloballogistics.com","description":"Leader logistique portuaire Afrique de l'Ouest, filiale MSC Group. Manutention portuaire, transit douanier et logistique à Abidjan.","products":["Manutention portuaire","Transit douanier","Logistique supply chain","Entreposage"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":2000,"reports_url":"https://www.africagloballogistics.com","brvm_page":"https://www.brvm.org/fr/valeurs/0/SDSC"},
+    "SLBC": {"name":"SOLIBRA CI","full_name":"Société de Limonaderies et Brasseries d'Afrique","founded":1955,"sector":"Consommation","country":"Côte d'Ivoire","website":"","description":"Brasseur leader en Côte d'Ivoire, filiale Castel Group. Produit bières, sodas et eaux minérales via un dense réseau de distribution.","products":["Bières Flag","Beaufort","Coca-Cola CI","Eaux Awa"],"markets":["Côte d'Ivoire"],"employees_approx":800,"reports_url":"https://www.brvm.org/fr/valeurs/0/SLBC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SLBC"},
+    "SCRC": {"name":"Sucrivoire CI","full_name":"Sucrivoire Côte d'Ivoire SA","founded":1971,"sector":"Agriculture","country":"Côte d'Ivoire","website":"","description":"Producteur de sucre en Côte d'Ivoire, filiale SIFCA. Exploite plantations de canne à sucre et raffineries sur le territoire ivoirien.","products":["Sucre blanc","Mélasse","Bagasse","Énergie biomasse"],"markets":["Côte d'Ivoire"],"employees_approx":3000,"reports_url":"https://www.brvm.org/fr/valeurs/0/SCRC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SCRC"},
+    "CABC": {"name":"Sicable CI","full_name":"Sicable Côte d'Ivoire SA","founded":1973,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Fabricant de câbles électriques et de télécommunication en Côte d'Ivoire. Fournit les réseaux électriques et télécom ivoiriens.","products":["Câbles électriques","Câbles télécom","Fils et câbles"],"markets":["Côte d'Ivoire"],"employees_approx":300,"reports_url":"https://www.brvm.org/fr/valeurs/0/CABC","brvm_page":"https://www.brvm.org/fr/valeurs/0/CABC"},
+    "BNBC": {"name":"Bernabé CI","full_name":"Bernabé Côte d'Ivoire SA","founded":1960,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Distributeur matériaux électriques, sanitaires et de construction en Côte d'Ivoire. Acteur clé approvisionnement secteur BTP ivoirien.","products":["Matériaux électriques","Robinetterie","Quincaillerie","Équipements sanitaires"],"markets":["Côte d'Ivoire"],"employees_approx":250,"reports_url":"https://www.brvm.org/fr/valeurs/0/BNBC","brvm_page":"https://www.brvm.org/fr/valeurs/0/BNBC"},
+    "SICC": {"name":"Sicor CI","full_name":"Sicor Côte d'Ivoire SA","founded":1975,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Société industrielle ivoirienne spécialisée dans la transformation de produits agricoles et la fabrication industrielle.","products":["Transformation agricole","Production industrielle"],"markets":["Côte d'Ivoire"],"employees_approx":200,"reports_url":"https://www.brvm.org/fr/valeurs/0/SICC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SICC"},
+    "PRSC": {"name":"Tractafric Motors CI","full_name":"Tractafric Motors Côte d'Ivoire SA","founded":1970,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Distributeur engins de chantier et véhicules industriels en Côte d'Ivoire. Représentant Caterpillar et Ford sur le marché ivoirien.","products":["Engins Caterpillar","Ford","Pièces de rechange","SAV"],"markets":["Côte d'Ivoire"],"employees_approx":300,"reports_url":"https://www.brvm.org/fr/valeurs/0/PRSC","brvm_page":"https://www.brvm.org/fr/valeurs/0/PRSC"},
+    "ABJC": {"name":"Servair Abidjan CI","full_name":"Servair Abidjan Côte d'Ivoire SA","founded":1975,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Prestataire restauration aérienne et services au sol à l'aéroport international d'Abidjan, filiale Air France Services.","products":["Catering aérien","Services au sol","Restauration collective"],"markets":["Côte d'Ivoire"],"employees_approx":400,"reports_url":"https://www.brvm.org/fr/valeurs/0/ABJC","brvm_page":"https://www.brvm.org/fr/valeurs/0/ABJC"},
+    "STAC": {"name":"Setao CI","full_name":"Setao Côte d'Ivoire SA","founded":1958,"sector":"Industriel","country":"Côte d'Ivoire","website":"","description":"Société de travaux publics et de construction en Côte d'Ivoire. Active dans la réalisation d'infrastructures routières et de bâtiments.","products":["Travaux publics","Construction","BTP","Infrastructures routières"],"markets":["Côte d'Ivoire"],"employees_approx":300,"reports_url":"https://www.brvm.org/fr/valeurs/0/STAC","brvm_page":"https://www.brvm.org/fr/valeurs/0/STAC"},
+    "UNXC": {"name":"Uniwax CI","full_name":"Uniwax Côte d'Ivoire SA","founded":1970,"sector":"Consommation","country":"Côte d'Ivoire","website":"","description":"Fabricant tissus wax imprimés en Côte d'Ivoire, filiale Vlisco. Produit les célèbres tissus Woodin très prisés en Afrique de l'Ouest.","products":["Tissus wax Woodin","Textiles imprimés","Pagnes africains"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":500,"reports_url":"https://www.brvm.org/fr/valeurs/0/UNXC","brvm_page":"https://www.brvm.org/fr/valeurs/0/UNXC"},
+    "NEIC": {"name":"NEI-CEDA CI","full_name":"NEI-CEDA Côte d'Ivoire SA","founded":1976,"sector":"Consommation","country":"Côte d'Ivoire","website":"","description":"Société édition, imprimerie et librairie en Côte d'Ivoire. Produit manuels scolaires et matériel pédagogique pour l'Afrique de l'Ouest.","products":["Manuels scolaires","Édition","Imprimerie","Librairie"],"markets":["Côte d'Ivoire","Afrique de l'Ouest"],"employees_approx":200,"reports_url":"https://www.brvm.org/fr/valeurs/0/NEIC","brvm_page":"https://www.brvm.org/fr/valeurs/0/NEIC"},
+    "ORGT": {"name":"Oragroup Togo","full_name":"Oragroup SA","founded":2000,"sector":"Banque","country":"Togo","website":"https://www.oragroup.net","description":"Holding bancaire panafricain présent dans 12 pays via ses filiales Orabank. Accompagne PME et particuliers dans leur développement en Afrique.","products":["Banque de détail","Banque d'entreprises","Microfinance","Orabank Mobile"],"markets":["12 pays Afrique de l'Ouest et Centrale"],"employees_approx":2500,"reports_url":"https://www.oragroup.net","brvm_page":"https://www.brvm.org/fr/valeurs/0/ORGT"},
+    "SAFC": {"name":"SAFCA CI","full_name":"Société Africaine de Crédit Automobile","founded":1963,"sector":"Banque","country":"Côte d'Ivoire","website":"","description":"Société de financement spécialisée dans le crédit automobile et l'équipement en Côte d'Ivoire.","products":["Crédit automobile","Financement équipement","Leasing"],"markets":["Côte d'Ivoire"],"employees_approx":100,"reports_url":"https://www.brvm.org/fr/valeurs/0/SAFC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SAFC"},
+    "SEMC": {"name":"Crown Siem CI","full_name":"Crown Siem Côte d'Ivoire SA","founded":1970,"sector":"Énergie","country":"Côte d'Ivoire","website":"","description":"Société spécialisée dans la production et la distribution d'énergie en Côte d'Ivoire.","products":["Production énergie","Distribution","Maintenance équipements"],"markets":["Côte d'Ivoire"],"employees_approx":150,"reports_url":"https://www.brvm.org/fr/valeurs/0/SEMC","brvm_page":"https://www.brvm.org/fr/valeurs/0/SEMC"},
 }
 
-# ── HISTORIQUE DIVIDENDES (XOF net par action) ───────────────────────────────
-DIVIDEND_HISTORY = {
-    "SGBC":  {"divs":[202,270,527,261,297,331,904,1107,1398,2293],"years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "SIBC":  {"divs":[120,140,162,175,180,180,202,247,338,425],  "years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "SNTS":  {"divs":[1107,1188,1214,1260,1134,1225,1400,1500,1740,1740],"years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "CBIBF": {"divs":[360,380,430,450,430,450,540,630,810,900], "years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "NSBC":  {"divs":[0,0,0,0,0,0,0,404,505,759],               "years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "BOAB":  {"divs":[150,168,180,189,195,207,258,297,421,585], "years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "SMBC":  {"divs":[756,900,990,1080,1080,990,1035,1080,1200,1200],"years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-    "ECOC":  {"divs":[200,250,300,350,400,500,600,700,750,781], "years":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]},
-}
+def get_company(ticker):
+    t = ticker.upper()
+    if t in COMPANIES:
+        return {"ticker": t, **COMPANIES[t]}
+    return {"ticker": t, "name": t, "sector": "—", "country": "—",
+            "description": "Société cotée sur la BRVM.", "products": [], "markets": [],
+            "founded": None, "website": "", "employees_approx": None,
+            "reports_url": f"https://www.brvm.org/fr/valeurs/0/{t}",
+            "brvm_page": f"https://www.brvm.org/fr/valeurs/0/{t}"}
 
-# ── DONNÉES FONDAMENTALES HISTORIQUES (résultats annuels vérifiés) ────────────
-FINANCIALS = {
-    "SGBC": {
-        "description": "Société Générale de Banque en Côte d'Ivoire — filiale du groupe Société Générale (France). Présente depuis plus de 50 ans en CI, 2e banque du pays par total bilan.",
-        "business_model": "Banque universelle : crédit aux entreprises (60% PNB), retail banking (25%), marchés financiers (15%). Marché captif CI avec présence dans l'UEMOA.",
-        "strengths": ["ROE >20% constant depuis 2015", "Coefficient d'exploitation 37% (record BRVM)", "Croissance crédit +15%/an", "Dividende croissant 10 ans consécutifs"],
-        "risks": ["Concentration géographique CI", "Risque souverain UEMOA", "Concurrence bancaire croissante", "Exposition créances douteuses"],
-        "net_profit_bn": [55, 58, 61, 66, 70, 80, 100, 120, 128, 128],
-        "revenue_bn":    [120,128,140,155,165,180,220,260,285,290],
-        "years":         [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-        "roe_hist":      [18, 19, 20, 21, 22, 22, 24, 24, 24, 24],
-        "latest_news": "T1 2025: bénéfice net 27,08 Md FCFA (+2,2%), PNB 66,28 Md FCFA (+1,3%). Ratio coût/revenus 37% vs 41% en 2024.",
-        "analyst_view": "Champion absolu de la BRVM. 10 ans de croissance ininterrompue, dividende multiplié par 11 depuis 2016. La seule réserve est la valorisation qui, après le 9× depuis 2016, offre moins de marge de sécurité qu'auparavant. Reste un HOLD fort pour les porteurs long terme.",
-        "target_price": 38000,
-        "upside_pct": 9,
-    },
-    "SIBC": {
-        "description": "Société Ivoirienne de Banque — filiale d'Attijariwafa Bank (Maroc), 1er groupe bancaire du Maghreb. 7e banque UEMOA par total bilan, 71 agences en CI.",
-        "business_model": "Banque universelle universelle CI. Plan stratégique IMPULSION 2028 axé digitalisation et croissance des PME. Augmentation de capital 2024 (10→20 Md FCFA).",
-        "strengths": ["ROE 27,2% en 2025 — meilleur de la BRVM", "Croissance BNA +13%/an sur 5 ans", "Parent Attijariwafa solide (hausse bénéfice 20%+)", "Coefficient d'exploitation 38,6% en baisse constante"],
-        "risks": ["Exposition crédit PME CI", "Concentration géographique", "Risque souverain CI", "Concurrence MTN MoMo et Wave"],
-        "net_profit_bn": [20, 23, 28, 33, 38, 43, 45, 43, 50, 56],
-        "revenue_bn":    [45, 50, 60, 70, 78, 85, 95, 95,103,108],
-        "years":         [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-        "roe_hist":      [18, 19, 21, 23, 24, 25, 26, 27, 27, 27],
-        "latest_news": "2025: résultat net 55,6 Md FCFA (+11%), PNB 108 Md FCFA (+6%), total bilan +12%, dépôts +7%, crédits +11%. ROE 27,2%.",
-        "analyst_view": "La meilleure banque de la BRVM par ROE. Résultats 2025 remarquables. P/E de ~10× pour un ROE de 27% est une anomalie de marché — le ratio justifié (Graham) serait 15-18×. Catalyseur: re-rating progressif à mesure que les investisseurs institutionnels découvrent la valeur. BUY.",
-        "target_price": 10000,
-        "upside_pct": 44,
-    },
-    "SNTS": {
-        "description": "Groupe Sonatel — filiale d'Orange SA (France), opérateur télécom leader en Afrique de l'Ouest. Présent dans 5 pays : Sénégal, Mali, Guinée, Guinée-Bissau, Sierra Leone.",
-        "business_model": "Télécommunications multi-services: mobile (data 4G/5G), haut débit fixe (fibre), Orange Money (fintech), entreprises. Pivot stratégique de la voix vers la data et les services financiers.",
-        "strengths": ["Part de marché 55,9% Sénégal, 76,2% Guinée", "Orange Money 208,9 Md FCFA (+fort)", "EBITDAaL 47,9% — marge world class", "FCF yield ~15% — exceptionnel", "5G déploiement en cours"],
-        "risks": ["Taxes mobiles money nouvelles", "Instabilité Mali (20% revenus)", "Réglementation SIM stricte (-1,6% abonnés)", "Concurrence Free/Expresso"],
-        "net_profit_bn": [290,310,330,340,345,365,370,393,394,414],
-        "revenue_bn":    [1100,1200,1300,1400,1450,1500,1620,1621,1776,1923],
-        "years":         [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-        "roe_hist":      [28, 29, 31, 32, 32, 33, 34, 34, 34, 34],
-        "latest_news": "2025: CA 1 923 Md FCFA (+8,3%), bénéfice net 413,5 Md FCFA (+5,1%), EBITDAaL 921 Md FCFA (47,9% marge), Orange Money 208,9 Md FCFA.",
-        "analyst_view": "La qualité la plus élevée de toute la BRVM. EV/EBITDA de 3,2× vs 6-8× pour les telcos africains équivalents = sous-valorisation structurelle. L'accélération d'Orange Money (mobile banking) est le catalyseur non-pricé. Target 5 ans: 45,000-55,000 XOF. BUY fort.",
-        "target_price": 38000,
-        "upside_pct": 33,
-    },
-    "CBIBF": {
-        "description": "Coris Bank International — banque panafricaine burkinabè avec réseau UEMOA. Fondée 2008, expansion rapide dans 9 pays africains.",
-        "business_model": "Banque commerciale universelle focalisée PME et microfinance. Développement digital via Coris Money. Stratégie de pénétration rurale différenciante.",
-        "strengths": ["P/E 5× = valeur absolue", "Dividende croissant 10 ans", "Expansion multi-pays", "ROE 18% stable"],
-        "risks": ["Burkina Faso instabilité politique (coups 2022)", "Risque sécuritaire Sahel", "Dépendance économie régionale", "Liquidité titre limitée"],
-        "net_profit_bn": [15, 18, 22, 26, 28, 32, 38, 45, 55, 63],
-        "revenue_bn":    [40, 48, 58, 68, 75, 85, 100,120,140,160],
-        "years":         [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-        "roe_hist":      [14, 15, 16, 17, 17, 18, 18, 18, 18, 18],
-        "latest_news": "Dividende 2026 confirmé: 900 XOF/action (ex-div 06/07/2026). Expansion continue réseau UEMOA. Coris Money en développement.",
-        "analyst_view": "P/E de 5× pour une banque profitable en croissance = opportunité contrariante. Le risque géopolitique Burkina est réel mais potentiellement trop pricé. Toute normalisation politique = re-rating immédiat de 50-100%. Pour investisseur à haute tolérance au risque: BUY avec horizon 3-5 ans.",
-        "target_price": 22000,
-        "upside_pct": 33,
-    },
-    "NSBC": {
-        "description": "NSIA Banque CI — filiale de NSIA Groupe (banque + assurance). Banque universelle CI en pleine montée en puissance depuis 2021.",
-        "business_model": "Synergies banque-assurance avec NSIA Assurances. Cross-selling unique. Dividende lancé en 2023 après réserve des années précédentes.",
-        "strengths": ["P/B = 1,0× = achat à la valeur comptable", "Dividende en forte accélération (+87% en 3 ans)", "Croissance bénéfice 15%+/an", "Synergie assurance-banque unique"],
-        "risks": ["Historique dividende court (depuis 2023)", "ROE 15% — inférieur aux pairs", "Taille plus modeste", "Liquidité faible en bourse"],
-        "net_profit_bn": [8, 10, 12, 15, 16, 18, 22, 28, 35, 40],
-        "revenue_bn":    [22, 26, 30, 35, 38, 42, 50, 62, 75, 85],
-        "years":         [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-        "roe_hist":      [10, 11, 12, 13, 13, 14, 14, 15, 15, 15],
-        "latest_news": "Dividende 2026: 759 XOF/action. Croissance bénéfice accélère. Plan stratégique ambitieux d'expansion du réseau CI.",
-        "analyst_view": "NSBC aujourd'hui ressemble à SIBC en 2019 — même profil de valorisation, même trajectoire de croissance. Acheter à P/B 1,0× une banque avec ROE 15% qui croît à 15%/an est un cadeau rare sur marchés africains. BUY — catalyseur: re-rating de 1,0× à 1,5×P/B = +50%.",
-        "target_price": 21000,
-        "upside_pct": 51,
-    },
-}
-
-# ── ANALYSE IA CLAUDE ─────────────────────────────────────────────────────────
-AI_ANALYSIS = {
-    "SGBC": """
-**Analyse fondamentale — SGBC (Société Générale CI)**
-
-**Résumé exécutif :** SGBC est le compoundeur par excellence de la BRVM. 10 ans de croissance ininterrompue du bénéfice, dividende multiplié par 11, ROE constamment supérieur à 20%. Après un parcours exceptionnel (+900% depuis 2016), la question est : y a-t-il encore de la valeur ?
-
-**Analyse financière :** Le T1 2025 confirme la tendance : PNB +1,3%, bénéfice net +2,2%, coefficient d'exploitation record de 37%. La banque génère 128 milliards FCFA de bénéfice annuel pour une capitalisation de ~1 085 milliards = P/E 8,5×. Avec un ROE de 24%, le P/B justifié (Warren Buffett) serait ROE/coût fonds propres = 24%/10% = 2,4× book. Actuellement à 2,0× — légèrement décote par rapport à la valeur intrinsèque.
-
-**Flux de trésorerie :** En tant que banque, le FCF se mesure via les dividendes soutenables. Payout ratio 55% vs ROE 24% — le dividende est 100% couvert et en croissance. Dividende 2025 : 2 293 XOF = +64% vs 2024 (confirmation de l'excellente année 2025).
-
-**Verdict :** Acheter et conserver. La croissance ralentit (maturité) mais la qualité et le rendement (6,5%) compensent. Target 12 mois : 38 000 XOF. Upside limité mais risque très faible.
-""",
-    "SIBC": """
-**Analyse fondamentale — SIBC (Société Ivoirienne de Banque)**
-
-**Résumé exécutif :** La meilleure opportunité actuelle sur la BRVM. ROE 27,2% (le plus élevé de toute la cote), P/E 10,7× = sous-valorisation manifeste. Les résultats 2025 (bénéfice +11% à 55,6 Md FCFA, PNB +6% à 108 Md FCFA) confirment une machine à croissance bien huilée.
-
-**Analyse financière :** Sur 5 ans, la SIB réalise une croissance annuelle moyenne du bénéfice de 13%. Avec une trajectoire aussi régulière et un ROE durablement >25%, le P/E justifié par les méthodes de Greenwald (EPV) ou Gordon Growth serait 15-18×. À 10,7× aujourd'hui, il y a un gap de re-rating de 40-70%.
-
-**Flux de trésorerie :** Coefficient d'exploitation 38,6% (en baisse constante depuis 45,1% en 2021) = levier opérationnel croissant. Chaque FCFA de revenus supplémentaire génère de plus en plus de profits. FCF opérationnel solide, dividende 2025 proposé 425 FCFA brut (rendement 6%).
-
-**Catalyseurs 2026-2028 :** Plan IMPULSION 2028 — digitalisation accélérée, 71 agences → expansion, crédit PME (+11%). Le parent Attijariwafa Bank (profit +20% au S1 2025) investit massivement en CI.
-
-**Verdict :** STRONG BUY. C'est la convergence rare d'une qualité exceptionnelle (ROE 27%) à un prix de solde (P/E 10,7×). Target 18 mois : 10 000 XOF (+44%). Catalyseur principal : découverte par les investisseurs institutionnels régionaux.
-""",
-    "SNTS": """
-**Analyse fondamentale — SNTS (Sonatel Sénégal)**
-
-**Résumé exécutif :** Sonatel est l'actif de qualité la plus élevée de toute la BRVM. CA 2025 : 1 923 Md FCFA (+8,3%), bénéfice net 413,5 Md FCFA (+5,1%), marge EBITDAaL 47,9% — des niveaux world-class. Pourtant l'action se négocie à EV/EBITDA 3,2× vs 6-8× pour les comparables mondiaux.
-
-**Analyse financière :** Le modèle économique est en pleine mutation vers les services à plus forte valeur ajoutée : data mobile (+8,6% abonnés 4G), fibre optique (+48,2% en 2024), Orange Money (208,9 Md FCFA de revenus, 3,8 milliards de transactions). Ces segments croissent 2-3× plus vite que la voix traditionnelle avec des marges supérieures.
-
-**Flux de trésorerie :** FCF opérationnel T3 2025 : +15,8% à 483,4 Md FCFA. Capex/CA = 15% — investissement maîtrisé. FCF yield ~15% sur la capitalisation actuelle = l'une des meilleures générations de cash de la BRVM. Dividende 2026 : 1 740 XOF net (ex-div 22/05/2026).
-
-**Risques :** Nouvelles taxes mobile money au Sénégal partiellement absorbées par les volumes. Mali (~20% CA) en situation politique fragile — risque géographique réel mais géré.
-
-**Verdict :** BUY. L'écart de valorisation vs les télécoms africains équivalents (MTN, Safaricom) est inexplicable et va se réduire. La 5G et Orange Money sont deux catalyseurs à long terme non encore intégrés dans le prix. Target 5 ans : 45 000-55 000 XOF.
-""",
-    "CBIBF": """
-**Analyse fondamentale — CBIBF (Coris Bank International)**
-
-**Résumé exécutif :** P/E 5× pour une banque qui a multiplié son bénéfice par 4 en 10 ans. Le risque géopolitique Burkina Faso est la seule explication de cette sous-valorisation extrême.
-
-**Analyse financière :** Coris Bank est une success story : fondée en 2008, elle a construit un réseau dans 9 pays avec une croissance du bénéfice de 15%/an. ROE stable à 18%, dividende en hausse chaque année depuis 2015. Le P/E de 5× implique un rendement des bénéfices de 20% — pour une banque profitable et en croissance.
-
-**Flux de trésorerie :** Dividende 900 XOF confirmé pour 2026 (ex-div 06/07). Payout ratio ~27% = très conservateur = solidité du bilan = capacité à absorber les chocs.
-
-**Scénario géopolitique :** Le risque Burkina est réel (deux coups d'État en 2022) mais excessivement pricé. La banque a traversé les crises en maintenant sa rentabilité. Si stabilité politique : re-rating immédiat vers P/E 8-10× = doublement du cours.
-
-**Verdict :** BUY spéculatif pour investisseur avec horizon 3-5 ans et tolérance au risque géopolitique. Le downside est limité (le prix intègre déjà le risque). L'upside en cas de normalisation politique est de 100-150%. Target conditionnel : 28 000 XOF.
-""",
-    "NSBC": """
-**Analyse fondamentale — NSBC (NSIA Banque CI)**
-
-**Résumé exécutif :** NSBC est où SIBC était en 2019 — un compoundeur en début de cycle de re-rating. P/B 1,0×, P/E 7×, dividende en forte accélération. La convergence NSIA Banque + NSIA Assurances crée des synergies uniques.
-
-**Analyse financière :** Croissance du bénéfice : 15-20%/an sur 3 ans. Dividende multiplié par 2 en 3 ans (0 → 404 → 505 → 759 XOF). Le ROE de 15% est modeste mais en progression. La vraie valeur est dans l'accélération : chaque amélioration de 1pt de ROE = +10-15% sur le cours justifié.
-
-**Flux de trésorerie :** P/B = 1,0× signifie qu'on achète exactement à la valeur comptable une banque qui génère 15% de return sur ces actifs. En théorie : si maintenu, la valeur doublera tous les 7 ans. Avec 15%+ de croissance par an — beaucoup plus vite.
-
-**Catalyseurs :** 1) Synergie Banque-Assurance accélérée. 2) Plan d'expansion réseau CI. 3) Re-rating naturel au fur et à mesure que l'historique de dividendes s'allonge. 4) Potentielle découverte par fonds panafricains.
-
-**Verdict :** STRONG BUY. Risque/rendement le plus attractif de la BRVM pour un horizon 3-5 ans. Target : 21 000 XOF (+51%). Scenario bear : 16 000 XOF si ROE stagne.
-""",
-}
-
-def get_company_data(ticker: str) -> dict:
-    """Retourne toutes les données enrichies pour un ticker"""
-    return {
-        "price_history": PRICE_HISTORY.get(ticker, {}),
-        "dividend_history": DIVIDEND_HISTORY.get(ticker, {}),
-        "financials": FINANCIALS.get(ticker, {}),
-        "ai_analysis": AI_ANALYSIS.get(ticker, ""),
-    }
-
-def get_top_performers() -> list:
-    """Retourne le classement des meilleurs performers 10 ans"""
-    results = []
-    for ticker in PRICE_HISTORY:
-        ph = PRICE_HISTORY[ticker]
-        if len(ph["prices"]) >= 2:
-            gain = (ph["prices"][-1] / ph["prices"][0] - 1) * 100
-            dh = DIVIDEND_HISTORY.get(ticker, {})
-            total_divs = sum(dh.get("divs", []))
-            results.append({
-                "ticker": ticker,
-                "price_gain_pct": round(gain, 1),
-                "total_divs_xof": total_divs,
-                "current_price": ph["prices"][-1],
-                "start_price": ph["prices"][0],
-            })
-    return sorted(results, key=lambda x: x["price_gain_pct"], reverse=True)
-
+def get_all_tickers():
+    return list(COMPANIES.keys())
 
 if __name__ == "__main__":
-    print("=== TOP PERFORMERS 10 ANS ===")
-    for r in get_top_performers():
-        print(f"  {r['ticker']}: +{r['price_gain_pct']:.0f}%  "
-              f"({r['start_price']:,} → {r['current_price']:,} XOF)  "
-              f"Dividendes cumulés: {r['total_divs_xof']:,} XOF")
+    c = get_company("SGBC")
+    print(f"{c['name']} — {c['sector']} — {c['country']}")
+    print(f"Produits: {', '.join(c['products'])}")
+    print(f"Total: {len(COMPANIES)} sociétés documentées")

@@ -448,6 +448,61 @@ def api_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/company/<ticker>")
+def api_company(ticker):
+    """Fiche société enrichie : activité, produits, marchés, rapports"""
+    try:
+        from company_data import get_company
+        import anthropic, os
+        t = ticker.upper()
+        company = get_company(t)
+
+        # Récupère le prix live
+        live = {}
+        try:
+            cache = get_live_data()
+            live = cache.get("prices", {}).get(t, {})
+        except Exception:
+            pass
+
+        # Enrichissement IA — résumé activité + perspectives
+        ai_summary = ""
+        try:
+            client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+            prompt = f"""Tu es un analyste financier spécialisé sur la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
+
+Société : {company.get('name')} ({t})
+Secteur : {company.get('sector')} | Pays : {company.get('country')}
+Fondée : {company.get('founded', 'N/D')}
+Description : {company.get('description', '')}
+Produits/Services : {', '.join(company.get('products', []))}
+Marchés : {', '.join(company.get('markets', []))}
+
+Donne en 3-4 phrases courtes :
+1. Le positionnement stratégique de cette société sur la BRVM
+2. Les principaux moteurs de croissance ou risques en 2025-2026
+3. Une perspective sur l'attractivité du titre pour un investisseur long terme
+
+Réponds en français, de façon factuelle et concise."""
+            resp = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=300,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            ai_summary = resp.content[0].text
+        except Exception as e:
+            ai_summary = ""
+
+        return jsonify({
+            "ticker": t,
+            "company": company,
+            "live": live,
+            "ai_summary": ai_summary,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     import socket
     import os as _os

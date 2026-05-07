@@ -908,6 +908,8 @@ async function showStock(ticker){
     const fi=cd.financials||{},ai=cd.ai_analysis||'';
     const models=[['Graham',s.score_graham||0,s.detail_graham||''],['DCF/FCF',s.score_dcf||0,s.detail_dcf||''],['DDM',s.score_ddm||0,s.detail_ddm||''],['EPV',s.score_epv||0,s.detail_epv||''],['Buffett',s.score_buffett||0,s.detail_buffett||''],['Rev.DCF',s.score_rev_dcf||0,s.detail_rev_dcf||''],['Relatif',s.score_relatif||0,s.detail_relatif||''],['Technique',s.score_technique||0,s.detail_technique||'']];
     const ci=COMM_PROD[ticker];
+    const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
+    const hasCompany=co&&co.description&&co.description.length>10;
     const isFav=favorites.includes(ticker);
     document.getElementById('stockDetail').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
@@ -917,6 +919,24 @@ async function showStock(ticker){
             <span style="font-size:11px;color:var(--t2);font-weight:400">· ${s.sector||''} · ${s.country||''}</span></h2>
           <p style="color:var(--t2);font-size:12px;margin-top:2px">${s.name||''}</p>
           ${fi.description?`<p style="font-size:11px;color:var(--t3);margin-top:3px;max-width:550px;line-height:1.5">${fi.description}</p>`:''}
+    ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
+      <div class="ct">🏢 Activité</div>
+      <p style="font-size:11px;color:var(--t2);margin:4px 0 8px;line-height:1.6">${co.description||''}</p>
+      ${co.products&&co.products.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${co.products.map(p=>`<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.07);color:var(--t2)">${p}</span>`).join('')}
+      </div>`:''}
+      <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);margin-top:4px;flex-wrap:wrap">
+        ${co.founded?`<span>📅 Fondée ${co.founded}</span>`:''}
+        ${co.employees_approx?`<span>👥 ~${co.employees_approx.toLocaleString('fr-FR')} employés</span>`:''}
+        ${co.markets&&co.markets.length?`<span>🌍 ${co.markets.join(' · ')}</span>`:''}
+      </div>
+      ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
+      ${co.reports_url?` &nbsp;<a href="${co.reports_url}" target="_blank" style="font-size:10px;color:var(--amber);margin-top:6px;display:inline-block">📄 Rapports annuels</a>`:''}
+    </div>`:''}
+    ${aiSummary?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--green);background:var(--bg3)">
+      <div class="ct">🤖 Analyse IA — Positionnement stratégique</div>
+      <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.6;white-space:pre-wrap">${aiSummary.trim()}</p>
+    </div>`:'' }
         </div>
         <div style="text-align:right">
           <div style="font-size:22px;font-weight:700">${s.price?s.price.toLocaleString('fr-FR'):'N/D'} <span style="font-size:12px;color:var(--t2)">XOF</span></div>
