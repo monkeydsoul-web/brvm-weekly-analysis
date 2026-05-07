@@ -14,10 +14,17 @@ import subprocess
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+try:
+    from live_data import get_live_data, start_scheduler, is_market_open
+    LIVE_DATA_OK = True
+except ImportError:
+    LIVE_DATA_OK = False
 
 app = Flask(__name__, static_folder="dashboard", static_url_path="")
 CORS(app)
 logging.basicConfig(level=logging.INFO)
+if LIVE_DATA_OK:
+    start_scheduler()
 logger = logging.getLogger("app")
 
 DATA_DIR = "data"
@@ -400,6 +407,46 @@ def api_portfolio_optimize_summary():
     if not cache:
         optimize(n_sim=3000)
     return get_optimizer_html()
+
+
+@app.route("/api/live")
+def api_live():
+    """Cours live BRVM depuis brvm.org — cache 5 min"""
+    try:
+        force = request.args.get("force", "false").lower() == "true"
+        data = get_live_data(force_refresh=force)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/live/<ticker>")
+def api_live_ticker(ticker):
+    """Cours live pour un ticker specifique"""
+    try:
+        data = get_live_data()
+        prices = data.get("prices", {})
+        t = ticker.upper()
+        if t not in prices:
+            return jsonify({"error": f"{t} non trouve"}), 404
+        return jsonify({"ticker": t, **prices[t], "updated_at": data.get("updated_at")})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/status")
+def api_status():
+    """Statut du marche et du cache live"""
+    try:
+        data = get_live_data()
+        stats = data.get("stats", {})
+        return jsonify({
+            "market_open": data.get("market_open", False),
+            "updated_at":  data.get("updated_at"),
+            "total":       stats.get("total", 0),
+            "with_price":  stats.get("with_price", 0),
+            "sources":     stats.get("sources", {}),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     import socket
