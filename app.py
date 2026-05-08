@@ -604,6 +604,25 @@ def api_analyze_ticker(ticker):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/live-ranking")
+def api_live_ranking():
+    force = request.args.get("refresh", "0") == "1"
+    try:
+        from live_ranker import compute_live_ranking, load_ranking
+        result = compute_live_ranking(trigger="manual") if force else (load_ranking() or compute_live_ranking(trigger="manual"))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/live-ranking/changes")
+def api_live_ranking_changes():
+    try:
+        from live_ranker import get_ranking_changes
+        return jsonify(get_ranking_changes())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     import socket
     import os as _os

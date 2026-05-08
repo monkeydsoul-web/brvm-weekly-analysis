@@ -112,3 +112,24 @@ async function analyzePDF(url, ticker, docType, year, btn) {
     if (btn) { btn.textContent = 'Analyser PDF'; btn.disabled = false; }
   }
 }
+
+async function loadLiveRank(ticker) {
+  try {
+    const res = await fetch('/api/live-ranking');
+    const d = await res.json();
+    if (!d.ranking) return;
+    const r = d.ranking.find(x => x.ticker === ticker);
+    if (!r) return;
+    const el = document.getElementById('live-rank-badge');
+    if (!el) return;
+    const delta = r.rank_delta || 0;
+    const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '—';
+    const col   = delta > 0 ? '#00c076' : delta < 0 ? 'var(--red)' : 'var(--t2)';
+    el.innerHTML =
+      '<span style="font-size:11px;color:var(--t2)">Rang live : </span>' +
+      '<span style="font-size:13px;font-weight:700">#' + r.rank + '</span>' +
+      '<span style="font-size:11px;color:' + col + ';margin-left:4px">' + arrow +
+      (delta !== 0 ? Math.abs(delta) : '') + '</span>' +
+      '<span style="font-size:10px;color:var(--t2);margin-left:6px">/ 47</span>';
+  } catch(e) {}
+}

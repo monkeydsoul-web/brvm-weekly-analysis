@@ -1089,6 +1089,7 @@ async function showStock(ticker){
             <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
             <span style="font-size:11px;color:var(--t2);font-weight:400">· ${s.sector||''} · ${s.country||''}</span></h2>
           <p style="color:var(--t2);font-size:12px;margin-top:2px">${s.name||''}</p>
+          <div id="live-rank-badge" style="margin-top:4px"></div>
           ${fi.description?`<p style="font-size:11px;color:var(--t3);margin-top:3px;max-width:550px;line-height:1.5">${fi.description}</p>`:''}
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>

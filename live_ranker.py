@@ -1,0 +1,402 @@
+"""
+live_ranker.py — Reclassement automatique des 47 sociétés BRVM
+Recalcule les 8 modèles dès qu'un prix change ou qu'un rapport est analysé.
+Cache : data/live_ranking.json (mis à jour à chaque déclenchement)
+"""
+
+import os
+import json
+import logging
+import time
+import threading
+from datetime import datetime, timezone
+from copy import deepcopy
+
+logger = logging.getLogger(__name__)
+
+BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
+RANKING_PATH  = os.path.join(BASE_DIR, "data", "live_ranking.json")
+HISTORY_PATH  = os.path.join(BASE_DIR, "data", "ranking_history.json")
+
+# Verrou pour éviter les recalculs simultanés
+_lock = threading.Lock()
+_last_ranking = None          # Cache en mémoire
+_last_prices  = {}            # Derniers prix connus (pour détecter les changements)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Construction du row fondamental enrichi
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
+    """
+    Fusionne les 3 sources de données pour un ticker :
+    1. Fondamentaux statiques (scraper.py)
+    2. Prix live (live_data.py)
+    3. KPIs extraits des PDF (bulk_analyzer.py)
+    """
+    row = dict(base_row)
+
+    # ── Prix live ──────────────────────────────────────────────────────────
+    live_price = live_price_data.get("price")
+    if live_price and live_price > 0:
+        old_price = row.get("price") or live_price
+        row["price"]      = live_price
+        row["change_pct"] = live_price_data.get("change_pct", 0)
+        row["prev_close"] = live_price_data.get("prev_close")
+        row["volume"]     = live_price_data.get("volume", 0)
+        row["trend"]      = live_price_data.get("trend")
+
+        # Recalcul P/E et P/B proportionnels au prix live
+        if old_price and old_price != live_price:
+            ratio = live_price / old_price
+            for key in ("pe_ref", "pe_hist"):
+                old_val = row.get(key)
+                if old_val and old_val < 990:
+                    row[key] = round(old_val * ratio, 2)
+            for key in ("pb_ref", "pb_hist"):
+                old_val = row.get(key)
+                if old_val and old_val < 990:
+                    row[key] = round(old_val * ratio, 2)
+            # Recalcul div_yield
+            old_div = row.get("div_yield") or 0
+            if old_div and old_price:
+                dps = old_div / 100 * old_price
+                row["div_yield"]     = round(dps / live_price * 100, 2)
+                row["div_per_share"] = dps
+
+    # ── KPIs PDF (priorité sur fondamentaux statiques) ────────────────────
+    if pdf_analysis and pdf_analysis.get("status") == "ok":
+        kpis = pdf_analysis.get("kpis") or {}
+
+        def kv(key):
+            return (kpis.get(key) or {}).get("valeur")
+
+        roe_pdf = kv("roe")
+        div_pdf = kv("dividende_par_action")
+
+        if roe_pdf is not None:
+            row["roe"] = round(float(roe_pdf), 1)
+
+        if div_pdf and div_pdf > 0:
+            row["div_per_share"] = float(div_pdf)
+            price = row.get("price") or 0
+            if price > 0:
+                row["div_yield"] = round(float(div_pdf) / price * 100, 2)
+
+        # Métadonnées PDF pour l'affichage
+        row["pdf_verdict"]      = pdf_analysis.get("verdict_investisseur")
+        row["pdf_ca"]           = kv("chiffre_affaires")
+        row["pdf_rn"]           = kv("resultat_net")
+        row["pdf_ebitda"]       = kv("ebitda")
+        row["pdf_marge"]        = kv("marge_nette")
+        row["pdf_year"]         = pdf_analysis.get("year")
+        row["pdf_points_cles"]  = pdf_analysis.get("points_cles", [])[:3]
+        row["pdf_perspectives"] = pdf_analysis.get("perspectives", "")[:200]
+        row["pdf_resume"]       = pdf_analysis.get("resume", "")[:300]
+
+    return row
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Calcul des 8 modèles
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _compute_scores(row):
+    """Calcule les 8 scores et le composite /80."""
+    from valuation import (
+        score_graham, score_dcf, score_ddm, score_epv,
+        score_buffett, score_reverse_dcf, score_relative,
+        GEO_RISK_PENALTY,
+    )
+    from live_valuation import score_technique_live
+
+    g   = score_graham(row)
+    dcf = score_dcf(row)
+    ddm = score_ddm(row)
+    epv = score_epv(row)
+    buf = score_buffett(row)
+    rev = score_reverse_dcf(row)
+    rel = score_relative(row)
+    tec = score_technique_live(row)
+
+    geo_penalty  = GEO_RISK_PENALTY.get(row.get("country", ""), 0)
+    composite_raw = (
+        g["score"] + dcf["score"] + ddm["score"] + epv["score"]
+        + buf["score"] + rev["score"] + rel["score"]
+    )
+    composite_adj_70 = max(0, composite_raw + geo_penalty * 7 / 10)
+    composite_adj_80 = round(min(80, composite_adj_70 + tec["score"]), 1)
+
+    return {
+        "score_graham":    g["score"],
+        "score_dcf":       dcf["score"],
+        "score_ddm":       ddm["score"],
+        "score_epv":       epv["score"],
+        "score_buffett":   buf["score"],
+        "score_rev_dcf":   rev["score"],
+        "score_relatif":   rel["score"],
+        "score_technique": tec["score"],
+        "detail_graham":   g["details"],
+        "detail_dcf":      dcf["details"],
+        "detail_ddm":      ddm["details"],
+        "detail_epv":      epv["details"],
+        "detail_buffett":  buf["details"],
+        "detail_rev_dcf":  rev["details"],
+        "detail_relatif":  rel["details"],
+        "detail_technique":tec["details"],
+        "geo_penalty":     geo_penalty,
+        "composite_raw":   round(composite_raw, 1),
+        "composite_adj":   composite_adj_80,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reclassement complet
+# ─────────────────────────────────────────────────────────────────────────────
+
+def compute_live_ranking(trigger="manual", force=False):
+    """
+    Recalcule le classement complet des 47 sociétés.
+    trigger: "price_update" | "pdf_analysis" | "manual" | "scheduler"
+    """
+    global _last_ranking, _last_prices
+
+    with _lock:
+        try:
+            from scraper import STOCK_FUNDAMENTALS
+            from live_data import get_live_data
+
+            # Charger les analyses PDF
+            summary_path = os.path.join(BASE_DIR, "data", "analyses_summary.json")
+            pdf_summary  = {}
+            if os.path.exists(summary_path):
+                with open(summary_path, encoding="utf-8") as f:
+                    pdf_summary = json.load(f)
+
+            # Charger les prix live (depuis cache, pas de re-fetch)
+            live_cache  = get_live_data(force_refresh=False)
+            live_prices = live_cache.get("prices", {})
+
+            results = []
+            changed_tickers = []
+
+            for ticker, base_row in STOCK_FUNDAMENTALS.items():
+                try:
+                    live_price_data = live_prices.get(ticker, {})
+                    pdf_analysis    = pdf_summary.get(ticker)
+
+                    # Détecter si le prix a changé
+                    new_price = live_price_data.get("price")
+                    old_price = _last_prices.get(ticker)
+                    if new_price and new_price != old_price:
+                        changed_tickers.append(ticker)
+                        _last_prices[ticker] = new_price
+
+                    # Construire le row enrichi
+                    row = _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis)
+
+                    # Calculer les 8 scores
+                    scores = _compute_scores(row)
+
+                    result = {
+                        "ticker":        ticker,
+                        "name":          base_row.get("name", ""),
+                        "sector":        base_row.get("sector", ""),
+                        "country":       base_row.get("country", ""),
+                        "price":         row.get("price"),
+                        "change_pct":    row.get("change_pct", 0),
+                        "volume":        row.get("volume", 0),
+                        "trend":         row.get("trend"),
+                        "pe_ref":        row.get("pe_ref") or row.get("pe_hist"),
+                        "pb_ref":        row.get("pb_ref") or row.get("pb_hist"),
+                        "roe":           row.get("roe"),
+                        "div_yield":     row.get("div_yield"),
+                        "div_per_share": row.get("div_per_share"),
+                        "pdf_verdict":   row.get("pdf_verdict"),
+                        "pdf_ca":        row.get("pdf_ca"),
+                        "pdf_rn":        row.get("pdf_rn"),
+                        "pdf_year":      row.get("pdf_year"),
+                        "pdf_resume":    row.get("pdf_resume"),
+                        "pdf_points_cles": row.get("pdf_points_cles", []),
+                        **scores,
+                    }
+                    results.append(result)
+
+                except Exception as e:
+                    logger.warning(f"Erreur scoring {ticker}: {e}")
+                    results.append({
+                        "ticker": ticker,
+                        "name":   base_row.get("name", ""),
+                        "composite_adj": 0,
+                        "error": str(e),
+                    })
+
+            # Trier par score décroissant
+            results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+
+            # Calculer les mouvements de rang
+            old_ranks = {}
+            if _last_ranking:
+                for r in _last_ranking.get("ranking", []):
+                    old_ranks[r["ticker"]] = r.get("rank", 0)
+
+            for i, r in enumerate(results):
+                r["rank"]      = i + 1
+                old_rank       = old_ranks.get(r["ticker"], i + 1)
+                r["rank_delta"] = old_rank - (i + 1)  # positif = monté
+
+            # Payload final
+            payload = {
+                "updated_at":       datetime.now(timezone.utc).isoformat(),
+                "trigger":          trigger,
+                "market_open":      live_cache.get("market_open", False),
+                "changed_tickers":  changed_tickers,
+                "total":            len(results),
+                "ranking":          results,
+            }
+
+            # Sauvegarder
+            os.makedirs(os.path.dirname(RANKING_PATH), exist_ok=True)
+            with open(RANKING_PATH, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+
+            # Sauvegarder dans l'historique (top 10 seulement, max 30 entrées)
+            _save_history(payload)
+
+            _last_ranking = payload
+            logger.info(
+                f"Ranking recalculé — trigger={trigger} "
+                f"changements={len(changed_tickers)} "
+                f"top1={results[0]['ticker'] if results else '?'}"
+            )
+            return payload
+
+        except Exception as e:
+            logger.error(f"compute_live_ranking erreur: {e}")
+            return _last_ranking or {}
+
+
+def _save_history(payload):
+    """Sauvegarde un snapshot du top 10 dans l'historique."""
+    try:
+        history = []
+        if os.path.exists(HISTORY_PATH):
+            with open(HISTORY_PATH, encoding="utf-8") as f:
+                history = json.load(f)
+
+        snapshot = {
+            "ts":      payload["updated_at"],
+            "trigger": payload["trigger"],
+            "top10":   [
+                {"ticker": r["ticker"], "score": r["composite_adj"], "rank": r["rank"]}
+                for r in payload["ranking"][:10]
+            ],
+        }
+        history.append(snapshot)
+        history = history[-30:]  # Garder 30 derniers
+
+        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.debug(f"_save_history: {e}")
+
+
+def load_ranking():
+    """Charge le dernier classement depuis le cache fichier."""
+    global _last_ranking
+    if _last_ranking:
+        return _last_ranking
+    if os.path.exists(RANKING_PATH):
+        try:
+            with open(RANKING_PATH, encoding="utf-8") as f:
+                _last_ranking = json.load(f)
+                return _last_ranking
+        except Exception:
+            pass
+    return None
+
+
+def get_ranking_changes():
+    """Retourne les sociétés dont le rang a changé depuis le dernier calcul."""
+    ranking = load_ranking()
+    if not ranking:
+        return []
+    changes = [
+        {
+            "ticker":      r["ticker"],
+            "name":        r.get("name", ""),
+            "rank":        r["rank"],
+            "rank_delta":  r.get("rank_delta", 0),
+            "score":       r.get("composite_adj", 0),
+            "change_pct":  r.get("change_pct", 0),
+        }
+        for r in ranking.get("ranking", [])
+        if r.get("rank_delta", 0) != 0
+    ]
+    return sorted(changes, key=lambda x: abs(x["rank_delta"]), reverse=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Scheduler intégration
+# ─────────────────────────────────────────────────────────────────────────────
+
+def schedule_ranking_jobs(scheduler):
+    """
+    Ajoute les jobs de reclassement à l'APScheduler existant.
+    Appeler depuis app.py après start_scheduler().
+    """
+    # Recalcul après chaque mise à jour des prix live (toutes les 5 min)
+    def job_ranking_on_price():
+        compute_live_ranking(trigger="price_update")
+
+    scheduler.add_job(
+        job_ranking_on_price,
+        "interval", minutes=5,
+        id="live_ranking_price",
+        replace_existing=True,
+    )
+
+    # Recalcul après analyse PDF (quotidien 23h30)
+    def job_ranking_on_pdf():
+        compute_live_ranking(trigger="pdf_analysis")
+
+    scheduler.add_job(
+        job_ranking_on_pdf,
+        "cron", hour=23, minute=30,
+        id="live_ranking_pdf",
+        replace_existing=True,
+    )
+
+    logger.info("Jobs ranking schedulés")
+
+
+if __name__ == "__main__":
+    import sys
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+    print("Calcul du classement live...")
+    result = compute_live_ranking(trigger="manual")
+
+    if result.get("ranking"):
+        print(f"\nClassement live — {result['updated_at'][:19]}")
+        print(f"{'Rg':3} {'Ticker':8} {'Score':6} {'P/E':6} {'ROE':6} {'PDF':8} {'Δ':4}")
+        print("-" * 55)
+        for r in result["ranking"][:20]:
+            delta = r.get("rank_delta", 0)
+            delta_str = f"+{delta}" if delta > 0 else str(delta) if delta < 0 else "—"
+            pdf = r.get("pdf_verdict", "")[:7] if r.get("pdf_verdict") else "—"
+            pe  = f"{r.get('pe_ref',0):.1f}x" if r.get("pe_ref") else "—"
+            roe = f"{r.get('roe',0):.0f}%" if r.get("roe") else "—"
+            print(
+                f"{r['rank']:3d} {r['ticker']:8s} "
+                f"{r.get('composite_adj',0):5.1f}  "
+                f"{pe:6s} {roe:6s} {pdf:8s} {delta_str:4s}"
+            )
+
+        changes = get_ranking_changes()
+        if changes:
+            print(f"\nMouvements ({len(changes)}):")
+            for c in changes[:5]:
+                arrow = "▲" if c["rank_delta"] > 0 else "▼"
+                print(f"  {arrow} {c['ticker']:8s} rang {c['rank']} ({c['rank_delta']:+d})")
