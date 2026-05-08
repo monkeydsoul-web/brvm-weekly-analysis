@@ -1,0 +1,37 @@
+async function fetchLiveScore(ticker){
+  const el=document.getElementById('live-score-container');
+  if(!el)return;
+  el.innerHTML='<div style="color:var(--t2);font-size:12px;padding:6px 0"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#00c076;animation:pulse 1s infinite;margin-right:5px"></span>Calcul score live...</div>';
+  try{
+    const res=await fetch('/api/live-score/'+ticker);
+    const d=await res.json();
+    if(d.error){el.innerHTML='<div style="color:var(--red);font-size:11px">'+d.error+'</div>';return;}
+    const sc=d.composite_adj||0;
+    const col=sc>=57?'var(--green)':sc>=40?'var(--amber)':sc>=23?'var(--orange,#f97316)':'var(--red)';
+    const tier=sc>=57?'FORT':sc>=40?'MODERE':sc>=23?'FAIBLE':'EVITER';
+    const chg=d.live_change_pct||0;
+    const chgCol=chg>=0?'var(--green)':'var(--red)';
+    const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
+    const price=d.live_price?d.live_price.toLocaleString('fr-FR')+' XOF':'N/D';
+    const badge=d.live_source!=='static'?'<span style="background:#00c07620;color:#00c076;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">LIVE</span>':'';
+    const models=[['Graham',d.score_graham],['DCF',d.score_dcf],['DDM',d.score_ddm],['EPV',d.score_epv],['Buffett',d.score_buffett],['RevDCF',d.score_rev_dcf],['Relatif',d.score_relatif],['Tech.',d.score_technique]];
+    const bars=models.map(function(m){
+      var l=m[0],v=m[1],sv=v||0;
+      var bc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';
+      return '<div style="display:grid;grid-template-columns:52px 1fr 26px;align-items:center;gap:5px;font-size:11px"><span style="color:var(--t2)">'+l+'</span><div style="background:var(--border);border-radius:3px;height:4px"><div style="width:'+sv*10+'%;height:4px;border-radius:3px;background:'+bc+'"></div></div><span style="color:'+bc+';font-weight:600;text-align:right">'+sv.toFixed(1)+'</span></div>';
+    }).join('');
+    el.innerHTML='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+      '<div><div style="font-size:11px;color:var(--t2);margin-bottom:3px">Score live '+badge+'</div>'+
+      '<div style="font-size:12px">'+price+' <span style="color:'+chgCol+'">'+chgStr+'</span></div></div>'+
+      '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+sc.toFixed(1)+'<span style="font-size:13px;color:var(--t2)">/80</span></div>'+
+      '<div style="font-size:11px;font-weight:600;color:'+col+'">'+tier+'</div></div></div>'+
+      '<div style="background:var(--border);border-radius:4px;height:5px;margin-bottom:10px">'+
+      '<div style="width:'+(sc/80*100).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">'+bars+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--t2);border-top:1px solid var(--border);padding-top:6px;align-items:center">'+
+      '<span>P/E: '+(d.pe_ref_live||0).toFixed(1)+'x</span><span>P/B: '+(d.pb_ref_live||0).toFixed(1)+'x</span>'+
+      '<span>Rdt: '+(d.div_yield_live||0).toFixed(1)+'%</span>'+
+      '<button onclick="fetchLiveScore(\''+ticker+'\')" style="margin-left:auto;font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;color:var(--t2)">Actualiser</button></div></div>';
+  }catch(e){el.innerHTML='<div style="color:var(--red);font-size:11px">Erreur: '+e.message+'</div>';}
+}

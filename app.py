@@ -14,6 +14,8 @@ import subprocess
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from live_valuation import compute_live_score, compute_all_live_scores
+from live_data import get_live_data
 try:
     from live_data import get_live_data, start_scheduler, is_market_open
     LIVE_DATA_OK = True
@@ -520,6 +522,42 @@ Réponds en français, de façon factuelle et concise."""
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route("/api/live-score/<ticker>")
+def api_live_score_ticker(ticker):
+    ticker = ticker.upper()
+    try:
+        from scraper import STOCK_FUNDAMENTALS
+    except ImportError:
+        return jsonify({"error": "scraper.py introuvable"}), 500
+    if ticker not in STOCK_FUNDAMENTALS:
+        return jsonify({"error": f"Ticker {ticker} inconnu"}), 404
+    force = request.args.get("refresh", "0") == "1"
+    try:
+        live_cache = get_live_data(force_refresh=force)
+        result = compute_live_score(ticker, STOCK_FUNDAMENTALS[ticker], live_cache)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/live-scores")
+def api_live_scores_all():
+    force = request.args.get("refresh", "0") == "1"
+    try:
+        from scraper import STOCK_FUNDAMENTALS
+        live_cache = get_live_data(force_refresh=force)
+        results = compute_all_live_scores(STOCK_FUNDAMENTALS, live_cache)
+        return jsonify({"scores": results, "updated_at": live_cache.get("updated_at"), "market_open": live_cache.get("market_open"), "total": len(results)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/live_score.js")
+def serve_live_score_js():
+    return send_from_directory("dashboard", "live_score.js", mimetype="application/javascript")
+
 if __name__ == "__main__":
     import socket
     import os as _os
@@ -538,3 +576,4 @@ if __name__ == "__main__":
     print(f"  BRVM Dashboard — http://localhost:{port}")
     print("="*50 + "\n")
     app.run(debug=False, port=port, host="127.0.0.1")
+

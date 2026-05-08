@@ -1113,6 +1113,7 @@ async function showStock(ticker){
           <div style="font-size:22px;font-weight:700">${s.price?s.price.toLocaleString('fr-FR'):'N/D'} <span style="font-size:12px;color:var(--t2)">XOF</span></div>
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
           <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
+          <div id="live-score-container" style="margin-top:8px"></div>
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
       <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
@@ -1159,6 +1160,7 @@ async function showStock(ticker){
       const lc=prices[prices.length-1]>=prices[0]?'#4ADE80':'#F87171';
       svgLineInteractive(document.getElementById('stockChartDiv'),lbls,[{label:ticker,data:prices}],180,ticker);
     }
+    fetchLiveScore(ticker);
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
 
@@ -1253,4 +1255,5 @@ updateLiveStatus();
 setInterval(updateLiveStatus, 300000);
 </script>
 <script src="/simulator.js"></script>
+<script src="/live_score.js"></script>
 </body></html>
