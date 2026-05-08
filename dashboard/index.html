@@ -1101,7 +1101,8 @@ async function showStock(ticker){
         ${co.employees_approx?`<span>👥 ~${co.employees_approx.toLocaleString('fr-FR')} employés</span>`:''}
         ${co.markets&&co.markets.length?`<span>🌍 ${co.markets.join(' · ')}</span>`:''}
       </div>
-      ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
+      <div id="reports-container" style="margin-top:6px"></div>
+          ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
       ${co.reports_url?` &nbsp;<a href="${co.reports_url}" target="_blank" style="font-size:10px;color:var(--amber);margin-top:6px;display:inline-block">📄 Rapports annuels</a>`:''}
     </div>`:''}
     ${aiSummary?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--green);background:var(--bg3)">
@@ -1161,6 +1162,7 @@ async function showStock(ticker){
       svgLineInteractive(document.getElementById('stockChartDiv'),lbls,[{label:ticker,data:prices}],180,ticker);
     }
     fetchLiveScore(ticker);
+  loadReports(ticker);
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
 

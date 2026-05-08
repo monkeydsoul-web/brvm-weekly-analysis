@@ -559,6 +559,18 @@ def api_live_scores_all():
 def serve_live_score_js():
     return send_from_directory("dashboard", "live_score.js", mimetype="application/javascript")
 
+
+@app.route("/api/reports/<ticker>")
+def api_reports(ticker):
+    ticker = ticker.upper()
+    force = request.args.get("refresh", "0") == "1"
+    try:
+        from reports_scraper import get_reports
+        reports = get_reports(ticker, force_refresh=force)
+        return jsonify({"ticker": ticker, "reports": reports, "total": len(reports)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     import socket
     import os as _os
