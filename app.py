@@ -17,6 +17,12 @@ from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
 try:
+    from scraper import STOCK_FUNDAMENTALS
+    print(f"STOCK_FUNDAMENTALS charge: {len(STOCK_FUNDAMENTALS)} tickers")
+except ImportError:
+    STOCK_FUNDAMENTALS = {}
+    print("WARN: scraper.py introuvable")
+try:
     from live_data import get_live_data, start_scheduler, is_market_open
     LIVE_DATA_OK = True
 except ImportError:
@@ -527,10 +533,6 @@ Réponds en français, de façon factuelle et concise."""
 @app.route("/api/live-score/<ticker>")
 def api_live_score_ticker(ticker):
     ticker = ticker.upper()
-    try:
-        from scraper import STOCK_FUNDAMENTALS
-    except ImportError:
-        return jsonify({"error": "scraper.py introuvable"}), 500
     if ticker not in STOCK_FUNDAMENTALS:
         return jsonify({"error": f"Ticker {ticker} inconnu"}), 404
     force = request.args.get("refresh", "0") == "1"
@@ -546,7 +548,6 @@ def api_live_score_ticker(ticker):
 def api_live_scores_all():
     force = request.args.get("refresh", "0") == "1"
     try:
-        from scraper import STOCK_FUNDAMENTALS
         live_cache = get_live_data(force_refresh=force)
         results = compute_all_live_scores(STOCK_FUNDAMENTALS, live_cache)
         return jsonify({"scores": results, "updated_at": live_cache.get("updated_at"), "market_open": live_cache.get("market_open"), "total": len(results)})

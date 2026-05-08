@@ -3,7 +3,10 @@ async function fetchLiveScore(ticker){
   if(!el)return;
   el.innerHTML='<div style="color:var(--t2);font-size:12px;padding:6px 0"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#00c076;animation:pulse 1s infinite;margin-right:5px"></span>Calcul score live...</div>';
   try{
-    const res=await fetch('/api/live-score/'+ticker);
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch('/api/live-score/'+ticker,{signal:ctrl.signal});
+    clearTimeout(tid);
     const d=await res.json();
     if(d.error){el.innerHTML='<div style="color:var(--red);font-size:11px">'+d.error+'</div>';return;}
     const sc=d.composite_adj||0;
@@ -17,8 +20,8 @@ async function fetchLiveScore(ticker){
     const models=[['Graham',d.score_graham],['DCF',d.score_dcf],['DDM',d.score_ddm],['EPV',d.score_epv],['Buffett',d.score_buffett],['RevDCF',d.score_rev_dcf],['Relatif',d.score_relatif],['Tech.',d.score_technique]];
     const bars=models.map(function(m){
       var l=m[0],v=m[1],sv=v||0;
-      var bc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';
-      return '<div style="display:grid;grid-template-columns:52px 1fr 26px;align-items:center;gap:5px;font-size:11px"><span style="color:var(--t2)">'+l+'</span><div style="background:var(--border);border-radius:3px;height:4px"><div style="width:'+sv*10+'%;height:4px;border-radius:3px;background:'+bc+'"></div></div><span style="color:'+bc+';font-weight:600;text-align:right">'+sv.toFixed(1)+'</span></div>';
+      var bc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';var det=d['detail_'+l.toLowerCase().replace('.','').replace('/','_')]||'';
+      return '<div title="'+det+'" style="display:grid;grid-template-columns:52px 1fr 26px;align-items:center;gap:5px;font-size:11px"><span style="color:var(--t2)">'+l+'</span><div style="background:var(--border);border-radius:3px;height:4px"><div style="width:'+sv*10+'%;height:4px;border-radius:3px;background:'+bc+'"></div></div><span style="color:'+bc+';font-weight:600;text-align:right">'+sv.toFixed(1)+'</span></div>';
     }).join('');
     el.innerHTML='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
@@ -33,5 +36,5 @@ async function fetchLiveScore(ticker){
       '<span>P/E: '+(d.pe_ref_live||0).toFixed(1)+'x</span><span>P/B: '+(d.pb_ref_live||0).toFixed(1)+'x</span>'+
       '<span>Rdt: '+(d.div_yield_live||0).toFixed(1)+'%</span>'+
       '<button onclick="fetchLiveScore(\''+ticker+'\')" style="margin-left:auto;font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;color:var(--t2)">Actualiser</button></div></div>';
-  }catch(e){el.innerHTML='<div style="color:var(--red);font-size:11px">Erreur: '+e.message+'</div>';}
+  }catch(e){var msg=e.name==='AbortError'?'Timeout — brvm.org trop lent':e.message;el.innerHTML='<div style="color:var(--red);font-size:11px">'+msg+' <button onclick="fetchLiveScore(\"'+ticker+'\")" style="margin-left:6px;font-size:10px;padding:1px 6px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;color:var(--t2)">Réessayer</button></div>';}
 }

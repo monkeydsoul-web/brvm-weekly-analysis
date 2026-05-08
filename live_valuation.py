@@ -13,6 +13,20 @@ from valuation import (
 
 logger = logging.getLogger(__name__)
 
+_score_cache = {}
+_CACHE_TTL = 300
+
+def _get_cached(ticker):
+    import time
+    entry = _score_cache.get(ticker)
+    if entry and (time.time() - entry['ts']) < _CACHE_TTL:
+        return entry['data']
+    return None
+
+def _set_cached(ticker, data):
+    import time
+    _score_cache[ticker] = {'ts': time.time(), 'data': data}
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Score technique /10 — momentum prix live
@@ -142,6 +156,10 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
     Returns:
         dict avec tous les scores + métadonnées live
     """
+    cached = _get_cached(ticker)
+    if cached:
+        logger.debug(f"Score cache hit: {ticker}")
+        return cached
     prices = live_cache.get("prices", {})
     live_data_ticker = prices.get(ticker, {})
     live_price = live_data_ticker.get("price")
@@ -189,7 +207,7 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
     # Score total /80 avec technique
     composite_adj_80 = round(min(80, composite_adj_70 + tec["score"]), 1)
 
-    return {
+    result = {
         "ticker":           ticker,
         "live_price":       live_price,
         "live_change_pct":  live_data_ticker.get("change_pct", 0),
@@ -222,6 +240,8 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
         "pb_ref_live":      row.get("pb_ref") or row.get("pb_hist") or row.get("pb_hist"),
         "div_yield_live":   row.get("div_yield"),
     }
+    _set_cached(ticker, result)
+    return result
 
 
 def compute_all_live_scores(base_fundamentals_dict: dict, live_cache: dict) -> list:
