@@ -60,12 +60,55 @@ async function loadReports(ticker) {
         '<span style="font-size:10px;font-weight:600;color:'+col+';min-width:115px;white-space:nowrap">'+r.type+'</span>'+
         '<span style="font-size:11px;color:var(--t2);min-width:34px">'+(r.year||'?')+'</span>'+
         '<span style="font-size:11px;color:var(--t);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</span>'+
-        '<span style="font-size:10px;color:#3b82f6;font-weight:600">PDF</span></a>';
+        '<span style="font-size:10px;color:#3b82f6;font-weight:600">PDF</span>'+
+        (r.type==='Etats financiers'||r.type==='Rapport annuel'?
+          ' <button onclick="event.preventDefault();analyzePDF(\''+r.url+'\',\''+ticker+'\',\''+r.type+'\','+r.year+',this)" style="font-size:9px;padding:1px 5px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;color:var(--t2);margin-left:4px">Analyser</button>':'')+
+        '</a>';
     }).join('');
     el.innerHTML = '<div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px">'+
       '<div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Rapports BRVM ('+d.total+')</div>'+
       rows+'</div>';
   } catch(e) {
     el.innerHTML = '<span style="color:var(--red);font-size:11px">'+(e.name==='AbortError'?'Timeout':'Erreur: '+e.message)+'</span>';
+  }
+}
+
+async function analyzePDF(url, ticker, docType, year, btn) {
+  if (btn) { btn.textContent = 'Analyse en cours...'; btn.disabled = true; }
+  const el = document.getElementById('pdf-analysis-container');
+  if (el) el.innerHTML = '<div style="color:var(--t2);font-size:12px;padding:8px 0">Claude lit le rapport... (~20s)</div>';
+  try {
+    const res = await fetch('/api/analyze-report', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url, ticker, doc_type: docType, year})
+    });
+    const d = await res.json();
+    if (d.error) { if(el) el.innerHTML='<div style="color:var(--red);font-size:11px">'+d.error+'</div>'; return; }
+    const vc = d.verdict_investisseur==='POSITIF'?'var(--green)':d.verdict_investisseur==='NEGATIF'?'var(--red)':'var(--amber)';
+    const kpis = d.kpis || {};
+    const kpiRows = Object.entries(kpis).filter(function(e){return e[1]&&e[1].valeur!=null;}).map(function(e){
+      var label=e[0].replace(/_/g,' ');
+      var v=e[1];
+      var chg=v.variation?'<span style="color:'+(v.variation.startsWith('+')?'var(--green)':'var(--red)')+'">'+v.variation+'</span>':'';
+      return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px">'+
+        '<span style="color:var(--t2)">'+label+'</span>'+
+        '<span><strong>'+v.valeur.toLocaleString('fr-FR')+'</strong> '+v.unite+' '+chg+'</span></div>';
+    }).join('');
+    const pts = (d.points_cles||[]).map(function(p){return '<li style="margin-bottom:4px">'+p+'</li>';}).join('');
+    if (el) el.innerHTML =
+      '<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<span style="font-size:12px;font-weight:600">Analyse IA — '+docType+' '+(year||'')+'</span>'+
+      '<span style="font-size:11px;font-weight:700;color:'+vc+'">'+d.verdict_investisseur+'</span></div>'+
+      '<p style="font-size:11px;color:var(--t2);margin-bottom:8px;line-height:1.5">'+d.resume+'</p>'+
+      (kpiRows?'<div style="margin-bottom:8px">'+kpiRows+'</div>':'')+
+      (pts?'<div style="font-size:11px;margin-top:6px"><strong>Points clés :</strong><ul style="margin:4px 0;padding-left:16px">'+pts+'</ul></div>':'')+
+      (d.perspectives?'<p style="font-size:11px;color:var(--t2);margin-top:6px;font-style:italic">'+d.perspectives+'</p>':'')+
+      '</div>';
+    if (btn) { btn.textContent = 'Ré-analyser'; btn.disabled = false; }
+  } catch(e) {
+    if (el) el.innerHTML='<div style="color:var(--red);font-size:11px">Erreur: '+e.message+'</div>';
+    if (btn) { btn.textContent = 'Analyser PDF'; btn.disabled = false; }
   }
 }

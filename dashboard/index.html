@@ -1102,6 +1102,7 @@ async function showStock(ticker){
         ${co.markets&&co.markets.length?`<span>🌍 ${co.markets.join(' · ')}</span>`:''}
       </div>
       <div id="reports-container" style="margin-top:6px"></div>
+          <div id="pdf-analysis-container"></div>
           ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
       ${co.reports_url?` &nbsp;<a href="${co.reports_url}" target="_blank" style="font-size:10px;color:var(--amber);margin-top:6px;display:inline-block">📄 Rapports annuels</a>`:''}
     </div>`:''}

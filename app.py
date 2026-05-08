@@ -571,6 +571,39 @@ def api_reports(ticker):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/analyze-report", methods=["POST"])
+def api_analyze_report():
+    data = request.get_json() or {}
+    url      = data.get("url")
+    ticker   = (data.get("ticker") or "").upper()
+    doc_type = data.get("doc_type", "Document")
+    year     = data.get("year")
+    force    = data.get("force", False)
+    if not url or not ticker:
+        return jsonify({"error": "url et ticker requis"}), 400
+    try:
+        from pdf_analyzer import analyze_report
+        result = analyze_report(url, ticker, doc_type, year, force=force)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/analyze-ticker/<ticker>")
+def api_analyze_ticker(ticker):
+    ticker = ticker.upper()
+    force  = request.args.get("force", "0") == "1"
+    try:
+        from reports_scraper import get_reports
+        from pdf_analyzer    import get_analyses_for_ticker
+        reports = get_reports(ticker)
+        if not reports:
+            return jsonify({"error": f"Aucun rapport pour {ticker}"}), 404
+        results = get_analyses_for_ticker(ticker, reports, max_reports=2, force=force)
+        return jsonify({"ticker": ticker, "analyses": results, "total": len(results)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     import socket
     import os as _os
