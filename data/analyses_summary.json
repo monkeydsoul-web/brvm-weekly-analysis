@@ -1,0 +1,2000 @@
+{
+  "SNTS": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels consolidés",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 1923122,
+        "unite": "MFCFA",
+        "variation": "+8.3%"
+      },
+      "resultat_net": {
+        "valeur": 413588,
+        "unite": "MFCFA",
+        "variation": "+5.1%"
+      },
+      "resultat_exploitation": {
+        "valeur": 669792,
+        "unite": "MFCFA",
+        "variation": "+8.1%"
+      },
+      "total_bilan": {
+        "valeur": 3270175,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": 1399263,
+        "unite": "MFCFA",
+        "variation": "+9.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 1933,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 29.6,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 21.5,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 921200,
+        "unite": "MFCFA",
+        "variation": "+17.4%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires consolidé progresse de +8,3% à 1 923 milliards FCFA, porté par la Data mobile (+17,7%), le Fixe Broadband (+22,5%) et Orange Money (+11,3%).",
+      "L'EBITDAaL atteint 921,2 milliards FCFA avec un taux de marge de 47,9%, confirmant la solide rentabilité opérationnelle du Groupe.",
+      "Le résultat net consolidé ressort à 413,6 milliards FCFA (+5,1% YoY), avec un résultat net part du Groupe de 341,9 milliards FCFA, soit 3 420 FCFA par action.",
+      "Les investissements (CAPEX) s'établissent à 288,6 milliards FCFA, en légère baisse de -3,9%, représentant 15% du chiffre d'affaires.",
+      "Un dividende brut de 1 933 FCFA par action est proposé, avec un paiement net de 1 740 FCFA à compter du 25 mai 2026."
+    ],
+    "risques": [
+      "Durcissement des mesures d'identification impactant la base clients mobile (-1,6% YoY) dans plusieurs pays.",
+      "Nouvelles taxes et réglementations dans plusieurs pays de présence (Sierra Leone, Guinée Bissau) pesant sur les marges.",
+      "Forte pression fiscale avec des impôts et taxes d'exploitation en hausse de +22,5% à 182,5 milliards FCFA.",
+      "Écarts de conversion négatifs de -64 milliards FCFA impactant le résultat global consolidé en raison de la volatilité des devises locales.",
+      "Environnement concurrentiel intense, notamment avec l'entrée de Starlink en Guinée Bissau et les projets de roaming national au Mali."
+    ],
+    "perspectives": "En 2026, Sonatel ambitionne d'accélérer le déploiement du Très Haut Débit fixe et mobile (fibre, 4G/5G, satellite) et de développer des solutions Fintech, cloud et cyber sécurité. Le Groupe mise sur l'intelligence artificielle pour transformer l'expérience client et ses processus internes, tout en capitalisant sur les Jeux Olympiques de la Jeunesse 2026 à Dakar. Le potentiel de croissance reste significatif avec un gap d'usage supérieur à 50% dans tous les pays de présence.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "Le Groupe Sonatel affiche des résultats financiers 2025 solides avec une croissance du chiffre d'affaires de +8,3% à 1 923 milliards FCFA et un résultat net en hausse de +5,1% à 413,6 milliards FCFA, confirmant la résilience du modèle dans un environnement réglementaire et concurrentiel exigeant. La rentabilité reste excellente avec un taux d'EBITDAaL de 47,9% et un bilan solide avec des capitaux propres de 1 399 milliards FCFA. Le dividende proposé de 1 933 FCFA brut par action et les perspectives de croissance liées à la digitalisation des économies africaines en font un titre attractif pour les investisseurs de long terme.",
+    "ticker": "SNTS",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260216_-_etats_financiers_2025_et_attestation_des_cac_-_sonatel_sn.pdf",
+    "n_pages": 31,
+    "analyzed_at": "2026-05-08T16:37:17.972037+00:00",
+    "status": "ok",
+    "cached_at": 1778258237.972287
+  },
+  "ORAC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers consolidés annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 1197.1,
+        "unite": "MFCFA",
+        "variation": "+10.4%"
+      },
+      "resultat_net": {
+        "valeur": 167.8,
+        "unite": "MFCFA",
+        "variation": "+6.1%"
+      },
+      "resultat_exploitation": {
+        "valeur": 287.2,
+        "unite": "MFCFA",
+        "variation": "+9.1%"
+      },
+      "total_bilan": {
+        "valeur": 2554.1,
+        "unite": "MFCFA",
+        "variation": "+10.6%"
+      },
+      "capitaux_propres": {
+        "valeur": 707.8,
+        "unite": "MFCFA",
+        "variation": "-0.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 800,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 18.3,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 14.0,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 110.1,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 424.1,
+        "unite": "MFCFA",
+        "variation": "+8.7%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires consolidé progresse de +10,4% à 1 197,1 milliards FCFA, porté par la croissance dans les trois pays (Côte d'Ivoire, Burkina Faso, Libéria).",
+      "Le résultat net s'établit à 167,8 milliards FCFA (+6,1%), pénalisé par des amendes douanières exceptionnelles au Burkina Faso ; hors cet impact, la croissance aurait été de +9,3%.",
+      "Un dividende brut de 800 FCFA par action est proposé, prélevé sur le compte Report à Nouveau, pour un montant global de 120,5 milliards FCFA.",
+      "L'EBITDAaL atteint 424,1 milliards FCFA (+8,7%), reflétant une bonne maîtrise des coûts malgré une pression fiscale et réglementaire accrue.",
+      "Le total bilan progresse de +10,6% à 2 554,1 milliards FCFA, avec un eCapex en hausse à 184 milliards FCFA contre 159,1 milliards en 2024."
+    ],
+    "risques": [
+      "Pression réglementaire et fiscale accrue pesant sur la rentabilité, notamment via des impôts et taxes d'exploitation en hausse de +20,8%.",
+      "Risque de change impactant les filiales hors zone CFA (Orange Libéria), avec des écarts de conversion négatifs de -13,2 milliards en 2025.",
+      "Amendes douanières exceptionnelles à Orange Burkina Faso ayant réduit la croissance du résultat net de ~3,2 points de pourcentage.",
+      "Augmentation significative du coût de l'endettement financier brut (+26,8%) et des passifs financiers non courants (+40,2%), signalant un recours accru à la dette.",
+      "Baisse des disponibilités de -21,3% à 225,8 milliards FCFA, liée à des flux de financement négatifs de -214,4 milliards incluant 192,5 milliards de dividendes versés."
+    ],
+    "perspectives": "Le Groupe Orange CI affiche une dynamique de croissance solide dans ses trois marchés, soutenue par des investissements continus dans les réseaux mobiles, la fibre optique et Orange Money. La stratégie d'expansion des capacités réseau et la diversification des services (data, Orange Energies) devraient maintenir la trajectoire haussière du chiffre d'affaires. Toutefois, la vigilance s'impose face à la pression fiscale et aux risques réglementaires qui pourraient continuer de peser sur les marges.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "Le Groupe Orange Côte d'Ivoire livre une solide performance en 2025 avec un chiffre d'affaires en hausse de +10,4% à 1 197,1 milliards FCFA et un résultat net de 167,8 milliards FCFA (+6,1%), malgré des éléments exceptionnels défavorables. La distribution d'un dividende brut de 800 FCFA par action témoigne de la confiance du management dans la solidité financière du groupe. La croissance des investissements (eCapex +15,7%) et l'expansion dans trois pays constituent des catalyseurs positifs pour la création de valeur à moyen terme.",
+    "ticker": "ORAC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260217_-_etats_financiers_-_exercice_2025_-_orange_ci.pdf",
+    "n_pages": 14,
+    "analyzed_at": "2026-05-08T16:47:36.201755+00:00",
+    "status": "ok",
+    "cached_at": 1778258856.2018838
+  },
+  "ECOC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 132725,
+        "unite": "MFCFA",
+        "variation": "+8.5%"
+      },
+      "resultat_net": {
+        "valeur": 63482,
+        "unite": "MFCFA",
+        "variation": "+10.4%"
+      },
+      "resultat_exploitation": {
+        "valeur": 73995,
+        "unite": "MFCFA",
+        "variation": "+14.9%"
+      },
+      "total_bilan": {
+        "valeur": 2054491,
+        "unite": "MFCFA",
+        "variation": "+0.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 218573,
+        "unite": "MFCFA",
+        "variation": "+9.6%"
+      },
+      "dividende_par_action": {
+        "valeur": 888,
+        "unite": "FCFA",
+        "variation": "+10%"
+      },
+      "roe": {
+        "valeur": 29.0,
+        "unite": "%",
+        "variation": "+0.2 pts"
+      },
+      "marge_nette": {
+        "valeur": 47.8,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 75794,
+        "unite": "MFCFA",
+        "variation": "+12.6%"
+      }
+    },
+    "points_cles": [
+      "Le résultat net atteint 63,5 milliards FCFA en hausse de 10,4%, porté par une croissance du PNB de 8,5% à 132,7 milliards FCFA.",
+      "Le coefficient d'exploitation s'améliore de 205 points de base à 42,9%, reflétant une efficacité opérationnelle renforcée.",
+      "Les dépôts de la clientèle progressent fortement de 15,1% à 1 626 milliards FCFA, tandis que les crédits franchissent le cap des 1 000 milliards (+8%).",
+      "Le dividende proposé de 888 FCFA par action (+10%) représente un taux de distribution de 77% du résultat net.",
+      "Le ROE s'établit à 29% et le ROA à 3,1%, confirmant la solidité et la rentabilité du modèle bancaire."
+    ],
+    "risques": [
+      "Ralentissement de la croissance mondiale (3,1% en 2025) et incertitudes géopolitiques et commerciales pouvant affecter l'activité.",
+      "Concurrence accrue dans le secteur bancaire ivoirien et pression sur les marges.",
+      "Cadre réglementaire plus exigeant imposé par la BCEAO pouvant alourdir les contraintes opérationnelles.",
+      "Baisse des taux directeurs de la BCEAO (-50 pb) susceptible de comprimer la marge nette d'intérêts à moyen terme.",
+      "Service de la dette et inflation alimentaire en Afrique pouvant peser sur la qualité du portefeuille de crédit."
+    ],
+    "perspectives": "Ecobank Côte d'Ivoire aborde 2026 avec confiance, soutenue par une Côte d'Ivoire attendue en croissance à 6,7% et la mise en œuvre du Plan National de Développement 2026-2030. La banque poursuit son plan stratégique axé sur la croissance, la transformation et le rendement, en misant sur l'innovation numérique, l'interopérabilité et une gestion prudente des risques. Elle réaffirme son ambition de demeurer la banque panafricaine de référence tout en intégrant les engagements ESG dans son modèle de création de valeur.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "Ecobank Côte d'Ivoire livre en 2025 une performance financière solide et en nette progression, avec un résultat net de 63,5 milliards FCFA (+10,4%), un ROE de 29% et un coefficient d'exploitation en amélioration à 42,9%. La banque propose un dividende de 888 FCFA par action (+10%), témoignant d'une politique de distribution généreuse et d'une solidité financière confirmée. Les fondamentaux bilantaires sont robustes avec des dépôts en forte hausse (+15,1%) et des capitaux propres en progression de 9,6%, positionnant favorablement la valeur pour les investisseurs.",
+    "ticker": "ECOC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260414_-_rapport_dactivites_et_etats_financiers_-_exercice_2025_-_ecobank_ci.pdf",
+    "n_pages": 12,
+    "analyzed_at": "2026-05-08T16:48:26.041370+00:00",
+    "status": "ok",
+    "cached_at": 1778258906.041643
+  },
+  "NTLC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 233261.163,
+        "unite": "MFCFA",
+        "variation": "+5.97%"
+      },
+      "resultat_net": {
+        "valeur": 18426.899,
+        "unite": "MFCFA",
+        "variation": "+1.53%"
+      },
+      "resultat_exploitation": {
+        "valeur": 37687.318,
+        "unite": "MFCFA",
+        "variation": "+6.83%"
+      },
+      "total_bilan": {
+        "valeur": 189958.728,
+        "unite": "MFCFA",
+        "variation": "+6.80%"
+      },
+      "capitaux_propres": {
+        "valeur": 29587.107,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": 1680,
+        "unite": "FCFA",
+        "variation": "-48.75%"
+      },
+      "roe": {
+        "valeur": 62.27,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 7.9,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 86926.764,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 46171.248,
+        "unite": "MFCFA",
+        "variation": "+6.04%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse de près de 6% à 233,3 milliards FCFA, porté par la croissance des ventes de produits fabriqués (+6,3%) et des ventes de marchandises (+4%).",
+      "Le résultat net ressort à 18,4 milliards FCFA en légère hausse de +1,5%, malgré une forte augmentation des frais financiers (+25,8%) et des dotations aux amortissements (+22,8%).",
+      "Le dividende brut proposé est fortement réduit à 9,27 milliards FCFA contre 18,1 milliards en 2024, soit environ 1 680 FCFA par action, traduisant une politique de rétention de trésorerie accrue.",
+      "L'EBE (EBITDA) progresse à 46,2 milliards FCFA (+6%), confirmant une amélioration de la performance opérationnelle courante.",
+      "La trésorerie active s'améliore significativement à 9,3 milliards FCFA contre 2,6 milliards en 2024, mais la trésorerie passif reste très élevée à 56,1 milliards FCFA."
+    ],
+    "risques": [
+      "Niveau élevé de trésorerie passif (56,1 milliards FCFA) et d'endettement financier (emprunts à 32,1 milliards + autres dettes financières à 8,1 milliards), exposant la société à un risque de liquidité.",
+      "Hausse significative des frais financiers (+25,8% à 7,96 milliards FCFA), qui pèse sur la rentabilité nette et reflète un coût croissant de la dette.",
+      "Pression sur les coûts d'exploitation, notamment les matières premières et services extérieurs, pouvant comprimer les marges en cas de retournement des prix.",
+      "Forte réduction du dividende distribué (-49%) pourrait décevoir les actionnaires et peser sur le cours boursier à court terme."
+    ],
+    "perspectives": "Nestle Côte d'Ivoire affiche une trajectoire de croissance solide avec un chiffre d'affaires en hausse et une amélioration de l'EBE, suggérant une dynamique commerciale favorable. Le renforcement des investissements (immobilisations corporelles en hausse de +16%) laisse entrevoir une capacité de production accrue pour les prochains exercices. Toutefois, la maîtrise de l'endettement et des frais financiers constitue un enjeu clé pour préserver la rentabilité nette.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Nestle Côte d'Ivoire clôture l'exercice 2025 avec un chiffre d'affaires de 233,3 milliards FCFA (+6%) et un bénéfice net de 18,4 milliards FCFA (+1,5%), témoignant d'une performance commerciale robuste. La forte réduction du dividende distribué (de 18,1 à 9,3 milliards FCFA) et la montée des frais financiers constituent des signaux prudentiels pour l'investisseur. Le dossier reste fondamentalement solide mais nécessite une vigilance sur la structure financière et la politique de distribution.",
+    "ticker": "NTLC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_-_exercice_2025_-_nestle_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T16:49:22.430134+00:00",
+    "status": "ok",
+    "cached_at": 1778258962.430413
+  },
+  "BOAC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 72724,
+        "unite": "MFCFA",
+        "variation": "+19.6%"
+      },
+      "resultat_net": {
+        "valeur": 32044,
+        "unite": "MFCFA",
+        "variation": "+22.9%"
+      },
+      "resultat_exploitation": {
+        "valeur": 39222,
+        "unite": "MFCFA",
+        "variation": "+26.4%"
+      },
+      "total_bilan": {
+        "valeur": 1075479,
+        "unite": "MFCFA",
+        "variation": "+14.6%"
+      },
+      "capitaux_propres": {
+        "valeur": 112644,
+        "unite": "MFCFA",
+        "variation": "+17.6%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 28.4,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 44.1,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 47619,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le Produit Net Bancaire (PNB) progresse de 19,6% à 72 724 MFCFA, porté notamment par le retournement positif des opérations de portefeuille de négociation (+10 290 MFCFA).",
+      "Le résultat net atteint 32 044 MFCFA en hausse de 22,9%, confirmant une forte dynamique de rentabilité.",
+      "Le total bilan croît de 14,6% à 1 075 479 MFCFA, soutenu par une hausse significative des dépôts clientèle (+20,0%) et un doublement du capital souscrit à 40 000 MFCFA.",
+      "Le coût du risque s'alourdit de 40,8% à 6 792 MFCFA, signalant une dégradation de la qualité du portefeuille de crédit.",
+      "Les créances bancaires bondissent de 285,8%, reflétant une diversification accrue des emplois interbancaires."
+    ],
+    "risques": [
+      "Hausse significative du coût du risque (+40,8%) indiquant une potentielle détérioration de la qualité des actifs et du portefeuille de crédit.",
+      "Augmentation de la charge fiscale de 56,9%, pesant sur la conversion du résultat brut en résultat net.",
+      "Baisse des créances sur la clientèle (-4,7%) suggérant un possible ralentissement de l'activité de crédit retail/corporate.",
+      "Forte hausse des commissions charges (+104,7%) et des autres charges d'exploitation bancaire (+88,4%) pouvant peser sur les marges futures."
+    ],
+    "perspectives": "Bank Of Africa Côte d'Ivoire affiche une trajectoire de croissance solide avec un bilan en expansion et une rentabilité en nette amélioration. Le doublement du capital souscrit renforce la capacité de développement et la solidité financière de l'établissement. Toutefois, la surveillance du coût du risque demeure un enjeu prioritaire pour préserver la qualité des performances.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "BOAC enregistre d'excellentes performances en 2024 avec un résultat net de 32 044 MFCFA (+22,9%) et un PNB de 72 724 MFCFA (+19,6%), reflétant une forte dynamique commerciale et opérationnelle. Le bilan progresse de 14,6% à plus de 1 075 milliards FCFA, porté par la collecte de dépôts et le renforcement des fonds propres suite au doublement du capital. Le principal point de vigilance reste la montée du coût du risque (+40,8%) qui devra être maîtrisée pour consolider la rentabilité sur le long terme.",
+    "ticker": "BOAC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250402_-_etats_financiers_-_exercice_2024_-_boa_ci.pdf",
+    "n_pages": 2,
+    "analyzed_at": "2026-05-08T16:58:45.088301+00:00",
+    "status": "ok",
+    "cached_at": 1778259525.088477
+  },
+  "ETIT": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels consolidés",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 1424261,
+        "unite": "MFCFA",
+        "variation": "+12%"
+      },
+      "resultat_net": {
+        "valeur": 345523,
+        "unite": "MFCFA",
+        "variation": "+15%"
+      },
+      "resultat_exploitation": {
+        "valeur": 465618,
+        "unite": "MFCFA",
+        "variation": "+16%"
+      },
+      "total_bilan": {
+        "valeur": 19243865,
+        "unite": "MFCFA",
+        "variation": "+9%"
+      },
+      "capitaux_propres": {
+        "valeur": 1597846,
+        "unite": "MFCFA",
+        "variation": "+41%"
+      },
+      "dividende_par_action": {
+        "valeur": 0.0016,
+        "unite": "USD",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 27.8,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 24.3,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 782400,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le Produit Net Bancaire progresse de 17% en USD (+12% en FCFA) à 1 424 milliards FCFA, porté par la banque CIB (+21%) et la banque de détail CCB (+14%).",
+      "Le coefficient d'exploitation atteint un niveau record de 48,3% (contre 52,8% en 2024), reflétant une amélioration significative de l'efficacité opérationnelle.",
+      "Les dépôts clientèle bondissent de 24% à 14 120 milliards FCFA avec un ratio CASA de 87,1%, et les capitaux propres augmentent de 41% en FCFA.",
+      "Le résultat net consolidé ressort à 345 milliards FCFA (+15% en FCFA), pour un résultat net part du Groupe de 237 milliards FCFA.",
+      "Les charges de dépréciation sur actifs financiers ont fortement augmenté (+38% en USD), traduisant une vigilance accrue sur le risque de crédit."
+    ],
+    "risques": [
+      "Forte hausse des charges de dépréciation sur actifs financiers (+38% à 270 milliards FCFA), signalant une détérioration de la qualité du portefeuille de crédit.",
+      "Exposition significative au risque de change, le groupe opérant dans 39 pays avec des devises locales volatiles face au dollar et au FCFA.",
+      "Cession des activités au Mozambique et pertes sur activités arrêtées ou en cours de cession (-3,6 milliards FCFA), indiquant des défis de rentabilité dans certains marchés.",
+      "Pression fiscale élevée avec un taux d'imposition effectif d'environ 25% du résultat avant impôts.",
+      "Réduction des effectifs (de 14 982 à 14 560 salariés) pouvant générer des risques sociaux et opérationnels durant la transformation."
+    ],
+    "perspectives": "Ecobank aborde 2026 avec confiance en s'appuyant sur sa stratégie GTR (Croissance, Transformation, Rentabilité) et un modèle panafricain diversifié sur 39 pays. L'amélioration des conditions macroéconomiques en Afrique (baisse des taux directeurs, stabilité monétaire) devrait soutenir la croissance des revenus et la qualité du crédit. Le groupe vise à poursuivre ses progrès en termes d'efficacité opérationnelle et de satisfaction client, tout en maintenant une gestion rigoureuse des risques.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "Ecobank (ETI) publie des résultats 2025 solides avec un PNB en hausse de 17% à 2,45 milliards USD et un résultat avant impôts en progression de 21% à 466 milliards FCFA, soutenu par un coefficient d'exploitation record de 48,3%. Le ROE tangible de 27,8% et la forte croissance des dépôts (+24%) témoignent de la solidité du modèle panafricain. La hausse des provisions sur créances et les risques de change restent des points de vigilance, mais les fondamentaux demeurent favorables pour les investisseurs à moyen terme.",
+    "ticker": "ETIT",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260413_-_etats_financiers_ifrs_-_exercice_2025_-_eti_tg.pdf",
+    "n_pages": 6,
+    "analyzed_at": "2026-05-08T16:59:58.593322+00:00",
+    "status": "ok",
+    "cached_at": 1778259598.593604
+  },
+  "SLBC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 309722,
+        "unite": "MFCFA",
+        "variation": "-0.5%"
+      },
+      "resultat_net": {
+        "valeur": 21472,
+        "unite": "MFCFA",
+        "variation": "+42.4%"
+      },
+      "resultat_exploitation": {
+        "valeur": 34735,
+        "unite": "MFCFA",
+        "variation": "+106.7%"
+      },
+      "total_bilan": {
+        "valeur": 307546,
+        "unite": "MFCFA",
+        "variation": "-6.1%"
+      },
+      "capitaux_propres": {
+        "valeur": 169443,
+        "unite": "MFCFA",
+        "variation": "+10.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 20082224800,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 12.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.9,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 65093,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 57494,
+        "unite": "MFCFA",
+        "variation": "+39.5%"
+      }
+    },
+    "points_cles": [
+      "Le résultat net bondit de +42.4% à 21 472 MFCFA malgré un chiffre d'affaires quasi stable (-0.5%) à 309 722 MFCFA, témoignant d'une forte amélioration de la rentabilité opérationnelle.",
+      "L'excédent brut d'exploitation (EBITDA) progresse de +39.5% à 57 494 MFCFA grâce à une réduction significative des achats et charges externes (-8.8%), illustrant des gains d'efficacité opérationnelle.",
+      "Les capitaux propres s'établissent à 169 443 MFCFA (+10.8%) et la trésorerie nette s'améliore nettement, passant de -55 415 MFCFA à -14 132 MFCFA, reflétant un désendettement en cours.",
+      "Un dividende brut de 20 082 224 800 FCFA est proposé pour l'exercice 2024, contre aucun dividende versé en 2023, signalant la confiance du management dans la solidité financière retrouvée."
+    ],
+    "risques": [
+      "Endettement financier encore significatif avec 50 961 MFCFA de dettes financières, même si en baisse par rapport à 60 195 MFCFA en 2023.",
+      "Résultat hors activités ordinaires négatif (-817 MFCFA en 2024 contre +7 542 MFCFA en 2023), indiquant des éléments exceptionnels défavorables pouvant peser sur les prochains exercices.",
+      "Dégradation du passif circulant (+22% à 60 888 MFCFA) avec une hausse des dettes fiscales, sociales et autres dettes, pouvant générer des tensions de liquidité à court terme.",
+      "Contraction du chiffre d'affaires dans un contexte de marché potentiellement concurrentiel ou de pression sur les volumes de ventes."
+    ],
+    "perspectives": "SOLIBRA affiche une nette amélioration de sa rentabilité en 2024 grâce à une maîtrise des coûts et une optimisation opérationnelle, malgré un chiffre d'affaires stable. La reprise du versement de dividendes et la réduction de l'endettement net signalent une trajectoire financière positive. La poursuite des investissements corporels (14 792 MFCFA) laisse entrevoir une volonté de maintenir l'outil industriel en vue d'une croissance future.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "SOLIBRA (SLBC) délivre une performance 2024 remarquable avec un résultat net en hausse de +42.4% à 21 472 MFCFA et un EBITDA en progression de +39.5% à 57 494 MFCFA, grâce à une réduction substantielle des coûts opérationnels. La structure financière se renforce avec des capitaux propres à 169 443 MFCFA et une amélioration significative de la trésorerie nette. La reprise du dividende et la solidité bilancielle font de SOLIBRA un dossier attractif sur la BRVM.",
+    "ticker": "SLBC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250502_-_etats_financiers_-_exercice_2024_-_solibra_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:01:07.711555+00:00",
+    "status": "ok",
+    "cached_at": 1778259667.7117922
+  },
+  "SMBC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 229061,
+        "unite": "MFCFA",
+        "variation": "-7.5%"
+      },
+      "resultat_net": {
+        "valeur": 8698,
+        "unite": "MFCFA",
+        "variation": "-49.6%"
+      },
+      "resultat_exploitation": {
+        "valeur": 12036,
+        "unite": "MFCFA",
+        "variation": "-57.9%"
+      },
+      "total_bilan": {
+        "valeur": 163113,
+        "unite": "MFCFA",
+        "variation": "-11.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 35294,
+        "unite": "MFCFA",
+        "variation": "-1.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 1119,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 24.6,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 3.8,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 418,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 13030,
+        "unite": "MFCFA",
+        "variation": "-57.0%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires recule de 7.5% à 229 milliards FCFA, entraînant une forte compression de la marge brute de 49,5 Mds à 32,3 Mds FCFA.",
+      "Le résultat net chute de près de 50% à 8,7 milliards FCFA, pénalisé par la hausse des achats et la baisse des volumes.",
+      "La trésorerie nette se redresse significativement, passant de -10,2 Mds à +6,1 Mds FCFA grâce à une amélioration du BFR de 13,6 Mds FCFA.",
+      "Des dividendes de 5,46 milliards FCFA sont proposés à l'affectation, représentant environ 1 119 FCFA par action.",
+      "L'endettement financier net reste faible à environ 418 millions FCFA, témoignant d'une structure financière saine malgré la baisse des résultats."
+    ],
+    "risques": [
+      "Forte dépendance aux prix des matières premières (bitume), avec une variation de stocks déstabilisante entre 2023 et 2024.",
+      "Contraction significative des marges opérationnelles (marge d'exploitation passant de 11.5% à 5.3%), indiquant une pression sur la rentabilité structurelle.",
+      "Concentration des créances clients élevées (106,6 Mds FCFA) exposant la société à un risque de contrepartie important.",
+      "Baisse des stocks de 61,8 Mds à 27,9 Mds FCFA pouvant refléter des difficultés d'approvisionnement ou une réduction volontaire exposant à des risques de rupture."
+    ],
+    "perspectives": "SMBC doit faire face à un environnement difficile marqué par la compression des marges et la baisse des volumes. L'assainissement du bilan (trésorerie positive, BFR maîtrisé) constitue un signal positif pour la stabilité financière à court terme. La reprise des investissements en infrastructures dans l'UEMOA pourrait soutenir la demande en bitume et permettre un rebond des résultats.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "La Société Multinationale de Bitumes (SMBC) publie des résultats 2024 en nette dégradation avec un résultat net en baisse de 50% à 8,7 Mds FCFA et une marge nette réduite à 3,8%, pénalisés par la hausse des coûts d'achats et la baisse du chiffre d'affaires. Point positif, la trésorerie nette redevient positive à +6,1 Mds FCFA et la structure bilancielle reste solide avec des capitaux propres de 35,3 Mds FCFA et un endettement net quasi nul. Le maintien d'un dividende (environ 1 119 FCFA/action) témoigne de la confiance du management, mais la visibilité sur le redressement des marges reste limitée.",
+    "ticker": "SMBC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250903_-_etats_financiers_-_exercice_2024_-_smb_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:01:50.105614+00:00",
+    "status": "ok",
+    "cached_at": 1778259710.105868
+  },
+  "PALC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 197629.996,
+        "unite": "MFCFA",
+        "variation": "+14.8%"
+      },
+      "resultat_net": {
+        "valeur": 15508.655,
+        "unite": "MFCFA",
+        "variation": "-2.2%"
+      },
+      "resultat_exploitation": {
+        "valeur": 18163.004,
+        "unite": "MFCFA",
+        "variation": "-6.3%"
+      },
+      "total_bilan": {
+        "valeur": 199116.293,
+        "unite": "MFCFA",
+        "variation": "-1.7%"
+      },
+      "capitaux_propres": {
+        "valeur": 142638.984,
+        "unite": "MFCFA",
+        "variation": "+5.6%"
+      },
+      "dividende_par_action": {
+        "valeur": 502,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 10.87,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 7.85,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -4558.544,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 33027.296,
+        "unite": "MFCFA",
+        "variation": "-11.0%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse fortement de +14.8% à 197,6 milliards FCFA, porté principalement par les ventes de produits fabriqués (+15.5%).",
+      "Malgré la hausse du CA, la rentabilité se dégrade : le résultat net recule de 2.2% à 15,5 milliards FCFA, pénalisé par une forte hausse des achats de matières premières (+53.8%).",
+      "L'EBE (EBITDA) chute de 11% à 33 milliards FCFA, reflétant une compression significative des marges opérationnelles due à la hausse des coûts de production.",
+      "La trésorerie nette s'améliore nettement, passant de -12,7 milliards à -4,6 milliards FCFA, grâce à un flux opérationnel robuste de 38,7 milliards FCFA.",
+      "Un dividende brut de 502 FCFA par action est proposé, en baisse par rapport à l'exercice précédent (dividendes versés de 7,93 milliards contre 9,68 milliards en 2024)."
+    ],
+    "risques": [
+      "Forte hausse des coûts des matières premières (+53.8%) comprimant les marges malgré la croissance du chiffre d'affaires.",
+      "Pression sur la valeur ajoutée qui recule de 65,6 à 62,6 milliards FCFA malgré une hausse significative des revenus.",
+      "Niveau de créances clients élevé (78,3 milliards FCFA), représentant un risque de liquidité important.",
+      "Exposition aux fluctuations des prix des matières premières agricoles (huile de palme) sur les marchés internationaux."
+    ],
+    "perspectives": "PALMCI affiche une croissance solide de son chiffre d'affaires, mais fait face à une compression de ses marges due à la hausse des coûts des intrants. L'amélioration de la trésorerie nette et la solidité des capitaux propres (142,6 milliards FCFA) offrent une base financière stable. La capacité à maîtriser les coûts de production sera déterminante pour restaurer la rentabilité.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "PALMCI (PALC) enregistre en 2025 une croissance de son chiffre d'affaires de +14.8% à 197,6 milliards FCFA, mais voit sa rentabilité se comprimer sous l'effet de la hausse des coûts des matières premières, avec un résultat net en légère baisse à 15,5 milliards FCFA. La structure financière reste solide avec des capitaux propres de 142,6 milliards et une amélioration de la trésorerie nette. Un dividende de 502 FCFA par action est proposé, offrant un rendement modeste dans un contexte de marges sous pression.",
+    "ticker": "PALC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260323_-_etats_financiers_-_exercice_2025_-_palm_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:02:37.929088+00:00",
+    "status": "ok",
+    "cached_at": 1778259757.92935
+  },
+  "SOGC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 98616,
+        "unite": "MFCFA",
+        "variation": "+12%"
+      },
+      "resultat_net": {
+        "valeur": 12493,
+        "unite": "MFCFA",
+        "variation": "-5%"
+      },
+      "resultat_exploitation": {
+        "valeur": 17061,
+        "unite": "MFCFA",
+        "variation": "-7.2%"
+      },
+      "total_bilan": {
+        "valeur": 90288,
+        "unite": "MFCFA",
+        "variation": "+1.5%"
+      },
+      "capitaux_propres": {
+        "valeur": 68430,
+        "unite": "MFCFA",
+        "variation": "-0.9%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 18.26,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 12.67,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -4565,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 23541,
+        "unite": "MFCFA",
+        "variation": "-5.7%"
+      }
+    },
+    "points_cles": [
+      "Le résultat net 2025 s'établit à 12,493 milliards de FCFA, en baisse de 5% par rapport à 2024 (-618 millions de FCFA).",
+      "Les ventes de produits fabriqués progressent de 12% grâce à la hausse des prix de l'huile de palme (+20%) et du caoutchouc (+3%), compensant partiellement la baisse des volumes.",
+      "Les achats de matières premières bondissent de 15% (+3,701 milliards de FCFA) en raison de la flambée du prix d'achat du coagulum auprès des planteurs villageois, comprimant les marges.",
+      "La trésorerie nette au 31 décembre 2025 s'améliore significativement à 4,575 milliards de FCFA contre 1,442 milliard en 2024, portée par de solides flux opérationnels (22,644 milliards).",
+      "Des dividendes de 12,313 milliards de FCFA sont proposés à l'affectation, en légère baisse par rapport aux 12,965 milliards de 2024."
+    ],
+    "risques": [
+      "Concurrence accrue sur l'achat du coagulum auprès des planteurs villageois, faisant pression à la hausse sur les coûts de production du caoutchouc.",
+      "Contexte local et international plus difficile depuis le second semestre 2025, pouvant peser sur les performances futures.",
+      "Baisse des volumes vendus d'huile de palme (-5%) et d'huile de palmiste (-15%), exposant la société à un risque volumique malgré la hausse des prix.",
+      "Volatilité des prix des matières premières agricoles (coagulum, huile de palme) susceptible d'affecter les marges de manière imprévisible."
+    ],
+    "perspectives": "La société fait face à un environnement concurrentiel et de coûts plus difficile depuis le second semestre 2025, notamment sur le segment caoutchouc. La capacité d'autofinancement reste solide (18,938 milliards de FCFA) et la trésorerie s'est renforcée, offrant une marge de manœuvre. Toutefois, la pression sur les coûts d'approvisionnement en coagulum pourrait continuer de peser sur la rentabilité en 2026.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "SOGB affiche des résultats 2025 raisonnablement solides avec un chiffre d'affaires en hausse de 12%, mais un résultat net en recul de 5% à 12,493 milliards de FCFA sous l'effet de la hausse des coûts d'approvisionnement en coagulum. La trésorerie nette s'améliore fortement à 4,575 milliards de FCFA et des dividendes de 12,313 milliards sont proposés. Le contexte concurrentiel accru sur les matières premières agricoles constitue le principal risque à surveiller pour les exercices futurs.",
+    "ticker": "SOGC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260422_-_etats_financiers_syscohada_-_exercice_2025_-_sogb_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:03:27.841960+00:00",
+    "status": "ok",
+    "cached_at": 1778259807.842179
+  },
+  "SCRC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 80568.59,
+        "unite": "MFCFA",
+        "variation": "-7.6%"
+      },
+      "resultat_net": {
+        "valeur": -6131.8,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 1828.95,
+        "unite": "MFCFA",
+        "variation": "-77.3%"
+      },
+      "total_bilan": {
+        "valeur": 146852.08,
+        "unite": "MFCFA",
+        "variation": "+19.3%"
+      },
+      "capitaux_propres": {
+        "valeur": 13822.04,
+        "unite": "MFCFA",
+        "variation": "-30.7%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": -44.36,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": -7.61,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 75622.91,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 15630.53,
+        "unite": "MFCFA",
+        "variation": "-23.0%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires recule de 7,6% à 80,6 milliards FCFA contre 87,2 milliards en 2024, traduisant une contraction de l'activité.",
+      "Le résultat net bascule dans le rouge à -6,1 milliards FCFA après un bénéfice de 2,6 milliards en 2024, principalement plombé par des frais financiers en forte hausse à 7,6 milliards FCFA.",
+      "L'EBITDA se détériore de 23% à 15,6 milliards FCFA, et le résultat d'exploitation s'effondre de 77,3% à seulement 1,8 milliard FCFA.",
+      "Les dettes financières explosent de 32 milliards à 69 milliards FCFA, fragilisant fortement la structure financière de la société.",
+      "Les capitaux propres se contractent de 30,7% à 13,8 milliards FCFA, avec un report à nouveau débiteur cumulé de 17,4 milliards FCFA."
+    ],
+    "risques": [
+      "Risque de solvabilité élevé : endettement financier multiplié par plus de 2 en un an (69 milliards vs 32 milliards FCFA), avec une trésorerie nette négative de -6,5 milliards FCFA.",
+      "Risque de dégradation des capitaux propres : pertes accumulées et report à nouveau débiteur croissant menacent l'équilibre bilanciel.",
+      "Risque de liquidité : flux de trésorerie d'investissement très négatifs (-22,8 milliards) et charge d'intérêts absorbant l'essentiel du résultat d'exploitation.",
+      "Risque opérationnel : baisse du chiffre d'affaires combinée à une hausse des charges (services extérieurs, impôts et taxes) comprimant les marges."
+    ],
+    "perspectives": "La société fait face à une situation financière très tendue avec un résultat net fortement négatif et un endettement en forte progression. L'absence de dividendes versés et le projet d'affectation du résultat en pertes reportées confirment la priorité donnée à la préservation des ressources. Un redressement durable nécessitera une réduction significative des charges financières et un retour à la croissance du chiffre d'affaires.",
+    "verdict_investisseur": "NEGATIF",
+    "resume": "SCRC affiche en 2025 un résultat net en forte perte de -6,1 milliards FCFA, contre un bénéfice de 2,6 milliards en 2024, sous l'effet conjugué d'un recul du chiffre d'affaires (-7,6%) et d'une envolée des frais financiers liée à un endettement qui a plus que doublé. La structure financière se fragilise avec des capitaux propres en baisse à 13,8 milliards et une trésorerie nette négative, sans perspective de dividende. Le profil risque/rendement est actuellement peu attractif pour les investisseurs.",
+    "ticker": "SCRC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_syscohada_-_exercice_2025_-_sucrivoire_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:04:13.161926+00:00",
+    "status": "ok",
+    "cached_at": 1778259853.162199
+  },
+  "SHEC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 600708,
+        "unite": "MFCFA",
+        "variation": "+9%"
+      },
+      "resultat_net": {
+        "valeur": 5354,
+        "unite": "MFCFA",
+        "variation": "+33%"
+      },
+      "resultat_exploitation": {
+        "valeur": 11337,
+        "unite": "MFCFA",
+        "variation": "+34%"
+      },
+      "total_bilan": {
+        "valeur": 207064,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": 26521,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 20.19,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 0.89,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 59000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires 2024 atteint 600 708 MFCFA, en hausse de 9% grâce à l'effet volume sur les segments Entreprises, Aviation et Butane.",
+      "Le résultat net progresse de 33% à 5 354 MFCFA, bénéficiant d'une nette amélioration du résultat d'exploitation (+34%).",
+      "Le résultat financier se dégrade fortement (-95%) à -3 965 MFCFA en raison de l'utilisation accrue des lignes de découvert bancaire et de la hausse des taux.",
+      "Au T1 2025, la dynamique reste positive avec un chiffre d'affaires en hausse de 4% et un résultat net en progression de 3% à 1 323 MFCFA.",
+      "La trésorerie passive bondit à 56 674 MFCFA (vs 31 332 MFCFA en 2023), reflétant une dépendance croissante aux lignes de découvert pour financer les investissements."
+    ],
+    "risques": [
+      "Dégradation continue du résultat financier liée à la hausse des taux de découvert bancaire et à l'endettement court terme croissant.",
+      "Exposition aux variations des prix des carburants à la pompe, avec une faible marge nette (~0,9%) rendant le résultat très sensible aux chocs de prix.",
+      "Forte hausse des dettes fournisseurs (+42%) et de la trésorerie passive pouvant indiquer des tensions sur la liquidité.",
+      "Les comptes 2024 n'ont pas encore reçu la certification définitive du commissaire aux comptes au moment de la publication."
+    ],
+    "perspectives": "Le premier trimestre 2025 confirme la tendance positive avec une croissance des volumes de 5% et un résultat net en hausse de 3%, suggérant une continuité de la dynamique commerciale. Cependant, la pression sur le résultat financier demeure un risque majeur si les taux d'intérêt restent élevés. La maîtrise des charges d'exploitation et la diversification des segments (Aviation, Butane, Entreprises) constituent les principaux leviers de croissance.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Vivo Energy Côte d'Ivoire affiche une solide performance opérationnelle en 2024 avec un chiffre d'affaires de 600 708 MFCFA (+9%) et un résultat net de 5 354 MFCFA (+33%), portés par la croissance des volumes. Néanmoins, la marge nette reste très faible (~0,9%) et le résultat financier se dégrade significativement en raison d'une dépendance accrue aux découverts bancaires, constituant le principal risque pour la rentabilité future. Le momentum positif du T1 2025 est encourageant, mais la structure financière mérite une surveillance attentive.",
+    "ticker": "SHEC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250516_-_etats_financiers_2024_et_rapport_dactivites_du_1er_trimestre_2025_-_vivo_energy_ci.pdf",
+    "n_pages": 5,
+    "analyzed_at": "2026-05-08T17:05:06.079257+00:00",
+    "status": "ok",
+    "cached_at": 1778259906.079534
+  },
+  "CIEC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels consolidés IFRS",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 264472,
+        "unite": "MFCFA",
+        "variation": "+3.6%"
+      },
+      "resultat_net": {
+        "valeur": 10555,
+        "unite": "MFCFA",
+        "variation": "-8.3%"
+      },
+      "resultat_exploitation": {
+        "valeur": 18200,
+        "unite": "MFCFA",
+        "variation": "+8.1%"
+      },
+      "total_bilan": {
+        "valeur": 563746,
+        "unite": "MFCFA",
+        "variation": "-1.8%"
+      },
+      "capitaux_propres": {
+        "valeur": 40037,
+        "unite": "MFCFA",
+        "variation": "-0.5%"
+      },
+      "dividende_par_action": {
+        "valeur": 180,
+        "unite": "FCFA",
+        "variation": "+2.9%"
+      },
+      "roe": {
+        "valeur": 26.4,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 3.99,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 166204,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 34459,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires consolidé progresse de 3.6% à 264 472 MFCFA, porté par la croissance des prestations de service et des ventes de marchandises.",
+      "Le résultat net consolidé recule de 8.3% à 10 555 MFCFA, pénalisé par la hausse des dotations aux amortissements et des charges financières.",
+      "Le nombre de clients augmente significativement de +13.3% à 4 587 952 clients, témoignant de la dynamique d'électrification en Côte d'Ivoire.",
+      "Les ventes d'énergie gérées pour le compte de l'Autorité Concédante bondissent de +21% à 984 732 MFCFA, reflétant la forte croissance de la consommation nationale.",
+      "La trésorerie nette consolidée s'améliore à 28 847 MFCFA contre 23 723 MFCFA en 2023, grâce à de solides flux opérationnels de 48 185 MFCFA."
+    ],
+    "risques": [
+      "Pression sur la rentabilité nette avec une marge nette en contraction due à la hausse des charges de personnel et des amortissements.",
+      "Niveau d'endettement financier courant élevé (147 195 MFCFA) pouvant peser sur la flexibilité financière du groupe.",
+      "Baisse des ventes d'énergie à l'export (-21%) qui réduit une source de revenus complémentaires en devises.",
+      "Risque de change lié aux opérations d'importation d'énergie et aux créances/dettes en devises étrangères."
+    ],
+    "perspectives": "La CIE bénéficie d'une dynamique de croissance soutenue par l'expansion de sa base clients et la montée en puissance du plan d'électrification national (PEPT). Le résultat opérationnel courant en hausse de 8.7% à 18 216 MFCFA témoigne de l'amélioration de l'efficacité opérationnelle. L'entreprise devrait continuer à profiter de la croissance économique ivoirienne, bien que la pression sur les marges nettes nécessite une vigilance sur la maîtrise des coûts.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "La CIE affiche une solide performance opérationnelle en 2024 avec un chiffre d'affaires consolidé en hausse de 3.6% à 264 472 MFCFA et un résultat opérationnel amélioré à 18 200 MFCFA. Cependant, le résultat net recule de 8.3% à 10 555 MFCFA (188 FCFA par action), impacté par des charges plus élevées, tandis que la distribution de dividendes de 10 080 MFCFA (environ 180 FCFA/action) maintient l'attractivité du titre pour les investisseurs en quête de revenus. La forte croissance du nombre de clients (+13.3%) et des volumes d'énergie vendus constitue un signal positif pour la croissance future, bien que la compression des marges reste un point de vigilance.",
+    "ticker": "CIEC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250430_-_etats_financiers_-_norme_syscohada_-_exercice_2024_-_cie_ci.pdf",
+    "n_pages": 3,
+    "analyzed_at": "2026-05-08T17:05:52.486757+00:00",
+    "status": "ok",
+    "cached_at": 1778259952.486969
+  },
+  "SDCC": {
+    "annee": 2026,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 189400,
+        "unite": "MFCFA",
+        "variation": "+10%"
+      },
+      "resultat_net": {
+        "valeur": 4663,
+        "unite": "MFCFA",
+        "variation": "+31%"
+      },
+      "resultat_exploitation": {
+        "valeur": 9100,
+        "unite": "MFCFA",
+        "variation": "+34%"
+      },
+      "total_bilan": {
+        "valeur": 472700,
+        "unite": "MFCFA",
+        "variation": "+9%"
+      },
+      "capitaux_propres": {
+        "valeur": 43898,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": 525,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 2.46,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 21800,
+        "unite": "MFCFA",
+        "variation": "+21%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires de la SODECI atteint 189,4 milliards FCFA en 2025, en hausse de 10% portée par la progression des ventes d'eau et l'amélioration des performances commerciales.",
+      "Le résultat net s'établit à 4,663 milliards FCFA (+31%), reflétant une nette amélioration de la rentabilité avec une marge d'exploitation en hausse de 34%.",
+      "Le nombre de clients progresse de 6,14% à 2 272 032, avec un taux de recouvrement amélioré à 95,85% et un ratio de facturation à 85,51%.",
+      "Un dividende brut de 525 FCFA par action est proposé, soit une distribution totale de 4,725 milliards FCFA, payable au plus tard le 30 septembre 2026.",
+      "Le total bilan progresse à 472,7 milliards FCFA (+9%), mais la situation de trésorerie demeure sous tension malgré l'amélioration des indicateurs opérationnels."
+    ],
+    "risques": [
+      "Situation de trésorerie sous tension malgré l'amélioration des performances opérationnelles, reflétant des besoins de financement accrus dans un environnement sectoriel exigeant.",
+      "Dépendance au cadre réglementaire et au nouveau contrat de délégation du service public de l'eau potable dont le déploiement est prévu en 2026.",
+      "Pression sur les charges d'exploitation (charges de personnel élevées, coûts de production) dans un environnement inflationniste.",
+      "Niveau d'endettement élevé avec des dettes financières significatives, pesant sur la capacité d'autofinancement."
+    ],
+    "perspectives": "La SODECI entend déployer son nouveau contrat de délégation du service public de l'eau potable en 2026 tout en poursuivant l'amélioration de ses performances opérationnelles et commerciales. La société mise sur la transformation digitale et l'innovation pour renforcer la qualité de service. Des discussions sont en cours avec les parties prenantes pour établir un cadre sectoriel favorable à une trajectoire financière durable.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "La SODECI affiche en 2025 une solide progression de ses indicateurs financiers avec un chiffre d'affaires de 189,4 milliards FCFA (+10%), un résultat net de 4,663 milliards FCFA (+31%) et un EBE en hausse de 21%, témoignant d'une amélioration structurelle de la rentabilité. La distribution d'un dividende de 525 FCFA par action récompense les actionnaires et illustre la confiance de la direction. Cependant, la tension sur la trésorerie et le niveau d'endettement restent des points de vigilance à surveiller pour les investisseurs.",
+    "ticker": "SDCC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260427_-_etats_financiers_-_exercice_2025_-_sodeci.pdf",
+    "n_pages": 3,
+    "analyzed_at": "2026-05-08T17:06:22.605845+00:00",
+    "status": "ok",
+    "cached_at": 1778259982.606058
+  },
+  "STBC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 268074.013,
+        "unite": "MFCFA",
+        "variation": "+25.4%"
+      },
+      "resultat_net": {
+        "valeur": 36157.776,
+        "unite": "MFCFA",
+        "variation": "-18.1%"
+      },
+      "resultat_exploitation": {
+        "valeur": 45971.833,
+        "unite": "MFCFA",
+        "variation": "-19.4%"
+      },
+      "total_bilan": {
+        "valeur": 75184.092,
+        "unite": "MFCFA",
+        "variation": "-20.8%"
+      },
+      "capitaux_propres": {
+        "valeur": 45336.577,
+        "unite": "MFCFA",
+        "variation": "-13.7%"
+      },
+      "dividende_par_action": {
+        "valeur": 8486,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 79.8,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 13.5,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -30763.29,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 46389.953,
+        "unite": "MFCFA",
+        "variation": "-19.0%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse fortement de +25.4% à 268 Mds FCFA, porté par une hausse significative des ventes de marchandises.",
+      "Le résultat net recule de -18.1% à 36.16 Mds FCFA malgré la croissance du CA, en raison d'une forte hausse des achats et des services extérieurs comprimant les marges.",
+      "La trésorerie nette reste solide à 30.76 Mds FCFA, bien qu'en baisse de 36% par rapport à 2024 suite au versement de 38.09 Mds FCFA de dividendes aux actionnaires.",
+      "Un dividende de 38.09 Mds FCFA est proposé, soit environ 8 486 FCFA par action, représentant un taux de distribution de plus de 100% des bénéfices nets incluant le report à nouveau.",
+      "La valeur ajoutée se contracte de -19.0% à 49.08 Mds FCFA, reflet de la compression des marges opérationnelles due à la hausse des coûts d'approvisionnement."
+    ],
+    "risques": [
+      "Compression significative des marges : la marge nette passe de ~20.4% à ~13.5% en un an, signalant une pression structurelle sur la rentabilité.",
+      "Forte dépendance aux achats de marchandises (207 Mds FCFA, +38% YoY), exposant la société à la volatilité des prix d'approvisionnement.",
+      "Hausse très importante des services extérieurs (+96%) et des impôts et taxes (+333%), pouvant indiquer des coûts structurels en hausse durable.",
+      "Politique de distribution agressive (dividendes > bénéfice net), réduisant les réserves disponibles pour l'investissement et la croissance future.",
+      "Risque réglementaire et fiscal inhérent au secteur du tabac, avec des taxes susceptibles d'augmenter sous pression des politiques de santé publique."
+    ],
+    "perspectives": "La SITAB affiche une forte croissance de son activité commerciale en 2025, mais la rentabilité se dégrade nettement sous l'effet de la hausse des coûts. La politique de distribution très généreuse laisse peu de marges de manœuvre pour financer la croissance. La soutenabilité des résultats dépendra de la capacité à maîtriser les charges opérationnelles dans un secteur sous pression fiscale et réglementaire croissante.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "La SITAB (STBC) enregistre en 2025 une croissance notable de son chiffre d'affaires (+25.4%) mais voit son résultat net chuter de -18.1% à 36.16 Mds FCFA en raison d'une forte hausse des coûts d'exploitation. La société propose un dividende exceptionnel de 38.09 Mds FCFA (>100% du bénéfice), offrant un rendement attractif à court terme mais soulevant des questions sur la pérennité financière. Le profil risque/rendement est équilibré, justifiant un verdict neutre dans l'attente d'une stabilisation des marges.",
+    "ticker": "STBC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_syscohada_-_exercice_2025_-_sitab_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:07:11.955941+00:00",
+    "status": "ok",
+    "cached_at": 1778260031.956169
+  },
+  "UNLC": {
+    "annee": 2023,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 34682.08,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_net": {
+        "valeur": 640.33,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 3340.64,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": 23009.56,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": -10658.86,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 1.85,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 14364.74,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 3340.64,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Retour à la rentabilité avec un résultat net positif de 640 MFCFA en 2023, après une perte massive de -6 908 MFCFA en 2022.",
+      "Les capitaux propres restent fortement négatifs à -10 659 MFCFA, reflétant un report à nouveau déficitaire cumulé de -35 635 MFCFA.",
+      "Le chiffre d'affaires global (XB) s'établit à 34 682 MFCFA, en légère baisse par rapport aux 36 175 MFCFA de l'exercice précédent.",
+      "La trésorerie nette est fortement négative à -11 957 MFCFA, signalant une dépendance aux crédits bancaires à court terme (14 875 MFCFA).",
+      "L'excédent brut d'exploitation (EBE) est positif à 3 341 MFCFA contre -6 258 MFCFA en 2022, marquant un redressement opérationnel significatif."
+    ],
+    "risques": [
+      "Capitaux propres profondément négatifs (-10 659 MFCFA) indiquant une situation de fonds propres structurellement dégradée nécessitant une recapitalisation.",
+      "Dépendance excessive aux crédits bancaires à court terme (14 875 MFCFA) représentant un risque de liquidité et de refinancement élevé.",
+      "Report à nouveau cumulé très déficitaire (-35 635 MFCFA) qui pèsera sur la capacité à distribuer des dividendes pour de nombreuses années.",
+      "Baisse du chiffre d'affaires global par rapport à N-1, suggérant des pressions sur les volumes ou les prix dans un environnement concurrentiel difficile."
+    ],
+    "perspectives": "Unilever Côte d'Ivoire a réalisé un redressement opérationnel notable en 2023 avec un retour à un résultat net positif après la lourde perte de 2022. Toutefois, la situation bilancielle reste très préoccupante avec des capitaux propres négatifs et une trésorerie nette fortement déficitaire. La continuité de l'exploitation dépend du soutien du groupe Unilever et de la capacité à poursuivre l'amélioration des marges opérationnelles.",
+    "verdict_investisseur": "NEGATIF",
+    "resume": "Unilever Côte d'Ivoire affiche un retour symbolique à la rentabilité en 2023 (résultat net +640 MFCFA) après une perte de -6 908 MFCFA en 2022, signalant un début de redressement opérationnel. Cependant, la structure financière demeure extrêmement fragilisée avec des capitaux propres négatifs de -10 659 MFCFA et une dette bancaire court terme de 14 875 MFCFA qui fait peser un risque de liquidité majeur. Pour un investisseur BRVM, la situation bilancielle dégradée et l'absence de perspective de dividende à court terme rendent la valeur peu attractive malgré l'amélioration opérationnelle.",
+    "ticker": "UNLC",
+    "doc_type": "Etats financiers",
+    "year": 2024,
+    "url": "https://www.brvm.org/sites/default/files/20240904_-_etats_financiers_-_exercice_2023_-_unilever_ci.pdf",
+    "n_pages": 5,
+    "analyzed_at": "2026-05-08T17:07:56.610171+00:00",
+    "status": "ok",
+    "cached_at": 1778260076.610642
+  },
+  "FTSC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 30694517,
+        "unite": "KFCFA",
+        "variation": "-19.7%"
+      },
+      "resultat_net": {
+        "valeur": 18595275,
+        "unite": "KFCFA",
+        "variation": "+504.5%"
+      },
+      "resultat_exploitation": {
+        "valeur": -882181,
+        "unite": "KFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": 61061747,
+        "unite": "KFCFA",
+        "variation": "+20.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 46454156,
+        "unite": "KFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": 2000.67,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 60.6,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -18831391,
+        "unite": "KFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 473316,
+        "unite": "KFCFA",
+        "variation": "-84.1%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires recule de 20% à 30,7 milliards FCFA, reflétant une contraction significative de l'activité opérationnelle.",
+      "Le résultat net bondit à 18,6 milliards FCFA grâce à un résultat HAO exceptionnel de 18,9 milliards FCFA, masquant une exploitation déficitaire.",
+      "La trésorerie nette passe d'un solde négatif de -10,5 milliards à un positif de +18,8 milliards FCFA, une amélioration majeure liée notamment à des cessions d'immobilisations financières.",
+      "Une distribution exceptionnelle totale de 28,2 milliards FCFA est proposée, combinant affectation du résultat (18,6 Md) et distribution partielle de prime d'émission (9,6 Md), soit 2 000,67 FCFA par action."
+    ],
+    "risques": [
+      "Résultat d'exploitation négatif (-882 millions FCFA) signalant une activité opérationnelle structurellement déficitaire.",
+      "Forte dépendance du résultat net à des éléments exceptionnels (HAO) non récurrents de 18,9 milliards FCFA.",
+      "Baisse significative du chiffre d'affaires de 20% suggérant une perte de volumes ou de marchés.",
+      "Distribution massive supérieure au résultat net généré (28,2 Md distribués vs 18,6 Md de résultat) entamant les réserves."
+    ],
+    "perspectives": "La société FTSC affiche une performance opérationnelle préoccupante avec un EBIT négatif et un chiffre d'affaires en forte baisse. La solidité apparente du bilan repose sur une trésorerie exceptionnellement élevée et des éléments non récurrents. La distribution massive aux actionnaires, bien qu'attractive à court terme, soulève des questions sur la soutenabilité du modèle d'affaires.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "FTSC présente des états financiers 2024 en trompe-l'œil : un résultat net spectaculaire de 18,6 milliards FCFA est quasi-intégralement dû à des éléments exceptionnels (HAO), tandis que l'exploitation reste déficitaire et le chiffre d'affaires chute de 20%. La distribution d'un dividende exceptionnel de ~2 001 FCFA/action est attractive mais la performance opérationnelle structurelle reste une source de préoccupation majeure pour l'investisseur long terme.",
+    "ticker": "FTSC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250523_-_etats_financiers_-_exercice_2024_-_filtisac_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:08:40.021434+00:00",
+    "status": "ok",
+    "cached_at": 1778260120.021653
+  },
+  "ABJC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 9283,
+        "unite": "MFCFA",
+        "variation": "+9.1%"
+      },
+      "resultat_net": {
+        "valeur": 377,
+        "unite": "MFCFA",
+        "variation": "-57.9%"
+      },
+      "resultat_exploitation": {
+        "valeur": 522,
+        "unite": "MFCFA",
+        "variation": "-36.6%"
+      },
+      "total_bilan": {
+        "valeur": 14023,
+        "unite": "MFCFA",
+        "variation": "-10.7%"
+      },
+      "capitaux_propres": {
+        "valeur": 3272,
+        "unite": "MFCFA",
+        "variation": "+1.9%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 11.5,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 4.1,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 2567,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 1474,
+        "unite": "MFCFA",
+        "variation": "-11.5%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse de +9.1% à 9 283 MFCFA, porté par la croissance des ventes de produits fabriqués et des travaux/services vendus.",
+      "Le résultat net chute fortement de -57.9% à 377 MFCFA (contre 896 MFCFA en 2023), traduisant une forte pression sur les marges.",
+      "Le total du bilan se contracte de -10.7% à 14 023 MFCFA, avec une réduction significative de la trésorerie nette négative passant de -1 791 MFCFA à -2 143 MFCFA.",
+      "La société n'a toujours pas établi ses états financiers selon les normes IFRS, en dérogation aux obligations réglementaires OHADA depuis 2019.",
+      "Les actifs industriels représentent 32.2% du total bilan (4 518 MFCFA en VNC), sans indice de dépréciation identifié par les commissaires aux comptes."
+    ],
+    "risques": [
+      "Non-conformité persistante aux normes IFRS obligatoires depuis 2019 pour les sociétés cotées, exposant la société à des risques réglementaires et de marché financier.",
+      "Dégradation significative de la rentabilité : la marge nette passe de 10.5% à 4.1%, signalant une compression importante des marges opérationnelles.",
+      "Trésorerie nette structurellement négative (-2 143 MFCFA), en détérioration par rapport à -1 791 MFCFA en 2023, fragilisant la liquidité de la société.",
+      "Forte concentration des actifs dans des immobilisations industrielles (32% du bilan), exposant la société à des risques d'obsolescence ou de dépréciation future.",
+      "Endettement financier résiduel (emprunts 425 MFCFA) et passif circulant élevé (8 004 MFCFA), dont une dette fournisseurs importante de 3 748 MFCFA."
+    ],
+    "perspectives": "La croissance du chiffre d'affaires de +9.1% témoigne d'une dynamique commerciale positive pour Erium Côte d'Ivoire. Cependant, la forte contraction de la rentabilité nette en 2024 constitue un signal d'alerte majeur pour les investisseurs, nécessitant une amélioration du contrôle des coûts opérationnels. La mise en conformité IFRS reste un chantier prioritaire pour restaurer la confiance des marchés financiers.",
+    "verdict_investisseur": "NEGATIF",
+    "resume": "Erium Côte d'Ivoire (ABJC) affiche une croissance commerciale encourageante (+9.1% du CA à 9 283 MFCFA) pour l'exercice 2024, mais le résultat net s'effondre de près de 58% à 377 MFCFA, révélant une forte dégradation des marges. La trésorerie nette reste structurellement négative et la non-conformité aux normes IFRS constitue un risque réglementaire persistant, rendant le profil risque/rendement peu attractif pour un investisseur à court terme.",
+    "ticker": "ABJC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20251205_-_rapport_des_cacs_sur_les_etats_financiers_au_ca_-_air_liquide_ci.pdf",
+    "n_pages": 75,
+    "analyzed_at": "2026-05-08T17:09:14.838218+00:00",
+    "status": "ok",
+    "cached_at": 1778260154.8385038
+  },
+  "CFAC": {
+    "annee": 2023,
+    "type_rapport": "Etats financiers annuels IFRS",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 77672.808,
+        "unite": "MFCFA",
+        "variation": "+11.1%"
+      },
+      "resultat_net": {
+        "valeur": 2044.698,
+        "unite": "MFCFA",
+        "variation": "-42.6%"
+      },
+      "resultat_exploitation": {
+        "valeur": 3533.078,
+        "unite": "MFCFA",
+        "variation": "-35.0%"
+      },
+      "total_bilan": {
+        "valeur": 54277.216,
+        "unite": "MFCFA",
+        "variation": "-2.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 10916.681,
+        "unite": "MFCFA",
+        "variation": "-4.3%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 18.73,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 2.63,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -2112.083,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 7205.551,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse de +11.1% à 77.7 milliards de FCFA en 2023, témoignant d'une bonne dynamique commerciale.",
+      "Le résultat net chute de -42.6% à 2.04 milliards de FCFA, pénalisé par la hausse des achats consommés, des charges de personnel et des amortissements.",
+      "La trésorerie nette s'établit à 2.1 milliards de FCFA fin 2023, en baisse significative par rapport aux 5.8 milliards de fin 2022, après des flux opérationnels très faibles de 826 millions.",
+      "Les charges de personnel ont bondi de +27.2% à 4.8 milliards de FCFA, contribuant à la compression des marges.",
+      "Les stocks ont diminué de 4.2 milliards, signe de déstockage, tandis que les créances clients ont fortement augmenté de +55.2%."
+    ],
+    "risques": [
+      "Forte compression des marges opérationnelles malgré la croissance du chiffre d'affaires, liée à la hausse des coûts d'achats et de personnel.",
+      "Dégradation significative des flux de trésorerie opérationnels (826 millions en 2023 vs 10.5 milliards en 2022), fragilisant la capacité à financer les investissements et dividendes.",
+      "Hausse des créances clients de +55% exposant l'entreprise à un risque accru de non-recouvrement.",
+      "Niveau élevé d'endettement locatif (IFRS 16) avec 4.5 milliards de dettes de location, générant des charges financières récurrentes importantes."
+    ],
+    "perspectives": "CFAC affiche une croissance commerciale soutenue mais fait face à une pression significative sur ses marges en 2023. La maîtrise des coûts opérationnels et la gestion du besoin en fonds de roulement seront déterminantes pour restaurer la rentabilité. La capacité à maintenir le versement de dividendes dépendra de l'amélioration des flux de trésorerie.",
+    "verdict_investisseur": "NEGATIF",
+    "resume": "CFAC enregistre en 2023 une croissance du chiffre d'affaires de +11% à 77.7 milliards de FCFA, mais son résultat net s'effondre de -42.6% à 2.04 milliards sous l'effet conjugué de la hausse des coûts d'achats, de personnel et des amortissements. La trésorerie se dégrade fortement avec des flux opérationnels quasi nuls (826 millions vs 10.5 milliards en 2022), suscitant des interrogations sur la soutenabilité du modèle à court terme. Le verdict est négatif pour l'investisseur dans l'attente d'un redressement des marges et des flux de trésorerie.",
+    "ticker": "CFAC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250617_-_etats_financiers_-_exercices_2018_a_2023_-_tractafric_motors_ci_annule_et_remplace_le_precedent.pdf",
+    "n_pages": 3,
+    "analyzed_at": "2026-05-08T17:09:40.973462+00:00",
+    "status": "ok",
+    "cached_at": 1778260180.9737291
+  },
+  "LNBB": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 98598,
+        "unite": "MFCFA",
+        "variation": "-4%"
+      },
+      "resultat_net": {
+        "valeur": 4622,
+        "unite": "MFCFA",
+        "variation": "-36%"
+      },
+      "resultat_exploitation": {
+        "valeur": 6376,
+        "unite": "MFCFA",
+        "variation": "+39.9%"
+      },
+      "total_bilan": {
+        "valeur": 32609,
+        "unite": "MFCFA",
+        "variation": "+12.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 21954,
+        "unite": "MFCFA",
+        "variation": "-7%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 21.1,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 4.7,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -7416,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 7164,
+        "unite": "MFCFA",
+        "variation": "+33.6%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires recule de 4% à 98,6 milliards FCFA sous l'effet de la concurrence déloyale des opérateurs illégaux de jeux.",
+      "Le résultat net chute de 36% à 4,6 milliards FCFA principalement en raison de l'absence de produits exceptionnels significatifs en 2025 (vs 3,1 Mds FCFA en 2024).",
+      "Malgré la baisse du chiffre d'affaires, la maîtrise des charges permet une hausse de la valeur ajoutée (+22%), de l'EBE (+34%) et du résultat d'exploitation (+40%).",
+      "Les jeux en ligne progressent de 18% à 67,5 milliards FCFA, représentant 68,4% du chiffre d'affaires global.",
+      "La structure financière reste saine avec des fonds propres de 22 milliards FCFA, un ratio d'autonomie financière de 2,06 et une trésorerie nette positive de 7,98 milliards FCFA."
+    ],
+    "risques": [
+      "Concurrence déloyale des opérateurs illégaux proposant des taux de retour aux joueurs supérieurs au plafond réglementaire de 85%, entraînant une perte de clientèle.",
+      "Prolifération des machines à sous illégales sur le territoire national, détournant une partie croissante de la clientèle.",
+      "Risque réglementaire et d'exécution lié à la capacité des autorités (Cellule de Supervision des Jeux) à assainir effectivement le secteur.",
+      "Dépendance au Loto 5/90 qui génère entre 67% et 80% du chiffre d'affaires global, exposant la société à un risque de concentration produit."
+    ],
+    "perspectives": "La LNB SA prévoit en 2026 le lancement de nouveaux produits (Double Chance, LNB Zoo, Kadolo), la montée en puissance du digital avec une plateforme unifiée (casino, paris sportifs, jeux virtuels) et l'interfaçage avec les opérateurs de mobile money. La société anticipe une reprise de la croissance grâce à sa veille concurrentielle, à l'assainissement du secteur par les autorités et au déploiement géographique vers le nord du Bénin. La distribution d'environ 80% du résultat net 2025 est proposée, témoignant de la confiance du management dans la solidité financière de la société.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "La LNB SA clôture 2025 sur un recul des performances commerciales (CA -4%, résultat net -36% à 4,6 Mds FCFA) principalement imputable à la concurrence illégale, mais démontre une bonne maîtrise opérationnelle avec un EBE en hausse de 34% et un bilan solide (fonds propres 22 Mds FCFA, trésorerie nette positive). La forte progression des jeux en ligne (+18%) constitue un relais de croissance structurel prometteur. Les perspectives 2026 sont conditionnées à l'assainissement du secteur par les autorités et à l'exécution réussie de la feuille de route digitale.",
+    "ticker": "LNBB",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_-_exercice_2025_-_lnb_bn.pdf",
+    "n_pages": 22,
+    "analyzed_at": "2026-05-08T17:10:33.037026+00:00",
+    "status": "ok",
+    "cached_at": 1778260233.0373251
+  },
+  "SICC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 21263.067,
+        "unite": "MFCFA",
+        "variation": "+11.2%"
+      },
+      "resultat_net": {
+        "valeur": 1439.474,
+        "unite": "MFCFA",
+        "variation": "+4.7%"
+      },
+      "resultat_exploitation": {
+        "valeur": 2088.527,
+        "unite": "MFCFA",
+        "variation": "+28.2%"
+      },
+      "total_bilan": {
+        "valeur": 23609.026,
+        "unite": "MFCFA",
+        "variation": "+8.3%"
+      },
+      "capitaux_propres": {
+        "valeur": 9345.551,
+        "unite": "MFCFA",
+        "variation": "+4.7%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 15.4,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.77,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": -4721.159,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 2195.136,
+        "unite": "MFCFA",
+        "variation": "+10.4%"
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires progresse de +11.2% à 21,26 milliards de FCFA en 2025, confirmant une trajectoire de croissance soutenue depuis 2023.",
+      "Le résultat net atteint 1,44 milliard de FCFA (+4.7%), avec un résultat d'exploitation en forte hausse de +28.2% à 2,09 milliards de FCFA.",
+      "La trésorerie nette reste solide à 5,14 milliards de FCFA malgré une baisse par rapport à 2024, impactée par une augmentation des stocks et des créances clients.",
+      "Les dividendes distribués ont augmenté significativement à 758 millions de FCFA contre 523 millions en 2024, reflétant la confiance de la direction dans la génération de cash.",
+      "La structure bilancielle est saine avec des capitaux propres de 9,35 milliards et une dette financière résiduelle très faible de 417 millions de FCFA."
+    ],
+    "risques": [
+      "Forte augmentation des stocks (+37% à 7,4 milliards) et des créances clients (+22% à 8,4 milliards), générant une pression sur le besoin en fonds de roulement et un flux opérationnel négatif en 2025.",
+      "Provisions importantes et croissantes (3,4 milliards de FCFA), pouvant indiquer des risques opérationnels ou des litiges non résolus.",
+      "Volatilité des impôts différés impactant la lisibilité du résultat net (impact négatif de -74,9 millions en 2025 contre +321 millions en 2024).",
+      "Dépendance à un secteur industriel (câbles) sensible aux fluctuations des cours des matières premières (cuivre, aluminium)."
+    ],
+    "perspectives": "SICABLE affiche une dynamique commerciale solide avec une croissance du chiffre d'affaires à deux chiffres et une amélioration de la rentabilité opérationnelle. La politique de distribution de dividendes en hausse témoigne d'une bonne santé financière. Toutefois, la surveillance du besoin en fonds de roulement et la maîtrise des provisions seront des enjeux clés pour maintenir la performance.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "SICABLE (SICC) délivre une solide performance en 2025 avec un chiffre d'affaires de 21,26 milliards FCFA (+11.2%) et un résultat net de 1,44 milliard FCFA (+4.7%), portés par une forte hausse du résultat d'exploitation (+28.2%). Le bilan est robuste avec une trésorerie nette positive de 5,14 milliards et des capitaux propres de 9,35 milliards, tandis que les dividendes distribués ont été relevés à 758 millions de FCFA. Le principal point de vigilance reste la tension sur le besoin en fonds de roulement liée à la hausse conjointe des stocks et des créances clients.",
+    "ticker": "SICC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260311_-_etats_financiers_ifrs_-_exercice_2025_-_sicable_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:11:21.918891+00:00",
+    "status": "ok",
+    "cached_at": 1778260281.919188
+  },
+  "ORGT": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels consolidés",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 186609,
+        "unite": "MFCFA",
+        "variation": "-4.5%"
+      },
+      "resultat_net": {
+        "valeur": 21643,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 29166,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": 4014192,
+        "unite": "MFCFA",
+        "variation": "+1.3%"
+      },
+      "capitaux_propres": {
+        "valeur": 113165,
+        "unite": "MFCFA",
+        "variation": "+17.0%"
+      },
+      "dividende_par_action": {
+        "valeur": 0,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 19.1,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 11.6,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 54233,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Retour à la rentabilité avec un résultat net consolidé de 21,6 Mds FCFA en 2025 contre une perte de -44,4 Mds FCFA en 2024.",
+      "Forte réduction du coût du risque à -7,0 Mds FCFA contre -69,1 Mds FCFA en 2024, principal moteur du redressement.",
+      "Le Produit Net Bancaire recule de 4,5% à 186,6 Mds FCFA, pénalisé par la baisse des commissions (-16,2%) et des intérêts nets.",
+      "Aucun dividende ne sera distribué au titre de l'exercice 2025, le résultat de la holding Oragroup SA étant négatif (-8 Mds FCFA).",
+      "Les capitaux propres consolidés progressent de 17% à 113,2 Mds FCFA, renforçant la solidité du bilan."
+    ],
+    "risques": [
+      "Le résultat de la holding Oragroup SA reste déficitaire à -8 Mds FCFA, ce qui empêche toute distribution de dividendes.",
+      "Baisse significative des commissions (-16,2%) pouvant traduire une pression concurrentielle ou une réduction des volumes d'activité.",
+      "Exposition aux risques de change, avec un impact négatif de -1,5 Md FCFA sur la trésorerie en 2025.",
+      "Niveau élevé des dettes envers la clientèle (3 089 Mds FCFA) exposant le groupe à un risque de liquidité en cas de retraits massifs."
+    ],
+    "perspectives": "Le groupe Oragroup affiche un net redressement opérationnel en 2025 grâce à une normalisation du coût du risque, après une année 2024 marquée par des provisions exceptionnelles. La reconstitution des capitaux propres est un signal positif, mais l'absence de dividende et le déficit persistant de la holding mère pourraient freiner l'intérêt des investisseurs à court terme. La poursuite de la maîtrise des charges d'exploitation et la consolidation des revenus de commissions seront déterminantes pour 2026.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Oragroup (ORGT) réalise un retour à la rentabilité en 2025 avec un résultat net consolidé de 21,6 Mds FCFA, porté essentiellement par une normalisation spectaculaire du coût du risque. Cependant, le PNB est en recul, la holding mère reste déficitaire et aucun dividende ne sera versé. Le dossier est en phase de redressement mais nécessite confirmation de la tendance avant un positionnement acheteur fort.",
+    "ticker": "ORGT",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260504_-_etats_financiers_-_exercice_2025_-_oragroup_tg.pdf",
+    "n_pages": 4,
+    "analyzed_at": "2026-05-08T17:12:02.882262+00:00",
+    "status": "ok",
+    "cached_at": 1778260322.882537
+  },
+  "SEMC": {
+    "annee": 2023,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_net": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Les états financiers sont arrêtés au 31 décembre 2023 pour EVIOSYS PACKAGING SIEM (SEMC).",
+      "Les états financiers ont été vérifiés et certifiés par les Commissaires aux Comptes.",
+      "L'approbation des états financiers est prévue lors de l'Assemblée Générale Ordinaire du 30 décembre 2024."
+    ],
+    "risques": [
+      "Aucune donnée financière chiffrée disponible dans le document fourni pour évaluer les risques financiers.",
+      "Le délai entre la clôture des comptes (31/12/2023) et l'AGO d'approbation (30/12/2024) est inhabituellement long, ce qui peut indiquer des difficultés de gouvernance ou de publication."
+    ],
+    "perspectives": "Aucune information sur les perspectives n'est disponible dans le document fourni. Le rapport se limite à une page de couverture sans données financières ni commentaires de gestion.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Le document fourni ne contient que la page de couverture des états financiers annuels 2023 d'EVIOSYS PACKAGING SIEM (SEMC), sans aucune donnée financière exploitable. Les états ont été certifiés par les Commissaires aux Comptes et devaient être soumis à l'AGO le 30 décembre 2024. Une analyse financière complète est impossible en l'absence des données chiffrées.",
+    "ticker": "SEMC",
+    "doc_type": "Etats financiers",
+    "year": 2024,
+    "url": "https://www.brvm.org/sites/default/files/20241216_-_etats_financiers_de_synthese_-exercice_2023_-_eviosys_packaging_siem_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:12:21.181183+00:00",
+    "status": "ok",
+    "cached_at": 1778260341.1814668
+  },
+  "BICC": {
+    "annee": 2025,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 79563,
+        "unite": "MFCFA",
+        "variation": "+16.9%"
+      },
+      "resultat_net": {
+        "valeur": 36520,
+        "unite": "MFCFA",
+        "variation": "+39.3%"
+      },
+      "resultat_exploitation": {
+        "valeur": 40620,
+        "unite": "MFCFA",
+        "variation": "+41.2%"
+      },
+      "total_bilan": {
+        "valeur": 1126270,
+        "unite": "MFCFA",
+        "variation": "+10.9%"
+      },
+      "capitaux_propres": {
+        "valeur": 120570,
+        "unite": "MFCFA",
+        "variation": "+20.8%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 30.3,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 45.9,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 45315,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le Produit Net Bancaire (PNB) progresse de +16.9% à 79 563 MFCFA, porté par la hausse des intérêts perçus (+11.6%) et la forte croissance des commissions (+32.8%).",
+      "Le résultat net bondit de +39.3% à 36 520 MFCFA, traduisant une amélioration significative de la rentabilité globale de la banque.",
+      "Le total bilan franchit le seuil de 1 126 milliards de FCFA (+10.9%), avec une forte progression des effets publics (+44.3%) et des dépôts clientèle (+16.3%).",
+      "Les capitaux propres s'établissent à 120 570 MFCFA (+20.8%), reflétant une solidité financière renforcée.",
+      "Les charges générales d'exploitation sont quasi-stables à 34 248 MFCFA (-1.3%), démontrant une bonne maîtrise des coûts malgré la croissance de l'activité."
+    ],
+    "risques": [
+      "Hausse du coût du risque à 1 498 MFCFA (+14.4%), signalant une légère détérioration de la qualité du portefeuille de crédits.",
+      "Augmentation des charges sur commissions (+60.2%) et des intérêts et charges assimilées (+23.4%), pouvant peser sur les marges futures.",
+      "Forte hausse des immobilisations incorporelles (+144%) et réduction des immobilisations corporelles, suggérant des investissements significatifs dont le retour reste à confirmer.",
+      "Recul des créances sur la clientèle (-7.2%) malgré la croissance des dépôts, pouvant indiquer une prudence dans l'octroi de crédits ou une demande plus faible."
+    ],
+    "perspectives": "La BICICI affiche une performance financière excellente en 2025 avec une rentabilité en forte hausse, soutenue par la diversification des revenus (commissions, titres publics). La maîtrise des charges d'exploitation et le renforcement des fonds propres positionnent favorablement la banque pour poursuivre sa croissance. Le développement des engagements de financement hors bilan (+140%) laisse présager une accélération de l'activité commerciale en 2026.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "La BICICI (BICC) livre des résultats 2025 remarquables avec un résultat net de 36,5 milliards FCFA, en hausse de +39.3%, et un PNB de 79,6 milliards FCFA (+16.9%), portés par la dynamique des commissions et des intérêts. La rentabilité des capitaux propres (ROE) dépasse 30%, témoignant d'une efficacité opérationnelle élevée. Le bilan solide à 1 126 milliards FCFA et les capitaux propres en progression à 120,6 milliards FCFA en font un titre attractif pour les investisseurs à la recherche d'une banque bien gérée dans la zone UEMOA.",
+    "ticker": "BICC",
+    "doc_type": "Etats financiers",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260417_-_etats_financiers_-_exercice_2025_-_bici_ci.pdf",
+    "n_pages": 1,
+    "analyzed_at": "2026-05-08T17:12:48.039251+00:00",
+    "status": "ok",
+    "cached_at": 1778260368.03951
+  },
+  "BOLLORE": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 85643,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_net": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le chiffre d'affaires d'Africa Global Logistics Côte d'Ivoire s'élève à 85 643 MFCFA au 31 décembre 2024, représentant 98,90% du total des produits des activités ordinaires.",
+      "Le compte débours présente un solde créditeur de 22 043 MFCFA, soit 12% du total bilan, reflétant un volume élevé de commandes clients en cours de traitement.",
+      "Les commissaires aux comptes ont émis une opinion sans réserve sur les états financiers, mais signalent un manquement formel : les états financiers ont été arrêtés après le délai réglementaire de quatre mois (30 avril 2025), le Conseil d'Administration les ayant arrêtés le 14 mai 2025."
+    ],
+    "risques": [
+      "Non-respect du délai réglementaire OHADA d'arrêté des comptes (délai dépassé : arrêté le 14 mai 2025 au lieu du 30 avril 2025), constituant un manquement aux obligations comptables formelles.",
+      "Risque opérationnel lié au volume élevé de débours (22 043 MFCFA) et à la complexité de leur apurement, pouvant affecter les résultats d'exploitation.",
+      "Risque de reconnaissance anticipée des revenus compte tenu de la diversité des activités (consignation, manutention, transit, transport, agence de voyage, immobilier) et de l'importance du chiffre d'affaires comme indicateur de performance.",
+      "Retard dans l'établissement des états financiers combinés du périmètre UEMOA (comptes 2023 toujours en cours de clôture à la date du rapport), générant un risque de conformité réglementaire au niveau groupe."
+    ],
+    "perspectives": "Le rapport ne fournit pas d'informations prospectives explicites sur les perspectives de la société pour 2025. La diversification des activités (consignation, manutention, transit maritime, transport aérien/ferroviaire, agence de voyage, immobilier) offre une base de revenus variée. La mise en place en cours des états financiers combinés du groupe UEMOA pourrait améliorer la gouvernance et la transparence financière.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Africa Global Logistics Côte d'Ivoire affiche un chiffre d'affaires de 85 643 MFCFA pour l'exercice 2024, avec une opinion d'audit sans réserve attestant de la sincérité des états financiers. Toutefois, le rapport ne fournit pas les indicateurs financiers clés (résultat net, total bilan, capitaux propres) permettant une évaluation complète de la rentabilité et de la solidité financière de la société. Des manquements formels (retard d'arrêté des comptes, retard dans les états financiers combinés groupe) et le risque lié aux débours élevés méritent une vigilance particulière de la part des investisseurs.",
+    "ticker": "BOLLORE",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250829_-_etats_financiers_et_rapport_des_cac_-_exercice_2024_-_africa_global_logistics_ci.pdf",
+    "n_pages": 11,
+    "analyzed_at": "2026-05-08T17:13:21.729539+00:00",
+    "status": "ok",
+    "cached_at": 1778260401.729804
+  }
+}
