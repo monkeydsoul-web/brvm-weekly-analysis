@@ -38,3 +38,34 @@ async function fetchLiveScore(ticker){
       '<button onclick="fetchLiveScore(\''+ticker+'\')" style="margin-left:auto;font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;color:var(--t2)">Actualiser</button></div></div>';
   }catch(e){var msg=e.name==='AbortError'?'Timeout — brvm.org trop lent':e.message;el.innerHTML='<div style="color:var(--red);font-size:11px">'+msg+' <button onclick="fetchLiveScore(\"'+ticker+'\")" style="margin-left:6px;font-size:10px;padding:1px 6px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;color:var(--t2)">Réessayer</button></div>';}
 }
+
+async function loadReports(ticker) {
+  const el = document.getElementById('reports-container');
+  if (!el) return;
+  el.innerHTML = '<span style="color:var(--t2);font-size:11px">Chargement rapports...</span>';
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch('/api/reports/' + ticker, {signal: ctrl.signal});
+    clearTimeout(tid);
+    const d = await res.json();
+    if (!d.reports || !d.reports.length) {
+      el.innerHTML = '<span style="color:var(--t2);font-size:11px">Aucun rapport disponible</span>';
+      return;
+    }
+    const types = {'Rapport annuel':'#00c076','Etats financiers':'var(--amber)','Rapport S1':'#3b82f6','Rapport T3':'#3b82f6','Rapport RSE':'#8b5cf6','Rapport trimestriel':'#3b82f6'};
+    const rows = d.reports.slice(0,12).map(function(r) {
+      var col = types[r.type] || 'var(--t2)';
+      return '<a href="'+r.url+'" target="_blank" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit">'+
+        '<span style="font-size:10px;font-weight:600;color:'+col+';min-width:115px;white-space:nowrap">'+r.type+'</span>'+
+        '<span style="font-size:11px;color:var(--t2);min-width:34px">'+(r.year||'?')+'</span>'+
+        '<span style="font-size:11px;color:var(--t);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</span>'+
+        '<span style="font-size:10px;color:#3b82f6;font-weight:600">PDF</span></a>';
+    }).join('');
+    el.innerHTML = '<div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Rapports BRVM ('+d.total+')</div>'+
+      rows+'</div>';
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--red);font-size:11px">'+(e.name==='AbortError'?'Timeout':'Erreur: '+e.message)+'</span>';
+  }
+}
