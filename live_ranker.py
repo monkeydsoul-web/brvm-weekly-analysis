@@ -47,44 +47,97 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
         row["volume"]     = live_price_data.get("volume", 0)
         row["trend"]      = live_price_data.get("trend")
 
-        # Recalcul P/E et P/B proportionnels au prix live
-        if old_price and old_price != live_price:
+        # Recalcul P/E live depuis EPS si disponible
+        eps = row.get("eps") or row.get("eps_est")
+        if eps and eps > 0:
+            row["pe_ref"] = round(live_price / eps, 2)
+        elif old_price and old_price > 0 and old_price != live_price:
             ratio = live_price / old_price
             for key in ("pe_ref", "pe_hist"):
                 old_val = row.get(key)
-                if old_val and old_val < 990:
+                if old_val and 0 < old_val < 990:
                     row[key] = round(old_val * ratio, 2)
             for key in ("pb_ref", "pb_hist"):
                 old_val = row.get(key)
-                if old_val and old_val < 990:
+                if old_val and 0 < old_val < 990:
                     row[key] = round(old_val * ratio, 2)
-            # Recalcul div_yield
-            old_div = row.get("div_yield") or 0
-            if old_div and old_price:
-                dps = old_div / 100 * old_price
-                row["div_yield"]     = round(dps / live_price * 100, 2)
-                row["div_per_share"] = dps
 
-    # ── KPIs PDF (priorité sur fondamentaux statiques) ────────────────────
+        # Recalcul div_yield depuis dividende par action (source la plus fiable)
+        dps = (row.get("div_per_share") or row.get("div_hist") or
+               row.get("div_2024") or row.get("div_2023") or 0)
+        if dps and dps > 0 and live_price > 0:
+            row["div_yield"]     = round(float(dps) / live_price * 100, 2)
+            row["div_per_share"] = float(dps)
+        elif row.get("div_yield") and old_price and old_price > 0 and old_price != live_price:
+            # Fallback: recalcul proportionnel seulement si div_yield existait
+            dps_calc = row["div_yield"] / 100 * old_price
+            row["div_yield"] = round(dps_calc / live_price * 100, 2)
+
+    # ── KPIs PDF — enrichissement prioritaire des modeles ────────────────
     if pdf_analysis and pdf_analysis.get("status") == "ok":
         kpis = pdf_analysis.get("kpis") or {}
 
         def kv(key):
-            return (kpis.get(key) or {}).get("valeur")
+            v = (kpis.get(key) or {}).get("valeur")
+            return float(v) if v is not None else None
 
+        price = row.get("price") or 0
+
+        # ROE depuis PDF (plus fiable que statique)
         roe_pdf = kv("roe")
+        if roe_pdf is not None and 0 < roe_pdf < 200:
+            row["roe"] = round(roe_pdf, 1)
+            # ROE > 15% = earnings_stable pour Buffett/Relatif
+            row["earnings_stable"] = roe_pdf >= 12
+
+        # Dividende par action depuis PDF → div_yield recalculé
         div_pdf = kv("dividende_par_action")
-
-        if roe_pdf is not None:
-            row["roe"] = round(float(roe_pdf), 1)
-
         if div_pdf and div_pdf > 0:
-            row["div_per_share"] = float(div_pdf)
-            price = row.get("price") or 0
+            row["div_per_share"] = div_pdf
             if price > 0:
-                row["div_yield"] = round(float(div_pdf) / price * 100, 2)
+                row["div_yield"] = round(div_pdf / price * 100, 2)
 
-        # Métadonnées PDF pour l'affichage
+        # EPS depuis résultat net / nb actions (si disponible)
+        rn_pdf  = kv("resultat_net")    # en MFCFA
+        ca_pdf  = kv("chiffre_affaires") # en MFCFA
+        nb_actions = row.get("shares_outstanding") or row.get("nb_actions")
+
+        if rn_pdf and nb_actions and nb_actions > 0:
+            # rn_pdf en MFCFA → FCFA : * 1_000_000
+            eps_calc = rn_pdf * 1_000_000 / nb_actions
+            if eps_calc > 0:
+                row["eps"] = round(eps_calc, 0)
+                if price > 0:
+                    row["pe_ref"] = round(price / eps_calc, 2)
+
+        # P/B depuis capitaux propres / nb actions
+        cap_propres = kv("capitaux_propres")  # MFCFA
+        if cap_propres and nb_actions and nb_actions > 0 and price > 0:
+            vcp = cap_propres * 1_000_000 / nb_actions
+            if vcp > 0:
+                row["pb_ref"] = round(price / vcp, 2)
+
+        # EBITDA → dette implicite et niveau d'endettement
+        ebitda_pdf  = kv("ebitda")
+        dette_nette = kv("dette_nette")
+        if ebitda_pdf and ebitda_pdf > 0 and dette_nette is not None:
+            ratio_dette = dette_nette / ebitda_pdf if ebitda_pdf else 0
+            if ratio_dette < 1:
+                row["debt_level"] = "low"
+            elif ratio_dette < 2.5:
+                row["debt_level"] = "medium"
+            else:
+                row["debt_level"] = "high"
+
+        # Marge nette → proxy qualité (FCF)
+        marge = kv("marge_nette")
+        if marge is not None and ca_pdf and ca_pdf > 0:
+            fcf_proxy = ca_pdf * (marge / 100) * 0.7  # MFCFA
+            row["fcf_margin"] = round(marge, 1)
+            if nb_actions and nb_actions > 0:
+                row["fcf_per_share"] = round(fcf_proxy * 1_000_000 / nb_actions, 0)
+
+        # Métadonnées PDF pour affichage
         row["pdf_verdict"]      = pdf_analysis.get("verdict_investisseur")
         row["pdf_ca"]           = kv("chiffre_affaires")
         row["pdf_rn"]           = kv("resultat_net")

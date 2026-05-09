@@ -41,6 +41,21 @@ REPORTS_DIR = "reports"
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def load_latest_scores():
+    # Priorité 1 : live_ranking.json (reclassement automatique temps réel)
+    live_path = os.path.join(DATA_DIR, "live_ranking.json")
+    if os.path.exists(live_path):
+        try:
+            with open(live_path, encoding="utf-8") as f:
+                data = json.load(f)
+            ranking = data.get("ranking", [])
+            if ranking:
+                # Convertir au format attendu par le dashboard
+                for r in ranking:
+                    r.setdefault("composite_adj", r.get("composite_adj", 0))
+                return ranking
+        except Exception as e:
+            logger.warning(f"live_ranking.json erreur: {e}")
+    # Fallback : fichier scores_*.json statique
     files = sorted(glob.glob(os.path.join(DATA_DIR, "scores_*.json")))
     if not files:
         return []
