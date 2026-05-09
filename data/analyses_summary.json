@@ -513,7 +513,7 @@
         "variation": "+10.8%"
       },
       "dividende_par_action": {
-        "valeur": 20082224800,
+        "valeur": null,
         "unite": "FCFA",
         "variation": null
       },
@@ -1152,12 +1152,12 @@
         "variation": "-13.7%"
       },
       "dividende_par_action": {
-        "valeur": 8486,
+        "valeur": 2096,
         "unite": "FCFA",
         "variation": null
       },
       "roe": {
-        "valeur": 79.8,
+        "valeur": null,
         "unite": "%",
         "variation": null
       },
@@ -1313,7 +1313,7 @@
         "variation": null
       },
       "dividende_par_action": {
-        "valeur": 2000.67,
+        "valeur": null,
         "unite": "FCFA",
         "variation": null
       },

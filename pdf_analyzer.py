@@ -62,6 +62,14 @@ Format attendu :
   "resume": "Résumé exécutif en 3 phrases max pour un investisseur."
 }
 
+REGLES CRITIQUES SUR LES UNITES:
+- chiffre_affaires, resultat_net, ebitda, capitaux_propres, dette_nette: TOUJOURS en MILLIONS de FCFA (MFCFA)
+- dividende_par_action: FCFA PAR ACTION (montant unitaire, ex: 1740), JAMAIS le dividende total
+- roe, marge_nette: en POURCENTAGE (ex: 29.6 pour 29.6%)
+- Si le rapport donne des chiffres en milliards, convertis en millions (×1000)
+- Si le rapport donne des chiffres en milliers, convertis en millions (÷1000)
+- Vérifie la cohérence: dividende_par_action doit être << chiffre_affaires
+
 Si une donnée est absente du rapport, mets null.
 Les valeurs numériques doivent être des nombres (pas des chaînes).
 Les montants en millions de FCFA (MFCFA) sauf indication contraire.
