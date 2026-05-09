@@ -79,6 +79,23 @@ def enrich_fundamentals(base_fundamentals, analysis):
     row["pdf_year"]          = analysis.get("year")
     row["pdf_analyzed_at"]   = analysis.get("analyzed_at")
 
+    # Calcul BNA et BVPA reels depuis KPIs PDF + shares
+    shares = row.get("shares")
+    price  = row.get("price") or row.get("price_ref") or 0
+    if shares and shares > 0:
+        # BNA = Resultat Net / nb actions (rn en MFCFA -> FCFA)
+        if rn is not None and rn > 0:
+            bna = round(float(rn) * 1_000_000 / shares, 1)
+            row["bna"] = bna
+            if price and price > 0:
+                row["pe_ref"] = round(price / bna, 2)
+        # BVPA = Capitaux Propres / nb actions (cap_propres en MFCFA -> FCFA)
+        if cap_propres is not None and cap_propres > 0:
+            bvpa = round(float(cap_propres) * 1_000_000 / shares, 1)
+            row["bvpa"] = bvpa
+            if price and price > 0:
+                row["pb_ref"] = round(price / bvpa, 2)
+
     return row
 
 

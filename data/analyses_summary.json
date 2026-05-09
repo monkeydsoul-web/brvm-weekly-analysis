@@ -85,27 +85,27 @@
     "type_rapport": "Etats financiers consolidés annuels",
     "kpis": {
       "chiffre_affaires": {
-        "valeur": 1197.1,
+        "valeur": 1197100.0,
         "unite": "MFCFA",
         "variation": "+10.4%"
       },
       "resultat_net": {
-        "valeur": 167.8,
+        "valeur": 167800.0,
         "unite": "MFCFA",
         "variation": "+6.1%"
       },
       "resultat_exploitation": {
-        "valeur": 287.2,
+        "valeur": 287200.0,
         "unite": "MFCFA",
         "variation": "+9.1%"
       },
       "total_bilan": {
-        "valeur": 2554.1,
+        "valeur": 2554100.0,
         "unite": "MFCFA",
         "variation": "+10.6%"
       },
       "capitaux_propres": {
-        "valeur": 707.8,
+        "valeur": 707800.0,
         "unite": "MFCFA",
         "variation": "-0.8%"
       },
@@ -125,12 +125,12 @@
         "variation": null
       },
       "dette_nette": {
-        "valeur": 110.1,
+        "valeur": 110100.0,
         "unite": "MFCFA",
         "variation": null
       },
       "ebitda": {
-        "valeur": 424.1,
+        "valeur": 424100.0,
         "unite": "MFCFA",
         "variation": "+8.7%"
       }
@@ -1996,5 +1996,164 @@
     "analyzed_at": "2026-05-08T17:13:21.729539+00:00",
     "status": "ok",
     "cached_at": 1778260401.729804
+  },
+  "SIBC": {
+    "annee": 2025,
+    "type_rapport": "Rapport annuel",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 108663,
+        "unite": "MFCFA",
+        "variation": "+6%"
+      },
+      "resultat_net": {
+        "valeur": 55623,
+        "unite": "MFCFA",
+        "variation": "+11%"
+      },
+      "resultat_exploitation": {
+        "valeur": 63095,
+        "unite": "MFCFA",
+        "variation": "+10%"
+      },
+      "total_bilan": {
+        "valeur": 1881733,
+        "unite": "MFCFA",
+        "variation": "+12%"
+      },
+      "capitaux_propres": {
+        "valeur": 204765,
+        "unite": "MFCFA",
+        "variation": "+9%"
+      },
+      "dividende_par_action": {
+        "valeur": 425,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 27.16,
+        "unite": "%",
+        "variation": "+32bp"
+      },
+      "marge_nette": {
+        "valeur": 51.19,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 66734,
+        "unite": "MFCFA",
+        "variation": "+7%"
+      }
+    },
+    "points_cles": [
+      "Le Produit Net Bancaire progresse de 6% à 108,7 milliards FCFA, porté par la croissance des crédits (+11%) et des dépôts (+7%).",
+      "Le résultat net atteint 55,6 milliards FCFA en hausse de 11%, avec un ROE en amélioration à 27,16% et un coefficient d'exploitation maîtrisé à 38,6%.",
+      "Le coût du risque recule de 30% à 3,6 milliards FCFA, témoignant d'une gestion prudente et d'une qualité de portefeuille en amélioration.",
+      "Le total bilan s'établit à 1 882 milliards FCFA (+12%) et la notation financière AA- est maintenue avec une perspective relevée de stable à positive.",
+      "Un dividende brut de 425 FCFA par action est proposé, offrant un rendement estimé à 7,39%, accompagné d'une progression du cours de l'action de +61,74%."
+    ],
+    "risques": [
+      "Ralentissement du crédit dans un contexte d'assouplissement monétaire modéré pouvant peser sur les revenus d'intérêts futurs.",
+      "Tensions géopolitiques internationales persistantes pouvant affecter l'environnement macroéconomique de l'Afrique de l'Ouest.",
+      "Hausse des frais généraux de 4% qui, si elle s'accélère, pourrait peser sur le coefficient d'exploitation.",
+      "Exposition au risque de crédit avec 1 227 milliards de crédits à la clientèle malgré la baisse du coût du risque."
+    ],
+    "perspectives": "La SIB poursuit l'exécution de son Plan Stratégique « IMPULSION 2028 » avec pour objectifs l'accélération de la modernisation des services, le renforcement des standards de gouvernance et le développement de solutions adaptées aux besoins clients. L'institution entend jouer un rôle actif dans le financement de l'économie ivoirienne, bénéficiant d'un contexte de croissance robuste en Côte d'Ivoire estimée à 6,3% en 2025.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "La SIB affiche en 2025 des résultats excellents avec un résultat net en hausse de 11% à 55,6 milliards FCFA et un ROE de 27,16%, confirmant la solidité de son modèle économique. La maîtrise des charges, la baisse du coût du risque et la croissance équilibrée des crédits et dépôts témoignent d'une gestion rigoureuse et d'une dynamique commerciale forte. Le dividende de 425 FCFA par action et la progression de +61,74% du cours boursier illustrent la confiance du marché dans les perspectives de l'institution.",
+    "ticker": "SIBC",
+    "doc_type": "Rapport annuel",
+    "year": 2026,
+    "url": "https://www.brvm.org/sites/default/files/20260421_-_rapport_dactivites_annuel_et_etats_financiers_-_exercice_2025_-_sib_ci.pdf",
+    "n_pages": 7,
+    "analyzed_at": "2026-05-09T11:44:19.456049+00:00",
+    "status": "ok",
+    "cached_at": 1778327059.456222
+  },
+  "NSBC": {
+    "annee": 2024,
+    "type_rapport": "Etats financiers annuels",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 97819,
+        "unite": "MFCFA",
+        "variation": "+7%"
+      },
+      "resultat_net": {
+        "valeur": 38112,
+        "unite": "MFCFA",
+        "variation": "+9%"
+      },
+      "resultat_exploitation": {
+        "valeur": 39937,
+        "unite": "MFCFA",
+        "variation": "+4%"
+      },
+      "total_bilan": {
+        "valeur": 2514388,
+        "unite": "MFCFA",
+        "variation": "+23%"
+      },
+      "capitaux_propres": {
+        "valeur": 215330,
+        "unite": "MFCFA",
+        "variation": "+13%"
+      },
+      "dividende_par_action": {
+        "valeur": null,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 17.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 38.96,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 48411,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Le résultat net progresse de 9% à 38,1 milliards FCFA en 2024, contre 34,8 milliards FCFA en 2023.",
+      "Le total bilan croît de 23% pour atteindre 2 514 milliards FCFA, porté par une hausse de 17% des créances clientèle à 1 536 milliards FCFA.",
+      "Le Produit Net Bancaire augmente de 7% à 97,8 milliards FCFA, soutenu par une forte progression des commissions (+27%).",
+      "Le coût net du risque s'améliore significativement, passant de -3,4 milliards FCFA en 2023 à +0,6 milliard FCFA en 2024.",
+      "Les fonds propres atteignent 215 milliards FCFA (+13%), confirmant le renforcement de la solidité financière de la banque."
+    ],
+    "risques": [
+      "Hausse du coefficient d'exploitation à 59,7% (contre 58,3% en 2023), reflétant une progression des charges plus rapide que celle des revenus.",
+      "Environnement socio-politique régional incertain susceptible d'affecter l'activité bancaire en Côte d'Ivoire.",
+      "Pression sur la marge d'intérêt, en légère baisse de 1% à 63,5 milliards FCFA malgré la croissance du bilan."
+    ],
+    "perspectives": "NSIA Banque CI poursuivra son plan stratégique 'Altitude 22-26' visant à renforcer son positionnement comme acteur bancaire de référence en Côte d'Ivoire. La banque entend maintenir ses standards de gouvernance et accompagner la transformation du secteur bancaire et l'inclusion financière. En 2025, marqué par les 30 ans du Groupe NSIA, la banque ambitionne de franchir une nouvelle étape de développement dans un contexte économique mondial en mutation.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "NSIA Banque CI affiche en 2024 des résultats solides avec un bénéfice net de 38,1 milliards FCFA (+9%) et un total bilan en hausse de 23% à 2 514 milliards FCFA. La forte croissance des commissions (+27%) et l'amélioration significative du coût du risque témoignent d'une bonne maîtrise opérationnelle et d'un portefeuille de qualité. La banque présente un profil de croissance rentable et régulier, confirmé par sa notation AA- maintenue par Bloomfield Investment.",
+    "ticker": "NSBC",
+    "doc_type": "Etats financiers",
+    "year": 2025,
+    "url": "https://www.brvm.org/sites/default/files/20250325_-_etats_financiers_certifies_par_les_commissaires_aux_comptes_-_exercice_2024_-_nsia_banque_ci.pdf",
+    "n_pages": 3,
+    "analyzed_at": "2026-05-09T11:45:03.457819+00:00",
+    "status": "ok",
+    "cached_at": 1778327103.4580858
   }
 }

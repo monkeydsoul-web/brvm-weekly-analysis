@@ -30,9 +30,9 @@ HEADERS = {
 # ── Mapping ticker → slug brvm.org ────────────────────────────────────────────
 TICKER_SLUG = {
     "SGBC":  "societe-generale-ci",
-    "SIBC":  "societe-ivoirienne-de-banque",
+    "SIBC":  "sib",
     "SNTS":  "sonatel",
-    "NSBC":  "nsia-banque-ci",
+    "NSBC":  "nsbc",
     "CBIBF": "coris-bank-international",
     "BOAB":  "bank-africa-bn",
     "BOABF": "bank-africa-bf",

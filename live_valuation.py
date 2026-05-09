@@ -156,10 +156,8 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
     Returns:
         dict avec tous les scores + métadonnées live
     """
-    cached = _get_cached(ticker)
-    if cached:
-        logger.debug(f"Score cache hit: {ticker}")
-        return cached
+    # Cache désactivé — score vient de live_ranker.py
+    pass
     prices = live_cache.get("prices", {})
     live_data_ticker = prices.get(ticker, {})
     live_price = live_data_ticker.get("price")
@@ -240,7 +238,6 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
         "pb_ref_live":      row.get("pb_ref") or row.get("pb_hist") or row.get("pb_hist"),
         "div_yield_live":   row.get("div_yield"),
     }
-    _set_cached(ticker, result)
     return result
 
 

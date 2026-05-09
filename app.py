@@ -550,6 +550,16 @@ def api_live_score_ticker(ticker):
     ticker = ticker.upper()
     if ticker not in STOCK_FUNDAMENTALS:
         return jsonify({"error": f"Ticker {ticker} inconnu"}), 404
+    try:
+        from live_ranker import load_ranking
+        ranking_data = load_ranking()
+        if ranking_data and "ranking" in ranking_data:
+            entry = next((r for r in ranking_data["ranking"] if r.get("ticker") == ticker), None)
+            if entry:
+                return jsonify(entry)
+    except Exception as e:
+        print(f"[live-score] fallback live_valuation: {e}")
+    # Fallback calcul a la volee
     force = request.args.get("refresh", "0") == "1"
     try:
         live_cache = get_live_data(force_refresh=force)
@@ -561,6 +571,21 @@ def api_live_score_ticker(ticker):
 
 @app.route("/api/live-scores")
 def api_live_scores_all():
+    try:
+        from live_ranker import load_ranking
+        ranking_data = load_ranking()
+        if ranking_data and "ranking" in ranking_data:
+            r = ranking_data["ranking"]
+            return jsonify({
+                "scores":     r,
+                "ranking":    r,
+                "updated_at": ranking_data.get("updated_at"),
+                "market_open": ranking_data.get("market_open"),
+                "total":      len(r)
+            })
+    except Exception as e:
+        print(f"[live-scores] fallback compute_all: {e}")
+    # Fallback
     force = request.args.get("refresh", "0") == "1"
     try:
         live_cache = get_live_data(force_refresh=force)
@@ -573,6 +598,10 @@ def api_live_scores_all():
 @app.route("/live_score.js")
 def serve_live_score_js():
     return send_from_directory("dashboard", "live_score.js", mimetype="application/javascript")
+
+@app.route("/ranking.js")
+def serve_ranking_js():
+    return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
 
 
 @app.route("/api/reports/<ticker>")

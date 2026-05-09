@@ -100,7 +100,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
         # EPS depuis résultat net / nb actions (si disponible)
         rn_pdf  = kv("resultat_net")    # en MFCFA
         ca_pdf  = kv("chiffre_affaires") # en MFCFA
-        nb_actions = row.get("shares_outstanding") or row.get("nb_actions")
+        nb_actions = row.get("shares") or row.get("shares_outstanding") or row.get("nb_actions")
 
         if rn_pdf and nb_actions and nb_actions > 0:
             # rn_pdf en MFCFA → FCFA : * 1_000_000
@@ -272,6 +272,15 @@ def compute_live_ranking(trigger="manual", force=False):
                         "pdf_year":      row.get("pdf_year"),
                         "pdf_resume":    row.get("pdf_resume"),
                         "pdf_points_cles": row.get("pdf_points_cles", []),
+                        "shares":        row.get("shares"),
+                        "eps":           row.get("eps"),
+                        "bna":           row.get("eps"),
+                        "bvpa":          row.get("bvpa"),
+                        "pdf_rn_mfcfa":  row.get("pdf_rn_mfcfa"),
+                        "pdf_cap_propres": row.get("pdf_cap_propres"),
+                        "pdf_ca_mfcfa":  row.get("pdf_ca_mfcfa"),
+                        "ebitda":        row.get("pdf_ebitda_mfcfa"),
+                        "debt_level":    row.get("debt_level"),
                         **scores,
                     }
                     results.append(result)

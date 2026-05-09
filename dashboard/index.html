@@ -176,16 +176,23 @@ input[type=range]{padding:0;height:20px}
   <div class="ph">
     <h2>Classement complet</h2>
     <div style="display:flex;gap:8px">
-      <select id="fSec" onchange="renderRank()"><option value="">Tous secteurs</option></select>
-      <select id="fSort" onchange="renderRank()">
+      <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
+      <select id="fSort" onchange="renderRankLive()">
         <option value="composite_adj">Score /80</option><option value="div_yield">Dividende</option>
         <option value="roe">ROE</option><option value="pe_ref">P/E</option>
       </select>
+      <select id="fVerdict" onchange="renderRankLive()">
+        <option value="">Tous verdicts</option>
+        <option value="achet">Acheter</option>
+        <option value="neutr">Neutre</option>
+        <option value="vend">Vendre</option>
+      </select>
+      <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
   <div class="card" style="padding:0;overflow-x:auto">
-    <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
+    <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Verdict</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
 </div>
@@ -640,7 +647,7 @@ async function init(){
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
     scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
-    renderDash(m);renderRank();renderDiv();renderPerf();renderNews();renderComm();
+    renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();
     renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadAlerts();updateAlertBadge();loadAlerts();updateAlertBadge();loadStatus();
     populateSelects();
   }catch(e){console.error(e)}
@@ -1176,7 +1183,7 @@ async function doRefresh(){
     setTimeout(async()=>{
       const[s,n,c,m]=await Promise.all([fetch('/api/scores').then(r=>r.json()),fetch('/api/news').then(r=>r.json()),fetch('/api/commodities').then(r=>r.json()),fetch('/api/macro').then(r=>r.json())]);
       scores=s;news=n;comms=c;
-      renderDash(m);renderRank();renderDiv();renderPerf();renderNews();renderComm();renderTargets();loadStatus();
+      renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();renderTargets();loadStatus();
       document.getElementById('ri').classList.remove('spin');
     },5000);
   }catch(e){document.getElementById('ri').classList.remove('spin');}
@@ -1260,4 +1267,5 @@ setInterval(updateLiveStatus, 300000);
 </script>
 <script src="/simulator.js"></script>
 <script src="/live_score.js"></script>
+<script src="/ranking.js"></script>
 </body></html>
