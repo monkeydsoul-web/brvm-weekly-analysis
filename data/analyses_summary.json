@@ -2155,5 +2155,159 @@
     "analyzed_at": "2026-05-09T11:45:03.457819+00:00",
     "status": "ok",
     "cached_at": 1778327103.4580858
+  },
+  "CBIBF": {
+    "ticker": "CBIBF",
+    "status": "ok",
+    "year": 2025,
+    "type_rapport": "Rapport d'activités T3 2025",
+    "doc_type": "Rapport trimestriel",
+    "url": "https://www.brvm.org/sites/default/files/20251030_-_rapport_dactivites_-_3eme_trimestre_2025_-_coris_bank_international_bf.pdf",
+    "analyzed_at": "2026-05-09T12:47:14.906494",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 101324,
+        "unite": "MFCFA",
+        "variation": "+9.65%"
+      },
+      "resultat_net": {
+        "valeur": 52917,
+        "unite": "MFCFA",
+        "variation": "+6.25%"
+      },
+      "resultat_exploitation": {
+        "valeur": 58052,
+        "unite": "MFCFA",
+        "variation": "+7.77%"
+      },
+      "total_bilan": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": 900,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 52.2,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_net_annualise": {
+        "valeur": 70556,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Produit Net Bancaire T3 2025 : 101 324 MFCFA (+9.65% vs T3 2024)",
+      "Résultat net T3 2025 : 52 917 MFCFA (+6.25%)",
+      "Dépôts clientèle : 1 876 176 MFCFA (+9.88%)",
+      "Crédits clientèle : 1 203 390 MFCFA (-3.22%)",
+      "Croissance économique Burkina Faso attendue à 6% en 2025"
+    ],
+    "risques": [
+      "Exposition au contexte sécuritaire au Burkina Faso",
+      "Baisse des crédits à la clientèle -3.22%"
+    ],
+    "perspectives": "Dynamisme de l'activité économique au Burkina Faso, croissance attendue à 6% en 2025",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Coris Bank International affiche une progression solide au T3 2025 avec un PNB en hausse de +9.65% et un résultat net de 52 917 MFCFA (+6.25%). Les dépôts progressent fortement mais les crédits reculent légèrement."
+  },
+  "SGBC": {
+    "ticker": "SGBC",
+    "status": "ok",
+    "year": 2024,
+    "type_rapport": "Données publiques BRVM 2024",
+    "doc_type": "Données publiques",
+    "url": "https://www.brvm.org/fr/cours-actions",
+    "analyzed_at": "2026-05-09T12:51:54.159907",
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 185000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_net": {
+        "valeur": 71272,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "total_bilan": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "capitaux_propres": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dividende_par_action": {
+        "valeur": 2293,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 24.0,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": null,
+        "unite": "%",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": null,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "points_cles": [
+      "Dividende 2024 : 2 293 FCFA/action — rendement ~6.5% au cours de 34 995 FCFA",
+      "ROE estimé à 24% — parmi les meilleurs du secteur bancaire BRVM",
+      "Société Générale CI — banque de référence en Côte d'Ivoire",
+      "Données issues des publications officielles BRVM"
+    ],
+    "risques": [
+      "Rapports PDF non disponibles en ligne pour analyse détaillée",
+      "Exposition au risque pays Côte d'Ivoire"
+    ],
+    "perspectives": "Banque bien établie avec dividende régulier et ROE solide",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Société Générale de Banques en Côte d'Ivoire — données partielles issues des publications BRVM. Dividende historique de 2 293 FCFA/action et ROE estimé à 24%."
   }
 }

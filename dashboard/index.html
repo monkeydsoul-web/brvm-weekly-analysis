@@ -1129,9 +1129,7 @@ async function showStock(ticker){
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         </div>
       </div>
-      <div class="g4" style="margin-bottom:12px">
-        ${[['P/E',(s.pe_ref||'—')+'×',''],['P/B',(s.pb_ref||'—')+'×',''],['ROE',(s.roe||'—')+'%','var(--green)'],['EPS',s.eps_est?s.eps_est.toLocaleString('fr-FR')+' XOF':'—','var(--blue)']].map(([l,vv,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c||'var(--text)'};font-size:15px">${vv}</div></div>`).join('')}
-      </div>
+      ${buildKpiCards(s)}
       ${s.div_per_share&&s.div_per_share>0?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende 2026</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[['Par action',fmt(s.div_per_share)+' XOF','var(--amber)'],['Rendement',(s.div_yield||0).toFixed(2)+'%','var(--amber)'],['Ex-dividende',s.ex_div_date||'N/D',''],['Paiement',s.pay_div_date&&s.pay_div_date!=='N/D'?s.pay_div_date:'N/D','']].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
@@ -1156,8 +1154,8 @@ async function showStock(ticker){
             '<div class="card" style="margin-bottom:12px"><div class="ct">🌍 Commodités</div><p style="font-size:11px;color:var(--t2)">Pas d\'exposition directe.</p></div>'}
           ${fi.net_profit_bn?`<div class="card" style="margin-bottom:12px"><div class="ct">Bénéfice net historique (Md FCFA)</div>
             <div id="stockProfitDiv" style="width:100%;height:140px"></div></div>`:''}
-          <div class="card" style="margin-bottom:0"><div class="ct">📈 Cours</div>
-            <div id="stockChartDiv" style="width:100%;height:150px"></div></div>
+          <div class="card" style="margin-bottom:0"><div class="ct">📈 Cours historique</div>
+            <div id="stockChartDiv" style="width:100%;min-height:220px"></div></div>
         </div>
         <div class="card" style="max-height:580px;overflow-y:auto;margin-bottom:0"><div class="ct">📰 Actualités (${(d.news||[]).length})</div>
           ${(d.news||[]).length?(d.news||[]).map(n=>`<div class="news-item"><div class="news-t">${n.title}</div><div class="news-m"><span class="src">${n.source}</span>${n.is_dividend_news?'<span class="b ba">Div</span>':''}${n.is_results_news?'<span class="b bp">Résultats</span>':''}</div></div>`).join(''):'<p style="font-size:12px;color:var(--t2);padding:10px 0">Aucune actualité.</p>'}
@@ -1165,13 +1163,11 @@ async function showStock(ticker){
       </div>`;
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
-    if((d.price_history||[]).length>1){
-      const prices=d.price_history.map(p=>p.price),lbls=d.price_history.map(p=>(p.date||p.week||'').substring(0,10));
-      const lc=prices[prices.length-1]>=prices[0]?'#4ADE80':'#F87171';
-      svgLineInteractive(document.getElementById('stockChartDiv'),lbls,[{label:ticker,data:prices}],180,ticker);
-    }
+    loadPriceChart(ticker, 'stockChartDiv');
     fetchLiveScore(ticker);
-  loadReports(ticker);
+    window._openTicker = ticker;
+    renderLiveRankBadge(ticker);
+    loadReports(ticker);
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
 
@@ -1268,4 +1264,6 @@ setInterval(updateLiveStatus, 300000);
 <script src="/simulator.js"></script>
 <script src="/live_score.js"></script>
 <script src="/ranking.js"></script>
+<script src="/stock_chart.js"></script>
+<script src="/badges.js"></script>
 </body></html>

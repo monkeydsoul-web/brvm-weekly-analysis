@@ -116,6 +116,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
             vcp = cap_propres * 1_000_000 / nb_actions
             if vcp > 0:
                 row["pb_ref"] = round(price / vcp, 2)
+                row["bvpa"]   = round(vcp, 1)
 
         # EBITDA → dette implicite et niveau d'endettement
         ebitda_pdf  = kv("ebitda")
@@ -276,10 +277,11 @@ def compute_live_ranking(trigger="manual", force=False):
                         "eps":           row.get("eps"),
                         "bna":           row.get("eps"),
                         "bvpa":          row.get("bvpa"),
-                        "pdf_rn_mfcfa":  row.get("pdf_rn_mfcfa"),
+                        "pdf_rn_mfcfa":  row.get("pdf_rn") or row.get("pdf_rn_mfcfa"),
                         "pdf_cap_propres": row.get("pdf_cap_propres"),
-                        "pdf_ca_mfcfa":  row.get("pdf_ca_mfcfa"),
-                        "ebitda":        row.get("pdf_ebitda_mfcfa"),
+                        "pdf_ca_mfcfa":  row.get("pdf_ca") or row.get("pdf_ca_mfcfa"),
+                        "ebitda":        row.get("pdf_ebitda") or row.get("pdf_ebitda_mfcfa"),
+                        "bvpa":          row.get("bvpa"),
                         "debt_level":    row.get("debt_level"),
                         **scores,
                     }

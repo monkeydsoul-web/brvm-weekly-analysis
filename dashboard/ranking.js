@@ -113,9 +113,12 @@ function startAutoRefresh() {
       const data = await res.json();
       const arr  = Array.isArray(data) ? data : (data.scores || data.ranking || []);
       if (arr.length > 0) {
-        window.scores = arr; scores = arr;
-        renderRankLive();
-        if (typeof renderDash === 'function') renderDash(window._lastMarket || {});
+        if (typeof onScoresRefreshed === 'function') {
+          onScoresRefreshed(arr);
+        } else {
+          window.scores = arr; scores = arr;
+          renderRankLive();
+        }
         const dot = document.getElementById('liveDot');
         if (dot) { dot.style.background = 'var(--green)'; setTimeout(() => { dot.style.background = ''; }, 2000); }
         console.log('[AutoRefresh] scores mis a jour', new Date().toLocaleTimeString());

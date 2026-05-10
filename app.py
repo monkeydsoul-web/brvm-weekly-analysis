@@ -67,6 +67,14 @@ def load_latest_scores():
 
 
 def load_price_history():
+    from price_history_builder import append_live_prices, get_price_history, load_history
+    try:
+        append_live_prices()
+    except Exception:
+        pass
+    return load_history()
+
+def _load_price_history_legacy():
     path = os.path.join(DATA_DIR, "price_history.json")
     if os.path.exists(path):
         with open(path) as f:
@@ -602,6 +610,14 @@ def serve_live_score_js():
 @app.route("/ranking.js")
 def serve_ranking_js():
     return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
+
+@app.route("/stock_chart.js")
+def serve_stock_chart_js():
+    return send_from_directory("dashboard", "stock_chart.js", mimetype="application/javascript")
+
+@app.route("/badges.js")
+def serve_badges_js():
+    return send_from_directory("dashboard", "badges.js", mimetype="application/javascript")
 
 
 @app.route("/api/reports/<ticker>")
