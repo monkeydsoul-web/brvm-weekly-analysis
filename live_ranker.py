@@ -73,27 +73,37 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
             dps_calc = row["div_yield"] / 100 * old_price
             row["div_yield"] = round(dps_calc / live_price * 100, 2)
 
-    # ── BOC — PER et dividende officiels BRVM ───────────────────────────────
+    # ── BOC — PER, var_annee, ex_div_date (appliqué avant PDF) ─────────────
     try:
         from boc_scraper import get_boc_price_history
         _boc = get_boc_price_history()
         boc_entry = _boc.get(ticker, {})
         if boc_entry:
-            # PER BOC (source officielle BRVM)
             if boc_entry.get('per_boc') and not row.get('pe_hist'):
                 row['pe_hist'] = boc_entry['per_boc']
-            # Dividende BOC
-            if boc_entry.get('div_net') and not row.get('div_per_share'):
-                row['div_per_share'] = boc_entry['div_net']
-                price = row.get('price') or 0
-                if price > 0:
-                    row['div_yield'] = round(boc_entry['div_net'] / price * 100, 2)
             if boc_entry.get('div_date'):
                 row['ex_div_date'] = boc_entry['div_date']
             if boc_entry.get('var_annee'):
                 row['var_annee'] = boc_entry['var_annee']
+            # Stocker div BOC pour application finale après PDF
+            row['_boc_div'] = boc_entry.get('div_net') or 0
     except Exception as _e:
         pass
+
+    # ── Div BOC appliqué en dernier (après PDF) ─────────────────────────────
+    boc_div = row.get('_boc_div') or 0
+    existing_div = row.get('div_per_share') or 0
+    price = row.get('price') or 0
+    # BOC corrige uniquement si: pas de div PDF OU div BOC proche du div PDF (±50%)
+    if boc_div > 0:
+        if existing_div == 0:
+            row['div_per_share'] = boc_div
+            if price > 0: row['div_yield'] = round(boc_div/price*100, 2)
+        elif 0.5 <= boc_div/existing_div <= 2.0:
+            # BOC et PDF cohérents — utiliser BOC (plus récent)
+            row['div_per_share'] = boc_div
+            if price > 0: row['div_yield'] = round(boc_div/price*100, 2)
+        # Sinon garder le PDF (gros écart = dividende exceptionnel ou erreur BOC)
 
     # ── earnings_stable automatique si absent ─────────────────────────────
     if not row.get('earnings_stable'):

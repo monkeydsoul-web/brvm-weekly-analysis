@@ -1,0 +1,393 @@
+{
+  "BRVM": {
+    "date": "2026-05-08",
+    "cours_prev": 404.59,
+    "cours_ouv": 30191.36,
+    "cours_clot": 158.71,
+    "per_boc": 158.71
+  },
+  "NTLC": {
+    "date": "2026-05-08",
+    "cours_clot": 11650.0,
+    "per_boc": 13.95,
+    "div_net": 721.6,
+    "div_date": "18-août-25",
+    "var_annee": 9.39
+  },
+  "PALC": {
+    "date": "2026-05-08",
+    "cours_clot": 7800.0,
+    "per_boc": 7.78,
+    "div_net": 451.45,
+    "div_date": "10-sept.-25",
+    "var_annee": 3.7
+  },
+  "SPHC": {
+    "date": "2026-05-08",
+    "cours_clot": 7050.0,
+    "per_boc": 7.22,
+    "div_net": 323.84,
+    "div_date": "17-juil.-25",
+    "var_annee": 10.76
+  },
+  "SMBC": {
+    "date": "2026-05-08",
+    "cours_clot": 11995.0,
+    "per_boc": 7.15,
+    "div_net": 616.0,
+    "div_date": "15-sept.-25",
+    "var_annee": 26.26
+  },
+  "TTLC": {
+    "date": "2026-05-08",
+    "cours_clot": 2750.0,
+    "per_boc": 19.05,
+    "div_net": 195.67,
+    "div_date": "3-sept.-25",
+    "var_annee": 17.77
+  },
+  "TTLS": {
+    "date": "2026-05-08",
+    "cours_clot": 2950.0,
+    "per_boc": 14.18,
+    "div_net": 222.4,
+    "div_date": "11-juil.-25",
+    "var_annee": 18.0
+  },
+  "ECOC": {
+    "date": "2026-05-08",
+    "cours_clot": 16800.0,
+    "per_boc": 14.57,
+    "div_net": 707.52,
+    "div_date": "30-mai-25",
+    "var_annee": 5.0
+  },
+  "SGBC": {
+    "date": "2026-05-08",
+    "cours_clot": 34500.0,
+    "per_boc": 10.59,
+    "div_net": 1645.78,
+    "div_date": "5-août-25",
+    "var_annee": 15.4
+  },
+  "SIBC": {
+    "date": "2026-05-08",
+    "cours_clot": 7095.0,
+    "per_boc": 12.76,
+    "div_net": 330.0,
+    "div_date": "31-juil.-25",
+    "var_annee": 23.39
+  },
+  "ONTBF": {
+    "date": "2026-05-08",
+    "cours_clot": 2760.0,
+    "per_boc": 12.93,
+    "div_net": 189.53,
+    "div_date": "21-juil.-25",
+    "var_annee": 11.07
+  },
+  "ORAC": {
+    "date": "2026-05-08",
+    "cours_clot": 14920.0,
+    "per_boc": 13.4,
+    "div_net": 660.0,
+    "div_date": "4-juin-25",
+    "var_annee": 4.7
+  },
+  "SNTS": {
+    "date": "2026-05-08",
+    "cours_clot": 28900.0,
+    "per_boc": 6.99,
+    "div_net": 1655.0,
+    "div_date": "22-mai-25",
+    "var_annee": 10.64
+  },
+  "SCRC": {
+    "date": "2026-05-08",
+    "cours_clot": 2405.0,
+    "div_net": 40.5,
+    "div_date": "20-août-21",
+    "var_annee": 126.89
+  },
+  "SICC": {
+    "date": "2026-05-08",
+    "cours_clot": 4290.0,
+    "per_boc": 133.75,
+    "var_annee": 30.0
+  },
+  "SLBC": {
+    "date": "2026-05-08",
+    "cours_clot": 37500.0,
+    "per_boc": 28.75,
+    "div_net": 1073.6,
+    "div_date": "29-juil.-25",
+    "var_annee": 29.76
+  },
+  "SOGC": {
+    "date": "2026-05-08",
+    "cours_clot": 7390.0,
+    "per_boc": 12.78,
+    "div_net": 528.0,
+    "div_date": "15-juil.-25",
+    "var_annee": 6.46
+  },
+  "STBC": {
+    "date": "2026-05-08",
+    "cours_clot": 21500.0,
+    "per_boc": 10.68,
+    "div_net": 2096.0,
+    "div_date": "29-août-25",
+    "var_annee": 8.7
+  },
+  "UNLC": {
+    "date": "2026-05-08",
+    "cours_clot": 56000.0,
+    "var_annee": 63.62
+  },
+  "ABJC": {
+    "date": "2026-05-08",
+    "cours_clot": 2975.0,
+    "per_boc": 24.39,
+    "div_net": 206.2,
+    "div_date": "30-sept.-24",
+    "var_annee": 2.59
+  },
+  "BNBC": {
+    "date": "2026-05-08",
+    "cours_clot": 1300.0,
+    "div_net": 150.0,
+    "div_date": "24-juil.-23",
+    "var_annee": 7.8
+  },
+  "CFAC": {
+    "date": "2026-05-08",
+    "cours_clot": 1385.0,
+    "per_boc": 53.52,
+    "div_net": 7.04,
+    "div_date": "19-août-25",
+    "var_annee": 3.15
+  },
+  "LNBB": {
+    "date": "2026-05-08",
+    "cours_clot": 3845.0,
+    "per_boc": 16.64,
+    "div_net": 275.5,
+    "div_date": "31-juil.-25",
+    "var_annee": 10.48
+  },
+  "NEIC": {
+    "date": "2026-05-08",
+    "cours_clot": 1745.0,
+    "per_boc": 10.94,
+    "div_net": 81.78,
+    "div_date": "25-juin-24",
+    "var_annee": 45.42
+  },
+  "PRSC": {
+    "date": "2026-05-08",
+    "cours_clot": 3695.0,
+    "per_boc": 15.98,
+    "div_net": 182.16,
+    "div_date": "30-sept.-25",
+    "var_annee": 4.65
+  },
+  "UNXC": {
+    "date": "2026-05-08",
+    "cours_clot": 1805.0,
+    "div_net": 60.75,
+    "div_date": "29-juil.-22",
+    "var_annee": 28.93
+  },
+  "SHEC": {
+    "date": "2026-05-08",
+    "cours_clot": 1945.0,
+    "per_boc": 20.33,
+    "div_net": 75.29,
+    "div_date": "22-oct.-25",
+    "var_annee": 34.6
+  },
+  "BICB": {
+    "date": "2026-05-08",
+    "cours_clot": 5225.0,
+    "per_boc": 9.95,
+    "div_net": 254.6,
+    "div_date": "15-sept.-25",
+    "var_annee": 5.03
+  },
+  "BICC": {
+    "date": "2026-05-08",
+    "cours_clot": 26000.0,
+    "per_boc": 11.87,
+    "div_net": 830.72,
+    "div_date": "23-mai-25",
+    "var_annee": 33.71
+  },
+  "BOAB": {
+    "date": "2026-05-08",
+    "cours_clot": 9400.0,
+    "per_boc": 18.96,
+    "div_net": 468.0,
+    "div_date": "3-juin-25",
+    "var_annee": 60.68
+  },
+  "BOABF": {
+    "date": "2026-05-08",
+    "cours_clot": 5400.0,
+    "per_boc": 12.34,
+    "div_net": 397.0,
+    "div_date": "23-avr.-26",
+    "var_annee": 44.0
+  },
+  "BOAC": {
+    "date": "2026-05-08",
+    "cours_clot": 8705.0,
+    "per_boc": 10.87,
+    "div_net": 597.53,
+    "div_date": "6-mai-26",
+    "var_annee": 21.24
+  },
+  "BOAM": {
+    "date": "2026-05-08",
+    "cours_clot": 4700.0,
+    "per_boc": 11.64,
+    "div_net": 237.15,
+    "div_date": "3-juin-25",
+    "var_annee": 17.5
+  },
+  "BOAN": {
+    "date": "2026-05-08",
+    "cours_clot": 3485.0,
+    "per_boc": 177.12,
+    "div_net": 209.25,
+    "div_date": "3-juin-25",
+    "var_annee": 33.52
+  },
+  "BOAS": {
+    "date": "2026-05-08",
+    "cours_clot": 7390.0,
+    "per_boc": 12.15,
+    "div_net": 350.0,
+    "div_date": "2-juin-25",
+    "var_annee": 41.03
+  },
+  "CBIBF": {
+    "date": "2026-05-08",
+    "cours_clot": 16800.0,
+    "per_boc": 8.21,
+    "div_net": 555.0,
+    "div_date": "7-juil.-25",
+    "var_annee": 55.84
+  },
+  "NSBC": {
+    "date": "2026-05-08",
+    "cours_clot": 14010.0,
+    "per_boc": 9.09,
+    "div_net": 668.15,
+    "div_date": "9-juil.-25",
+    "var_annee": 22.41
+  },
+  "ORGT": {
+    "date": "2026-05-08",
+    "cours_clot": 2550.0,
+    "per_boc": 8.18,
+    "div_net": 59.52,
+    "div_date": "17-juil.-20",
+    "var_annee": 6.25
+  },
+  "SAFC": {
+    "date": "2026-05-08",
+    "cours_clot": 3500.0,
+    "per_boc": 40.54,
+    "var_annee": 5.9
+  },
+  "CABC": {
+    "date": "2026-05-08",
+    "cours_clot": 3500.0,
+    "per_boc": 14.39,
+    "div_net": 112.72,
+    "div_date": "2-juin-25",
+    "var_annee": 48.31
+  },
+  "FTSC": {
+    "date": "2026-05-08",
+    "cours_clot": 2220.0,
+    "per_boc": 1.68,
+    "div_net": 1726.56,
+    "div_date": "30-sept.-25",
+    "var_annee": 0.0
+  },
+  "SDSC": {
+    "date": "2026-05-08",
+    "cours_clot": 1745.0,
+    "per_boc": 4.51,
+    "div_net": 92.0,
+    "div_date": "29-août-25",
+    "var_annee": 15.18
+  },
+  "SEMC": {
+    "date": "2026-05-08",
+    "cours_clot": 1525.0,
+    "per_boc": 37.96,
+    "div_net": 14.0,
+    "div_date": "28-déc.-21",
+    "var_annee": 117.86
+  },
+  "SIVC": {
+    "date": "2026-05-08",
+    "cours_clot": 2845.0,
+    "per_boc": 65.92,
+    "var_annee": 80.06
+  },
+  "STAC": {
+    "date": "2026-05-08",
+    "cours_clot": 2660.0,
+    "div_net": 66.15,
+    "div_date": "18-juil.-22",
+    "var_annee": 100.75
+  },
+  "CIEC": {
+    "date": "2026-05-08",
+    "cours_clot": 3330.0,
+    "per_boc": 18.46,
+    "div_net": 158.4,
+    "div_date": "31-juil.-25",
+    "var_annee": 41.1
+  },
+  "SDCC": {
+    "date": "2026-05-08",
+    "cours_clot": 9095.0,
+    "per_boc": 13.92,
+    "div_net": 352.0,
+    "div_date": "30-sept.-25",
+    "var_annee": 56.81
+  },
+  "ETIT": {
+    "date": "2026-05-08",
+    "cours_clot": 30330189.0
+  },
+  "OAM": {
+    "date": "2026-05-08",
+    "cours_clot": 36403.22
+  },
+  "last_update": "2026-05-11T16:12:58.199783",
+  "FIN": {
+    "date": "2026-05-05",
+    "cours_clot": 8850.0,
+    "per_boc": 11.05,
+    "div_net": 597.53,
+    "div_date": "6-mai-26",
+    "var_annee": 23.26
+  },
+  "ERIUM": {
+    "date": "2026-04-13",
+    "cours_clot": 103.48
+  },
+  "SETAO": {
+    "date": "2026-04-23",
+    "cours_clot": 138.11
+  },
+  "SAFCA": {
+    "date": "2026-04-10",
+    "cours_clot": 124.96
+  }
+}

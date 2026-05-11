@@ -739,6 +739,24 @@ def api_live_ranking_changes():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/sector-indices")
+def api_sector_indices():
+    try:
+        from brvm_data_scraper import get_sector_indices, scrape_sector_indices
+        force = request.args.get("force","false").lower() == "true"
+        data = scrape_sector_indices() if force else get_sector_indices()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/announcements")
+def api_announcements():
+    try:
+        from brvm_data_scraper import get_announcements
+        return jsonify(get_announcements())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/price-history")
 def api_price_history():
     """Historique de prix pour le graphique performances."""
