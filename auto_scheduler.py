@@ -49,6 +49,15 @@ def job_price_history():
     except Exception as e:
         logger.error(f"job_price_history: {e}")
 
+def job_boc():
+    """Scrape le Bulletin Officiel de la Cote chaque jour à 18h30."""
+    try:
+        from boc_scraper import update_from_boc
+        data = update_from_boc()
+        logger.info(f"BOC: {len(data)} tickers mis à jour")
+    except Exception as e:
+        logger.error(f"job_boc: {e}")
+
 def job_scrape_reports():
     """Scrape les rapports PDF depuis brvm.org à 22h."""
     try:
@@ -120,6 +129,11 @@ def start_scheduler():
     sched.add_job(job_price_history, CronTrigger(hour=18, minute=0),
                   id='price_history', replace_existing=True,
                   name='Price history 18h')
+
+    # BOC quotidien à 18h30
+    sched.add_job(job_boc, CronTrigger(hour=18, minute=30),
+                  id='boc_scrape', replace_existing=True,
+                  name='BOC scrape 18h30')
     
     # Market data toutes les 15min
     sched.add_job(job_market_data, IntervalTrigger(minutes=15),

@@ -663,6 +663,10 @@ def serve_compare_js():
 def serve_alerts_js():
     return send_from_directory("dashboard", "alerts.js", mimetype="application/javascript")
 
+@app.route("/performance.js")
+def serve_performance_js():
+    return send_from_directory("dashboard", "performance.js", mimetype="application/javascript")
+
 @app.route("/sectors.js")
 def serve_sectors_js():
     return send_from_directory("dashboard", "sectors.js", mimetype="application/javascript")
@@ -728,6 +732,15 @@ def api_live_ranking_changes():
     try:
         from live_ranker import get_ranking_changes
         return jsonify(get_ranking_changes())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/price-history")
+def api_price_history():
+    """Historique de prix pour le graphique performances."""
+    try:
+        from price_history_builder import load_history
+        return jsonify(load_history())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

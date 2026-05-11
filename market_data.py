@@ -42,31 +42,43 @@ def fetch_market_data():
                     value = cols[1].get_text(strip=True)
                     result["market_activity"][label] = value
 
-        # Table 1 : Top 5
-        if len(tables) > 1:
-            for row in tables[1].find_all("tr")[1:]:
-                cols = row.find_all(["td","th"])
-                if len(cols) >= 3:
-                    try:
-                        result["top5"].append({
-                            "ticker": cols[0].get_text(strip=True).upper(),
-                            "price":  float(clean(cols[1].get_text(strip=True))),
-                            "change": float(clean(cols[2].get_text(strip=True)).replace("%","")),
-                        })
-                    except: pass
+        # Détecter dynamiquement les tables Top5/Flop5/market_activity
+        for i, table in enumerate(tables):
+            headers = [th.get_text(strip=True) for th in table.find_all("th")]
+            first_header = headers[0] if headers else ""
 
-        # Table 2 : Flop 5
-        if len(tables) > 2:
-            for row in tables[2].find_all("tr")[1:]:
-                cols = row.find_all(["td","th"])
-                if len(cols) >= 3:
-                    try:
-                        result["flop5"].append({
-                            "ticker": cols[0].get_text(strip=True).upper(),
-                            "price":  float(clean(cols[1].get_text(strip=True))),
-                            "change": float(clean(cols[2].get_text(strip=True)).replace("%","")),
-                        })
-                    except: pass
+            if "Top 5" in first_header or "Top5" in first_header:
+                for row in table.find_all("tr")[1:]:
+                    cols = row.find_all(["td","th"])
+                    if len(cols) >= 3:
+                        try:
+                            result["top5"].append({
+                                "ticker": cols[0].get_text(strip=True).upper(),
+                                "price":  float(clean(cols[1].get_text(strip=True))),
+                                "change": float(clean(cols[2].get_text(strip=True)).replace("%","")),
+                            })
+                        except: pass
+
+            elif "Flop 5" in first_header or "Flop5" in first_header:
+                for row in table.find_all("tr")[1:]:
+                    cols = row.find_all(["td","th"])
+                    if len(cols) >= 3:
+                        try:
+                            result["flop5"].append({
+                                "ticker": cols[0].get_text(strip=True).upper(),
+                                "price":  float(clean(cols[1].get_text(strip=True))),
+                                "change": float(clean(cols[2].get_text(strip=True)).replace("%","")),
+                            })
+                        except: pass
+
+            elif "Activit" in first_header or len(cols if (cols:=table.find_all("td")) else []) and "Capitalisation" in table.get_text():
+                for row in table.find_all("tr"):
+                    cols = row.find_all(["td","th"])
+                    if len(cols) >= 2:
+                        label = cols[0].get_text(strip=True)
+                        value = cols[1].get_text(strip=True)
+                        if label:
+                            result["market_activity"][label] = value
 
         # Table 3 : Indices BRVM
         if len(tables) > 3:
