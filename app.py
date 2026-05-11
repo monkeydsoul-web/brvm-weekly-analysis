@@ -489,7 +489,11 @@ def api_market():
     try:
         from market_data import get_market_data
         force = request.args.get("force","false").lower() == "true"
-        return jsonify(get_market_data(force_refresh=force))
+        data = get_market_data(force_refresh=force)
+        # Si top5 vide, forcer refresh
+        if not data.get("top5") and not force:
+            data = get_market_data(force_refresh=True)
+        return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
