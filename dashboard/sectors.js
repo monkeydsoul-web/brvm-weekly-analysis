@@ -1,10 +1,18 @@
 // ── Analyse sectorielle — sectors.js ─────────────────────────────────────
 
-function renderSectorPage() {
+async function renderSectorPage() {
   const container = document.getElementById('sectorContent');
   if (!container) return;
   const all = window.scores || scores || [];
   if (!all.length) return;
+
+  // Charger indices sectoriels BRVM
+  let sectorIndices = {};
+  try {
+    const res = await fetch('/api/sector-indices');
+    const data = await res.json();
+    sectorIndices = data.indices || {};
+  } catch(e) {}
 
   // Grouper par secteur
   const sectorMap = {};
@@ -77,14 +85,24 @@ function renderSectorPage() {
     const avgPE = items.filter(x=>x.pe_ref&&x.pe_ref<200).reduce((a,x,_,arr) => a+x.pe_ref/arr.length, 0);
     const avgDiv = items.filter(x=>x.div_yield>0).reduce((a,x,_,arr) => a+x.div_yield/arr.length, 0);
     const positifs = items.filter(x=>(x.pdf_verdict||'').includes('POSITIF')).length;
+    const idxKey = Object.keys(sectorIndices).find(k =>
+      s.toLowerCase().includes(k.toLowerCase().split(' ')[0]) ||
+      k.toLowerCase().includes(s.toLowerCase().split(' ')[0]));
+    const idx = idxKey ? sectorIndices[idxKey] : null;
 
     return `<div class="card" style="border-left:3px solid ${color};margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div>
           <div style="font-weight:700;font-size:13px;color:${color}">${s}</div>
           <div style="font-size:10px;color:var(--t2);margin-top:2px">${items.length} sociétés · Score moy. ${avgScore.toFixed(0)}/80</div>
+          ${idx?`<div style="font-size:10px;margin-top:3px">
+            <span style="color:var(--t2)">Indice BRVM: </span>
+            <span style="font-weight:600">${idx.current.toFixed(2)}</span>
+            <span style="color:${idx.change>=0?'var(--green)':'var(--red)'};margin-left:4px">${idx.change>=0?'+':''}${idx.change.toFixed(2)}%</span>
+            <span style="color:var(--t3);margin-left:6px">YTD ${idx.ytd>=0?'+':''}${idx.ytd.toFixed(1)}%</span>
+          </div>`:''}
         </div>
-        <div style="display:flex;gap:8px;font-size:10px">
+        <div style="display:flex;gap:8px;font-size:10px;flex-wrap:wrap">
           ${avgPE>0?`<span style="background:var(--bg3);padding:2px 6px;border-radius:4px">P/E moy. ${avgPE.toFixed(1)}×</span>`:''}
           ${avgDiv>0?`<span style="background:var(--bg3);padding:2px 6px;border-radius:4px">Div ${avgDiv.toFixed(1)}%</span>`:''}
           ${positifs>0?`<span style="background:rgba(74,222,128,0.1);color:var(--green);padding:2px 6px;border-radius:4px">${positifs} POSITIF</span>`:''}
