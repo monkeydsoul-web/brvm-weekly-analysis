@@ -358,16 +358,24 @@ def score_buffett(row: dict) -> dict:
         score += 0.5
 
     # Dette faible = flexibilité financière
-    if debt == "Faible":
+    if debt in ("low", "Faible", "faible"):
         score += 1.0
         details.append("Bilan sain ✓")
+    elif debt in ("medium", "Modérée", "modérée"):
+        score += 0.5
+        details.append("Dette modérée")
 
     # Prix raisonnable (pas de premium excessif)
-    if pe <= 15:
-        score += 1.0
-        details.append(f"P/E={pe}× — Prix raisonnable ✓")
-    elif pe <= 25:
-        score += 0.5
+    if pe and pe < 990:
+        if pe <= 8:
+            score += 2.0
+            details.append(f"P/E={pe}× — Très attractif ✓✓")
+        elif pe <= 15:
+            score += 1.0
+            details.append(f"P/E={pe}× — Prix raisonnable ✓")
+        elif pe <= 25:
+            score += 0.5
+            details.append(f"P/E={pe}× — Correct")
     else:
         details.append(f"P/E={pe}× — Premium élevé ✗")
 

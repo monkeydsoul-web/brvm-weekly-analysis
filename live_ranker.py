@@ -95,6 +95,22 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
     except Exception as _e:
         pass
 
+    # ── earnings_stable automatique si absent ─────────────────────────────
+    if not row.get('earnings_stable'):
+        roe = row.get('roe') or 0
+        debt = row.get('debt_level') or 'medium'
+        verdict = row.get('pdf_verdict') or ''
+        var_annee = row.get('var_annee') or 0
+        div = row.get('div_per_share') or 0
+        if roe >= 12 and debt in ('low','medium') and div > 0:
+            row['earnings_stable'] = True
+        elif roe >= 15 and verdict in ('POSITIF','NEUTRE'):
+            row['earnings_stable'] = True
+        elif roe >= 10 and var_annee >= 5 and div > 0:
+            row['earnings_stable'] = True
+        else:
+            row['earnings_stable'] = roe >= 18
+
     # ── KPIs PDF — enrichissement prioritaire des modeles ────────────────
     if pdf_analysis and pdf_analysis.get("status") == "ok":
         kpis = pdf_analysis.get("kpis") or {}
@@ -299,11 +315,19 @@ def compute_live_ranking(trigger="manual", force=False):
                         "eps":           row.get("eps"),
                         "bna":           row.get("eps"),
                         "bvpa":          row.get("bvpa"),
+                        "var_annee":       row.get("var_annee"),
+                        "ex_div_date":     row.get("ex_div_date"),
+                        "earnings_stable": row.get("earnings_stable"),
+                        "debt_level":      row.get("debt_level"),
                         "pdf_rn_mfcfa":  row.get("pdf_rn") or row.get("pdf_rn_mfcfa"),
                         "pdf_cap_propres": row.get("pdf_cap_propres"),
                         "pdf_ca_mfcfa":  row.get("pdf_ca") or row.get("pdf_ca_mfcfa"),
                         "ebitda":        row.get("pdf_ebitda") or row.get("pdf_ebitda_mfcfa"),
                         "bvpa":          row.get("bvpa"),
+                        "var_annee":       row.get("var_annee"),
+                        "ex_div_date":     row.get("ex_div_date"),
+                        "earnings_stable": row.get("earnings_stable"),
+                        "debt_level":      row.get("debt_level"),
                         "debt_level":    row.get("debt_level"),
                         **scores,
                     }

@@ -98,6 +98,48 @@ def score_technique_live(row: dict) -> dict:
         details.append("Top 5 du jour ✓✓")
     elif trend == "flop":
         score -= 1.0
+
+    # Variation annuelle (depuis BOC)
+    var_annee = row.get("var_annee") or 0
+    if var_annee >= 20:
+        score += 2.0
+        details.append(f"Perf annuelle +{var_annee:.1f}% ✓✓")
+    elif var_annee >= 5:
+        score += 1.0
+        details.append(f"Perf annuelle +{var_annee:.1f}% ✓")
+    elif var_annee >= 0:
+        score += 0.5
+        details.append(f"Perf annuelle +{var_annee:.1f}% stable")
+    elif var_annee >= -10:
+        score -= 0.5
+        details.append(f"Perf annuelle {var_annee:.1f}% ✗")
+    else:
+        score -= 1.0
+        details.append(f"Perf annuelle {var_annee:.1f}% ✗✗")
+
+    # Historique prix — tendance long terme
+    try:
+        from price_history_builder import get_price_history
+        hist = get_price_history(row.get("ticker",""), weeks=52)
+        if hist and len(hist) >= 4:
+            prices = [p["price"] for p in hist if p.get("price")]
+            if len(prices) >= 4:
+                # Tendance 3 mois
+                q = len(prices)//4
+                avg_recent = sum(prices[-q:]) / q
+                avg_old    = sum(prices[:q]) / q
+                if avg_old > 0:
+                    trend_pct = (avg_recent - avg_old) / avg_old * 100
+                    if trend_pct >= 15:
+                        score += 1.5
+                        details.append(f"Tendance haussière +{trend_pct:.0f}% ✓✓")
+                    elif trend_pct >= 0:
+                        score += 0.5
+                        details.append(f"Tendance stable +{trend_pct:.0f}% ✓")
+                    else:
+                        details.append(f"Tendance baissière {trend_pct:.0f}% ✗")
+    except Exception:
+        pass
         details.append("Flop 5 du jour ✗")
 
     score = min(10.0, max(0.0, score))

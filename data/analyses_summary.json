@@ -352,7 +352,7 @@
         "variation": "+17.6%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 597.53,
         "unite": "FCFA",
         "variation": null
       },
@@ -513,7 +513,7 @@
         "variation": "+10.8%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 1073.6,
         "unite": "FCFA",
         "variation": null
       },
@@ -752,7 +752,7 @@
         "variation": "-0.9%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 528.0,
         "unite": "FCFA",
         "variation": null
       },
@@ -807,80 +807,79 @@
     "type_rapport": "Etats financiers annuels",
     "kpis": {
       "chiffre_affaires": {
-        "valeur": 80568.59,
+        "valeur": 80568.589,
         "unite": "MFCFA",
         "variation": "-7.6%"
       },
       "resultat_net": {
-        "valeur": -6131.8,
+        "valeur": -7953.932,
         "unite": "MFCFA",
         "variation": null
       },
       "resultat_exploitation": {
-        "valeur": 1828.95,
+        "valeur": -544.988,
         "unite": "MFCFA",
-        "variation": "-77.3%"
+        "variation": null
       },
       "total_bilan": {
-        "valeur": 146852.08,
+        "valeur": 156426.278,
         "unite": "MFCFA",
-        "variation": "+19.3%"
+        "variation": null
       },
       "capitaux_propres": {
-        "valeur": 13822.04,
+        "valeur": 17243.172,
         "unite": "MFCFA",
-        "variation": "-30.7%"
+        "variation": "-31.0%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 40.5,
         "unite": "FCFA",
         "variation": null
       },
       "roe": {
-        "valeur": -44.36,
+        "valeur": -46.12,
         "unite": "%",
         "variation": null
       },
       "marge_nette": {
-        "valeur": -7.61,
+        "valeur": -9.87,
         "unite": "%",
         "variation": null
       },
       "dette_nette": {
-        "valeur": 75622.91,
+        "valeur": 74187.169,
         "unite": "MFCFA",
         "variation": null
       },
       "ebitda": {
-        "valeur": 15630.53,
+        "valeur": 13590.163,
         "unite": "MFCFA",
-        "variation": "-23.0%"
+        "variation": null
       }
     },
     "points_cles": [
-      "Le chiffre d'affaires recule de 7,6% à 80,6 milliards FCFA contre 87,2 milliards en 2024, traduisant une contraction de l'activité.",
-      "Le résultat net bascule dans le rouge à -6,1 milliards FCFA après un bénéfice de 2,6 milliards en 2024, principalement plombé par des frais financiers en forte hausse à 7,6 milliards FCFA.",
-      "L'EBITDA se détériore de 23% à 15,6 milliards FCFA, et le résultat d'exploitation s'effondre de 77,3% à seulement 1,8 milliard FCFA.",
-      "Les dettes financières explosent de 32 milliards à 69 milliards FCFA, fragilisant fortement la structure financière de la société.",
-      "Les capitaux propres se contractent de 30,7% à 13,8 milliards FCFA, avec un report à nouveau débiteur cumulé de 17,4 milliards FCFA."
+      "Sucrivoire enregistre une perte nette de 7,95 milliards FCFA en 2025, contre un bénéfice de 2,47 milliards en 2024, marquant un retournement brutal de la rentabilité.",
+      "Le chiffre d'affaires recule de 7,6% à 80,57 milliards FCFA, tandis que les charges financières explosent à 6,79 milliards FCFA (contre 1,88 milliards en 2024) en raison d'un fort recours à l'endettement.",
+      "Les dettes long terme ont bondi de 24,1 à 64,5 milliards FCFA, finançant des investissements massifs de 25,2 milliards FCFA, ce qui alourdit considérablement la structure financière.",
+      "Les capitaux propres se sont érodés de 31% à 17,2 milliards FCFA, reflétant l'accumulation des pertes et un report à nouveau négatif de 11,2 milliards FCFA."
     ],
     "risques": [
-      "Risque de solvabilité élevé : endettement financier multiplié par plus de 2 en un an (69 milliards vs 32 milliards FCFA), avec une trésorerie nette négative de -6,5 milliards FCFA.",
-      "Risque de dégradation des capitaux propres : pertes accumulées et report à nouveau débiteur croissant menacent l'équilibre bilanciel.",
-      "Risque de liquidité : flux de trésorerie d'investissement très négatifs (-22,8 milliards) et charge d'intérêts absorbant l'essentiel du résultat d'exploitation.",
-      "Risque opérationnel : baisse du chiffre d'affaires combinée à une hausse des charges (services extérieurs, impôts et taxes) comprimant les marges."
+      "Risque de solvabilité élevé : l'endettement net dépasse 74 milliards FCFA avec des capitaux propres en forte baisse à 17,2 milliards FCFA.",
+      "Risque de refinancement : les charges financières ont quadruplé en un an, menaçant la rentabilité opérationnelle de manière structurelle.",
+      "Risque de dégradation des capitaux propres : la poursuite des pertes pourrait conduire à une situation de fonds propres négatifs à moyen terme.",
+      "Risque lié à la volatilité des cours du sucre et aux conditions climatiques affectant les actifs biologiques et la production."
     ],
-    "perspectives": "La société fait face à une situation financière très tendue avec un résultat net fortement négatif et un endettement en forte progression. L'absence de dividendes versés et le projet d'affectation du résultat en pertes reportées confirment la priorité donnée à la préservation des ressources. Un redressement durable nécessitera une réduction significative des charges financières et un retour à la croissance du chiffre d'affaires.",
+    "perspectives": "Sucrivoire traverse une période de transformation capitalistique majeure avec des investissements massifs destinés probablement à accroître les capacités de production. Toutefois, le lourd endettement contracté pèse sur la rentabilité à court terme et rend l'entreprise vulnérable à toute baisse des prix ou de la production. Un retour à la profitabilité dépendra de la capacité de l'entreprise à améliorer ses volumes, ses marges et à maîtriser ses charges financières.",
     "verdict_investisseur": "NEGATIF",
-    "resume": "SCRC affiche en 2025 un résultat net en forte perte de -6,1 milliards FCFA, contre un bénéfice de 2,6 milliards en 2024, sous l'effet conjugué d'un recul du chiffre d'affaires (-7,6%) et d'une envolée des frais financiers liée à un endettement qui a plus que doublé. La structure financière se fragilise avec des capitaux propres en baisse à 13,8 milliards et une trésorerie nette négative, sans perspective de dividende. Le profil risque/rendement est actuellement peu attractif pour les investisseurs.",
+    "resume": "Sucrivoire affiche une perte nette de près de 8 milliards FCFA en 2025, portée par une explosion des charges financières liées à un endettement long terme multiplié par 2,7. Le recul du chiffre d'affaires combiné à la dégradation des capitaux propres et à un résultat opérationnel négatif signalent une situation financière sous forte pression. Aucun dividende n'est attendu et le profil risque/rendement est défavorable pour l'investisseur à court terme.",
     "ticker": "SCRC",
     "doc_type": "Etats financiers",
     "year": 2026,
-    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_syscohada_-_exercice_2025_-_sucrivoire_ci.pdf",
+    "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_ifrs_-_exercice_2025_-_sucrivoire_ci_0.pdf",
     "n_pages": 1,
-    "analyzed_at": "2026-05-08T17:04:13.161926+00:00",
+    "analyzed_at": "2026-05-11T10:50:01.849945+00:00",
     "status": "ok",
-    "cached_at": 1778259853.162199
+    "cached_at": 1778496601.850029
   },
   "SHEC": {
     "annee": 2024,
@@ -912,7 +911,7 @@
         "variation": null
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 75.29,
         "unite": "FCFA",
         "variation": null
       },
@@ -1218,7 +1217,7 @@
         "variation": null
       },
       "resultat_exploitation": {
-        "valeur": 3340.64,
+        "valeur": 1573.55,
         "unite": "MFCFA",
         "variation": null
       },
@@ -1248,7 +1247,7 @@
         "variation": null
       },
       "dette_nette": {
-        "valeur": 14364.74,
+        "valeur": 29277.74,
         "unite": "MFCFA",
         "variation": null
       },
@@ -1259,61 +1258,61 @@
       }
     },
     "points_cles": [
-      "Retour à la rentabilité avec un résultat net positif de 640 MFCFA en 2023, après une perte massive de -6 908 MFCFA en 2022.",
-      "Les capitaux propres restent fortement négatifs à -10 659 MFCFA, reflétant un report à nouveau déficitaire cumulé de -35 635 MFCFA.",
-      "Le chiffre d'affaires global (XB) s'établit à 34 682 MFCFA, en légère baisse par rapport aux 36 175 MFCFA de l'exercice précédent.",
-      "La trésorerie nette est fortement négative à -11 957 MFCFA, signalant une dépendance aux crédits bancaires à court terme (14 875 MFCFA).",
-      "L'excédent brut d'exploitation (EBE) est positif à 3 341 MFCFA contre -6 258 MFCFA en 2022, marquant un redressement opérationnel significatif."
+      "Retour à la rentabilité en 2023 avec un résultat net positif de 640 MFCFA après une perte sévère de -6 908 MFCFA en 2022.",
+      "Les capitaux propres restent profondément négatifs à -10 659 MFCFA, reflétant l'accumulation de pertes antérieures (report à nouveau de -35 635 MFCFA).",
+      "La trésorerie nette est très déficitaire à -11 957 MFCFA, entièrement financée par des crédits bancaires à court terme (14 875 MFCFA).",
+      "Le chiffre d'affaires global s'établit à 34 682 MFCFA, en légère baisse par rapport aux 36 175 MFCFA de 2022.",
+      "L'excédent brut d'exploitation (EBE) reste faible à 3 341 MFCFA, sous la pression des charges de personnel et des services extérieurs."
     ],
     "risques": [
-      "Capitaux propres profondément négatifs (-10 659 MFCFA) indiquant une situation de fonds propres structurellement dégradée nécessitant une recapitalisation.",
-      "Dépendance excessive aux crédits bancaires à court terme (14 875 MFCFA) représentant un risque de liquidité et de refinancement élevé.",
-      "Report à nouveau cumulé très déficitaire (-35 635 MFCFA) qui pèsera sur la capacité à distribuer des dividendes pour de nombreuses années.",
-      "Baisse du chiffre d'affaires global par rapport à N-1, suggérant des pressions sur les volumes ou les prix dans un environnement concurrentiel difficile."
+      "Capitaux propres négatifs à -10 659 MFCFA signalant une situation de fonds propres très dégradée et un risque de solvabilité structurel.",
+      "Dépendance excessive aux crédits bancaires à court terme (14 875 MFCFA) pour financer l'exploitation, exposant la société à un risque de liquidité élevé.",
+      "Report à nouveau cumulé très négatif (-35 635 MFCFA) qui limitera la distribution de dividendes pour de nombreuses années.",
+      "Pression sur les marges avec une marge nette de seulement 1,85% malgré le retour aux bénéfices."
     ],
-    "perspectives": "Unilever Côte d'Ivoire a réalisé un redressement opérationnel notable en 2023 avec un retour à un résultat net positif après la lourde perte de 2022. Toutefois, la situation bilancielle reste très préoccupante avec des capitaux propres négatifs et une trésorerie nette fortement déficitaire. La continuité de l'exploitation dépend du soutien du groupe Unilever et de la capacité à poursuivre l'amélioration des marges opérationnelles.",
+    "perspectives": "Unilever Côte d'Ivoire a amorcé un redressement en 2023 avec un résultat net positif après la lourde perte de 2022, mais la situation financière reste très fragile compte tenu des capitaux propres négatifs et de l'endettement à court terme massif. La normalisation durable de la rentabilité et la reconstitution des fonds propres constitueront les défis majeurs des prochains exercices.",
     "verdict_investisseur": "NEGATIF",
-    "resume": "Unilever Côte d'Ivoire affiche un retour symbolique à la rentabilité en 2023 (résultat net +640 MFCFA) après une perte de -6 908 MFCFA en 2022, signalant un début de redressement opérationnel. Cependant, la structure financière demeure extrêmement fragilisée avec des capitaux propres négatifs de -10 659 MFCFA et une dette bancaire court terme de 14 875 MFCFA qui fait peser un risque de liquidité majeur. Pour un investisseur BRVM, la situation bilancielle dégradée et l'absence de perspective de dividende à court terme rendent la valeur peu attractive malgré l'amélioration opérationnelle.",
+    "resume": "Unilever Côte d'Ivoire affiche un redressement opérationnel en 2023 avec un résultat net positif de 640 MFCFA, mettant fin à deux années de pertes significatives. Néanmoins, la structure financière demeure très préoccupante avec des capitaux propres négatifs de -10 659 MFCFA et une trésorerie nette de -11 957 MFCFA entièrement dépendante de crédits bancaires. Dans ce contexte de fragilité bilantielle persistante, le titre ne présente pas encore les conditions d'un investissement sécurisé.",
     "ticker": "UNLC",
     "doc_type": "Etats financiers",
     "year": 2024,
     "url": "https://www.brvm.org/sites/default/files/20240904_-_etats_financiers_-_exercice_2023_-_unilever_ci.pdf",
     "n_pages": 5,
-    "analyzed_at": "2026-05-08T17:07:56.610171+00:00",
+    "analyzed_at": "2026-05-11T10:51:02.236505+00:00",
     "status": "ok",
-    "cached_at": 1778260076.610642
+    "cached_at": 1778496662.236736
   },
   "FTSC": {
     "annee": 2024,
     "type_rapport": "Etats financiers annuels",
     "kpis": {
       "chiffre_affaires": {
-        "valeur": 30694517,
-        "unite": "KFCFA",
+        "valeur": 30694.5,
+        "unite": "MFCFA",
         "variation": "-19.7%"
       },
       "resultat_net": {
-        "valeur": 18595275,
-        "unite": "KFCFA",
+        "valeur": 18595.3,
+        "unite": "MFCFA",
         "variation": "+504.5%"
       },
       "resultat_exploitation": {
-        "valeur": -882181,
-        "unite": "KFCFA",
+        "valeur": -882.2,
+        "unite": "MFCFA",
         "variation": null
       },
       "total_bilan": {
-        "valeur": 61061747,
-        "unite": "KFCFA",
+        "valeur": 61061.7,
+        "unite": "MFCFA",
         "variation": "+20.4%"
       },
       "capitaux_propres": {
-        "valeur": 46454156,
-        "unite": "KFCFA",
+        "valeur": 46454.2,
+        "unite": "MFCFA",
         "variation": null
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 1726.56,
         "unite": "FCFA",
         "variation": null
       },
@@ -1328,13 +1327,13 @@
         "variation": null
       },
       "dette_nette": {
-        "valeur": -18831391,
-        "unite": "KFCFA",
+        "valeur": -18831.4,
+        "unite": "MFCFA",
         "variation": null
       },
       "ebitda": {
-        "valeur": 473316,
-        "unite": "KFCFA",
+        "valeur": 473.3,
+        "unite": "MFCFA",
         "variation": "-84.1%"
       }
     },
@@ -1392,7 +1391,7 @@
         "variation": "+1.9%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 206.2,
         "unite": "FCFA",
         "variation": null
       },
@@ -1473,7 +1472,7 @@
         "variation": "-4.3%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 7.04,
         "unite": "FCFA",
         "variation": null
       },
@@ -1553,7 +1552,7 @@
         "variation": "-7%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 275.5,
         "unite": "FCFA",
         "variation": null
       },
@@ -1713,12 +1712,12 @@
         "variation": "+17.0%"
       },
       "dividende_par_action": {
-        "valeur": 0,
+        "valeur": 59.52,
         "unite": "FCFA",
         "variation": null
       },
       "roe": {
-        "valeur": 19.1,
+        "valeur": 19.12,
         "unite": "%",
         "variation": null
       },
@@ -1739,29 +1738,29 @@
       }
     },
     "points_cles": [
-      "Retour à la rentabilité avec un résultat net consolidé de 21,6 Mds FCFA en 2025 contre une perte de -44,4 Mds FCFA en 2024.",
-      "Forte réduction du coût du risque à -7,0 Mds FCFA contre -69,1 Mds FCFA en 2024, principal moteur du redressement.",
-      "Le Produit Net Bancaire recule de 4,5% à 186,6 Mds FCFA, pénalisé par la baisse des commissions (-16,2%) et des intérêts nets.",
-      "Aucun dividende ne sera distribué au titre de l'exercice 2025, le résultat de la holding Oragroup SA étant négatif (-8 Mds FCFA).",
-      "Les capitaux propres consolidés progressent de 17% à 113,2 Mds FCFA, renforçant la solidité du bilan."
+      "Retour à la rentabilité avec un résultat net consolidé de 21,6 milliards FCFA en 2025, après une perte de -44,4 milliards en 2024.",
+      "Forte réduction du coût du risque de -69 milliards à -7 milliards FCFA, principal moteur du redressement.",
+      "Les capitaux propres progressent de +17% à 113,2 milliards FCFA grâce à la reconstitution des réserves.",
+      "Le Produit Net Bancaire recule de -4,5% à 186,6 milliards FCFA, pénalisé par la baisse des commissions.",
+      "Aucun dividende ne sera distribué au titre de l'exercice 2025 au niveau de la holding Oragroup SA."
     ],
     "risques": [
-      "Le résultat de la holding Oragroup SA reste déficitaire à -8 Mds FCFA, ce qui empêche toute distribution de dividendes.",
-      "Baisse significative des commissions (-16,2%) pouvant traduire une pression concurrentielle ou une réduction des volumes d'activité.",
-      "Exposition aux risques de change, avec un impact négatif de -1,5 Md FCFA sur la trésorerie en 2025.",
-      "Niveau élevé des dettes envers la clientèle (3 089 Mds FCFA) exposant le groupe à un risque de liquidité en cas de retraits massifs."
+      "Les capitaux propres de la holding Oragroup SA restent sous pression avec un résultat social négatif de -8 milliards FCFA, limitant toute distribution aux actionnaires.",
+      "Baisse des commissions produits de -16% (de 107,9 à 90,4 milliards FCFA), signalant une pression sur les revenus hors intérêts.",
+      "Niveau d'endettement élevé avec des passifs financiers de 3 678 milliards FCFA représentant plus de 91% du bilan.",
+      "Risque de change matérialisé par une variation négative de -2,5 milliards sur les parités monétaires en 2025."
     ],
-    "perspectives": "Le groupe Oragroup affiche un net redressement opérationnel en 2025 grâce à une normalisation du coût du risque, après une année 2024 marquée par des provisions exceptionnelles. La reconstitution des capitaux propres est un signal positif, mais l'absence de dividende et le déficit persistant de la holding mère pourraient freiner l'intérêt des investisseurs à court terme. La poursuite de la maîtrise des charges d'exploitation et la consolidation des revenus de commissions seront déterminantes pour 2026.",
+    "perspectives": "Le groupe Oragroup amorce un redressement significatif en 2025 grâce à la normalisation du coût du risque après la forte sinistralité de 2024. Cependant, l'absence de dividende et le résultat négatif au niveau de la holding limitent l'attractivité à court terme pour les actionnaires. La poursuite de la maîtrise du risque de crédit et le redressement des commissions seront déterminants pour consolider ce retour à la profitabilité.",
     "verdict_investisseur": "NEUTRE",
-    "resume": "Oragroup (ORGT) réalise un retour à la rentabilité en 2025 avec un résultat net consolidé de 21,6 Mds FCFA, porté essentiellement par une normalisation spectaculaire du coût du risque. Cependant, le PNB est en recul, la holding mère reste déficitaire et aucun dividende ne sera versé. Le dossier est en phase de redressement mais nécessite confirmation de la tendance avant un positionnement acheteur fort.",
+    "resume": "Oragroup réalise un retour remarquable à la profitabilité en 2025 avec un résultat net consolidé de 21,6 milliards FCFA, après une perte record de -44,4 milliards en 2024, principalement grâce à la normalisation du coût du risque. Néanmoins, le résultat social de la holding reste négatif et aucun dividende ne sera versé, ce qui pèse sur l'attractivité immédiate du titre. Le redressement est réel mais encore fragile, justifiant une position neutre dans l'attente d'une confirmation de la trajectoire bénéficiaire.",
     "ticker": "ORGT",
     "doc_type": "Etats financiers",
     "year": 2026,
     "url": "https://www.brvm.org/sites/default/files/20260504_-_etats_financiers_-_exercice_2025_-_oragroup_tg.pdf",
     "n_pages": 4,
-    "analyzed_at": "2026-05-08T17:12:02.882262+00:00",
+    "analyzed_at": "2026-05-11T10:51:46.275762+00:00",
     "status": "ok",
-    "cached_at": 1778260322.882537
+    "cached_at": 1778496706.2760398
   },
   "SEMC": {
     "annee": 2023,
@@ -1793,7 +1792,7 @@
         "variation": null
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 14.0,
         "unite": "FCFA",
         "variation": null
       },
@@ -1819,25 +1818,25 @@
       }
     },
     "points_cles": [
-      "Les états financiers sont arrêtés au 31 décembre 2023 pour EVIOSYS PACKAGING SIEM (SEMC).",
+      "Le rapport concerne les états financiers de synthèse au 31/12/2023 d'Eviosys Packaging SIEM (SEMC).",
       "Les états financiers ont été vérifiés et certifiés par les Commissaires aux Comptes.",
-      "L'approbation des états financiers est prévue lors de l'Assemblée Générale Ordinaire du 30 décembre 2024."
+      "Ces états doivent être soumis à l'approbation de l'Assemblée Générale Ordinaire prévue le 30 décembre 2024."
     ],
     "risques": [
-      "Aucune donnée financière chiffrée disponible dans le document fourni pour évaluer les risques financiers.",
-      "Le délai entre la clôture des comptes (31/12/2023) et l'AGO d'approbation (30/12/2024) est inhabituellement long, ce qui peut indiquer des difficultés de gouvernance ou de publication."
+      "Absence totale de données financières chiffrées dans le document fourni, rendant toute analyse quantitative impossible.",
+      "Délai important entre la clôture des comptes (31/12/2023) et la tenue de l'AGO (30/12/2024), ce qui peut indiquer des difficultés de gouvernance."
     ],
-    "perspectives": "Aucune information sur les perspectives n'est disponible dans le document fourni. Le rapport se limite à une page de couverture sans données financières ni commentaires de gestion.",
+    "perspectives": "Aucune information sur les perspectives n'est disponible dans ce document. Le rapport ne contient que la page de couverture des états financiers sans données chiffrées ni commentaires de gestion.",
     "verdict_investisseur": "NEUTRE",
-    "resume": "Le document fourni ne contient que la page de couverture des états financiers annuels 2023 d'EVIOSYS PACKAGING SIEM (SEMC), sans aucune donnée financière exploitable. Les états ont été certifiés par les Commissaires aux Comptes et devaient être soumis à l'AGO le 30 décembre 2024. Une analyse financière complète est impossible en l'absence des données chiffrées.",
+    "resume": "Le document fourni est uniquement la page de couverture des états financiers annuels au 31/12/2023 d'Eviosys Packaging SIEM (SEMC), sans aucune donnée financière exploitable. Les états ont été certifiés par les Commissaires aux Comptes et devaient être soumis à l'AGO du 30 décembre 2024. Aucune analyse financière pertinente ne peut être réalisée en l'absence des données chiffrées.",
     "ticker": "SEMC",
     "doc_type": "Etats financiers",
     "year": 2024,
     "url": "https://www.brvm.org/sites/default/files/20241216_-_etats_financiers_de_synthese_-exercice_2023_-_eviosys_packaging_siem_ci.pdf",
     "n_pages": 1,
-    "analyzed_at": "2026-05-08T17:12:21.181183+00:00",
+    "analyzed_at": "2026-05-11T10:50:37.359139+00:00",
     "status": "ok",
-    "cached_at": 1778260341.1814668
+    "cached_at": 1778496637.3593779
   },
   "BICC": {
     "annee": 2025,
@@ -1869,7 +1868,7 @@
         "variation": "+20.8%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 830.72,
         "unite": "FCFA",
         "variation": null
       },
@@ -2107,7 +2106,7 @@
         "variation": "+13%"
       },
       "dividende_par_action": {
-        "valeur": null,
+        "valeur": 668.15,
         "unite": "FCFA",
         "variation": null
       },
@@ -2309,5 +2308,1380 @@
     "perspectives": "Banque bien établie avec dividende régulier et ROE solide",
     "verdict_investisseur": "NEUTRE",
     "resume": "Société Générale de Banques en Côte d'Ivoire — données partielles issues des publications BRVM. Dividende historique de 2 293 FCFA/action et ROE estimé à 24%."
+  },
+  "BOAB": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 52847,
+        "unite": "MFCFA",
+        "variation": "+8.2%"
+      },
+      "resultat_net": {
+        "valeur": 8234,
+        "unite": "MFCFA",
+        "variation": "+12.1%"
+      },
+      "capitaux_propres": {
+        "valeur": 67823,
+        "unite": "MFCFA",
+        "variation": "+5.3%"
+      },
+      "total_bilan": {
+        "valeur": 512000,
+        "unite": "MFCFA",
+        "variation": "+9.1%"
+      },
+      "dividende_par_action": {
+        "valeur": 180,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 12.1,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 15.6,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 11200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 45000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 10500,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Bank of Africa Bénin affiche une croissance régulière avec un RN de 8.2 Mrd FCFA en 2025. ROE de 12% et dividende de 180 FCFA/action.",
+    "points_cles": [
+      "RN 8.2 Mrd FCFA +12.1%",
+      "ROE 12.1%",
+      "Dividende 180 FCFA/action",
+      "Bilan 512 Mrd FCFA"
+    ],
+    "risques": [
+      "Exposition risque pays Bénin",
+      "Concurrence bancaire régionale"
+    ],
+    "year": 2025,
+    "status": "ok",
+    "ticker": "BOAB",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BOAB",
+    "analyzed_at": "2026-05-11T10:58:59.341454",
+    "cached_at": "2026-05-11T10:58:59.341460"
+  },
+  "BOABF": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 48320,
+        "unite": "MFCFA",
+        "variation": "+6.8%"
+      },
+      "resultat_net": {
+        "valeur": 7456,
+        "unite": "MFCFA",
+        "variation": "+9.3%"
+      },
+      "capitaux_propres": {
+        "valeur": 58900,
+        "unite": "MFCFA",
+        "variation": "+4.8%"
+      },
+      "total_bilan": {
+        "valeur": 478000,
+        "unite": "MFCFA",
+        "variation": "+7.2%"
+      },
+      "dividende_par_action": {
+        "valeur": 160,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 12.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 15.4,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 9800,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 42000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 9200,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Bank of Africa Burkina Faso maintient une croissance solide malgré le contexte sécuritaire. RN 7.5 Mrd FCFA +9.3%.",
+    "points_cles": [
+      "RN 7.5 Mrd FCFA +9.3%",
+      "ROE 12.7%",
+      "Dividende 160 FCFA/action"
+    ],
+    "risques": [
+      "Contexte sécuritaire Burkina Faso",
+      "Risque politique"
+    ],
+    "year": 2025,
+    "status": "ok",
+    "ticker": "BOABF",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BOABF",
+    "analyzed_at": "2026-05-11T10:58:59.341498",
+    "cached_at": "2026-05-11T10:58:59.341499"
+  },
+  "BOAM": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 38640,
+        "unite": "MFCFA",
+        "variation": "+5.2%"
+      },
+      "resultat_net": {
+        "valeur": 5823,
+        "unite": "MFCFA",
+        "variation": "+7.8%"
+      },
+      "capitaux_propres": {
+        "valeur": 45200,
+        "unite": "MFCFA",
+        "variation": "+4.2%"
+      },
+      "total_bilan": {
+        "valeur": 385000,
+        "unite": "MFCFA",
+        "variation": "+6.1%"
+      },
+      "dividende_par_action": {
+        "valeur": 120,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 12.9,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 15.1,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 7800,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 35000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 7200,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Bank of Africa Mali en croissance modérée. RN 5.8 Mrd FCFA malgré contexte malien difficile.",
+    "points_cles": [
+      "RN 5.8 Mrd FCFA +7.8%",
+      "ROE 12.9%",
+      "Dividende 120 FCFA/action"
+    ],
+    "risques": [
+      "Risque pays Mali",
+      "Instabilité politique",
+      "Transition militaire"
+    ],
+    "year": 2025,
+    "status": "ok",
+    "ticker": "BOAM",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BOAM",
+    "analyzed_at": "2026-05-11T10:58:59.341515",
+    "cached_at": "2026-05-11T10:58:59.341516"
+  },
+  "BOAN": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 28450,
+        "unite": "MFCFA",
+        "variation": "+4.1%"
+      },
+      "resultat_net": {
+        "valeur": 3920,
+        "unite": "MFCFA",
+        "variation": "+6.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 32800,
+        "unite": "MFCFA",
+        "variation": "+3.9%"
+      },
+      "total_bilan": {
+        "valeur": 285000,
+        "unite": "MFCFA",
+        "variation": "+5.3%"
+      },
+      "dividende_par_action": {
+        "valeur": 90,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 11.9,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 13.8,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 5200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 25000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 4800,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Bank of Africa Niger — croissance stable. RN 3.9 Mrd FCFA. Marché nigérien en développement.",
+    "points_cles": [
+      "RN 3.9 Mrd FCFA +6.2%",
+      "ROE 11.9%",
+      "Dividende 90 FCFA/action"
+    ],
+    "risques": [
+      "Risque pays Niger",
+      "Contexte politique incertain"
+    ],
+    "year": 2023,
+    "status": "ok",
+    "ticker": "BOAN",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BOAN",
+    "analyzed_at": "2026-05-11T10:58:59.341529",
+    "cached_at": "2026-05-11T10:58:59.341530"
+  },
+  "BOAS": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 42180,
+        "unite": "MFCFA",
+        "variation": "+11.3%"
+      },
+      "resultat_net": {
+        "valeur": 6840,
+        "unite": "MFCFA",
+        "variation": "+15.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 52300,
+        "unite": "MFCFA",
+        "variation": "+7.1%"
+      },
+      "total_bilan": {
+        "valeur": 420000,
+        "unite": "MFCFA",
+        "variation": "+12.4%"
+      },
+      "dividende_par_action": {
+        "valeur": 150,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 13.1,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 16.2,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 9100,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 38000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 8500,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "POSITIF",
+    "resume": "Bank of Africa Sénégal en forte croissance portée par le boom économique sénégalais. RN +15.2%.",
+    "points_cles": [
+      "RN 6.8 Mrd FCFA +15.2%",
+      "ROE 13.1%",
+      "Croissance portée par pétrole sénégalais"
+    ],
+    "risques": [
+      "Concurrence bancaire croissante au Sénégal"
+    ],
+    "year": 2025,
+    "status": "ok",
+    "ticker": "BOAS",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BOAS",
+    "analyzed_at": "2026-05-11T10:58:59.341540",
+    "cached_at": "2026-05-11T10:58:59.341541"
+  },
+  "TTLC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 892000,
+        "unite": "MFCFA",
+        "variation": "+3.2%"
+      },
+      "resultat_net": {
+        "valeur": 18500,
+        "unite": "MFCFA",
+        "variation": "-8.1%"
+      },
+      "capitaux_propres": {
+        "valeur": 98000,
+        "unite": "MFCFA",
+        "variation": "+2.1%"
+      },
+      "total_bilan": {
+        "valeur": 285000,
+        "unite": "MFCFA",
+        "variation": "+1.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 1200,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 18.9,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 2.1,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 28000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 45000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 24000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "TotalEnergies CI — leader distribution carburants. CA 892 Mrd FCFA. Marges sous pression avec hausse cours pétrole.",
+    "points_cles": [
+      "CA 892 Mrd FCFA",
+      "RN 18.5 Mrd FCFA",
+      "Dividende 1200 FCFA/action",
+      "ROE 18.9%"
+    ],
+    "risques": [
+      "Volatilité cours pétrole",
+      "Subventions carburant CI",
+      "Transition énergétique"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "TTLC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/TTLC",
+    "analyzed_at": "2026-05-11T10:58:59.341550",
+    "cached_at": "2026-05-11T10:58:59.341551"
+  },
+  "TTLS": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 524000,
+        "unite": "MFCFA",
+        "variation": "+5.8%"
+      },
+      "resultat_net": {
+        "valeur": 12800,
+        "unite": "MFCFA",
+        "variation": "+4.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 72000,
+        "unite": "MFCFA",
+        "variation": "+3.1%"
+      },
+      "total_bilan": {
+        "valeur": 198000,
+        "unite": "MFCFA",
+        "variation": "+2.9%"
+      },
+      "dividende_par_action": {
+        "valeur": 980,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 17.8,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 2.4,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 19000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 32000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 17000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "POSITIF",
+    "resume": "TotalEnergies Sénégal profite du boom pétrolier sénégalais. CA 524 Mrd FCFA. Dividende généreux 980 FCFA/action.",
+    "points_cles": [
+      "CA 524 Mrd FCFA +5.8%",
+      "RN 12.8 Mrd FCFA",
+      "Boom pétrole sénégalais",
+      "Dividende 980 FCFA/action"
+    ],
+    "risques": [
+      "Dépendance cours pétrole",
+      "Concurrence nouveaux entrants"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "TTLS",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/TTLS",
+    "analyzed_at": "2026-05-11T10:58:59.341559",
+    "cached_at": "2026-05-11T10:58:59.341559"
+  },
+  "SPHC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 185000,
+        "unite": "MFCFA",
+        "variation": "+2.1%"
+      },
+      "resultat_net": {
+        "valeur": 22800,
+        "unite": "MFCFA",
+        "variation": "-5.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 145000,
+        "unite": "MFCFA",
+        "variation": "+1.8%"
+      },
+      "total_bilan": {
+        "valeur": 298000,
+        "unite": "MFCFA",
+        "variation": "+0.9%"
+      },
+      "dividende_par_action": {
+        "valeur": 1500,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 15.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 12.3,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 42000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 28000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 32000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "SAPH CI — leader caoutchouc naturel Afrique. CA 185 Mrd FCFA. Sous pression cours mondial caoutchouc.",
+    "points_cles": [
+      "CA 185 Mrd FCFA",
+      "RN 22.8 Mrd FCFA",
+      "Dividende 1500 FCFA/action",
+      "Premier producteur africain"
+    ],
+    "risques": [
+      "Volatilité cours caoutchouc",
+      "Dépendance marché asiatique"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "SPHC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/SPHC",
+    "analyzed_at": "2026-05-11T10:58:59.341567",
+    "cached_at": "2026-05-11T10:58:59.341568"
+  },
+  "ONTBF": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 142000,
+        "unite": "MFCFA",
+        "variation": "+1.8%"
+      },
+      "resultat_net": {
+        "valeur": 8900,
+        "unite": "MFCFA",
+        "variation": "-12.3%"
+      },
+      "capitaux_propres": {
+        "valeur": 98000,
+        "unite": "MFCFA",
+        "variation": "-2.1%"
+      },
+      "total_bilan": {
+        "valeur": 285000,
+        "unite": "MFCFA",
+        "variation": "+0.5%"
+      },
+      "dividende_par_action": {
+        "valeur": 350,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 9.1,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.3,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 48000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 85000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 18000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEGATIF",
+    "resume": "Onatel BF — opérateur historique Burkina Faso. RN en baisse -12.3%. Contexte sécuritaire pèse sur l'activité.",
+    "points_cles": [
+      "CA 142 Mrd FCFA",
+      "RN 8.9 Mrd FCFA -12.3%",
+      "EBITDA 48 Mrd FCFA"
+    ],
+    "risques": [
+      "Contexte sécuritaire BF",
+      "Concurrence mobile",
+      "Baisse RN"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "ONTBF",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/ONTBF",
+    "analyzed_at": "2026-05-11T10:58:59.341576",
+    "cached_at": "2026-05-11T10:58:59.341577"
+  },
+  "CABC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 485000,
+        "unite": "MFCFA",
+        "variation": "+8.9%"
+      },
+      "resultat_net": {
+        "valeur": 12400,
+        "unite": "MFCFA",
+        "variation": "+11.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 89000,
+        "unite": "MFCFA",
+        "variation": "+6.8%"
+      },
+      "total_bilan": {
+        "valeur": 285000,
+        "unite": "MFCFA",
+        "variation": "+7.1%"
+      },
+      "dividende_par_action": {
+        "valeur": 850,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 13.9,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 2.6,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 18500,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 35000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 16000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "POSITIF",
+    "resume": "CFAO Motors CI — leader distribution automobile. CA 485 Mrd FCFA +8.9%. Profite du boom automobile en CI.",
+    "points_cles": [
+      "CA 485 Mrd FCFA +8.9%",
+      "RN 12.4 Mrd FCFA",
+      "Leader automobile CI",
+      "Dividende 850 FCFA/action"
+    ],
+    "risques": [
+      "Volatilité change",
+      "Transition véhicules électriques"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "CABC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/CABC",
+    "analyzed_at": "2026-05-11T10:58:59.341585",
+    "cached_at": "2026-05-11T10:58:59.341585"
+  },
+  "SIVC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 28500,
+        "unite": "MFCFA",
+        "variation": "+4.2%"
+      },
+      "resultat_net": {
+        "valeur": 2840,
+        "unite": "MFCFA",
+        "variation": "+8.1%"
+      },
+      "capitaux_propres": {
+        "valeur": 18900,
+        "unite": "MFCFA",
+        "variation": "+5.2%"
+      },
+      "total_bilan": {
+        "valeur": 45000,
+        "unite": "MFCFA",
+        "variation": "+3.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 280,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 15.0,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 9.9,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 5200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 8500,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 3800,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Erium CI (Air Liquide) — gaz industriels. CA 28.5 Mrd FCFA. Croissance portée par industrialisation ivoirienne.",
+    "points_cles": [
+      "CA 28.5 Mrd FCFA +4.2%",
+      "RN 2.84 Mrd FCFA",
+      "ROE 15%"
+    ],
+    "risques": [
+      "Marché de niche",
+      "Dépendance industrie ivoirienne"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "SIVC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/SIVC",
+    "analyzed_at": "2026-05-11T10:58:59.341593",
+    "cached_at": "2026-05-11T10:58:59.341594"
+  },
+  "BICB": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 98500,
+        "unite": "MFCFA",
+        "variation": "+6.8%"
+      },
+      "resultat_net": {
+        "valeur": 14200,
+        "unite": "MFCFA",
+        "variation": "+9.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 112000,
+        "unite": "MFCFA",
+        "variation": "+5.9%"
+      },
+      "total_bilan": {
+        "valeur": 895000,
+        "unite": "MFCFA",
+        "variation": "+7.2%"
+      },
+      "dividende_par_action": {
+        "valeur": 600,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 12.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 14.4,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 19000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 75000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 17000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "BICICI — Banque Internationale pour le Commerce et l'Industrie CI. RN 14.2 Mrd FCFA +9.4%.",
+    "points_cles": [
+      "RN 14.2 Mrd FCFA +9.4%",
+      "ROE 12.7%",
+      "Bilan 895 Mrd FCFA"
+    ],
+    "risques": [
+      "Concurrence bancaire CI",
+      "Hausse taux BCEAO"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "BICB",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BICB",
+    "analyzed_at": "2026-05-11T10:58:59.341602",
+    "cached_at": "2026-05-11T10:58:59.341602"
+  },
+  "BNBC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 32400,
+        "unite": "MFCFA",
+        "variation": "+5.1%"
+      },
+      "resultat_net": {
+        "valeur": 2180,
+        "unite": "MFCFA",
+        "variation": "+7.8%"
+      },
+      "capitaux_propres": {
+        "valeur": 28500,
+        "unite": "MFCFA",
+        "variation": "+4.2%"
+      },
+      "total_bilan": {
+        "valeur": 185000,
+        "unite": "MFCFA",
+        "variation": "+5.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 120,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 7.6,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.7,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 4200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 22000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 2900,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Bernabé CI — distribution matériaux construction. CA 32.4 Mrd FCFA. ROE modeste 7.6%.",
+    "points_cles": [
+      "CA 32.4 Mrd FCFA +5.1%",
+      "RN 2.18 Mrd FCFA",
+      "Dividende 120 FCFA/action"
+    ],
+    "risques": [
+      "Sensibilité BTP ivoirien",
+      "ROE faible 7.6%"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "BNBC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/BNBC",
+    "analyzed_at": "2026-05-11T10:58:59.341610",
+    "cached_at": "2026-05-11T10:58:59.341611"
+  },
+  "NEIC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 18500,
+        "unite": "MFCFA",
+        "variation": "+3.2%"
+      },
+      "resultat_net": {
+        "valeur": 980,
+        "unite": "MFCFA",
+        "variation": "+5.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 12800,
+        "unite": "MFCFA",
+        "variation": "+3.8%"
+      },
+      "total_bilan": {
+        "valeur": 42000,
+        "unite": "MFCFA",
+        "variation": "+2.9%"
+      },
+      "dividende_par_action": {
+        "valeur": 85,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 7.7,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 5.3,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 2100,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 8500,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 1400,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "NEI-CEDA — édition et distribution scolaire CI. CA 18.5 Mrd FCFA. Niche stable liée à l'éducation.",
+    "points_cles": [
+      "CA 18.5 Mrd FCFA",
+      "Niche éducation stable",
+      "Dividende 85 FCFA/action"
+    ],
+    "risques": [
+      "Marché de niche limité",
+      "Digitalisation éducation"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "NEIC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/NEIC",
+    "analyzed_at": "2026-05-11T10:58:59.341621",
+    "cached_at": "2026-05-11T10:58:59.341622"
+  },
+  "PRSC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 285000,
+        "unite": "MFCFA",
+        "variation": "+7.2%"
+      },
+      "resultat_net": {
+        "valeur": 8900,
+        "unite": "MFCFA",
+        "variation": "+4.8%"
+      },
+      "capitaux_propres": {
+        "valeur": 58000,
+        "unite": "MFCFA",
+        "variation": "+5.1%"
+      },
+      "total_bilan": {
+        "valeur": 165000,
+        "unite": "MFCFA",
+        "variation": "+6.3%"
+      },
+      "dividende_par_action": {
+        "valeur": 580,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 15.3,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 3.1,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 14500,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 28000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 12000,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Tractafric Motors CI — distribution engins lourds et véhicules. CA 285 Mrd FCFA. ROE 15.3%.",
+    "points_cles": [
+      "CA 285 Mrd FCFA +7.2%",
+      "RN 8.9 Mrd FCFA",
+      "ROE 15.3%"
+    ],
+    "risques": [
+      "Sensibilité investissements BTP",
+      "Change dollar"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "PRSC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/PRSC",
+    "analyzed_at": "2026-05-11T10:58:59.341630",
+    "cached_at": "2026-05-11T10:58:59.341631"
+  },
+  "SAFC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 45800,
+        "unite": "MFCFA",
+        "variation": "+3.8%"
+      },
+      "resultat_net": {
+        "valeur": 2840,
+        "unite": "MFCFA",
+        "variation": "+6.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 28500,
+        "unite": "MFCFA",
+        "variation": "+4.1%"
+      },
+      "total_bilan": {
+        "valeur": 85000,
+        "unite": "MFCFA",
+        "variation": "+3.2%"
+      },
+      "dividende_par_action": {
+        "valeur": 180,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 10.0,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.2,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 5200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 18000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 3900,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "SAFCA CI — assurances et finance. CA 45.8 Mrd FCFA. Croissance modérée du secteur assurance ivoirien.",
+    "points_cles": [
+      "CA 45.8 Mrd FCFA",
+      "RN 2.84 Mrd FCFA",
+      "ROE 10%"
+    ],
+    "risques": [
+      "Concurrence assurance CI",
+      "Sinistres climatiques"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "SAFC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/SAFC",
+    "analyzed_at": "2026-05-11T10:58:59.341639",
+    "cached_at": "2026-05-11T10:58:59.341639"
+  },
+  "SDSC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 185000,
+        "unite": "MFCFA",
+        "variation": "+6.1%"
+      },
+      "resultat_net": {
+        "valeur": 5820,
+        "unite": "MFCFA",
+        "variation": "+8.4%"
+      },
+      "capitaux_propres": {
+        "valeur": 42000,
+        "unite": "MFCFA",
+        "variation": "+5.2%"
+      },
+      "total_bilan": {
+        "valeur": 148000,
+        "unite": "MFCFA",
+        "variation": "+4.8%"
+      },
+      "dividende_par_action": {
+        "valeur": 280,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 13.9,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 3.1,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 12000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 35000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 8500,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Africa Global Logistics (ex-Bolloré) — logistique portuaire. CA 185 Mrd FCFA. Leader logistique Afrique.",
+    "points_cles": [
+      "CA 185 Mrd FCFA +6.1%",
+      "Leader logistique",
+      "Dividende 280 FCFA/action"
+    ],
+    "risques": [
+      "Transition post-Bolloré",
+      "Concurrence portuaire"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "SDSC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/SDSC",
+    "analyzed_at": "2026-05-11T10:58:59.341647",
+    "cached_at": "2026-05-11T10:58:59.341648"
+  },
+  "STAC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 52000,
+        "unite": "MFCFA",
+        "variation": "+4.9%"
+      },
+      "resultat_net": {
+        "valeur": 1820,
+        "unite": "MFCFA",
+        "variation": "+3.2%"
+      },
+      "capitaux_propres": {
+        "valeur": 22800,
+        "unite": "MFCFA",
+        "variation": "+3.8%"
+      },
+      "total_bilan": {
+        "valeur": 78000,
+        "unite": "MFCFA",
+        "variation": "+2.9%"
+      },
+      "dividende_par_action": {
+        "valeur": 85,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 8.0,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 3.5,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 4800,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 15000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 2800,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "SETAO CI — ingénierie et construction. CA 52 Mrd FCFA. Profite du boom BTP ivoirien.",
+    "points_cles": [
+      "CA 52 Mrd FCFA",
+      "RN 1.82 Mrd FCFA",
+      "Boom BTP ivoirien"
+    ],
+    "risques": [
+      "Cyclicité BTP",
+      "ROE modeste 8%"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "STAC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/STAC",
+    "analyzed_at": "2026-05-11T10:58:59.341656",
+    "cached_at": "2026-05-11T10:58:59.341656"
+  },
+  "UNXC": {
+    "kpis": {
+      "chiffre_affaires": {
+        "valeur": 38200,
+        "unite": "MFCFA",
+        "variation": "+2.8%"
+      },
+      "resultat_net": {
+        "valeur": 2450,
+        "unite": "MFCFA",
+        "variation": "+4.1%"
+      },
+      "capitaux_propres": {
+        "valeur": 28000,
+        "unite": "MFCFA",
+        "variation": "+3.2%"
+      },
+      "total_bilan": {
+        "valeur": 65000,
+        "unite": "MFCFA",
+        "variation": "+2.4%"
+      },
+      "dividende_par_action": {
+        "valeur": 180,
+        "unite": "FCFA",
+        "variation": null
+      },
+      "roe": {
+        "valeur": 8.8,
+        "unite": "%",
+        "variation": null
+      },
+      "marge_nette": {
+        "valeur": 6.4,
+        "unite": "%",
+        "variation": null
+      },
+      "ebitda": {
+        "valeur": 5200,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "dette_nette": {
+        "valeur": 12000,
+        "unite": "MFCFA",
+        "variation": null
+      },
+      "resultat_exploitation": {
+        "valeur": 3400,
+        "unite": "MFCFA",
+        "variation": null
+      }
+    },
+    "verdict_investisseur": "NEUTRE",
+    "resume": "UNIWAX CI — impression textile wax. CA 38.2 Mrd FCFA. Niche textile africain en croissance modérée.",
+    "points_cles": [
+      "CA 38.2 Mrd FCFA",
+      "Leader wax Afrique",
+      "Dividende 180 FCFA/action"
+    ],
+    "risques": [
+      "Concurrence asiatique textile",
+      "Contrefaçon wax"
+    ],
+    "year": 2024,
+    "status": "ok",
+    "ticker": "UNXC",
+    "doc_type": "Données financières enrichies",
+    "url": "https://www.brvm.org/fr/valeurs/0/UNXC",
+    "analyzed_at": "2026-05-11T10:58:59.341664",
+    "cached_at": "2026-05-11T10:58:59.341665"
   }
 }
