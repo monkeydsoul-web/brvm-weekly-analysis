@@ -953,13 +953,21 @@ async function createAlert(){
 // ── Actualités ─────────────────────────────────────────────────────────────
 function renderNews(f=''){
   const n=f?news.filter(x=>x.tickers?.includes(f)):news;
-  document.getElementById('newsList').innerHTML=n.length?n.slice(0,30).map(x=>`
-    <div class="news-item"><div class="news-t">${x.title}</div>
-      <div class="news-m"><span class="src">${x.source}</span>
-        ${(x.tickers||[]).map(t=>`<span class="b bg" style="margin-right:2px">${t}</span>`).join('')}
-        ${x.is_dividend_news?'<span class="b ba">Div</span>':''}
-        ${x.is_results_news?'<span class="b bp">Résultats</span>':''}</div></div>`).join('')
-    :'<p style="color:var(--t2)">Lance une mise à jour.</p>';
+  const sorted=[...n].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('newsList').innerHTML=sorted.length?sorted.slice(0,50).map(x=>`
+    <div class="news-item" style="border-bottom:1px solid var(--border);padding:10px 0;cursor:pointer" ${x.url?`onclick="window.open('${x.url}','_blank')"`:''}>
+      <div class="news-t" style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4">${x.title}</div>
+      ${x.description?`<div style="font-size:11px;color:var(--t2);margin-bottom:4px;line-height:1.4">${x.description.substring(0,150)}${x.description.length>150?'...':''}</div>`:''}
+      <div class="news-m" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="src" style="font-size:10px;color:var(--t3)">${x.source}</span>
+        ${x.date?`<span style="font-size:10px;color:var(--t3)">${x.date}</span>`:''}
+        ${(x.tickers||[]).map(t=>`<span onclick="event.stopPropagation();showStock('${t}')" class="b bg" style="margin-right:2px;cursor:pointer;font-size:9px">${t}</span>`).join('')}
+        ${x.is_dividend_news?'<span class="b ba" style="font-size:9px">💰 Div</span>':''}
+        ${x.is_results_news?'<span class="b bp" style="font-size:9px">📊 Résultats</span>':''}
+        ${x.url?'<span style="font-size:9px;color:var(--blue)">↗ Lire</span>':''}
+      </div>
+    </div>`).join('')
+    :'<p style="color:var(--t2)">Aucune actualité.</p>';
   const sd=scores.filter(x=>x.sentiment_score!==0&&x.sentiment_score!=null).sort((a,b)=>(b.sentiment_score||0)-(a.sentiment_score||0)).slice(0,12);
   if(sd.length) svgBar(document.getElementById('cSentDiv'),sd.map(x=>x.ticker),sd.map(x=>Math.abs(x.sentiment_score||0)),sd.map(x=>(x.sentiment_score||0)>0?'#4ADE80':'#F87171'),320,true);
 }
@@ -1026,6 +1034,7 @@ async function showStock(ticker){
     if(d.error){document.getElementById('stockDetail').innerHTML=`<p>${d.error}</p>`;return;}
     const s=d.stock,v=s.composite_adj||0;
     const fi=cd.financials||{},ai=cd.ai_analysis||'';
+    const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
     const models=[['Graham',s.score_graham||0,s.detail_graham||''],['DCF/FCF',s.score_dcf||0,s.detail_dcf||''],['DDM',s.score_ddm||0,s.detail_ddm||''],['EPV',s.score_epv||0,s.detail_epv||''],['Buffett',s.score_buffett||0,s.detail_buffett||''],['Rev.DCF',s.score_rev_dcf||0,s.detail_rev_dcf||''],['Relatif',s.score_relatif||0,s.detail_relatif||''],['Technique',s.score_technique||0,s.detail_technique||'']];
     const ci=COMM_PROD[ticker];
     const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
@@ -1072,9 +1081,14 @@ async function showStock(ticker){
         </div>
       </div>
       ${buildKpiCards(s)}
-      ${s.div_per_share&&s.div_per_share>0?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende 2026</div>
+      ${(s.div_per_share&&s.div_per_share>0)||(entry&&entry.div_per_share>0)?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-          ${[['Par action',fmt(s.div_per_share)+' XOF','var(--amber)'],['Rendement',(s.div_yield||0).toFixed(2)+'%','var(--amber)'],['Ex-dividende',s.ex_div_date||'N/D',''],['Paiement',s.pay_div_date&&s.pay_div_date!=='N/D'?s.pay_div_date:'N/D','']].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
+          ${[
+            ['Par action',fmt(s.div_per_share||entry?.div_per_share||0)+' XOF','var(--amber)'],
+            ['Rendement',((s.div_yield||entry?.div_yield||0)).toFixed(2)+'%','var(--amber)'],
+            ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
+            ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
+          ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
         </div></div>`:''}
       <div class="card" style="margin-bottom:12px"><div class="ct">Scores détaillés — 8 modèles</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
