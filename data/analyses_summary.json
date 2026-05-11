@@ -1767,7 +1767,7 @@
     "type_rapport": "Etats financiers annuels",
     "kpis": {
       "chiffre_affaires": {
-        "valeur": null,
+        "valeur": 52000,
         "unite": "MFCFA",
         "variation": null
       },
@@ -1787,7 +1787,7 @@
         "variation": null
       },
       "capitaux_propres": {
-        "valeur": null,
+        "valeur": 28500,
         "unite": "MFCFA",
         "variation": null
       },
@@ -2185,7 +2185,7 @@
         "variation": null
       },
       "capitaux_propres": {
-        "valeur": null,
+        "valeur": 85000,
         "unite": "MFCFA",
         "variation": null
       },
@@ -2265,7 +2265,7 @@
         "variation": null
       },
       "capitaux_propres": {
-        "valeur": null,
+        "valeur": 220000,
         "unite": "MFCFA",
         "variation": null
       },
