@@ -13,6 +13,12 @@ import threading
 import subprocess
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
+try:
+    from auto_scheduler import start_scheduler, get_scheduler_status
+except Exception as _e:
+    print(f"auto_scheduler import error: {_e}")
+    def start_scheduler(): pass
+    def get_scheduler_status(): return {}
 from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
@@ -725,6 +731,28 @@ def api_live_ranking_changes():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/scheduler/status")
+def api_scheduler_status():
+    try:
+        return jsonify(get_scheduler_status())
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+@app.route("/api/scheduler/run/<job_id>", methods=["POST"])
+def api_scheduler_run(job_id):
+    jobs = {
+        "news":    lambda: __import__("company_scraper").run_company_scraper(),
+        "ranking": lambda: __import__("live_ranker").compute_live_ranking(trigger="manual"),
+        "history": lambda: __import__("price_history_builder").append_live_prices(),
+    }
+    if job_id not in jobs:
+        return jsonify({"error": "Job inconnu"}), 404
+    try:
+        result = jobs[job_id]()
+        return jsonify({"status": "ok", "job": job_id, "result": str(result)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     import socket
     import os as _os
@@ -742,5 +770,11 @@ if __name__ == "__main__":
     print("\n" + "="*50)
     print(f"  BRVM Dashboard — http://localhost:{port}")
     print("="*50 + "\n")
+    try:
+        from auto_scheduler import start_scheduler as _start_auto
+        _sched = _start_auto()
+        logger.info(f"Auto-scheduler démarré — {len(_sched.get_jobs())} jobs")
+    except Exception as e:
+        logger.warning(f"Scheduler non démarré: {e}")
     app.run(debug=False, port=port, host="127.0.0.1")
 

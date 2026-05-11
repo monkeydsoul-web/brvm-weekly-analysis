@@ -604,7 +604,7 @@ async function init(){
     ]);
     scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
     renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();
-    renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadAlerts();updateAlertBadge();loadAlerts();updateAlertBadge();loadStatus();
+    renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();updateAlertBadge();loadStatus();
     populateSelects();
   }catch(e){console.error(e)}
 }
