@@ -168,11 +168,37 @@ async function launchCompareAnalysis() {
     
     if (data.error) throw new Error(data.error);
     
-    // Formater le markdown basique
+    // Formater le markdown en HTML
     let text = data.analysis || '';
-    text = text.replace(/\*\*(.*?)\*\*/g, '$1'); // enlever **bold**
-    
-    textDiv.textContent = text;
+    // Tableaux markdown -> HTML
+    const lines = text.split('\n');
+    let html = '';
+    let inTable = false;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith('|')) {
+        if (!inTable) { html += '<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:11px">'; inTable = true; }
+        if (line.includes('---')) continue;
+        const cells = line.split('|').filter(c=>c.trim());
+        const isHeader = i < lines.length-1 && lines[i+1]?.includes('---');
+        const tag = isHeader ? 'th' : 'td';
+        html += '<tr>' + cells.map(c=>`<${tag} style="border:1px solid var(--border);padding:4px 8px;text-align:left">${c.trim().replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</${tag}>`).join('') + '</tr>';
+      } else {
+        if (inTable) { html += '</table>'; inTable = false; }
+        let l = line
+          .replace(/^### (.*)/,'<h4 style="font-size:12px;font-weight:700;color:var(--blue);margin:10px 0 4px">$1</h4>')
+          .replace(/^## (.*)/,'<h3 style="font-size:13px;font-weight:700;color:var(--t1);margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:4px">$1</h3>')
+          .replace(/^# (.*)/,'<h2 style="font-size:14px;font-weight:700;color:var(--green);margin:14px 0 8px">$1</h2>')
+          .replace(/^---$/,'<hr style="border-color:var(--border);margin:10px 0">')
+          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+          .replace(/^- (.*)/,'<li style="margin:2px 0;padding-left:8px">$1</li>')
+          .replace(/^> (.*)/,'<blockquote style="border-left:3px solid var(--blue);padding-left:8px;color:var(--t2);margin:4px 0">$1</blockquote>');
+        if (l === line && line.trim()) l = `<p style="margin:3px 0">${line}</p>`;
+        html += l;
+      }
+    }
+    if (inTable) html += '</table>';
+    textDiv.innerHTML = html;
     metaDiv.textContent = `Analyse générée le ${new Date(data.generated_at).toLocaleString('fr-FR')} pour ${data.tickers.join(', ')}`;
     resultDiv.style.display = 'block';
     resultDiv.scrollIntoView({behavior:'smooth'});
