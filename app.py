@@ -667,6 +667,10 @@ def serve_compare_js():
 def serve_alerts_js():
     return send_from_directory("dashboard", "alerts.js", mimetype="application/javascript")
 
+@app.route("/compare_analysis.js")
+def serve_compare_analysis_js():
+    return send_from_directory("dashboard", "compare_analysis.js", mimetype="application/javascript")
+
 @app.route("/performance.js")
 def serve_performance_js():
     return send_from_directory("dashboard", "performance.js", mimetype="application/javascript")
@@ -737,6 +741,91 @@ def api_live_ranking_changes():
         from live_ranker import get_ranking_changes
         return jsonify(get_ranking_changes())
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/compare-analysis", methods=["POST"])
+def api_compare_analysis():
+    """Analyse comparative IA de plusieurs sociétés BRVM."""
+    try:
+        data = request.json or {}
+        tickers = data.get("tickers", [])[:6]  # max 6
+        question = data.get("question", "")
+        
+        if not tickers:
+            return jsonify({"error": "Aucun ticker fourni"}), 400
+        
+        import anthropic, os
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY",""))
+        
+        scores = load_latest_scores()
+        analyses = json.load(open(os.path.join(DATA_DIR, "analyses_summary.json"), encoding="utf-8"))
+        boc = {}
+        boc_path = os.path.join(DATA_DIR, "boc_data.json")
+        if os.path.exists(boc_path):
+            boc = json.load(open(boc_path))
+        
+        # Construire contexte enrichi pour chaque société
+        companies_ctx = []
+        for ticker in tickers:
+            stock = next((s for s in scores if s.get("ticker") == ticker), {})
+            analysis = analyses.get(ticker, {})
+            boc_data = boc.get(ticker, {})
+            kpis = analysis.get("kpis", {})
+            
+            def kv(k): return (kpis.get(k) or {}).get("valeur")
+            
+            ctx = f"""
+=== {ticker} — {stock.get("name", "")} ({stock.get("sector", "")} · {stock.get("country", "")}) ===
+Score global: {stock.get("composite_adj", 0):.1f}/80 | Rang: #{stock.get("rank", "?")}
+Cours: {stock.get("price", 0):,} XOF | Var annuelle: {boc_data.get("var_annee", "?")}%
+P/E: {stock.get("pe_ref", "?")} | P/B: {stock.get("pb_ref", "?")} | ROE: {stock.get("roe", "?")}%
+BNA: {stock.get("eps", "?")} XOF | BVPA: {stock.get("bvpa", "?")} XOF
+Dividende: {stock.get("div_per_share", 0)} XOF ({stock.get("div_yield", 0):.1f}%) | Ex-div: {stock.get("ex_div_date", "N/D")}
+Scores modèles: Graham={stock.get("score_graham", 0):.0f} DCF={stock.get("score_dcf", 0):.0f} DDM={stock.get("score_ddm", 0):.0f} EPV={stock.get("score_epv", 0):.0f} Buffett={stock.get("score_buffett", 0):.0f} RevDCF={stock.get("score_rev_dcf", 0):.0f} Relatif={stock.get("score_relatif", 0):.0f} Tech={stock.get("score_technique", 0):.0f}
+CA: {kv("chiffre_affaires")} MFCFA | RN: {kv("resultat_net")} MFCFA | EBITDA: {kv("ebitda")} MFCFA
+Capitaux propres: {kv("capitaux_propres")} MFCFA | Dette nette: {kv("dette_nette")} MFCFA
+Verdict IA: {analysis.get("verdict_investisseur", "N/D")}
+Points clés: {" | ".join((analysis.get("points_cles") or [])[:3])}
+Risques: {" | ".join((analysis.get("risques") or [])[:2])}
+Perspectives: {analysis.get("perspectives", "")[:200] if analysis.get("perspectives") else "N/D"}
+"""
+            companies_ctx.append(ctx)
+        
+        question_part = ("\n\nQuestion spécifique: " + question) if question else ""
+        
+        prompt = f"""Tu es un analyste financier expert de la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
+
+Voici les données détaillées des sociétés à analyser comparativement:
+
+{"".join(companies_ctx)}
+
+Effectue une analyse comparative approfondie et structurée:{question_part}
+
+Ta réponse doit inclure:
+1. **Synthèse comparative** — Points forts/faibles de chaque société
+2. **Classement recommandé** — De la plus à la moins attractive pour un investisseur
+3. **Valorisation relative** — Quelle est la mieux valorisée (P/E, P/B, DDM)
+4. **Dividendes** — Comparaison rendements et régularité
+5. **Risques spécifiques** — Par société et sectoriels
+6. **Recommandation finale** — Avec justification claire
+
+Utilise les données chiffrées. Sois précis, concis et pratique. Réponds en français."""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        analysis_text = response.content[0].text
+        return jsonify({
+            "analysis": analysis_text,
+            "tickers": tickers,
+            "generated_at": __import__("datetime").datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"compare-analysis: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/sector-indices")
