@@ -95,6 +95,7 @@ input[type=range]{padding:0;height:20px}
   <nav class="nav">
     <div class="ni on" onclick="nav('dash')"><span>🏠</span> Tableau de bord</div>
     <div class="ni" onclick="nav('rank')"><span>🏆</span> Classement</div>
+    <div class="ni" onclick="nav('sectors');renderSectorPage()"><span>📊</span> Secteurs</div>
     <div class="ni" onclick="nav('port')"><span>💼</span> Portefeuille</div>
     <div class="ni" onclick="nav('div')"><span>💰</span> Dividendes</div>
     <div class="ni" onclick="nav('perf')"><span>📈</span> Performances</div>
@@ -195,6 +196,14 @@ input[type=range]{padding:0;height:20px}
     <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Verdict</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
+</div>
+
+<!-- SECTEURS -->
+<div class="page" id="page-sectors">
+  <div class="ph">
+    <h2>📊 Analyse sectorielle</h2>
+  </div>
+  <div id="sectorContent"><p style="color:var(--t2)">Chargement...</p></div>
 </div>
 
 <!-- PORTEFEUILLE -->
@@ -442,6 +451,14 @@ input[type=range]{padding:0;height:20px}
 <div id="mk-box"><p style="text-align:center;color:var(--t2);padding:20px">Chargement Markowitz...</p></div>
 </div>
 </main></div>
+<script src="/simulator.js"></script>
+<script src="/live_score.js"></script>
+<script src="/ranking.js"></script>
+<script src="/stock_chart.js"></script>
+<script src="/badges.js"></script>
+<script src="/compare.js"></script>
+<script src="/alerts.js"></script>
+<script src="/sectors.js"></script>
 <script>
 let scores=[],news=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
 const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
@@ -564,76 +581,15 @@ function showTooltip(evt,text){
 }
 function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
 
-// — Alertes prix —
-var priceAlerts={};
-function loadAlerts(){try{priceAlerts=JSON.parse(localStorage.getItem('brvm_alerts')||'{}');}catch{priceAlerts={};}}
-function saveAlerts(){localStorage.setItem('brvm_alerts',JSON.stringify(priceAlerts));}
-function setAlert(ticker,threshold,direction){
-  if(!priceAlerts[ticker])priceAlerts[ticker]=[];
-  priceAlerts[ticker]=priceAlerts[ticker].filter(a=>a.direction!==direction);
-  priceAlerts[ticker].push({threshold:parseFloat(threshold),direction,active:true});
-  saveAlerts();
-  showNotif('Alerte '+(direction==='above'?'hausse':'baisse')+' creee pour '+ticker+' a '+threshold+' XOF','green');
-  updateAlertBadge();
-}
-function checkAlerts(prices){
-  if(!prices)return;
-  var triggered=[];
-  Object.entries(priceAlerts).forEach(function(e){
-    var ticker=e[0],alerts=e[1];
-    var p=prices[ticker];if(!p||!p.price)return;
-    alerts.forEach(function(a){
-      if(!a.active)return;
-      if(a.direction==='above'&&p.price>=a.threshold){triggered.push({ticker,price:p.price,threshold:a.threshold,dir:'UP'});a.active=false;}
-      if(a.direction==='below'&&p.price<=a.threshold){triggered.push({ticker,price:p.price,threshold:a.threshold,dir:'DOWN'});a.active=false;}
-    });
-  });
-  if(triggered.length){saveAlerts();triggered.forEach(function(t){showNotif('Alerte '+t.ticker+' '+t.dir+' '+t.price.toLocaleString('fr-FR')+' XOF',t.dir==='UP'?'green':'red');});updateAlertBadge();}
-}
-function updateAlertBadge(){
-  var n=Object.values(priceAlerts).flat().filter(function(a){return a.active;}).length;
-  var badge=document.getElementById('alert-badge');
-  if(badge)badge.textContent=n>0?n:'';
-}
+// alertes gérées par alerts.js
 function showNotif(msg,color){
   var n=document.createElement('div');
   n.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+(color==='green'?'var(--green)':'var(--red)')+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,.3)';
   n.textContent=msg;document.body.appendChild(n);setTimeout(function(){n.remove();},4000);
 }
-function showAlertModal(ticker){
-  var existing=document.getElementById('alert-modal');
-  if(existing)existing.remove();
-  var modal=document.createElement('div');
-  modal.id='alert-modal';
-  modal.style='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
-  modal.innerHTML=`<div style="font-weight:700;margin-bottom:12px">Alerte prix — ${ticker}</div>
-    <div style="margin-bottom:8px"><label style="font-size:11px;color:var(--t2)">Prix seuil (XOF)</label>
-    <input id="alert-price" type="number" style="width:100%;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);margin-top:4px"/></div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button onclick="setAlert('${ticker}',document.getElementById('alert-price').value,'above');document.getElementById('alert-modal').remove()" style="flex:1;padding:8px;background:var(--green);border:none;border-radius:6px;color:#000;cursor:pointer;font-size:11px">Au-dessus</button>
-      <button onclick="setAlert('${ticker}',document.getElementById('alert-price').value,'below');document.getElementById('alert-modal').remove()" style="flex:1;padding:8px;background:var(--red);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:11px">En-dessous</button>
-    </div>
-    <button onclick="document.getElementById('alert-modal').remove()" style="width:100%;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t2);cursor:pointer;font-size:11px">Annuler</button>`;
-  document.body.appendChild(modal);
-}
+// showAlertModal gérée par alerts.js
 
-// — Comparaison multi-actions —
-var compareList=[];
-function toggleCompare(ticker){
-  if(compareList.includes(ticker)){
-    compareList=compareList.filter(function(t){return t!==ticker;});
-    showNotif(ticker+' retire de la comparaison','green');
-  } else {
-    if(compareList.length>=5){showNotif('Maximum 5 actions','red');return;}
-    compareList.push(ticker);
-    showNotif(ticker+' ajoute a la comparaison','green');
-  }
-  updateCompareBadge();
-}
-function updateCompareBadge(){
-  var b=document.getElementById('compare-badge');
-  if(b)b.textContent=compareList.length>0?'('+compareList.length+')':'';
-}
+// compare gérée par compare.js
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init(){
@@ -646,7 +602,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
+    scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
     renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();
     renderTargets();loadCustomScores();loadSidebar();loadMarketWidget();loadAlerts();updateAlertBadge();loadAlerts();updateAlertBadge();loadStatus();
     populateSelects();
@@ -979,34 +935,7 @@ async function createAlert(){
   document.getElementById('addAlertForm').style.display='none';
   loadAlerts();
 }
-async function loadAlerts(){
-  const alerts=await fetch('/api/alerts').then(r=>r.json());
-  document.getElementById('alertsList').innerHTML=alerts.length?alerts.map(a=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span class="b ${a.active?'bg':'ba'}">${a.active?'Actif':'Déclenché'}</span>
-      <strong>${a.ticker}</strong>
-      <span style="font-size:11px;color:var(--t2)">${a.type==='price'?'Prix':'Score'} ${a.direction==='above'?'≥':'≤'} ${fmt(a.threshold)}</span>
-      ${a.triggered?`<span style="font-size:10px;color:var(--amber)">Déclenché le ${a.triggered.substring(0,10)}</span>`:''}
-      <button class="btn btn-r" style="font-size:9px;padding:2px 6px;margin-left:auto" onclick="deleteAlert(${a.id})">✕</button>
-    </div>`).join(''):'<p style="color:var(--t2);font-size:12px">Aucune alerte.</p>';
-}
-async function deleteAlert(id){
-  await fetch('/api/alerts/'+id,{method:'DELETE'});loadAlerts();
-}
-async function checkAlerts(){
-  const triggered=await fetch('/api/alerts/check').then(r=>r.json());
-  if(triggered.length){
-    document.getElementById('triggeredCard').style.display='block';
-    document.getElementById('triggeredList').innerHTML=triggered.map(a=>`
-      <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
-        🔔 <strong>${a.ticker}</strong> — ${a.type==='price'?'Prix':'Score'} ${a.direction==='above'?'≥':'≤'} ${fmt(a.threshold)} 
-        (valeur actuelle: ${fmt(a.current_value)})
-      </div>`).join('');
-  }else{
-    document.getElementById('triggeredCard').style.display='none';
-  }
-  loadAlerts();
-}
+// loadAlerts/checkAlerts/deleteAlert gérées par alerts.js
 
 // ── Actualités ─────────────────────────────────────────────────────────────
 function renderNews(f=''){
@@ -1189,7 +1118,7 @@ async function loadStatus(){
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
-const pageLoaders={port:loadPortfolio,alerts:loadAlerts,sim:updateSim};
+const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();}};
 document.querySelectorAll('.ni').forEach(ni=>{
   const orig=ni.getAttribute('onclick');
   ni.setAttribute('onclick',orig+`;if(pageLoaders[arguments[0]]||pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']) (pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']||function(){})();`);
@@ -1257,13 +1186,9 @@ function updateLiveStatus() {
 
 // Lancement au demarrage et toutes les 5 min
 updateLiveStatus();
-  fetch('/api/live').then(function(r){return r.json();}).then(function(d){checkAlerts(d.prices);}).catch(function(){});
+  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
   fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
 setInterval(updateLiveStatus, 300000);
 </script>
-<script src="/simulator.js"></script>
-<script src="/live_score.js"></script>
-<script src="/ranking.js"></script>
-<script src="/stock_chart.js"></script>
-<script src="/badges.js"></script>
+
 </body></html>

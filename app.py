@@ -261,6 +261,36 @@ def api_stock(ticker):
     })
 
 
+@app.route("/api/top_performers")
+def api_top_performers():
+    """Top performers — sociétés avec meilleure variation sur 52 semaines."""
+    try:
+        scores = load_latest_scores()
+        from price_history_builder import load_history
+        history = load_history()
+        performers = []
+        for s in scores:
+            ticker = s.get("ticker")
+            hist = history.get(ticker, [])
+            if len(hist) >= 2:
+                hist_sorted = sorted(hist, key=lambda x: x.get("date",""))
+                first = hist_sorted[0].get("price", 0)
+                last  = hist_sorted[-1].get("price", 0)
+                if first and first > 0:
+                    perf = round((last - first) / first * 100, 1)
+                    performers.append({
+                        "ticker": ticker,
+                        "name": s.get("name",""),
+                        "sector": s.get("sector",""),
+                        "perf_1y": perf,
+                        "price": last,
+                        "composite_adj": s.get("composite_adj", 0)
+                    })
+        performers.sort(key=lambda x: x.get("perf_1y", 0), reverse=True)
+        return jsonify(performers[:10])
+    except Exception as e:
+        return jsonify([])
+
 @app.route("/api/news")
 def api_news():
     ticker = request.args.get("ticker", "")
@@ -618,6 +648,18 @@ def serve_stock_chart_js():
 @app.route("/badges.js")
 def serve_badges_js():
     return send_from_directory("dashboard", "badges.js", mimetype="application/javascript")
+
+@app.route("/compare.js")
+def serve_compare_js():
+    return send_from_directory("dashboard", "compare.js", mimetype="application/javascript")
+
+@app.route("/alerts.js")
+def serve_alerts_js():
+    return send_from_directory("dashboard", "alerts.js", mimetype="application/javascript")
+
+@app.route("/sectors.js")
+def serve_sectors_js():
+    return send_from_directory("dashboard", "sectors.js", mimetype="application/javascript")
 
 
 @app.route("/api/reports/<ticker>")
