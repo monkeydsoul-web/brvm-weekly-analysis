@@ -19,12 +19,20 @@ HEADERS = {
 
 # Flux RSS fiables
 RSS_FEEDS = [
-    {'url': 'https://www.brvm.org/fr/rss.xml',                          'source': 'BRVM Officiel'},
-    {'url': 'https://www.financialafrik.com/tag/brvm/feed/',             'source': 'Financial Afrik BRVM'},
-    {'url': 'https://www.financialafrik.com/tag/cote-divoire/feed/',     'source': 'Financial Afrik CI'},
-    {'url': 'https://www.financialafrik.com/tag/senegal/feed/',          'source': 'Financial Afrik SN'},
-    {'url': 'https://www.financialafrik.com/tag/burkina/feed/',          'source': 'Financial Afrik BF'},
-    {'url': 'https://www.financialafrik.com/tag/mali/feed/',             'source': 'Financial Afrik ML'},
+    {'url': 'https://www.brvm.org/fr/rss.xml',                              'source': 'BRVM Officiel'},
+    {'url': 'https://www.financialafrik.com/tag/brvm/feed/',                'source': 'Financial Afrik BRVM'},
+    {'url': 'https://www.financialafrik.com/tag/cote-divoire/feed/',        'source': 'Financial Afrik CI'},
+    {'url': 'https://www.financialafrik.com/tag/senegal/feed/',             'source': 'Financial Afrik SN'},
+    {'url': 'https://www.financialafrik.com/tag/burkina/feed/',             'source': 'Financial Afrik BF'},
+    {'url': 'https://www.financialafrik.com/tag/mali/feed/',                'source': 'Financial Afrik ML'},
+    {'url': 'https://www.financialafrik.com/tag/dividende/feed/',           'source': 'Financial Afrik Dividendes'},
+    {'url': 'https://www.financialafrik.com/tag/bourse/feed/',              'source': 'Financial Afrik Bourse'},
+    {'url': 'https://www.financialafrik.com/tag/banque/feed/',              'source': 'Financial Afrik Banque'},
+    {'url': 'https://www.financialafrik.com/tag/telecom/feed/',             'source': 'Financial Afrik Telecom'},
+    {'url': 'https://www.financialafrik.com/category/finance/feed/',        'source': 'Financial Afrik Finance'},
+    {'url': 'https://www.financialafrik.com/tag/niger/feed/',               'source': 'Financial Afrik NE'},
+    {'url': 'https://www.financialafrik.com/tag/benin/feed/',               'source': 'Financial Afrik BJ'},
+    {'url': 'https://www.financialafrik.com/tag/togo/feed/',                'source': 'Financial Afrik TG'},
 ]
 
 # Sites officiels entreprises — scraping direct
