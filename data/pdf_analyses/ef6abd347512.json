@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 21263.067,
+      "unite": "MFCFA",
+      "variation": "+11.2%"
+    },
+    "resultat_net": {
+      "valeur": 1439.474,
+      "unite": "MFCFA",
+      "variation": "+4.7%"
+    },
+    "resultat_exploitation": {
+      "valeur": 2088.527,
+      "unite": "MFCFA",
+      "variation": "+28.2%"
+    },
+    "total_bilan": {
+      "valeur": 23609.026,
+      "unite": "MFCFA",
+      "variation": "+8.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 9345.551,
+      "unite": "MFCFA",
+      "variation": "+4.7%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 15.4,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 6.77,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -4721.159,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 2195.136,
+      "unite": "MFCFA",
+      "variation": "+10.4%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de +11.2% à 21,26 milliards de FCFA en 2025, confirmant une trajectoire de croissance soutenue depuis 2023.",
+    "Le résultat net atteint 1,44 milliard de FCFA (+4.7%), avec un résultat d'exploitation en forte hausse de +28.2% à 2,09 milliards de FCFA.",
+    "La trésorerie nette reste solide à 5,14 milliards de FCFA malgré une baisse par rapport à 2024, impactée par une augmentation des stocks et des créances clients.",
+    "Les dividendes distribués ont augmenté significativement à 758 millions de FCFA contre 523 millions en 2024, reflétant la confiance de la direction dans la génération de cash.",
+    "La structure bilancielle est saine avec des capitaux propres de 9,35 milliards et une dette financière résiduelle très faible de 417 millions de FCFA."
+  ],
+  "risques": [
+    "Forte augmentation des stocks (+37% à 7,4 milliards) et des créances clients (+22% à 8,4 milliards), générant une pression sur le besoin en fonds de roulement et un flux opérationnel négatif en 2025.",
+    "Provisions importantes et croissantes (3,4 milliards de FCFA), pouvant indiquer des risques opérationnels ou des litiges non résolus.",
+    "Volatilité des impôts différés impactant la lisibilité du résultat net (impact négatif de -74,9 millions en 2025 contre +321 millions en 2024).",
+    "Dépendance à un secteur industriel (câbles) sensible aux fluctuations des cours des matières premières (cuivre, aluminium)."
+  ],
+  "perspectives": "SICABLE affiche une dynamique commerciale solide avec une croissance du chiffre d'affaires à deux chiffres et une amélioration de la rentabilité opérationnelle. La politique de distribution de dividendes en hausse témoigne d'une bonne santé financière. Toutefois, la surveillance du besoin en fonds de roulement et la maîtrise des provisions seront des enjeux clés pour maintenir la performance.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "SICABLE (SICC) délivre une solide performance en 2025 avec un chiffre d'affaires de 21,26 milliards FCFA (+11.2%) et un résultat net de 1,44 milliard FCFA (+4.7%), portés par une forte hausse du résultat d'exploitation (+28.2%). Le bilan est robuste avec une trésorerie nette positive de 5,14 milliards et des capitaux propres de 9,35 milliards, tandis que les dividendes distribués ont été relevés à 758 millions de FCFA. Le principal point de vigilance reste la tension sur le besoin en fonds de roulement liée à la hausse conjointe des stocks et des créances clients.",
+  "ticker": "SICC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260311_-_etats_financiers_ifrs_-_exercice_2025_-_sicable_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:11:21.918891+00:00",
+  "status": "ok",
+  "cached_at": 1778260281.919188
+}

@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 197629.996,
+      "unite": "MFCFA",
+      "variation": "+14.8%"
+    },
+    "resultat_net": {
+      "valeur": 15508.655,
+      "unite": "MFCFA",
+      "variation": "-2.2%"
+    },
+    "resultat_exploitation": {
+      "valeur": 18163.004,
+      "unite": "MFCFA",
+      "variation": "-6.3%"
+    },
+    "total_bilan": {
+      "valeur": 199116.293,
+      "unite": "MFCFA",
+      "variation": "-1.7%"
+    },
+    "capitaux_propres": {
+      "valeur": 142638.984,
+      "unite": "MFCFA",
+      "variation": "+5.6%"
+    },
+    "dividende_par_action": {
+      "valeur": 502,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 10.87,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 7.85,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -4558.544,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 33027.296,
+      "unite": "MFCFA",
+      "variation": "-11.0%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse fortement de +14.8% à 197,6 milliards FCFA, porté principalement par les ventes de produits fabriqués (+15.5%).",
+    "Malgré la hausse du CA, la rentabilité se dégrade : le résultat net recule de 2.2% à 15,5 milliards FCFA, pénalisé par une forte hausse des achats de matières premières (+53.8%).",
+    "L'EBE (EBITDA) chute de 11% à 33 milliards FCFA, reflétant une compression significative des marges opérationnelles due à la hausse des coûts de production.",
+    "La trésorerie nette s'améliore nettement, passant de -12,7 milliards à -4,6 milliards FCFA, grâce à un flux opérationnel robuste de 38,7 milliards FCFA.",
+    "Un dividende brut de 502 FCFA par action est proposé, en baisse par rapport à l'exercice précédent (dividendes versés de 7,93 milliards contre 9,68 milliards en 2024)."
+  ],
+  "risques": [
+    "Forte hausse des coûts des matières premières (+53.8%) comprimant les marges malgré la croissance du chiffre d'affaires.",
+    "Pression sur la valeur ajoutée qui recule de 65,6 à 62,6 milliards FCFA malgré une hausse significative des revenus.",
+    "Niveau de créances clients élevé (78,3 milliards FCFA), représentant un risque de liquidité important.",
+    "Exposition aux fluctuations des prix des matières premières agricoles (huile de palme) sur les marchés internationaux."
+  ],
+  "perspectives": "PALMCI affiche une croissance solide de son chiffre d'affaires, mais fait face à une compression de ses marges due à la hausse des coûts des intrants. L'amélioration de la trésorerie nette et la solidité des capitaux propres (142,6 milliards FCFA) offrent une base financière stable. La capacité à maîtriser les coûts de production sera déterminante pour restaurer la rentabilité.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "PALMCI (PALC) enregistre en 2025 une croissance de son chiffre d'affaires de +14.8% à 197,6 milliards FCFA, mais voit sa rentabilité se comprimer sous l'effet de la hausse des coûts des matières premières, avec un résultat net en légère baisse à 15,5 milliards FCFA. La structure financière reste solide avec des capitaux propres de 142,6 milliards et une amélioration de la trésorerie nette. Un dividende de 502 FCFA par action est proposé, offrant un rendement modeste dans un contexte de marges sous pression.",
+  "ticker": "PALC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260323_-_etats_financiers_-_exercice_2025_-_palm_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:02:37.929088+00:00",
+  "status": "ok",
+  "cached_at": 1778259757.92935
+}

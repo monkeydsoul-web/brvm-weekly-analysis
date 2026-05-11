@@ -1,0 +1,77 @@
+{
+  "indices": {
+    "30": {
+      "current": 191.57,
+      "change": 0.11,
+      "ytd": 1.97,
+      "sector": "30"
+    },
+    "COMPOSITE": {
+      "current": 405.75,
+      "change": 0.29,
+      "ytd": 1.7,
+      "sector": "COMPOSITE"
+    },
+    "PRESTIGE": {
+      "current": 158.42,
+      "change": -0.18,
+      "ytd": 1.47,
+      "sector": "PRESTIGE"
+    },
+    "PRINCIPAL": {
+      "current": 282.31,
+      "change": 0.57,
+      "ytd": 0.78,
+      "sector": "PRINCIPAL"
+    },
+    "CONSOMMATION DE BASE": {
+      "current": 262.43,
+      "change": 1.04,
+      "ytd": 1.51,
+      "sector": "Consommation"
+    },
+    "CONSOMMATION DISCRETIONNAIRE": {
+      "current": 172.35,
+      "change": 0.37,
+      "ytd": -0.87,
+      "sector": "Industriel"
+    },
+    "ENERGIE": {
+      "current": 139.28,
+      "change": 1.84,
+      "ytd": -0.11,
+      "sector": "Énergie"
+    },
+    "INDUSTRIELS": {
+      "current": 180.14,
+      "change": -2.07,
+      "ytd": 0.12,
+      "sector": "Industriel"
+    },
+    "SERVICES FINANCIERS": {
+      "current": 180.01,
+      "change": -0.16,
+      "ytd": 0.56,
+      "sector": "Banque"
+    },
+    "SERVICES PUBLICS": {
+      "current": 149.96,
+      "change": -2.71,
+      "ytd": 3.3,
+      "sector": "Utilités"
+    },
+    "TELECOMMUNICATIONS": {
+      "current": 103.2,
+      "change": 0.62,
+      "ytd": 3.44,
+      "sector": "Télécoms"
+    },
+    "BRVM – COMPOSITE TOTAL RETURN": {
+      "current": 156.66,
+      "change": 0.29,
+      "ytd": 1.7,
+      "sector": "BRVM – COMPOSITE TOTAL RETURN"
+    }
+  },
+  "updated_at": "2026-05-11T16:15:15.261882"
+}

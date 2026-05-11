@@ -1,0 +1,81 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels consolidés",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1424261,
+      "unite": "MFCFA",
+      "variation": "+12%"
+    },
+    "resultat_net": {
+      "valeur": 345523,
+      "unite": "MFCFA",
+      "variation": "+15%"
+    },
+    "resultat_exploitation": {
+      "valeur": 465618,
+      "unite": "MFCFA",
+      "variation": "+16%"
+    },
+    "total_bilan": {
+      "valeur": 19243865,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "capitaux_propres": {
+      "valeur": 1597846,
+      "unite": "MFCFA",
+      "variation": "+41%"
+    },
+    "dividende_par_action": {
+      "valeur": 0.0016,
+      "unite": "USD",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 27.8,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 24.3,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 782400,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le Produit Net Bancaire progresse de 17% en USD (+12% en FCFA) à 1 424 milliards FCFA, porté par la banque CIB (+21%) et la banque de détail CCB (+14%).",
+    "Le coefficient d'exploitation atteint un niveau record de 48,3% (contre 52,8% en 2024), reflétant une amélioration significative de l'efficacité opérationnelle.",
+    "Les dépôts clientèle bondissent de 24% à 14 120 milliards FCFA avec un ratio CASA de 87,1%, et les capitaux propres augmentent de 41% en FCFA.",
+    "Le résultat net consolidé ressort à 345 milliards FCFA (+15% en FCFA), pour un résultat net part du Groupe de 237 milliards FCFA.",
+    "Les charges de dépréciation sur actifs financiers ont fortement augmenté (+38% en USD), traduisant une vigilance accrue sur le risque de crédit."
+  ],
+  "risques": [
+    "Forte hausse des charges de dépréciation sur actifs financiers (+38% à 270 milliards FCFA), signalant une détérioration de la qualité du portefeuille de crédit.",
+    "Exposition significative au risque de change, le groupe opérant dans 39 pays avec des devises locales volatiles face au dollar et au FCFA.",
+    "Cession des activités au Mozambique et pertes sur activités arrêtées ou en cours de cession (-3,6 milliards FCFA), indiquant des défis de rentabilité dans certains marchés.",
+    "Pression fiscale élevée avec un taux d'imposition effectif d'environ 25% du résultat avant impôts.",
+    "Réduction des effectifs (de 14 982 à 14 560 salariés) pouvant générer des risques sociaux et opérationnels durant la transformation."
+  ],
+  "perspectives": "Ecobank aborde 2026 avec confiance en s'appuyant sur sa stratégie GTR (Croissance, Transformation, Rentabilité) et un modèle panafricain diversifié sur 39 pays. L'amélioration des conditions macroéconomiques en Afrique (baisse des taux directeurs, stabilité monétaire) devrait soutenir la croissance des revenus et la qualité du crédit. Le groupe vise à poursuivre ses progrès en termes d'efficacité opérationnelle et de satisfaction client, tout en maintenant une gestion rigoureuse des risques.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Ecobank (ETI) publie des résultats 2025 solides avec un PNB en hausse de 17% à 2,45 milliards USD et un résultat avant impôts en progression de 21% à 466 milliards FCFA, soutenu par un coefficient d'exploitation record de 48,3%. Le ROE tangible de 27,8% et la forte croissance des dépôts (+24%) témoignent de la solidité du modèle panafricain. La hausse des provisions sur créances et les risques de change restent des points de vigilance, mais les fondamentaux demeurent favorables pour les investisseurs à moyen terme.",
+  "ticker": "ETIT",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260413_-_etats_financiers_ifrs_-_exercice_2025_-_eti_tg.pdf",
+  "n_pages": 6,
+  "analyzed_at": "2026-05-08T16:59:58.593322+00:00",
+  "status": "ok",
+  "cached_at": 1778259598.593604
+}

@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels consolidés",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1084.1,
+      "unite": "MFCFA",
+      "variation": "+6.6%"
+    },
+    "resultat_net": {
+      "valeur": 158.2,
+      "unite": "MFCFA",
+      "variation": "+2.1%"
+    },
+    "resultat_exploitation": {
+      "valeur": 263.2,
+      "unite": "MFCFA",
+      "variation": "+2.0%"
+    },
+    "total_bilan": {
+      "valeur": 2309.1,
+      "unite": "MFCFA",
+      "variation": "+11.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 713.8,
+      "unite": "MFCFA",
+      "variation": "-1.4%"
+    },
+    "dividende_par_action": {
+      "valeur": 750,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 22.2,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 14.6,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 48.8,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 390.3,
+      "unite": "MFCFA",
+      "variation": "+3.3%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires consolidé (Côte d'Ivoire, Burkina Faso, Libéria) progresse de +6,6% à 1 084,1 milliards FCFA, porté par les investissements réseau et le déploiement de la fibre.",
+    "Le résultat net consolidé atteint 158,2 milliards FCFA (+2,1%), avec une part attribuable aux actionnaires de la maison mère de 112,8 milliards FCFA.",
+    "Un dividende brut de 750 FCFA par action est proposé, couvrant l'intégralité du résultat net de la société mère complété par un prélèvement sur réserves libres.",
+    "La trésorerie disponible progresse de +20,7% à 287 milliards FCFA, reflétant une solide génération de cash malgré un capex en hausse.",
+    "La dette financière non courante a fortement augmenté (+17 440% à 159,8 milliards FCFA), signalant un recours accru à l'endettement long terme pour financer les investissements."
+  ],
+  "risques": [
+    "Contexte réglementaire et fiscal de plus en plus contraignant pouvant peser sur les marges futures.",
+    "Forte baisse des prix moyens sur la voix et la data comprimant les revenus unitaires malgré la croissance des usages.",
+    "Hausse significative du coût de l'endettement financier brut (+40,5%) et exposition au risque de change sur le dollar libérien.",
+    "Pression inflationniste sur les coûts opérationnels (énergie, charges de personnel +17,1%) dans les trois zones géographiques."
+  ],
+  "perspectives": "Le groupe bénéficie d'une dynamique de croissance soutenue par ses investissements dans la modernisation du réseau et l'extension de la fibre, avec un parc FMI en hausse de +4,5%. La poursuite du déploiement dans les zones rurales et l'accélération de la fibre devraient maintenir la trajectoire de croissance du chiffre d'affaires. Toutefois, la compression des marges liée aux pressions tarifaires, fiscales et inflationnistes constitue un défi structurel à surveiller.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Orange Côte d'Ivoire affiche en 2024 une solide performance avec un chiffre d'affaires consolidé de 1 084 milliards FCFA (+6,6%) et un résultat net de 158,2 milliards FCFA (+2,1%), témoignant de la résilience du modèle malgré un environnement fiscal et concurrentiel difficile. La politique de dividende généreuse (750 FCFA/action, soit 100% du résultat net de la maison mère) récompense les actionnaires, tandis que la trésorerie robuste et le niveau d'investissement élevé préparent la croissance future. Le titre présente un profil attractif pour les investisseurs recherchant rendement et exposition à la croissance digitale en Afrique de l'Ouest.",
+  "ticker": "ORAC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250221_-_etats_financiers_-_exercice_2024_-_orange_ci.pdf",
+  "n_pages": 14,
+  "analyzed_at": "2026-05-08T16:48:01.262816+00:00",
+  "status": "ok",
+  "cached_at": 1778258881.263053
+}

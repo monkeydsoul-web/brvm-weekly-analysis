@@ -1,4 +1,46 @@
 async function fetchLiveScore(ticker){
+  // Lire depuis le ranking live (scores enrichis PDF)
+  try {
+    const rRes = await fetch('/api/live-ranking');
+    const rData = await rRes.json();
+    if (rData.ranking) {
+      const r = rData.ranking.find(x => x.ticker === ticker);
+      if (r && r.composite_adj > 0) {
+        _renderLiveScore(ticker, {
+          composite_adj:   r.composite_adj,
+          live_price:      r.price,
+          live_change_pct: r.change_pct,
+          live_source:     'brvm.org',
+          market_open:     rData.market_open,
+          score_graham:    r.score_graham,
+          score_dcf:       r.score_dcf,
+          score_ddm:       r.score_ddm,
+          score_epv:       r.score_epv,
+          score_buffett:   r.score_buffett,
+          score_rev_dcf:   r.score_rev_dcf,
+          score_relatif:   r.score_relatif,
+          score_technique: r.score_technique,
+          detail_graham:   r.detail_graham,
+          detail_dcf:      r.detail_dcf,
+          detail_ddm:      r.detail_ddm,
+          detail_epv:      r.detail_epv,
+          detail_buffett:  r.detail_buffett,
+          detail_rev_dcf:  r.detail_rev_dcf,
+          detail_relatif:  r.detail_relatif,
+          detail_technique:r.detail_technique,
+          pe_ref_live:     r.pe_ref,
+          pb_ref_live:     r.pb_ref,
+          div_yield_live:  r.div_yield,
+        });
+        return;
+      }
+    }
+  } catch(e) {}
+  // Fallback: ancienne route
+  _fetchLiveScoreFallback(ticker);
+}
+
+async function _fetchLiveScoreFallback(ticker){
   const el=document.getElementById('live-score-container');
   if(!el)return;
   el.innerHTML='<div style="color:var(--t2);font-size:12px;padding:6px 0"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#00c076;animation:pulse 1s infinite;margin-right:5px"></span>Calcul score live...</div>';

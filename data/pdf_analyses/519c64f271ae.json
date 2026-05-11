@@ -1,0 +1,80 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 110189,
+      "unite": "MFCFA",
+      "variation": "+11.1%"
+    },
+    "resultat_net": {
+      "valeur": 48071,
+      "unite": "MFCFA",
+      "variation": "+7.8%"
+    },
+    "resultat_exploitation": {
+      "valeur": 54381,
+      "unite": "MFCFA",
+      "variation": "+12.4%"
+    },
+    "total_bilan": {
+      "valeur": 1953299,
+      "unite": "MFCFA",
+      "variation": "+2.7%"
+    },
+    "capitaux_propres": {
+      "valeur": 178208,
+      "unite": "MFCFA",
+      "variation": "+8.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 660,
+      "unite": "FCFA",
+      "variation": "+8.2%"
+    },
+    "roe": {
+      "valeur": 27.0,
+      "unite": "%",
+      "variation": "-0.2%"
+    },
+    "marge_nette": {
+      "valeur": 43.6,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 62857,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le Produit Net Bancaire franchit pour la première fois le cap des 100 milliards de FCFA à 110,2 milliards, en hausse de 11,1%.",
+    "Le résultat net atteint un niveau record de 48,1 milliards de FCFA, en progression de 7,8%, avec un ROE solide de 27%.",
+    "Les crédits à la clientèle bondissent de 16,1% à 1 045 milliards de FCFA et les dépôts progressent de 14,3% à 1 451 milliards de FCFA.",
+    "Un dividende brut de 660 FCFA par action est proposé (+8,2%), représentant 75,6% du résultat net et un rendement de 8,7%.",
+    "Le coefficient d'exploitation reste maîtrisé à 45,3% malgré une hausse de 10,8% des charges d'exploitation."
+  ],
+  "risques": [
+    "Environnement géopolitique régional incertain avec des défis émergents pouvant impacter l'activité.",
+    "Hausse des charges d'exploitation de 10,8% liée aux investissements dans le capital humain, susceptible de peser sur la rentabilité si les revenus ralentissent.",
+    "Baisse de 13,5% du portefeuille titres en lien avec les remboursements des États de l'UEMOA, réduisant une source de revenus diversifiée.",
+    "Transition stratégique en 2024 vers un nouveau modèle comportant des risques d'exécution."
+  ],
+  "perspectives": "L'année 2024 marque une transition stratégique articulée autour de la croissance, d'une transformation opérationnelle agile et d'un focus sur le retour sur investissement. La banque vise à renforcer son positionnement marché et améliorer l'expérience client. Toutefois, les défis géopolitiques et les risques émergents invitent à une certaine prudence dans l'exécution.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Ecobank Côte d'Ivoire livre en 2023 des résultats record avec un PNB dépassant 110 milliards de FCFA (+11,1%) et un résultat net de 48 milliards de FCFA (+7,8%), soutenu par une forte dynamique commerciale sur les crédits et les dépôts. La rentabilité reste excellente avec un ROE de 27% et un coefficient d'exploitation maîtrisé à 45,3%. La rémunération des actionnaires est généreuse avec un dividende en hausse de 8,2% offrant un rendement de 8,7%, ce qui en fait une valeur attractive sur la BRVM.",
+  "ticker": "ECOC",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20240328_-_resultats_financiers_-_exercice_2023_-_ecobank_ci.pdf",
+  "n_pages": 8,
+  "analyzed_at": "2026-05-08T16:48:46.605494+00:00",
+  "status": "ok",
+  "cached_at": 1778258926.6057239
+}

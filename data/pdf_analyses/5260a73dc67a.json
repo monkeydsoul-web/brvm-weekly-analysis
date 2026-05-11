@@ -1,0 +1,80 @@
+{
+  "annee": 2026,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 189400,
+      "unite": "MFCFA",
+      "variation": "+10%"
+    },
+    "resultat_net": {
+      "valeur": 4663,
+      "unite": "MFCFA",
+      "variation": "+31%"
+    },
+    "resultat_exploitation": {
+      "valeur": 9100,
+      "unite": "MFCFA",
+      "variation": "+34%"
+    },
+    "total_bilan": {
+      "valeur": 472700,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "capitaux_propres": {
+      "valeur": 43898,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": 525,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 2.46,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 21800,
+      "unite": "MFCFA",
+      "variation": "+21%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires de la SODECI atteint 189,4 milliards FCFA en 2025, en hausse de 10% portée par la progression des ventes d'eau et l'amélioration des performances commerciales.",
+    "Le résultat net s'établit à 4,663 milliards FCFA (+31%), reflétant une nette amélioration de la rentabilité avec une marge d'exploitation en hausse de 34%.",
+    "Le nombre de clients progresse de 6,14% à 2 272 032, avec un taux de recouvrement amélioré à 95,85% et un ratio de facturation à 85,51%.",
+    "Un dividende brut de 525 FCFA par action est proposé, soit une distribution totale de 4,725 milliards FCFA, payable au plus tard le 30 septembre 2026.",
+    "Le total bilan progresse à 472,7 milliards FCFA (+9%), mais la situation de trésorerie demeure sous tension malgré l'amélioration des indicateurs opérationnels."
+  ],
+  "risques": [
+    "Situation de trésorerie sous tension malgré l'amélioration des performances opérationnelles, reflétant des besoins de financement accrus dans un environnement sectoriel exigeant.",
+    "Dépendance au cadre réglementaire et au nouveau contrat de délégation du service public de l'eau potable dont le déploiement est prévu en 2026.",
+    "Pression sur les charges d'exploitation (charges de personnel élevées, coûts de production) dans un environnement inflationniste.",
+    "Niveau d'endettement élevé avec des dettes financières significatives, pesant sur la capacité d'autofinancement."
+  ],
+  "perspectives": "La SODECI entend déployer son nouveau contrat de délégation du service public de l'eau potable en 2026 tout en poursuivant l'amélioration de ses performances opérationnelles et commerciales. La société mise sur la transformation digitale et l'innovation pour renforcer la qualité de service. Des discussions sont en cours avec les parties prenantes pour établir un cadre sectoriel favorable à une trajectoire financière durable.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "La SODECI affiche en 2025 une solide progression de ses indicateurs financiers avec un chiffre d'affaires de 189,4 milliards FCFA (+10%), un résultat net de 4,663 milliards FCFA (+31%) et un EBE en hausse de 21%, témoignant d'une amélioration structurelle de la rentabilité. La distribution d'un dividende de 525 FCFA par action récompense les actionnaires et illustre la confiance de la direction. Cependant, la tension sur la trésorerie et le niveau d'endettement restent des points de vigilance à surveiller pour les investisseurs.",
+  "ticker": "SDCC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260427_-_etats_financiers_-_exercice_2025_-_sodeci.pdf",
+  "n_pages": 3,
+  "analyzed_at": "2026-05-08T17:06:22.605845+00:00",
+  "status": "ok",
+  "cached_at": 1778259982.606058
+}

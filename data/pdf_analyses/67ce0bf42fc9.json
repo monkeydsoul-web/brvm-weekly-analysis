@@ -1,0 +1,81 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 102544,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "resultat_net": {
+      "valeur": 7176,
+      "unite": "MFCFA",
+      "variation": "+83%"
+    },
+    "resultat_exploitation": {
+      "valeur": 4458,
+      "unite": "MFCFA",
+      "variation": "-13%"
+    },
+    "total_bilan": {
+      "valeur": 29400,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": 23600,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": 290,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 30.4,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 7.0,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 5363,
+      "unite": "MFCFA",
+      "variation": "-13%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires atteint 102,5 milliards FCFA en 2024, en hausse de 9%, porté par la forte croissance du digital qui représente désormais 55,7% des ventes.",
+    "Le résultat net bondit de 83% à 7,2 milliards FCFA, notamment grâce à un résultat hors activités ordinaires exceptionnel de 3,1 milliards FCFA.",
+    "La LNB SA a été admise à la cote de la BRVM le 13 décembre 2024, marquant une étape majeure dans sa gouvernance et sa transparence.",
+    "Les marges opérationnelles se contractent malgré la hausse du chiffre d'affaires : l'EBE recule de 13% et la valeur ajoutée baisse de 7%.",
+    "Le conseil d'administration propose un dividende de 290 FCFA par action, soit une distribution totale de 5,8 milliards FCFA (environ 80% du résultat net)."
+  ],
+  "risques": [
+    "Pression concurrentielle croissante avec l'entrée de nouveaux acteurs sur le marché des jeux de hasard au Bénin.",
+    "Érosion des marges opérationnelles malgré la hausse du chiffre d'affaires, reflétant une structure de coûts en augmentation.",
+    "Forte dépendance au canal digital (55,7% du CA) exposant la société à des risques technologiques et cybersécurité.",
+    "Résultat net 2024 fortement influencé par un élément exceptionnel (HAO +3,1 milliards), fragilisant la récurrence des bénéfices.",
+    "Environnement réglementaire et social sensible autour des jeux d'argent, avec des exigences de jeu responsable."
+  ],
+  "perspectives": "La LNB SA prévoit en 2025 de finaliser le déploiement de 5 000 terminaux sur le territoire national et d'intensifier sa stratégie digitale et multicanale pour consolider sa croissance commerciale. La société entend renforcer l'accessibilité au paiement des gains et dynamiser ses produits phares (Loto 5/90, Paris sportifs en ligne). L'objectif est d'offrir une valeur durable aux actionnaires tout en consolidant sa position de leader dans un marché en pleine mutation.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "La LNB SA affiche une solide performance en 2024 avec un chiffre d'affaires en hausse de 9% à 102,5 milliards FCFA et un résultat net en progression de 83% à 7,2 milliards FCFA, soutenu par la digitalisation accélérée des ventes. La structure financière est robuste avec 80,3% d'autonomie financière et une capacité d'autofinancement de 7,86 milliards FCFA. L'admission à la BRVM et la distribution d'un dividende de 290 FCFA/action renforcent l'attractivité du titre pour les investisseurs, malgré une vigilance nécessaire sur la compression des marges opérationnelles.",
+  "ticker": "LNBB",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250602_-_etats_financiers_-_exercice_2024_-_lnb_bn.pdf",
+  "n_pages": 23,
+  "analyzed_at": "2026-05-08T17:10:57.240192+00:00",
+  "status": "ok",
+  "cached_at": 1778260257.240478
+}

@@ -1,0 +1,76 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_net": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le rapport concerne les états financiers de synthèse au 31/12/2023 d'Eviosys Packaging SIEM (SEMC).",
+    "Les états financiers ont été vérifiés et certifiés par les Commissaires aux Comptes.",
+    "Ces états doivent être soumis à l'approbation de l'Assemblée Générale Ordinaire prévue le 30 décembre 2024."
+  ],
+  "risques": [
+    "Absence totale de données financières chiffrées dans le document fourni, rendant toute analyse quantitative impossible.",
+    "Délai important entre la clôture des comptes (31/12/2023) et la tenue de l'AGO (30/12/2024), ce qui peut indiquer des difficultés de gouvernance."
+  ],
+  "perspectives": "Aucune information sur les perspectives n'est disponible dans ce document. Le rapport ne contient que la page de couverture des états financiers sans données chiffrées ni commentaires de gestion.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "Le document fourni est uniquement la page de couverture des états financiers annuels au 31/12/2023 d'Eviosys Packaging SIEM (SEMC), sans aucune donnée financière exploitable. Les états ont été certifiés par les Commissaires aux Comptes et devaient être soumis à l'AGO du 30 décembre 2024. Aucune analyse financière pertinente ne peut être réalisée en l'absence des données chiffrées.",
+  "ticker": "SEMC",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20241216_-_etats_financiers_de_synthese_-exercice_2023_-_eviosys_packaging_siem_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-11T10:50:37.359139+00:00",
+  "status": "ok",
+  "cached_at": 1778496637.3593779
+}

@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 72724,
+      "unite": "MFCFA",
+      "variation": "+19.6%"
+    },
+    "resultat_net": {
+      "valeur": 32044,
+      "unite": "MFCFA",
+      "variation": "+22.9%"
+    },
+    "resultat_exploitation": {
+      "valeur": 39222,
+      "unite": "MFCFA",
+      "variation": "+26.4%"
+    },
+    "total_bilan": {
+      "valeur": 1075479,
+      "unite": "MFCFA",
+      "variation": "+14.6%"
+    },
+    "capitaux_propres": {
+      "valeur": 112644,
+      "unite": "MFCFA",
+      "variation": "+17.6%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 28.4,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 44.1,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 47619,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le Produit Net Bancaire (PNB) progresse de 19,6% à 72 724 MFCFA, porté notamment par le retournement positif des opérations de portefeuille de négociation (+10 290 MFCFA).",
+    "Le résultat net atteint 32 044 MFCFA en hausse de 22,9%, confirmant une forte dynamique de rentabilité.",
+    "Le total bilan croît de 14,6% à 1 075 479 MFCFA, soutenu par une hausse significative des dépôts clientèle (+20,0%) et un doublement du capital souscrit à 40 000 MFCFA.",
+    "Le coût du risque s'alourdit de 40,8% à 6 792 MFCFA, signalant une dégradation de la qualité du portefeuille de crédit.",
+    "Les créances bancaires bondissent de 285,8%, reflétant une diversification accrue des emplois interbancaires."
+  ],
+  "risques": [
+    "Hausse significative du coût du risque (+40,8%) indiquant une potentielle détérioration de la qualité des actifs et du portefeuille de crédit.",
+    "Augmentation de la charge fiscale de 56,9%, pesant sur la conversion du résultat brut en résultat net.",
+    "Baisse des créances sur la clientèle (-4,7%) suggérant un possible ralentissement de l'activité de crédit retail/corporate.",
+    "Forte hausse des commissions charges (+104,7%) et des autres charges d'exploitation bancaire (+88,4%) pouvant peser sur les marges futures."
+  ],
+  "perspectives": "Bank Of Africa Côte d'Ivoire affiche une trajectoire de croissance solide avec un bilan en expansion et une rentabilité en nette amélioration. Le doublement du capital souscrit renforce la capacité de développement et la solidité financière de l'établissement. Toutefois, la surveillance du coût du risque demeure un enjeu prioritaire pour préserver la qualité des performances.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "BOAC enregistre d'excellentes performances en 2024 avec un résultat net de 32 044 MFCFA (+22,9%) et un PNB de 72 724 MFCFA (+19,6%), reflétant une forte dynamique commerciale et opérationnelle. Le bilan progresse de 14,6% à plus de 1 075 milliards FCFA, porté par la collecte de dépôts et le renforcement des fonds propres suite au doublement du capital. Le principal point de vigilance reste la montée du coût du risque (+40,8%) qui devra être maîtrisée pour consolider la rentabilité sur le long terme.",
+  "ticker": "BOAC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250402_-_etats_financiers_-_exercice_2024_-_boa_ci.pdf",
+  "n_pages": 2,
+  "analyzed_at": "2026-05-08T16:58:45.088301+00:00",
+  "status": "ok",
+  "cached_at": 1778259525.088477
+}

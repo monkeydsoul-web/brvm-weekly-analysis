@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 229061,
+      "unite": "MFCFA",
+      "variation": "-7.5%"
+    },
+    "resultat_net": {
+      "valeur": 8698,
+      "unite": "MFCFA",
+      "variation": "-49.6%"
+    },
+    "resultat_exploitation": {
+      "valeur": 12036,
+      "unite": "MFCFA",
+      "variation": "-57.9%"
+    },
+    "total_bilan": {
+      "valeur": 163113,
+      "unite": "MFCFA",
+      "variation": "-11.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 35294,
+      "unite": "MFCFA",
+      "variation": "-1.8%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 24.6,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 3.8,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 415,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 13030,
+      "unite": "MFCFA",
+      "variation": "-57.0%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 7.5% à 229 milliards FCFA, traduisant un environnement commercial moins favorable qu'en 2023.",
+    "Le résultat net chute de près de 50% à 8,7 milliards FCFA, impacté par une forte compression des marges (marge brute en baisse de 34.8% à 32,3 milliards FCFA).",
+    "La trésorerie nette redevient positive à 6,07 milliards FCFA fin 2024 contre -10,2 milliards fin 2023, grâce à une amélioration significative du besoin en fonds de roulement.",
+    "Les dividendes versés en 2024 s'élèvent à 9,35 milliards FCFA, dépassant le résultat net de l'exercice, ce qui érode légèrement les capitaux propres.",
+    "Les dettes financières augmentent significativement (de 2,4 à 6,5 milliards FCFA) suite à un nouvel emprunt de 5 milliards FCFA contracté en 2024."
+  ],
+  "risques": [
+    "Forte compression des marges : la marge brute passe de 20% à 14%, signalant une pression sur les coûts d'approvisionnement ou une baisse des prix de vente.",
+    "Politique de distribution de dividendes agressive dépassant le résultat net, susceptible d'affaiblir la structure financière à terme.",
+    "Hausse de l'endettement financier avec un recours accru aux emprunts, augmentant la sensibilité aux conditions de financement.",
+    "Forte variation des stocks (de 61,8 à 27,9 milliards FCFA) indiquant une gestion des stocks volatile, potentiellement liée à la cyclicité du secteur du bitume."
+  ],
+  "perspectives": "SMB doit faire face à un contexte de marges compressées après une année 2023 exceptionnelle, avec un résultat net divisé par deux. La normalisation de la trésorerie est un signal positif, mais la soutenabilité de la politique de dividendes et la maîtrise des coûts d'achat seront déterminantes pour 2025. Le maintien de l'activité dans un secteur lié aux infrastructures publiques offre une certaine visibilité, mais les performances financières dépendront fortement de l'évolution des prix des matières premières.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "La Société Multinationale de Bitumes (SMB) affiche en 2024 une dégradation significative de ses performances avec un résultat net en baisse de 50% à 8,7 milliards FCFA et une marge nette réduite à 3,8%. Si la trésorerie s'est redressée grâce à une amélioration du BFR, la compression des marges et une politique de dividendes supérieure au résultat net constituent des signaux d'alerte. Le profil risque/rendement apparaît défavorable dans l'immédiat, justifiant un verdict négatif pour les investisseurs.",
+  "ticker": "SMBC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250430_-_etats_financiers_-_exercice_2024_-_smb_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:02:11.873350+00:00",
+  "status": "ok",
+  "cached_at": 1778259731.87361
+}

@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Rapport d'activité annuel",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 102763,
+      "unite": "MFCFA",
+      "variation": "+8%"
+    },
+    "resultat_net": {
+      "valeur": 50234,
+      "unite": "MFCFA",
+      "variation": "+15%"
+    },
+    "resultat_exploitation": {
+      "valeur": 57440,
+      "unite": "MFCFA",
+      "variation": "+17%"
+    },
+    "total_bilan": {
+      "valeur": 1685249,
+      "unite": "MFCFA",
+      "variation": "+5%"
+    },
+    "capitaux_propres": {
+      "valeur": 187136,
+      "unite": "MFCFA",
+      "variation": "+14%"
+    },
+    "dividende_par_action": {
+      "valeur": 375,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 30.56,
+      "unite": "%",
+      "variation": "+123bp"
+    },
+    "marge_nette": {
+      "valeur": 48.88,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 62635,
+      "unite": "MFCFA",
+      "variation": "+10%"
+    }
+  },
+  "points_cles": [
+    "Le résultat net atteint 50,2 milliards FCFA en 2024, en hausse de +15% par rapport à 2023, constituant une performance exceptionnelle.",
+    "Le Produit Net Bancaire progresse de +8% à 102,8 milliards FCFA, porté par la marge d'intermédiation et le résultat sur opérations de marché (+13% chacun).",
+    "Le coût du risque s'améliore significativement de -35% à 5,2 milliards FCFA, reflétant une gestion saine du portefeuille de crédit.",
+    "L'augmentation de capital de 10 milliards FCFA porte le capital social à 20 milliards FCFA, renforçant la base financière de la banque.",
+    "Le ratio d'efficience opérationnelle s'améliore de 141 bps à 39%, et le ratio de solvabilité dépasse 14%, largement au-dessus du seuil réglementaire de 11,5%."
+  ],
+  "risques": [
+    "Concurrence accrue sur le marché bancaire ivoirien pouvant peser sur les marges.",
+    "Ralentissement économique mondial (faiblesse de la demande en zone euro, ralentissement en Chine) pouvant affecter indirectement l'économie ivoirienne.",
+    "Contraction des prix des matières premières exportées par l'UEMOA (-9,7% au T3 2024) susceptible d'impacter certains clients de la banque.",
+    "Risques liés à la transformation digitale et aux investissements requis par le plan stratégique IMPULSION 2028."
+  ],
+  "perspectives": "La SIB s'appuie sur son nouveau Plan Stratégique 'IMPULSION 2028' pour accélérer sa transformation digitale, développer des solutions financières adaptées aux PME/TPE et aux particuliers, et renforcer sa gouvernance. Avec une base financière consolidée (capital porté à 20 milliards FCFA, ratio de solvabilité >14%) et une notation maintenue à A1/AA-, la banque est bien positionnée pour poursuivre sa croissance dans un contexte économique ivoirien dynamique (+6,5% de croissance en 2024).",
+  "verdict_investisseur": "POSITIF",
+  "resume": "La Société Ivoirienne de Banque (SIB) affiche en 2024 des performances exceptionnelles avec un résultat net de 50,2 milliards FCFA (+15%), un ROE de 30,56% et un coefficient d'exploitation amélioré à 39%. La solidité du bilan (1 685 milliards FCFA de total actif), la baisse du coût du risque (-35%) et le dividende proposé de 375 FCFA par action (rendement ~10,55%) témoignent d'une banque résiliente et bien gérée. Le lancement du plan IMPULSION 2028 et l'augmentation de capital renforcent les perspectives de croissance à moyen terme.",
+  "ticker": "SIBC",
+  "doc_type": "Rapport annuel",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250305_-_rapport_dactivites_annuel_-_exercice_2024_-_sib_ci.pdf",
+  "n_pages": 7,
+  "analyzed_at": "2026-05-09T11:44:44.002061+00:00",
+  "status": "ok",
+  "cached_at": 1778327084.002274
+}

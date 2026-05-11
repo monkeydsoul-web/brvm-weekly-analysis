@@ -1,0 +1,80 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 34682.08,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_net": {
+      "valeur": 640.33,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": 1573.55,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": 23009.56,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": -10658.86,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 1.85,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 29277.74,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 3340.64,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Retour à la rentabilité en 2023 avec un résultat net positif de 640 MFCFA après une perte sévère de -6 908 MFCFA en 2022.",
+    "Les capitaux propres restent profondément négatifs à -10 659 MFCFA, reflétant l'accumulation de pertes antérieures (report à nouveau de -35 635 MFCFA).",
+    "La trésorerie nette est très déficitaire à -11 957 MFCFA, entièrement financée par des crédits bancaires à court terme (14 875 MFCFA).",
+    "Le chiffre d'affaires global s'établit à 34 682 MFCFA, en légère baisse par rapport aux 36 175 MFCFA de 2022.",
+    "L'excédent brut d'exploitation (EBE) reste faible à 3 341 MFCFA, sous la pression des charges de personnel et des services extérieurs."
+  ],
+  "risques": [
+    "Capitaux propres négatifs à -10 659 MFCFA signalant une situation de fonds propres très dégradée et un risque de solvabilité structurel.",
+    "Dépendance excessive aux crédits bancaires à court terme (14 875 MFCFA) pour financer l'exploitation, exposant la société à un risque de liquidité élevé.",
+    "Report à nouveau cumulé très négatif (-35 635 MFCFA) qui limitera la distribution de dividendes pour de nombreuses années.",
+    "Pression sur les marges avec une marge nette de seulement 1,85% malgré le retour aux bénéfices."
+  ],
+  "perspectives": "Unilever Côte d'Ivoire a amorcé un redressement en 2023 avec un résultat net positif après la lourde perte de 2022, mais la situation financière reste très fragile compte tenu des capitaux propres négatifs et de l'endettement à court terme massif. La normalisation durable de la rentabilité et la reconstitution des fonds propres constitueront les défis majeurs des prochains exercices.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "Unilever Côte d'Ivoire affiche un redressement opérationnel en 2023 avec un résultat net positif de 640 MFCFA, mettant fin à deux années de pertes significatives. Néanmoins, la structure financière demeure très préoccupante avec des capitaux propres négatifs de -10 659 MFCFA et une trésorerie nette de -11 957 MFCFA entièrement dépendante de crédits bancaires. Dans ce contexte de fragilité bilantielle persistante, le titre ne présente pas encore les conditions d'un investissement sécurisé.",
+  "ticker": "UNLC",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20240904_-_etats_financiers_-_exercice_2023_-_unilever_ci.pdf",
+  "n_pages": 5,
+  "analyzed_at": "2026-05-11T10:51:02.236505+00:00",
+  "status": "ok",
+  "cached_at": 1778496662.236736
+}

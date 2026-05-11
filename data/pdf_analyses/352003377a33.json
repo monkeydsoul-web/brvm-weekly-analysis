@@ -1,0 +1,79 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 80568.589,
+      "unite": "MFCFA",
+      "variation": "-7.6%"
+    },
+    "resultat_net": {
+      "valeur": -7953.932,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": -544.988,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": 156426.278,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": 17243.172,
+      "unite": "MFCFA",
+      "variation": "-31.0%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": -46.12,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": -9.87,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 74187.169,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 13590.163,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Sucrivoire enregistre une perte nette de 7,95 milliards FCFA en 2025, contre un bénéfice de 2,47 milliards en 2024, marquant un retournement brutal de la rentabilité.",
+    "Le chiffre d'affaires recule de 7,6% à 80,57 milliards FCFA, tandis que les charges financières explosent à 6,79 milliards FCFA (contre 1,88 milliards en 2024) en raison d'un fort recours à l'endettement.",
+    "Les dettes long terme ont bondi de 24,1 à 64,5 milliards FCFA, finançant des investissements massifs de 25,2 milliards FCFA, ce qui alourdit considérablement la structure financière.",
+    "Les capitaux propres se sont érodés de 31% à 17,2 milliards FCFA, reflétant l'accumulation des pertes et un report à nouveau négatif de 11,2 milliards FCFA."
+  ],
+  "risques": [
+    "Risque de solvabilité élevé : l'endettement net dépasse 74 milliards FCFA avec des capitaux propres en forte baisse à 17,2 milliards FCFA.",
+    "Risque de refinancement : les charges financières ont quadruplé en un an, menaçant la rentabilité opérationnelle de manière structurelle.",
+    "Risque de dégradation des capitaux propres : la poursuite des pertes pourrait conduire à une situation de fonds propres négatifs à moyen terme.",
+    "Risque lié à la volatilité des cours du sucre et aux conditions climatiques affectant les actifs biologiques et la production."
+  ],
+  "perspectives": "Sucrivoire traverse une période de transformation capitalistique majeure avec des investissements massifs destinés probablement à accroître les capacités de production. Toutefois, le lourd endettement contracté pèse sur la rentabilité à court terme et rend l'entreprise vulnérable à toute baisse des prix ou de la production. Un retour à la profitabilité dépendra de la capacité de l'entreprise à améliorer ses volumes, ses marges et à maîtriser ses charges financières.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "Sucrivoire affiche une perte nette de près de 8 milliards FCFA en 2025, portée par une explosion des charges financières liées à un endettement long terme multiplié par 2,7. Le recul du chiffre d'affaires combiné à la dégradation des capitaux propres et à un résultat opérationnel négatif signalent une situation financière sous forte pression. Aucun dividende n'est attendu et le profil risque/rendement est défavorable pour l'investisseur à court terme.",
+  "ticker": "SCRC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_ifrs_-_exercice_2025_-_sucrivoire_ci_0.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-11T10:50:01.849945+00:00",
+  "status": "ok",
+  "cached_at": 1778496601.850029
+}

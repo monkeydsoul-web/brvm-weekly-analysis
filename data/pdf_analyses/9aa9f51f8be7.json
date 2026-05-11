@@ -1,0 +1,81 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels consolidés",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1923122,
+      "unite": "MFCFA",
+      "variation": "+8.3%"
+    },
+    "resultat_net": {
+      "valeur": 413588,
+      "unite": "MFCFA",
+      "variation": "+5.1%"
+    },
+    "resultat_exploitation": {
+      "valeur": 669792,
+      "unite": "MFCFA",
+      "variation": "+8.1%"
+    },
+    "total_bilan": {
+      "valeur": 3270175,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": 1399263,
+      "unite": "MFCFA",
+      "variation": "+9.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 1933,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 29.6,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 21.5,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 921200,
+      "unite": "MFCFA",
+      "variation": "+17.4%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires consolidé progresse de +8,3% à 1 923 milliards FCFA, porté par la Data mobile (+17,7%), le Fixe Broadband (+22,5%) et Orange Money (+11,3%).",
+    "L'EBITDAaL atteint 921,2 milliards FCFA avec un taux de marge de 47,9%, confirmant la solide rentabilité opérationnelle du Groupe.",
+    "Le résultat net consolidé ressort à 413,6 milliards FCFA (+5,1% YoY), avec un résultat net part du Groupe de 341,9 milliards FCFA, soit 3 420 FCFA par action.",
+    "Les investissements (CAPEX) s'établissent à 288,6 milliards FCFA, en légère baisse de -3,9%, représentant 15% du chiffre d'affaires.",
+    "Un dividende brut de 1 933 FCFA par action est proposé, avec un paiement net de 1 740 FCFA à compter du 25 mai 2026."
+  ],
+  "risques": [
+    "Durcissement des mesures d'identification impactant la base clients mobile (-1,6% YoY) dans plusieurs pays.",
+    "Nouvelles taxes et réglementations dans plusieurs pays de présence (Sierra Leone, Guinée Bissau) pesant sur les marges.",
+    "Forte pression fiscale avec des impôts et taxes d'exploitation en hausse de +22,5% à 182,5 milliards FCFA.",
+    "Écarts de conversion négatifs de -64 milliards FCFA impactant le résultat global consolidé en raison de la volatilité des devises locales.",
+    "Environnement concurrentiel intense, notamment avec l'entrée de Starlink en Guinée Bissau et les projets de roaming national au Mali."
+  ],
+  "perspectives": "En 2026, Sonatel ambitionne d'accélérer le déploiement du Très Haut Débit fixe et mobile (fibre, 4G/5G, satellite) et de développer des solutions Fintech, cloud et cyber sécurité. Le Groupe mise sur l'intelligence artificielle pour transformer l'expérience client et ses processus internes, tout en capitalisant sur les Jeux Olympiques de la Jeunesse 2026 à Dakar. Le potentiel de croissance reste significatif avec un gap d'usage supérieur à 50% dans tous les pays de présence.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Le Groupe Sonatel affiche des résultats financiers 2025 solides avec une croissance du chiffre d'affaires de +8,3% à 1 923 milliards FCFA et un résultat net en hausse de +5,1% à 413,6 milliards FCFA, confirmant la résilience du modèle dans un environnement réglementaire et concurrentiel exigeant. La rentabilité reste excellente avec un taux d'EBITDAaL de 47,9% et un bilan solide avec des capitaux propres de 1 399 milliards FCFA. Le dividende proposé de 1 933 FCFA brut par action et les perspectives de croissance liées à la digitalisation des économies africaines en font un titre attractif pour les investisseurs de long terme.",
+  "ticker": "SNTS",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260216_-_etats_financiers_2025_et_attestation_des_cac_-_sonatel_sn.pdf",
+  "n_pages": 31,
+  "analyzed_at": "2026-05-08T16:37:17.972037+00:00",
+  "status": "ok",
+  "cached_at": 1778258237.972287
+}

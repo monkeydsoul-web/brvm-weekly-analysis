@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 172182.502,
+      "unite": "MFCFA",
+      "variation": "-16.5%"
+    },
+    "resultat_net": {
+      "valeur": 15861.643,
+      "unite": "MFCFA",
+      "variation": "-18.0%"
+    },
+    "resultat_exploitation": {
+      "valeur": 19393.765,
+      "unite": "MFCFA",
+      "variation": "-32.0%"
+    },
+    "total_bilan": {
+      "valeur": 202603.319,
+      "unite": "MFCFA",
+      "variation": "-1.6%"
+    },
+    "capitaux_propres": {
+      "valeur": 135061.151,
+      "unite": "MFCFA",
+      "variation": "+4.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 513,
+      "unite": "FCFA",
+      "variation": "-46.9%"
+    },
+    "roe": {
+      "valeur": 11.74,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 9.21,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -12659.387,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 37115.862,
+      "unite": "MFCFA",
+      "variation": "-12.8%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 16,5% à 172,2 milliards FCFA en 2024 contre 206,2 milliards en 2023, notamment en raison d'une forte baisse des ventes de produits fabriqués et des travaux/services vendus.",
+    "Le résultat net diminue de 18% à 15,9 milliards FCFA, pénalisé par la hausse des dotations aux amortissements (+23%) et une compression des marges opérationnelles.",
+    "Le dividende proposé est de 513 FCFA par action, en baisse significative de près de 47% par rapport à l'exercice précédent (environ 966 FCFA estimés), reflétant la dégradation des performances.",
+    "La trésorerie nette reste négative à -12,7 milliards FCFA au 31/12/2024 contre -8,2 milliards un an plus tôt, signalant une tension persistante sur la liquidité.",
+    "Les capitaux propres progressent à 135,1 milliards FCFA grâce au report à nouveau en hausse, témoignant d'une structure bilancielle encore solide."
+  ],
+  "risques": [
+    "Détérioration continue de la trésorerie nette, passant de -8,2 à -12,7 milliards FCFA, indiquant une pression croissante sur la liquidité.",
+    "Forte baisse du chiffre d'affaires (-16,5%) pouvant refléter une perte de volumes ou une pression sur les prix de vente des produits palmiers.",
+    "Hausse significative des dotations aux amortissements et provisions (+23%), qui pèse sur la rentabilité opérationnelle.",
+    "Réduction importante du dividende par action (-47%) pouvant nuire à l'attractivité du titre pour les investisseurs en quête de revenus."
+  ],
+  "perspectives": "PALMCI devra redresser ses volumes de ventes et maîtriser ses charges opérationnelles pour retrouver le niveau de rentabilité de 2023. La poursuite des investissements en immobilisations corporelles (~20 milliards FCFA en 2024) suggère une stratégie de développement à moyen terme. La tension sur la trésorerie reste un point de vigilance majeur pour les exercices à venir.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "PALMCI affiche en 2024 un recul marqué de ses performances avec un chiffre d'affaires en baisse de 16,5% et un résultat net en repli de 18% à 15,9 milliards FCFA. La trésorerie nette reste négative et le dividende proposé chute de près de 47% à 513 FCFA par action. Malgré des capitaux propres solides à 135 milliards FCFA, la dégradation des indicateurs clés et les tensions de liquidité justifient une prudence accrue pour les investisseurs.",
+  "ticker": "PALC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250417_-_etats_financiers_provisoires_valides_par_le_ca_-_exercice_2024_-_palm_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:03:02.401834+00:00",
+  "status": "ok",
+  "cached_at": 1778259782.402111
+}

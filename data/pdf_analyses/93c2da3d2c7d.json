@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 98616,
+      "unite": "MFCFA",
+      "variation": "+12%"
+    },
+    "resultat_net": {
+      "valeur": 12493,
+      "unite": "MFCFA",
+      "variation": "-5%"
+    },
+    "resultat_exploitation": {
+      "valeur": 17061,
+      "unite": "MFCFA",
+      "variation": "-7.2%"
+    },
+    "total_bilan": {
+      "valeur": 90288,
+      "unite": "MFCFA",
+      "variation": "+1.5%"
+    },
+    "capitaux_propres": {
+      "valeur": 68430,
+      "unite": "MFCFA",
+      "variation": "-0.9%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 18.26,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 12.67,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -4565,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 23541,
+      "unite": "MFCFA",
+      "variation": "-5.7%"
+    }
+  },
+  "points_cles": [
+    "Le résultat net 2025 s'établit à 12,493 milliards de FCFA, en baisse de 5% par rapport à 2024 (-618 millions de FCFA).",
+    "Les ventes de produits fabriqués progressent de 12% grâce à la hausse des prix de l'huile de palme (+20%) et du caoutchouc (+3%), compensant partiellement la baisse des volumes.",
+    "Les achats de matières premières bondissent de 15% (+3,701 milliards de FCFA) en raison de la flambée du prix d'achat du coagulum auprès des planteurs villageois, comprimant les marges.",
+    "La trésorerie nette au 31 décembre 2025 s'améliore significativement à 4,575 milliards de FCFA contre 1,442 milliard en 2024, portée par de solides flux opérationnels (22,644 milliards).",
+    "Des dividendes de 12,313 milliards de FCFA sont proposés à l'affectation, en légère baisse par rapport aux 12,965 milliards de 2024."
+  ],
+  "risques": [
+    "Concurrence accrue sur l'achat du coagulum auprès des planteurs villageois, faisant pression à la hausse sur les coûts de production du caoutchouc.",
+    "Contexte local et international plus difficile depuis le second semestre 2025, pouvant peser sur les performances futures.",
+    "Baisse des volumes vendus d'huile de palme (-5%) et d'huile de palmiste (-15%), exposant la société à un risque volumique malgré la hausse des prix.",
+    "Volatilité des prix des matières premières agricoles (coagulum, huile de palme) susceptible d'affecter les marges de manière imprévisible."
+  ],
+  "perspectives": "La société fait face à un environnement concurrentiel et de coûts plus difficile depuis le second semestre 2025, notamment sur le segment caoutchouc. La capacité d'autofinancement reste solide (18,938 milliards de FCFA) et la trésorerie s'est renforcée, offrant une marge de manœuvre. Toutefois, la pression sur les coûts d'approvisionnement en coagulum pourrait continuer de peser sur la rentabilité en 2026.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "SOGB affiche des résultats 2025 raisonnablement solides avec un chiffre d'affaires en hausse de 12%, mais un résultat net en recul de 5% à 12,493 milliards de FCFA sous l'effet de la hausse des coûts d'approvisionnement en coagulum. La trésorerie nette s'améliore fortement à 4,575 milliards de FCFA et des dividendes de 12,313 milliards sont proposés. Le contexte concurrentiel accru sur les matières premières agricoles constitue le principal risque à surveiller pour les exercices futurs.",
+  "ticker": "SOGC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260422_-_etats_financiers_syscohada_-_exercice_2025_-_sogb_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:03:27.841960+00:00",
+  "status": "ok",
+  "cached_at": 1778259807.842179
+}

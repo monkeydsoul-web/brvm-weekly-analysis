@@ -1,0 +1,78 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 85643,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_net": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires d'Africa Global Logistics Côte d'Ivoire s'élève à 85 643 MFCFA au 31 décembre 2024, représentant 98,90% du total des produits des activités ordinaires.",
+    "Le compte débours présente un solde créditeur de 22 043 MFCFA, soit 12% du total bilan, reflétant un volume élevé de commandes clients en cours de traitement.",
+    "Les commissaires aux comptes ont émis une opinion sans réserve sur les états financiers, mais signalent un manquement formel : les états financiers ont été arrêtés après le délai réglementaire de quatre mois (30 avril 2025), le Conseil d'Administration les ayant arrêtés le 14 mai 2025."
+  ],
+  "risques": [
+    "Non-respect du délai réglementaire OHADA d'arrêté des comptes (délai dépassé : arrêté le 14 mai 2025 au lieu du 30 avril 2025), constituant un manquement aux obligations comptables formelles.",
+    "Risque opérationnel lié au volume élevé de débours (22 043 MFCFA) et à la complexité de leur apurement, pouvant affecter les résultats d'exploitation.",
+    "Risque de reconnaissance anticipée des revenus compte tenu de la diversité des activités (consignation, manutention, transit, transport, agence de voyage, immobilier) et de l'importance du chiffre d'affaires comme indicateur de performance.",
+    "Retard dans l'établissement des états financiers combinés du périmètre UEMOA (comptes 2023 toujours en cours de clôture à la date du rapport), générant un risque de conformité réglementaire au niveau groupe."
+  ],
+  "perspectives": "Le rapport ne fournit pas d'informations prospectives explicites sur les perspectives de la société pour 2025. La diversification des activités (consignation, manutention, transit maritime, transport aérien/ferroviaire, agence de voyage, immobilier) offre une base de revenus variée. La mise en place en cours des états financiers combinés du groupe UEMOA pourrait améliorer la gouvernance et la transparence financière.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "Africa Global Logistics Côte d'Ivoire affiche un chiffre d'affaires de 85 643 MFCFA pour l'exercice 2024, avec une opinion d'audit sans réserve attestant de la sincérité des états financiers. Toutefois, le rapport ne fournit pas les indicateurs financiers clés (résultat net, total bilan, capitaux propres) permettant une évaluation complète de la rentabilité et de la solidité financière de la société. Des manquements formels (retard d'arrêté des comptes, retard dans les états financiers combinés groupe) et le risque lié aux débours élevés méritent une vigilance particulière de la part des investisseurs.",
+  "ticker": "BOLLORE",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250829_-_etats_financiers_et_rapport_des_cac_-_exercice_2024_-_africa_global_logistics_ci.pdf",
+  "n_pages": 11,
+  "analyzed_at": "2026-05-08T17:13:21.729539+00:00",
+  "status": "ok",
+  "cached_at": 1778260401.729804
+}

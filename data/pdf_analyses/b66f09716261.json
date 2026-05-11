@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 220113.267165,
+      "unite": "MFCFA",
+      "variation": "+8.1%"
+    },
+    "resultat_net": {
+      "valeur": 18149.967087,
+      "unite": "MFCFA",
+      "variation": "+9.6%"
+    },
+    "resultat_exploitation": {
+      "valeur": 35276.845649,
+      "unite": "MFCFA",
+      "variation": "+16.9%"
+    },
+    "total_bilan": {
+      "valeur": 177852.053839,
+      "unite": "MFCFA",
+      "variation": "+4.4%"
+    },
+    "capitaux_propres": {
+      "valeur": 29248.935686,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": 3276,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 62.06,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 8.25,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 82158.413069,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 43543.421067,
+      "unite": "MFCFA",
+      "variation": "+27.1%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de 8.1% à 220,1 milliards FCFA en 2024, porté par la croissance des ventes de produits fabriqués (+6.9%) et des ventes de marchandises (+16.9%).",
+    "Le résultat d'exploitation bondit de +16.9% à 35,3 milliards FCFA, témoignant d'une nette amélioration de la rentabilité opérationnelle et d'une hausse de la valeur ajoutée de +17.3%.",
+    "Un dividende brut de 18,097 milliards FCFA est proposé, soit environ 3 276 FCFA par action, représentant près de 99.7% du bénéfice net distribué aux actionnaires.",
+    "La trésorerie nette est négative (-44,3 milliards FCFA), reflétant un recours important aux découverts et financements bancaires à court terme.",
+    "Les charges financières augmentent à 6,3 milliards FCFA (+21.4%), signe d'une pression croissante liée à l'endettement."
+  ],
+  "risques": [
+    "Trésorerie nette fortement négative (~-44,3 milliards FCFA) indiquant une dépendance élevée aux financements bancaires à court terme.",
+    "Hausse des frais financiers (+21.4%) pouvant peser davantage sur la rentabilité en cas de remontée des taux d'intérêt.",
+    "Volatilité des coûts des matières premières et des achats, qui représentent une part significative des charges d'exploitation.",
+    "Risque de change lié aux opérations en devises étrangères (présence d'écarts de conversion à l'actif et au passif)."
+  ],
+  "perspectives": "Nestlé Côte d'Ivoire affiche une trajectoire de croissance solide avec des marges en amélioration, portée par la dynamique commerciale et l'optimisation opérationnelle. La forte distribution de dividendes témoigne de la confiance du management dans la génération de cash-flows futurs. Cependant, la maîtrise de l'endettement à court terme et des charges financières reste un enjeu clé pour consolider la performance.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Nestlé Côte d'Ivoire enregistre en 2024 d'excellents résultats avec un chiffre d'affaires de 220,1 milliards FCFA (+8.1%) et un bénéfice net de 18,1 milliards FCFA (+9.6%), confirmant sa position de leader agroalimentaire dans la zone UEMOA. La rentabilité opérationnelle s'améliore nettement avec un EBITDA en hausse de 27% et un résultat d'exploitation en progression de 17%. La quasi-totalité du bénéfice est distribuée en dividendes (~3 276 FCFA/action), faisant de NTLC une valeur de rendement attractive, malgré une trésorerie nette négative à surveiller.",
+  "ticker": "NTLC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250505_-_etats_financiers_-_exercice_2024_-_nestle_ci_annule_et_remplace_le_precedent.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T16:49:43.357891+00:00",
+  "status": "ok",
+  "cached_at": 1778258983.358113
+}

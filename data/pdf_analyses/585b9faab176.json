@@ -1,0 +1,79 @@
+{
+  "annee": 2022,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 36174.563,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_net": {
+      "valeur": -6382.6,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": -4639.967,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": 22361.43,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": -10773.429,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": -17.64,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 12699.234,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": -5531.206,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Unilever Côte d'Ivoire enregistre une perte nette de -6,38 milliards FCFA au 31/12/2022, en forte dégradation par rapport à un bénéfice de 175 millions FCFA l'exercice précédent.",
+    "Les capitaux propres sont négatifs à -10,77 milliards FCFA, traduisant une situation de capitaux propres obérés et une dépendance aux dettes financières pour financer l'activité.",
+    "Le chiffre d'affaires recule significativement de 46,06 milliards FCFA à 36,17 milliards FCFA, soit une baisse d'environ 21,5% par rapport à l'exercice précédent.",
+    "La trésorerie nette est fortement négative (-12,70 milliards FCFA) du fait de crédits de trésorerie importants (15,11 milliards FCFA) face à une trésorerie active limitée (2,41 milliards FCFA)."
+  ],
+  "risques": [
+    "Capitaux propres négatifs (-10,77 milliards FCFA) indiquant une situation de solvabilité critique et un risque de continuité d'exploitation.",
+    "Endettement financier élevé et trésorerie nette très négative exposant la société à un risque de liquidité important.",
+    "Recul marqué du chiffre d'affaires (-21,5%) suggérant une perte de parts de marché ou une contraction de la demande.",
+    "Résultat d'exploitation négatif (-4,64 milliards FCFA) reflétant une structure de coûts non maîtrisée par rapport aux revenus générés."
+  ],
+  "perspectives": "La situation financière d'Unilever Côte d'Ivoire est très préoccupante avec des capitaux propres négatifs, une perte nette significative et un chiffre d'affaires en forte baisse. Un redressement nécessiterait une restructuration financière profonde, incluant potentiellement une recapitalisation et une réduction des charges opérationnelles. Aucun dividende n'est envisageable dans ces conditions.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "Unilever Côte d'Ivoire affiche une situation financière alarmante au 31/12/2022 avec une perte nette de 6,38 milliards FCFA, des capitaux propres négatifs de -10,77 milliards FCFA et un chiffre d'affaires en recul de 21,5% à 36,17 milliards FCFA. La trésorerie nette est fortement négative (-12,70 milliards FCFA), traduisant une dépendance critique aux crédits bancaires à court terme. Cette configuration représente un risque élevé pour tout investisseur et ne laisse aucune place à une distribution de dividendes.",
+  "ticker": "UNLC",
+  "doc_type": "Etats financiers",
+  "year": 2023,
+  "url": "https://www.brvm.org/sites/default/files/20230503_-_etats_financiers_exercice_2022_-_unilever_ci.pdf",
+  "n_pages": 2,
+  "analyzed_at": "2026-05-11T10:51:24.566009+00:00",
+  "status": "ok",
+  "cached_at": 1778496684.566227
+}

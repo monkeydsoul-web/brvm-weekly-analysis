@@ -1,0 +1,81 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers consolidés annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1776443,
+      "unite": "MFCFA",
+      "variation": "+9.6%"
+    },
+    "resultat_net": {
+      "valeur": 393662,
+      "unite": "MFCFA",
+      "variation": "+18.7%"
+    },
+    "resultat_exploitation": {
+      "valeur": 619524,
+      "unite": "MFCFA",
+      "variation": "+20.1%"
+    },
+    "total_bilan": {
+      "valeur": 3105287,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": 1274638,
+      "unite": "MFCFA",
+      "variation": "+19.6%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 30.9,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 22.2,
+      "unite": "%",
+      "variation": "+1.7pts"
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 839200,
+      "unite": "MFCFA",
+      "variation": "+12.3%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires consolidé atteint 1 776,4 Mds FCFA en hausse de +9,6% YoY, tiré par la data mobile (+19,8%), la fibre (+24%) et Orange Money (+16%).",
+    "L'EBITDAal progresse de +12,3% à 839,2 Mds FCFA, avec un taux de marge de 47,2%, supérieur à la croissance du CA grâce à la maîtrise des charges.",
+    "Le résultat net bondit de +18,7% à 393,7 Mds FCFA (22,2% du CA), porté par la dynamique commerciale dans tous les pays de présence.",
+    "Les investissements atteignent 300,5 Mds FCFA (+18,5% YoY), représentant 16,9% du CA, notamment pour le déploiement de la fibre, de la 4G et de la 5G.",
+    "Le parc clients dépasse 42,4 millions (+3,3% YoY) avec une forte accélération de la data mobile (+19,7%), du broadband fixe (+23,8%) et d'Orange Money (+8,4%)."
+  ],
+  "risques": [
+    "Environnement politique et social difficile dans certains pays de présence, notamment la sortie du Mali de la CEDEAO effective depuis janvier 2025.",
+    "Concurrence accrue sur les marchés mobiles et Mobile Money, avec l'octroi d'agréments à de nouveaux acteurs en Orange Money au Sénégal.",
+    "Inflation élevée en Sierra Leone (36,6%) et en Guinée (11%) pouvant peser sur le pouvoir d'achat des clients et les coûts opérationnels.",
+    "Obligations réglementaires (identification NINA au Mali, limitation du nombre de numéros) susceptibles de réduire le parc actif.",
+    "Hausse significative de la charge fiscale : l'impôt sur les sociétés décaissé atteint 182,5 Mds FCFA, en lien avec la forte rentabilité du Groupe."
+  ],
+  "perspectives": "En 2025, Sonatel célébrera ses 40 ans avec une stratégie axée sur le renforcement des infrastructures 5G et fibre optique, l'accélération de l'innovation B2B et des services financiers digitaux, et l'exploration de nouveaux marchés. Le Groupe ambitionne de maintenir une croissance durable en s'appuyant sur la digitalisation, l'intelligence artificielle et une expansion continue de l'inclusion numérique dans ses pays de présence.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Sonatel affiche en 2024 des résultats remarquables avec un CA en hausse de +9,6% à 1 776 Mds FCFA et un résultat net en progression de +18,7% à 394 Mds FCFA, confirmant la solidité et la résilience du Groupe dans tous ses marchés. La rentabilité s'améliore nettement (marge nette à 22,2%, EBITDAal à 47,2%) tandis que les investissements soutenus (+300 Mds FCFA) préparent la croissance future via la fibre, la 4G et la 5G. Le bilan est solide avec des capitaux propres de 1 275 Mds FCFA et une trésorerie en croissance à 460 Mds FCFA, faisant de SNTS une valeur de référence sur la BRVM.",
+  "ticker": "SNTS",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20250221_-_etats_financiers_-_exercice_2024_-_sonatel_sn.pdf",
+  "n_pages": 33,
+  "analyzed_at": "2026-05-08T16:33:05.393044+00:00",
+  "status": "ok",
+  "cached_at": 1778257985.393384
+}

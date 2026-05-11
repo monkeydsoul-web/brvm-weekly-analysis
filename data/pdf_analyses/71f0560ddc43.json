@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 89414695,
+      "unite": "MFCFA",
+      "variation": "+21.8%"
+    },
+    "resultat_net": {
+      "valeur": 13110790,
+      "unite": "MFCFA",
+      "variation": "+149%"
+    },
+    "resultat_exploitation": {
+      "valeur": 18383382,
+      "unite": "MFCFA",
+      "variation": "+139.4%"
+    },
+    "total_bilan": {
+      "valeur": 88962049,
+      "unite": "MFCFA",
+      "variation": "-0.03%"
+    },
+    "capitaux_propres": {
+      "valeur": 68898842,
+      "unite": "MFCFA",
+      "variation": "+11.2%"
+    },
+    "dividende_par_action": {
+      "valeur": 12965304,
+      "unite": "MFCFA",
+      "variation": "+161%"
+    },
+    "roe": {
+      "valeur": 19.03,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 14.65,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -1433176,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 24974609,
+      "unite": "MFCFA",
+      "variation": "+62.3%"
+    }
+  },
+  "points_cles": [
+    "Le résultat net 2024 bondit de 149% à 13,11 milliards FCFA, porté par la hausse des prix du caoutchouc (+29%) et de l'huile de palmiste (+14%).",
+    "Les ventes de produits fabriqués progressent de 22% (+15,44 milliards FCFA), grâce à la fois à la hausse des prix et à l'augmentation des volumes vendus.",
+    "L'EBITDA s'améliore significativement de 62% à 24,97 milliards FCFA, reflétant une forte amélioration de la rentabilité opérationnelle.",
+    "Les dividendes proposés s'élèvent à 12,97 milliards FCFA, soit un taux de distribution de près de 99% du résultat net.",
+    "La dette financière est quasi nulle (9,3 millions FCFA contre 5,2 milliards en 2023), conférant à la société un bilan très solide."
+  ],
+  "risques": [
+    "Forte dépendance aux prix mondiaux des matières premières (caoutchouc, huile de palme), exposant la société à une volatilité significative des revenus.",
+    "Hausse de 25% des achats de matières premières liée à l'augmentation du prix du coagulum auprès des planteurs villageois, pouvant peser sur les marges.",
+    "Variation négative du besoin en fonds de roulement (-5,2 milliards FCFA) indiquant une pression sur la trésorerie opérationnelle.",
+    "Charges fiscales en forte hausse (+2,1 milliards FCFA) en lien avec l'amélioration des résultats, réduisant partiellement le bénéfice net."
+  ],
+  "perspectives": "La SOGB bénéficie d'une dynamique commerciale favorable portée par la hausse des prix mondiaux du caoutchouc et de l'huile de palmiste. La quasi-disparition de la dette financière renforce la capacité d'investissement et de distribution. Les perspectives restent positives sous réserve du maintien des niveaux de prix des matières premières sur les marchés internationaux.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "La Société des Caoutchoucs de Grand-Béréby (SOGC) affiche en 2024 une performance exceptionnelle avec un résultat net en hausse de 149% à 13,11 milliards FCFA, soutenu par la flambée des prix du caoutchouc et de l'huile de palmiste. La structure financière est assainie avec une dette quasi nulle et des capitaux propres représentant plus de 77% du bilan total. La généreuse politique de dividendes (~99% du résultat distribué) et la forte amélioration de la rentabilité en font un titre attractif pour les investisseurs à la recherche de rendement sur la BRVM.",
+  "ticker": "SOGC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250616_-_etats_financiers_-_exercice_2024_-_sogb_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:03:48.892378+00:00",
+  "status": "ok",
+  "cached_at": 1778259828.892666
+}

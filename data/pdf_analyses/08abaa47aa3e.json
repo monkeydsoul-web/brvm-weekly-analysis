@@ -1,0 +1,81 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers consolidés annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1197.1,
+      "unite": "MFCFA",
+      "variation": "+10.4%"
+    },
+    "resultat_net": {
+      "valeur": 167.8,
+      "unite": "MFCFA",
+      "variation": "+6.1%"
+    },
+    "resultat_exploitation": {
+      "valeur": 287.2,
+      "unite": "MFCFA",
+      "variation": "+9.1%"
+    },
+    "total_bilan": {
+      "valeur": 2554.1,
+      "unite": "MFCFA",
+      "variation": "+10.6%"
+    },
+    "capitaux_propres": {
+      "valeur": 707.8,
+      "unite": "MFCFA",
+      "variation": "-0.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 800,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 18.3,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 14.0,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 110.1,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 424.1,
+      "unite": "MFCFA",
+      "variation": "+8.7%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires consolidé progresse de +10,4% à 1 197,1 milliards FCFA, porté par la croissance dans les trois pays (Côte d'Ivoire, Burkina Faso, Libéria).",
+    "Le résultat net s'établit à 167,8 milliards FCFA (+6,1%), pénalisé par des amendes douanières exceptionnelles au Burkina Faso ; hors cet impact, la croissance aurait été de +9,3%.",
+    "Un dividende brut de 800 FCFA par action est proposé, prélevé sur le compte Report à Nouveau, pour un montant global de 120,5 milliards FCFA.",
+    "L'EBITDAaL atteint 424,1 milliards FCFA (+8,7%), reflétant une bonne maîtrise des coûts malgré une pression fiscale et réglementaire accrue.",
+    "Le total bilan progresse de +10,6% à 2 554,1 milliards FCFA, avec un eCapex en hausse à 184 milliards FCFA contre 159,1 milliards en 2024."
+  ],
+  "risques": [
+    "Pression réglementaire et fiscale accrue pesant sur la rentabilité, notamment via des impôts et taxes d'exploitation en hausse de +20,8%.",
+    "Risque de change impactant les filiales hors zone CFA (Orange Libéria), avec des écarts de conversion négatifs de -13,2 milliards en 2025.",
+    "Amendes douanières exceptionnelles à Orange Burkina Faso ayant réduit la croissance du résultat net de ~3,2 points de pourcentage.",
+    "Augmentation significative du coût de l'endettement financier brut (+26,8%) et des passifs financiers non courants (+40,2%), signalant un recours accru à la dette.",
+    "Baisse des disponibilités de -21,3% à 225,8 milliards FCFA, liée à des flux de financement négatifs de -214,4 milliards incluant 192,5 milliards de dividendes versés."
+  ],
+  "perspectives": "Le Groupe Orange CI affiche une dynamique de croissance solide dans ses trois marchés, soutenue par des investissements continus dans les réseaux mobiles, la fibre optique et Orange Money. La stratégie d'expansion des capacités réseau et la diversification des services (data, Orange Energies) devraient maintenir la trajectoire haussière du chiffre d'affaires. Toutefois, la vigilance s'impose face à la pression fiscale et aux risques réglementaires qui pourraient continuer de peser sur les marges.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Le Groupe Orange Côte d'Ivoire livre une solide performance en 2025 avec un chiffre d'affaires en hausse de +10,4% à 1 197,1 milliards FCFA et un résultat net de 167,8 milliards FCFA (+6,1%), malgré des éléments exceptionnels défavorables. La distribution d'un dividende brut de 800 FCFA par action témoigne de la confiance du management dans la solidité financière du groupe. La croissance des investissements (eCapex +15,7%) et l'expansion dans trois pays constituent des catalyseurs positifs pour la création de valeur à moyen terme.",
+  "ticker": "ORAC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260217_-_etats_financiers_-_exercice_2025_-_orange_ci.pdf",
+  "n_pages": 14,
+  "analyzed_at": "2026-05-08T16:47:36.201755+00:00",
+  "status": "ok",
+  "cached_at": 1778258856.2018838
+}

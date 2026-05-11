@@ -1,0 +1,80 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 311395,
+      "unite": "MFCFA",
+      "variation": "+10.5%"
+    },
+    "resultat_net": {
+      "valeur": 15078,
+      "unite": "MFCFA",
+      "variation": "+1138.9%"
+    },
+    "resultat_exploitation": {
+      "valeur": 16807,
+      "unite": "MFCFA",
+      "variation": "+136.3%"
+    },
+    "total_bilan": {
+      "valeur": 327698,
+      "unite": "MFCFA",
+      "variation": "-1.9%"
+    },
+    "capitaux_propres": {
+      "valeur": 152909,
+      "unite": "MFCFA",
+      "variation": "+10.9%"
+    },
+    "dividende_par_action": {
+      "valeur": 4938252000,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 9.86,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 4.84,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 115610,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 41205,
+      "unite": "MFCFA",
+      "variation": "+16.6%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de +10.5% à 311,4 milliards FCFA, témoignant d'une solide dynamique commerciale.",
+    "Le résultat net bondit de 1 217 à 15 078 millions FCFA grâce à un résultat hors activités ordinaires exceptionnel de 7 542 millions FCFA.",
+    "L'EBE s'améliore significativement de +16.6% à 41 205 millions FCFA, reflétant une meilleure maîtrise des coûts opérationnels.",
+    "Les capitaux propres se renforcent à 152 909 millions FCFA (+10.9%), consolidant la solidité financière du bilan.",
+    "La trésorerie nette est négative à -55 415 millions FCFA (trésorerie actif 1 281 vs trésorerie passif 56 696), signalant une dépendance aux financements court terme."
+  ],
+  "risques": [
+    "Trésorerie nette fortement négative (-55 415 MFCFA), exposant la société à un risque de liquidité à court terme.",
+    "Charges financières élevées (5 527 MFCFA) pesant sur le résultat financier, avec un résultat financier déficitaire de -5 521 MFCFA.",
+    "Résultat net 2023 fortement soutenu par un résultat exceptionnel (HAO de +7 542 MFCFA) dont la récurrence n'est pas garantie.",
+    "Niveau d'endettement financier important (dettes financières de 60 195 MFCFA) malgré un remboursement partiel en cours."
+  ],
+  "perspectives": "SOLIBRA affiche une nette amélioration de ses performances opérationnelles en 2023, portée par la croissance du chiffre d'affaires et la progression de l'EBE. Un dividende de 4 938 252 000 FCFA est proposé à l'AGO, illustrant la confiance de la direction. Toutefois, la vigilance reste de mise sur la gestion de la liquidité et la réduction de l'endettement financier.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "SOLIBRA (SLBC) affiche en 2023 des résultats en forte amélioration avec un bénéfice net de 15 078 MFCFA contre 1 217 MFCFA en 2022, porté par la croissance organique (+10.5% de CA) et des éléments exceptionnels favorables. La solidité du bilan se renforce avec des capitaux propres en hausse à 152,9 milliards FCFA et un EBE en progression à 41,2 milliards FCFA. Le principal point de vigilance reste la trésorerie nette négative et le niveau d'endettement financier qui constituent des risques structurels à surveiller.",
+  "ticker": "SLBC",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20240513_-_etats_financiers_de_synthese_-_exercice_2023_-_solibra_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:01:26.553446+00:00",
+  "status": "ok",
+  "cached_at": 1778259686.553726
+}

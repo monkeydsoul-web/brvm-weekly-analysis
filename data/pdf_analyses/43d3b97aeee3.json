@@ -1,0 +1,81 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 132725,
+      "unite": "MFCFA",
+      "variation": "+8.5%"
+    },
+    "resultat_net": {
+      "valeur": 63482,
+      "unite": "MFCFA",
+      "variation": "+10.4%"
+    },
+    "resultat_exploitation": {
+      "valeur": 73995,
+      "unite": "MFCFA",
+      "variation": "+14.9%"
+    },
+    "total_bilan": {
+      "valeur": 2054491,
+      "unite": "MFCFA",
+      "variation": "+0.2%"
+    },
+    "capitaux_propres": {
+      "valeur": 218573,
+      "unite": "MFCFA",
+      "variation": "+9.6%"
+    },
+    "dividende_par_action": {
+      "valeur": 888,
+      "unite": "FCFA",
+      "variation": "+10%"
+    },
+    "roe": {
+      "valeur": 29.0,
+      "unite": "%",
+      "variation": "+0.2 pts"
+    },
+    "marge_nette": {
+      "valeur": 47.8,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 75794,
+      "unite": "MFCFA",
+      "variation": "+12.6%"
+    }
+  },
+  "points_cles": [
+    "Le résultat net atteint 63,5 milliards FCFA en hausse de 10,4%, porté par une croissance du PNB de 8,5% à 132,7 milliards FCFA.",
+    "Le coefficient d'exploitation s'améliore de 205 points de base à 42,9%, reflétant une efficacité opérationnelle renforcée.",
+    "Les dépôts de la clientèle progressent fortement de 15,1% à 1 626 milliards FCFA, tandis que les crédits franchissent le cap des 1 000 milliards (+8%).",
+    "Le dividende proposé de 888 FCFA par action (+10%) représente un taux de distribution de 77% du résultat net.",
+    "Le ROE s'établit à 29% et le ROA à 3,1%, confirmant la solidité et la rentabilité du modèle bancaire."
+  ],
+  "risques": [
+    "Ralentissement de la croissance mondiale (3,1% en 2025) et incertitudes géopolitiques et commerciales pouvant affecter l'activité.",
+    "Concurrence accrue dans le secteur bancaire ivoirien et pression sur les marges.",
+    "Cadre réglementaire plus exigeant imposé par la BCEAO pouvant alourdir les contraintes opérationnelles.",
+    "Baisse des taux directeurs de la BCEAO (-50 pb) susceptible de comprimer la marge nette d'intérêts à moyen terme.",
+    "Service de la dette et inflation alimentaire en Afrique pouvant peser sur la qualité du portefeuille de crédit."
+  ],
+  "perspectives": "Ecobank Côte d'Ivoire aborde 2026 avec confiance, soutenue par une Côte d'Ivoire attendue en croissance à 6,7% et la mise en œuvre du Plan National de Développement 2026-2030. La banque poursuit son plan stratégique axé sur la croissance, la transformation et le rendement, en misant sur l'innovation numérique, l'interopérabilité et une gestion prudente des risques. Elle réaffirme son ambition de demeurer la banque panafricaine de référence tout en intégrant les engagements ESG dans son modèle de création de valeur.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Ecobank Côte d'Ivoire livre en 2025 une performance financière solide et en nette progression, avec un résultat net de 63,5 milliards FCFA (+10,4%), un ROE de 29% et un coefficient d'exploitation en amélioration à 42,9%. La banque propose un dividende de 888 FCFA par action (+10%), témoignant d'une politique de distribution généreuse et d'une solidité financière confirmée. Les fondamentaux bilantaires sont robustes avec des dépôts en forte hausse (+15,1%) et des capitaux propres en progression de 9,6%, positionnant favorablement la valeur pour les investisseurs.",
+  "ticker": "ECOC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260414_-_rapport_dactivites_et_etats_financiers_-_exercice_2025_-_ecobank_ci.pdf",
+  "n_pages": 12,
+  "analyzed_at": "2026-05-08T16:48:26.041370+00:00",
+  "status": "ok",
+  "cached_at": 1778258906.041643
+}

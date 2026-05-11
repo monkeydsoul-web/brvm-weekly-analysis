@@ -1,0 +1,81 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 172235,
+      "unite": "MFCFA",
+      "variation": "-1.8%"
+    },
+    "resultat_net": {
+      "valeur": 3959,
+      "unite": "MFCFA",
+      "variation": "-35.4%"
+    },
+    "resultat_exploitation": {
+      "valeur": 6881,
+      "unite": "MFCFA",
+      "variation": "-26.7%"
+    },
+    "total_bilan": {
+      "valeur": 433424,
+      "unite": "MFCFA",
+      "variation": "+11.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 25798,
+      "unite": "MFCFA",
+      "variation": "-3.2%"
+    },
+    "dividende_par_action": {
+      "valeur": 800,
+      "unite": "FCFA",
+      "variation": "+3.2%"
+    },
+    "roe": {
+      "valeur": 15.3,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 2.3,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -24912,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 17946,
+      "unite": "MFCFA",
+      "variation": "-20.6%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule légèrement à 172,2 milliards FCFA (-1,8%) en raison d'une baisse significative des travaux et services vendus, partiellement compensée par la progression des ventes d'eau.",
+    "Le résultat net ressort à 3,6 milliards FCFA (SYSCOHADA) / 3,96 milliards FCFA (IFRS), en baisse notable par rapport à 2023, pénalisé par la hausse des coûts directs d'exploitation (énergie, produits chimiques) et la baisse de l'activité travaux.",
+    "Amélioration majeure de la trésorerie nette qui passe de -64,6 milliards FCFA à -24,9 milliards FCFA, grâce au recouvrement partiel des créances sectorielles et une gestion optimisée des flux.",
+    "La production d'eau potable atteint 378,5 millions de m³, en croissance de 8%, reflétant la dynamique opérationnelle positive.",
+    "Un dividende de 3,6 milliards FCFA est proposé (800 FCFA/action), représentant la quasi-totalité du résultat net."
+  ],
+  "risques": [
+    "Trésorerie nette encore négative à -24,9 milliards FCFA malgré l'amélioration, exposant la société à un risque de liquidité persistant.",
+    "Créances et emplois assimilés très élevés à 300,2 milliards FCFA (SYSCOHADA), dont des créances sectorielles significatives, impliquant un risque de recouvrement important.",
+    "Forte dépendance aux coûts de l'énergie et des produits chimiques, susceptibles de peser sur les marges en cas de hausse des prix.",
+    "Baisse structurelle de l'activité travaux qui comprime le chiffre d'affaires et les résultats.",
+    "Passif circulant élevé à 278,4 milliards FCFA (SYSCOHADA), reflétant une pression sur le besoin en fonds de roulement."
+  ],
+  "perspectives": "La SODECI aborde 2025 avec ambition en s'appuyant sur une trésorerie améliorée et une production en hausse. Les priorités porteront sur l'optimisation opérationnelle, la digitalisation des réseaux et l'accompagnement des objectifs nationaux d'accès universel à l'eau potable. La poursuite du recouvrement des créances sectorielles sera déterminante pour consolider l'assise financière.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "La SODECI affiche en 2024 une performance opérationnelle solide avec une production d'eau en hausse de 8%, mais son résultat net recule de plus de 35% à 3,6 milliards FCFA sous l'effet de la hausse des coûts et du recul de l'activité travaux. Le point positif majeur reste l'amélioration significative de la trésorerie nette (-24,9 Mds FCFA vs -64,6 Mds FCFA), témoignant d'un meilleur recouvrement des créances. Le dividende proposé de 800 FCFA/action absorbe la quasi-totalité du résultat, limitant la capacité de renforcement des fonds propres.",
+  "ticker": "SDCC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250430_-_etats_financiers_-_exercice_2024_-_sode_ci.pdf",
+  "n_pages": 3,
+  "analyzed_at": "2026-05-08T17:06:48.095939+00:00",
+  "status": "ok",
+  "cached_at": 1778260008.096171
+}

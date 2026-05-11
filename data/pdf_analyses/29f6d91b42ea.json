@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels individuels SYSCOHADA",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 214312,
+      "unite": "MFCFA",
+      "variation": "+26.2%"
+    },
+    "resultat_net": {
+      "valeur": 44174,
+      "unite": "MFCFA",
+      "variation": "+256.3%"
+    },
+    "resultat_exploitation": {
+      "valeur": 57069,
+      "unite": "MFCFA",
+      "variation": "+251.3%"
+    },
+    "total_bilan": {
+      "valeur": 94926,
+      "unite": "MFCFA",
+      "variation": "+168.0%"
+    },
+    "capitaux_propres": {
+      "valeur": 52265,
+      "unite": "MFCFA",
+      "variation": "+125.4%"
+    },
+    "dividende_par_action": {
+      "valeur": 2375,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 84.5,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 20.4,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -48194,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 57253,
+      "unite": "MFCFA",
+      "variation": "+244.7%"
+    }
+  },
+  "points_cles": [
+    "Le bénéfice net bondit de +256% à 44,2 milliards FCFA en 2024, tiré par une forte progression du chiffre d'affaires et une amélioration significative de la valeur ajoutée.",
+    "La trésorerie nette explose à 48,2 milliards FCFA au 31 décembre 2024 contre 7,2 milliards en 2023, reflétant une génération de cash exceptionnelle.",
+    "Un dividende brut de 2 375 FCFA par action est proposé, représentant un total de 42,6 milliards FCFA distribués aux actionnaires, soit un taux de distribution de ~96% du bénéfice net.",
+    "La valeur ajoutée triple à 60,6 milliards FCFA contre 19,6 milliards en 2023, traduisant une amélioration structurelle de la rentabilité opérationnelle.",
+    "L'entreprise est quasiment sans dette financière (7,95 millions FCFA d'autres dettes financières), avec une position de trésorerie nette très confortable."
+  ],
+  "risques": [
+    "Concentration du chiffre d'affaires sur le secteur du tabac, exposé à des risques réglementaires croissants (taxes, restrictions publicitaires, interdictions).",
+    "Taux de distribution de dividendes très élevé (~96% du bénéfice net), limitant les capacités de réinvestissement et de croissance future.",
+    "Forte dépendance aux achats de marchandises (149,8 milliards FCFA), exposant la société aux fluctuations des prix des matières premières et aux risques de change.",
+    "La forte augmentation du passif circulant (42,6 milliards vs 13,7 milliards en 2023) mérite une surveillance attentive quant à la nature des engagements court terme."
+  ],
+  "perspectives": "SITAB affiche une performance exceptionnelle en 2024 avec un résultat net multiplié par 3,6. La société dispose d'une trésorerie nette très solide de 48,2 milliards FCFA, lui permettant de maintenir une politique de dividendes généreuse. Les perspectives restent dépendantes de l'environnement réglementaire du secteur du tabac en Côte d'Ivoire et dans la zone UEMOA.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "SITAB (STBC) publie des résultats 2024 exceptionnels avec un bénéfice net de 44,2 milliards FCFA (+256%) et un EBE de 57,3 milliards FCFA, soutenus par une forte progression des ventes et de la valeur ajoutée. La société propose un dividende brut record de 2 375 FCFA par action, offrant un rendement attractif aux actionnaires. Avec une trésorerie nette de 48,2 milliards FCFA et zéro dette financière significative, le bilan est d'une solidité remarquable.",
+  "ticker": "STBC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250721_-_etats_financiers_individuels_syscohada_-_sitab_ci_annule_remplace_le_precedent.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:07:32.851909+00:00",
+  "status": "ok",
+  "cached_at": 1778260052.852136
+}

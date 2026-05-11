@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 158313,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_net": {
+      "valeur": 4693,
+      "unite": "MFCFA",
+      "variation": "-26.7%"
+    },
+    "resultat_exploitation": {
+      "valeur": 7847,
+      "unite": "MFCFA",
+      "variation": "-29.4%"
+    },
+    "total_bilan": {
+      "valeur": 85013,
+      "unite": "MFCFA",
+      "variation": "-2.7%"
+    },
+    "capitaux_propres": {
+      "valeur": 19453,
+      "unite": "MFCFA",
+      "variation": "+8.2%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 24.1,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 2.97,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 625,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 9374,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires s'établit à 158,3 milliards FCFA pour l'exercice 2024, constitué principalement de ventes de marchandises (154,2 Mds) et de services (4,1 Mds).",
+    "Le résultat net recule significativement à 4,69 milliards FCFA contre 6,40 milliards en 2023, soit une baisse de 26,7%, pénalisé par une charge d'impôt de 2,27 milliards.",
+    "La trésorerie nette passe en territoire négatif à -624 millions FCFA fin 2024 contre +4,23 milliards fin 2023, reflétant une dégradation de la position de liquidité.",
+    "Les capitaux propres progressent à 19,45 milliards FCFA grâce notamment à un report à nouveau en hausse à 3,44 milliards, malgré la baisse du résultat.",
+    "Les dettes fournisseurs restent élevées à 35,95 milliards FCFA et les crédits bancaires à court terme augmentent à 4,49 milliards, signalant une pression sur le fonds de roulement."
+  ],
+  "risques": [
+    "Dégradation de la trésorerie nette devenue négative (-624 millions FCFA), avec un recours croissant aux crédits bancaires à court terme (4,49 Mds vs 1,5 Mds en N-1).",
+    "Baisse sensible de la rentabilité nette (-26,7%) et de la marge nette (2,97% vs ~3,97% en N-1), reflétant une pression sur les marges opérationnelles.",
+    "Flux de trésorerie d'investissement fortement négatifs (-8,74 milliards) liés à d'importantes acquisitions d'immobilisations corporelles, réduisant les liquidités disponibles.",
+    "Niveau élevé du passif circulant (60 milliards FCFA) concentrant un risque de liquidité à court terme face à un actif circulant de 56,5 milliards."
+  ],
+  "perspectives": "CFAO Mobility Côte d'Ivoire maintient une activité commerciale soutenue avec un chiffre d'affaires dépassant 158 milliards FCFA, mais fait face à une contraction de sa rentabilité et d'une dégradation de sa position de trésorerie en 2024. Les investissements significatifs réalisés (notamment en terrains et bâtiments avec des placements nets en hausse) pourraient soutenir la capacité opérationnelle à moyen terme, sous réserve d'un redressement des marges et d'une meilleure gestion du besoin en fonds de roulement.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "CFAO Mobility Côte d'Ivoire affiche un résultat net en baisse de 26,7% à 4,69 milliards FCFA en 2024, malgré un chiffre d'affaires robuste de 158,3 milliards FCFA. La trésorerie nette devient négative (-624 millions FCFA) et le recours à l'endettement bancaire à court terme s'accroît, signalant des tensions sur la liquidité. Si la structure bilancielle reste solide avec des capitaux propres en légère hausse à 19,45 milliards, la contraction des marges et la dégradation du cash-flow appellent à la vigilance avant tout engagement d'investissement.",
+  "ticker": "CFAC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250516_-_etats_financiers_-_exercice_2024_-_cfao_motors_ci.pdf",
+  "n_pages": 5,
+  "analyzed_at": "2026-05-08T17:10:06.755896+00:00",
+  "status": "ok",
+  "cached_at": 1778260206.756161
+}

@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 233261.163,
+      "unite": "MFCFA",
+      "variation": "+5.97%"
+    },
+    "resultat_net": {
+      "valeur": 18426.899,
+      "unite": "MFCFA",
+      "variation": "+1.53%"
+    },
+    "resultat_exploitation": {
+      "valeur": 37687.318,
+      "unite": "MFCFA",
+      "variation": "+6.83%"
+    },
+    "total_bilan": {
+      "valeur": 189958.728,
+      "unite": "MFCFA",
+      "variation": "+6.80%"
+    },
+    "capitaux_propres": {
+      "valeur": 29587.107,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": 1680,
+      "unite": "FCFA",
+      "variation": "-48.75%"
+    },
+    "roe": {
+      "valeur": 62.27,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 7.9,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 86926.764,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 46171.248,
+      "unite": "MFCFA",
+      "variation": "+6.04%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de près de 6% à 233,3 milliards FCFA, porté par la croissance des ventes de produits fabriqués (+6,3%) et des ventes de marchandises (+4%).",
+    "Le résultat net ressort à 18,4 milliards FCFA en légère hausse de +1,5%, malgré une forte augmentation des frais financiers (+25,8%) et des dotations aux amortissements (+22,8%).",
+    "Le dividende brut proposé est fortement réduit à 9,27 milliards FCFA contre 18,1 milliards en 2024, soit environ 1 680 FCFA par action, traduisant une politique de rétention de trésorerie accrue.",
+    "L'EBE (EBITDA) progresse à 46,2 milliards FCFA (+6%), confirmant une amélioration de la performance opérationnelle courante.",
+    "La trésorerie active s'améliore significativement à 9,3 milliards FCFA contre 2,6 milliards en 2024, mais la trésorerie passif reste très élevée à 56,1 milliards FCFA."
+  ],
+  "risques": [
+    "Niveau élevé de trésorerie passif (56,1 milliards FCFA) et d'endettement financier (emprunts à 32,1 milliards + autres dettes financières à 8,1 milliards), exposant la société à un risque de liquidité.",
+    "Hausse significative des frais financiers (+25,8% à 7,96 milliards FCFA), qui pèse sur la rentabilité nette et reflète un coût croissant de la dette.",
+    "Pression sur les coûts d'exploitation, notamment les matières premières et services extérieurs, pouvant comprimer les marges en cas de retournement des prix.",
+    "Forte réduction du dividende distribué (-49%) pourrait décevoir les actionnaires et peser sur le cours boursier à court terme."
+  ],
+  "perspectives": "Nestle Côte d'Ivoire affiche une trajectoire de croissance solide avec un chiffre d'affaires en hausse et une amélioration de l'EBE, suggérant une dynamique commerciale favorable. Le renforcement des investissements (immobilisations corporelles en hausse de +16%) laisse entrevoir une capacité de production accrue pour les prochains exercices. Toutefois, la maîtrise de l'endettement et des frais financiers constitue un enjeu clé pour préserver la rentabilité nette.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "Nestle Côte d'Ivoire clôture l'exercice 2025 avec un chiffre d'affaires de 233,3 milliards FCFA (+6%) et un bénéfice net de 18,4 milliards FCFA (+1,5%), témoignant d'une performance commerciale robuste. La forte réduction du dividende distribué (de 18,1 à 9,3 milliards FCFA) et la montée des frais financiers constituent des signaux prudentiels pour l'investisseur. Le dossier reste fondamentalement solide mais nécessite une vigilance sur la structure financière et la politique de distribution.",
+  "ticker": "NTLC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_-_exercice_2025_-_nestle_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T16:49:22.430134+00:00",
+  "status": "ok",
+  "cached_at": 1778258962.430413
+}

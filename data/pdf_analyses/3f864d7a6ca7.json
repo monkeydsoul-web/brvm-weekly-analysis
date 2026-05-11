@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 229061,
+      "unite": "MFCFA",
+      "variation": "-7.5%"
+    },
+    "resultat_net": {
+      "valeur": 8698,
+      "unite": "MFCFA",
+      "variation": "-49.6%"
+    },
+    "resultat_exploitation": {
+      "valeur": 12036,
+      "unite": "MFCFA",
+      "variation": "-57.9%"
+    },
+    "total_bilan": {
+      "valeur": 163113,
+      "unite": "MFCFA",
+      "variation": "-11.4%"
+    },
+    "capitaux_propres": {
+      "valeur": 35294,
+      "unite": "MFCFA",
+      "variation": "-1.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 1119,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 24.6,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 3.8,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 418,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 13030,
+      "unite": "MFCFA",
+      "variation": "-57.0%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 7.5% à 229 milliards FCFA, entraînant une forte compression de la marge brute de 49,5 Mds à 32,3 Mds FCFA.",
+    "Le résultat net chute de près de 50% à 8,7 milliards FCFA, pénalisé par la hausse des achats et la baisse des volumes.",
+    "La trésorerie nette se redresse significativement, passant de -10,2 Mds à +6,1 Mds FCFA grâce à une amélioration du BFR de 13,6 Mds FCFA.",
+    "Des dividendes de 5,46 milliards FCFA sont proposés à l'affectation, représentant environ 1 119 FCFA par action.",
+    "L'endettement financier net reste faible à environ 418 millions FCFA, témoignant d'une structure financière saine malgré la baisse des résultats."
+  ],
+  "risques": [
+    "Forte dépendance aux prix des matières premières (bitume), avec une variation de stocks déstabilisante entre 2023 et 2024.",
+    "Contraction significative des marges opérationnelles (marge d'exploitation passant de 11.5% à 5.3%), indiquant une pression sur la rentabilité structurelle.",
+    "Concentration des créances clients élevées (106,6 Mds FCFA) exposant la société à un risque de contrepartie important.",
+    "Baisse des stocks de 61,8 Mds à 27,9 Mds FCFA pouvant refléter des difficultés d'approvisionnement ou une réduction volontaire exposant à des risques de rupture."
+  ],
+  "perspectives": "SMBC doit faire face à un environnement difficile marqué par la compression des marges et la baisse des volumes. L'assainissement du bilan (trésorerie positive, BFR maîtrisé) constitue un signal positif pour la stabilité financière à court terme. La reprise des investissements en infrastructures dans l'UEMOA pourrait soutenir la demande en bitume et permettre un rebond des résultats.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "La Société Multinationale de Bitumes (SMBC) publie des résultats 2024 en nette dégradation avec un résultat net en baisse de 50% à 8,7 Mds FCFA et une marge nette réduite à 3,8%, pénalisés par la hausse des coûts d'achats et la baisse du chiffre d'affaires. Point positif, la trésorerie nette redevient positive à +6,1 Mds FCFA et la structure bilancielle reste solide avec des capitaux propres de 35,3 Mds FCFA et un endettement net quasi nul. Le maintien d'un dividende (environ 1 119 FCFA/action) témoigne de la confiance du management, mais la visibilité sur le redressement des marges reste limitée.",
+  "ticker": "SMBC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250903_-_etats_financiers_-_exercice_2024_-_smb_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:01:50.105614+00:00",
+  "status": "ok",
+  "cached_at": 1778259710.105868
+}

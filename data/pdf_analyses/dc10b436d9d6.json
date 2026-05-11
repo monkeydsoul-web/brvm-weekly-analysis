@@ -1,0 +1,79 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 309722,
+      "unite": "MFCFA",
+      "variation": "-0.5%"
+    },
+    "resultat_net": {
+      "valeur": 21472,
+      "unite": "MFCFA",
+      "variation": "+42.4%"
+    },
+    "resultat_exploitation": {
+      "valeur": 34735,
+      "unite": "MFCFA",
+      "variation": "+106.7%"
+    },
+    "total_bilan": {
+      "valeur": 307546,
+      "unite": "MFCFA",
+      "variation": "-6.1%"
+    },
+    "capitaux_propres": {
+      "valeur": 169443,
+      "unite": "MFCFA",
+      "variation": "+10.8%"
+    },
+    "dividende_par_action": {
+      "valeur": 20082224800,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 12.7,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 6.9,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 65093,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 57494,
+      "unite": "MFCFA",
+      "variation": "+39.5%"
+    }
+  },
+  "points_cles": [
+    "Le résultat net bondit de +42.4% à 21 472 MFCFA malgré un chiffre d'affaires quasi stable (-0.5%) à 309 722 MFCFA, témoignant d'une forte amélioration de la rentabilité opérationnelle.",
+    "L'excédent brut d'exploitation (EBITDA) progresse de +39.5% à 57 494 MFCFA grâce à une réduction significative des achats et charges externes (-8.8%), illustrant des gains d'efficacité opérationnelle.",
+    "Les capitaux propres s'établissent à 169 443 MFCFA (+10.8%) et la trésorerie nette s'améliore nettement, passant de -55 415 MFCFA à -14 132 MFCFA, reflétant un désendettement en cours.",
+    "Un dividende brut de 20 082 224 800 FCFA est proposé pour l'exercice 2024, contre aucun dividende versé en 2023, signalant la confiance du management dans la solidité financière retrouvée."
+  ],
+  "risques": [
+    "Endettement financier encore significatif avec 50 961 MFCFA de dettes financières, même si en baisse par rapport à 60 195 MFCFA en 2023.",
+    "Résultat hors activités ordinaires négatif (-817 MFCFA en 2024 contre +7 542 MFCFA en 2023), indiquant des éléments exceptionnels défavorables pouvant peser sur les prochains exercices.",
+    "Dégradation du passif circulant (+22% à 60 888 MFCFA) avec une hausse des dettes fiscales, sociales et autres dettes, pouvant générer des tensions de liquidité à court terme.",
+    "Contraction du chiffre d'affaires dans un contexte de marché potentiellement concurrentiel ou de pression sur les volumes de ventes."
+  ],
+  "perspectives": "SOLIBRA affiche une nette amélioration de sa rentabilité en 2024 grâce à une maîtrise des coûts et une optimisation opérationnelle, malgré un chiffre d'affaires stable. La reprise du versement de dividendes et la réduction de l'endettement net signalent une trajectoire financière positive. La poursuite des investissements corporels (14 792 MFCFA) laisse entrevoir une volonté de maintenir l'outil industriel en vue d'une croissance future.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "SOLIBRA (SLBC) délivre une performance 2024 remarquable avec un résultat net en hausse de +42.4% à 21 472 MFCFA et un EBITDA en progression de +39.5% à 57 494 MFCFA, grâce à une réduction substantielle des coûts opérationnels. La structure financière se renforce avec des capitaux propres à 169 443 MFCFA et une amélioration significative de la trésorerie nette. La reprise du dividende et la solidité bilancielle font de SOLIBRA un dossier attractif sur la BRVM.",
+  "ticker": "SLBC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250502_-_etats_financiers_-_exercice_2024_-_solibra_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:01:07.711555+00:00",
+  "status": "ok",
+  "cached_at": 1778259667.7117922
+}

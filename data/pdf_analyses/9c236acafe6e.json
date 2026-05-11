@@ -1,0 +1,80 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels IFRS",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 77672.808,
+      "unite": "MFCFA",
+      "variation": "+11.1%"
+    },
+    "resultat_net": {
+      "valeur": 2044.698,
+      "unite": "MFCFA",
+      "variation": "-42.6%"
+    },
+    "resultat_exploitation": {
+      "valeur": 3533.078,
+      "unite": "MFCFA",
+      "variation": "-35.0%"
+    },
+    "total_bilan": {
+      "valeur": 54277.216,
+      "unite": "MFCFA",
+      "variation": "-2.4%"
+    },
+    "capitaux_propres": {
+      "valeur": 10916.681,
+      "unite": "MFCFA",
+      "variation": "-4.3%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 18.73,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 2.63,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -2112.083,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 7205.551,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de +11.1% à 77.7 milliards de FCFA en 2023, témoignant d'une bonne dynamique commerciale.",
+    "Le résultat net chute de -42.6% à 2.04 milliards de FCFA, pénalisé par la hausse des achats consommés, des charges de personnel et des amortissements.",
+    "La trésorerie nette s'établit à 2.1 milliards de FCFA fin 2023, en baisse significative par rapport aux 5.8 milliards de fin 2022, après des flux opérationnels très faibles de 826 millions.",
+    "Les charges de personnel ont bondi de +27.2% à 4.8 milliards de FCFA, contribuant à la compression des marges.",
+    "Les stocks ont diminué de 4.2 milliards, signe de déstockage, tandis que les créances clients ont fortement augmenté de +55.2%."
+  ],
+  "risques": [
+    "Forte compression des marges opérationnelles malgré la croissance du chiffre d'affaires, liée à la hausse des coûts d'achats et de personnel.",
+    "Dégradation significative des flux de trésorerie opérationnels (826 millions en 2023 vs 10.5 milliards en 2022), fragilisant la capacité à financer les investissements et dividendes.",
+    "Hausse des créances clients de +55% exposant l'entreprise à un risque accru de non-recouvrement.",
+    "Niveau élevé d'endettement locatif (IFRS 16) avec 4.5 milliards de dettes de location, générant des charges financières récurrentes importantes."
+  ],
+  "perspectives": "CFAC affiche une croissance commerciale soutenue mais fait face à une pression significative sur ses marges en 2023. La maîtrise des coûts opérationnels et la gestion du besoin en fonds de roulement seront déterminantes pour restaurer la rentabilité. La capacité à maintenir le versement de dividendes dépendra de l'amélioration des flux de trésorerie.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "CFAC enregistre en 2023 une croissance du chiffre d'affaires de +11% à 77.7 milliards de FCFA, mais son résultat net s'effondre de -42.6% à 2.04 milliards sous l'effet conjugué de la hausse des coûts d'achats, de personnel et des amortissements. La trésorerie se dégrade fortement avec des flux opérationnels quasi nuls (826 millions vs 10.5 milliards en 2022), suscitant des interrogations sur la soutenabilité du modèle à court terme. Le verdict est négatif pour l'investisseur dans l'attente d'un redressement des marges et des flux de trésorerie.",
+  "ticker": "CFAC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250617_-_etats_financiers_-_exercices_2018_a_2023_-_tractafric_motors_ci_annule_et_remplace_le_precedent.pdf",
+  "n_pages": 3,
+  "analyzed_at": "2026-05-08T17:09:40.973462+00:00",
+  "status": "ok",
+  "cached_at": 1778260180.9737291
+}

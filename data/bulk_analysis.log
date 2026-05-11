@@ -1,0 +1,165 @@
+/Users/soulman/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+
+Analyse IA BRVM — 43 sociétés
+Force refresh: False
+============================================================
+
+[1/43] SGBC 2026-05-08 16:57:50,554 WARNING SGBC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/societe-generale-ci
+— aucun rapport
+
+[2/43] SIBC 2026-05-08 16:57:51,356 WARNING SIBC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/societe-ivoirienne-de-banque
+— aucun rapport
+
+[3/43] SNTS 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2025 ✓ POSITIF
+[4/43] NSBC 2026-05-08 16:57:57,824 WARNING NSBC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/nsia-banque-ci
+— aucun rapport
+
+[5/43] CBIBF 
+  → Rapport annuel 2026 2026-05-08 16:58:01,070 WARNING incorrect startxref pointer(3)
+2026-05-08 16:58:01,071 ERROR Erreur analyse CBIBF: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Rapport annuel 2025 2026-05-08 16:58:04,151 WARNING Multiple definitions in dictionary at byte 0xa6052 for key /Info
+2026-05-08 16:58:04,151 WARNING Multiple definitions in dictionary at byte 0xa605f for key /Info
+2026-05-08 16:58:04,152 WARNING Multiple definitions in dictionary at byte 0xa606c for key /Info
+2026-05-08 16:58:04,154 ERROR Erreur analyse CBIBF: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[6/43] BOAB 
+  → Etats financiers 2026 2026-05-08 16:58:10,471 ERROR Erreur analyse BOAB: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2025 2026-05-08 16:58:13,549 ERROR Erreur analyse BOAB: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[7/43] BOABF 
+  → Etats financiers 2026 2026-05-08 16:58:18,558 ERROR Erreur analyse BOABF: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2025 2026-05-08 16:58:21,720 ERROR Erreur analyse BOABF: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[8/43] BOAC 
+  → Etats financiers 2025 ✓ POSITIF
+  → Etats financiers 2024 ✓ POSITIF
+[9/43] BOAM 
+  → Etats financiers 2026 2026-05-08 16:59:10,500 ERROR Erreur analyse BOAM: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2025 2026-05-08 16:59:13,722 ERROR Erreur analyse BOAM: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[10/43] BOAN 
+  → Etats financiers 2026 2026-05-08 16:59:20,302 ERROR Erreur analyse BOAN: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2024 2026-05-08 16:59:23,592 ERROR Erreur analyse BOAN: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[11/43] BOAS 
+  → Etats financiers 2026 2026-05-08 16:59:27,777 ERROR Erreur analyse BOAS: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2026 2026-05-08 16:59:30,646 ERROR Erreur analyse BOAS: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[12/43] ETIT 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2026 ✓ POSITIF
+[13/43] ECOC 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2024 ✓ POSITIF
+[14/43] ORAC 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2025 ✓ POSITIF
+[15/43] ONTBF 2026-05-08 17:00:42,398 WARNING ONTBF: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/onatel
+— aucun rapport
+
+[16/43] NTLC 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 ✓ POSITIF
+[17/43] SLBC 
+  → Etats financiers 2025 ✓ POSITIF
+  → Etats financiers 2024 ✓ POSITIF
+[18/43] SMBC 
+  → Etats financiers 2025 2026-05-08 17:01:30,993 WARNING Ignoring wrong pointing object 37 0 (offset 0)
+2026-05-08 17:01:30,998 WARNING Ignoring wrong pointing object 743 0 (offset 0)
+✓ NEUTRE
+  → Etats financiers 2025 ✓ NEGATIF
+[19/43] PALC 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 ✓ NEGATIF
+[20/43] SPHC 2026-05-08 17:03:05,343 WARNING SPHC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/saph
+— aucun rapport
+
+[21/43] SOGC 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 ✓ POSITIF
+[22/43] SCRC 
+  → Etats financiers 2026 ✓ NEGATIF
+  → Etats financiers 2026 ✓ NEGATIF
+[23/43] TTLC 2026-05-08 17:04:42,667 WARNING TTLC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/total-ci
+— aucun rapport
+
+[24/43] TTLS 2026-05-08 17:04:43,858 WARNING TTLS: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/total-senegal
+— aucun rapport
+
+[25/43] SHEC 
+  → Etats financiers 2025 ✓ NEUTRE
+  → Etats financiers 2025 ✓ POSITIF
+[26/43] CIEC 
+  → Etats financiers 2025 ✓ NEUTRE
+  → Etats financiers 2024 2026-05-08 17:05:56,889 ERROR Erreur analyse CIEC: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[27/43] SDCC 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2025 ✓ NEUTRE
+[28/43] STBC 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 ✓ POSITIF
+[29/43] UNLC 
+  → Etats financiers 2024 ✓ NEGATIF
+  → Etats financiers 2023 ✓ NEGATIF
+[30/43] FTSC 
+  → Etats financiers 2025 ✓ NEUTRE
+  → Etats financiers 2024 2026-05-08 17:08:43,030 ERROR Erreur analyse FTSC: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[31/43] ABJC 
+  → Etats financiers 2025 2026-05-08 17:08:49,360 ERROR Erreur analyse ABJC: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+  → Etats financiers 2025 ✓ NEGATIF
+[32/43] CFAC 
+  → Etats financiers 2025 ✓ NEGATIF
+  → Etats financiers 2025 ✓ NEUTRE
+[33/43] LNBB 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 ✓ POSITIF
+[34/43] PRSC 2026-05-08 17:11:00,690 WARNING PRSC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/tractafric-motors-ci
+— aucun rapport
+
+[35/43] SVOC 2026-05-08 17:11:01,406 WARNING SVOC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/sivoa
+— aucun rapport
+
+[36/43] SICC 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2026 ✓ POSITIF
+[37/43] NEIC 2026-05-08 17:11:41,555 WARNING NEIC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/nei-ceda
+— aucun rapport
+
+[38/43] CABC 2026-05-08 17:11:42,680 WARNING CABC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/crrh
+— aucun rapport
+
+[39/43] ORGT 
+  → Etats financiers 2026 ✓ NEUTRE
+  → Etats financiers 2025 2026-05-08 17:12:07,166 ERROR Erreur analyse ORGT: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[40/43] SEMC 
+  → Etats financiers 2024 ✓ NEUTRE
+  → Etats financiers 2022 2026-05-08 17:12:24,019 ERROR Erreur analyse SEMC: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[41/43] STAC 2026-05-08 17:12:26,841 WARNING STAC: HTTP 404 pour https://www.brvm.org/fr/rapports-societe-cotes/setao
+— aucun rapport
+
+[42/43] BICC 
+  → Etats financiers 2026 ✓ POSITIF
+  → Etats financiers 2025 2026-05-08 17:12:52,613 ERROR Erreur analyse BICC: PDF sans texte extractible (probablement scanné)
+✗ PDF sans texte extractible (probablement
+[43/43] BOLLORE 
+  → Etats financiers 2025 ✓ NEUTRE
+  → Etats financiers 2024 2026-05-08 17:14:00,537 ERROR Erreur analyse BOLLORE: PDF trop volumineux (>15MB)
+✗ PDF trop volumineux (>15MB)
+
+============================================================
+Terminé — OK: 43 | Erreurs: 19 | Sans rapport: 12
+Summary: /Users/soulman/brvm-weekly-analysis/data/analyses_summary.json

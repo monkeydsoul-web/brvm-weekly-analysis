@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels consolidés",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 186609,
+      "unite": "MFCFA",
+      "variation": "-4.5%"
+    },
+    "resultat_net": {
+      "valeur": 21643,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": 29166,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": 4014192,
+      "unite": "MFCFA",
+      "variation": "+1.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 113165,
+      "unite": "MFCFA",
+      "variation": "+17.0%"
+    },
+    "dividende_par_action": {
+      "valeur": 0,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 19.12,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 11.6,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 54233,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Retour à la rentabilité avec un résultat net consolidé de 21,6 milliards FCFA en 2025, après une perte de -44,4 milliards en 2024.",
+    "Forte réduction du coût du risque de -69 milliards à -7 milliards FCFA, principal moteur du redressement.",
+    "Les capitaux propres progressent de +17% à 113,2 milliards FCFA grâce à la reconstitution des réserves.",
+    "Le Produit Net Bancaire recule de -4,5% à 186,6 milliards FCFA, pénalisé par la baisse des commissions.",
+    "Aucun dividende ne sera distribué au titre de l'exercice 2025 au niveau de la holding Oragroup SA."
+  ],
+  "risques": [
+    "Les capitaux propres de la holding Oragroup SA restent sous pression avec un résultat social négatif de -8 milliards FCFA, limitant toute distribution aux actionnaires.",
+    "Baisse des commissions produits de -16% (de 107,9 à 90,4 milliards FCFA), signalant une pression sur les revenus hors intérêts.",
+    "Niveau d'endettement élevé avec des passifs financiers de 3 678 milliards FCFA représentant plus de 91% du bilan.",
+    "Risque de change matérialisé par une variation négative de -2,5 milliards sur les parités monétaires en 2025."
+  ],
+  "perspectives": "Le groupe Oragroup amorce un redressement significatif en 2025 grâce à la normalisation du coût du risque après la forte sinistralité de 2024. Cependant, l'absence de dividende et le résultat négatif au niveau de la holding limitent l'attractivité à court terme pour les actionnaires. La poursuite de la maîtrise du risque de crédit et le redressement des commissions seront déterminants pour consolider ce retour à la profitabilité.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "Oragroup réalise un retour remarquable à la profitabilité en 2025 avec un résultat net consolidé de 21,6 milliards FCFA, après une perte record de -44,4 milliards en 2024, principalement grâce à la normalisation du coût du risque. Néanmoins, le résultat social de la holding reste négatif et aucun dividende ne sera versé, ce qui pèse sur l'attractivité immédiate du titre. Le redressement est réel mais encore fragile, justifiant une position neutre dans l'attente d'une confirmation de la trajectoire bénéficiaire.",
+  "ticker": "ORGT",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260504_-_etats_financiers_-_exercice_2025_-_oragroup_tg.pdf",
+  "n_pages": 4,
+  "analyzed_at": "2026-05-11T10:51:46.275762+00:00",
+  "status": "ok",
+  "cached_at": 1778496706.2760398
+}

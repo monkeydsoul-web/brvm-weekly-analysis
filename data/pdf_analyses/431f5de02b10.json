@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 79563,
+      "unite": "MFCFA",
+      "variation": "+16.9%"
+    },
+    "resultat_net": {
+      "valeur": 36520,
+      "unite": "MFCFA",
+      "variation": "+39.3%"
+    },
+    "resultat_exploitation": {
+      "valeur": 40620,
+      "unite": "MFCFA",
+      "variation": "+41.2%"
+    },
+    "total_bilan": {
+      "valeur": 1126270,
+      "unite": "MFCFA",
+      "variation": "+10.9%"
+    },
+    "capitaux_propres": {
+      "valeur": 120570,
+      "unite": "MFCFA",
+      "variation": "+20.8%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 30.3,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 45.9,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 45315,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le Produit Net Bancaire (PNB) progresse de +16.9% à 79 563 MFCFA, porté par la hausse des intérêts perçus (+11.6%) et la forte croissance des commissions (+32.8%).",
+    "Le résultat net bondit de +39.3% à 36 520 MFCFA, traduisant une amélioration significative de la rentabilité globale de la banque.",
+    "Le total bilan franchit le seuil de 1 126 milliards de FCFA (+10.9%), avec une forte progression des effets publics (+44.3%) et des dépôts clientèle (+16.3%).",
+    "Les capitaux propres s'établissent à 120 570 MFCFA (+20.8%), reflétant une solidité financière renforcée.",
+    "Les charges générales d'exploitation sont quasi-stables à 34 248 MFCFA (-1.3%), démontrant une bonne maîtrise des coûts malgré la croissance de l'activité."
+  ],
+  "risques": [
+    "Hausse du coût du risque à 1 498 MFCFA (+14.4%), signalant une légère détérioration de la qualité du portefeuille de crédits.",
+    "Augmentation des charges sur commissions (+60.2%) et des intérêts et charges assimilées (+23.4%), pouvant peser sur les marges futures.",
+    "Forte hausse des immobilisations incorporelles (+144%) et réduction des immobilisations corporelles, suggérant des investissements significatifs dont le retour reste à confirmer.",
+    "Recul des créances sur la clientèle (-7.2%) malgré la croissance des dépôts, pouvant indiquer une prudence dans l'octroi de crédits ou une demande plus faible."
+  ],
+  "perspectives": "La BICICI affiche une performance financière excellente en 2025 avec une rentabilité en forte hausse, soutenue par la diversification des revenus (commissions, titres publics). La maîtrise des charges d'exploitation et le renforcement des fonds propres positionnent favorablement la banque pour poursuivre sa croissance. Le développement des engagements de financement hors bilan (+140%) laisse présager une accélération de l'activité commerciale en 2026.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "La BICICI (BICC) livre des résultats 2025 remarquables avec un résultat net de 36,5 milliards FCFA, en hausse de +39.3%, et un PNB de 79,6 milliards FCFA (+16.9%), portés par la dynamique des commissions et des intérêts. La rentabilité des capitaux propres (ROE) dépasse 30%, témoignant d'une efficacité opérationnelle élevée. Le bilan solide à 1 126 milliards FCFA et les capitaux propres en progression à 120,6 milliards FCFA en font un titre attractif pour les investisseurs à la recherche d'une banque bien gérée dans la zone UEMOA.",
+  "ticker": "BICC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260417_-_etats_financiers_-_exercice_2025_-_bici_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:12:48.039251+00:00",
+  "status": "ok",
+  "cached_at": 1778260368.03951
+}

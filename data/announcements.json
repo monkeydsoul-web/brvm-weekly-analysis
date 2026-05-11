@@ -1,0 +1,407 @@
+[
+  {
+    "date": "30/03/2026",
+    "company": "BANK OF AFRICA CI",
+    "ticker": "BOAC",
+    "title": "BOA CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260327_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "30/03/2026",
+    "company": "SONATEL",
+    "ticker": "SNTS",
+    "title": "SONATEL SN : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260327_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_sonatel_sn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "29/11/2025",
+    "company": "AIR LIQUIDE CI",
+    "ticker": "SIVC",
+    "title": "AIR LIQUIDE CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251128_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_air_liquide_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "28/08/2025",
+    "company": "UNIWAX CI",
+    "ticker": "UNXC",
+    "title": "UNIWAX CÔTE D'IVOIRE : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250828_-_avis_de_convocation_-assemblee_generale_ordinaire_-_uniwax_ci_0.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "26/06/2025",
+    "company": "BIIC",
+    "ticker": null,
+    "title": "BANQUE INTERNATIONALE POUR L'INDUSTRIE ET LE COMMERCE DU BENIN :Avis de convocation à l'Assemblée Générale Ordinaire (Annule et remplace le précédent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250626_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_biic_bn_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "25/06/2025",
+    "company": "SGCI",
+    "ticker": null,
+    "title": "SOCIETE GENERALE CÔTE D'IVOIRE : Avis de convocation à l'Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250625_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_societe_generale_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "25/03/2026",
+    "company": "PALM CI",
+    "ticker": "PALC",
+    "title": "PALM CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260325_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_palm_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "25/03/2026",
+    "company": "PALM CI",
+    "ticker": "PALC",
+    "title": "PALM CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260325_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_palm_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "25/03/2026",
+    "company": "BANK OF AFRICA ML",
+    "ticker": "BOAM",
+    "title": "BOA ML : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260324_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_ml.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "24/06/2025",
+    "company": "LNB",
+    "ticker": null,
+    "title": "LOTERIE NATIONALE DU BENIN : ERRATUM - Avis de convocation - Assemblée Générale Mixte",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250624_-_erratum_-_avis_de_convocation_-_assemblee_generale_mixte_-_loterie_nationale_du_benin.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "24/04/2026",
+    "company": "SIB",
+    "ticker": "SIBC",
+    "title": "SIB CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260423_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_sib_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "21/07/2025",
+    "company": "SITAB",
+    "ticker": "STBC",
+    "title": "SITAB CÔTE D'IVOIRE : Avis de convocation modificatif - Assemblée Générale Ordinaire (Annule et remplace le précédent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250721_-_avis_de_convocation_modificatif_-_assemblee_generale_ordinaire_-_sitab_ci_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "21/07/2025",
+    "company": "SITAB",
+    "ticker": "STBC",
+    "title": "SITAB CÔTE D'IVOIRE : Projet de résolutions - Assemblée Générale Ordinaire (Annule et remplace le précèdent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250721_-_projet_de_resolutions_-_assemblee_generale_ordinaire_-_sitab_ci_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "21/07/2025",
+    "company": "SITAB",
+    "ticker": "STBC",
+    "title": "SITAB CÔTE D'IVOIRE : Pouvoir - Assemblée Générale Ordinaire - Personne Physique - (Annule et remplace le précèdent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250721_-_pouvoir_-_assemblee_generale_ordinaire_-_personne_physique_-_sitab_ci_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "21/07/2025",
+    "company": "SITAB",
+    "ticker": "STBC",
+    "title": "SITAB CÔTE D'IVOIRE : Pouvoir - Assemblée Générale Ordinaire - Personne Morale -  (Annule et remplace le précèdent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250721_-_pouvoir_-_assemblee_generale_ordinaire_-_personne_morale_-_sitab_ci_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "19/03/2026",
+    "company": "BANK OF AFRICA NG",
+    "ticker": "BOAN",
+    "title": "BOA NG - Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260318_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_ng.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "19/03/2026",
+    "company": "BANK OF AFRICA NG",
+    "ticker": "BOAN",
+    "title": "BOA NG - Pouvoir - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260318_-_pouvoir_-_assemblee_generale_ordinaire_-_boa_ng.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "18/03/2026",
+    "company": "BANK OF AFRICA SN",
+    "ticker": "BOAS",
+    "title": "BOA SN : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260317_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_sn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "18/03/2026",
+    "company": "BANK OF AFRICA SN",
+    "ticker": "BOAS",
+    "title": "BOA SN : Pouvoir - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260317_-_pouvoir_-_assemblee_generale_ordinaire_-_boa_sn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "17/12/2025",
+    "company": "CROWN SIEM CI",
+    "ticker": null,
+    "title": "EVIOSYS PACKAGING SIEM CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251216_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_eviosys_packaging_siem_ci_0.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "17/06/2025",
+    "company": "CFAO MOTORS CI",
+    "ticker": "CABC",
+    "title": "CFAO MOTORS CÔTE D'IVOIRE : Avis de convocation à l'Assemblée Générale Mixte",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250617_-_avis_de_convocation_-_assemblee_generale_mixte_-_cfao_motors_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "17/04/2026",
+    "company": "BICI CI",
+    "ticker": "BICC",
+    "title": "BICI CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260417_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_bici_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "16/04/2026",
+    "company": "BANK OF AFRICA BN",
+    "ticker": "BOAB",
+    "title": "BOA BN : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260415_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_bn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "16/04/2026",
+    "company": "ECOBANK TG",
+    "ticker": null,
+    "title": "ETI TG : Avis de convocation - Assemblée Générale Extraordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260415_-_avis_de_convocation_-_assemblee_generale_extraordinaire_-_eti_tg.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "14/10/2025",
+    "company": "BANK OF AFRICA CI",
+    "ticker": "BOAC",
+    "title": "BOA CÔTE D'IVOIRE : Report de l'Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251014_-_report_de_lassemblee_generale_ordinaire_-_boa_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "13/06/2025",
+    "company": "LNB",
+    "ticker": null,
+    "title": "LOTERIE NATIONALE DU BENIN : Avis de convocation à l'Assemblée Générale Mixte",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250613_-_avis_de_convocation_-_assemblee_generale_mixte-loterie_nationale_du_benin.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "13/06/2025",
+    "company": "BIIC",
+    "ticker": null,
+    "title": "BANQUE INTERNATIONALE POUR L'INDUSTRIE ET LE COMMERCE BENIN : Avis de convocation à l'Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250613_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_biic_bn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "12/03/2026",
+    "company": "UNILEVER CI",
+    "ticker": "UNLC",
+    "title": "UNILEVER CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260311_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_unilever_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "12/03/2026",
+    "company": "SICABLE",
+    "ticker": null,
+    "title": ": Pouvoir - Assemblée Générale Ordinaire - (Annule et remplace le précédent)",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260311_-_pouvoir_-_assemblee_generale_ordinaire_-_sicable_ci_annule_et_remplace_le_precedent.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "10/04/2026",
+    "company": "ECOBANK CI",
+    "ticker": "ECOC",
+    "title": "ECOBANK CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260410_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_ecobank_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "10/03/2026",
+    "company": "SICABLE",
+    "ticker": null,
+    "title": "SICABLE : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260310_-_ordre_du_jour_-_assemblee_generale_ordinaire_-_sicable_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "10/03/2026",
+    "company": "SICABLE",
+    "ticker": null,
+    "title": "SICABLE CI : Pouvoir - Assemblée Générale Mixte",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260310_-_pouvoir_-_assemblee_generale_mixte_-_sicable_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "09/10/2025",
+    "company": "SAFCA CI",
+    "ticker": "SAFC",
+    "title": "SAFCA CÔTE D'IVOIRE : Avis de convocation - Assemblée Générale Extraordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251009_-_avis_de_convocation_-_assemblee_generale_extraordinaire_-_safca_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "09/04/2026",
+    "company": "ONATEL BF",
+    "ticker": "ONTBF",
+    "title": "ONATEL BURKINA FASO  Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260409_-_communique_de_presse_-_onatel_bf_0.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "07/11/2025",
+    "company": "BANK OF AFRICA SN",
+    "ticker": "BOAS",
+    "title": "BOA SENEGAL : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251107_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_sn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "07/11/2025",
+    "company": "BANK OF AFRICA SN",
+    "ticker": "BOAS",
+    "title": "BOA SENEGAL : Pouvoir - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251107_-_pouvoir_-_assemblee_generale_ordinaire_-_boa_sn.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "07/07/2025",
+    "company": "SITAB",
+    "ticker": "STBC",
+    "title": "SITAB CÔTE D'IVOIRE : Avis de convocation à l'Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20250707_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_sitab_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "06/10/2025",
+    "company": "BANK OF AFRICA CI",
+    "ticker": "BOAC",
+    "title": "BOA CÔTE D'IVOIRE : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20251006_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "06/03/2026",
+    "company": "BANK OF AFRICA BF",
+    "ticker": "BOABF",
+    "title": "BOA BF : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260306_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_boa_bf.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "05/05/2026",
+    "company": "TOTAL",
+    "ticker": "TTLC",
+    "title": "TotalEnergies Marketing CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260505_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_totalenergies_marketing_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "03/04/2026",
+    "company": "ORANGE CI",
+    "ticker": "ORAC",
+    "title": "ORANGE CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260403_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_orange_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "01/05/2026",
+    "company": "SUCRIVOIRE",
+    "ticker": "SCRC",
+    "title": "SUCRIVOIRE CI : Avis de convocation et projets de résolution - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260430_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_sucrivoire_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "01/05/2026",
+    "company": "SERVAIR ABIDJAN CI",
+    "ticker": "ABJC",
+    "title": "SERVAIR ABIDJAN CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260430_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_servair_abidjan_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "01/05/2026",
+    "company": "SETAO CI",
+    "ticker": "STAC",
+    "title": "SETAO CI : Avis de convocation - Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260430_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_setao_ci.pdf",
+    "div_amount": null
+  },
+  {
+    "date": "01/04/2026",
+    "company": "CORIS BANK INTERNATIONAL",
+    "ticker": "CBIBF",
+    "title": "CORIS BANK INTERNATIONAL BF : Assemblée Générale Ordinaire",
+    "type": "convocations-assemblees-generales",
+    "pdf_url": "https://www.brvm.org/sites/default/files/20260331_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_coris_bank_international_bf.pdf",
+    "div_amount": null
+  }
+]

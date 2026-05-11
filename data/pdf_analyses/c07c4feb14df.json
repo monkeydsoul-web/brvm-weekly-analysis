@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers consolidés annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 1424261,
+      "unite": "MFCFA",
+      "variation": "+12%"
+    },
+    "resultat_net": {
+      "valeur": 345523,
+      "unite": "MFCFA",
+      "variation": "+15%"
+    },
+    "resultat_exploitation": {
+      "valeur": 465618,
+      "unite": "MFCFA",
+      "variation": "+16%"
+    },
+    "total_bilan": {
+      "valeur": 19243865,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "capitaux_propres": {
+      "valeur": 1597846,
+      "unite": "MFCFA",
+      "variation": "+41%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 24.3,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 512383,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le produit net bancaire progresse de 17% en USD à 2,45 milliards $EU (1 424 milliards FCFA), porté par la hausse des marges d'intérêts et des commissions.",
+    "Le résultat avant impôt bondit de 21% à 801 millions $EU (466 milliards FCFA), reflétant une forte dynamique opérationnelle malgré une hausse des charges de dépréciation (+44%).",
+    "Le total du bilan croît de 23% à 34,5 milliards $EU (19 244 milliards FCFA), tiré par une expansion des crédits à la clientèle (+19%) et des dépôts (+24%).",
+    "Les capitaux propres augmentent de 41% en FCFA à 1 598 milliards FCFA, reflétant une amélioration significative des résultats cumulés non distribués.",
+    "Aucun dividende ne sera distribué au titre de l'exercice, en continuité avec la politique de rétention des bénéfices."
+  ],
+  "risques": [
+    "Forte hausse des charges de dépréciation des actifs financiers (+38% en USD) signalant une détérioration de la qualité du portefeuille de crédit.",
+    "Exposition aux risques de change dans 39 pays d'Afrique subsaharienne, avec des effets de conversion significatifs sur les résultats en FCFA.",
+    "Absence de dividende versé aux actionnaires ordinaires, ce qui peut peser sur l'attractivité du titre pour les investisseurs en quête de revenus.",
+    "Réduction des effectifs (14 560 en 2025 contre 14 982 en 2024) pouvant indiquer des restructurations en cours avec risques opérationnels associés."
+  ],
+  "perspectives": "Le Groupe Ecobank affiche une trajectoire de croissance soutenue avec des résultats en forte hausse sur l'ensemble des indicateurs clés en 2025. L'expansion du bilan et la croissance des dépôts témoignent d'une dynamique commerciale robuste dans ses 39 marchés africains. Toutefois, la montée des provisions pour créances douteuses et l'absence de dividende invitent à la vigilance quant à la qualité des actifs et à la politique de rémunération des actionnaires.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Ecobank Transnational Incorporated (ETI) publie d'excellents résultats pour l'exercice 2025, avec un produit net bancaire en hausse de 17% et un résultat net consolidé de 346 milliards FCFA (+15%). La solidité du bilan, la croissance des dépôts et l'amélioration des capitaux propres confirment la résilience du modèle panafricain du groupe. Le principal bémol reste l'absence de dividende et la progression marquée des charges de dépréciation, à surveiller dans les prochains exercices.",
+  "ticker": "ETIT",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260413_-_rapport_des_commissaires_aux_comptes_sur_les_etats_financiers_annuels_-_exercice_2025_-_eti_tg.pdf",
+  "n_pages": 7,
+  "analyzed_at": "2026-05-08T17:00:23.525694+00:00",
+  "status": "ok",
+  "cached_at": 1778259623.525985
+}

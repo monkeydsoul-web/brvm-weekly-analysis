@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 80568.59,
+      "unite": "MFCFA",
+      "variation": "-7.6%"
+    },
+    "resultat_net": {
+      "valeur": -6131.8,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "resultat_exploitation": {
+      "valeur": 1828.95,
+      "unite": "MFCFA",
+      "variation": "-77.3%"
+    },
+    "total_bilan": {
+      "valeur": 146852.08,
+      "unite": "MFCFA",
+      "variation": "+19.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 13822.04,
+      "unite": "MFCFA",
+      "variation": "-30.7%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": -44.36,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": -7.61,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 75604.46,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 15630.53,
+      "unite": "MFCFA",
+      "variation": "-23.0%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 7,6% à 80,6 Mds FCFA, contre 87,2 Mds FCFA en 2024.",
+    "Le résultat net est fortement déficitaire à -6,1 Mds FCFA en 2025, contre un bénéfice de +2,6 Mds FCFA en 2024, principalement en raison d'une charge financière de 7,6 Mds FCFA.",
+    "L'endettement financier a explosé, passant de 32,1 Mds à 69,1 Mds FCFA, alourdissant considérablement les frais financiers.",
+    "L'EBITDA recule de 23% à 15,6 Mds FCFA, reflétant une dégradation des marges opérationnelles.",
+    "Aucun dividende n'est proposé au titre de l'exercice 2025 compte tenu du résultat déficitaire."
+  ],
+  "risques": [
+    "Risque de surendettement : les dettes financières ont plus que doublé en un an, générant des frais financiers qui annulent le résultat opérationnel.",
+    "Risque de détérioration des capitaux propres : le report à nouveau débiteur cumulé atteint 17,4 Mds FCFA, fragilisant la structure financière.",
+    "Risque de liquidité : la trésorerie nette est négative à -6,5 Mds FCFA au 31 décembre 2025.",
+    "Risque opérationnel : la forte augmentation des stocks (+14,5 Mds FCFA) immobilise du cash et témoigne de difficultés d'écoulement de la production."
+  ],
+  "perspectives": "La société SCRC affiche une situation financière préoccupante en 2025, avec un résultat net en forte perte et une structure d'endettement dégradée. Le redressement dépendra de la capacité à améliorer les ventes, maîtriser les charges financières et réduire les stocks accumulés. Aucun dividende n'est distribué, ce qui limitera l'attractivité du titre à court terme.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "SCRC enregistre une perte nette de 6,1 Mds FCFA en 2025 après un bénéfice de 2,6 Mds FCFA en 2024, plombée par l'explosion des frais financiers liés à un doublement de l'endettement. Le chiffre d'affaires recule de 7,6% et les capitaux propres se contractent de 30,7%, fragilisant davantage le bilan. La situation financière exige une vigilance accrue et aucun dividende n'est versé aux actionnaires.",
+  "ticker": "SCRC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_syscohada_-_exercice_2025_-_sucrivoire_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-11T10:50:22.820334+00:00",
+  "status": "ok",
+  "cached_at": 1778496622.820528
+}

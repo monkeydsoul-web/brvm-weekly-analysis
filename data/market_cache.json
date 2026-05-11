@@ -1,0 +1,152 @@
+{
+  "updated_at": "2026-05-11T16:53:52.504694+00:00",
+  "market_activity": {
+    "Valeur des transactions": "1 818 423 516 FCFA",
+    "Capitalisation Actions": "15 630 710 823 840 FCFA",
+    "Capitalisation des obligations": "12 322 204 091 593 FCFA",
+    "BRVM-C": "405,75",
+    "BRVM-30": "191,57",
+    "BRVM-PRES": "158,42"
+  },
+  "top5": [
+    {
+      "ticker": "ORGT",
+      "price": 2740.0,
+      "change": 7.45
+    },
+    {
+      "ticker": "BNBC",
+      "price": 1395.0,
+      "change": 7.31
+    },
+    {
+      "ticker": "UNLC",
+      "price": 59900.0,
+      "change": 6.96
+    },
+    {
+      "ticker": "NEIC",
+      "price": 1850.0,
+      "change": 6.02
+    },
+    {
+      "ticker": "TTLC",
+      "price": 2850.0,
+      "change": 3.64
+    }
+  ],
+  "flop5": [
+    {
+      "ticker": "SCRC",
+      "price": 2260.0,
+      "change": -6.03
+    },
+    {
+      "ticker": "STAC",
+      "price": 2515.0,
+      "change": -5.45
+    },
+    {
+      "ticker": "NTLC",
+      "price": 11150.0,
+      "change": -4.29
+    },
+    {
+      "ticker": "CIEC",
+      "price": 3200.0,
+      "change": -3.9
+    },
+    {
+      "ticker": "ECOC",
+      "price": 16200.0,
+      "change": -3.57
+    }
+  ],
+  "indices": [
+    {
+      "name": "BRVM-30",
+      "prev": 191.36,
+      "current": 191.57,
+      "change": 0.11,
+      "ytd": 1.97
+    },
+    {
+      "name": "BRVM - COMPOSITE",
+      "prev": 404.59,
+      "current": 405.75,
+      "change": 0.29,
+      "ytd": 1.7
+    },
+    {
+      "name": "BRVM - PRESTIGE",
+      "prev": 158.71,
+      "current": 158.42,
+      "change": -0.18,
+      "ytd": 1.47
+    },
+    {
+      "name": "BRVM - PRINCIPAL",
+      "prev": 280.72,
+      "current": 282.31,
+      "change": 0.57,
+      "ytd": 0.78
+    }
+  ],
+  "sector_indices": [
+    {
+      "name": "BRVM - CONSOMMATION DE BASE",
+      "prev": 259.74,
+      "current": 262.43,
+      "change": 1.04,
+      "ytd": 1.51
+    },
+    {
+      "name": "BRVM - CONSOMMATION DISCRETIONNAIRE",
+      "prev": 171.71,
+      "current": 172.35,
+      "change": 0.37,
+      "ytd": -0.87
+    },
+    {
+      "name": "BRVM - ENERGIE",
+      "prev": 136.76,
+      "current": 139.28,
+      "change": 1.84,
+      "ytd": -0.11
+    },
+    {
+      "name": "BRVM - INDUSTRIELS",
+      "prev": 183.95,
+      "current": 180.14,
+      "change": -2.07,
+      "ytd": 0.12
+    },
+    {
+      "name": "BRVM - SERVICES FINANCIERS",
+      "prev": 180.3,
+      "current": 180.01,
+      "change": -0.16,
+      "ytd": 0.56
+    },
+    {
+      "name": "BRVM - SERVICES PUBLICS",
+      "prev": 154.14,
+      "current": 149.96,
+      "change": -2.71,
+      "ytd": 3.3
+    },
+    {
+      "name": "BRVM - TELECOMMUNICATIONS",
+      "prev": 102.56,
+      "current": 103.2,
+      "change": 0.62,
+      "ytd": 3.44
+    }
+  ],
+  "total_return": {
+    "name": "BRVM – COMPOSITE TOTAL RETURN",
+    "prev": 156.21,
+    "current": 156.66,
+    "change": 0.29
+  }
+}

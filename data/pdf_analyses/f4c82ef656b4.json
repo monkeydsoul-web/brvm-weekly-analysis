@@ -1,0 +1,81 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 9283,
+      "unite": "MFCFA",
+      "variation": "+9.1%"
+    },
+    "resultat_net": {
+      "valeur": 377,
+      "unite": "MFCFA",
+      "variation": "-57.9%"
+    },
+    "resultat_exploitation": {
+      "valeur": 522,
+      "unite": "MFCFA",
+      "variation": "-36.6%"
+    },
+    "total_bilan": {
+      "valeur": 14023,
+      "unite": "MFCFA",
+      "variation": "-10.7%"
+    },
+    "capitaux_propres": {
+      "valeur": 3272,
+      "unite": "MFCFA",
+      "variation": "+1.9%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 11.5,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 4.1,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 2567,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 1474,
+      "unite": "MFCFA",
+      "variation": "-11.5%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de +9.1% à 9 283 MFCFA, porté par la croissance des ventes de produits fabriqués et des travaux/services vendus.",
+    "Le résultat net chute fortement de -57.9% à 377 MFCFA (contre 896 MFCFA en 2023), traduisant une forte pression sur les marges.",
+    "Le total du bilan se contracte de -10.7% à 14 023 MFCFA, avec une réduction significative de la trésorerie nette négative passant de -1 791 MFCFA à -2 143 MFCFA.",
+    "La société n'a toujours pas établi ses états financiers selon les normes IFRS, en dérogation aux obligations réglementaires OHADA depuis 2019.",
+    "Les actifs industriels représentent 32.2% du total bilan (4 518 MFCFA en VNC), sans indice de dépréciation identifié par les commissaires aux comptes."
+  ],
+  "risques": [
+    "Non-conformité persistante aux normes IFRS obligatoires depuis 2019 pour les sociétés cotées, exposant la société à des risques réglementaires et de marché financier.",
+    "Dégradation significative de la rentabilité : la marge nette passe de 10.5% à 4.1%, signalant une compression importante des marges opérationnelles.",
+    "Trésorerie nette structurellement négative (-2 143 MFCFA), en détérioration par rapport à -1 791 MFCFA en 2023, fragilisant la liquidité de la société.",
+    "Forte concentration des actifs dans des immobilisations industrielles (32% du bilan), exposant la société à des risques d'obsolescence ou de dépréciation future.",
+    "Endettement financier résiduel (emprunts 425 MFCFA) et passif circulant élevé (8 004 MFCFA), dont une dette fournisseurs importante de 3 748 MFCFA."
+  ],
+  "perspectives": "La croissance du chiffre d'affaires de +9.1% témoigne d'une dynamique commerciale positive pour Erium Côte d'Ivoire. Cependant, la forte contraction de la rentabilité nette en 2024 constitue un signal d'alerte majeur pour les investisseurs, nécessitant une amélioration du contrôle des coûts opérationnels. La mise en conformité IFRS reste un chantier prioritaire pour restaurer la confiance des marchés financiers.",
+  "verdict_investisseur": "NEGATIF",
+  "resume": "Erium Côte d'Ivoire (ABJC) affiche une croissance commerciale encourageante (+9.1% du CA à 9 283 MFCFA) pour l'exercice 2024, mais le résultat net s'effondre de près de 58% à 377 MFCFA, révélant une forte dégradation des marges. La trésorerie nette reste structurellement négative et la non-conformité aux normes IFRS constitue un risque réglementaire persistant, rendant le profil risque/rendement peu attractif pour un investisseur à court terme.",
+  "ticker": "ABJC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20251205_-_rapport_des_cacs_sur_les_etats_financiers_au_ca_-_air_liquide_ci.pdf",
+  "n_pages": 75,
+  "analyzed_at": "2026-05-08T17:09:14.838218+00:00",
+  "status": "ok",
+  "cached_at": 1778260154.8385038
+}

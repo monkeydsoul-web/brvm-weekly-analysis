@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 600708,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "resultat_net": {
+      "valeur": 5354,
+      "unite": "MFCFA",
+      "variation": "+33%"
+    },
+    "resultat_exploitation": {
+      "valeur": 11337,
+      "unite": "MFCFA",
+      "variation": "+34%"
+    },
+    "total_bilan": {
+      "valeur": 207064,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "capitaux_propres": {
+      "valeur": 26521,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 20.2,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 0.89,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 48556,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse de 9% à 600,7 Mds FCFA grâce à la croissance des volumes sur les segments Entreprises, Aviation et Butane.",
+    "Le résultat net bondit de 33% à 5 354 MFCFA, porté par une hausse de 34% du résultat d'exploitation.",
+    "Le résultat financier se dégrade fortement (-95%) en raison de l'utilisation accrue des lignes de découvert bancaire et de la hausse des taux d'intérêt.",
+    "Au T1 2025, la dynamique se confirme avec un chiffre d'affaires en hausse de 4% et un résultat net en progression de 3%.",
+    "La trésorerie passive a fortement augmenté (de 31,3 Mds à 56,7 Mds FCFA), signalant une dépendance croissante aux découverts bancaires."
+  ],
+  "risques": [
+    "Risque financier croissant : l'augmentation des dettes de trésorerie et des frais financiers pèse sur la rentabilité nette et pourrait s'aggraver si les taux d'intérêt restent élevés.",
+    "Risque de compression des marges : la marge brute n'a progressé que de 3% alors que le CA a augmenté de 9%, indiquant une pression sur les prix ou les coûts d'approvisionnement.",
+    "Risque réglementaire et prix : la fixation administrative des prix des carburants à la pompe limite la capacité de la société à répercuter les hausses de coûts.",
+    "Risque de liquidité : la forte hausse des dettes fournisseurs (+42%) et de la trésorerie passive traduit une tension sur le besoin en fonds de roulement."
+  ],
+  "perspectives": "Le T1 2025 confirme la trajectoire de croissance avec des hausses modestes du CA (+4%) et du résultat net (+3%), soutenues par des volumes en progression de 5%. La société reste cependant exposée à la pression des charges financières et à la volatilité des prix des carburants. La finalisation du rapport des commissaires aux comptes est attendue avant fin juin 2025.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "Vivo Energy Côte d'Ivoire affiche une solide performance en 2024 avec un chiffre d'affaires de 600,7 Mds FCFA (+9%) et un résultat net en hausse de 33% à 5 354 MFCFA, porté par la croissance des volumes. La dynamique se poursuit au T1 2025 bien qu'à un rythme plus modéré. Le principal point de vigilance reste la dégradation du résultat financier liée à une dépendance accrue aux lignes de découvert bancaire.",
+  "ticker": "SHEC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250516_-_etats_financiers_2024_et_rapport_dactivites_du_1er_trimestre_2025_-_vivo_energy_ci_1.pdf",
+  "n_pages": 5,
+  "analyzed_at": "2026-05-08T17:05:29.216473+00:00",
+  "status": "ok",
+  "cached_at": 1778259929.2168
+}

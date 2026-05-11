@@ -1,0 +1,80 @@
+{
+  "annee": 2023,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 60811,
+      "unite": "MFCFA",
+      "variation": "+27.2%"
+    },
+    "resultat_net": {
+      "valeur": 26075,
+      "unite": "MFCFA",
+      "variation": "+29.9%"
+    },
+    "resultat_exploitation": {
+      "valeur": 31018,
+      "unite": "MFCFA",
+      "variation": "+41.6%"
+    },
+    "total_bilan": {
+      "valeur": 938739,
+      "unite": "MFCFA",
+      "variation": "+11.3%"
+    },
+    "capitaux_propres": {
+      "valeur": 95801,
+      "unite": "MFCFA",
+      "variation": "+17.2%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 27.2,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 42.9,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 37664,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le Produit Net Bancaire (PNB) progresse fortement de +27.2% à 60 811 MFCFA, porté notamment par une hausse spectaculaire des commissions (+67.0%) et des intérêts et produits assimilés (+25.3%).",
+    "Le résultat net bondit de +29.9% à 26 075 MFCFA, témoignant d'une rentabilité en nette amélioration malgré une hausse du coût du risque de +76.3%.",
+    "Le total bilan croît de +11.3% à 938 739 MFCFA, soutenu par une expansion du portefeuille crédits clientèle (+18.1%) et une hausse des dépôts clientèle (+10.6%).",
+    "Les capitaux propres atteignent 95 801 MFCFA (+17.2%), reflétant une solidité financière accrue et une bonne rétention des bénéfices.",
+    "Le coût du risque se dégrade significativement (+76.3% à 4 824 MFCFA), signal d'une vigilance accrue nécessaire sur la qualité du portefeuille de crédit."
+  ],
+  "risques": [
+    "Forte augmentation du coût du risque (+76.3%), suggérant une détérioration potentielle de la qualité des actifs de crédit.",
+    "Pertes nettes sur opérations de portefeuilles de négociation de -4 257 MFCFA contre +859 MFCFA en 2022, indiquant une forte volatilité et des pertes sur activités de marché.",
+    "Hausse des charges d'intérêts (+26.2%) corrélée à la croissance des dettes interbancaires et clientèle, pouvant peser sur la marge d'intérêt future.",
+    "Concentration des ressources sur les dépôts clientèle (76% du passif), exposant la banque à un risque de liquidité en cas de retraits massifs."
+  ],
+  "perspectives": "La banque affiche une trajectoire de croissance solide portée par le développement des activités de commissions et de crédit. La maîtrise du coût du risque constituera un enjeu majeur pour préserver la qualité du portefeuille et maintenir la rentabilité. Le renforcement continu des fonds propres offre une bonne base pour soutenir la croissance future.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "BOA Côte d'Ivoire (BOAC) délivre d'excellents résultats en 2023 avec un résultat net en hausse de +29.9% à 26 075 MFCFA et un PNB en progression de +27.2% à 60 811 MFCFA. La croissance du bilan (+11.3%), le renforcement des capitaux propres (+17.2%) et la hausse des commissions (+67.0%) témoignent d'une dynamique commerciale robuste. Le principal point de vigilance reste la forte progression du coût du risque (+76.3%) et les pertes sur portefeuille de négociation, à surveiller de près.",
+  "ticker": "BOAC",
+  "doc_type": "Etats financiers",
+  "year": 2024,
+  "url": "https://www.brvm.org/sites/default/files/20240314_-_etats_financiers_-_exercice_2023_-_boa_ci.pdf",
+  "n_pages": 2,
+  "analyzed_at": "2026-05-08T16:59:05.547673+00:00",
+  "status": "ok",
+  "cached_at": 1778259545.547912
+}

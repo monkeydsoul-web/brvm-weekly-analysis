@@ -1,0 +1,80 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels consolidés IFRS",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 264472,
+      "unite": "MFCFA",
+      "variation": "+3.6%"
+    },
+    "resultat_net": {
+      "valeur": 10555,
+      "unite": "MFCFA",
+      "variation": "-8.3%"
+    },
+    "resultat_exploitation": {
+      "valeur": 18200,
+      "unite": "MFCFA",
+      "variation": "+8.1%"
+    },
+    "total_bilan": {
+      "valeur": 563746,
+      "unite": "MFCFA",
+      "variation": "-1.8%"
+    },
+    "capitaux_propres": {
+      "valeur": 40037,
+      "unite": "MFCFA",
+      "variation": "-0.5%"
+    },
+    "dividende_par_action": {
+      "valeur": 180,
+      "unite": "FCFA",
+      "variation": "+2.9%"
+    },
+    "roe": {
+      "valeur": 26.4,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 3.99,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": 166204,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 34459,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires consolidé progresse de 3.6% à 264 472 MFCFA, porté par la croissance des prestations de service et des ventes de marchandises.",
+    "Le résultat net consolidé recule de 8.3% à 10 555 MFCFA, pénalisé par la hausse des dotations aux amortissements et des charges financières.",
+    "Le nombre de clients augmente significativement de +13.3% à 4 587 952 clients, témoignant de la dynamique d'électrification en Côte d'Ivoire.",
+    "Les ventes d'énergie gérées pour le compte de l'Autorité Concédante bondissent de +21% à 984 732 MFCFA, reflétant la forte croissance de la consommation nationale.",
+    "La trésorerie nette consolidée s'améliore à 28 847 MFCFA contre 23 723 MFCFA en 2023, grâce à de solides flux opérationnels de 48 185 MFCFA."
+  ],
+  "risques": [
+    "Pression sur la rentabilité nette avec une marge nette en contraction due à la hausse des charges de personnel et des amortissements.",
+    "Niveau d'endettement financier courant élevé (147 195 MFCFA) pouvant peser sur la flexibilité financière du groupe.",
+    "Baisse des ventes d'énergie à l'export (-21%) qui réduit une source de revenus complémentaires en devises.",
+    "Risque de change lié aux opérations d'importation d'énergie et aux créances/dettes en devises étrangères."
+  ],
+  "perspectives": "La CIE bénéficie d'une dynamique de croissance soutenue par l'expansion de sa base clients et la montée en puissance du plan d'électrification national (PEPT). Le résultat opérationnel courant en hausse de 8.7% à 18 216 MFCFA témoigne de l'amélioration de l'efficacité opérationnelle. L'entreprise devrait continuer à profiter de la croissance économique ivoirienne, bien que la pression sur les marges nettes nécessite une vigilance sur la maîtrise des coûts.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "La CIE affiche une solide performance opérationnelle en 2024 avec un chiffre d'affaires consolidé en hausse de 3.6% à 264 472 MFCFA et un résultat opérationnel amélioré à 18 200 MFCFA. Cependant, le résultat net recule de 8.3% à 10 555 MFCFA (188 FCFA par action), impacté par des charges plus élevées, tandis que la distribution de dividendes de 10 080 MFCFA (environ 180 FCFA/action) maintient l'attractivité du titre pour les investisseurs en quête de revenus. La forte croissance du nombre de clients (+13.3%) et des volumes d'énergie vendus constitue un signal positif pour la croissance future, bien que la compression des marges reste un point de vigilance.",
+  "ticker": "CIEC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250430_-_etats_financiers_-_norme_syscohada_-_exercice_2024_-_cie_ci.pdf",
+  "n_pages": 3,
+  "analyzed_at": "2026-05-08T17:05:52.486757+00:00",
+  "status": "ok",
+  "cached_at": 1778259952.486969
+}

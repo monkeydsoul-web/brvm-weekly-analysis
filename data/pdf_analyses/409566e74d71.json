@@ -1,0 +1,81 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 268074.013,
+      "unite": "MFCFA",
+      "variation": "+25.4%"
+    },
+    "resultat_net": {
+      "valeur": 36157.776,
+      "unite": "MFCFA",
+      "variation": "-18.1%"
+    },
+    "resultat_exploitation": {
+      "valeur": 45971.833,
+      "unite": "MFCFA",
+      "variation": "-19.4%"
+    },
+    "total_bilan": {
+      "valeur": 75184.092,
+      "unite": "MFCFA",
+      "variation": "-20.8%"
+    },
+    "capitaux_propres": {
+      "valeur": 45336.577,
+      "unite": "MFCFA",
+      "variation": "-13.7%"
+    },
+    "dividende_par_action": {
+      "valeur": 8486,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 79.8,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 13.5,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -30763.29,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 46389.953,
+      "unite": "MFCFA",
+      "variation": "-19.0%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires progresse fortement de +25.4% à 268 Mds FCFA, porté par une hausse significative des ventes de marchandises.",
+    "Le résultat net recule de -18.1% à 36.16 Mds FCFA malgré la croissance du CA, en raison d'une forte hausse des achats et des services extérieurs comprimant les marges.",
+    "La trésorerie nette reste solide à 30.76 Mds FCFA, bien qu'en baisse de 36% par rapport à 2024 suite au versement de 38.09 Mds FCFA de dividendes aux actionnaires.",
+    "Un dividende de 38.09 Mds FCFA est proposé, soit environ 8 486 FCFA par action, représentant un taux de distribution de plus de 100% des bénéfices nets incluant le report à nouveau.",
+    "La valeur ajoutée se contracte de -19.0% à 49.08 Mds FCFA, reflet de la compression des marges opérationnelles due à la hausse des coûts d'approvisionnement."
+  ],
+  "risques": [
+    "Compression significative des marges : la marge nette passe de ~20.4% à ~13.5% en un an, signalant une pression structurelle sur la rentabilité.",
+    "Forte dépendance aux achats de marchandises (207 Mds FCFA, +38% YoY), exposant la société à la volatilité des prix d'approvisionnement.",
+    "Hausse très importante des services extérieurs (+96%) et des impôts et taxes (+333%), pouvant indiquer des coûts structurels en hausse durable.",
+    "Politique de distribution agressive (dividendes > bénéfice net), réduisant les réserves disponibles pour l'investissement et la croissance future.",
+    "Risque réglementaire et fiscal inhérent au secteur du tabac, avec des taxes susceptibles d'augmenter sous pression des politiques de santé publique."
+  ],
+  "perspectives": "La SITAB affiche une forte croissance de son activité commerciale en 2025, mais la rentabilité se dégrade nettement sous l'effet de la hausse des coûts. La politique de distribution très généreuse laisse peu de marges de manœuvre pour financer la croissance. La soutenabilité des résultats dépendra de la capacité à maîtriser les charges opérationnelles dans un secteur sous pression fiscale et réglementaire croissante.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "La SITAB (STBC) enregistre en 2025 une croissance notable de son chiffre d'affaires (+25.4%) mais voit son résultat net chuter de -18.1% à 36.16 Mds FCFA en raison d'une forte hausse des coûts d'exploitation. La société propose un dividende exceptionnel de 38.09 Mds FCFA (>100% du bénéfice), offrant un rendement attractif à court terme mais soulevant des questions sur la pérennité financière. Le profil risque/rendement est équilibré, justifiant un verdict neutre dans l'attente d'une stabilisation des marges.",
+  "ticker": "STBC",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_syscohada_-_exercice_2025_-_sitab_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:07:11.955941+00:00",
+  "status": "ok",
+  "cached_at": 1778260031.956169
+}

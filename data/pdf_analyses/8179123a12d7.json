@@ -1,0 +1,80 @@
+{
+  "annee": 2025,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 98598,
+      "unite": "MFCFA",
+      "variation": "-4%"
+    },
+    "resultat_net": {
+      "valeur": 4622,
+      "unite": "MFCFA",
+      "variation": "-36%"
+    },
+    "resultat_exploitation": {
+      "valeur": 6376,
+      "unite": "MFCFA",
+      "variation": "+39.9%"
+    },
+    "total_bilan": {
+      "valeur": 32609,
+      "unite": "MFCFA",
+      "variation": "+12.2%"
+    },
+    "capitaux_propres": {
+      "valeur": 21954,
+      "unite": "MFCFA",
+      "variation": "-7%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 21.1,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 4.7,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -7416,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 7164,
+      "unite": "MFCFA",
+      "variation": "+33.6%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 4% à 98,6 milliards FCFA sous l'effet de la concurrence déloyale des opérateurs illégaux de jeux.",
+    "Le résultat net chute de 36% à 4,6 milliards FCFA principalement en raison de l'absence de produits exceptionnels significatifs en 2025 (vs 3,1 Mds FCFA en 2024).",
+    "Malgré la baisse du chiffre d'affaires, la maîtrise des charges permet une hausse de la valeur ajoutée (+22%), de l'EBE (+34%) et du résultat d'exploitation (+40%).",
+    "Les jeux en ligne progressent de 18% à 67,5 milliards FCFA, représentant 68,4% du chiffre d'affaires global.",
+    "La structure financière reste saine avec des fonds propres de 22 milliards FCFA, un ratio d'autonomie financière de 2,06 et une trésorerie nette positive de 7,98 milliards FCFA."
+  ],
+  "risques": [
+    "Concurrence déloyale des opérateurs illégaux proposant des taux de retour aux joueurs supérieurs au plafond réglementaire de 85%, entraînant une perte de clientèle.",
+    "Prolifération des machines à sous illégales sur le territoire national, détournant une partie croissante de la clientèle.",
+    "Risque réglementaire et d'exécution lié à la capacité des autorités (Cellule de Supervision des Jeux) à assainir effectivement le secteur.",
+    "Dépendance au Loto 5/90 qui génère entre 67% et 80% du chiffre d'affaires global, exposant la société à un risque de concentration produit."
+  ],
+  "perspectives": "La LNB SA prévoit en 2026 le lancement de nouveaux produits (Double Chance, LNB Zoo, Kadolo), la montée en puissance du digital avec une plateforme unifiée (casino, paris sportifs, jeux virtuels) et l'interfaçage avec les opérateurs de mobile money. La société anticipe une reprise de la croissance grâce à sa veille concurrentielle, à l'assainissement du secteur par les autorités et au déploiement géographique vers le nord du Bénin. La distribution d'environ 80% du résultat net 2025 est proposée, témoignant de la confiance du management dans la solidité financière de la société.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "La LNB SA clôture 2025 sur un recul des performances commerciales (CA -4%, résultat net -36% à 4,6 Mds FCFA) principalement imputable à la concurrence illégale, mais démontre une bonne maîtrise opérationnelle avec un EBE en hausse de 34% et un bilan solide (fonds propres 22 Mds FCFA, trésorerie nette positive). La forte progression des jeux en ligne (+18%) constitue un relais de croissance structurel prometteur. Les perspectives 2026 sont conditionnées à l'assainissement du secteur par les autorités et à l'exécution réussie de la feuille de route digitale.",
+  "ticker": "LNBB",
+  "doc_type": "Etats financiers",
+  "year": 2026,
+  "url": "https://www.brvm.org/sites/default/files/20260430_-_etats_financiers_-_exercice_2025_-_lnb_bn.pdf",
+  "n_pages": 22,
+  "analyzed_at": "2026-05-08T17:10:33.037026+00:00",
+  "status": "ok",
+  "cached_at": 1778260233.0373251
+}

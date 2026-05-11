@@ -1,0 +1,79 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 97819,
+      "unite": "MFCFA",
+      "variation": "+7%"
+    },
+    "resultat_net": {
+      "valeur": 38112,
+      "unite": "MFCFA",
+      "variation": "+9%"
+    },
+    "resultat_exploitation": {
+      "valeur": 39937,
+      "unite": "MFCFA",
+      "variation": "+4%"
+    },
+    "total_bilan": {
+      "valeur": 2514388,
+      "unite": "MFCFA",
+      "variation": "+23%"
+    },
+    "capitaux_propres": {
+      "valeur": 215330,
+      "unite": "MFCFA",
+      "variation": "+13%"
+    },
+    "dividende_par_action": {
+      "valeur": null,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": 17.7,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 38.96,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": null,
+      "unite": "MFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 48411,
+      "unite": "MFCFA",
+      "variation": null
+    }
+  },
+  "points_cles": [
+    "Le résultat net progresse de 9% à 38,1 milliards FCFA en 2024, contre 34,8 milliards FCFA en 2023.",
+    "Le total bilan croît de 23% pour atteindre 2 514 milliards FCFA, porté par une hausse de 17% des créances clientèle à 1 536 milliards FCFA.",
+    "Le Produit Net Bancaire augmente de 7% à 97,8 milliards FCFA, soutenu par une forte progression des commissions (+27%).",
+    "Le coût net du risque s'améliore significativement, passant de -3,4 milliards FCFA en 2023 à +0,6 milliard FCFA en 2024.",
+    "Les fonds propres atteignent 215 milliards FCFA (+13%), confirmant le renforcement de la solidité financière de la banque."
+  ],
+  "risques": [
+    "Hausse du coefficient d'exploitation à 59,7% (contre 58,3% en 2023), reflétant une progression des charges plus rapide que celle des revenus.",
+    "Environnement socio-politique régional incertain susceptible d'affecter l'activité bancaire en Côte d'Ivoire.",
+    "Pression sur la marge d'intérêt, en légère baisse de 1% à 63,5 milliards FCFA malgré la croissance du bilan."
+  ],
+  "perspectives": "NSIA Banque CI poursuivra son plan stratégique 'Altitude 22-26' visant à renforcer son positionnement comme acteur bancaire de référence en Côte d'Ivoire. La banque entend maintenir ses standards de gouvernance et accompagner la transformation du secteur bancaire et l'inclusion financière. En 2025, marqué par les 30 ans du Groupe NSIA, la banque ambitionne de franchir une nouvelle étape de développement dans un contexte économique mondial en mutation.",
+  "verdict_investisseur": "POSITIF",
+  "resume": "NSIA Banque CI affiche en 2024 des résultats solides avec un bénéfice net de 38,1 milliards FCFA (+9%) et un total bilan en hausse de 23% à 2 514 milliards FCFA. La forte croissance des commissions (+27%) et l'amélioration significative du coût du risque témoignent d'une bonne maîtrise opérationnelle et d'un portefeuille de qualité. La banque présente un profil de croissance rentable et régulier, confirmé par sa notation AA- maintenue par Bloomfield Investment.",
+  "ticker": "NSBC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250325_-_etats_financiers_certifies_par_les_commissaires_aux_comptes_-_exercice_2024_-_nsia_banque_ci.pdf",
+  "n_pages": 3,
+  "analyzed_at": "2026-05-09T11:45:03.457819+00:00",
+  "status": "ok",
+  "cached_at": 1778327103.4580858
+}

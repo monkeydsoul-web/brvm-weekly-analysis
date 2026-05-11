@@ -1,0 +1,79 @@
+{
+  "annee": 2024,
+  "type_rapport": "Etats financiers annuels",
+  "kpis": {
+    "chiffre_affaires": {
+      "valeur": 30694517,
+      "unite": "KFCFA",
+      "variation": "-19.7%"
+    },
+    "resultat_net": {
+      "valeur": 18595275,
+      "unite": "KFCFA",
+      "variation": "+504.5%"
+    },
+    "resultat_exploitation": {
+      "valeur": -882181,
+      "unite": "KFCFA",
+      "variation": null
+    },
+    "total_bilan": {
+      "valeur": 61061747,
+      "unite": "KFCFA",
+      "variation": "+20.4%"
+    },
+    "capitaux_propres": {
+      "valeur": 46454156,
+      "unite": "KFCFA",
+      "variation": null
+    },
+    "dividende_par_action": {
+      "valeur": 2000.67,
+      "unite": "FCFA",
+      "variation": null
+    },
+    "roe": {
+      "valeur": null,
+      "unite": "%",
+      "variation": null
+    },
+    "marge_nette": {
+      "valeur": 60.6,
+      "unite": "%",
+      "variation": null
+    },
+    "dette_nette": {
+      "valeur": -18831391,
+      "unite": "KFCFA",
+      "variation": null
+    },
+    "ebitda": {
+      "valeur": 473316,
+      "unite": "KFCFA",
+      "variation": "-84.1%"
+    }
+  },
+  "points_cles": [
+    "Le chiffre d'affaires recule de 20% à 30,7 milliards FCFA, reflétant une contraction significative de l'activité opérationnelle.",
+    "Le résultat net bondit à 18,6 milliards FCFA grâce à un résultat HAO exceptionnel de 18,9 milliards FCFA, masquant une exploitation déficitaire.",
+    "La trésorerie nette passe d'un solde négatif de -10,5 milliards à un positif de +18,8 milliards FCFA, une amélioration majeure liée notamment à des cessions d'immobilisations financières.",
+    "Une distribution exceptionnelle totale de 28,2 milliards FCFA est proposée, combinant affectation du résultat (18,6 Md) et distribution partielle de prime d'émission (9,6 Md), soit 2 000,67 FCFA par action."
+  ],
+  "risques": [
+    "Résultat d'exploitation négatif (-882 millions FCFA) signalant une activité opérationnelle structurellement déficitaire.",
+    "Forte dépendance du résultat net à des éléments exceptionnels (HAO) non récurrents de 18,9 milliards FCFA.",
+    "Baisse significative du chiffre d'affaires de 20% suggérant une perte de volumes ou de marchés.",
+    "Distribution massive supérieure au résultat net généré (28,2 Md distribués vs 18,6 Md de résultat) entamant les réserves."
+  ],
+  "perspectives": "La société FTSC affiche une performance opérationnelle préoccupante avec un EBIT négatif et un chiffre d'affaires en forte baisse. La solidité apparente du bilan repose sur une trésorerie exceptionnellement élevée et des éléments non récurrents. La distribution massive aux actionnaires, bien qu'attractive à court terme, soulève des questions sur la soutenabilité du modèle d'affaires.",
+  "verdict_investisseur": "NEUTRE",
+  "resume": "FTSC présente des états financiers 2024 en trompe-l'œil : un résultat net spectaculaire de 18,6 milliards FCFA est quasi-intégralement dû à des éléments exceptionnels (HAO), tandis que l'exploitation reste déficitaire et le chiffre d'affaires chute de 20%. La distribution d'un dividende exceptionnel de ~2 001 FCFA/action est attractive mais la performance opérationnelle structurelle reste une source de préoccupation majeure pour l'investisseur long terme.",
+  "ticker": "FTSC",
+  "doc_type": "Etats financiers",
+  "year": 2025,
+  "url": "https://www.brvm.org/sites/default/files/20250523_-_etats_financiers_-_exercice_2024_-_filtisac_ci.pdf",
+  "n_pages": 1,
+  "analyzed_at": "2026-05-08T17:08:40.021434+00:00",
+  "status": "ok",
+  "cached_at": 1778260120.021653
+}
