@@ -689,6 +689,10 @@ def serve_compare_js():
 def serve_alerts_js():
     return send_from_directory("dashboard", "alerts.js", mimetype="application/javascript")
 
+@app.route("/backtest.js")
+def serve_backtest_js():
+    return send_from_directory("dashboard", "backtest.js", mimetype="application/javascript")
+
 @app.route("/compare_analysis.js")
 def serve_compare_analysis_js():
     return send_from_directory("dashboard", "compare_analysis.js", mimetype="application/javascript")
@@ -922,6 +926,119 @@ Utilise les données chiffrées. Sois précis, concis et pratique. Réponds en f
         
     except Exception as e:
         logger.error(f"compare-analysis: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/backtest", methods=["POST"])
+def api_backtest():
+    """Backtesting portefeuille BRVM sur historique de prix."""
+    try:
+        data = request.json or {}
+        tickers = data.get("tickers", [])
+        weights = data.get("weights", {})  # {ticker: poids}
+        period = data.get("period", "1an")  # 1an, 3ans, 5ans, tout
+        initial_capital = data.get("capital", 1000000)  # FCFA
+        
+        if not tickers:
+            return jsonify({"error": "Aucun ticker"}), 400
+        
+        import json as _json
+        ph_path = os.path.join(DATA_DIR, "price_history.json")
+        if not os.path.exists(ph_path):
+            return jsonify({"error": "Historique non disponible"}), 404
+        
+        with open(ph_path) as f:
+            history = _json.load(f)
+        
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        period_map = {"1an": 365, "3ans": 1095, "5ans": 1825, "tout": 3650}
+        days = period_map.get(period, 365)
+        cutoff = (now - timedelta(days=days)).strftime("%Y-%m-%d")
+        
+        # Pondérations égales si non fournies
+        n = len(tickers)
+        equal_w = 1.0 / n
+        
+        # Calculer performance par ticker
+        results = {}
+        portfolio_data = {}
+        
+        for ticker in tickers:
+            pts = sorted([p for p in history.get(ticker, []) if p.get("date", "") >= cutoff], 
+                        key=lambda x: x["date"])
+            if len(pts) < 2:
+                continue
+            
+            first_price = pts[0]["price"]
+            last_price = pts[-1]["price"]
+            if first_price <= 0:
+                continue
+            
+            perf_pct = (last_price - first_price) / first_price * 100
+            w = weights.get(ticker, equal_w)
+            
+            results[ticker] = {
+                "ticker": ticker,
+                "start_price": first_price,
+                "end_price": last_price,
+                "perf_pct": round(perf_pct, 2),
+                "weight": round(w, 4),
+                "start_date": pts[0]["date"],
+                "end_date": pts[-1]["date"],
+                "nb_points": len(pts),
+                "contribution": round(perf_pct * w, 2),
+            }
+            
+            # Série temporelle normalisée base 100
+            portfolio_data[ticker] = [
+                {"date": p["date"], "value": round((p["price"] / first_price) * 100, 2)}
+                for p in pts
+            ]
+        
+        if not results:
+            return jsonify({"error": "Données insuffisantes pour la période"}), 404
+        
+        # Performance globale du portefeuille (moyenne pondérée)
+        total_contrib = sum(r["contribution"] for r in results.values())
+        total_weight = sum(r["weight"] for r in results.values())
+        portfolio_perf = total_contrib / total_weight if total_weight > 0 else 0
+        
+        # Valeur finale du portefeuille
+        final_value = initial_capital * (1 + portfolio_perf / 100)
+        gain = final_value - initial_capital
+        
+        # Top performers dans le portefeuille
+        sorted_results = sorted(results.values(), key=lambda x: x["perf_pct"], reverse=True)
+        
+        # Série portefeuille agrégée
+        all_dates = sorted(set(d["date"] for pts in portfolio_data.values() for d in pts))
+        portfolio_series = []
+        for date in all_dates:
+            weighted_val = 0
+            total_w = 0
+            for ticker, pts in portfolio_data.items():
+                pt = next((p for p in pts if p["date"] == date), None)
+                if pt:
+                    w = results[ticker]["weight"]
+                    weighted_val += pt["value"] * w
+                    total_w += w
+            if total_w > 0:
+                portfolio_series.append({"date": date, "value": round(weighted_val / total_w, 2)})
+        
+        return jsonify({
+            "period": period,
+            "initial_capital": initial_capital,
+            "final_value": round(final_value),
+            "gain": round(gain),
+            "portfolio_perf_pct": round(portfolio_perf, 2),
+            "nb_tickers": len(results),
+            "results": sorted_results,
+            "portfolio_series": portfolio_series[-60:],  # max 60 points
+            "ticker_series": {t: pts[-60:] for t, pts in portfolio_data.items()},
+        })
+        
+    except Exception as e:
+        logger.error(f"backtest: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/sector-indices")
