@@ -96,7 +96,7 @@ input[type=range]{padding:0;height:20px}
     <div class="ni on" onclick="nav('dash')"><span>🏠</span> Tableau de bord</div>
     <div class="ni" onclick="nav('rank')"><span>🏆</span> Classement</div>
     <div class="ni" onclick="nav('sectors');renderSectorPage()"><span>📊</span> Secteurs</div>
-    <div class="ni" onclick="nav('perfhist');renderPerfPage()"><span>📈</span> Performances</div>
+    
     <div class="ni" onclick="nav('port')"><span>💼</span> Portefeuille</div>
     <div class="ni" onclick="nav('div')"><span>💰</span> Dividendes</div>
     <div class="ni" onclick="nav('perf')"><span>📈</span> Performances</div>
@@ -195,7 +195,7 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <div class="card" style="padding:0;overflow-x:auto">
-    <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Verdict</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
+    <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>30j</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Verdict</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
 </div>
@@ -288,9 +288,6 @@ input[type=range]{padding:0;height:20px}
   </div>
 </div>
 
-<!-- PERFORMANCES -->
-<div class="page" id="page-perf">
-  <div class="ph"><h2>Performances historiques 10 ans</h2></div>
   <div class="card"><div class="ct">Évolution des cours 2016–2025</div>
     <div id="cPriceDiv" style="width:100%;height:260px"></div></div>
   <div class="g2">
@@ -442,7 +439,7 @@ input[type=range]{padding:0;height:20px}
 </div>
 
 <!-- PERFORMANCES HISTORIQUES -->
-<div class="page" id="page-perfhist">
+<div class="page" id="page-perf">
   <div class="ph">
     <h2>📈 Performances historiques</h2>
   </div>
@@ -615,8 +612,18 @@ async function init(){
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
     scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
-    renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();
+    // Charger historique prix PUIS rendu
+    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
+      window._priceHistory=ph;
+      console.log('Price history loaded:', Object.keys(ph).length, 'tickers');
+      const snts = ph['SNTS']||[];
+      const boc = snts.filter(p=>p.source==='boc');
+      console.log('SNTS BOC points:', boc.length, 'sample:', boc.slice(-2));
+    }).catch(e=>{window._priceHistory={};console.error('Price history error:',e);}).finally(()=>{
+      renderDash(m);initRanking();renderRankLive();renderDiv();renderNews();renderComm();startAutoRefresh();
+    });
     renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget, 500);
+
     populateSelects();
   }catch(e){console.error(e)}
 }
@@ -675,6 +682,22 @@ function renderDash(m){
     highDiv.length?`💰 <strong style="color:var(--text)">Hauts rendements :</strong> ${highDiv.map(x=>x.ticker+' '+x.div_yield.toFixed(1)+'%').join(', ')}`:'',
     exSoon.length?`📅 <strong style="color:var(--text)">Prochains ex-div :</strong> ${exSoon.map(x=>x.ticker+' le '+x.ex_div_date).join(' · ')}`:'',
   ].filter(Boolean).join('<br>');
+}
+
+function sparkline(prices, w=80, h=28) {
+  if (!prices || prices.length < 2) return '<svg width="'+w+'" height="'+h+'"></svg>';
+  const vals = prices.map(p => p.price || p).filter(Boolean);
+  if (vals.length < 2) return '<svg width="'+w+'" height="'+h+'"></svg>';
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const range = mx - mn || 1;
+  const pts = vals.map((v,i) => {
+    const x = (i/(vals.length-1))*w;
+    const y = h - ((v-mn)/range)*(h-4) - 2;
+    return x+','+y;
+  }).join(' ');
+  const last = vals[vals.length-1], first = vals[0];
+  const color = last >= first ? '#4ADE80' : '#F87171';
+  return `<svg width="${w}" height="${h}" style="display:block"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" opacity="0.9"/></svg>`;
 }
 
 function loadMarketWidget(){
@@ -747,12 +770,17 @@ function renderRank(){
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
+    // Récupérer historique 30 derniers points BOC
+    const ph = window._priceHistory || {};
+    const hist30 = (ph[x.ticker]||[]).filter(p=>p.source==='boc').slice(-30);
+    const spk = hist30.length>=2 ? sparkline(hist30, 80, 26) : '<span id="spk-'+x.ticker+'" style="color:var(--t3);font-size:9px;display:inline-block;width:80px"></span>';
     return`<tr onclick="showStock('${x.ticker}')">
       <td style="color:var(--t2)">${i+1}</td>
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
       <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
+      <td style="padding:2px 4px">${spk}</td>
       <td style="color:${chgC}">${chg?chg.toFixed(1)+'%':'—'}</td>
       <td>${x.pe_ref||'—'}×</td><td style="color:var(--t2)">${x.pb_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>

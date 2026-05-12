@@ -223,7 +223,29 @@ def serve_simulator():
 
 @app.route("/")
 def index():
-    return send_from_directory("dashboard", "index.html")
+    from flask import Response
+    import json as _json
+    try:
+        # Injecter price_history minimal (30 derniers BOC) dans le HTML
+        ph_path = os.path.join(DATA_DIR, "price_history.json")
+        ph = {}
+        if os.path.exists(ph_path):
+            with open(ph_path) as f:
+                raw = _json.load(f)
+            # Garder seulement les 30 derniers points BOC par ticker
+            for ticker, pts in raw.items():
+                boc = [p for p in pts if p.get("source")=="boc"][-30:]
+                if boc:
+                    ph[ticker] = boc
+        
+        with open(os.path.join("dashboard","index.html"), encoding="utf-8") as f:
+            html = f.read()
+        
+        inject = f"<script>window._priceHistory={_json.dumps(ph)};</script>"
+        html = html.replace("<body", inject + "<body", 1)
+        return Response(html, mimetype="text/html")
+    except Exception as e:
+        return send_from_directory("dashboard", "index.html")
 
 
 @app.route("/api/scores")

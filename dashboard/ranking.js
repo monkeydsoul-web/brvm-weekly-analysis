@@ -56,6 +56,10 @@ function renderRankLive() {
     const chg  = x.change_pct || 0;
     const chgC = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
     const isFav = (window.favorites || []).includes(x.ticker);
+    // Sparkline 30 derniers jours BOC
+    const _ph = window._priceHistory || {};
+    const _boc = (_ph[x.ticker]||[]).filter(p=>p.source==='boc').slice(-30);
+    const _spk = _boc.length>=2 ? sparkline(_boc,80,26) : '<span style="color:var(--t3);font-size:9px">—</span>';
 
     // Verdict PDF badge
     const verd = x.pdf_verdict || '';
@@ -81,6 +85,7 @@ function renderRankLive() {
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name || ''}</td>
       <td>${x.price ? x.price.toLocaleString('fr-FR') : 'N/D'}</td>
+      <td style="padding:2px 4px;vertical-align:middle">${_spk}</td>
       <td style="color:${chgC}">${chg ? chg.toFixed(1) + '%' : '—'}</td>
       <td style="color:var(--t2)">${pe}</td>
       <td style="color:var(--t2)">${pb}</td>
