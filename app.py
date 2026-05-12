@@ -689,6 +689,10 @@ def serve_compare_js():
 def serve_alerts_js():
     return send_from_directory("dashboard", "alerts.js", mimetype="application/javascript")
 
+@app.route("/markowitz.js")
+def serve_markowitz_js():
+    return send_from_directory("dashboard", "markowitz.js", mimetype="application/javascript")
+
 @app.route("/backtest.js")
 def serve_backtest_js():
     return send_from_directory("dashboard", "backtest.js", mimetype="application/javascript")
@@ -926,6 +930,133 @@ Utilise les données chiffrées. Sois précis, concis et pratique. Réponds en f
         
     except Exception as e:
         logger.error(f"compare-analysis: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/markowitz", methods=["POST"])
+def api_markowitz():
+    """Optimisation portefeuille Markowitz - frontière efficiente BRVM."""
+    try:
+        data = request.json or {}
+        tickers = data.get("tickers", [])
+        n_portfolios = data.get("n_portfolios", 3000)
+        risk_free = data.get("risk_free", 0.06)  # BCEAO taux ~6%
+        
+        if len(tickers) < 2:
+            return jsonify({"error": "Minimum 2 actifs"}), 400
+        
+        import json as _json, numpy as np
+        ph_path = os.path.join(DATA_DIR, "price_history.json")
+        with open(ph_path) as f:
+            history = _json.load(f)
+        
+        # Extraire séries de prix (BOC seulement - quotidien)
+        price_series = {}
+        for ticker in tickers:
+            pts = sorted([p for p in history.get(ticker, []) 
+                         if p.get("source") == "boc"], key=lambda x: x["date"])
+            if len(pts) >= 20:
+                price_series[ticker] = {p["date"]: p["price"] for p in pts}
+        
+        valid_tickers = list(price_series.keys())
+        if len(valid_tickers) < 2:
+            return jsonify({"error": "Données insuffisantes (min 20 points BOC)"}), 400
+        
+        # Aligner les dates communes
+        all_dates = sorted(set.intersection(*[set(ps.keys()) for ps in price_series.values()]))
+        if len(all_dates) < 10:
+            # Si peu de dates communes, utiliser union avec forward-fill
+            all_dates = sorted(set.union(*[set(ps.keys()) for ps in price_series.values()]))
+        
+        # Construire matrice de prix
+        prices = {}
+        for ticker in valid_tickers:
+            ps = price_series[ticker]
+            last_price = None
+            ticker_prices = []
+            for d in all_dates:
+                if d in ps:
+                    last_price = ps[d]
+                ticker_prices.append(last_price)
+            prices[ticker] = ticker_prices
+        
+        # Retours journaliers
+        returns = {}
+        for ticker in valid_tickers:
+            p = [x for x in prices[ticker] if x is not None]
+            if len(p) < 2:
+                continue
+            ret = [(p[i]-p[i-1])/p[i-1] for i in range(1, len(p))]
+            returns[ticker] = ret
+        
+        valid_tickers = [t for t in valid_tickers if t in returns and len(returns[t]) >= 10]
+        if len(valid_tickers) < 2:
+            return jsonify({"error": "Retours insuffisants"}), 400
+        
+        # Matrice de retours
+        min_len = min(len(returns[t]) for t in valid_tickers)
+        R = np.array([[returns[t][i] for t in valid_tickers] for i in range(min_len)])
+        
+        # Statistiques
+        mean_returns = R.mean(axis=0) * 252  # annualisé
+        cov_matrix = np.cov(R.T) * 252
+        
+        # Simulation Monte Carlo
+        results = []
+        np.random.seed(42)
+        for _ in range(n_portfolios):
+            w = np.random.dirichlet(np.ones(len(valid_tickers)))
+            port_ret = float(np.dot(w, mean_returns))
+            port_vol = float(np.sqrt(w @ cov_matrix @ w))
+            sharpe = (port_ret - risk_free) / port_vol if port_vol > 0 else 0
+            results.append({
+                "weights": {valid_tickers[i]: round(float(w[i]), 4) for i in range(len(valid_tickers))},
+                "return": round(port_ret * 100, 2),
+                "volatility": round(port_vol * 100, 2),
+                "sharpe": round(sharpe, 3)
+            })
+        
+        # Trouver les portefeuilles optimaux
+        max_sharpe = max(results, key=lambda x: x["sharpe"])
+        min_vol = min(results, key=lambda x: x["volatility"])
+        max_ret = max(results, key=lambda x: x["return"])
+        
+        # Frontière efficiente (top 200 points)
+        frontier = sorted(results, key=lambda x: x["volatility"])
+        efficient = []
+        max_ret_seen = -999
+        for p in frontier:
+            if p["return"] > max_ret_seen:
+                max_ret_seen = p["return"]
+                efficient.append(p)
+        
+        # Stats individuelles
+        individual = {}
+        for i, ticker in enumerate(valid_tickers):
+            individual[ticker] = {
+                "annual_return": round(float(mean_returns[i]) * 100, 2),
+                "annual_vol": round(float(np.sqrt(cov_matrix[i,i])) * 100, 2),
+                "sharpe": round((float(mean_returns[i]) - risk_free) / float(np.sqrt(cov_matrix[i,i])), 3) if cov_matrix[i,i] > 0 else 0
+            }
+        
+        # Nuage de points (échantillon 500)
+        import random
+        cloud = random.sample(results, min(500, len(results)))
+        
+        return jsonify({
+            "tickers": valid_tickers,
+            "max_sharpe": max_sharpe,
+            "min_volatility": min_vol,
+            "max_return": max_ret,
+            "frontier": efficient[:100],
+            "cloud": cloud,
+            "individual": individual,
+            "n_simulated": len(results),
+            "risk_free": risk_free * 100,
+        })
+    except ImportError:
+        return jsonify({"error": "numpy non disponible"}), 500
+    except Exception as e:
+        logger.error(f"markowitz: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/backtest", methods=["POST"])
