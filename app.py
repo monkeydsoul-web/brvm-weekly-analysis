@@ -765,6 +765,80 @@ def api_live_ranking_changes():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/sector-analysis", methods=["POST"])
+def api_sector_analysis():
+    """Analyse IA d'un secteur BRVM complet."""
+    try:
+        data = request.json or {}
+        sector = data.get("sector", "Banque")
+        
+        import anthropic, os
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY",""))
+        
+        scores = load_latest_scores()
+        analyses = json.load(open(os.path.join(DATA_DIR, "analyses_summary.json"), encoding="utf-8"))
+        sector_indices = {}
+        si_path = os.path.join(DATA_DIR, "sector_indices.json")
+        if os.path.exists(si_path):
+            sector_indices = json.load(open(si_path)).get("indices", {})
+        
+        # Sociétés du secteur
+        sector_stocks = [s for s in scores if s.get("sector") == sector]
+        sector_stocks.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+        
+        if not sector_stocks:
+            return jsonify({"error": f"Secteur {sector} non trouvé"}), 404
+        
+        # Contexte sectoriel
+        idx_key = next((k for k in sector_indices if sector.lower() in k.lower() or k.lower() in sector.lower()), None)
+        idx_data = sector_indices.get(idx_key, {}) if idx_key else {}
+        
+        companies_ctx = []
+        for s in sector_stocks:
+            a = analyses.get(s["ticker"], {})
+            kpis = a.get("kpis", {})
+            def kv(k): return (kpis.get(k) or {}).get("valeur")
+            ctx = f"• {s['ticker']} ({s.get('country','')}) — Score {s.get('composite_adj',0):.0f}/80 | P/E {s.get('pe_ref','?')} | ROE {s.get('roe','?')}% | Div {s.get('div_yield',0):.1f}% | Verdict: {a.get('verdict_investisseur','N/D')} | CA: {kv('chiffre_affaires')} MFCFA | RN: {kv('resultat_net')} MFCFA"
+            companies_ctx.append(ctx)
+        
+        idx_ctx = f"Indice BRVM {sector}: {idx_data.get('current','N/D')} ({idx_data.get('change',0):+.2f}% jour, YTD {idx_data.get('ytd',0):+.2f}%)" if idx_data else ""
+        
+        prompt = f"""Tu es un analyste sectoriel expert de la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
+
+SECTEUR: {sector} ({len(sector_stocks)} sociétés cotées)
+{idx_ctx}
+
+SOCIÉTÉS DU SECTEUR:
+{chr(10).join(companies_ctx)}
+
+Effectue une analyse sectorielle complète et structurée:
+
+1. **Vue d'ensemble du secteur** — Dynamiques, tendances, environnement macro UEMOA
+2. **Classement et champions** — Top 3 et pourquoi, sociétés à éviter
+3. **Comparaison valorisation** — P/E et P/B moyens vs normes sectorielles mondiales  
+4. **Dividendes sectoriels** — Généreux vs avares, tendances de distribution
+5. **Risques sectoriels communs** — Taux, réglementation, concurrence, géopolitique
+6. **Opportunités 2026** — Catalyseurs de croissance identifiés
+7. **Recommandation de portefeuille sectoriel** — Pondération suggérée entre les sociétés
+
+Sois précis, data-driven et pratique. Réponds en français."""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return jsonify({
+            "analysis": response.content[0].text,
+            "sector": sector,
+            "nb_stocks": len(sector_stocks),
+            "generated_at": __import__("datetime").datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"sector-analysis: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/compare-analysis", methods=["POST"])
 def api_compare_analysis():
     """Analyse comparative IA de plusieurs sociétés BRVM."""

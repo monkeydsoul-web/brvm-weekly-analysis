@@ -129,6 +129,17 @@ async function renderSectorPage() {
     </div>`;
   }).join('');
 
+  // Boutons analyse sectorielle IA
+  const _sectorNames = Object.keys(sectors.reduce((acc,[s])=>{acc[s]=1;return acc},{}));
+  const _aiDiv = document.createElement('div');
+  _aiDiv.innerHTML = `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:600;color:var(--t2)">🤖 Analyse IA :</span>
+      ${_sectorNames.map(s=>`<button onclick="launchSectorAnalysis('${s}')" style="font-size:10px;padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--t2)">${s}</button>`).join('')}
+    </div>
+    <div id="sector-ai-result" style="display:none;margin-top:10px;padding:12px;background:var(--bg3);border-radius:8px;max-height:420px;overflow-y:auto;font-size:11px;line-height:1.7"></div>
+  </div>`;
+
   container.innerHTML = `
     <div class="g2" style="margin-bottom:16px">
       <div class="card" style="margin-bottom:0">
@@ -152,4 +163,38 @@ async function renderSectorPage() {
       </div>
     </div>
     ${sectorCards}`;
+}
+
+async function launchSectorAnalysis(sector) {
+  const resultDiv = document.getElementById('sector-ai-result');
+  if (!resultDiv) return;
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `<div style="text-align:center;padding:16px;color:var(--t2)">⏳ Analyse du secteur ${sector}...</div>`;
+  resultDiv.scrollIntoView({behavior:'smooth'});
+  try {
+    const res = await fetch('/api/sector-analysis', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({sector})
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    let html = data.analysis
+      .replace(/^### (.*)/gm,'<h4 style="font-size:11px;font-weight:700;color:var(--blue);margin:8px 0 3px">$1</h4>')
+      .replace(/^## (.*)/gm,'<h3 style="font-size:12px;font-weight:700;color:var(--t1);margin:10px 0 4px;border-bottom:1px solid var(--border);padding-bottom:2px">$1</h3>')
+      .replace(/^# (.*)/gm,'<h2 style="font-size:13px;font-weight:700;color:var(--green);margin:10px 0 5px">$1</h2>')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/^\- (.*)/gm,'<li style="margin:2px 0">$1</li>')
+      .replace(/^---$/gm,'<hr style="border-color:var(--border);margin:6px 0">');
+    resultDiv.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <strong style="color:var(--green)">📊 ${sector} — ${data.nb_stocks} sociétés</strong>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('_sa_text').textContent).then(()=>showNotif('Copié!','green'))" 
+        style="font-size:10px;padding:2px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--t2)">📋 Copier</button>
+    </div>
+    <div>${html}</div>
+    <textarea id="_sa_text" style="display:none">${data.analysis}</textarea>
+    <div style="font-size:9px;color:var(--t3);margin-top:8px">Généré le ${new Date(data.generated_at).toLocaleString('fr-FR')}</div>`;
+  } catch(e) {
+    resultDiv.innerHTML = `<div style="color:var(--red)">Erreur: ${e.message}</div>`;
+  }
 }
