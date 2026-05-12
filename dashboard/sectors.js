@@ -129,10 +129,9 @@ async function renderSectorPage() {
     </div>`;
   }).join('');
 
-  // Boutons analyse sectorielle IA
+  // Boutons analyse sectorielle IA — injectés directement dans container
   const _sectorNames = Object.keys(sectors.reduce((acc,[s])=>{acc[s]=1;return acc},{}));
-  const _aiDiv = document.createElement('div');
-  _aiDiv.innerHTML = `<div class="card" style="margin-bottom:12px">
+  const _aiBlock = `<div class="card" style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <span style="font-size:11px;font-weight:600;color:var(--t2)">🤖 Analyse IA :</span>
       ${_sectorNames.map(s=>`<button onclick="launchSectorAnalysis('${s}')" style="font-size:10px;padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--t2)">${s}</button>`).join('')}
@@ -140,7 +139,7 @@ async function renderSectorPage() {
     <div id="sector-ai-result" style="display:none;margin-top:10px;padding:12px;background:var(--bg3);border-radius:8px;max-height:420px;overflow-y:auto;font-size:11px;line-height:1.7"></div>
   </div>`;
 
-  container.innerHTML = `
+  container.innerHTML = _aiBlock + `
     <div class="g2" style="margin-bottom:16px">
       <div class="card" style="margin-bottom:0">
         <div class="ct">Répartition sectorielle</div>
