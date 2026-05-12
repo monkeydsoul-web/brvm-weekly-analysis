@@ -484,6 +484,72 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
 
+
+<script>
+function navAnalyse(){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
+  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
+  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
+  document.querySelector(".main").scrollTop=0;
+  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
+  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
+}
+
+// ── Live status & auto-refresh ─────────────────────────────────────────────
+function updateLiveStatus() {
+  fetch('/api/status')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var open = d.market_open;
+      var dot   = document.getElementById('live-dot');
+      var label = document.getElementById('live-label');
+      var time  = document.getElementById('live-time');
+      var src   = document.getElementById('live-src');
+      if (dot) {
+        dot.style.background = open ? '#22c55e' : '#f59e0b';
+        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
+      }
+      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
+      if (time && d.updated_at) {
+        var dt = new Date(d.updated_at);
+        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+      }
+      if (src) {
+        var sources = d.sources || {};
+        var parts = [];
+        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
+        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
+        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
+      }
+      // Mettre a jour les prix dans la sidebar si disponible
+      fetch('/api/live')
+        .then(function(r){ return r.json(); })
+        .then(function(live) {
+          var prices = live.prices || {};
+          // Mettre a jour les items de la sidebar tlItems si present
+          var items = document.querySelectorAll('[data-ticker]');
+          items.forEach(function(el) {
+            var t = el.getAttribute('data-ticker');
+            if (prices[t] && prices[t].price) {
+              var priceEl = el.querySelector('.ti-score');
+              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
+              var chg = prices[t].change_pct || 0;
+              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
+            }
+          });
+        }).catch(function(){});
+    })
+    .catch(function(e){ console.warn('live status:', e); });
+}
+
+// Lancement au demarrage et toutes les 5 min
+updateLiveStatus();
+  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
+  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
+setInterval(updateLiveStatus, 300000);
+</script>
+
+
 <script>
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
@@ -1224,69 +1290,4 @@ document.querySelectorAll('.ni').forEach(ni=>{
 
 init();
 </script>
-
-<script>
-function navAnalyse(){
-  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
-  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
-  document.querySelector(".main").scrollTop=0;
-  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
-  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
-}
-
-// ── Live status & auto-refresh ─────────────────────────────────────────────
-function updateLiveStatus() {
-  fetch('/api/status')
-    .then(function(r){ return r.json(); })
-    .then(function(d) {
-      var open = d.market_open;
-      var dot   = document.getElementById('live-dot');
-      var label = document.getElementById('live-label');
-      var time  = document.getElementById('live-time');
-      var src   = document.getElementById('live-src');
-      if (dot) {
-        dot.style.background = open ? '#22c55e' : '#f59e0b';
-        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
-      }
-      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
-      if (time && d.updated_at) {
-        var dt = new Date(d.updated_at);
-        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-      }
-      if (src) {
-        var sources = d.sources || {};
-        var parts = [];
-        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
-        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
-        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
-      }
-      // Mettre a jour les prix dans la sidebar si disponible
-      fetch('/api/live')
-        .then(function(r){ return r.json(); })
-        .then(function(live) {
-          var prices = live.prices || {};
-          // Mettre a jour les items de la sidebar tlItems si present
-          var items = document.querySelectorAll('[data-ticker]');
-          items.forEach(function(el) {
-            var t = el.getAttribute('data-ticker');
-            if (prices[t] && prices[t].price) {
-              var priceEl = el.querySelector('.ti-score');
-              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
-              var chg = prices[t].change_pct || 0;
-              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
-            }
-          });
-        }).catch(function(){});
-    })
-    .catch(function(e){ console.warn('live status:', e); });
-}
-
-// Lancement au demarrage et toutes les 5 min
-updateLiveStatus();
-  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
-  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
-setInterval(updateLiveStatus, 300000);
-</script>
-
 </body></html>
