@@ -78,14 +78,7 @@ input[type=range]{padding:0;height:20px}
 .search-box{display:flex;gap:8px;margin-bottom:14px}
 .search-box input{flex:1}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
-</style>
-<script src="/ranking.js"></script>
-<script src="/sectors.js"></script>
-<script src="/performance.js"></script>
-<script src="/compare_analysis.js"></script>
-<script src="/backtest.js"></script>
-<script src="/markowitz.js"></script>
-</head>
+</style></head>
 <body><div class="app">
 <aside class="sb">
   <div class="logo">
@@ -197,9 +190,9 @@ input[type=range]{padding:0;height:20px}
         <option value="vend">Vendre</option>
       </select>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
-      <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
-      <button class="btn btn-o" style="padding:6px 13px" onclick="openMarkowitz((window.scores||scores||[]).slice(0,8).map(x=>x.ticker))">📐 Markowitz</button>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openCompareAnalysis(_compareAnalysisTickers.length?_compareAnalysisTickers:(window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">🤖 Analyse IA</button>
+      <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
+      <button class="btn btn-o" style="padding:6px 13px" onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))">📐 Markowitz</button>
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
@@ -462,23 +455,20 @@ input[type=range]{padding:0;height:20px}
 </div>
 
 <div class="page" id="page-analyse">
-  <div class="ph">
-    <h2>📐 Analyse & Optimisation</h2>
-    <p style="font-size:12px;color:var(--t2);margin-top:4px">Optimisation de portefeuille par la théorie moderne de Markowitz</p>
-  </div>
+  <div class="ph"><h2>📐 Analyse & Optimisation</h2></div>
   <div class="g2" style="margin-bottom:16px">
     <div class="card" style="margin-bottom:0">
-      <div class="ct">🚀 Lancer une optimisation</div>
-      <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Calculez la frontière efficiente pour trouver le meilleur portefeuille BRVM selon votre profil de risque.</p>
-      <button onclick="openMarkowitz((window.scores||scores||[]).slice(0,8).map(x=>x.ticker))"
+      <div class="ct">🚀 Outils d'optimisation</div>
+      <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Optimisez votre portefeuille BRVM avec la théorie de Markowitz et le backtesting sur données réelles.</p>
+      <button onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))"
         style="width:100%;padding:14px;background:linear-gradient(135deg,#8B5CF6,#60A5FA);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px">
         📐 Optimisation Markowitz (Top 8)
       </button>
-      <button onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))"
+      <button onclick="openBacktest((window.scores||[]).slice(0,5).map(x=>x.ticker))"
         style="width:100%;padding:10px;background:linear-gradient(135deg,#60A5FA,#4ADE80);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:8px">
         📊 Backtesting portefeuille
       </button>
-      <button onclick="openCompareAnalysis((window.scores||scores||[]).slice(0,4).map(x=>x.ticker))"
+      <button onclick="openCompareAnalysis((window.scores||[]).slice(0,4).map(x=>x.ticker))"
         style="width:100%;padding:10px;background:linear-gradient(135deg,#4ADE80,#22D3EE);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer">
         🤖 Analyse comparative IA
       </button>
@@ -486,32 +476,15 @@ input[type=range]{padding:0;height:20px}
     <div class="card" style="margin-bottom:0">
       <div class="ct">📊 Théorie de Markowitz</div>
       <div style="font-size:12px;color:var(--t2);line-height:1.7">
-        <p style="margin-bottom:8px">La <strong style="color:var(--t1)">théorie moderne du portefeuille</strong> (Markowitz, 1952) permet d'identifier la composition optimale d'un portefeuille selon le couple risque/rendement.</p>
-        <p style="margin-bottom:8px"><strong style="color:var(--green)">📐 Frontière efficiente</strong> — Ensemble des portefeuilles offrant le rendement maximal pour chaque niveau de risque.</p>
-        <p style="margin-bottom:8px"><strong style="color:var(--amber)">🏆 Ratio de Sharpe</strong> — Mesure le rendement excédentaire par unité de risque. Plus il est élevé, meilleur est le portefeuille.</p>
-        <p style="margin-bottom:8px"><strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations de portefeuilles aléatoires pour cartographier l'espace risque/rendement.</p>
-        <p><strong style="color:var(--t1)">📈 Données</strong> — Basé sur les cours BOC quotidiens réels BRVM (80 jours, ~4 mois).</p>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">💡 Guide d'utilisation</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:11px">
-      <div style="background:var(--bg3);border-radius:8px;padding:12px">
-        <div style="font-weight:700;color:var(--green);margin-bottom:6px">1️⃣ Sélectionner</div>
-        <div style="color:var(--t2)">Choisissez 2 à 10 actions BRVM à analyser. Utilisez les filtres rapides (Top5, Banques, etc.).</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:8px;padding:12px">
-        <div style="font-weight:700;color:var(--amber);margin-bottom:6px">2️⃣ Calculer</div>
-        <div style="color:var(--t2)">Lancez le calcul. L'algorithme simule 3000 portefeuilles et identifie les allocations optimales.</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:8px;padding:12px">
-        <div style="font-weight:700;color:var(--blue);margin-bottom:6px">3️⃣ Appliquer</div>
-        <div style="color:var(--t2)">Cliquez sur "Tester →" pour backtester le portefeuille optimal sur l'historique réel.</div>
+        <p><strong style="color:var(--green)">📐 Frontière efficiente</strong> — Portefeuilles optimaux pour chaque niveau de risque.</p>
+        <p><strong style="color:var(--amber)">🏆 Ratio de Sharpe</strong> — Rendement excédentaire par unité de risque.</p>
+        <p><strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations pour cartographier l'espace risque/rendement.</p>
+        <p><strong style="color:var(--t1)">📈 Données</strong> — Cours BOC quotidiens réels BRVM (80 jours).</p>
       </div>
     </div>
   </div>
 
+<script>
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
@@ -647,7 +620,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -1175,8 +1148,6 @@ async function showStock(ticker){
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
       <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px;background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(34,211,238,0.2));border-color:var(--green)" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
-      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
-      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="openMarkowitz(['${ticker}'])">📐 Markowitz</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         </div>
       </div>
