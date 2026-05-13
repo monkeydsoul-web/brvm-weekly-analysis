@@ -687,6 +687,10 @@ def serve_performance_js():
 def serve_sectors_js():
     return send_from_directory("dashboard", "sectors.js", mimetype="application/javascript")
 
+@app.route("/screener.js")
+def serve_screener_js():
+    return send_from_directory("dashboard", "screener.js", mimetype="application/javascript")
+
 
 @app.route("/api/reports/<ticker>")
 def api_reports(ticker):
