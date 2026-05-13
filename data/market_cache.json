@@ -1,152 +1,152 @@
 {
-  "updated_at": "2026-05-12T09:58:17.671329+00:00",
+  "updated_at": "2026-05-13T10:22:13.618955+00:00",
   "market_activity": {
-    "Valeur des transactions": "178 409 665 FCFA",
-    "Capitalisation Actions": "15 634 902 056 290 FCFA",
-    "Capitalisation des obligations": "12 322 204 091 593 FCFA",
-    "BRVM-C": "405,85",
-    "BRVM-30": "191,66",
-    "BRVM-PRES": "158,36"
+    "Valeur des transactions": "625 260 625 FCFA",
+    "Capitalisation Actions": "15 656 023 475 400 FCFA",
+    "Capitalisation des obligations": "12 314 394 177 393 FCFA",
+    "BRVM-C": "406,40",
+    "BRVM-30": "192,06",
+    "BRVM-PRES": "159,17"
   },
   "top5": [
     {
-      "ticker": "BNBC",
-      "price": 1415.0,
-      "change": 1.43
+      "ticker": "SCRC",
+      "price": 2420.0,
+      "change": 5.91
     },
     {
-      "ticker": "CBIBF",
-      "price": 17000.0,
-      "change": 1.19
+      "ticker": "TTLS",
+      "price": 3000.0,
+      "change": 5.45
     },
     {
-      "ticker": "ABJC",
-      "price": 2995.0,
-      "change": 0.34
+      "ticker": "SAFC",
+      "price": 3895.0,
+      "change": 4.01
     },
     {
-      "ticker": "BOAM",
-      "price": 4695.0,
-      "change": 0.21
+      "ticker": "CABC",
+      "price": 3490.0,
+      "change": 2.65
     },
     {
-      "ticker": "BOAS",
-      "price": 7455.0,
-      "change": 0.07
+      "ticker": "SDCC",
+      "price": 9500.0,
+      "change": 1.12
     }
   ],
   "flop5": [
     {
-      "ticker": "TTLS",
-      "price": 2850.0,
-      "change": -1.72
+      "ticker": "SIBC",
+      "price": 7150.0,
+      "change": -1.99
     },
     {
-      "ticker": "PALC",
-      "price": 7775.0,
-      "change": -0.32
+      "ticker": "TTLC",
+      "price": 3000.0,
+      "change": -1.96
     },
     {
-      "ticker": "STAC",
-      "price": 2510.0,
-      "change": -0.2
+      "ticker": "ORGT",
+      "price": 2695.0,
+      "change": -1.64
     },
     {
-      "ticker": "BICB",
-      "price": 5165.0,
-      "change": -0.1
+      "ticker": "SMBC",
+      "price": 12500.0,
+      "change": -1.46
     },
     {
-      "ticker": "BOABF",
-      "price": 5405.0,
-      "change": -0.09
+      "ticker": "NTLC",
+      "price": 11600.0,
+      "change": -0.85
     }
   ],
   "indices": [
     {
       "name": "BRVM-30",
-      "prev": 191.57,
-      "current": 191.66,
-      "change": 0.05,
+      "prev": 192.16,
+      "current": 192.06,
+      "change": -0.05,
       "ytd": 1.97
     },
     {
       "name": "BRVM - COMPOSITE",
-      "prev": 405.75,
-      "current": 405.85,
-      "change": 0.02,
+      "prev": 406.25,
+      "current": 406.4,
+      "change": 0.04,
       "ytd": 1.7
     },
     {
       "name": "BRVM - PRESTIGE",
-      "prev": 158.42,
-      "current": 158.36,
-      "change": -0.04,
+      "prev": 159.46,
+      "current": 159.17,
+      "change": -0.18,
       "ytd": 1.47
     },
     {
       "name": "BRVM - PRINCIPAL",
-      "prev": 282.31,
-      "current": 282.59,
-      "change": 0.1,
+      "prev": 281.76,
+      "current": 282.26,
+      "change": 0.18,
       "ytd": 0.78
     }
   ],
   "sector_indices": [
     {
       "name": "BRVM - CONSOMMATION DE BASE",
-      "prev": 262.43,
-      "current": 262.37,
-      "change": -0.02,
+      "prev": 258.74,
+      "current": 259.55,
+      "change": 0.31,
       "ytd": 1.51
     },
     {
       "name": "BRVM - CONSOMMATION DISCRETIONNAIRE",
-      "prev": 172.35,
-      "current": 172.44,
-      "change": 0.05,
+      "prev": 172.83,
+      "current": 173.44,
+      "change": 0.35,
       "ytd": -0.87
     },
     {
       "name": "BRVM - ENERGIE",
-      "prev": 139.28,
-      "current": 138.82,
-      "change": -0.33,
+      "prev": 142.72,
+      "current": 142.67,
+      "change": -0.04,
       "ytd": -0.11
     },
     {
       "name": "BRVM - INDUSTRIELS",
-      "prev": 180.14,
-      "current": 180.09,
-      "change": -0.03,
+      "prev": 182.75,
+      "current": 183.27,
+      "change": 0.28,
       "ytd": 0.12
     },
     {
       "name": "BRVM - SERVICES FINANCIERS",
-      "prev": 180.01,
-      "current": 180.17,
-      "change": 0.09,
+      "prev": 181.24,
+      "current": 180.81,
+      "change": -0.24,
       "ytd": 0.56
     },
     {
       "name": "BRVM - SERVICES PUBLICS",
-      "prev": 149.96,
-      "current": 149.98,
-      "change": 0.01,
+      "prev": 154.57,
+      "current": 155.11,
+      "change": 0.35,
       "ytd": 3.3
     },
     {
       "name": "BRVM - TELECOMMUNICATIONS",
-      "prev": 103.2,
-      "current": 103.2,
-      "change": 0.0,
+      "prev": 102.85,
+      "current": 103.07,
+      "change": 0.21,
       "ytd": 3.44
     }
   ],
   "total_return": {
     "name": "BRVM – COMPOSITE TOTAL RETURN",
-    "prev": 156.66,
-    "current": 156.7,
-    "change": 0.03
+    "prev": 156.85,
+    "current": 156.91,
+    "change": 0.04
   }
 }
