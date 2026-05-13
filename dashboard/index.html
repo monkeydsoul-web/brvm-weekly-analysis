@@ -23,7 +23,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 /* ══ Layout ═════════════════════════════════════════════════════════════════ */
 .app{display:flex;height:100vh}
 .sb{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:transform .25s ease;z-index:500}
-.main{flex:1;overflow-y:auto;min-height:0}
+.main{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column}
+.main>:not(#app-footer){flex:1}
 /* ══ Sidebar ════════════════════════════════════════════════════════════════ */
 .logo{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .logo h1{font-size:14px;font-weight:700;color:var(--green)}
@@ -79,6 +80,18 @@ tr:hover td{background:var(--row-hover);cursor:pointer}
 .spin{animation:spin 1s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes kpi-shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.kpi.loading{position:relative;overflow:hidden}
+.kpi.loading::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.08) 50%,transparent 100%);background-size:400px 100%;animation:kpi-shimmer 1.4s infinite;border-radius:var(--r)}
+:root.light .kpi.loading::after{background:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.05) 50%,transparent 100%);background-size:400px 100%}
+/* ══ Global spinner ══════════════════════════════════════════════════════════ */
+#g-spin{display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));z-index:9000;animation:gbar 1.6s ease-in-out infinite}
+@keyframes gbar{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}51%{transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+/* ══ Sidebar groupes ════════════════════════════════════════════════════════ */
+.sb-grp{padding:6px 14px 2px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;border-top:1px solid var(--border)}
+.sb-grp:first-child{border-top:none;margin-top:0}
+/* ══ Footer ══════════════════════════════════════════════════════════════════ */
+#app-footer{background:var(--bg2);border-top:1px solid var(--border);padding:6px 20px;font-size:10px;color:var(--t3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;flex-shrink:0}
 /* ══ Misc ════════════════════════════════════════════════════════════════════ */
 #alert-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle}
 .mbar{background:var(--border);border-radius:3px;height:5px;overflow:hidden;margin:4px 0 1px}
@@ -203,7 +216,9 @@ input[type=range]{padding:0;height:20px}
 .gloss-ex{font-size:11px;color:var(--t3);border-left:2px solid var(--border);padding-left:8px;line-height:1.5}
 #cmp-modal-inner{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:900px;width:95%;max-height:90vh;overflow-y:auto}
 </style></head>
-<body><div class="app">
+<body>
+<div id="g-spin"></div>
+<div class="app">
 <button id="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">
   <span></span><span></span><span></span>
 </button>
@@ -227,22 +242,25 @@ input[type=range]{padding:0;height:20px}
     <button class="btn-o btn" onclick="toggleTheme()" style="margin-left:auto;padding:4px 8px;font-size:11px" title="Thème">🌙</button>
   </div>
   <nav class="nav">
+    <div class="sb-grp">Marché</div>
     <div class="ni on" onclick="nav('dash')"><span>🏠</span> Tableau de bord</div>
     <div class="ni" onclick="nav('rank')"><span>🏆</span> Classement</div>
     <div class="ni" onclick="nav('sectors');renderSectorPage()"><span>📊</span> Secteurs</div>
-    
-    <div class="ni" onclick="nav('port')"><span>💼</span> Portefeuille</div>
-    <div class="ni" onclick="nav('div')"><span>💰</span> Dividendes</div>
-    <div class="ni" onclick="nav('perf')"><span>📈</span> Performances</div>
-    <div class="ni" onclick="nav('targets')"><span>🎯</span> Prix cibles</div>
-    <div class="ni" onclick="nav('score-custom')"><span>⚖️</span> Score personnalisé</div>
-    <div class="ni" onclick="nav('sim')"><span>🧮</span> Simulateur div.</div>
-    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> Alertes<span id="alert-badge"></span></div>
     <div class="ni" onclick="nav('news')"><span>📰</span> Actualités</div>
     <div class="ni" onclick="nav('comm')"><span>🌍</span> Commodités</div>
-    <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
+    <div class="sb-grp">Analyse</div>
     <div class="ni" onclick="nav('screener');initScreener()"><span>🔍</span> Screener</div>
     <div class="ni" onclick="nav('analyse');setTimeout(renderCorrelMatrix,200)"><span>📐</span> Analyse &amp; Optim</div>
+    <div class="ni" onclick="nav('score-custom')"><span>⚖️</span> Score personnalisé</div>
+    <div class="ni" onclick="nav('targets')"><span>🎯</span> Prix cibles</div>
+    <div class="ni" onclick="nav('perf')"><span>📈</span> Performances</div>
+    <div class="sb-grp">Portefeuille</div>
+    <div class="ni" onclick="nav('port')"><span>💼</span> Portefeuille</div>
+    <div class="ni" onclick="nav('sim')"><span>🧮</span> Simulateur div.</div>
+    <div class="ni" onclick="nav('div')"><span>💰</span> Dividendes</div>
+    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> Alertes<span id="alert-badge"></span></div>
+    <div class="sb-grp">Outils</div>
+    <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()"><span>📚</span> Glossaire</div>
   </nav>
   <div class="tl">
@@ -827,6 +845,12 @@ input[type=range]{padding:0;height:20px}
   </div>
   <div id="gloss-list" style="max-width:800px"></div>
 </div>
+<footer id="app-footer">
+  <span>📈 BRVM Dashboard v2 · <span id="footer-date"></span></span>
+  <span id="footer-boc">BOC : — tickers</span>
+  <span id="footer-live">MàJ live : —</span>
+  <span style="color:var(--t3)">Données BRVM · Cours indicatifs</span>
+</footer>
 </main></div>
 <script src="/simulator.js"></script>
 <script src="/live_score.js"></script>
@@ -1071,6 +1095,8 @@ function showNotif(msg,color){
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init(){
+  gSpinShow();
+  document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
     const[s,n,c,m,f,tp]=await Promise.all([
       fetch('/api/scores').then(r=>r.json()),
@@ -1091,6 +1117,8 @@ async function init(){
       console.log('SNTS BOC points:', boc.length, 'sample:', boc.slice(-2));
     }).catch(e=>{window._priceHistory={};console.error('Price history error:',e);}).finally(()=>{
       renderDash(m);initRanking();renderRankLive();renderDiv();renderNews();renderComm();startAutoRefresh();
+      document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+      gSpinHide();
     });
     renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget, 500);
 
@@ -2114,8 +2142,13 @@ async function showStock(ticker){
 }
 
 // ── Refresh ─────────────────────────────────────────────────────────────────
+function gSpinShow(){ const el=document.getElementById('g-spin'); if(el)el.style.display='block'; }
+function gSpinHide(){ const el=document.getElementById('g-spin'); if(el)el.style.display='none'; }
+
 async function doRefresh(){
   document.getElementById('ri').classList.add('spin');
+  gSpinShow();
+  document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
     await fetch('/api/refresh',{method:'POST'});
     setTimeout(async()=>{
@@ -2123,11 +2156,31 @@ async function doRefresh(){
       scores=s;window.scores=s;news=n;comms=c;
       renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
       document.getElementById('ri').classList.remove('spin');
+      document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+      gSpinHide();
     },5000);
-  }catch(e){document.getElementById('ri').classList.remove('spin');}
+  }catch(e){document.getElementById('ri').classList.remove('spin');gSpinHide();}
 }
 async function loadStatus(){
-  try{const s=await fetch('/api/refresh/status').then(r=>r.json());document.getElementById('status').textContent='Màj: '+s.last_update;document.getElementById('lastUp').textContent=s.last_update;}catch(e){}
+  try{
+    const s=await fetch('/api/refresh/status').then(r=>r.json());
+    document.getElementById('status').textContent='Màj: '+s.last_update;
+    document.getElementById('lastUp').textContent=s.last_update;
+  }catch(e){}
+  // Footer info
+  try{
+    const fd=document.getElementById('footer-date');
+    if(fd&&!fd.textContent) fd.textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+    const lv=await fetch('/api/live').then(r=>r.json());
+    const n=Object.keys(lv.prices||{}).length;
+    const fb=document.getElementById('footer-boc');
+    if(fb) fb.textContent=`BOC : ${n} tickers live`;
+    const fl=document.getElementById('footer-live');
+    if(fl){
+      const at=lv.fetched_at?new Date(lv.fetched_at*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      fl.textContent='MàJ live : '+at;
+    }
+  }catch(e){}
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
