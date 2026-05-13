@@ -1593,7 +1593,26 @@ async function showStock(ticker){
           <p style="color:var(--t2);font-size:12px;margin-top:2px">${s.name||''}</p>
           <div id="live-rank-badge" style="margin-top:4px"></div>
           ${fi.description?`<p style="font-size:11px;color:var(--t3);margin-top:3px;max-width:550px;line-height:1.5">${fi.description}</p>`:''}
-          <div style="margin-top:8px"><a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a></div>
+          ${(()=>{
+            // Badge qualité des données
+            const hasPE = !!(s.pe_ref||s.pe_hist);
+            const hasDiv = !!(s.div_yield||s.div_per_share);
+            const hasBNA = !!(s.eps||s.bna);
+            const hasBOC = !!(s._boc_per||hasPE);
+            const hasPDF = !!(s.pdf_ca_mfcfa||s.pdf_rn_mfcfa||aiSummary);
+            const srcCount = [hasPE,hasDiv,hasBNA].filter(Boolean).length;
+            const [badge,bg,tip] = srcCount===3
+              ? ['✅ Données complètes','rgba(74,222,128,.15)','P/E, dividende et BNA tous disponibles depuis les sources BOC officiel et/ou rapports PDF.']
+              : srcCount>=2
+              ? ['⚠️ Données partielles','rgba(251,191,36,.15)',`Certaines données sont issues d'estimations PDF. P/E: ${hasPE?'✓':'✗'} | Dividende: ${hasDiv?'✓':'✗'} | BNA: ${hasBNA?'✓':'✗'}`]
+              : ['❌ Données limitées','rgba(248,113,113,.15)',`Moins de 3 sources disponibles. P/E: ${hasPE?'✓':'✗'} | Dividende: ${hasDiv?'✓':'✗'} | BNA: ${hasBNA?'✓':'✗'}. Utilisez ces données avec prudence.`];
+            const sources = [hasBOC?'BOC officiel':'',hasPDF?'Rapport PDF annuel':''].filter(Boolean).join(', ')||'Données statiques';
+            return `<div class="tt" data-tt="${tip} Sources : ${sources}" style="display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:10px;padding:3px 9px;border-radius:12px;background:${bg};border:1px solid ${bg.replace('.15','0.4')}">${badge} <span style="color:var(--t3);font-size:9px">— ${sources}</span></div>`;
+          })()}
+          <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a>
+            <button onclick="toggleCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
+          </div>
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>
       <p style="font-size:11px;color:var(--t2);margin:4px 0 8px;line-height:1.6">${co.description||''}</p>
