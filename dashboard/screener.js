@@ -9,10 +9,12 @@ function initScreener() {
   const all = window.scores || scores || [];
   const sects = [...new Set(all.map(x => x.sector).filter(Boolean))].sort();
   sects.forEach(s => sectSel.add(new Option(s, s)));
+  _screenerLoadFilters();
   runScreener();
 }
 
 function runScreener() {
+  _screenerSaveFilters();
   const all = window.scores || scores || [];
   const scoreMin = parseFloat(document.getElementById('sc-score')?.value) || 0;
   const peMax    = parseFloat(document.getElementById('sc-pe')?.value)    || Infinity;
@@ -102,6 +104,51 @@ function screenerSortBy(col) {
   runScreener();
 }
 
+const _LS_SCREENER = 'brvm_screener_filters_v1';
+
+function _screenerSaveFilters(){
+  const f = {};
+  ['sc-score','sc-pe','sc-div','sc-roe','sc-pb'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) f[id] = el.value;
+  });
+  const sect = document.getElementById('sc-sect');
+  if(sect) f['sc-sect'] = sect.value;
+  localStorage.setItem(_LS_SCREENER, JSON.stringify(f));
+}
+
+function _screenerLoadFilters(){
+  try{
+    const f = JSON.parse(localStorage.getItem(_LS_SCREENER)||'{}');
+    Object.entries(f).forEach(([id,val])=>{
+      const el = document.getElementById(id);
+      if(el) el.value = val;
+    });
+  }catch{}
+}
+
+function screenerPreset(name){
+  screenerReset();
+  const presets = {
+    value:      { 'sc-score': 45, 'sc-pe': 15, 'sc-pb': 1.5 },
+    croissance: { 'sc-score': 50, 'sc-roe': 15 },
+    revenus:    { 'sc-score': 40, 'sc-div': 5 },
+    defensif:   { 'sc-score': 40, 'sc-pe': 20, 'sc-div': 3, 'sc-roe': 10 },
+  };
+  const p = presets[name] || {};
+  Object.entries(p).forEach(([id,val])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = val;
+  });
+  // Highlight active chip
+  document.querySelectorAll('.chat-chip[onclick*="screenerPreset"]').forEach(btn=>{
+    btn.style.background = btn.getAttribute('onclick').includes(`'${name}'`) ? 'var(--blue)' : '';
+    btn.style.color = btn.getAttribute('onclick').includes(`'${name}'`) ? '#fff' : '';
+  });
+  runScreener();
+  _screenerSaveFilters();
+}
+
 function screenerReset() {
   ['sc-score', 'sc-pe', 'sc-div', 'sc-roe', 'sc-pb'].forEach(id => {
     const el = document.getElementById(id);
@@ -109,6 +156,12 @@ function screenerReset() {
   });
   const sect = document.getElementById('sc-sect');
   if (sect) sect.value = '';
+  // Reset chip highlights
+  document.querySelectorAll('.chat-chip[onclick*="screenerPreset"]').forEach(btn=>{
+    btn.style.background = '';
+    btn.style.color = '';
+  });
+  localStorage.removeItem(_LS_SCREENER);
   runScreener();
 }
 

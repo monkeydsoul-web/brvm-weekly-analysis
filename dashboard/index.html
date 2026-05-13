@@ -544,11 +544,37 @@ input[type=range]{padding:0;height:20px}
 
 <!-- DIVIDENDES -->
 <div class="page" id="page-div">
-  <div class="ph"><h2>Dividendes 2026</h2></div>
+  <div class="ph"><h2>💰 Dividendes 2026</h2></div>
+  <!-- Calendrier 12 mois visuel -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="ct" style="margin-bottom:10px">📅 Calendrier annuel des détachements</div>
+    <div id="divCalMonths" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
+  </div>
+  <!-- Simulateur inline -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="ct" style="margin-bottom:10px">🧮 Simulateur de revenus dividendes</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div>
+        <label style="font-size:10px;color:var(--t2)">Action</label>
+        <select id="divSimTicker" onchange="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px">
+          <option value="">— Choisir —</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:var(--t2)">Montant investi (XOF)</label>
+        <input id="divSimAmount" type="number" value="1000000" oninput="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;width:140px">
+      </div>
+      <div id="divSimResult" style="padding:8px 14px;border-radius:8px;background:var(--bg3);min-width:160px">
+        <div style="font-size:10px;color:var(--t2)">Revenus annuels estimés</div>
+        <div id="divSimOut" style="font-size:18px;font-weight:700;color:var(--amber)">—</div>
+        <div id="divSimDetail" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
+      </div>
+    </div>
+  </div>
   <div class="g2">
     <div>
-      <div class="card"><div class="ct">📅 Calendrier détachements</div><div id="divCal"></div></div>
-      <div class="card"><div class="ct">Rendements</div>
+      <div class="card"><div class="ct">📋 Prochains détachements</div><div id="divCal"></div></div>
+      <div class="card"><div class="ct">Rendements Top 15</div>
         <div id="cDivDiv" style="width:100%;height:250px"></div></div>
     </div>
     <div class="card"><div class="ct">Top 15 rendements</div>
@@ -753,6 +779,13 @@ input[type=range]{padding:0;height:20px}
       <button class="btn" onclick="screenerReset()" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer">Réinitialiser</button>
       <button class="btn btn-g" onclick="runScreener()">Filtrer</button>
     </div>
+  </div>
+  <!-- Presets stratégies -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <button class="chat-chip" onclick="screenerPreset('value')">📦 Value</button>
+    <button class="chat-chip" onclick="screenerPreset('croissance')">🚀 Croissance</button>
+    <button class="chat-chip" onclick="screenerPreset('revenus')">💰 Revenus</button>
+    <button class="chat-chip" onclick="screenerPreset('defensif')">🛡️ Défensif</button>
   </div>
   <div class="card" style="margin-bottom:12px">
     <div class="ct" style="margin-bottom:10px">Filtres combinables</div>
@@ -1852,7 +1885,121 @@ function navToRank(ticker){
 
 // (portfolio remplacé par localStorage ci-dessus)
 
+// ── Secteurs ────────────────────────────────────────────────────────────────
+function renderSectorPage(){
+  const all = window.scores || scores || [];
+  if(!all.length){ document.getElementById('sectorContent').innerHTML='<p style="color:var(--t2)">Données indisponibles.</p>'; return; }
+
+  // Grouper par secteur
+  const byS = {};
+  all.forEach(x=>{
+    const s = x.sector || 'Autre';
+    if(!byS[s]) byS[s] = [];
+    byS[s].push(x);
+  });
+  const sectors = Object.keys(byS).sort();
+
+  // Bar chart YTD par secteur (var_annee moyenne)
+  const ytdData = sectors.map(s=>{
+    const vals = byS[s].map(x=>x.var_annee||0).filter(v=>v!==0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  });
+  const maxYTD = Math.max(...ytdData.map(Math.abs), 1);
+
+  const chartBars = sectors.map((s,i)=>{
+    const v = ytdData[i];
+    const pct = Math.round(Math.abs(v)/maxYTD*100);
+    const col = v>=0?'var(--green)':'var(--red)';
+    const sign = v>=0?'+':'';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer" onclick="_sectorInvest('${s}')">
+      <div style="width:90px;font-size:10px;color:var(--t2);text-align:right;flex-shrink:0">${s.length>14?s.slice(0,13)+'…':s}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:3px;transition:width .4s"></div>
+      </div>
+      <div style="width:48px;text-align:right;font-size:11px;font-weight:700;color:${col}">${sign}${v.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+
+  // Carte par secteur avec top3 + flop1
+  const sectorCards = sectors.map(s=>{
+    const stocks = byS[s];
+    const sorted = [...stocks].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+    const top3 = sorted.slice(0,3);
+    const flop = [...stocks].sort((a,b)=>(a.composite_adj||0)-(b.composite_adj||0)).slice(0,1);
+    const avgScore = stocks.reduce((a,b)=>a+(b.composite_adj||0),0)/stocks.length;
+    const avgDiv = stocks.reduce((a,b)=>a+(b.div_yield||0),0)/stocks.length;
+    const scoreCol = avgScore>=55?'var(--green)':avgScore>=40?'var(--amber)':'var(--red)';
+
+    const top3html = top3.map(x=>{
+      const sc=x.composite_adj||0;
+      const col=sc>=60?'var(--green)':sc>=45?'var(--amber)':'var(--red)';
+      return `<span onclick="showStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${sc.toFixed(0)}</span></span>`;
+    }).join('');
+    const flophtml = flop.map(x=>`<span onclick="showStock('${x.ticker}')" style="cursor:pointer;background:rgba(248,113,113,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${(x.composite_adj||0).toFixed(0)}</span>`).join('');
+
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${s}</div>
+          <div style="font-size:10px;color:var(--t2)">${stocks.length} société${stocks.length>1?'s':''}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="text-align:center">
+            <div style="font-size:9px;color:var(--t3)">Score moy.</div>
+            <div style="font-size:15px;font-weight:700;color:${scoreCol}">${avgScore.toFixed(0)}<span style="font-size:9px;color:var(--t3)">/80</span></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;color:var(--t3)">Div. moy.</div>
+            <div style="font-size:15px;font-weight:700;color:var(--amber)">${avgDiv.toFixed(1)}%</div>
+          </div>
+          <button class="btn btn-g" style="font-size:10px;padding:5px 11px" onclick="_sectorInvest('${s}')">Investir ↗</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+        <span style="font-size:9px;color:var(--t3);padding-right:4px">Top :</span>${top3html}
+        <span style="font-size:9px;color:var(--t3);padding:0 4px;margin-left:4px">Attention :</span>${flophtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sectorContent').innerHTML = `
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct" style="margin-bottom:12px">Performance annuelle moyenne par secteur (YTD)</div>
+      ${chartBars}
+    </div>
+    ${sectorCards}`;
+}
+
+function _sectorInvest(sector){
+  // Naviguer au screener avec filtre secteur présélectionné
+  nav('screener');
+  setTimeout(()=>{
+    const sel = document.getElementById('sc-sect');
+    if(sel){ sel.value = sector; if(typeof runScreener==='function') runScreener(); }
+  }, 100);
+}
+
 // ── Dividendes ─────────────────────────────────────────────────────────────
+let _divData = [];
+
+function divSimCalc(){
+  const ticker = document.getElementById('divSimTicker')?.value;
+  const amount = parseFloat(document.getElementById('divSimAmount')?.value)||0;
+  const outEl = document.getElementById('divSimOut');
+  const detEl = document.getElementById('divSimDetail');
+  if(!ticker||!amount){ if(outEl) outEl.textContent='—'; return; }
+  const stock = _divData.find(x=>x.ticker===ticker);
+  if(!stock){ if(outEl) outEl.textContent='—'; return; }
+  const dy = stock.div_yield||0;
+  const price = stock.price||1;
+  const shares = Math.floor(amount/price);
+  const divPS = stock.div_per_share||0;
+  const annRev = shares * divPS;
+  const monthRev = annRev/12;
+  if(outEl) outEl.textContent = fmtXOF(Math.round(annRev));
+  if(detEl) detEl.innerHTML = `${shares.toLocaleString('fr-FR')} actions × ${fmtXOF(Math.round(divPS))} = ${dy.toFixed(1)}% rdt<br>≈ ${fmtXOF(Math.round(monthRev))}/mois`;
+}
+
 async function renderDiv(){
   let wd = [], wdate = [];
   try {
@@ -1866,18 +2013,52 @@ async function renderDiv(){
     wdate = [...all].filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
       .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
   }
+  _divData = wd;
 
-  // Calendrier ex-div
+  // Peupler select simulateur
+  const sel = document.getElementById('divSimTicker');
+  if(sel && sel.options.length <= 1){
+    wd.forEach(x=>sel.add(new Option(`${x.ticker} — ${(x.div_yield||0).toFixed(1)}%`, x.ticker)));
+    if(wd.length) { sel.value = wd[0].ticker; divSimCalc(); }
+  }
+
+  // Calendrier 12 mois visuel
+  const MONTHS_FR = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const byMonth = {};
+  wdate.forEach(x=>{
+    const m = parseInt((x.ex_div_date||'').split('-')[1]||'0')-1;
+    if(m>=0){ if(!byMonth[m]) byMonth[m]=[]; byMonth[m].push(x); }
+  });
+  const calMonthsEl = document.getElementById('divCalMonths');
+  if(calMonthsEl){
+    calMonthsEl.innerHTML = MONTHS_FR.map((mo,i)=>{
+      const stocks = byMonth[i]||[];
+      const hasDiv = stocks.length>0;
+      const maxDy = stocks.reduce((mx,x)=>Math.max(mx,x.div_yield||0),0);
+      const bg = hasDiv?(maxDy>=10?'rgba(74,222,128,.18)':maxDy>=5?'rgba(251,191,36,.15)':'rgba(96,165,250,.12)'):'var(--bg3)';
+      const border = hasDiv?(maxDy>=10?'rgba(74,222,128,.5)':maxDy>=5?'rgba(251,191,36,.4)':'rgba(96,165,250,.3)'):'var(--border)';
+      const tickers = stocks.slice(0,3).map(x=>`<div style="font-size:8px;color:var(--t1)">${x.ticker}</div>`).join('');
+      return `<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:6px;text-align:center;min-height:60px">
+        <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:4px">${mo}</div>
+        ${hasDiv?`${tickers}${stocks.length>3?`<div style="font-size:8px;color:var(--t3)">+${stocks.length-3}</div>`:''}
+        <div style="font-size:9px;color:var(--amber);margin-top:2px">${maxDy.toFixed(1)}%</div>`
+        :'<div style="font-size:9px;color:var(--t3);margin-top:8px">—</div>'}
+      </div>`;
+    }).join('');
+  }
+
+  // Calendrier ex-div liste
   document.getElementById('divCal').innerHTML = wdate.length ? wdate.map(x=>{
     const dy = x.div_yield||0;
     const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
-    return `<div style="padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showStock('${x.ticker}')">
+    const dyBg = dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="showStock('${x.ticker}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <strong style="font-size:12px">${x.ticker}</strong>
           <span style="font-size:10px;color:var(--t2);margin-left:6px">${x.name||''}</span>
         </div>
-        <span style="font-size:12px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>
+        <span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>
       </div>
       <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px">
         <span>📅 Ex-div: <strong style="color:var(--t1)">${x.ex_div_date}</strong></span>
@@ -1887,15 +2068,16 @@ async function renderDiv(){
     </div>`;
   }).join('') : '<p style="font-size:12px;color:var(--t2)">Dates à paraître.</p>';
 
-  // Table Top 15 rendements
+  // Table Top 15 rendements (couleurs renforcées)
   document.getElementById('divTable').innerHTML = wd.slice(0,15).map(x=>{
     const dy = x.div_yield||0;
-    const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--blue)';
+    const dyC = dy>=10?'#22c55e':dy>=5?'var(--amber)':'var(--t2)';
+    const dyBg = dy>=10?'rgba(34,197,94,.15)':dy>=5?'rgba(251,191,36,.1)':'transparent';
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
       <td style="font-weight:600">${fmtXOF(x.div_per_share)}</td>
-      <td><span style="font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span></td>
+      <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span></td>
       <td style="font-size:10px;color:var(--t2)">${x.ex_div_date||'N/D'}</td>
       <td style="font-size:10px;color:var(--t2)">${pe}</td>
       <td><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)'}">${x.pdf_verdict||'—'}</span></td>
