@@ -678,24 +678,43 @@ input[type=range]{padding:0;height:20px}
 
 <!-- ALERTES -->
 <div class="page" id="page-alerts">
-  <div class="ph"><h2>Alertes de prix & score</h2>
-    <button class="btn btn-g" onclick="showAddAlert()">+ Nouvelle alerte</button></div>
-  <div id="addAlertForm" style="display:none" class="card">
-    <div class="ct">Créer une alerte</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end">
+  <div class="ph"><h2>🔔 Alertes</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-o" onclick="addPortfolioAlerts()" style="font-size:11px">📦 Alertes portefeuille</button>
+      <button class="btn btn-g" onclick="showAddAlert()">+ Nouvelle alerte</button>
+    </div>
+  </div>
+  <div id="addAlertForm" style="display:none" class="card" style="margin-bottom:10px">
+    <div class="ct" style="margin-bottom:10px">Créer une alerte</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:8px;align-items:end">
       <div><label style="font-size:10px;color:var(--t2)">Action</label>
         <select id="alertTicker"><option value="">Sélectionner...</option></select></div>
       <div><label style="font-size:10px;color:var(--t2)">Type</label>
-        <select id="alertType"><option value="price">Prix XOF</option><option value="score">Score /80</option></select></div>
-      <div><label style="font-size:10px;color:var(--t2)">Seuil</label>
-        <input type="number" id="alertThreshold" placeholder="Ex: 30000"></div>
+        <select id="alertType" onchange="_alertTypeChanged()" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
+          <option value="price">Prix XOF</option>
+          <option value="score">Score /80</option>
+          <option value="div_yield">Rendement Div%</option>
+          <option value="change_pct">Variation jour%</option>
+        </select>
+      </div>
+      <div><label style="font-size:10px;color:var(--t2)" id="alertThresholdLabel">Seuil</label>
+        <input type="number" id="alertThreshold" placeholder="Ex: 30000" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)"></div>
       <div><label style="font-size:10px;color:var(--t2)">Direction</label>
-        <select id="alertDir"><option value="above">Au-dessus</option><option value="below">En-dessous</option></select></div>
-      <div><button class="btn btn-g" onclick="createAlert()">Créer</button></div>
+        <select id="alertDir" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
+          <option value="above">Au-dessus / ≥</option>
+          <option value="below">En-dessous / ≤</option>
+        </select>
+      </div>
+      <button class="btn btn-g" onclick="createAlert()" style="align-self:flex-end">Créer</button>
+      <button class="btn btn-o" onclick="testAlertNow()" style="align-self:flex-end;font-size:10px" title="Tester l'alerte avec les données actuelles">🧪 Tester</button>
     </div>
+    <div id="alertTestResult" style="margin-top:8px;font-size:11px;display:none"></div>
   </div>
   <div class="card">
-    <div class="ct">Alertes actives <button class="btn btn-o" onclick="checkAlerts()" style="font-size:10px;padding:3px 8px">Vérifier</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct">Alertes actives</div>
+      <button class="btn btn-o" onclick="checkAlerts()" style="font-size:10px;padding:3px 8px">🔄 Vérifier maintenant</button>
+    </div>
     <div id="alertsList"><p style="color:var(--t2);font-size:12px">Aucune alerte configurée.</p></div>
   </div>
   <div class="card" id="triggeredCard" style="display:none;border-left:3px solid var(--amber)">
@@ -708,18 +727,31 @@ input[type=range]{padding:0;height:20px}
       <button class="btn" onclick="checkSmartAlerts();renderSmartAlertsPanel()"
         style="font-size:10px;padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--t2);cursor:pointer">Vérifier</button>
     </div>
-    <p style="font-size:11px;color:var(--t3);margin-bottom:8px">Ex-div dans 7 jours · Cours &gt; Cible Graham · Cours &gt; EPV</p>
+    <p style="font-size:11px;color:var(--t3);margin-bottom:8px">Ex-div dans 7 jours · Cours &gt; Cible Graham · Score change · Cours &gt; EPV</p>
     <div id="smart-alerts-list"><p style="font-size:12px;color:var(--t2)">Aucune alerte intelligente active.</p></div>
   </div>
 </div>
 
 <!-- ACTUALITÉS -->
 <div class="page" id="page-news">
-  <div class="ph"><h2>Actualités BRVM</h2>
-    <select id="nFil" onchange="filterNews()"><option value="">Toutes</option></select></div>
+  <div class="ph"><h2>📰 Actualités BRVM</h2>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="nFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px"><option value="">Tous tickers</option></select>
+      <select id="nSectFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px"><option value="">Tous secteurs</option></select>
+      <select id="nSentFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px">
+        <option value="">Tous sentiments</option>
+        <option value="pos">🟢 Positif</option>
+        <option value="neg">🔴 Négatif</option>
+        <option value="neu">🟡 Neutre</option>
+      </select>
+    </div>
+  </div>
   <div class="g2">
     <div class="card" style="max-height:65vh;overflow-y:auto;margin-bottom:0">
-      <div class="ct">Articles</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="ct">Articles</div>
+        <span id="news-count" style="font-size:10px;color:var(--t2)"></span>
+      </div>
       <div id="newsList"><p style="color:var(--t2)">Lance une mise à jour.</p></div>
     </div>
     <div class="card" style="margin-bottom:0"><div class="ct">Sentiment par action</div>
@@ -2328,6 +2360,39 @@ function simCalc(){
 
 // ── Alertes ────────────────────────────────────────────────────────────────
 function showAddAlert(){document.getElementById('addAlertForm').style.display='block';}
+
+function _alertTypeChanged(){
+  const type = document.getElementById('alertType')?.value;
+  const lbl = document.getElementById('alertThresholdLabel');
+  const inp = document.getElementById('alertThreshold');
+  const placeholders = { price:'Ex: 30 000 XOF', score:'Ex: 60 (sur 80)', div_yield:'Ex: 8 (en %)', change_pct:'Ex: 5 (en %)' };
+  if(lbl) lbl.textContent = { price:'Seuil Prix (XOF)', score:'Seuil Score /80', div_yield:'Seuil Div%', change_pct:'Variation %' }[type]||'Seuil';
+  if(inp) inp.placeholder = placeholders[type]||'Seuil';
+}
+
+function testAlertNow(){
+  const ticker = document.getElementById('alertTicker')?.value;
+  const type   = document.getElementById('alertType')?.value;
+  const threshold = parseFloat(document.getElementById('alertThreshold')?.value);
+  const direction = document.getElementById('alertDir')?.value;
+  const resEl = document.getElementById('alertTestResult');
+  if(!ticker||!threshold){ if(resEl){resEl.style.display='block';resEl.innerHTML='<span style="color:var(--red)">⚠ Remplissez l\'action et le seuil.</span>';} return; }
+  const stock = (window.scores||scores||[]).find(x=>x.ticker===ticker);
+  if(!stock){ if(resEl){resEl.style.display='block';resEl.innerHTML='<span style="color:var(--red)">Action introuvable dans les données actuelles.</span>';} return; }
+  const fieldMap = { price:'price', score:'composite_adj', div_yield:'div_yield', change_pct:'change_pct' };
+  const field = fieldMap[type]||'price';
+  const current = stock[field]||0;
+  const triggered = direction==='above' ? current>=threshold : current<=threshold;
+  const col = triggered?'var(--green)':'var(--amber)';
+  const symbol = { price:'XOF', score:'/80', div_yield:'%', change_pct:'%' }[type]||'';
+  if(resEl){
+    resEl.style.display='block';
+    resEl.innerHTML=`<span style="color:${col}">${triggered?'✅ Alerte déclenchée':'⏳ Pas encore déclenchée'}</span>
+      — Valeur actuelle : <strong>${current.toLocaleString('fr-FR')} ${symbol}</strong>
+      (seuil : ${threshold.toLocaleString('fr-FR')} ${symbol} ${direction==='above'?'≥':'≤'})`;
+  }
+}
+
 async function createAlert(){
   const ticker=document.getElementById('alertTicker').value;
   const type=document.getElementById('alertType').value;
@@ -2337,17 +2402,89 @@ async function createAlert(){
   await fetch('/api/alerts',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ticker,type,threshold,direction})});
   document.getElementById('addAlertForm').style.display='none';
-  loadAlerts();
+  if(typeof loadAlerts==='function') loadAlerts();
+  if(typeof loadAlertsLocal==='function') loadAlertsLocal();
 }
+
+function addPortfolioAlerts(){
+  const positions = _portData().map(_normPos);
+  if(!positions.length){ showNotif('Portefeuille vide', 'red'); return; }
+  let created = 0;
+  positions.forEach(p=>{
+    if(!p.ticker||!p.avg_price) return;
+    // Alerte si le cours dépasse le prix d'achat +15% (prise de profit)
+    const target = Math.round(p.avg_price * 1.15);
+    const existing = (window._priceAlerts||[]).find(a=>a.ticker===p.ticker&&a.type==='price'&&a.target===target);
+    if(!existing){
+      if(typeof addAlertLocal==='function'){
+        addAlertLocal({ticker:p.ticker, type:'price', target, direction:'above', note:`+15% vs achat ${Math.round(p.avg_price)} XOF`});
+        created++;
+      }
+    }
+  });
+  showNotif(created>0?`${created} alerte${created>1?'s':''} créée${created>1?'s':''} (+15% vs achat)`:'Alertes déjà existantes', created>0?'green':'amber');
+  if(typeof loadAlertsLocal==='function') loadAlertsLocal();
+  if(typeof renderAlertsPanel==='function') renderAlertsPanel();
+}
+
 // loadAlerts/checkAlerts/deleteAlert gérées par alerts.js
 
 // ── Actualités ─────────────────────────────────────────────────────────────
+function _newsInitFilters(){
+  // Secteur
+  const sectSel = document.getElementById('nSectFil');
+  if(sectSel && sectSel.options.length<=1){
+    const sects=[...new Set((window.scores||scores||[]).map(x=>x.sector).filter(Boolean))].sort();
+    sects.forEach(s=>sectSel.add(new Option(s,s)));
+  }
+  // Tickers populaires (ceux avec news)
+  const nFil = document.getElementById('nFil');
+  if(nFil && nFil.options.length<=1){
+    const tks=[...new Set(news.flatMap(x=>x.tickers||[]))].sort();
+    tks.forEach(t=>nFil.add(new Option(t,t)));
+  }
+}
+
+function _newsSentimentScore(article){
+  const title = (article.title||'').toLowerCase();
+  const pos=['hausse','croissance','bénéfice','dividende','record','solide','positif','optimiste','progression','fort'];
+  const neg=['baisse','perte','chute','déficit','recul','crise','négatif','risque','faible','difficile'];
+  let s=0;
+  pos.forEach(w=>{if(title.includes(w))s++;});
+  neg.forEach(w=>{if(title.includes(w))s--;});
+  return s;
+}
+
 function renderNews(f=''){
-  const n=f?news.filter(x=>x.tickers?.includes(f)):news;
+  _newsInitFilters();
+  const ticker  = f || document.getElementById('nFil')?.value || '';
+  const sect    = document.getElementById('nSectFil')?.value||'';
+  const sentFil = document.getElementById('nSentFil')?.value||'';
+
+  // Map ticker→sector
+  const tickerSect={};
+  (window.scores||scores||[]).forEach(x=>{ if(x.ticker&&x.sector) tickerSect[x.ticker]=x.sector; });
+
+  let n = [...news];
+  if(ticker) n=n.filter(x=>x.tickers?.includes(ticker));
+  if(sect)   n=n.filter(x=>(x.tickers||[]).some(t=>tickerSect[t]===sect));
+  if(sentFil){
+    n=n.filter(x=>{
+      const sc=_newsSentimentScore(x);
+      if(sentFil==='pos') return sc>0;
+      if(sentFil==='neg') return sc<0;
+      return sc===0;
+    });
+  }
   const sorted=[...n].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  document.getElementById('newsList').innerHTML=sorted.length?sorted.slice(0,50).map(x=>`
-    <div class="news-item" style="border-bottom:1px solid var(--border);padding:10px 0;cursor:pointer" ${x.url?`onclick="window.open('${x.url}','_blank')"`:''}>
-      <div class="news-t" style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4">${x.title}</div>
+  const cntEl=document.getElementById('news-count');
+  if(cntEl) cntEl.textContent=`${sorted.length} article${sorted.length!==1?'s':''}`;
+
+  document.getElementById('newsList').innerHTML=sorted.length?sorted.slice(0,50).map(x=>{
+    const sc=_newsSentimentScore(x);
+    const sentBadge = sc>0?'<span style="font-size:10px">🟢</span>':sc<0?'<span style="font-size:10px">🔴</span>':'<span style="font-size:10px">🟡</span>';
+    return `<div class="news-item" style="border-bottom:1px solid var(--border);padding:10px 0;cursor:pointer" ${x.url?`onclick="window.open('${x.url}','_blank')"`:''}>
+      <div class="news-t" style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4">${sentBadge} ${x.title}</div>
       ${x.description?`<div style="font-size:11px;color:var(--t2);margin-bottom:4px;line-height:1.4">${x.description.substring(0,150)}${x.description.length>150?'...':''}</div>`:''}
       <div class="news-m" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <span class="src" style="font-size:10px;color:var(--t3)">${x.source}</span>
@@ -2357,12 +2494,12 @@ function renderNews(f=''){
         ${x.is_results_news?'<span class="b bp" style="font-size:9px">📊 Résultats</span>':''}
         ${x.url?'<span style="font-size:9px;color:var(--blue)">↗ Lire</span>':''}
       </div>
-    </div>`).join('')
+    </div>`;}).join('')
     :'<p style="color:var(--t2)">Aucune actualité.</p>';
   const sd=scores.filter(x=>x.sentiment_score!==0&&x.sentiment_score!=null).sort((a,b)=>(b.sentiment_score||0)-(a.sentiment_score||0)).slice(0,12);
   if(sd.length) svgBar(document.getElementById('cSentDiv'),sd.map(x=>x.ticker),sd.map(x=>Math.abs(x.sentiment_score||0)),sd.map(x=>(x.sentiment_score||0)>0?'#4ADE80':'#F87171'),320,true);
 }
-function filterNews(){renderNews(document.getElementById('nFil').value);}
+function filterNews(){renderNews();}
 
 // ── Commodités ─────────────────────────────────────────────────────────────
 function renderComm(){
