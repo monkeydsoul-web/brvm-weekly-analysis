@@ -112,6 +112,38 @@ function screenerReset() {
   runScreener();
 }
 
+function screenerExportCSV() {
+  if (!_scrResults.length) { if(typeof showNotif==='function') showNotif('Aucun résultat à exporter', 'red'); return; }
+  const cols = ['Ticker','Nom','Secteur','Score/80','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Verdict IA','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
+  const rows = _scrResults.map(x => [
+    x.ticker,
+    (x.name||'').replace(/,/g,''),
+    (x.sector||'').replace(/,/g,''),
+    (x.composite_adj||0).toFixed(1),
+    x.pe_ref ? x.pe_ref.toFixed(2) : '',
+    x.pb_ref ? x.pb_ref.toFixed(2) : '',
+    x.div_yield ? x.div_yield.toFixed(2) : '',
+    x.roe ? x.roe.toFixed(1) : '',
+    x.change_pct != null ? x.change_pct.toFixed(2) : '',
+    x.price ? Math.round(x.price) : '',
+    x.pdf_verdict||'',
+    (x.score_graham||0).toFixed(1),
+    (x.score_dcf||0).toFixed(1),
+    (x.score_ddm||0).toFixed(1),
+    (x.score_epv||0).toFixed(1),
+    (x.score_buffett||0).toFixed(1),
+  ]);
+  const csv = [cols, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8' }); // BOM pour Excel
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `BRVM_Screener_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  if(typeof showNotif==='function') showNotif(`${_scrResults.length} sociétés exportées`, 'green');
+}
+
 async function screenerAnalyseAI() {
   const checked = [...document.querySelectorAll('.sc-chk:checked')].map(el => el.value);
   const tickers = checked.length ? checked : _scrResults.slice(0, 6).map(x => x.ticker);
