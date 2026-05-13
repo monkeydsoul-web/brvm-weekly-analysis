@@ -1217,6 +1217,15 @@ def api_scheduler_run(job_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/sw.js")
+def serve_sw():
+    from flask import Response
+    with open(os.path.join(os.path.dirname(__file__), "dashboard", "sw.js")) as f:
+        content = f.read()
+    return Response(content, mimetype="application/javascript",
+                    headers={"Service-Worker-Allowed": "/"})
+
+
 @app.route("/api/rapport/<ticker>")
 def api_rapport_pdf(ticker):
     """Génère un rapport PDF pour une société."""

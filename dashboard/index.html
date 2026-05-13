@@ -148,6 +148,10 @@ input[type=range]{padding:0;height:20px}
   <div id="cmp-bar">
     <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
   </div>
+  <div id="push-notif-bar" style="padding:4px 8px;border-top:1px solid var(--border);display:none">
+    <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
+    <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
+  </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
   <div id="live-src" style="color:var(--t3)">Source : —</div>
@@ -869,7 +873,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
     setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
@@ -1657,6 +1661,80 @@ function updateLiveStatus() {
         }).catch(function(){});
     })
     .catch(function(e){ console.warn('live status:', e); });
+}
+
+// ── Service Worker — Notifications Push ────────────────────────────────────
+let _swReg = null;
+
+async function initServiceWorker() {
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  // Afficher le bouton d'activation
+  document.getElementById('push-notif-bar').style.display = 'block';
+  // Vérifier si déjà accordé
+  if (Notification.permission === 'granted') {
+    _updatePushUI('granted');
+    try {
+      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      _setupSWMessaging();
+    } catch(e) { console.warn('SW register:', e); }
+  } else if (Notification.permission !== 'denied') {
+    _updatePushUI('default');
+  } else {
+    _updatePushUI('denied');
+  }
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  _updatePushUI(perm);
+  if (perm === 'granted') {
+    try {
+      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      _setupSWMessaging();
+    } catch(e) { console.warn('SW register:', e); }
+  }
+}
+
+function _updatePushUI(perm) {
+  const btn = document.getElementById('push-btn');
+  const st = document.getElementById('push-status');
+  if (perm === 'granted') {
+    if (btn) { btn.textContent = '🔔 Notifications actives'; btn.disabled = true; btn.style.color = 'var(--green)'; }
+    if (st) st.textContent = 'Alertes prix en arrière-plan activées';
+  } else if (perm === 'denied') {
+    if (btn) { btn.textContent = '🔕 Notifications bloquées'; btn.disabled = true; btn.style.color = 'var(--red)'; }
+    if (st) st.textContent = 'Autoriser dans les réglages navigateur';
+  } else {
+    if (btn) { btn.textContent = '🔔 Activer notifications push'; btn.disabled = false; }
+  }
+}
+
+function _setupSWMessaging() {
+  if (!_swReg) return;
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SW_TRIGGER_CHECK') triggerSWAlertCheck();
+    if (e.data?.type === 'OPEN_TICKER') showStock(e.data.ticker);
+  });
+  // Démarrer la vérification périodique dans le SW (toutes les 5min)
+  _swReg.active?.postMessage({ type: 'SCHEDULE_CHECK', intervalMs: 300000 });
+  console.log('[SW] Messaging set up — periodic check every 5min');
+}
+
+function triggerSWAlertCheck() {
+  if (!_swReg?.active) return;
+  const alerts = (window._priceAlerts || []).filter(a => a.active !== false);
+  if (!alerts.length) return;
+  fetch('/api/live').then(r => r.json()).then(d => {
+    _swReg.active.postMessage({ type: 'CHECK_ALERTS', alerts, prices: d.prices || {} });
+  }).catch(() => {});
+}
+
+// Tester une notification push (debug)
+function testPushNotification() {
+  if (Notification.permission === 'granted') {
+    new Notification('📈 BRVM Test', { body: 'Les notifications push fonctionnent !', icon: '/favicon.ico' });
+  }
 }
 
 // Lancement au demarrage et toutes les 5 min
