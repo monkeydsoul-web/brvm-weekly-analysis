@@ -1,392 +1,392 @@
 {
-  "updated_at": "2026-05-13T10:26:31.970688+00:00",
-  "market_open": true,
+  "updated_at": "2026-05-13T16:25:13.444374+00:00",
+  "market_open": false,
   "prices": {
     "ABJC": {
-      "price": 2980.0,
-      "prev_close": 2980.0,
-      "change_pct": 0.0,
-      "volume": 408,
+      "price": 2850.0,
+      "prev_close": 2805.0,
+      "change_pct": -4.36,
+      "volume": 2995,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967742+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441215+00:00",
+      "trend": "flop"
     },
     "BICB": {
-      "price": 5200.0,
+      "price": 5220.0,
       "prev_close": 5200.0,
-      "change_pct": 0.0,
-      "volume": 380,
+      "change_pct": 0.38,
+      "volume": 782,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967809+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441284+00:00"
     },
     "BICC": {
-      "price": 26295.0,
+      "price": 26400.0,
       "prev_close": 26300.0,
-      "change_pct": -0.02,
-      "volume": 147,
+      "change_pct": 0.38,
+      "volume": 1209,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967857+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441339+00:00"
     },
     "BNBC": {
-      "price": 1500.0,
-      "prev_close": 1495.0,
-      "change_pct": 0.33,
-      "volume": 1123,
+      "price": 1590.0,
+      "prev_close": 1580.0,
+      "change_pct": 6.35,
+      "volume": 3439,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967903+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441390+00:00"
     },
     "BOAB": {
-      "price": 9405.0,
+      "price": 9410.0,
       "prev_close": 9420.0,
-      "change_pct": -0.16,
-      "volume": 736,
+      "change_pct": -0.11,
+      "volume": 2844,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967950+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441446+00:00"
     },
     "BOABF": {
-      "price": 5410.0,
+      "price": 5405.0,
       "prev_close": 5410.0,
-      "change_pct": 0.0,
-      "volume": 728,
+      "change_pct": -0.09,
+      "volume": 2437,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.967995+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441495+00:00"
     },
     "BOAC": {
-      "price": 8585.0,
+      "price": 8600.0,
       "prev_close": 8585.0,
-      "change_pct": 0.0,
-      "volume": 2065,
+      "change_pct": 0.17,
+      "volume": 11731,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968038+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441544+00:00"
     },
     "BOAM": {
-      "price": 4695.0,
+      "price": 4675.0,
       "prev_close": 4680.0,
-      "change_pct": 0.32,
-      "volume": 933,
+      "change_pct": -0.11,
+      "volume": 3021,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968082+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441592+00:00"
     },
     "BOAN": {
-      "price": 3440.0,
+      "price": 3395.0,
       "prev_close": 3440.0,
-      "change_pct": 0.0,
-      "volume": 343,
+      "change_pct": -1.31,
+      "volume": 7385,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968126+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441642+00:00",
+      "trend": "flop"
     },
     "BOAS": {
-      "price": 7460.0,
+      "price": 7555.0,
       "prev_close": 7500.0,
-      "change_pct": -0.53,
-      "volume": 4937,
+      "change_pct": 0.73,
+      "volume": 11661,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968168+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441690+00:00"
     },
     "CABC": {
-      "price": 3490.0,
+      "price": 3500.0,
       "prev_close": 3490.0,
-      "change_pct": 2.65,
-      "volume": 3,
+      "change_pct": 2.94,
+      "volume": 2869,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968212+00:00",
-      "trend": "top"
+      "fetched_at": "2026-05-13T16:25:13.441738+00:00"
     },
     "CBIBF": {
-      "price": 17400.0,
-      "prev_close": 17400.0,
-      "change_pct": 0.0,
-      "volume": 1443,
+      "price": 18700.0,
+      "prev_close": 18700.0,
+      "change_pct": 7.47,
+      "volume": 7809,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968256+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441786+00:00",
+      "trend": "top"
     },
     "CFAC": {
-      "price": 1385.0,
-      "prev_close": 1380.0,
-      "change_pct": 0.36,
-      "volume": 317,
+      "price": 1480.0,
+      "prev_close": 1480.0,
+      "change_pct": 7.25,
+      "volume": 5983,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968299+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441835+00:00",
+      "trend": "top"
     },
     "CIEC": {
-      "price": 3295.0,
-      "prev_close": 3295.0,
-      "change_pct": 0.0,
-      "volume": 458,
+      "price": 3300.0,
+      "prev_close": 3300.0,
+      "change_pct": 0.15,
+      "volume": 4285,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968341+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441885+00:00"
     },
     "ECOC": {
-      "price": 16200.0,
+      "price": 16300.0,
       "prev_close": 16200.0,
-      "change_pct": 0.0,
-      "volume": 54,
+      "change_pct": 0.62,
+      "volume": 1114,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968383+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441933+00:00"
     },
     "ETIT": {
       "price": 30.0,
       "prev_close": 30.0,
       "change_pct": 0.0,
-      "volume": 71780,
+      "volume": 265017,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968425+00:00"
+      "fetched_at": "2026-05-13T16:25:13.441976+00:00"
     },
     "FTSC": {
       "price": 2250.0,
       "prev_close": 2240.0,
       "change_pct": 0.45,
-      "volume": 792,
+      "volume": 2187,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968468+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442019+00:00"
     },
     "LNBB": {
       "price": 3900.0,
-      "prev_close": 3865.0,
+      "prev_close": 3900.0,
       "change_pct": 0.91,
-      "volume": 2504,
+      "volume": 6086,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968510+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442061+00:00"
     },
     "NEIC": {
-      "price": 1890.0,
-      "prev_close": 1890.0,
-      "change_pct": 0.0,
-      "volume": 213,
+      "price": 1990.0,
+      "prev_close": 1980.0,
+      "change_pct": 5.29,
+      "volume": 11437,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968553+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442104+00:00"
     },
     "NSBC": {
-      "price": 13890.0,
-      "prev_close": 13810.0,
-      "change_pct": 0.58,
-      "volume": 438,
+      "price": 14100.0,
+      "prev_close": 14100.0,
+      "change_pct": 2.1,
+      "volume": 2554,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968595+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442146+00:00"
     },
     "NTLC": {
       "price": 11600.0,
       "prev_close": 11400.0,
       "change_pct": -0.85,
-      "volume": 157,
+      "volume": 437,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968638+00:00",
-      "trend": "flop"
+      "fetched_at": "2026-05-13T16:25:13.442190+00:00"
     },
     "ONTBF": {
-      "price": 2680.0,
-      "prev_close": 2680.0,
-      "change_pct": 0.0,
-      "volume": 459,
+      "price": 2750.0,
+      "prev_close": 2760.0,
+      "change_pct": 2.61,
+      "volume": 2816,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968680+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442232+00:00"
     },
     "ORAC": {
-      "price": 15100.0,
+      "price": 15000.0,
       "prev_close": 15050.0,
-      "change_pct": 0.33,
-      "volume": 35,
+      "change_pct": -0.33,
+      "volume": 1336,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968725+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442280+00:00"
     },
     "ORGT": {
-      "price": 2695.0,
-      "prev_close": 2740.0,
-      "change_pct": -1.64,
-      "volume": 1020,
+      "price": 2575.0,
+      "prev_close": 2600.0,
+      "change_pct": -6.02,
+      "volume": 11184,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968768+00:00",
+      "fetched_at": "2026-05-13T16:25:13.442324+00:00",
       "trend": "flop"
     },
     "PALC": {
       "price": 7800.0,
-      "prev_close": 7650.0,
+      "prev_close": 7850.0,
       "change_pct": -0.64,
-      "volume": 100,
+      "volume": 765,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968810+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442368+00:00"
     },
     "PRSC": {
-      "price": 3690.0,
-      "prev_close": 3690.0,
-      "change_pct": 0.0,
-      "volume": 74,
+      "price": 3695.0,
+      "prev_close": 3695.0,
+      "change_pct": 0.14,
+      "volume": 1004,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968853+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442422+00:00"
     },
     "SAFC": {
-      "price": 3900.0,
-      "prev_close": 3900.0,
-      "change_pct": 4.14,
-      "volume": 4560,
+      "price": 3995.0,
+      "prev_close": 3950.0,
+      "change_pct": 6.68,
+      "volume": 36914,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968897+00:00",
-      "trend": "top"
+      "fetched_at": "2026-05-13T16:25:13.442465+00:00"
     },
     "SCRC": {
-      "price": 2420.0,
+      "price": 2455.0,
       "prev_close": 2455.0,
-      "change_pct": 5.91,
-      "volume": 4071,
+      "change_pct": 7.44,
+      "volume": 19357,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968940+00:00",
+      "fetched_at": "2026-05-13T16:25:13.442513+00:00",
       "trend": "top"
     },
     "SDCC": {
-      "price": 9500.0,
-      "prev_close": 9395.0,
-      "change_pct": 1.12,
-      "volume": 219,
+      "price": 9505.0,
+      "prev_close": 9505.0,
+      "change_pct": 1.17,
+      "volume": 821,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.968983+00:00",
-      "trend": "top"
+      "fetched_at": "2026-05-13T16:25:13.442555+00:00"
     },
     "SDSC": {
-      "price": 1745.0,
-      "prev_close": 1745.0,
-      "change_pct": 0.0,
-      "volume": 111,
+      "price": 1785.0,
+      "prev_close": 1760.0,
+      "change_pct": 2.29,
+      "volume": 4814,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969025+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442597+00:00"
     },
     "SEMC": {
-      "price": 1500.0,
-      "prev_close": 1500.0,
-      "change_pct": 0.0,
-      "volume": 789,
+      "price": 1580.0,
+      "prev_close": 1600.0,
+      "change_pct": 5.33,
+      "volume": 8847,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969067+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442639+00:00"
     },
     "SGBC": {
-      "price": 35000.0,
+      "price": 34995.0,
       "prev_close": 34990.0,
-      "change_pct": 0.03,
-      "volume": 228,
+      "change_pct": 0.01,
+      "volume": 983,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969110+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442681+00:00"
     },
     "SHEC": {
-      "price": 1940.0,
-      "prev_close": 1940.0,
-      "change_pct": 0.0,
-      "volume": 211,
+      "price": 2000.0,
+      "prev_close": 2000.0,
+      "change_pct": 3.09,
+      "volume": 4436,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969153+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442724+00:00"
     },
     "SIBC": {
-      "price": 7150.0,
-      "prev_close": 7295.0,
-      "change_pct": -1.99,
-      "volume": 1022,
+      "price": 7300.0,
+      "prev_close": 7300.0,
+      "change_pct": 0.07,
+      "volume": 5392,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969195+00:00",
-      "trend": "flop"
+      "fetched_at": "2026-05-13T16:25:13.442769+00:00"
     },
     "SICC": {
       "price": 4380.0,
       "prev_close": 4390.0,
       "change_pct": -0.23,
-      "volume": 20,
+      "volume": 335,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969238+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442811+00:00"
     },
     "SIVC": {
-      "price": 2855.0,
-      "prev_close": 2860.0,
-      "change_pct": -0.17,
-      "volume": 222,
+      "price": 2860.0,
+      "prev_close": 2855.0,
+      "change_pct": 0.0,
+      "volume": 4274,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969281+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442856+00:00"
     },
     "SLBC": {
-      "price": 37900.0,
+      "price": 37995.0,
       "prev_close": 37500.0,
-      "change_pct": 1.07,
-      "volume": 7,
+      "change_pct": 1.32,
+      "volume": 68,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969324+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442899+00:00"
     },
     "SMBC": {
-      "price": 12500.0,
-      "prev_close": 11950.0,
-      "change_pct": -1.46,
-      "volume": 910,
+      "price": 12295.0,
+      "prev_close": 12400.0,
+      "change_pct": -3.07,
+      "volume": 1256,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969366+00:00",
+      "fetched_at": "2026-05-13T16:25:13.442942+00:00",
       "trend": "flop"
     },
     "SNTS": {
       "price": 28950.0,
       "prev_close": 28910.0,
       "change_pct": 0.14,
-      "volume": 1822,
+      "volume": 5261,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969410+00:00"
+      "fetched_at": "2026-05-13T16:25:13.442984+00:00"
     },
     "SOGC": {
-      "price": 7400.0,
+      "price": 7450.0,
       "prev_close": 7395.0,
-      "change_pct": 0.0,
-      "volume": 160,
+      "change_pct": 0.68,
+      "volume": 646,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969452+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443027+00:00"
     },
     "SPHC": {
-      "price": 6995.0,
-      "prev_close": 6995.0,
-      "change_pct": 0.0,
-      "volume": 183,
+      "price": 7000.0,
+      "prev_close": 6900.0,
+      "change_pct": 0.07,
+      "volume": 2182,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969494+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443070+00:00"
     },
     "STAC": {
-      "price": 2605.0,
-      "prev_close": 2600.0,
-      "change_pct": 0.19,
-      "volume": 134,
+      "price": 2795.0,
+      "prev_close": 2795.0,
+      "change_pct": 7.5,
+      "volume": 3322,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969538+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443112+00:00",
+      "trend": "top"
     },
     "STBC": {
-      "price": 21100.0,
+      "price": 21000.0,
       "prev_close": 21050.0,
-      "change_pct": 0.24,
-      "volume": 96,
+      "change_pct": -0.24,
+      "volume": 2081,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969580+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443154+00:00"
     },
     "TTLC": {
-      "price": 3000.0,
-      "prev_close": 3060.0,
-      "change_pct": -1.96,
-      "volume": 1101,
+      "price": 2995.0,
+      "prev_close": 2950.0,
+      "change_pct": -2.12,
+      "volume": 10912,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969623+00:00",
+      "fetched_at": "2026-05-13T16:25:13.443201+00:00",
       "trend": "flop"
     },
     "TTLS": {
-      "price": 3000.0,
-      "prev_close": 2950.0,
-      "change_pct": 5.45,
-      "volume": 268,
+      "price": 3025.0,
+      "prev_close": 3010.0,
+      "change_pct": 6.33,
+      "volume": 2139,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969665+00:00",
-      "trend": "top"
+      "fetched_at": "2026-05-13T16:25:13.443243+00:00"
     },
     "UNLC": {
-      "price": 56100.0,
-      "prev_close": 56100.0,
-      "change_pct": 0.0,
-      "volume": 0,
+      "price": 60295.0,
+      "prev_close": 60295.0,
+      "change_pct": 7.48,
+      "volume": 48,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969708+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443285+00:00",
+      "trend": "top"
     },
     "UNXC": {
-      "price": 1825.0,
+      "price": 1840.0,
       "prev_close": 1825.0,
-      "change_pct": 0.0,
-      "volume": 2127,
+      "change_pct": 0.82,
+      "volume": 16098,
       "source": "brvm.org",
-      "fetched_at": "2026-05-13T10:26:31.969751+00:00"
+      "fetched_at": "2026-05-13T16:25:13.443328+00:00"
     }
   },
   "stats": {

@@ -100,25 +100,27 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
         _boc = get_boc_price_history()
         boc_entry = _boc.get(ticker, {})
         if boc_entry:
-            # 1. P/E BOC en priorité absolue (plus fiable que EPS estimé)
             per_boc = boc_entry.get('per_boc')
             if per_boc and 0 < float(per_boc) < 500:
-                row['pe_ref'] = float(per_boc)
                 row['pe_hist'] = float(per_boc)
-                # Dériver BNA/EPS depuis le PER BOC et le cours BOC
                 price_ref = row.get('price') or boc_entry.get('cours_clot')
+                existing_eps = row.get('eps') or row.get('bna') or 0
                 if price_ref and price_ref > 0:
                     bna_boc = round(price_ref / float(per_boc), 1)
-                    if bna_boc > 0:
-                        row['bna'] = bna_boc
-                        row['eps'] = bna_boc
-            # 2. var_annee BOC (perf annuelle réelle)
+                    if bna_boc > 0 and (not existing_eps or bna_boc >= existing_eps * 0.7):
+                        # BOC cohérent → appliquer eps et pe_ref BOC
+                        row['bna']    = bna_boc
+                        row['eps']    = bna_boc
+                        row['pe_ref'] = float(per_boc)
+                    elif existing_eps > 0:
+                        # Garder EPS scraper, pe_ref = prix / eps (cohérent)
+                        row['pe_ref'] = round(price_ref / existing_eps, 2)
+                    else:
+                        row['pe_ref'] = float(per_boc)
             if boc_entry.get('var_annee') is not None:
                 row['var_annee'] = boc_entry['var_annee']
-            # 3. Date ex-div BOC
             if boc_entry.get('div_date'):
                 row['ex_div_date'] = boc_entry['div_date']
-            # Stocker pour application finale après PDF
             row['_boc_per']      = per_boc
             row['_boc_div']      = boc_entry.get('div_net') or 0
             row['_boc_div_date'] = boc_entry.get('div_date', '')
@@ -218,28 +220,36 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
         row["pdf_perspectives"] = pdf_analysis.get("perspectives", "")[:200]
         row["pdf_resume"]       = pdf_analysis.get("resume", "")[:300]
 
-    # ── BOC — override final après PDF (priorité absolue) ────────────────────
-    # Le PER BOC et le dividende BOC sont plus récents que PDF et statiques.
+    # ── BOC — override final après PDF ───────────────────────────────────────
     boc_per      = row.get('_boc_per')
     boc_div      = row.get('_boc_div') or 0
     boc_div_date = row.get('_boc_div_date', '')
     boc_cours    = row.get('_boc_cours')
     price_final  = row.get('price') or boc_cours or 0
 
-    # P/E BOC re-appliqué après PDF (le PDF peut avoir écrasé pe_ref)
+    # pe_ref + EPS BOC après PDF : cohérence obligatoire pe_ref = prix / eps
     if boc_per and 0 < float(boc_per) < 500:
-        row['pe_ref'] = float(boc_per)
+        existing_eps = row.get('eps') or row.get('bna') or 0
         if price_final > 0:
             bna_boc = round(price_final / float(boc_per), 1)
-            if bna_boc > 0:
-                row['bna'] = bna_boc
-                row['eps'] = bna_boc
+            if bna_boc > 0 and (not existing_eps or bna_boc >= existing_eps * 0.7):
+                # BOC cohérent avec données existantes → on applique
+                row['bna']    = bna_boc
+                row['eps']    = bna_boc
+                row['pe_ref'] = float(boc_per)
+            elif existing_eps > 0:
+                # Garder l'EPS PDF (fiable), recalculer pe_ref cohérent
+                row['pe_ref'] = round(price_final / existing_eps, 2)
+            else:
+                row['pe_ref'] = float(boc_per)
 
-    # Dividende BOC appliqué en priorité absolue si date récente (≤ 3 ans)
+    # Dividende BOC : appliqué si date récente ET cohérent avec existant (≥ 50%)
     if boc_div > 0 and _is_div_date_recent(boc_div_date, max_years=3):
-        row['div_per_share'] = boc_div
-        if price_final > 0:
-            row['div_yield'] = round(boc_div / price_final * 100, 2)
+        existing_div = row.get('div_per_share') or 0
+        if not existing_div or boc_div >= existing_div * 0.5:
+            row['div_per_share'] = boc_div
+            if price_final > 0:
+                row['div_yield'] = round(boc_div / price_final * 100, 2)
 
     # Nettoyage des clés internes
     for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours'):
