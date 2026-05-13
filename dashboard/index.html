@@ -209,6 +209,23 @@ input[type=range]{padding:0;height:20px}
 .tour-step-dot.on{background:var(--blue)}
 .tour-highlight{outline:3px solid var(--blue)!important;outline-offset:4px;border-radius:4px;animation:tour-pulse 1.2s infinite}
 @keyframes tour-pulse{0%,100%{outline-color:var(--blue)}50%{outline-color:var(--green)}}
+/* ── Recherche globale ───────────────────────────────────────────────────── */
+#g-search-overlay{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding-top:80px}
+#g-search-overlay.open{display:flex}
+#g-search-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:min(600px,94vw);max-height:70vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.6);overflow:hidden}
+#g-search-input{padding:14px 16px;font-size:14px;border:none;background:transparent;color:var(--text);outline:none;border-bottom:1px solid var(--border);width:100%}
+#g-search-input::placeholder{color:var(--t3)}
+#g-search-results{overflow-y:auto;max-height:calc(70vh - 60px)}
+.gsr-section{padding:6px 14px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);border-top:1px solid var(--border);margin-top:4px}
+.gsr-section:first-child{border-top:none;margin-top:0}
+.gsr-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .1s}
+.gsr-item:hover,.gsr-item.active{background:var(--bg3)}
+.gsr-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.gsr-title{font-size:13px;font-weight:600;color:var(--text)}
+.gsr-sub{font-size:10px;color:var(--t2);margin-top:1px}
+.gsr-badge{margin-left:auto;flex-shrink:0}
+#g-search-hint{padding:8px 14px;font-size:10px;color:var(--t3);border-top:1px solid var(--border);display:flex;gap:16px}
+#g-search-hint span{display:flex;align-items:center;gap:4px}
 /* ── Glossaire ───────────────────────────────────────────────────────────── */
 .gloss-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
 .gloss-term{font-size:14px;font-weight:700;color:var(--blue);margin-bottom:3px}
@@ -218,6 +235,21 @@ input[type=range]{padding:0;height:20px}
 </style></head>
 <body>
 <div id="g-spin"></div>
+
+<!-- Recherche globale Cmd+K -->
+<div id="g-search-overlay" onclick="if(event.target===this)closeGSearch()">
+  <div id="g-search-box">
+    <input id="g-search-input" placeholder="Rechercher une action, une page, un terme... (Esc pour fermer)" autocomplete="off" oninput="runGSearch(this.value)" onkeydown="gsKeyNav(event)">
+    <div id="g-search-results"></div>
+    <div id="g-search-hint">
+      <span>↑↓ Naviguer</span>
+      <span>↵ Ouvrir</span>
+      <span>Esc Fermer</span>
+      <span style="margin-left:auto;opacity:.6">⌘K / Ctrl+K</span>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 <button id="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">
   <span></span><span></span><span></span>
@@ -265,7 +297,7 @@ input[type=range]{padding:0;height:20px}
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
-      <input id="searchInp" placeholder="Rechercher..." style="width:100px;padding:3px 7px;font-size:10px" oninput="filterSidebar(this.value)"/>
+      <input id="searchInp" placeholder="⌘K Rechercher..." style="width:110px;padding:3px 7px;font-size:10px;cursor:pointer" readonly onclick="openGSearch()" title="Recherche globale (⌘K)"/>
     </div>
     <div id="tlItems"></div>
   </div>
@@ -963,6 +995,149 @@ document.querySelectorAll('.ni').forEach(el => {
       document.getElementById('mob-overlay').classList.remove('show');
     }
   });
+});
+
+// ── Recherche globale Cmd+K ────────────────────────────────────────────────
+let _gsIdx = -1;
+
+const _PAGES = [
+  {id:'dash',  icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
+  {id:'rank',  icon:'🏆', label:'Classement',          desc:'Scores /80 toutes les actions'},
+  {id:'sectors',icon:'📊',label:'Secteurs',            desc:'Analyse par secteur BRVM'},
+  {id:'screener',icon:'🔍',label:'Screener',           desc:'Filtres avancés P/E, score, dividende'},
+  {id:'port',  icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
+  {id:'sim',   icon:'🧮', label:'Simulateur dividendes',desc:'Projection revenus, Markowitz'},
+  {id:'div',   icon:'💰', label:'Dividendes',           desc:'Calendrier, rendements 2026'},
+  {id:'targets',icon:'🎯',label:'Prix cibles',          desc:'Graham, EPV, P/B cible'},
+  {id:'perf',  icon:'📈', label:'Performances',         desc:'Historique cours, base 100'},
+  {id:'alerts',icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
+  {id:'news',  icon:'📰', label:'Actualités',           desc:'News marché et résultats'},
+  {id:'chat',  icon:'💬', label:'Chat IA',              desc:'Analyste IA BRVM'},
+  {id:'analyse',icon:'📐',label:'Analyse & Optim',      desc:'Corrélation, Markowitz'},
+  {id:'glossaire',icon:'📚',label:'Glossaire',          desc:'Termes financiers expliqués'},
+  {id:'comm',  icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
+  {id:'score-custom',icon:'⚖️',label:'Score personnalisé',desc:'Ajuster les poids des modèles'},
+];
+
+function openGSearch(){
+  const ov=document.getElementById('g-search-overlay');
+  const inp=document.getElementById('g-search-input');
+  ov.classList.add('open');
+  setTimeout(()=>inp?.focus(),50);
+  _gsIdx=-1;
+  runGSearch('');
+}
+function closeGSearch(){
+  document.getElementById('g-search-overlay')?.classList.remove('open');
+}
+
+function runGSearch(q){
+  _gsIdx=-1;
+  const res=document.getElementById('g-search-results');
+  if(!res) return;
+  q=(q||'').toLowerCase().trim();
+
+  const sc=window.scores||[];
+  const gl=typeof _glossTerms!=='undefined'?_glossTerms:[];
+
+  let html='';
+
+  // ── Actions
+  const matchStocks=sc.filter(x=>
+    (x.ticker||'').toLowerCase().includes(q)||
+    (x.name||'').toLowerCase().includes(q)||
+    (x.sector||'').toLowerCase().includes(q)
+  ).slice(0,8);
+  if(matchStocks.length){
+    html+=`<div class="gsr-section">Actions (${matchStocks.length})</div>`;
+    html+=matchStocks.map(x=>{
+      const v=x.composite_adj||0;
+      const chg=x.change_pct||0;
+      const chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+      const verdict=x.pdf_verdict||'—';
+      const verdC=verdict==='POSITIF'?'var(--green)':verdict==='NEGATIF'?'var(--red)':'var(--amber)';
+      return`<div class="gsr-item" data-action="stock" data-val="${x.ticker}">
+        <div class="gsr-icon" style="background:rgba(74,222,128,.1)">📈</div>
+        <div style="flex:1">
+          <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
+          <div class="gsr-sub">${x.sector||'—'} · ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${v.toFixed(0)}/80</span>
+          <span style="font-size:9px;color:${verdC}">${verdict}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Pages
+  const matchPages=_PAGES.filter(p=>
+    !q||p.label.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)
+  ).slice(0,5);
+  if(matchPages.length){
+    html+=`<div class="gsr-section">Pages</div>`;
+    html+=matchPages.map(p=>`<div class="gsr-item" data-action="page" data-val="${p.id}">
+      <div class="gsr-icon" style="background:rgba(96,165,250,.1);font-size:16px">${p.icon}</div>
+      <div>
+        <div class="gsr-title">${p.label}</div>
+        <div class="gsr-sub">${p.desc}</div>
+      </div>
+    </div>`).join('');
+  }
+
+  // ── Glossaire
+  const matchGloss=gl.filter(t=>
+    !q||t.term.toLowerCase().includes(q)||t.def.toLowerCase().includes(q)
+  ).slice(0,4);
+  if(matchGloss.length){
+    html+=`<div class="gsr-section">Glossaire</div>`;
+    html+=matchGloss.map(t=>`<div class="gsr-item" data-action="gloss" data-val="${t.term}">
+      <div class="gsr-icon" style="background:rgba(192,132,252,.1)">📚</div>
+      <div>
+        <div class="gsr-title">${t.term}</div>
+        <div class="gsr-sub" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.def.substring(0,60)}…</div>
+      </div>
+    </div>`).join('');
+  }
+
+  if(!html) html='<div style="padding:20px;text-align:center;color:var(--t2);font-size:12px">Aucun résultat pour "'+q+'"</div>';
+  res.innerHTML=html;
+}
+
+function gsKeyNav(e){
+  const items=[...document.querySelectorAll('#g-search-results .gsr-item')];
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();_gsIdx=(_gsIdx+1)%items.length;_gsHighlight(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();_gsIdx=(_gsIdx-1+items.length)%items.length;_gsHighlight(items);}
+  else if(e.key==='Enter'){e.preventDefault();if(_gsIdx>=0)gsActivate(items[_gsIdx]);else if(items[0])gsActivate(items[0]);}
+  else if(e.key==='Escape'){closeGSearch();}
+}
+function _gsHighlight(items){
+  items.forEach((el,i)=>el.classList.toggle('active',i===_gsIdx));
+  if(_gsIdx>=0) items[_gsIdx].scrollIntoView({block:'nearest'});
+}
+function gsActivate(el){
+  const action=el.getAttribute('data-action');
+  const val=el.getAttribute('data-val');
+  closeGSearch();
+  if(action==='stock'){ showStock(val); }
+  else if(action==='page'){
+    nav(val);
+    if(pageLoaders[val]) pageLoaders[val]();
+  } else if(action==='gloss'){
+    nav('glossaire'); initGlossaire();
+    setTimeout(()=>{ const si=document.getElementById('gloss-search');if(si){si.value=val;filterGlossaire(val);}},200);
+  }
+}
+// Délégation de clic sur les résultats
+document.addEventListener('click',e=>{
+  const item=e.target.closest('.gsr-item');
+  if(item) gsActivate(item);
+});
+// Cmd+K / Ctrl+K
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();}
+  else if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();}
 });
 
 // ── Theme dark/light ───────────────────────────────────────────────────────
