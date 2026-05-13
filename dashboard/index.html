@@ -495,12 +495,26 @@ input[type=range]{padding:0;height:20px}
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
   <div class="ph"><h2>Mon portefeuille</h2>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px">⚡ Optimiser</button>
       <button class="btn btn-o" onclick="sharePortfolioURL()" style="font-size:11px">🔗 Partager</button>
       <button class="btn btn-g" onclick="showAddPosition()">+ Ajouter position</button>
     </div>
   </div>
   <div id="portSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+  <!-- Graphique évolution valeur -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="ct">📈 Évolution de la valeur du portefeuille</div>
+      <span id="port-perf-badge" style="font-size:11px;font-weight:700"></span>
+    </div>
+    <div id="port-value-chart" style="width:100%;height:160px"></div>
+  </div>
+  <!-- Bilan mensuel -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="ct" style="margin-bottom:8px">📅 Bilan mensuel</div>
+    <div id="port-monthly-table" style="overflow-x:auto"></div>
+  </div>
 <div class="card" style="margin-bottom:12px" id="simPortCard">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="ct">Simulateur portefeuille live</div>
@@ -1895,6 +1909,20 @@ function loadPortfolio(){
       <span style="color:var(--t2)">${tx.shares} × ${fmt(tx.price)} XOF</span>
       <span style="color:var(--t3)">${tx.date||''}</span>
     </div>`).join('') || '<p style="font-size:11px;color:var(--t2)">Aucune transaction.</p>';
+
+  // Évolution valeur + bilan mensuel (lazy — seulement si price history dispo)
+  if(positions.length && window._priceHistory){
+    const series = _portValueSeries(positions);
+    _portDrawChart(series, positions);
+    _portMonthlyTable(positions);
+  } else if(positions.length) {
+    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
+      window._priceHistory=ph;
+      const series=_portValueSeries(positions);
+      _portDrawChart(series,positions);
+      _portMonthlyTable(positions);
+    }).catch(()=>{});
+  }
 }
 
 function sharePortfolioURL(){
@@ -1929,6 +1957,153 @@ function _importPortfolioFromURL(){
     const clean = location.pathname;
     history.replaceState({}, '', clean);
   }catch(e){ console.warn('Erreur import portfolio URL', e); }
+}
+
+// ── Portfolio évolution de valeur ──────────────────────────────────────────
+function _portValueSeries(positions){
+  const ph = window._priceHistory || {};
+  // Trouver date de début = la plus ancienne date d'achat
+  const buydates = positions.map(p=>p.date).filter(Boolean).sort();
+  if(!buydates.length) return [];
+  const startDate = buydates[0];
+
+  // Collecter toutes les dates disponibles dans l'historique des positions
+  const allDates = new Set();
+  positions.forEach(p=>{
+    (ph[p.ticker]||[]).filter(d=>d.date>=startDate&&d.price).forEach(d=>allDates.add(d.date));
+  });
+  const dates = [...allDates].sort();
+  if(dates.length<2) return [];
+
+  // Pour chaque date, calculer la valeur totale du portefeuille
+  return dates.map(date=>{
+    const val = positions.reduce((sum,p)=>{
+      if(p.date && date < p.date) return sum; // pas encore acheté
+      const hist = (ph[p.ticker]||[]).filter(d=>d.price&&d.date<=date);
+      if(!hist.length) {
+        // Utiliser prix d'achat si pas de données historiques antérieures
+        return sum + (p.shares * p.avg_price);
+      }
+      const price = hist[hist.length-1].price;
+      return sum + p.shares * price;
+    }, 0);
+    return {date, val};
+  });
+}
+
+function _portDrawChart(series, positions){
+  const el = document.getElementById('port-value-chart');
+  if(!el||series.length<2) { if(el) el.innerHTML='<p style="color:var(--t2);padding:20px;text-align:center">Données historiques insuffisantes.</p>'; return; }
+
+  const W=el.clientWidth||700, H=160;
+  const pad={l:60,r:20,t:10,b:28};
+  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
+
+  const vals=series.map(s=>s.val);
+  const minV=Math.min(...vals)*0.98, maxV=Math.max(...vals)*1.02;
+  const range=maxV-minV||1;
+
+  // Coût total (ligne de référence)
+  const cost=positions.reduce((s,p)=>s+p.shares*p.avg_price,0);
+  const costY=pad.t+gH-(cost-minV)/range*gH;
+
+  const pts=series.map((s,i)=>`${Math.round(pad.l+i/(series.length-1)*gW)},${Math.round(pad.t+gH-(s.val-minV)/range*gH)}`);
+  const lastVal=vals[vals.length-1];
+  const gainPct=cost>0?(lastVal/cost-1)*100:0;
+  const col=lastVal>=cost?'#4ADE80':'#F87171';
+
+  // Gradient fill
+  const fillPts=`${pad.l},${pad.t+gH} ${pts.join(' ')} ${pad.l+gW},${pad.t+gH}`;
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block;overflow:visible">`;
+  svg+=`<defs><linearGradient id="pv-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.3"/><stop offset="100%" stop-color="${col}" stop-opacity="0.02"/></linearGradient></defs>`;
+  // Fill
+  svg+=`<polygon points="${fillPts}" fill="url(#pv-grad)"/>`;
+  // Ligne coût
+  svg+=`<line x1="${pad.l}" y1="${costY}" x2="${pad.l+gW}" y2="${costY}" stroke="rgba(251,191,36,.5)" stroke-width="1" stroke-dasharray="4,3"/>`;
+  svg+=`<text x="${pad.l-4}" y="${costY+3}" font-size="8" fill="#FBBF24" text-anchor="end">Coût</text>`;
+  // Courbe valeur
+  svg+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>`;
+  // Point final
+  const lx=+pts[pts.length-1].split(',')[0], ly=+pts[pts.length-1].split(',')[1];
+  svg+=`<circle cx="${lx}" cy="${ly}" r="4" fill="${col}"/>`;
+  svg+=`<text x="${lx>W/2?lx-6:lx+6}" y="${ly-6}" font-size="9" fill="${col}" text-anchor="${lx>W/2?'end':'start'}" font-weight="bold">${Math.round(lastVal/1000)}k XOF</text>`;
+  // Axe X — quelques dates
+  const step=Math.max(1,Math.floor(series.length/5));
+  series.filter((_,i)=>i%step===0||i===series.length-1).forEach((s,_,arr)=>{
+    const xi=series.indexOf(s);
+    const x=pad.l+xi/(series.length-1)*gW;
+    svg+=`<text x="${x}" y="${H-4}" font-size="8" fill="#6b7280" text-anchor="middle">${s.date.slice(5)}</text>`;
+  });
+  // Axe Y
+  [minV,cost,(minV+maxV)/2,maxV].forEach(v=>{
+    const y=pad.t+gH-(v-minV)/range*gH;
+    svg+=`<text x="${pad.l-4}" y="${y+3}" font-size="8" fill="#6b7280" text-anchor="end">${Math.round(v/1000)}k</text>`;
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+gW}" y2="${y}" stroke="#1f2937" stroke-width="0.5"/>`;
+  });
+  svg+='</svg>';
+  el.innerHTML=svg;
+
+  // Badge perf
+  const badge=document.getElementById('port-perf-badge');
+  if(badge){
+    const c=gainPct>=0?'var(--green)':'var(--red)';
+    badge.innerHTML=`<span style="color:${c}">${gainPct>=0?'+':''}${gainPct.toFixed(1)}% vs coût</span>`;
+  }
+}
+
+function _portMonthlyTable(positions){
+  const el=document.getElementById('port-monthly-table');
+  if(!el) return;
+  const ph=window._priceHistory||{};
+
+  // Collecter les mois disponibles
+  const monthVals={};
+  positions.forEach(p=>{
+    (ph[p.ticker]||[]).filter(d=>d.price&&(!p.date||d.date>=p.date)).forEach(d=>{
+      const m=d.date.slice(0,7);
+      if(!monthVals[m]) monthVals[m]={};
+      monthVals[m][p.ticker]={price:d.price,shares:p.shares,avg_price:p.avg_price};
+    });
+  });
+
+  const months=Object.keys(monthVals).sort().slice(-12);
+  if(months.length<2){el.innerHTML='<p style="color:var(--t2);font-size:11px">Données insuffisantes (< 2 mois).</p>';return;}
+
+  const rows=months.map((m,i)=>{
+    const val=Object.values(monthVals[m]).reduce((s,x)=>s+x.shares*x.price,0);
+    const cost=Object.values(monthVals[m]).reduce((s,x)=>s+x.shares*x.avg_price,0);
+    const prevM=months[i-1];
+    const prevVal=prevM?Object.values(monthVals[prevM]).reduce((s,x)=>s+x.shares*x.price,0):val;
+    const monthGain=val-prevVal;
+    const totalGain=val-cost;
+    const mgC=monthGain>=0?'var(--green)':'var(--red)';
+    const tgC=totalGain>=0?'var(--green)':'var(--red)';
+    const moLabel=new Date(m+'-15').toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});
+    return`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 8px;font-size:11px;color:var(--t2)">${moLabel}</td>
+      <td style="padding:5px 8px;font-size:11px;font-weight:600">${Math.round(val/1000)}k XOF</td>
+      <td style="padding:5px 8px;font-size:11px;color:${mgC};font-weight:600">${monthGain>=0?'+':''}${Math.round(monthGain/1000)}k</td>
+      <td style="padding:5px 8px;font-size:11px;color:${tgC}">${totalGain>=0?'+':''}${Math.round(totalGain/1000)}k</td>
+      <td style="padding:5px 8px;font-size:11px;color:${tgC}">${cost>0?((val/cost-1)*100).toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Mois</th>
+      <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Valeur</th>
+      <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">G/P mois</th>
+      <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">G/P total</th>
+      <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Rdt</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function portOptimize(){
+  const positions=_portData().map(_normPos).filter(p=>p.ticker&&p.shares>0);
+  if(!positions.length){ showNotif('Portefeuille vide','red'); return; }
+  const tickers=positions.map(p=>p.ticker);
+  if(typeof openMarkowitz==='function') openMarkowitz(tickers);
+  else showNotif('Module Markowitz non chargé','red');
 }
 
 function showAddPosition(ticker=''){
