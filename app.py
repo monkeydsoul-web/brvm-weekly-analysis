@@ -1168,6 +1168,20 @@ def api_announcements():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/dividends")
+def api_dividends():
+    """Calendrier ex-div et rendements pour la page Dividendes."""
+    scores = load_latest_scores()
+    fields = ["ticker","name","div_yield","div_per_share","ex_div_date",
+              "eps","pe_ref","sector","pdf_verdict","composite_adj"]
+    result = []
+    for s in scores:
+        dy = s.get("div_yield") or 0
+        if dy > 0:
+            result.append({f: s.get(f) for f in fields})
+    result.sort(key=lambda x: x.get("div_yield") or 0, reverse=True)
+    return jsonify(result)
+
 @app.route("/api/price-history")
 def api_price_history():
     """Historique de prix pour le graphique performances."""

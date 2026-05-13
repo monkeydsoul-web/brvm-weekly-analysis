@@ -289,6 +289,13 @@ input[type=range]{padding:0;height:20px}
   </div>
 </div>
 
+<!-- PERFORMANCES HISTORIQUES -->
+<div class="page" id="page-perf">
+  <div class="ph"><h2>Performances historiques</h2>
+    <span style="font-size:11px;color:var(--t2)">Base 100 · Cours réels BRVM</span></div>
+  <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
+</div>
+
 <!-- PRIX CIBLES -->
 <div class="page" id="page-targets">
   <div class="ph"><h2>Prix cibles & prévisions</h2>
@@ -620,7 +627,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -856,13 +863,21 @@ async function removePosition(ticker){
 }
 
 // ── Dividendes ─────────────────────────────────────────────────────────────
-function renderDiv(){
-  const all = window.scores || scores || [];
-  const wd = [...all].filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
-  const wdate = [...all].filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
-    .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
+async function renderDiv(){
+  let wd = [], wdate = [];
+  try {
+    const data = await fetch('/api/dividends').then(r=>r.json());
+    wd = data;
+    wdate = data.filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
+      .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
+  } catch(e) {
+    const all = window.scores || scores || [];
+    wd = [...all].filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
+    wdate = [...all].filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
+      .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
+  }
 
-  // Calendrier ex-div enrichi
+  // Calendrier ex-div
   document.getElementById('divCal').innerHTML = wdate.length ? wdate.map(x=>{
     const dy = x.div_yield||0;
     const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
@@ -882,8 +897,8 @@ function renderDiv(){
     </div>`;
   }).join('') : '<p style="font-size:12px;color:var(--t2)">Dates à paraître.</p>';
 
-  // Table top rendements enrichie
-  document.getElementById('divTable').innerHTML = wd.slice(0,20).map(x=>{
+  // Table Top 15 rendements
+  document.getElementById('divTable').innerHTML = wd.slice(0,15).map(x=>{
     const dy = x.div_yield||0;
     const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--blue)';
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
@@ -898,7 +913,7 @@ function renderDiv(){
   }).join('');
 
   // Graphique barres rendements
-  const top = wd.slice(0,20);
+  const top = wd.slice(0,15);
   svgBar(document.getElementById('cDivDiv'),
     top.map(x=>x.ticker),
     top.map(x=>(x.div_yield||0)),
@@ -914,7 +929,7 @@ function renderPerf(){
   document.getElementById('perfTable').innerHTML=topPerf.map(x=>`<tr onclick="showStock('${x.ticker}')">
     <td><strong>${x.ticker}</strong></td><td style="color:var(--t2)">${fmt(x.start_price)}</td>
     <td style="font-weight:600">${fmt(x.current_price)}</td>
-    <td style="color:${(x.price_gain_pct||0)>=0?'var(--green)':'var(--red)'};font-weight:600">${(x.price_gain_pct||0)>=0?'+':''}{(x.price_gain_pct||0).toFixed(0)}%</td>
+    <td style="color:${(x.price_gain_pct||0)>=0?'var(--green)':'var(--red)'};font-weight:600">${(x.price_gain_pct||0)>=0?'+':''}${(x.price_gain_pct||0).toFixed(0)}%</td>
     <td style="color:var(--amber)">${fmt(x.total_divs_xof)}</td>
   </tr>`).join('');
 }
@@ -1206,7 +1221,7 @@ async function doRefresh(){
     await fetch('/api/refresh',{method:'POST'});
     setTimeout(async()=>{
       const[s,n,c,m]=await Promise.all([fetch('/api/scores').then(r=>r.json()),fetch('/api/news').then(r=>r.json()),fetch('/api/commodities').then(r=>r.json()),fetch('/api/macro').then(r=>r.json())]);
-      scores=s;news=n;comms=c;
+      scores=s;window.scores=s;news=n;comms=c;
       renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
       document.getElementById('ri').classList.remove('spin');
     },5000);
@@ -1217,7 +1232,7 @@ async function loadStatus(){
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
-const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perfhist:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();}};
+const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();}};
 document.querySelectorAll('.ni').forEach(ni=>{
   const orig=ni.getAttribute('onclick');
   ni.setAttribute('onclick',orig+`;if(pageLoaders[arguments[0]]||pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']) (pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']||function(){})();`);
@@ -1227,15 +1242,6 @@ init();
 </script>
 
 <script>
-function navAnalyse(){
-  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
-  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
-  document.querySelector(".main").scrollTop=0;
-  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
-  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
-}
-
 // ── Live status & auto-refresh ─────────────────────────────────────────────
 function updateLiveStatus() {
   fetch('/api/status')
@@ -1285,8 +1291,7 @@ function updateLiveStatus() {
 
 // Lancement au demarrage et toutes les 5 min
 updateLiveStatus();
-  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
-  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
+fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
 setInterval(updateLiveStatus, 300000);
 </script>
 
