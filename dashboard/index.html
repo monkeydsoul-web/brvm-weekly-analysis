@@ -162,6 +162,15 @@ input[type=range]{padding:0;height:20px}
   </div>
   <div class="g4" id="kpis"></div>
   <div class="g3" id="podium"></div>
+  <div class="card" style="margin-bottom:12px" id="opportunities-widget">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="ct">💎 Opportunités du moment</div>
+      <button class="btn btn-o" style="font-size:10px;padding:4px 10px" onclick="openScreenerOpportunities()">Voir toutes →</button>
+    </div>
+    <div id="opportunities-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+      <p style="color:var(--t2);font-size:12px">Chargement...</p>
+    </div>
+  </div>
   <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /80</div>
       <div id="cDistDiv" style="width:100%;height:170px"></div></div>
@@ -923,6 +932,7 @@ function renderDash(m){
     exSoon.length?`📅 <strong style="color:var(--text)">Prochains ex-div :</strong> ${exSoon.map(x=>x.ticker+' le '+x.ex_div_date).join(' · ')}`:'',
   ].filter(Boolean).join('<br>');
   renderHeatmap();
+  renderOpportunities();
 }
 
 // ── Heatmap BRVM ───────────────────────────────────────────────────────────
@@ -972,6 +982,59 @@ function renderHeatmap(){
       <span style="font-size:${Math.max(7,sz/7)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
     </div>`;
   }).join('');
+}
+
+// ── Widget Opportunités du moment ──────────────────────────────────────────
+function renderOpportunities(){
+  const el=document.getElementById('opportunities-list');
+  if(!el)return;
+  const s=[...(window.scores||scores||[])];
+  // Algorithme : Score ≥ 55 ET Div% ≥ 5% ET P/E < 10
+  let opps=s.filter(x=>(x.composite_adj||0)>=55&&(x.div_yield||0)>=5&&(x.pe_ref||x.pe_hist||999)<10);
+  // Si trop peu, élargir : Score ≥ 50 ET (Div% ≥ 4% OU P/E < 8)
+  if(opps.length<2){
+    opps=s.filter(x=>(x.composite_adj||0)>=50&&((x.div_yield||0)>=4||(x.pe_ref||x.pe_hist||999)<8));
+  }
+  opps=opps.sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0)).slice(0,3);
+  if(!opps.length){
+    el.innerHTML='<p style="color:var(--t2);font-size:12px;grid-column:1/-1">Aucune opportunité selon les critères actuels (Score≥55, Div≥5%, P/E<10).</p>';
+    return;
+  }
+  el.innerHTML=opps.map(x=>{
+    const sc=x.composite_adj||0;
+    const pe=x.pe_ref||x.pe_hist;
+    const pb=x.pb_ref||x.pb_hist;
+    const scC=sc>=60?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
+    const isUndervalued=pb&&pb<1;
+    const verdC=(x.pdf_verdict||'').toLowerCase().includes('achet')?'var(--green)':(x.pdf_verdict||'').toLowerCase().includes('vend')?'var(--red)':'var(--amber)';
+    return `<div onclick="showStock('${x.ticker}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <span style="font-weight:700;font-size:14px">${x.ticker}</span>
+          ${isUndervalued?'<span style="font-size:9px;background:rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:600">💎 Sous-évaluée</span>':''}
+        </div>
+        <span style="font-size:14px;font-weight:700;color:${scC}">${sc.toFixed(0)}/80</span>
+      </div>
+      <div style="font-size:10px;color:var(--t2);margin-bottom:8px">${x.name||''}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px">
+        ${(x.div_yield||0)>0?`<span style="color:var(--amber)">Div <strong>${x.div_yield.toFixed(1)}%</strong></span>`:''}
+        ${pe?`<span style="color:var(--t2)">P/E <strong>${pe.toFixed(1)}×</strong></span>`:''}
+        ${pb?`<span style="color:var(--t2)">P/B <strong>${pb.toFixed(1)}×</strong></span>`:''}
+        ${x.pdf_verdict?`<span style="color:${verdC};font-size:10px;font-weight:600">${x.pdf_verdict}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openScreenerOpportunities(){
+  nav('screener');
+  if(typeof initScreener==='function') initScreener();
+  setTimeout(()=>{
+    const sc=document.getElementById('scScore');if(sc)sc.value=50;
+    const div=document.getElementById('scDiv');if(div)div.value=4;
+    const pe=document.getElementById('scPE');if(pe)pe.value=10;
+    if(typeof runScreener==='function') runScreener();
+  },100);
 }
 
 function sparkline(prices, w=80, h=28) {
