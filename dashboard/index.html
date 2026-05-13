@@ -190,9 +190,8 @@ input[type=range]{padding:0;height:20px}
         <option value="vend">Vendre</option>
       </select>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
+      <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openCompareAnalysis(_compareAnalysisTickers.length?_compareAnalysisTickers:(window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">🤖 Analyse IA</button>
-      <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
-      <button class="btn btn-o" style="padding:6px 13px" onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))">📐 Markowitz</button>
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
@@ -455,102 +454,30 @@ input[type=range]{padding:0;height:20px}
 </div>
 
 <div class="page" id="page-analyse">
-  <div class="ph"><h2>📐 Analyse & Optimisation</h2></div>
-  <div class="g2" style="margin-bottom:16px">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">🚀 Outils d'optimisation</div>
-      <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Optimisez votre portefeuille BRVM avec la théorie de Markowitz et le backtesting sur données réelles.</p>
-      <button onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))"
-        style="width:100%;padding:14px;background:linear-gradient(135deg,#8B5CF6,#60A5FA);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px">
-        📐 Optimisation Markowitz (Top 8)
-      </button>
-      <button onclick="openBacktest((window.scores||[]).slice(0,5).map(x=>x.ticker))"
-        style="width:100%;padding:10px;background:linear-gradient(135deg,#60A5FA,#4ADE80);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:8px">
-        📊 Backtesting portefeuille
-      </button>
-      <button onclick="openCompareAnalysis((window.scores||[]).slice(0,4).map(x=>x.ticker))"
-        style="width:100%;padding:10px;background:linear-gradient(135deg,#4ADE80,#22D3EE);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer">
-        🤖 Analyse comparative IA
-      </button>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">📊 Théorie de Markowitz</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.7">
-        <p><strong style="color:var(--green)">📐 Frontière efficiente</strong> — Portefeuilles optimaux pour chaque niveau de risque.</p>
-        <p><strong style="color:var(--amber)">🏆 Ratio de Sharpe</strong> — Rendement excédentaire par unité de risque.</p>
-        <p><strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations pour cartographier l'espace risque/rendement.</p>
-        <p><strong style="color:var(--t1)">📈 Données</strong> — Cours BOC quotidiens réels BRVM (80 jours).</p>
-      </div>
-    </div>
-  </div>
-
-
+<div class="ph"><h2>📊 Analyse &amp; Optimisation</h2></div>
+<div id="bt-box" style="margin-bottom:16px"><p style="text-align:center;color:var(--t2);padding:20px">Chargement backtesting...</p></div>
+<div id="mk-box"><p style="text-align:center;color:var(--t2);padding:20px">Chargement Markowitz...</p></div>
+</div>
+</main></div>
+<script src="/simulator.js"></script>
+<script src="/live_score.js"></script>
+<script src="/ranking.js"></script>
+<script src="/stock_chart.js"></script>
+<script src="/badges.js"></script>
+<script src="/compare.js"></script>
+<script src="/alerts.js"></script>
+<script src="/sectors.js"></script>
+<script src="/performance.js"></script>
+<script src="/compare_analysis.js"></script>
+<script src="/backtest.js"></script>
 <script>
-function navAnalyse(){
-  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
-  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
-  document.querySelector(".main").scrollTop=0;
-  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
-  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
-}
+let scores=[],news=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
+const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
+const HIST_PRICES={SGBC:[3500,3800,5200,5670,7760,9120,11090,19435,33000,34995],SIBC:[843,900,1100,1350,2000,2500,2700,3300,4800,6950],SNTS:[14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],CBIBF:[8000,8500,9000,9800,9900,9885,9900,10000,13500,16490],NSBC:[5000,5200,5350,5400,5350,5350,5500,7500,9000,13900]};
+const HIST_DIV={SGBC:[202,270,527,261,297,331,904,1107,1398,2293],SIBC:[120,140,162,175,180,180,202,247,338,425],SNTS:[1107,1188,1214,1260,1134,1225,1400,1500,1740,1740],CBIBF:[360,380,430,450,430,450,540,630,810,900],NSBC:[0,0,0,0,0,0,0,404,505,759]};
+const YEARS=[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB923C','#A78BFA'];
 
-// ── Live status & auto-refresh ─────────────────────────────────────────────
-function updateLiveStatus() {
-  fetch('/api/status')
-    .then(function(r){ return r.json(); })
-    .then(function(d) {
-      var open = d.market_open;
-      var dot   = document.getElementById('live-dot');
-      var label = document.getElementById('live-label');
-      var time  = document.getElementById('live-time');
-      var src   = document.getElementById('live-src');
-      if (dot) {
-        dot.style.background = open ? '#22c55e' : '#f59e0b';
-        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
-      }
-      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
-      if (time && d.updated_at) {
-        var dt = new Date(d.updated_at);
-        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-      }
-      if (src) {
-        var sources = d.sources || {};
-        var parts = [];
-        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
-        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
-        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
-      }
-      // Mettre a jour les prix dans la sidebar si disponible
-      fetch('/api/live')
-        .then(function(r){ return r.json(); })
-        .then(function(live) {
-          var prices = live.prices || {};
-          // Mettre a jour les items de la sidebar tlItems si present
-          var items = document.querySelectorAll('[data-ticker]');
-          items.forEach(function(el) {
-            var t = el.getAttribute('data-ticker');
-            if (prices[t] && prices[t].price) {
-              var priceEl = el.querySelector('.ti-score');
-              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
-              var chg = prices[t].change_pct || 0;
-              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
-            }
-          });
-        }).catch(function(){});
-    })
-    .catch(function(e){ console.warn('live status:', e); });
-}
-
-// Lancement au demarrage et toutes les 5 min
-updateLiveStatus();
-  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
-  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
-setInterval(updateLiveStatus, 300000);
-</script>
-
-
-<script>
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
@@ -686,7 +613,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
+    scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -1214,6 +1141,7 @@ async function showStock(ticker){
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
       <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px;background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(34,211,238,0.2));border-color:var(--green)" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
+      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         </div>
       </div>
@@ -1290,4 +1218,69 @@ document.querySelectorAll('.ni').forEach(ni=>{
 
 init();
 </script>
+
+<script>
+function navAnalyse(){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
+  document.querySelectorAll(".ni").forEach(function(n){n.classList.remove("on");});
+  document.getElementById("page-analyse").classList.add("on");document.getElementById("page-analyse").style.display="block";
+  document.querySelector(".main").scrollTop=0;
+  fetch("/api/backtesting/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("bt-box").innerHTML=h;});
+  fetch("/api/portfolio/optimize/summary").then(function(r){return r.text();}).then(function(h){document.getElementById("mk-box").innerHTML=h;});
+}
+
+// ── Live status & auto-refresh ─────────────────────────────────────────────
+function updateLiveStatus() {
+  fetch('/api/status')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var open = d.market_open;
+      var dot   = document.getElementById('live-dot');
+      var label = document.getElementById('live-label');
+      var time  = document.getElementById('live-time');
+      var src   = document.getElementById('live-src');
+      if (dot) {
+        dot.style.background = open ? '#22c55e' : '#f59e0b';
+        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
+      }
+      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
+      if (time && d.updated_at) {
+        var dt = new Date(d.updated_at);
+        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+      }
+      if (src) {
+        var sources = d.sources || {};
+        var parts = [];
+        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
+        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
+        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
+      }
+      // Mettre a jour les prix dans la sidebar si disponible
+      fetch('/api/live')
+        .then(function(r){ return r.json(); })
+        .then(function(live) {
+          var prices = live.prices || {};
+          // Mettre a jour les items de la sidebar tlItems si present
+          var items = document.querySelectorAll('[data-ticker]');
+          items.forEach(function(el) {
+            var t = el.getAttribute('data-ticker');
+            if (prices[t] && prices[t].price) {
+              var priceEl = el.querySelector('.ti-score');
+              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
+              var chg = prices[t].change_pct || 0;
+              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
+            }
+          });
+        }).catch(function(){});
+    })
+    .catch(function(e){ console.warn('live status:', e); });
+}
+
+// Lancement au demarrage et toutes les 5 min
+updateLiveStatus();
+  fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
+  fetch('/api/live').then(r=>r.json()).then(d=>checkAlerts(d.prices)).catch(()=>{});
+setInterval(updateLiveStatus, 300000);
+</script>
+
 </body></html>
