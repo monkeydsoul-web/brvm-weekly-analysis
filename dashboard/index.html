@@ -1656,10 +1656,42 @@ async function showStock(ticker){
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
           ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
         </div></div>`:''}
-      <div class="card" style="margin-bottom:12px"><div class="ct">Scores détaillés — 8 modèles</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-          ${models.map(([l,mv,det])=>{const mc=mv>=7?'var(--green)':mv>=4?'var(--amber)':'var(--red)';return`<div class="tt" data-tt="${det||l+' /10'}" style="background:var(--bg3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t2);margin-bottom:3px">${l}</div><div class="mbar"><div class="mfill" style="width:${mv*10}%;background:${mc}"></div></div><div style="font-size:14px;font-weight:700;color:${mc}">${mv.toFixed(1)}</div></div>`;}).join('')}
-        </div></div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+          <div class="ct" style="margin-bottom:0">Scores détaillés — 8 modèles de valorisation</div>
+          <div style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:${v>=65?'rgba(74,222,128,.15)':v>=50?'rgba(251,191,36,.15)':'rgba(248,113,113,.15)'};color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">
+            Score ${v.toFixed(0)}/80 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          ${(()=>{
+            const modelDesc = {
+              'Graham': 'Vérifie P/E≤15, P/B≤1.5, dividende≥4%, dette faible. Benjamin Graham, père de l\'investissement valeur.',
+              'DCF/FCF': 'Discounted Cash Flows : actualise les flux de trésorerie futurs pour calculer la valeur présente.',
+              'DDM': 'Dividend Discount Model Gordon : D1÷(r−g). Pertinent si la société verse des dividendes réguliers et croissants.',
+              'EPV': 'Earnings Power Value (Greenwald) : valeur si la société ne croît plus. Scénario pessimiste mais sûr.',
+              'Buffett': 'Critères Warren Buffett : ROE≥15%, avantage concurrentiel, croissance BNA, dette maîtrisée.',
+              'Rev.DCF': 'Reverse DCF : quel taux de croissance le cours actuel implique-t-il ? S\'il est bas, l\'action est moins risquée.',
+              'Relatif': 'Compare le P/E et l\'EV/EBITDA aux médianes sectorielles BRVM. Valeur relative aux pairs.',
+              'Technique': 'Momentum : tendance 30j BOC, variation du jour, volume, performance annuelle.'
+            };
+            return models.map(([l,mv,det])=>{
+              const mc=mv>=7?'var(--green)':mv>=4?'var(--amber)':'var(--red)';
+              const label=mv>=7?'Sous-évalué 🟢':mv>=4?'Correct 🟡':'Surévalué 🔴';
+              const tip=(det||modelDesc[l]||l+' /10').replace(/"/g,"'");
+              return `<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:6px;padding:7px 10px">
+                <div style="width:72px;flex-shrink:0;font-size:10px;font-weight:600;color:var(--t2)">${l}</div>
+                <div style="flex:1;background:var(--border);border-radius:3px;height:6px;overflow:hidden">
+                  <div style="height:100%;width:${mv*10}%;background:${mc};border-radius:3px;transition:width .6s ease"></div>
+                </div>
+                <div style="width:28px;text-align:right;font-size:13px;font-weight:700;color:${mc};flex-shrink:0">${mv.toFixed(1)}</div>
+                <div style="width:130px;flex-shrink:0;font-size:10px;color:${mc}">${label}</div>
+                <div class="tt tt-r" data-tt="${tip}" style="color:var(--t3);font-size:12px;cursor:help;flex-shrink:0">ℹ</div>
+              </div>`;
+            }).join('');
+          })()}
+        </div>
+      </div>
       ${fi.strengths||fi.risks?`<div class="g2" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
         <div class="card" style="margin-bottom:0"><div class="ct">⚠️ Risques</div>${(fi.risks||[]).map(r=>`<div style="font-size:11px;color:var(--red);margin:3px 0">✗ ${r}</div>`).join('')}</div>
