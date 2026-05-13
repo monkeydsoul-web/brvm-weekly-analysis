@@ -137,7 +137,7 @@ input[type=range]{padding:0;height:20px}
     <div class="ni" onclick="nav('comm')"><span>🌍</span> Commodités</div>
     <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
     <div class="ni" onclick="nav('screener');initScreener()"><span>🔍</span> Screener</div>
-    <div class="ni" onclick="nav('analyse')"><span>📐</span> Analyse &amp; Optim</div>
+    <div class="ni" onclick="nav('analyse');setTimeout(renderCorrelMatrix,200)"><span>📐</span> Analyse &amp; Optim</div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -611,6 +611,28 @@ input[type=range]{padding:0;height:20px}
 <!-- ANALYSE & OPTIM -->
 <div class="page" id="page-analyse">
   <div class="ph"><h2>📐 Analyse &amp; Optimisation</h2></div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="ct">🔗 Matrice de corrélation — Top 15 actions (30j BOC)</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="corr-n" style="padding:4px 8px;font-size:11px;width:auto" onchange="renderCorrelMatrix()">
+          <option value="10">Top 10</option>
+          <option value="15" selected>Top 15</option>
+          <option value="20">Top 20</option>
+        </select>
+        <button class="btn btn-o" style="font-size:11px;padding:4px 10px" onclick="renderCorrelMatrix()">↻ Actualiser</button>
+      </div>
+    </div>
+    <div id="corr-matrix" style="overflow-x:auto;overflow-y:auto;max-height:480px">
+      <p style="color:var(--t2);font-size:12px">Chargement de l'historique de prix...</p>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:16px;font-size:10px;color:var(--t3);align-items:center;flex-wrap:wrap">
+      <span>Couleur = corrélation Pearson sur rendements journaliers 30j BOC</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#22c55e;display:inline-block;border-radius:2px"></span> ≥ 0.7 Forte+</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#64748b;display:inline-block;border-radius:2px"></span> ≈ 0 Neutre</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#ef4444;display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
+    </div>
+  </div>
   <div class="g2" style="margin-bottom:16px">
     <div class="card" style="margin-bottom:0">
       <div class="ct">🚀 Outils d'optimisation</div>
@@ -1607,7 +1629,94 @@ async function loadStatus(){
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
-const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();},screener:()=>{if(typeof initScreener!=="undefined")initScreener();}};
+const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();},screener:()=>{if(typeof initScreener!=="undefined")initScreener();},analyse:()=>renderCorrelMatrix()};
+
+// ── Matrice de corrélation ─────────────────────────────────────────────────
+function renderCorrelMatrix() {
+  const el = document.getElementById('corr-matrix');
+  if (!el) return;
+  const ph = window._priceHistory || {};
+  const all = window.scores || scores || [];
+  if (!all.length || !Object.keys(ph).length) {
+    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Données historiques indisponibles.</p>';
+    return;
+  }
+
+  const n = parseInt(document.getElementById('corr-n')?.value || '15');
+  const top = all.slice(0, n).map(x => x.ticker);
+
+  // Extraire les rendements journaliers BOC (30 derniers points)
+  const returns = {};
+  top.forEach(t => {
+    const pts = (ph[t] || []).filter(p => p.source === 'boc' && p.price).slice(-31);
+    if (pts.length < 3) return;
+    const r = [];
+    for (let i = 1; i < pts.length; i++) {
+      const prev = pts[i-1].price, curr = pts[i].price;
+      if (prev > 0) r.push((curr - prev) / prev);
+    }
+    if (r.length >= 3) returns[t] = r;
+  });
+
+  const tickers = Object.keys(returns);
+  if (tickers.length < 2) {
+    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Pas assez de données BOC pour calculer les corrélations (min. 3 points par action).</p>';
+    return;
+  }
+
+  // Pearson entre deux séries (longueur min commune)
+  function pearson(a, b) {
+    const len = Math.min(a.length, b.length);
+    if (len < 2) return 0;
+    const ax = a.slice(-len), bx = b.slice(-len);
+    const ma = ax.reduce((s,v)=>s+v,0)/len, mb = bx.reduce((s,v)=>s+v,0)/len;
+    let num=0, da=0, db=0;
+    for(let i=0;i<len;i++){const ai=ax[i]-ma,bi=bx[i]-mb;num+=ai*bi;da+=ai*ai;db+=bi*bi;}
+    return (da*db===0) ? 0 : num/Math.sqrt(da*db);
+  }
+
+  // Matrice
+  const matrix = tickers.map(ti => tickers.map(tj => pearson(returns[ti], returns[tj])));
+
+  // Couleur corrélation
+  function corrColor(v) {
+    if (v >= 0.7)  return '#15803d';  // vert foncé
+    if (v >= 0.4)  return '#4ade80';  // vert
+    if (v >= 0.1)  return '#86efac';  // vert clair
+    if (v >= -0.1) return '#475569';  // gris
+    if (v >= -0.3) return '#f87171';  // rouge clair
+    return '#dc2626';                  // rouge
+  }
+  function textColor(v) { return (v >= 0.4 || v <= -0.3) ? '#fff' : 'var(--text)'; }
+
+  const cellW = Math.max(36, Math.min(60, Math.floor(520/tickers.length)));
+  const cellH = 28;
+  const hdrW = 52;
+
+  let html = `<table style="border-collapse:collapse;font-size:${Math.max(8,Math.min(11,cellW/5))}px">
+    <thead><tr>
+      <th style="width:${hdrW}px;padding:4px;color:var(--t3)"></th>
+      ${tickers.map(t => `<th style="width:${cellW}px;height:${cellH}px;padding:2px;text-align:center;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${cellW}px" title="${t}">${t}</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  matrix.forEach((row, i) => {
+    html += `<tr>
+      <td style="padding:2px 4px;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;font-size:${Math.max(8,Math.min(11,cellW/5))}px;max-width:${hdrW}px;text-overflow:ellipsis" title="${tickers[i]}">${tickers[i]}</td>
+      ${row.map((v, j) => {
+        const isDiag = i === j;
+        const bg = isDiag ? 'var(--bg3)' : corrColor(v);
+        const tc = isDiag ? 'var(--t2)' : textColor(v);
+        const label = isDiag ? '—' : v.toFixed(2);
+        const tip = isDiag ? tickers[i] : `${tickers[i]} / ${tickers[j]} : ${v.toFixed(3)}`;
+        return `<td title="${tip}" style="width:${cellW}px;height:${cellH}px;text-align:center;background:${bg};color:${tc};font-weight:${Math.abs(v)>=0.5?'700':'400'};border:1px solid var(--border);border-radius:3px;padding:0">${label}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  html += `<div style="margin-top:6px;font-size:10px;color:var(--t3)">${tickers.length} actions analysées · ${Object.values(returns)[0]?.length||'?'} rendements journaliers BOC</div>`;
+  el.innerHTML = html;
+}
 document.querySelectorAll('.ni').forEach(ni=>{
   const orig=ni.getAttribute('onclick');
   ni.setAttribute('onclick',orig+`;if(pageLoaders[arguments[0]]||pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']) (pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']||function(){})();`);
