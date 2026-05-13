@@ -98,13 +98,17 @@ def score_technique_live(row: dict) -> dict:
         details.append("Top 5 du jour ✓✓")
     elif trend == "flop":
         score -= 1.0
+        details.append("Flop 5 du jour ✗")
 
-    # Variation annuelle (depuis BOC)
+    # Variation annuelle BOC — bandes élargies pour performances exceptionnelles
     var_annee = row.get("var_annee") or 0
-    if var_annee >= 20:
+    if var_annee >= 80:
+        score += 3.0
+        details.append(f"Perf annuelle +{var_annee:.1f}% ✓✓✓")
+    elif var_annee >= 30:
         score += 2.0
         details.append(f"Perf annuelle +{var_annee:.1f}% ✓✓")
-    elif var_annee >= 5:
+    elif var_annee >= 10:
         score += 1.0
         details.append(f"Perf annuelle +{var_annee:.1f}% ✓")
     elif var_annee >= 0:
@@ -117,15 +121,14 @@ def score_technique_live(row: dict) -> dict:
         score -= 1.0
         details.append(f"Perf annuelle {var_annee:.1f}% ✗✗")
 
-    # Historique prix — tendance long terme
+    # Historique prix — tendance 52 semaines
     try:
         from price_history_builder import get_price_history
-        hist = get_price_history(row.get("ticker",""), weeks=52)
+        hist = get_price_history(row.get("ticker", ""), weeks=52)
         if hist and len(hist) >= 4:
             prices = [p["price"] for p in hist if p.get("price")]
             if len(prices) >= 4:
-                # Tendance 3 mois
-                q = len(prices)//4
+                q = len(prices) // 4
                 avg_recent = sum(prices[-q:]) / q
                 avg_old    = sum(prices[:q]) / q
                 if avg_old > 0:
@@ -140,7 +143,6 @@ def score_technique_live(row: dict) -> dict:
                         details.append(f"Tendance baissière {trend_pct:.0f}% ✗")
     except Exception:
         pass
-        details.append("Flop 5 du jour ✗")
 
     score = min(10.0, max(0.0, score))
     return {"score": round(score, 1), "label": "Technique", "details": " | ".join(details)}

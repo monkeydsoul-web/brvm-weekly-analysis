@@ -95,12 +95,13 @@ def score_graham(row: dict) -> dict:
         details.append("Résultats instables ✗")
 
     # Dette faible
-    if debt == "Faible":
+    if debt in ("low", "Faible", "faible"):
         score += 1.0
         details.append("Dette faible ✓")
-    elif debt == "Modérée":
+    elif debt in ("medium", "Modérée", "modérée"):
         score += 0.3
-    else:
+        details.append("Dette modérée")
+    elif debt in ("high", "Élevée", "élevée"):
         details.append("Dette élevée ✗")
 
     score = min(10.0, max(0.0, score))
