@@ -88,6 +88,18 @@ input[type=range]{padding:0;height:20px}
 /* ── Convertisseur devise ────────────────────────────────────────────────── */
 .curr-btn{font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .1s}
 .curr-btn.on{background:var(--border);color:var(--text);font-weight:600}
+/* ── Heatmap filtres ─────────────────────────────────────────────────────── */
+.hf-btn{font-size:10px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s}
+.hf-btn:hover{background:var(--bg3);color:var(--text)}
+.hf-btn.hf-on{background:var(--border);color:var(--text);font-weight:600}
+/* ── Compare sidebar ─────────────────────────────────────────────────────── */
+.cmp-cb{width:13px;height:13px;cursor:pointer;accent-color:var(--blue);flex-shrink:0}
+#cmp-bar{position:sticky;bottom:0;background:var(--bg2);border-top:1px solid var(--border);padding:8px;display:none}
+#cmp-bar.show{display:block}
+/* ── Modal comparaison ───────────────────────────────────────────────────── */
+#cmp-modal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.7);align-items:center;justify-content:center}
+#cmp-modal.show{display:flex}
+#cmp-modal-inner{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:900px;width:95%;max-height:90vh;overflow-y:auto}
 </style></head>
 <body><div class="app">
 <aside class="sb">
@@ -188,15 +200,24 @@ input[type=range]{padding:0;height:20px}
   <div id="macroTxt" style="font-size:11px;color:var(--t2);margin-top:8px;display:none">—</div>
 </div>
   <div class="card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
       <div class="ct">🌡️ Heatmap BRVM — Performance du jour</div>
-      <span style="font-size:10px;color:var(--t3)">Taille = Score · Couleur = Variation%</span>
+      <div style="display:flex;gap:4px;flex-wrap:wrap" id="heatmap-filters">
+        <button class="hf-btn hf-on" onclick="setHeatmapFilter('')">Tous</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Banque')">Banques</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Industrie')">Industriel</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Telecom')">Télécoms</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Distribution')">Distribution</button>
+      </div>
     </div>
-    <div id="heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end"></div>
+    <div id="heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:60px"></div>
     <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--t3)">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>Hausse</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>&gt;+2%</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block"></span>0%→+2%</span>
       <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block"></span>Stable</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>Baisse</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#f87171;display:inline-block"></span>0%→-2%</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2%</span>
+      <span style="margin-left:auto;color:var(--t3)">Taille = Score · Couleur = Var%</span>
     </div>
   </div>
   <div class="card"><div class="ct">💡 Insights</div><div id="insights" style="font-size:12px;color:var(--t2);line-height:1.7">—</div></div>
@@ -905,13 +926,24 @@ function renderDash(m){
 }
 
 // ── Heatmap BRVM ───────────────────────────────────────────────────────────
+let _heatmapFilter='';
+function setHeatmapFilter(sector){
+  _heatmapFilter=sector;
+  document.querySelectorAll('.hf-btn').forEach(b=>{
+    const label=b.textContent.trim();
+    const match=sector===''?label==='Tous':b.getAttribute('onclick')?.includes(`'${sector}'`);
+    b.classList.toggle('hf-on',!!match);
+  });
+  renderHeatmap();
+}
+
 function renderHeatmap(){
   const grid=document.getElementById('heatmap-grid');
   if(!grid)return;
-  const all=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
-  if(!all.length){grid.innerHTML='<p style="color:var(--t2);font-size:12px">Données indisponibles.</p>';return;}
+  let all=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  if(_heatmapFilter) all=all.filter(x=>(x.sector||'').toLowerCase().includes(_heatmapFilter.toLowerCase()));
+  if(!all.length){grid.innerHTML='<p style="color:var(--t2);font-size:12px;padding:12px">Aucune société dans ce secteur.</p>';return;}
 
-  // Taille de cellule basée sur le score (min 32px, max 72px)
   const minSc=Math.min(...all.map(x=>x.composite_adj||0));
   const maxSc=Math.max(...all.map(x=>x.composite_adj||0));
   const scRange=maxSc-minSc||1;
@@ -919,26 +951,25 @@ function renderHeatmap(){
   grid.innerHTML=all.map(x=>{
     const chg=x.change_pct||0;
     const sc=x.composite_adj||0;
-    const sz=Math.round(32+(sc-minSc)/scRange*40); // 32–72px
+    const sz=Math.round(36+(sc-minSc)/scRange*44); // 36–80px
 
-    // Couleur selon variation (rouge ↔ gris ↔ vert)
-    let bg,border;
-    if(chg>=3){bg='rgba(34,197,94,0.85)';border='#22c55e';}
-    else if(chg>=1){bg='rgba(74,222,128,0.7)';border='#4ade80';}
-    else if(chg>=0){bg='rgba(74,222,128,0.35)';border='#334155';}
-    else if(chg>=-1){bg='rgba(248,113,113,0.35)';border='#334155';}
-    else if(chg>=-3){bg='rgba(239,68,68,0.7)';border='#ef4444';}
-    else{bg='rgba(220,38,38,0.85)';border='#dc2626';}
+    let bg,borderCol;
+    if(chg>=2){bg='rgba(34,197,94,0.88)';borderCol='#22c55e';}
+    else if(chg>0){bg='rgba(74,222,128,0.7)';borderCol='#4ade80';}
+    else if(chg===0){bg='rgba(100,116,139,0.35)';borderCol='#475569';}
+    else if(chg>-2){bg='rgba(248,113,113,0.6)';borderCol='#f87171';}
+    else{bg='rgba(239,68,68,0.88)';borderCol='#ef4444';}
 
-    const textColor=Math.abs(chg)>=1?'#fff':'var(--t1)';
-    const sign=chg>=0?'+':'';
+    const textColor=Math.abs(chg)>=1?'#fff':'var(--text)';
+    const sign=chg>0?'+':'';
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} | Var: ${sign}${chg.toFixed(2)}% | Score: ${sc.toFixed(0)}/80`;
     return `<div onclick="showStock('${x.ticker}')"
-      title="${x.ticker} — ${x.name||''} | Score: ${sc.toFixed(0)}/80 | Var: ${sign}${chg.toFixed(2)}%"
-      style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${border};border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;flex-shrink:0;overflow:hidden"
-      onmouseenter="this.style.transform='scale(1.08)';this.style.zIndex='10'"
-      onmouseleave="this.style.transform='';this.style.zIndex=''">
-      <span style="font-size:${Math.max(8,sz/5)}px;font-weight:700;color:${textColor};line-height:1.1">${x.ticker}</span>
-      <span style="font-size:${Math.max(7,sz/6)}px;color:${textColor};opacity:.85">${sign}${chg.toFixed(1)}%</span>
+      title="${tip}"
+      style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${borderCol};border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,box-shadow .15s;flex-shrink:0;overflow:hidden;box-sizing:border-box"
+      onmouseenter="this.style.transform='scale(1.1)';this.style.zIndex='10';this.style.boxShadow='0 4px 16px rgba(0,0,0,.5)'"
+      onmouseleave="this.style.transform='';this.style.zIndex='';this.style.boxShadow=''">
+      <span style="font-size:${Math.max(8,sz/6)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
+      <span style="font-size:${Math.max(7,sz/7)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
     </div>`;
   }).join('');
 }
