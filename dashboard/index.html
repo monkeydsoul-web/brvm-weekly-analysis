@@ -100,6 +100,30 @@ input[type=range]{padding:0;height:20px}
 /* ── Modal comparaison ───────────────────────────────────────────────────── */
 #cmp-modal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.7);align-items:center;justify-content:center}
 #cmp-modal.show{display:flex}
+/* ── Aide contextuelle ───────────────────────────────────────────────────── */
+#help-fab{position:fixed;bottom:24px;right:24px;z-index:2000;width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
+#help-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#help-drawer{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:2100;display:flex;flex-direction:column;transition:right .25s ease;box-shadow:-4px 0 24px rgba(0,0,0,.3);overflow:hidden}
+#help-drawer.open{right:0}
+#help-drawer-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+#help-drawer-body{flex:1;overflow-y:auto;padding:16px}
+#help-drawer-body h3{font-size:13px;font-weight:700;color:var(--text);margin:14px 0 4px}
+#help-drawer-body p{font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:6px}
+#help-drawer-body .help-tip{background:var(--bg3);border-left:3px solid var(--green);padding:8px 10px;border-radius:0 6px 6px 0;margin:8px 0;font-size:11px;color:var(--text);line-height:1.6}
+#help-drawer-body .help-example{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:6px;padding:8px 10px;margin:8px 0;font-size:11px;color:var(--t2);line-height:1.6}
+/* ── Tour guidé ──────────────────────────────────────────────────────────── */
+#tour-overlay{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.75);align-items:center;justify-content:center}
+#tour-overlay.show{display:flex}
+#tour-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:440px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.tour-step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;margin:0 3px;transition:background .2s}
+.tour-step-dot.on{background:var(--blue)}
+.tour-highlight{outline:3px solid var(--blue)!important;outline-offset:4px;border-radius:4px;animation:tour-pulse 1.2s infinite}
+@keyframes tour-pulse{0%,100%{outline-color:var(--blue)}50%{outline-color:var(--green)}}
+/* ── Glossaire ───────────────────────────────────────────────────────────── */
+.gloss-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.gloss-term{font-size:14px;font-weight:700;color:var(--blue);margin-bottom:3px}
+.gloss-def{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:4px}
+.gloss-ex{font-size:11px;color:var(--t3);border-left:2px solid var(--border);padding-left:8px;line-height:1.5}
 #cmp-modal-inner{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:900px;width:95%;max-height:90vh;overflow-y:auto}
 </style></head>
 <body><div class="app">
@@ -661,6 +685,29 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
 </div>
+<!-- ── Aide contextuelle FAB + Drawer ────────────────────────────────────── -->
+<button id="help-fab" onclick="toggleHelpDrawer()" title="Aide sur cette page">?</button>
+
+<div id="help-drawer">
+  <div id="help-drawer-head">
+    <span style="font-weight:700;font-size:13px">📖 Aide — <span id="help-page-title">Tableau de bord</span></span>
+    <button onclick="toggleHelpDrawer()" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer">✕</button>
+  </div>
+  <div id="help-drawer-body"></div>
+</div>
+<div id="help-overlay" onclick="closeHelpDrawer()" style="display:none;position:fixed;inset:0;z-index:2050;background:transparent"></div>
+
+<!-- ── Tour guidé ─────────────────────────────────────────────────────────── -->
+<div id="tour-overlay">
+  <div id="tour-box">
+    <div id="tour-content"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <button onclick="endTour()" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer">Passer le tour</button>
+      <div id="tour-dots" style="text-align:center"></div>
+      <button id="tour-next-btn" onclick="tourNext()" class="btn" style="padding:8px 18px;font-size:12px">Suivant →</button>
+    </div>
+  </div>
+</div>
 </main></div>
 <script src="/simulator.js"></script>
 <script src="/live_score.js"></script>
@@ -781,6 +828,9 @@ function nav(id){
   document.getElementById('page-'+id)?.classList.add('on');
   document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')});
   document.querySelector('.main').scrollTop=0;
+  // Mettre à jour la page courante pour l'aide contextuelle
+  if(typeof _currentPage!=='undefined') _currentPage=id;
+  if(_helpOpen) openHelpDrawer(id);
 }
 
 // ── SVG Charts ─────────────────────────────────────────────────────────────
@@ -1865,6 +1915,177 @@ setInterval(updateLiveStatus, 300000);
 </div>
 
 <script>
+// ── Aide contextuelle — contenu par page ───────────────────────────────────
+const _helpContent = {
+  dash: {
+    title: 'Tableau de bord',
+    sections: [
+      { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
+      { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre score sur 80 points. Plus le score est élevé, plus la société est financièrement attractive.' },
+      { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 55/80 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
+      { h: '🌡️ Heatmap BRVM', p: 'Chaque carré = une société. La taille = la capitalisation boursière. La couleur = la performance du jour. Vert vif = forte hausse. Rouge vif = forte baisse.' },
+      { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus grandes). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
+      { tip: '💡 Que faire ? Cliquez sur n\'importe quel carré de la heatmap ou sur une société dans les podiums pour voir sa fiche détaillée complète.' },
+      { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 68/80, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
+    ]
+  },
+  rank: {
+    title: 'Classement',
+    sections: [
+      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /80 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. Au-dessus de 60 = excellente opportunité potentielle.' },
+      { h: '📊 Les 8 modèles (colonnes G à Tech)', p: '• G = Graham : valeur intrinsèque classique\n• DCF = flux trésorerie actualisés\n• DDM = valorisation par les dividendes\n• EPV = pouvoir de gain normalisé\n• BUF = critères Warren Buffett\n• Rev = taux de croissance implicite\n• Rel = comparaison sectorielle\n• Tech = tendance technique' },
+      { h: '📈 Sparklines 30 jours', p: 'Le mini-graphique dans la colonne "30j" montre l\'évolution du cours sur les 30 derniers jours. Ligne verte = hausse globale sur la période, rouge = baisse.' },
+      { h: '🔍 Filtres en haut', p: 'Filtrez par secteur (Banque, Industrie…), par critère de tri (Score, Dividende, ROE, P/E), ou par verdict IA (POSITIF / NEUTRE / NÉGATIF).' },
+      { tip: '💡 Que faire ? Cliquez sur une ligne pour voir la fiche complète. Cochez les cases à gauche du ticker pour comparer plusieurs sociétés côte-à-côte (bouton "⚖️ Comparer" en bas de la barre).' },
+      { ex: '📌 Exemple : Filtrez "Verdict = POSITIF" + tri "Score /80" → vous verrez les meilleures sociétés validées par l\'IA en haut.' },
+    ]
+  },
+  sectors: {
+    title: 'Secteurs',
+    sections: [
+      { h: '📊 Analyse par groupe d\'activité', p: 'La BRVM est divisée en secteurs : Banque, Industrie, Distribution, Agriculture, Énergie, Télécoms, Utilités. Chaque secteur a ses propres cycles économiques.' },
+      { h: '📈 Indice sectoriel YTD', p: 'YTD = Year To Date = performance depuis le 1er janvier. Si le secteur Banque affiche +12% YTD, les banques cotées ont globalement gagné 12% depuis janvier.' },
+      { h: '⭐ Score moyen sectoriel', p: 'La moyenne des scores /80 de toutes les sociétés du secteur. Utile pour savoir quels secteurs sont les plus attractifs en ce moment.' },
+      { tip: '💡 Que faire ? Cliquez sur un bouton secteur en haut pour lancer une analyse IA complète de ce secteur — forces, faiblesses, opportunités.' },
+    ]
+  },
+  div: {
+    title: 'Dividendes',
+    sections: [
+      { h: '💰 Le dividende, c\'est quoi ?', p: 'Le dividende = la part des bénéfices qu\'une société vous verse chaque année si vous possédez ses actions. C\'est un revenu passif régulier, comme un loyer.' },
+      { h: '📅 Ex-date (date de détachement)', p: 'Pour recevoir le dividende, vous devez posséder l\'action AVANT cette date. Si vous achetez après l\'ex-date, vous ne touchez pas le dividende de l\'année.' },
+      { h: '📐 Rendement %', p: 'Rendement = dividende annuel ÷ cours de l\'action × 100. Ex : dividende 5 000 XOF + cours 100 000 XOF = rendement 5%. Cela signifie que vous gagnez 5% de votre investissement chaque année.' },
+      { h: '📊 BNA (Bénéfice Net par Action)', p: 'Les profits totaux de la société divisés par le nombre d\'actions. Plus le BNA est élevé par rapport au cours (P/E faible), plus l\'action est "bon marché".' },
+      { tip: '💡 Que faire ? Triez par colonne "Rendement%" pour voir les actions qui rapportent le plus. Vérifiez que l\'ex-date n\'est pas dépassée.' },
+      { ex: '📌 Exemple : SIBC, dividende 330 XOF, cours 7 300 XOF → rendement = 330/7300 = 4.5%. Pour 1 million XOF investis, vous recevez 45 000 XOF/an.' },
+    ]
+  },
+  perf: {
+    title: 'Performances',
+    sections: [
+      { h: '📈 Historique des cours — base 100', p: 'Tous les cours sont ramenés à 100 au départ pour pouvoir les comparer équitablement. Si une action est à 250 sur le graphique, elle a multiplié sa valeur par 2.5 depuis le début de la période.' },
+      { h: '📊 Comment lire le graphique', p: 'Chaque ligne de couleur = une action. La ligne qui monte le plus = la meilleure performance. Lignes qui se croisent = changement de leadership entre les actions.' },
+      { h: '🗓️ Périodes disponibles', p: '1 mois, 3 mois, 6 mois, 1 an, 3 ans, 5 ans. Attention : les performances passées ne garantissent pas les performances futures.' },
+      { tip: '💡 Que faire ? Sélectionnez 3-4 actions à comparer. Choisissez une période de 1 an pour avoir une vue représentative. Cherchez les actions avec une tendance régulièrement ascendante.' },
+      { ex: '📌 Exemple : SGBC base 100 → 999 sur 5 ans = +899%. 1 000 000 XOF investis en 2019 valent aujourd\'hui ~9 990 000 XOF.' },
+    ]
+  },
+  targets: {
+    title: 'Prix cibles',
+    sections: [
+      { h: '🎯 À quoi sert un prix cible ?', p: 'Chaque modèle calcule ce que DEVRAIT valoir l\'action si elle était justement évaluée par le marché. Comparer ce prix cible au cours réel révèle si l\'action est bon marché ou chère.' },
+      { h: '📐 Graham : la formule classique', p: 'Formule de Benjamin Graham : √(22.5 × BNA × BVPA). Si le cours est sous ce prix cible → l\'action est potentiellement sous-évaluée. C\'est le seuil "marge de sécurité".' },
+      { h: '🔋 EPV : cas pessimiste', p: 'EPV = Earnings Power Value. Valorisation si la société ne croît PLUS jamais. Si le cours est encore sous l\'EPV, l\'action est très bon marché même dans le pire scénario.' },
+      { h: '📚 P/B : valeur comptable', p: 'P/B = cours ÷ valeur comptable par action. Si P/B < 1, vous achetez l\'action en dessous de la valeur de ses actifs nets. C\'est rare et potentiellement intéressant.' },
+      { tip: '💡 Que faire ? Filtrez les actions dont le cours actuel est significativement en dessous du prix cible Graham (colonne "Marge"). Plus la marge est grande, plus l\'opportunité est importante.' },
+      { ex: '📌 Exemple : Si CABC a un prix cible Graham de 8 000 XOF et un cours de 5 200 XOF → marge de sécurité de 35% (opportunité potentielle).' },
+    ]
+  },
+  screener: {
+    title: 'Screener',
+    sections: [
+      { h: '🔍 Le screener, c\'est quoi ?', p: 'Un screener est un outil de filtrage. Vous définissez vos critères et il vous liste instantanément toutes les sociétés qui correspondent à votre profil d\'investisseur.' },
+      { h: '⚙️ Les filtres disponibles', p: '• Score min : 55 pour les meilleures sociétés seulement\n• P/E max : 10 pour les actions pas chères par rapport aux bénéfices\n• Dividende min% : 5 pour un rendement attrayant\n• ROE min% : 15 pour les sociétés très rentables\n• Secteur : filtrer par domaine d\'activité' },
+      { h: '🤖 Analyse IA', p: 'Cochez des actions dans les résultats (jusqu\'à 6), puis cliquez "Analyser avec IA". Claude analysera en détail pourquoi ces sociétés correspondent à vos critères et lesquelles privilégier.' },
+      { tip: '💡 Recette "pépites BRVM" : Score ≥ 55 + Dividende ≥ 5% + P/E ≤ 10 → les meilleures opportunités selon nos modèles.' },
+      { ex: '📌 Exemple : Score ≥ 60 + ROE ≥ 15% → vous obtenez les sociétés à la fois excellentes et très rentables. Exportez en CSV pour analyser dans Excel.' },
+    ]
+  },
+  analyse: {
+    title: 'Analyse & Optimisation',
+    sections: [
+      { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
+      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = à éviter.' },
+      { h: '🛡️ Min Volatilité (pour les prudents)', p: 'Trouve le portefeuille avec les fluctuations les plus faibles. Idéal si vous êtes nerveux face aux variations de prix.' },
+      { h: '🔗 Matrice de corrélation', p: 'Montre à quel point les actions bougent ensemble. Vert = très corrélées (bougent pareil), Rouge = inversement corrélées (se compensent). Pour diversifier, cherchez des corrélations faibles (gris).' },
+      { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
+    ]
+  },
+  chat: {
+    title: 'Chat IA',
+    sections: [
+      { h: '🤖 Votre analyste BRVM personnel', p: 'Posez n\'importe quelle question en français sur la BRVM, les actions, ou la finance en général. L\'IA connaît les données de toutes les 47 sociétés et les concepts financiers.' },
+      { h: '💬 Questions exemples', p: '• "Qu\'est-ce qu\'un P/E ratio et comment l\'utiliser ?"\n• "Quelle est la meilleure action BRVM pour les dividendes ?"\n• "Explique-moi comment fonctionne la BRVM"\n• "SIBC est-elle une bonne opportunité ?" \n• "Compare SGBC et BICB pour moi"' },
+      { h: '⚠️ Limites', p: 'L\'IA donne des analyses basées sur les données disponibles. Ce n\'est pas un conseil financier officiel. Consultez un professionnel pour des décisions importantes.' },
+      { tip: '💡 Astuce : Mentionnez un ticker précis ("SIBC", "CABC") pour des réponses sur une société spécifique. Ou demandez une comparaison entre plusieurs actions.' },
+    ]
+  },
+  glossaire: {
+    title: 'Glossaire',
+    sections: [
+      { h: '📚 Dictionnaire financier BRVM', p: 'Tous les termes financiers utilisés dans ce dashboard sont définis ici, avec des exemples concrets basés sur les sociétés BRVM réelles.' },
+      { h: '🔍 Comment utiliser le glossaire', p: 'Tapez un mot dans la barre de recherche (ex: "dividende", "P/E", "ROE") pour trouver instantanément la définition. Les termes sont classés par ordre alphabétique.' },
+      { tip: '💡 Revenez ici dès qu\'un terme vous échappe dans le dashboard. La compréhension des concepts clés est la base d\'un investissement réussi.' },
+    ]
+  },
+  port: {
+    title: 'Portefeuille',
+    sections: [
+      { h: '💼 Suivez vos investissements', p: 'Entrez vos actions avec le prix d\'achat pour suivre votre performance en temps réel. Les données de cours sont mises à jour automatiquement depuis la BRVM.' },
+      { h: '📊 P&L (Profit & Loss)', p: 'P&L = gain ou perte sur chaque position. Vert = vous êtes en gain par rapport à votre prix d\'achat. Rouge = vous êtes en perte actuellement.' },
+      { tip: '💡 Que faire ? Ajoutez vos actions avec le prix et la quantité achetés. Le tableau calcule automatiquement votre performance et votre poids sectoriel.' },
+    ]
+  },
+  alerts: {
+    title: 'Alertes',
+    sections: [
+      { h: '🔔 Alertes prix automatiques', p: 'Définissez un prix cible pour recevoir une notification quand une action atteint votre seuil. Exemple : "Alerter si SIBC dépasse 8 000 XOF".' },
+      { h: '🧠 Alertes intelligentes (Smart)', p: 'Alertes automatiques basées sur nos modèles : ex-dividende dans 7 jours, action entrant dans la zone de sous-évaluation Graham, etc.' },
+      { tip: '💡 Activez d\'abord les notifications push (bouton en bas de la barre latérale) pour recevoir les alertes même quand l\'onglet est fermé.' },
+    ]
+  },
+  news: {
+    title: 'Actualités',
+    sections: [
+      { h: '📰 Actualités financières BRVM', p: 'Flux d\'actualités agrégées depuis les sources spécialisées en finance africaine et BRVM. Mis à jour automatiquement toutes les heures.' },
+      { tip: '💡 Filtrez par ticker pour voir les actualités d\'une société spécifique. Les événements d\'entreprise peuvent impacter les cours — restez informé.' },
+    ]
+  },
+  comm: {
+    title: 'Commodités',
+    sections: [
+      { h: '🌍 Matières premières mondiales', p: 'Les commodités (cacao, café, pétrole, or…) impactent directement les sociétés BRVM. Le cacao et le café sont très importants pour les économies de l\'Afrique de l\'Ouest.' },
+      { tip: '💡 Surveiller le cours du cacao aide à anticiper les résultats des sociétés agricoles cotées à la BRVM.' },
+    ]
+  },
+};
+
+let _helpOpen = false;
+let _currentPage = 'dash';
+
+function openHelpDrawer(page) {
+  page = page || _currentPage;
+  const content = _helpContent[page] || _helpContent['dash'];
+  document.getElementById('help-page-title').textContent = content.title;
+  document.getElementById('help-drawer-body').innerHTML = content.sections.map(s => {
+    if (s.h) return `<h3>${s.h}</h3>${s.p ? `<p>${s.p.replace(/\n/g,'<br>')}</p>` : ''}`;
+    if (s.tip) return `<div class="help-tip">${s.tip}</div>`;
+    if (s.ex) return `<div class="help-example">${s.ex}</div>`;
+    return '';
+  }).join('') + `<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3)">
+    Vous avez une question ? Rendez-vous sur la page <strong>💬 Chat IA</strong> pour poser vos questions à Claude en français.
+  </div>`;
+  document.getElementById('help-drawer').classList.add('open');
+  document.getElementById('help-overlay').style.display = 'block';
+  _helpOpen = true;
+}
+
+function closeHelpDrawer() {
+  document.getElementById('help-drawer').classList.remove('open');
+  document.getElementById('help-overlay').style.display = 'none';
+  _helpOpen = false;
+}
+
+function toggleHelpDrawer() {
+  _helpOpen ? closeHelpDrawer() : openHelpDrawer(_currentPage);
+}
+
+// Intercept nav() pour mettre à jour la page courante
+const _origNav = window.nav;
+document.addEventListener('DOMContentLoaded', () => {
+  // Patch nav après chargement
+});
+
 // ── Comparaison rapide sidebar ──────────────────────────────────────────────
 let _cmpSelected = new Set();
 
