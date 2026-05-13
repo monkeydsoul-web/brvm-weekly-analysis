@@ -1598,29 +1598,43 @@ function _txData(){   try{return JSON.parse(localStorage.getItem(_LS_TX)||'[]');
 function _portSave(data){ localStorage.setItem(_LS_PORT,JSON.stringify(data)); }
 function _txSave(data){ localStorage.setItem(_LS_TX,JSON.stringify(data)); }
 
+function _normPos(pos){
+  // Accepte {shares,avg_price} OU {qty,buyPrice} OU {quantity,price}
+  const shares    = +(pos.shares ?? pos.qty ?? pos.quantity ?? 0);
+  const avg_price = +(pos.avg_price ?? pos.buyPrice ?? pos.buy_price ?? pos.price ?? 0);
+  return {...pos, shares, avg_price};
+}
+function _normTx(tx){
+  return {
+    ...tx,
+    shares: +(tx.shares ?? tx.qty ?? tx.quantity ?? 0),
+    price:  +(tx.price  ?? tx.buyPrice ?? tx.avg_price ?? 0),
+  };
+}
+
 function loadPortfolio(){
-  const positions = _portData();
-  const txs       = _txData();
+  const positions = _portData().map(_normPos);
+  const txs       = _txData().map(_normTx);
   const sc        = window.scores || [];
 
   // Enrichir avec prix live
   const enriched = positions.map(pos => {
     const live = sc.find(x=>x.ticker===pos.ticker) || {};
-    const curPrice = live.price || pos.avg_price;
-    const value    = curPrice * pos.shares;
-    const cost     = pos.avg_price * pos.shares;
+    const curPrice = live.price || pos.avg_price || 0;
+    const value    = isFinite(curPrice * pos.shares) ? curPrice * pos.shares : 0;
+    const cost     = isFinite(pos.avg_price * pos.shares) ? pos.avg_price * pos.shares : 0;
     const gain     = value - cost;
     const gainPct  = cost ? +((gain/cost)*100).toFixed(2) : 0;
     const annDiv   = (live.div_yield||0)/100 * value;
-    return {...pos, current_price:curPrice, value, gain, gain_pct:gainPct, annual_div:annDiv,
+    return {...pos, current_price:curPrice, value, cost, gain, gain_pct:gainPct, annual_div:annDiv,
             sector:live.sector||'', name:live.name||pos.ticker};
   });
 
-  const totalValue = enriched.reduce((s,p)=>s+p.value,0);
-  const totalCost  = enriched.reduce((s,p)=>s+p.avg_price*p.shares,0);
-  const totalGain  = totalValue - totalCost;
+  const totalValue   = enriched.reduce((s,p)=>s+(p.value||0),0);
+  const totalCost    = enriched.reduce((s,p)=>s+(p.cost||0),0);
+  const totalGain    = totalValue - totalCost;
   const totalGainPct = totalCost ? +((totalGain/totalCost)*100).toFixed(2) : 0;
-  const annDivTotal  = enriched.reduce((s,p)=>s+p.annual_div,0);
+  const annDivTotal  = enriched.reduce((s,p)=>s+(isFinite(p.annual_div)?p.annual_div:0),0);
 
   // Meilleure / pire
   const sorted = [...enriched].sort((a,b)=>b.gain_pct-a.gain_pct);
@@ -2352,7 +2366,12 @@ async function loadStatus(){
     if(fb) fb.textContent=`BOC : ${n} tickers live`;
     const fl=document.getElementById('footer-live');
     if(fl){
-      const at=lv.fetched_at?new Date(lv.fetched_at*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      // updated_at est une ISO string ; fetched_at (dans prices) aussi
+      const rawAt = lv.updated_at || lv.fetched_at
+        || Object.values(lv.prices||{})[0]?.fetched_at;
+      const at = rawAt
+        ? new Date(rawAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+        : '—';
       fl.textContent='MàJ live : '+at;
     }
   }catch(e){}
