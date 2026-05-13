@@ -121,26 +121,41 @@ def score_technique_live(row: dict) -> dict:
         score -= 1.0
         details.append(f"Perf annuelle {var_annee:.1f}% ✗✗")
 
-    # Historique prix — tendance 52 semaines
+    # Tendance 30j BOC (données quotidiennes BRVM)
     try:
-        from price_history_builder import get_price_history
-        hist = get_price_history(row.get("ticker", ""), weeks=52)
-        if hist and len(hist) >= 4:
-            prices = [p["price"] for p in hist if p.get("price")]
-            if len(prices) >= 4:
-                q = len(prices) // 4
-                avg_recent = sum(prices[-q:]) / q
-                avg_old    = sum(prices[:q]) / q
-                if avg_old > 0:
-                    trend_pct = (avg_recent - avg_old) / avg_old * 100
-                    if trend_pct >= 15:
-                        score += 1.5
-                        details.append(f"Tendance haussière +{trend_pct:.0f}% ✓✓")
-                    elif trend_pct >= 0:
-                        score += 0.5
-                        details.append(f"Tendance stable +{trend_pct:.0f}% ✓")
-                    else:
-                        details.append(f"Tendance baissière {trend_pct:.0f}% ✗")
+        from price_history_builder import load_history
+        ph = load_history()
+        ticker_hist = ph.get(row.get("ticker", ""), [])
+        boc_pts = sorted(
+            [p for p in ticker_hist if p.get("source") == "boc" and p.get("price")],
+            key=lambda x: x["date"]
+        )
+        if len(boc_pts) >= 5:
+            price_now  = boc_pts[-1]["price"]
+            price_30d  = boc_pts[-min(30, len(boc_pts))]["price"]
+            if price_30d > 0:
+                trend_30 = (price_now / price_30d - 1) * 100
+                if trend_30 >= 10:
+                    score += 1.5
+                    details.append(f"Tendance 30j BOC +{trend_30:.1f}% ✓✓")
+                elif trend_30 >= 3:
+                    score += 1.0
+                    details.append(f"Tendance 30j BOC +{trend_30:.1f}% ✓")
+                elif trend_30 >= -3:
+                    score += 0.5
+                    details.append(f"Tendance 30j BOC {trend_30:+.1f}% stable")
+                elif trend_30 >= -10:
+                    details.append(f"Tendance 30j BOC {trend_30:.1f}% ✗")
+                else:
+                    score -= 0.5
+                    details.append(f"Tendance 30j BOC {trend_30:.1f}% ✗✗")
+            # Bonus combo : var_annee positive ET tendance 30j positive
+            if var_annee >= 5 and len(boc_pts) >= 5:
+                price_now_  = boc_pts[-1]["price"]
+                price_30d_  = boc_pts[-min(30, len(boc_pts))]["price"]
+                if price_30d_ > 0 and price_now_ > price_30d_:
+                    score += 0.5
+                    details.append("Combo var_annee ↑ + 30j ↑ ✓")
     except Exception:
         pass
 
