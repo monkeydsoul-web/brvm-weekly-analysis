@@ -482,7 +482,10 @@ input[type=range]{padding:0;height:20px}
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
   <div class="ph"><h2>Mon portefeuille</h2>
-    <button class="btn btn-g" onclick="showAddPosition()">+ Ajouter position</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-o" onclick="sharePortfolioURL()" style="font-size:11px">🔗 Partager</button>
+      <button class="btn btn-g" onclick="showAddPosition()">+ Ajouter position</button>
+    </div>
   </div>
   <div id="portSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
 <div class="card" style="margin-bottom:12px" id="simPortCard">
@@ -1377,7 +1380,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
     setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
@@ -1879,6 +1882,40 @@ function loadPortfolio(){
       <span style="color:var(--t2)">${tx.shares} × ${fmt(tx.price)} XOF</span>
       <span style="color:var(--t3)">${tx.date||''}</span>
     </div>`).join('') || '<p style="font-size:11px;color:var(--t2)">Aucune transaction.</p>';
+}
+
+function sharePortfolioURL(){
+  const positions = _portData().map(_normPos).filter(p=>p.ticker&&p.shares>0);
+  if(!positions.length){ showNotif('Portefeuille vide', 'red'); return; }
+  // Encoder les positions en base64 (données minimales)
+  const payload = positions.map(p=>({t:p.ticker, s:p.shares, p:Math.round(p.avg_price), d:p.date||''}));
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url = `${location.origin}${location.pathname}?port=${b64}`;
+  navigator.clipboard.writeText(url).then(()=>{
+    showNotif('Lien copié dans le presse-papiers ✓', 'green');
+  }).catch(()=>{
+    prompt('Copiez ce lien de partage :', url);
+  });
+}
+
+function _importPortfolioFromURL(){
+  const params = new URLSearchParams(location.search);
+  const b64 = params.get('port');
+  if(!b64) return;
+  try{
+    const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    if(!Array.isArray(payload)||!payload.length) return;
+    const positions = payload.map(p=>({ ticker:p.t, shares:+p.s, avg_price:+p.p, date:p.d||new Date().toISOString().slice(0,10) }));
+    const existing = _portData();
+    positions.forEach(pos=>{
+      if(!existing.find(e=>e.ticker===pos.ticker)) existing.push(pos);
+    });
+    _portSave(existing);
+    showNotif(`Portefeuille importé : ${positions.length} positions`, 'green');
+    // Nettoyer l'URL
+    const clean = location.pathname;
+    history.replaceState({}, '', clean);
+  }catch(e){ console.warn('Erreur import portfolio URL', e); }
 }
 
 function showAddPosition(ticker=''){

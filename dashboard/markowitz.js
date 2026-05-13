@@ -169,7 +169,10 @@ function _renderMrkResult(d) {
           <span style="font-size:10px;color:${p.color};min-width:32px;text-align:right">${(wt*100).toFixed(1)}%</span>
         </div>
       </div>`).join('')}
-      <button onclick="applyMrkToBacktest(${JSON.stringify(w)})" style="width:100%;margin-top:8px;padding:5px;background:${p.color}22;border:1px solid ${p.color}44;border-radius:6px;color:${p.color};font-size:10px;cursor:pointer">📊 Tester →</button>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="applyMrkToBacktest(${JSON.stringify(w)})" style="flex:1;padding:5px;background:${p.color}22;border:1px solid ${p.color}44;border-radius:6px;color:${p.color};font-size:10px;cursor:pointer">📊 Tester</button>
+        <button onclick="saveMrkToPortfolio(${JSON.stringify(w)},1000000)" style="flex:1;padding:5px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);border-radius:6px;color:var(--green);font-size:10px;cursor:pointer">📦 Portefeuille</button>
+      </div>
     </div>`;
   }).join('');
   _drawMrkChart(d);
@@ -241,4 +244,44 @@ function _drawMrkChart(d) {
         <rect x="${PAD.left+CW+5}" y="${PAD.top}" width="12" height="${CH}" fill="url(#sh-grad)" rx="3"/>
         <text x="${PAD.left+CW+11}" y="${PAD.top-4}" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.5)">Sharpe</text>`;
   container.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block;overflow:visible">${svg}</svg>`;
+}
+
+function saveMrkToPortfolio(weights, totalXOF) {
+  const prices = {};
+  (window.scores||[]).forEach(x=>{ if(x.ticker) prices[x.ticker]=x.price||0; });
+
+  // Demander montant total
+  const input = prompt(`Montant total à investir (XOF) ?\nAllocation Markowitz sur ${Object.keys(weights).length} actions.`, totalXOF);
+  const total = parseFloat(input)||totalXOF;
+  if(!total) return;
+
+  const existing = JSON.parse(localStorage.getItem('brvm_portfolio_v2')||'[]');
+  let added = 0;
+
+  Object.entries(weights).forEach(([ticker, wt]) => {
+    const alloc = total * wt;
+    const price = prices[ticker];
+    if(!price || price<=0) return;
+    const shares = Math.floor(alloc/price);
+    if(shares<=0) return;
+    // Vérifier si déjà présent
+    const idx = existing.findIndex(p=>(p.ticker||p.symbol)===ticker);
+    if(idx>=0){
+      // Mettre à jour (ajouter les actions)
+      const old = existing[idx];
+      const oldShares = +(old.shares||old.qty||0);
+      const oldPrice = +(old.avg_price||old.buyPrice||price);
+      const newShares = oldShares+shares;
+      const newAvg = (oldShares*oldPrice+shares*price)/newShares;
+      existing[idx] = {...old, shares:newShares, avg_price:newAvg};
+    } else {
+      existing.push({ ticker, shares, avg_price: price, date: new Date().toISOString().slice(0,10), source:'markowitz' });
+    }
+    added++;
+  });
+
+  localStorage.setItem('brvm_portfolio_v2', JSON.stringify(existing));
+  if(typeof showNotif==='function') showNotif(`Markowitz : ${added} action${added>1?'s':''} ajoutée${added>1?'s':''} au portefeuille`, 'green');
+  closeMrk();
+  if(typeof loadPortfolio==='function') loadPortfolio();
 }
