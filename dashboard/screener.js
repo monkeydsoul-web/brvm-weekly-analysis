@@ -43,6 +43,7 @@ function runScreener() {
   if (count) count.textContent = `${_scrResults.length} résultat${_scrResults.length !== 1 ? 's' : ''}`;
 
   _renderScreenerTable();
+  _renderScatterPE();
 }
 
 function _renderScreenerTable() {
@@ -88,6 +89,70 @@ function _renderScreenerTable() {
       </td>
     </tr>`;
   }).join('');
+}
+
+function _renderScatterPE(){
+  const canvas = document.getElementById('sc-scatter');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Données valides (P/E > 0 et Div% > 0)
+  const pts = _scrResults.filter(x=>(x.pe_ref||0)>0&&(x.pe_ref||0)<60&&(x.div_yield||0)>0);
+  if(pts.length<2){ ctx.fillStyle='#6b7280'; ctx.font='13px sans-serif'; ctx.fillText('Données insuffisantes (P/E et Div% requis)',W/2-120,H/2); return; }
+
+  const peMax=Math.min(40, Math.max(...pts.map(x=>x.pe_ref||0))*1.1)||40;
+  const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.1||20;
+  const pad={l:40,r:20,t:20,b:35};
+  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
+
+  // Axes
+  ctx.strokeStyle='#374151'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+gH); ctx.lineTo(pad.l+gW,pad.t+gH); ctx.stroke();
+
+  // Zone idéale (P/E<15, Div>5)
+  const zx=pad.l, zy=pad.t+(1-5/dyMax)*gH;
+  const zw=(15/peMax)*gW, zh=gH-(1-5/dyMax)*gH;
+  ctx.fillStyle='rgba(74,222,128,0.07)'; ctx.fillRect(zx,zy,zw,zh);
+  ctx.strokeStyle='rgba(74,222,128,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+
+  // Labels axes
+  ctx.fillStyle='#9ca3af'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('P/E →',pad.l+gW/2, H-5);
+  ctx.save(); ctx.translate(10,pad.t+gH/2); ctx.rotate(-Math.PI/2); ctx.fillText('Div% ↑',0,0); ctx.restore();
+
+  // Graduations
+  [0,10,20,30].filter(v=>v<=peMax).forEach(v=>{
+    const x=pad.l+(v/peMax)*gW;
+    ctx.fillStyle='#6b7280'; ctx.textAlign='center'; ctx.fillText(v,x,pad.t+gH+12);
+    ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+gH); ctx.stroke();
+  });
+  [0,5,10,15].filter(v=>v<=dyMax).forEach(v=>{
+    const y=pad.t+(1-v/dyMax)*gH;
+    ctx.fillStyle='#6b7280'; ctx.textAlign='right'; ctx.fillText(v+'%',pad.l-4,y+3);
+    ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+gW,y); ctx.stroke();
+  });
+
+  // Points
+  pts.forEach(x=>{
+    const cx=pad.l+(x.pe_ref/peMax)*gW;
+    const cy=pad.t+(1-(x.div_yield||0)/dyMax)*gH;
+    const sc=x.composite_adj||0;
+    const col=sc>=60?'#4ADE80':sc>=45?'#FBBF24':'#F87171';
+    ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
+    ctx.fillStyle=col+'cc'; ctx.fill();
+    ctx.strokeStyle=col; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='#e5e7eb'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(x.ticker, cx+7, cy+3);
+  });
+
+  // Légende
+  ctx.font='9px sans-serif'; ctx.textAlign='left';
+  [['#4ADE80','Score ≥60'],['#FBBF24','Score 45-59'],['#F87171','Score <45']].forEach(([c,l],i)=>{
+    ctx.fillStyle=c; ctx.beginPath(); ctx.arc(pad.l+5,pad.t+8+i*14,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#9ca3af'; ctx.fillText(l, pad.l+12, pad.t+11+i*14);
+  });
 }
 
 function screenerSortBy(col) {
