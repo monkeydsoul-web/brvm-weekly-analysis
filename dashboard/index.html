@@ -125,6 +125,22 @@ input[type=range]{padding:0;height:20px}
 #mob-menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:600;width:38px;height:38px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px;box-shadow:var(--shadow)}
 #mob-menu-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;transition:all .2s}
 #mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:490}
+/* ══ Classement toggle avancé ════════════════════════════════════════════════ */
+.rank-adv-hidden .adv-col{display:none}
+.rank-tog-btn{font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s}
+.rank-tog-btn.on{background:var(--border);color:var(--text);font-weight:600}
+/* ══ Chat chips ══════════════════════════════════════════════════════════════ */
+.chat-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--t2);font-size:11px;cursor:pointer;transition:all .12s;white-space:nowrap}
+.chat-chip:hover{background:var(--border);color:var(--text)}
+.chat-copy-btn{font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--t3);cursor:pointer;margin-top:4px;display:block;width:fit-content}
+.chat-copy-btn:hover{background:var(--bg3);color:var(--text)}
+@keyframes dotBlink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.dot-blink{animation:dotBlink 1.2s infinite;display:inline-block}
+/* ══ Météo marché ════════════════════════════════════════════════════════════ */
+#market-weather{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border)}
+/* ══ Momentum badge ══════════════════════════════════════════════════════════ */
+.mom-up{color:var(--green);font-size:9px;font-weight:700}
+.mom-dn{color:var(--red);font-size:9px;font-weight:700}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
 @media(max-width:900px){
   .g4{grid-template-columns:repeat(2,1fr)}
@@ -421,9 +437,14 @@ input[type=range]{padding:0;height:20px}
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
-  <div class="card" style="padding:0;overflow-x:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+    <span id="rank-counter" style="font-size:11px;color:var(--t2)">Affichage : — / 47 sociétés</span>
+    <button class="rank-tog-btn" id="rank-adv-tog" onclick="toggleRankAdv()">Afficher scores détaillés</button>
+  </div>
+  <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
       <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
+      <th class="tt" data-tt="Capitalisation boursière = cours × nombre d'actions">CAP</th>
       <th class="tt" data-tt="Cours de clôture BOC BRVM (XOF). Toggle XOF/EUR/USD en haut à gauche.">Cours</th>
       <th class="tt" data-tt="Sparkline 30 derniers jours — tendance graphique du cours BOC">30j</th>
       <th class="tt" data-tt="Variation journalière du cours en %">Var%</th>
@@ -433,14 +454,15 @@ input[type=range]{padding:0;height:20px}
       <th class="tt" data-tt="ROE (Return On Equity) = résultat net / capitaux propres. ≥ 15% = excellent">ROE</th>
       <th class="tt" data-tt="Verdict IA issu de l'analyse des rapports annuels PDF (POSITIF / NEUTRE / NÉGATIF)">Verdict</th>
       <th class="tt" data-tt="Score composite /80 : somme pondérée des 8 modèles de valorisation">Score</th>
-      <th class="tt" data-tt="Graham /10 — P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, résultats stables">G</th>
-      <th class="tt" data-tt="DCF/FCF /10 — Rendement des bénéfices (1/PE) × qualité ROE × stabilité FCF">DCF</th>
-      <th class="tt" data-tt="DDM /10 — Dividend Discount Model Gordon : D1/(r−g) vs cours actuel">DDM</th>
-      <th class="tt" data-tt="EPV /10 — Earnings Power Value (Greenwald) : EPS normalisé / WACC vs cours">EPV</th>
-      <th class="tt" data-tt="Buffett /10 — ROE ≥ 15%, croissance BNA, avantage concurrentiel (moat), faible dette">Buf</th>
-      <th class="tt" data-tt="Reverse DCF /10 — Taux de croissance implicite dans le cours vs WACC">Rev</th>
-      <th class="tt" data-tt="Relatif /10 — P/E et EV/EBITDA vs médianes sectorielles BRVM">Rel</th>
-      <th class="tt" data-tt="Technique /10 — Momentum (var. jour, tendance 30j), volume, perf. annuelle BOC">Tech</th>
+      <th class="adv-col tt" data-tt="Graham /10 — P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, résultats stables">G</th>
+      <th class="adv-col tt" data-tt="DCF/FCF /10 — Rendement des bénéfices (1/PE) × qualité ROE × stabilité FCF">DCF</th>
+      <th class="adv-col tt" data-tt="DDM /10 — Dividend Discount Model Gordon : D1/(r−g) vs cours actuel">DDM</th>
+      <th class="adv-col tt" data-tt="EPV /10 — Earnings Power Value (Greenwald) : EPS normalisé / WACC vs cours">EPV</th>
+      <th class="adv-col tt" data-tt="Buffett /10 — ROE ≥ 15%, croissance BNA, avantage concurrentiel (moat), faible dette">Buf</th>
+      <th class="adv-col tt" data-tt="Reverse DCF /10 — Taux de croissance implicite dans le cours vs WACC">Rev</th>
+      <th class="adv-col tt" data-tt="Relatif /10 — P/E et EV/EBITDA vs médianes sectorielles BRVM">Rel</th>
+      <th class="adv-col tt" data-tt="Technique /10 — Momentum (var. jour, tendance 30j), volume, perf. annuelle BOC">Tech</th>
+      <th></th>
     </tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
@@ -706,10 +728,11 @@ input[type=range]{padding:0;height:20px}
       <button class="btn btn-g" onclick="sendChat()" id="chatBtn">Envoyer</button>
     </div>
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-o" style="font-size:10px;padding:4px 10px" onclick="quickChat('Quelles sont les 3 meilleures actions en ce moment ?')">Top 3 actions</button>
-      <button class="btn btn-o" style="font-size:10px;padding:4px 10px" onclick="quickChat('Quelle action offre le meilleur dividende ?')">Meilleur dividende</button>
-      <button class="btn btn-o" style="font-size:10px;padding:4px 10px" onclick="quickChat('Analyse SGBC vs SNTS — laquelle acheter ?')">SGBC vs SNTS</button>
-      <button class="btn btn-o" style="font-size:10px;padding:4px 10px" onclick="quickChat('Quelles actions sont sous-évaluées en ce moment ?')">Sous-évaluées</button>
+      <button class="chat-chip" onclick="quickChat('💎 Quelles sont les meilleures opportunités d\'investissement en ce moment sur la BRVM ?')">💎 Meilleures opportunités ?</button>
+      <button class="chat-chip" onclick="quickChat('📊 Analyse SIBC pour moi — score, valorisation, dividende et recommandation.')">📊 Analyse SIBC</button>
+      <button class="chat-chip" onclick="quickChat('🔮 Quelle est ta prévision pour le marché BRVM dans les prochains mois ?')">🔮 Prévision marché BRVM ?</button>
+      <button class="chat-chip" onclick="quickChat('💰 Comment investir intelligemment 1 million XOF sur la BRVM ?')">💰 Investir 1M XOF ?</button>
+      <button class="chat-chip" onclick="quickChat('📈 Quelles sont les actions avec les meilleurs dividendes BRVM en 2025 ?')">📈 Top dividendes 2025</button>
     </div>
   </div>
 </div>
@@ -1560,33 +1583,107 @@ async function toggleFav(ticker){
 }
 
 // ── Classement ─────────────────────────────────────────────────────────────
+let _rankAdvMode = false;
+function toggleRankAdv(){
+  _rankAdvMode = !_rankAdvMode;
+  const wrap = document.getElementById('rank-table-wrap');
+  const btn  = document.getElementById('rank-adv-tog');
+  if(wrap) wrap.classList.toggle('rank-adv-hidden', !_rankAdvMode);
+  if(btn){ btn.textContent = _rankAdvMode ? 'Masquer scores détaillés' : 'Afficher scores détaillés'; btn.classList.toggle('on', _rankAdvMode); }
+}
+
+function _capFmt(x){
+  const cap=(x.price||0)*(x.shares||0);
+  if(!cap) return '—';
+  if(cap>=1e12) return (cap/1e12).toFixed(1)+'T';
+  if(cap>=1e9)  return (cap/1e9).toFixed(1)+'Md';
+  if(cap>=1e6)  return (cap/1e6).toFixed(0)+'M';
+  return cap.toLocaleString('fr-FR');
+}
+
+function _sparklineDots(hist30, w, h){
+  if(hist30.length<2) return '';
+  const vals=hist30.map(p=>p.price||0);
+  const min=Math.min(...vals), max=Math.max(...vals), range=max-min||1;
+  const pts=vals.map((v,i)=>`${Math.round(i/(vals.length-1)*(w-4)+2)},${Math.round((1-(v-min)/range)*(h-4)+2)}`);
+  const col=vals[vals.length-1]>=vals[0]?'#4ADE80':'#F87171';
+  const line=`<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const last=pts[pts.length-1].split(',');
+  const dot=`<circle cx="${last[0]}" cy="${last[1]}" r="2.5" fill="${col}"/>`;
+  const priceLabel=`<text x="${+last[0]>w/2?+last[0]-2:+last[0]+3}" y="${+last[1]-3}" font-size="7" fill="${col}" text-anchor="${+last[0]>w/2?'end':'start'}">${Math.round(vals[vals.length-1]).toLocaleString('fr-FR')}</text>`;
+  return `<svg width="${w}" height="${h}" style="overflow:visible">${line}${dot}${priceLabel}</svg>`;
+}
+
 function renderRank(){
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
+  const verd=document.getElementById('fVerdict')?.value||'';
   let d=[...scores];
   if(sec)d=d.filter(x=>x.sector===sec);
+  if(verd)d=d.filter(x=>(x.pdf_verdict||'').toLowerCase().includes(verd));
   d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
+
+  // Contre
+  const ctr=document.getElementById('rank-counter');
+  if(ctr) ctr.textContent=`Affichage : ${d.length} / ${scores.length} sociétés`;
+
+  const ph=window._priceHistory||{};
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
-    // Récupérer historique 30 derniers points BOC
-    const ph = window._priceHistory || {};
-    const hist30 = (ph[x.ticker]||[]).filter(p=>p.source==='boc').slice(-30);
-    const spk = hist30.length>=2 ? sparkline(hist30, 80, 26) : '<span id="spk-'+x.ticker+'" style="color:var(--t3);font-size:9px;display:inline-block;width:80px"></span>';
+    const hist30=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-30);
+    const spk=hist30.length>=2?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">—</span>`;
+    // Momentum badge (5j vs 20j)
+    const boc20=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-20);
+    let momBadge='';
+    if(boc20.length>=6){
+      const p5=boc20.slice(-5).map(p=>p.price); const p20=boc20.map(p=>p.price);
+      const avg5=p5.reduce((s,v)=>s+v,0)/p5.length;
+      const avg20=p20.reduce((s,v)=>s+v,0)/p20.length;
+      momBadge=avg5>avg20*1.01?'<span class="mom-up">🚀</span>':avg5<avg20*0.99?'<span class="mom-dn">📉</span>':'';
+    }
+    const verdC=x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)';
     return`<tr id="rank-row-${x.ticker}" onclick="showStock('${x.ticker}')">
       <td style="color:var(--t2)">${i+1}</td>
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
-      <td><strong>${x.ticker}</strong></td>
-      <td style="color:var(--t2);max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
+      <td><strong>${x.ticker}</strong>${momBadge}</td>
+      <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
+      <td style="font-size:10px;color:var(--t3)">${_capFmt(x)}</td>
       <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
       <td style="padding:2px 4px">${spk}</td>
       <td style="color:${chgC}">${chg?chg.toFixed(1)+'%':'—'}</td>
       <td>${x.pe_ref||'—'}×</td><td style="color:var(--t2)">${x.pb_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="color:var(--green)">${x.roe||'—'}%</td>
+      <td><span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${x.pdf_verdict||'—'}</span></td>
       <td><span class="b ${bcls(v)}">${v.toFixed(0)}</span></td>
-      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td style="color:${sc};font-weight:600">${sv.toFixed(0)}</td>`;}).join('')}
+      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(0)}</td>`;}).join('')}
+      <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+📦</button></td>
     </tr>`;}).join('');
+  // Masquer par défaut les colonnes avancées
+  if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
+}
+
+function openAddToPort(ticker, price){
+  nav('port');
+  setTimeout(()=>{
+    showAddPosition(ticker);
+    const priceEl=document.getElementById('portPrice');
+    if(priceEl&&price) priceEl.value=Math.round(price);
+    const dtEl=document.getElementById('portDate');
+    if(dtEl&&!dtEl.value) dtEl.value=new Date().toISOString().slice(0,10);
+  },100);
+}
+
+function renderRankLive(){ renderRank(); }
+function initRanking(){
+  const all=window.scores||scores||[];
+  const sec=document.getElementById('fSec');
+  if(sec&&sec.options.length<=1){
+    const sects=[...new Set(all.map(x=>x.sector).filter(Boolean))].sort();
+    sects.forEach(s=>sec.add(new Option(s,s)));
+  }
+  renderRank();
 }
 
 // ── Portfolio localStorage ─────────────────────────────────────────────────
@@ -2109,28 +2206,71 @@ function renderComm(){
 // ── Chat IA ────────────────────────────────────────────────────────────────
 function clearChat(){
   chatHistory=[];
+  localStorage.removeItem(_LS_CHAT_MEM);
   document.getElementById('chatMessages').innerHTML=`<div class="chat-msg chat-ai">Bonjour ! Je suis votre analyste BRVM. Comment puis-je vous aider ?</div>`;
 }
-function quickChat(msg){document.getElementById('chatInput').value=msg;sendChat();}
+const _LS_CHAT_MEM = 'brvm_chat_memory_v1';
+function _chatMemLoad(){ try{return JSON.parse(localStorage.getItem(_LS_CHAT_MEM)||'[]');}catch{return[];} }
+function _chatMemSave(hist){ localStorage.setItem(_LS_CHAT_MEM, JSON.stringify(hist.slice(-10))); }
+
+function quickChat(msg){
+  const inp = document.getElementById('chatInput');
+  if(inp){ inp.value = msg; sendChat(); }
+}
+
+function _chatCopyReply(btn, text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copié';
+    setTimeout(()=>{ btn.textContent = orig; }, 1500);
+  }).catch(()=>{ btn.textContent = '✗ Erreur'; setTimeout(()=>{ btn.textContent = '📋 Copier'; }, 1500); });
+}
+
 async function sendChat(){
   const inp=document.getElementById('chatInput');
   const msg=inp.value.trim();
   if(!msg)return;
   inp.value='';
   const container=document.getElementById('chatMessages');
-  container.innerHTML+=`<div class="chat-msg chat-user">${msg}</div>`;
-  container.innerHTML+=`<div class="chat-msg chat-ai" id="chatTyping">...</div>`;
+
+  // Ajouter message utilisateur
+  const userDiv=document.createElement('div');
+  userDiv.className='chat-msg chat-user';
+  userDiv.textContent=msg;
+  container.appendChild(userDiv);
+
+  // Animation "Claude réfléchit..."
+  const thinkDiv=document.createElement('div');
+  thinkDiv.className='chat-msg chat-ai';
+  thinkDiv.id='chatTyping';
+  thinkDiv.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;color:var(--t2);font-style:italic">Claude réfléchit<span style="display:inline-flex;gap:3px"><span class="dot-blink" style="animation-delay:0s">.</span><span class="dot-blink" style="animation-delay:.2s">.</span><span class="dot-blink" style="animation-delay:.4s">.</span></span></span>';
+  container.appendChild(thinkDiv);
   container.scrollTop=container.scrollHeight;
+
   document.getElementById('chatBtn').disabled=true;
   chatHistory.push({role:'user',content:msg});
+  // Charger mémoire persistée
+  const mem = _chatMemLoad();
+  const histWithMem = [...mem.slice(-8), ...chatHistory].slice(-20);
+
   try{
     const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:msg,history:chatHistory})}).then(r=>r.json());
-    document.getElementById('chatTyping').remove();
-    container.innerHTML+=`<div class="chat-msg chat-ai">${r.reply.replace(/\n/g,'<br>')}</div>`;
-    chatHistory.push({role:'assistant',content:r.reply});
+      body:JSON.stringify({message:msg,history:histWithMem})}).then(r=>r.json());
+    thinkDiv.remove();
+    const reply = r.reply || r.error || 'Erreur';
+    chatHistory.push({role:'assistant',content:reply});
+    // Sauvegarder en mémoire (5 derniers échanges = 10 messages)
+    const newMem = [...mem, {role:'user',content:msg}, {role:'assistant',content:reply}];
+    _chatMemSave(newMem);
+    // Créer bulle IA avec bouton copier
+    const aiDiv=document.createElement('div');
+    aiDiv.className='chat-msg chat-ai';
+    const replyId='cr-'+Date.now();
+    aiDiv.innerHTML=`<div id="${replyId}" style="white-space:pre-wrap">${reply.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <button class="chat-copy-btn" onclick="_chatCopyReply(this,document.getElementById('${replyId}').innerText)">📋 Copier</button>`;
+    container.appendChild(aiDiv);
   }catch(e){
-    document.getElementById('chatTyping').textContent='Erreur de connexion.';
+    thinkDiv.textContent='Erreur de connexion.';
   }
   document.getElementById('chatBtn').disabled=false;
   container.scrollTop=container.scrollHeight;
