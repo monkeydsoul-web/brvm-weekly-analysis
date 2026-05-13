@@ -144,6 +144,9 @@ input[type=range]{padding:0;height:20px}
     </div>
     <div id="tlItems"></div>
   </div>
+  <div id="cmp-bar">
+    <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
+  </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
   <div id="live-src" style="color:var(--t3)">Source : —</div>
@@ -1085,9 +1088,11 @@ function loadSidebar(){
   document.getElementById('tlItems').innerHTML=s.map(x=>{
     const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
     const isFav=favorites.includes(x.ticker);
-    return`<div class="tb" style="display:flex;align-items:center">
-      <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 5px 0 0">★</button>
-      <span onclick="showStock('${x.ticker}')" style="flex:1;cursor:pointer">${x.ticker}</span>
+    const checked=_cmpSelected&&_cmpSelected.has(x.ticker)?'checked':'';
+    return`<div class="tb" style="display:flex;align-items:center;gap:3px">
+      <input type="checkbox" class="cmp-cb" data-ticker="${x.ticker}" ${checked} title="Comparer" onchange="toggleCompare('${x.ticker}')" style="flex-shrink:0"/>
+      <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 3px 0 0">★</button>
+      <span onclick="showStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
       <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v.toFixed(0)}</span>
     </div>`;}).join('');
 }
@@ -1631,6 +1636,119 @@ function updateLiveStatus() {
 updateLiveStatus();
 fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
 setInterval(updateLiveStatus, 300000);
+</script>
+
+<!-- ── Modal Comparaison ──────────────────────────────────────────────────── -->
+<div id="cmp-modal">
+  <div id="cmp-modal-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:700">⚖️ Comparaison actions</h3>
+      <button onclick="closeCompareModal()" class="btn-o btn" style="padding:4px 12px;font-size:12px">✕ Fermer</button>
+    </div>
+    <div id="cmp-modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ── Comparaison rapide sidebar ──────────────────────────────────────────────
+let _cmpSelected = new Set();
+
+function toggleCompare(ticker) {
+  if (_cmpSelected.has(ticker)) {
+    _cmpSelected.delete(ticker);
+  } else {
+    if (_cmpSelected.size >= 3) {
+      const first = _cmpSelected.values().next().value;
+      _cmpSelected.delete(first);
+    }
+    _cmpSelected.add(ticker);
+  }
+  _updateCmpBar();
+  _refreshCmpCheckboxes();
+}
+
+function _updateCmpBar() {
+  const n = _cmpSelected.size;
+  const bar = document.getElementById('cmp-bar');
+  const cnt = document.getElementById('cmp-count');
+  if (bar) bar.classList.toggle('show', n >= 2);
+  if (cnt) cnt.textContent = n;
+}
+
+function _refreshCmpCheckboxes() {
+  document.querySelectorAll('.cmp-cb').forEach(cb => {
+    cb.checked = _cmpSelected.has(cb.dataset.ticker);
+  });
+}
+
+function openCompareModal() {
+  const tickers = [..._cmpSelected];
+  if (tickers.length < 2) return;
+  const all = window.scores || scores || [];
+  const rows = tickers.map(t => all.find(x => x.ticker === t)).filter(Boolean);
+  if (!rows.length) return;
+
+  const kpis = [
+    ['Score /80', x => (x.composite_adj||0).toFixed(0)+'/80', x => x.composite_adj||0, true],
+    ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
+    ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
+    ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
+    ['P/B', x => (x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—', x => -(x.pb_ref||x.pb_hist||999), true],
+    ['ROE', x => x.roe ? x.roe.toFixed(1)+'%' : '—', x => x.roe||0, true],
+    ['Div%', x => x.div_yield && x.div_yield > 0 ? x.div_yield.toFixed(1)+'%' : '—', x => x.div_yield||0, true],
+    ['Graham /10', x => (x.score_graham||0).toFixed(1), x => x.score_graham||0, true],
+    ['DCF /10', x => (x.score_dcf||0).toFixed(1), x => x.score_dcf||0, true],
+    ['DDM /10', x => (x.score_ddm||0).toFixed(1), x => x.score_ddm||0, true],
+    ['EPV /10', x => (x.score_epv||0).toFixed(1), x => x.score_epv||0, true],
+    ['Buffett /10', x => (x.score_buffett||0).toFixed(1), x => x.score_buffett||0, true],
+    ['Technique /10', x => (x.score_technique||0).toFixed(1), x => x.score_technique||0, true],
+    ['Verdict IA', x => x.pdf_verdict || '—', () => null, false],
+  ];
+
+  const cols = rows.length;
+  let html = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr>
+      <th style="text-align:left;padding:8px;color:var(--t2);font-weight:500;border-bottom:1px solid var(--border)">Indicateur</th>
+      ${rows.map(r=>`<th style="padding:8px;text-align:center;border-bottom:1px solid var(--border)">
+        <div style="font-size:14px;font-weight:700">${r.ticker}</div>
+        <div style="font-size:10px;color:var(--t2)">${r.name||''}</div>
+      </th>`).join('')}
+    </tr></thead><tbody>`;
+
+  kpis.forEach(([label, fmt, rank, higherBetter]) => {
+    const vals = rows.map(r => rank(r));
+    const allNum = vals.every(v => v !== null && !isNaN(v));
+    const best = allNum ? (higherBetter ? Math.max(...vals) : Math.min(...vals.filter(v=>v!=null&&v>-900))) : null;
+
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 8px;color:var(--t2)">${label}</td>
+      ${rows.map((r,i) => {
+        const v = fmt(r);
+        const rv = vals[i];
+        const isBest = allNum && rv !== null && rv === best;
+        const c = isBest ? 'var(--green)' : 'var(--text)';
+        const fw = isBest ? '700' : '400';
+        return `<td style="padding:7px 8px;text-align:center;color:${c};font-weight:${fw}">${v}${isBest?'  ★':''}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  html += `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    ${rows.map(r=>`<button class="btn btn-o" style="font-size:11px;padding:5px 12px" onclick="closeCompareModal();showStock('${r.ticker}')">→ Fiche ${r.ticker}</button>`).join('')}
+    <button class="btn btn-o" style="font-size:11px;padding:5px 12px;margin-left:auto;color:var(--red)" onclick="_cmpSelected.clear();_updateCmpBar();_refreshCmpCheckboxes();closeCompareModal()">Effacer sélection</button>
+  </div>`;
+
+  document.getElementById('cmp-modal-content').innerHTML = html;
+  document.getElementById('cmp-modal').classList.add('show');
+}
+
+function closeCompareModal() {
+  document.getElementById('cmp-modal').classList.remove('show');
+}
+document.getElementById('cmp-modal').addEventListener('click', function(e){
+  if(e.target===this) closeCompareModal();
+});
 </script>
 
 </body></html>
