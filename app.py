@@ -1195,6 +1195,67 @@ def api_price_history():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/analyses/<ticker>")
+def api_analyses_ticker(ticker):
+    """Analyse IA complète depuis analyses_summary.json pour un ticker."""
+    ticker = ticker.upper()
+    try:
+        path = os.path.join(os.path.dirname(__file__), "data", "analyses_summary.json")
+        if not os.path.exists(path):
+            return jsonify({"error": "analyses_summary.json introuvable"}), 404
+        with open(path) as f:
+            data = json.load(f)
+        entry = data.get(ticker)
+        if not entry:
+            return jsonify({"error": f"Aucune analyse pour {ticker}"}), 404
+        return jsonify(entry)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/calendar")
+def api_calendar():
+    """Événements calendrier : ex-div + AG + résultats depuis dividends + announcements."""
+    events = []
+    try:
+        # Ex-dividendes
+        from valuation import STOCK_FUNDAMENTALS
+        for ticker, row in STOCK_FUNDAMENTALS.items():
+            exd = row.get("ex_div_date") or row.get("ex_div")
+            if exd and exd != "N/D":
+                events.append({
+                    "type": "ex-div",
+                    "ticker": ticker,
+                    "date": str(exd),
+                    "label": f"Ex-div {ticker}",
+                    "color": "#4ADE80",
+                    "div_per_share": row.get("div_per_share"),
+                })
+    except Exception:
+        pass
+    try:
+        # Annonces
+        ann_path = os.path.join(os.path.dirname(__file__), "data", "announcements.json")
+        if os.path.exists(ann_path):
+            with open(ann_path) as f:
+                anns = json.load(f)
+            for a in (anns if isinstance(anns, list) else []):
+                if a.get("date"):
+                    t = a.get("type", "").lower()
+                    color = "#60A5FA" if "ag" in t or "assembl" in t else "#FBBF24"
+                    events.append({
+                        "type": t or "evenement",
+                        "ticker": a.get("ticker", ""),
+                        "date": str(a["date"]),
+                        "label": a.get("title") or a.get("label") or t,
+                        "color": color,
+                    })
+    except Exception:
+        pass
+    events.sort(key=lambda x: x.get("date", ""))
+    return jsonify(events)
+
 @app.route("/api/scheduler/status")
 def api_scheduler_status():
     try:

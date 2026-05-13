@@ -141,6 +141,19 @@ input[type=range]{padding:0;height:20px}
 /* ══ Momentum badge ══════════════════════════════════════════════════════════ */
 .mom-up{color:var(--green);font-size:9px;font-weight:700}
 .mom-dn{color:var(--red);font-size:9px;font-weight:700}
+/* ── Fiche société onglets ─────────────────────────────────────────────── */
+.stock-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto}
+.stock-tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .15s}
+.stock-tab:hover{color:var(--text)}
+.stock-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.stock-tab-panel{display:none}
+.stock-tab-panel.active{display:block}
+/* ── Verdict analyste ──────────────────────────────────────────────────── */
+.analyst-verdict{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:12px}
+/* ── Tag news ──────────────────────────────────────────────────────────── */
+.news-tag{font-size:9px;padding:1px 6px;border-radius:8px;background:var(--bg3);color:var(--t3);border:1px solid var(--border)}
+/* ── Raccourcis clavier ────────────────────────────────────────────────── */
+#kbd-hint{position:fixed;bottom:8px;right:8px;font-size:9px;color:var(--t3);pointer-events:none;z-index:50}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
 @media(max-width:900px){
   .g4{grid-template-columns:repeat(2,1fr)}
@@ -2665,6 +2678,45 @@ async function sendChat(){
 }
 
 // ── Fiche action ────────────────────────────────────────────────────────────
+function _stockTab(id){
+  document.querySelectorAll('.stock-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+  document.querySelectorAll('.stock-tab-panel').forEach(p=>p.classList.toggle('active',p.id==='stab-'+id));
+}
+
+function _genVerdict(s){
+  const v=s.composite_adj||0;
+  const qual=v>=65?'une excellente opportunité':v>=55?'une opportunité intéressante':v>=45?'une société correcte':v>=35?'une société à surveiller':'une société risquée';
+  const reasons=[];
+  if(s.pe_ref&&s.pe_ref<15) reasons.push(`P/E faible (${s.pe_ref.toFixed(1)}×)`);
+  else if(s.pe_ref&&s.pe_ref<25) reasons.push(`P/E modéré (${s.pe_ref.toFixed(1)}×)`);
+  if((s.div_yield||0)>5) reasons.push(`dividende solide (${s.div_yield.toFixed(1)}%)`);
+  else if((s.div_yield||0)>2) reasons.push(`dividende correct (${s.div_yield.toFixed(1)}%)`);
+  if((s.roe||0)>15) reasons.push(`ROE élevé (${s.roe}%)`);
+  else if((s.roe||0)>10) reasons.push(`ROE correct (${s.roe}%)`);
+  if((s.pb_ref||99)<1.2) reasons.push(`P/B attractive (${s.pb_ref.toFixed(2)}×)`);
+  if(s.pdf_verdict==='POSITIF') reasons.push('verdict IA positif');
+  if(!reasons.length) reasons.push(`score composite ${v.toFixed(0)}/80`);
+  const col=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
+  const bg=v>=60?'rgba(74,222,128,.1)':v>=45?'rgba(251,191,36,.08)':'rgba(248,113,113,.08)';
+  return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col}">
+    <strong style="color:${col}">📋 Verdict analyste :</strong>
+    <span style="color:var(--t1)"> <strong>${s.ticker}</strong> est ${qual}</span>
+    ${reasons.length?`<span style="color:var(--t2)"> — ${reasons.join(', ')}.</span>`:''}
+  </div>`;
+}
+
+function _shareStockText(s){
+  const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
+    `Score BRVM : ${(s.composite_adj||0).toFixed(0)}/80\n`+
+    `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
+    `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× | ':''}`+
+    `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% | ':''}`+
+    `${s.roe?'ROE : '+s.roe+'%':''}\n`+
+    `Verdict IA : ${s.pdf_verdict||'—'}\n`+
+    `📈 Analysé sur BRVM Dashboard`;
+  navigator.clipboard.writeText(text).then(()=>showNotif('Fiche copiée ✓','green')).catch(()=>prompt('Copiez ce texte :',text));
+}
+
 async function showStock(ticker){
   nav('stock');
   document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.textContent.trim().startsWith(ticker)));
@@ -2708,6 +2760,7 @@ async function showStock(ticker){
           <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a>
             <button onclick="toggleCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
+            <button onclick="_shareStockText(${JSON.stringify(s)})" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>
@@ -2744,6 +2797,14 @@ async function showStock(ticker){
       <button class="btn btn-o" style="margin-top:4px;display:block;font-size:10px" onclick="navToRank('${ticker}')">📊 Voir classement</button>
         </div>
       </div>
+      ${_genVerdict(s)}
+      <!-- Onglets fiche société -->
+      <div class="stock-tabs">
+        <div class="stock-tab active" data-tab="general" onclick="_stockTab('general')">📊 Général</div>
+        <div class="stock-tab" data-tab="history" onclick="_stockTab('history');_loadStockHistory('${ticker}')">📅 Historique 30j</div>
+        <div class="stock-tab" data-tab="aianalysis" onclick="_stockTab('aianalysis');_loadStockAI('${ticker}')">🤖 Analyse IA complète</div>
+      </div>
+      <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
       ${(s.div_per_share&&s.div_per_share>0)||(entry&&entry.div_per_share>0)?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
@@ -2831,6 +2892,23 @@ async function showStock(ticker){
         <div class="card" style="max-height:580px;overflow-y:auto;margin-bottom:0"><div class="ct">📰 Actualités (${(d.news||[]).length})</div>
           ${(d.news||[]).length?(d.news||[]).map(n=>`<div class="news-item"><div class="news-t">${n.title}</div><div class="news-m"><span class="src">${n.source}</span>${n.is_dividend_news?'<span class="b ba">Div</span>':''}${n.is_results_news?'<span class="b bp">Résultats</span>':''}</div></div>`).join(''):'<p style="font-size:12px;color:var(--t2);padding:10px 0">Aucune actualité.</p>'}
         </div>
+      </div>
+      </div><!-- /stab-general -->
+
+      <!-- Onglet Historique 30j -->
+      <div id="stab-history" class="stock-tab-panel">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div class="ct">📅 Cours BOC — 30 derniers jours</div>
+            <span style="font-size:10px;color:var(--t2)">Source : BRVM BOC</span>
+          </div>
+          <div id="stock-hist-table"><p style="color:var(--t2)">Chargement...</p></div>
+        </div>
+      </div>
+
+      <!-- Onglet Analyse IA complète -->
+      <div id="stab-aianalysis" class="stock-tab-panel">
+        <div id="stock-ai-full"><div style="padding:30px;text-align:center;color:var(--t2)">Chargement de l'analyse IA...</div></div>
       </div>`;
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
@@ -2856,6 +2934,76 @@ async function showStock(ticker){
       }
     }
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
+}
+
+function _loadStockHistory(ticker){
+  const el=document.getElementById('stock-hist-table');
+  if(!el||el.dataset.loaded===ticker) return;
+  el.dataset.loaded=ticker;
+  const ph=window._priceHistory||{};
+  const hist=(ph[ticker]||[]).filter(p=>p.price).slice(-30).reverse();
+  if(hist.length>=2){
+    _renderHistTable(el,hist,ticker);
+  } else {
+    fetch('/api/price-history').then(r=>r.json()).then(data=>{
+      const h=(data[ticker]||[]).filter(p=>p.price).slice(-30).reverse();
+      _renderHistTable(el,h,ticker);
+    }).catch(()=>{el.innerHTML='<p style="color:var(--t2)">Données indisponibles.</p>';});
+  }
+}
+
+function _renderHistTable(el,hist,ticker){
+  if(!hist.length){el.innerHTML='<p style="color:var(--t2)">Aucun historique disponible.</p>';return;}
+  const rows=hist.map((p,i)=>{
+    const prev=hist[i+1];
+    const chg=prev&&prev.price?(p.price/prev.price-1)*100:null;
+    const chgC=chg===null?'var(--t2)':chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+    const chgS=chg===null?'—':(chg>=0?'+':'')+chg.toFixed(2)+'%';
+    const srcBadge=p.source==='boc'?'<span style="font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.15);color:var(--blue)">BOC</span>':'<span style="font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(251,191,36,.15);color:var(--amber)">Live</span>';
+    return`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 8px;font-size:11px;color:var(--t2)">${p.date}</td>
+      <td style="padding:6px 8px;font-size:12px;font-weight:600">${Math.round(p.price).toLocaleString('fr-FR')} XOF</td>
+      <td style="padding:6px 8px;font-size:11px;color:${chgC};font-weight:600">${chgS}</td>
+      <td style="padding:6px 8px">${srcBadge}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Date</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Cours</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Variation</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Source</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function _loadStockAI(ticker){
+  const el=document.getElementById('stock-ai-full');
+  if(!el||el.dataset.loaded===ticker) return;
+  el.dataset.loaded=ticker;
+  fetch('/api/analyses/'+ticker).then(r=>r.json()).then(data=>{
+    if(data.error){el.innerHTML=`<div class="card"><p style="color:var(--t2);font-size:12px">Aucune analyse IA disponible pour ${ticker}.</p></div>`;return;}
+    const vC=data.verdict_investisseur==='POSITIF'?'var(--green)':data.verdict_investisseur==='NEGATIF'?'var(--red)':'var(--amber)';
+    const kpis=data.kpis||{};
+    const kpiHtml=Object.entries(kpis).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--t2)">${k}</span><strong>${v}</strong></div>`).join('');
+    const pts=(data.points_cles||[]).map(p=>`<li style="color:var(--green);font-size:11px;margin-bottom:4px">✓ ${p}</li>`).join('');
+    const risques=(data.risques||[]).map(r=>`<li style="color:var(--red);font-size:11px;margin-bottom:4px">✗ ${r}</li>`).join('');
+    const persp=(data.perspectives||[]).map(p=>`<li style="color:var(--blue);font-size:11px;margin-bottom:4px">→ ${p}</li>`).join('');
+    el.innerHTML=`
+      <div class="card" style="margin-bottom:10px;border-left:3px solid ${vC}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="ct">🤖 Analyse IA — ${ticker} ${data.annee||''}</div>
+          <span style="font-size:11px;font-weight:700;color:${vC};padding:3px 10px;border-radius:10px;background:${vC==='var(--green)'?'rgba(74,222,128,.15)':vC==='var(--red)'?'rgba(248,113,113,.15)':'rgba(251,191,36,.15)'}">Verdict : ${data.verdict_investisseur||'—'}</span>
+        </div>
+        ${data.resume?`<p style="font-size:12px;color:var(--t1);line-height:1.7;margin-bottom:12px">${data.resume}</p>`:''}
+        ${kpiHtml?`<div style="margin-bottom:12px">${kpiHtml}</div>`:''}
+      </div>
+      ${pts||risques?`<div class="g2" style="margin-bottom:10px">
+        ${pts?`<div class="card" style="margin-bottom:0;border-left:3px solid var(--green)"><div class="ct">✅ Points clés</div><ul style="padding-left:14px;margin:0">${pts}</ul></div>`:''}
+        ${risques?`<div class="card" style="margin-bottom:0;border-left:3px solid var(--red)"><div class="ct">⚠️ Risques</div><ul style="padding-left:14px;margin:0">${risques}</ul></div>`:''}
+      </div>`:''}
+      ${persp?`<div class="card"><div class="ct">🔭 Perspectives</div><ul style="padding-left:14px;margin:0">${persp}</ul></div>`:''}
+      <div style="font-size:10px;color:var(--t3);margin-top:8px">Analysé le : ${(data.analyzed_at||'').slice(0,10)} · Source : ${data.url||'rapport PDF'}</div>`;
+  }).catch(()=>{el.innerHTML='<div class="card"><p style="color:var(--t2)">Erreur chargement analyse.</p></div>';});
 }
 
 // ── Refresh ─────────────────────────────────────────────────────────────────
