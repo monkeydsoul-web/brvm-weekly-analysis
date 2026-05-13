@@ -1217,6 +1217,190 @@ def api_scheduler_run(job_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/rapport/<ticker>")
+def api_rapport_pdf(ticker):
+    """Génère un rapport PDF pour une société."""
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.units import cm
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        import io
+
+        # Récupérer les données du ticker
+        ranking_path = os.path.join(os.path.dirname(__file__), "data", "live_ranking.json")
+        row = {}
+        if os.path.exists(ranking_path):
+            with open(ranking_path) as f:
+                data = json.load(f)
+            for x in data.get("ranking", []):
+                if x.get("ticker") == ticker.upper():
+                    row = x
+                    break
+
+        if not row:
+            return jsonify({"error": f"Ticker {ticker} introuvable"}), 404
+
+        # Résumé IA si dispo
+        ai_summary = ""
+        ai_paths = [
+            os.path.join(os.path.dirname(__file__), "data", "analyses_summary.json"),
+            os.path.join(os.path.dirname(__file__), "analyses_summary.json"),
+        ]
+        for p in ai_paths:
+            if os.path.exists(p):
+                try:
+                    with open(p) as f:
+                        summ = json.load(f)
+                    ai_summary = summ.get(ticker.upper(), {}).get("summary", "")
+                    if not ai_summary:
+                        ai_summary = summ.get(ticker.upper(), "")
+                    if isinstance(ai_summary, dict):
+                        ai_summary = ai_summary.get("summary", "")
+                except Exception:
+                    pass
+                break
+
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=A4,
+                                leftMargin=2*cm, rightMargin=2*cm,
+                                topMargin=2*cm, bottomMargin=2*cm)
+
+        styles = getSampleStyleSheet()
+        h1 = ParagraphStyle("h1", parent=styles["Title"], fontSize=20, textColor=colors.HexColor("#1E293B"), spaceAfter=4)
+        h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontSize=13, textColor=colors.HexColor("#0F4C8C"), spaceBefore=12, spaceAfter=4)
+        body = ParagraphStyle("body", parent=styles["Normal"], fontSize=10, textColor=colors.HexColor("#334155"), leading=15)
+        small = ParagraphStyle("small", parent=styles["Normal"], fontSize=8, textColor=colors.HexColor("#64748B"))
+        green = colors.HexColor("#16A34A"); red = colors.HexColor("#DC2626"); amber = colors.HexColor("#D97706")
+
+        sc = row.get("composite_adj", 0)
+        sc_color = green if sc >= 60 else (amber if sc >= 40 else red)
+        verdict = row.get("pdf_verdict", "—")
+
+        story = []
+        # En-tête
+        story.append(Paragraph(f"📈 Rapport BRVM — {ticker.upper()}", h1))
+        story.append(Paragraph(row.get("name", ticker.upper()), ParagraphStyle("sub", parent=styles["Normal"], fontSize=12, textColor=colors.HexColor("#64748B"))))
+        story.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} — Source : BRVM Dashboard", small))
+        story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0"), spaceAfter=10))
+
+        # Score + Cours
+        score_data = [
+            ["Score composite", f"{sc:.0f} / 80", "Rang", f"#{row.get('rank','?')}"],
+            ["Cours", f"{row.get('price', 0):,.0f} XOF".replace(",", " "), "Variation", f"{row.get('change_pct', 0):+.2f}%"],
+            ["Verdict IA", verdict, "Secteur", row.get("sector", "—")],
+        ]
+        ts_score = TableStyle([
+            ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#F8FAFC")),
+            ("BACKGROUND", (0,0), (0,-1), colors.HexColor("#EFF6FF")),
+            ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
+            ("FONTSIZE", (0,0), (-1,-1), 10),
+            ("FONTNAME", (1,0), (1,0), "Helvetica-Bold"),
+            ("TEXTCOLOR", (1,0), (1,0), sc_color),
+            ("FONTSIZE", (1,0), (1,0), 16),
+            ("GRID", (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+            ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.HexColor("#F8FAFC"), colors.HexColor("#FFFFFF")]),
+            ("PADDING", (0,0), (-1,-1), 8),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+        story.append(Table(score_data, colWidths=[4*cm, 5*cm, 3*cm, 5*cm], style=ts_score))
+        story.append(Spacer(1, 12))
+
+        # KPIs
+        story.append(Paragraph("Indicateurs financiers clés", h2))
+        pe = row.get("pe_ref") or row.get("pe_hist")
+        pb = row.get("pb_ref") or row.get("pb_hist")
+        kpi_data = [
+            ["Indicateur", "Valeur", "Signal", "Seuil"],
+            ["P/E (cours/BNA)", f"{pe:.1f}×" if pe else "—",
+             "✓ Bon" if pe and pe < 15 else ("~ Correct" if pe and pe < 25 else "✗ Élevé"),
+             "≤ 15 Graham"],
+            ["P/B (cours/BVPA)", f"{pb:.1f}×" if pb else "—",
+             "✓ Bon" if pb and pb < 1.5 else ("~ Correct" if pb and pb < 3 else "✗ Élevé"),
+             "≤ 1.5 Graham"],
+            ["ROE", f"{row.get('roe',0):.1f}%" if row.get('roe') else "—",
+             "✓ Excellent" if (row.get('roe') or 0) > 15 else ("~ Correct" if (row.get('roe') or 0) > 8 else "✗ Faible"),
+             "≥ 15%"],
+            ["Div. yield", f"{row.get('div_yield',0):.1f}%" if row.get('div_yield') else "—",
+             "✓ Bon" if (row.get('div_yield') or 0) > 5 else ("~ Correct" if (row.get('div_yield') or 0) > 2 else "—"),
+             "≥ 5% (attrayant)"],
+            ["BNA (EPS)", f"{row.get('eps',0):,.0f} XOF".replace(",", " ") if row.get('eps') else "—", "—", "Bénéfice/action"],
+            ["BVPA", f"{row.get('bvpa',0):,.0f} XOF".replace(",", " ") if row.get('bvpa') else "—", "—", "Valeur comptable/action"],
+        ]
+        def kpi_color(sig):
+            if "✓" in sig: return green
+            if "✗" in sig: return red
+            return amber
+        ts_kpi = TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#1E40AF")),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("FONTSIZE", (0,0), (-1,-1), 9),
+            ("GRID", (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+            ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.HexColor("#FFFFFF"), colors.HexColor("#F8FAFC")]),
+            ("PADDING", (0,0), (-1,-1), 7),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+        for i, row_d in enumerate(kpi_data[1:], 1):
+            ts_kpi.add("TEXTCOLOR", (2,i), (2,i), kpi_color(row_d[2]))
+            ts_kpi.add("FONTNAME", (2,i), (2,i), "Helvetica-Bold")
+        story.append(Table(kpi_data, colWidths=[4.5*cm, 3.5*cm, 3*cm, 5*cm], style=ts_kpi))
+        story.append(Spacer(1, 12))
+
+        # Scores 8 modèles
+        story.append(Paragraph("Scores des 8 modèles de valorisation (/10 chacun)", h2))
+        models = [
+            ("Graham", "score_graham"), ("DCF/FCF", "score_dcf"), ("DDM", "score_ddm"),
+            ("EPV", "score_epv"), ("Buffett", "score_buffett"), ("Reverse DCF", "score_rev_dcf"),
+            ("Relatif", "score_relatif"), ("Technique", "score_technique"),
+        ]
+        model_data = [["Modèle", "Score /10", "Évaluation"]]
+        for label, key in models:
+            v = row.get(key, 0)
+            ev = "Excellent" if v >= 8 else ("Bon" if v >= 6 else ("Correct" if v >= 4 else "Faible"))
+            model_data.append([label, f"{v:.1f}", ev])
+        ts_model = TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#0F172A")),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("FONTSIZE", (0,0), (-1,-1), 9),
+            ("GRID", (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+            ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.HexColor("#FFFFFF"), colors.HexColor("#F8FAFC")]),
+            ("PADDING", (0,0), (-1,-1), 7),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("ALIGN", (1,0), (1,-1), "CENTER"),
+        ])
+        for i, (_, key) in enumerate(models, 1):
+            v = row.get(key, 0)
+            c = green if v >= 7 else (amber if v >= 4 else red)
+            ts_model.add("TEXTCOLOR", (1,i), (1,i), c)
+            ts_model.add("FONTNAME", (1,i), (1,i), "Helvetica-Bold")
+        story.append(Table(model_data, colWidths=[5*cm, 3*cm, 8*cm], style=ts_model))
+        story.append(Spacer(1, 12))
+
+        # Résumé IA
+        if ai_summary:
+            story.append(Paragraph("Analyse IA — Résumé rapport annuel", h2))
+            story.append(Paragraph(str(ai_summary)[:2000], body))
+            story.append(Spacer(1, 8))
+
+        # Pied de page
+        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#E2E8F0"), spaceAfter=6))
+        story.append(Paragraph("Ce rapport est généré automatiquement à titre informatif. Il ne constitue pas un conseil en investissement.", small))
+
+        doc.build(story)
+        buf.seek(0)
+        from flask import send_file
+        return send_file(buf, mimetype="application/pdf",
+                         as_attachment=True,
+                         download_name=f"BRVM_{ticker.upper()}_{datetime.now().strftime('%Y%m%d')}.pdf")
+    except Exception as e:
+        logger.error(f"PDF rapport {ticker}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     import socket
     import os as _os

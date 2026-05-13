@@ -1408,6 +1408,7 @@ async function showStock(ticker){
           <p style="color:var(--t2);font-size:12px;margin-top:2px">${s.name||''}</p>
           <div id="live-rank-badge" style="margin-top:4px"></div>
           ${fi.description?`<p style="font-size:11px;color:var(--t3);margin-top:3px;max-width:550px;line-height:1.5">${fi.description}</p>`:''}
+          <div style="margin-top:8px"><a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a></div>
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>
       <p style="font-size:11px;color:var(--t2);margin:4px 0 8px;line-height:1.6">${co.description||''}</p>
