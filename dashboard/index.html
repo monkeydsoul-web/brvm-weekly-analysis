@@ -522,34 +522,58 @@ input[type=range]{padding:0;height:20px}
 
 <!-- SIMULATEUR DIVIDENDES -->
 <div class="page" id="page-sim">
-  <div class="ph"><h2>Simulateur de dividendes</h2></div>
-  <div class="g2" style="margin-bottom:12px">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">Paramètres</div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:var(--t2)">Investissement total (XOF)</label>
-        <input type="number" id="simInv" value="1000000" oninput="updateSim()">
-      </div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:var(--t2)">Horizon (années) : <span id="simYearsVal">5</span></label>
-        <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;updateSim()">
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-        <input type="checkbox" id="simReinvest" checked onchange="updateSim()" style="width:auto">
-        <label style="font-size:12px">Réinvestir les dividendes</label>
-      </div>
-      <div class="card" style="background:var(--bg3);margin-bottom:0">
-        <div class="ct">Résultats estimés</div>
-        <div id="simResults"></div>
+  <div class="ph"><h2>Simulateur de revenus dividendes</h2>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-g" onclick="simMarkowitz()">⚡ Répartition optimale</button>
+      <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
+    </div>
+  </div>
+  <!-- Paramètres haut -->
+  <div class="g3" style="margin-bottom:12px">
+    <div class="kpi">
+      <div class="kl">Montant à investir</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <input type="number" id="simInv2" value="1000000" min="10000" step="10000" oninput="simCalc()" style="flex:1">
+        <div style="display:flex;gap:2px">
+          <button id="simCurXOF" class="curr-btn on" onclick="simSetCur('XOF')">XOF</button>
+          <button id="simCurEUR" class="curr-btn" onclick="simSetCur('EUR')">EUR</button>
+          <button id="simCurUSD" class="curr-btn" onclick="simSetCur('USD')">USD</button>
+        </div>
       </div>
     </div>
+    <div class="kpi">
+      <div class="kl">Horizon (années) : <span id="simYearsVal">5</span></div>
+      <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;simCalc()" style="margin-top:8px">
+    </div>
+    <div class="kpi" style="display:flex;align-items:center;gap:10px">
+      <div>
+        <div class="kl">Réinvest. dividendes</div>
+        <input type="checkbox" id="simReinvest2" checked onchange="simCalc()" style="width:auto;margin-top:6px;transform:scale(1.4)">
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:10px;flex:1">
+        <div class="kl">Taux croissance div/an</div>
+        <input type="number" id="simGrowth" value="3" min="0" max="20" step="0.5" oninput="simCalc()" style="margin-top:4px">
+      </div>
+    </div>
+  </div>
+  <!-- KPI résultats -->
+  <div class="g4" id="simKPIs" style="margin-bottom:12px"></div>
+  <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0">
-      <div class="ct">Dividendes projetés par an</div>
-      <div id="cSimDiv" style="width:100%;height:280px"></div>
-      <div class="ct" style="margin-top:12px">Positions simulées (top 10 BRVM)</div>
-      <div style="max-height:200px;overflow-y:auto">
-        <table><thead><tr><th>Ticker</th><th>Rend.</th><th>Div an 1</th><th>Div total</th></tr></thead>
-        <tbody id="simTable"></tbody></table></div>
+      <div class="ct">Répartition par action (sliders)</div>
+      <div id="simSliders2" style="max-height:320px;overflow-y:auto"></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--t2)">Poids total : <span id="simTotalW" style="font-weight:700;color:var(--text)">0%</span></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct">Dividendes projetés sur 5 ans (XOF)</div>
+      <div id="cSimDiv" style="width:100%;height:260px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Détail par action — projection an 1</div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rend. div</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /80</th></tr></thead>
+      <tbody id="simTable2"></tbody></table>
     </div>
   </div>
 </div>
@@ -1647,29 +1671,163 @@ async function applyCustomScores(){
     </tr>`;}).join('');
 }
 
-// ── Simulateur dividendes ──────────────────────────────────────────────────
-async function updateSim(){
-  const inv=parseFloat(document.getElementById('simInv').value)||1000000;
-  const years=parseInt(document.getElementById('simYears').value)||5;
-  const reinvest=document.getElementById('simReinvest').checked;
-  const d=await fetch(`/api/simulate/dividends?investment=${inv}&years=${years}&reinvest=${reinvest}`).then(r=>r.json());
-  document.getElementById('simResults').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><div style="font-size:10px;color:var(--t2)">Dividendes an 1</div><div style="font-size:16px;font-weight:700;color:var(--amber)">${fmt(d.total_annual_yr1)} XOF</div></div>
-      <div><div style="font-size:10px;color:var(--t2)">Total sur ${years} ans</div><div style="font-size:16px;font-weight:700;color:var(--green)">${fmt(d.total_over_period)} XOF</div></div>
+// ── Simulateur dividendes v2 ───────────────────────────────────────────────
+let _simWeights = {}; // ticker → poids [0..100]
+let _simCur = 'XOF';
+
+function updateSim(){ simCalc(); } // legacy alias
+
+function simSetCur(c){
+  _simCur = c;
+  ['XOF','EUR','USD'].forEach(x=>{
+    const el=document.getElementById('simCur'+x);
+    if(el)el.classList.toggle('on',x===c);
+  });
+  simCalc();
+}
+
+function simReset2(){
+  _simWeights={};
+  document.getElementById('simInv2').value='1000000';
+  document.getElementById('simYears').value='5';
+  document.getElementById('simYearsVal').textContent='5';
+  document.getElementById('simReinvest2').checked=true;
+  document.getElementById('simGrowth').value='3';
+  _simCur='XOF';
+  simSetCur('XOF');
+  simBuildSliders();
+  simCalc();
+}
+
+// Répartition optimale : Max Sharpe heuristique = pondérer par score×divYield
+function simMarkowitz(){
+  const divStocks=(window.scores||[]).filter(x=>(x.div_yield||0)>0).slice(0,15);
+  if(!divStocks.length){if(typeof showNotif==='function')showNotif('Données insuffisantes','red');return;}
+  const raw=divStocks.map(x=>{
+    const sc=x.composite_adj||1;
+    const dy=x.div_yield||0;
+    return{ticker:x.ticker,w:sc*dy};
+  });
+  const total=raw.reduce((s,x)=>s+x.w,0);
+  _simWeights={};
+  raw.forEach(x=>{ _simWeights[x.ticker]=Math.round(x.w/total*100); });
+  // Ajuster pour sommer à 100
+  let sum=Object.values(_simWeights).reduce((s,v)=>s+v,0);
+  const keys=Object.keys(_simWeights);
+  if(keys.length&&sum!==100) _simWeights[keys[0]]+=100-sum;
+  simBuildSliders();
+  simCalc();
+  if(typeof showNotif==='function')showNotif('Répartition Max Sharpe appliquée','green');
+}
+
+function simBuildSliders(){
+  const sc=window.scores||[];
+  const all=Object.keys(_simWeights).length
+    ? sc.filter(x=>_simWeights[x.ticker]>0)
+    : sc.filter(x=>(x.div_yield||0)>0).slice(0,10);
+  const el=document.getElementById('simSliders2');
+  if(!el) return;
+  el.innerHTML=all.map(x=>{
+    const w=_simWeights[x.ticker]||0;
+    return`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="showStock('${x.ticker}')">${x.ticker}</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${(x.composite_adj||0).toFixed(0)}/80</span>
+        <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
+      </div>
+      <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
     </div>`;
-  // Chart par année
-  if(d.positions?.length){
-    const allYears=Array.from({length:years},(_,i)=>`An ${i+1}`);
-    const totalByYear=allYears.map((_,i)=>d.positions.reduce((s,p)=>s+(p.yearly?.[i]||0),0));
-    svgBar(document.getElementById('cSimDiv'),allYears,totalByYear,'#FBBF24',280);
+  }).join('');
+}
+
+function simSlide(ticker, val){
+  _simWeights[ticker]=val;
+  const sp=document.getElementById('sw-'+ticker);
+  if(sp) sp.textContent=val+'%';
+  simCalc();
+}
+
+function simCalc(){
+  const el2=document.getElementById('simInv2');
+  const invXOF = (parseFloat(el2?.value)||1000000) / (window._rates&&_simCur==='EUR'?window._rates.EUR:_simCur==='USD'?window._rates.USD:1) * (_simCur==='XOF'?1:1/(_simCur==='EUR'?window._rates?.EUR||1:window._rates?.USD||1));
+  const invBase=parseFloat(el2?.value)||1000000;
+  const years=parseInt(document.getElementById('simYears')?.value)||5;
+  const reinvest=document.getElementById('simReinvest2')?.checked??true;
+  const growthPct=(parseFloat(document.getElementById('simGrowth')?.value)||3)/100;
+
+  const sc=window.scores||[];
+  const weights=_simWeights;
+  const hasWeights=Object.values(weights).some(v=>v>0);
+
+  let positions=[];
+  if(hasWeights){
+    positions=sc.filter(x=>weights[x.ticker]>0).map(x=>({...x,w:weights[x.ticker]/100}));
+  } else {
+    const divStocks=sc.filter(x=>(x.div_yield||0)>0).slice(0,10);
+    const n=divStocks.length||1;
+    positions=divStocks.map(x=>({...x,w:1/n}));
   }
-  document.getElementById('simTable').innerHTML=(d.positions||[]).map(p=>`<tr>
-    <td><strong>${p.ticker}</strong></td>
-    <td style="color:var(--amber)">${p.div_yield?.toFixed(1)}%</td>
-    <td>${fmt(p.annual_div_yr1)}</td>
-    <td style="color:var(--green);font-weight:600">${fmt(p.total_divs)}</td>
-  </tr>`).join('');
+
+  const total=positions.reduce((s,p)=>s+p.w,0)||1;
+  let simW=document.getElementById('simTotalW');
+  if(simW)simW.textContent=Math.round(total*100)+'%';
+
+  // Calcul par position
+  let divAn1=0, divTotal=0;
+  const byYear=Array.from({length:years},()=>0);
+  const details=positions.map(p=>{
+    const alloc=invBase*(p.w/total);
+    const dy=(p.div_yield||0)/100;
+    let cumValue=alloc;
+    let cumDiv=0;
+    const yearly=[];
+    for(let y=0;y<years;y++){
+      const effectiveDy=dy*Math.pow(1+growthPct,y);
+      const d=cumValue*effectiveDy;
+      if(reinvest) cumValue+=d;
+      cumDiv+=d;
+      yearly.push(d);
+      byYear[y]+=d;
+    }
+    if(years>0)divAn1+=yearly[0];
+    divTotal+=cumDiv;
+    return{ticker:p.ticker,sector:p.sector,alloc,dy_pct:(p.div_yield||0),div_yr1:yearly[0]||0,div_total:cumDiv,ex_div:p.ex_div_date||'—',score:p.composite_adj||0,w:p.w/total};
+  });
+
+  // KPIs
+  const kpiEl=document.getElementById('simKPIs');
+  if(kpiEl){
+    const cur=_simCur;
+    const r=window._rates||{EUR:1/655,USD:1/615};
+    const toDisp=v=>_simCur==='XOF'?fmtXOF(v):_simCur==='EUR'?'€'+Math.round(v*(r.EUR||1/655)).toLocaleString('fr-FR'):'$'+Math.round(v*(r.USD||1/615)).toLocaleString('fr-FR');
+    kpiEl.innerHTML=[
+      ['Dividendes annuels', toDisp(divAn1), 'var(--amber)'],
+      ['Par mois (an 1)',     toDisp(divAn1/12), 'var(--amber)'],
+      ['Par trimestre',       toDisp(divAn1/4), 'var(--amber)'],
+      ['Total sur '+years+' ans', toDisp(divTotal), 'var(--green)'],
+    ].map(([l,v,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c};font-size:16px">${v}</div></div>`).join('');
+  }
+
+  // Chart projection
+  const chartEl=document.getElementById('cSimDiv');
+  if(chartEl&&byYear.length)
+    svgBar(chartEl,byYear.map((_,i)=>`An ${i+1}`),byYear.map(v=>Math.round(v)),'#FBBF24',260);
+
+  // Tableau détail
+  const tbody=document.getElementById('simTable2');
+  if(tbody){
+    tbody.innerHTML=details.sort((a,b)=>b.div_yr1-a.div_yr1).map(p=>`<tr onclick="showStock('${p.ticker}')" style="cursor:pointer">
+      <td><strong>${p.ticker}</strong></td>
+      <td style="color:var(--t2);font-size:11px">${p.sector||'—'}</td>
+      <td>${fmtXOF(Math.round(p.alloc))}</td>
+      <td style="color:var(--amber);font-weight:600">${p.dy_pct.toFixed(2)}%</td>
+      <td style="color:var(--green);font-weight:700">${fmtXOF(Math.round(p.div_yr1))}</td>
+      <td style="color:var(--t3);font-size:10px">${p.ex_div}</td>
+      <td><span class="b ${bcls(p.score)}">${p.score.toFixed(0)}</span></td>
+    </tr>`).join('');
+  }
+
+  if(Object.keys(_simWeights).length===0) simBuildSliders();
 }
 
 // ── Alertes ────────────────────────────────────────────────────────────────
@@ -1973,7 +2131,7 @@ async function loadStatus(){
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
-const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:updateSim,sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();},screener:()=>{if(typeof initScreener!=="undefined")initScreener();},analyse:()=>renderCorrelMatrix()};
+const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:()=>{simBuildSliders();simCalc();},sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();},screener:()=>{if(typeof initScreener!=="undefined")initScreener();},analyse:()=>renderCorrelMatrix()};
 
 // ── Matrice de corrélation ─────────────────────────────────────────────────
 function renderCorrelMatrix() {
