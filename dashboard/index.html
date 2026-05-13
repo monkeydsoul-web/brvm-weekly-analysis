@@ -162,6 +162,7 @@ input[type=range]{padding:0;height:20px}
     <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
     <div class="ni" onclick="nav('screener');initScreener()"><span>🔍</span> Screener</div>
     <div class="ni" onclick="nav('analyse');setTimeout(renderCorrelMatrix,200)"><span>📐</span> Analyse &amp; Optim</div>
+    <div class="ni" onclick="nav('glossaire');initGlossaire()"><span>📚</span> Glossaire</div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -707,6 +708,15 @@ input[type=range]{padding:0;height:20px}
       <button id="tour-next-btn" onclick="tourNext()" class="btn" style="padding:8px 18px;font-size:12px">Suivant →</button>
     </div>
   </div>
+</div>
+<!-- ── Glossaire ──────────────────────────────────────────────────────────── -->
+<div class="page" id="page-glossaire">
+  <div class="ph">
+    <h2>📚 Glossaire financier BRVM</h2>
+    <input id="gloss-search" placeholder="🔍 Rechercher un terme..." oninput="filterGlossaire(this.value)"
+      style="padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);width:240px">
+  </div>
+  <div id="gloss-list" style="max-width:800px"></div>
 </div>
 </main></div>
 <script src="/simulator.js"></script>
@@ -1915,6 +1925,61 @@ setInterval(updateLiveStatus, 300000);
 </div>
 
 <script>
+// ── Glossaire financier ────────────────────────────────────────────────────
+const _glossTerms = [
+  { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
+  { term:'BRVM-30', def:'Indice des 30 plus grandes capitalisations boursières de la BRVM. C\'est l\'équivalent du CAC 40 français ou du Dow Jones américain pour l\'Afrique de l\'Ouest.', ex:'Si le BRVM-30 gagne +2.5% en un mois, les 30 plus grandes entreprises de la BRVM valent globalement 2.5% de plus qu\'un mois avant.' },
+  { term:'BRVM-COMPOSITE', def:'Indice qui inclut TOUTES les sociétés cotées à la BRVM (47 actuellement). Plus large que le BRVM-30, il reflète la santé globale du marché boursier de l\'Afrique de l\'Ouest.', ex:'BRVM-COMPOSITE à 200 points et il y a 5 ans il était à 150 → croissance de 33% de l\'ensemble du marché.' },
+  { term:'Buffett Score', def:'Critères d\'investissement de Warren Buffett : ROE ≥ 15%, croissance du BNA, avantage concurrentiel durable ("moat"), dette faible, gestion honnête. Score /10 dans notre dashboard.', ex:'SNTS (Sonatel) obtient souvent un bon score Buffett car elle a un quasi-monopole des télécoms au Sénégal = avantage concurrentiel fort.' },
+  { term:'Capitalisation boursière', def:'La valeur totale de toutes les actions d\'une société sur le marché. Formule : cours × nombre d\'actions. Permet de classer les sociétés par taille.', ex:'SGBC : cours 12 000 XOF × 10 millions d\'actions = capitalisation de 120 milliards XOF (~183 millions €).' },
+  { term:'DCF (Discounted Cash Flows)', def:'Valeur actualisée des flux de trésorerie futurs. Principe : 1 000 XOF dans 5 ans vaut moins que 1 000 XOF aujourd\'hui (inflation, risque). Le DCF calcule ce que vaut l\'entreprise basé sur ses bénéfices futurs projetés.', ex:'Si le DCF calcule une valeur de 10 000 XOF pour une action qui cote 7 000 XOF → potentiel de hausse de +43%.' },
+  { term:'DDM (Dividend Discount Model)', def:'Modèle Gordon-Shapiro : valeur d\'une action = dividende futur ÷ (taux de rendement requis − taux de croissance). Pertinent pour les sociétés versant des dividendes réguliers et croissants.', ex:'SIBC verse 330 XOF/an. Avec un taux requis de 10% et une croissance de 3% → valeur DDM = 330 ÷ (10%−3%) = 4 714 XOF.' },
+  { term:'Dividende', def:'Part des bénéfices annuels qu\'une société distribue à ses actionnaires. Versé généralement une fois par an. Le rendement = dividende ÷ cours actuel. Un dividende stable et croissant est signe de bonne santé financière.', ex:'Vous possédez 100 actions SIBC à 7 300 XOF. Dividende = 330 XOF/action → vous recevez 33 000 XOF cette année sans vendre.' },
+  { term:'EPV (Earnings Power Value)', def:'Méthode Greenwald : valeur de la société si elle ne croît plus jamais. C\'est le scénario pessimiste. Si le cours est encore sous l\'EPV, l\'action est très bon marché même sans croissance future.', ex:'Si EPV = 5 000 XOF et cours = 4 000 XOF → même sans croissance future, l\'action semble sous-évaluée de 20%.' },
+  { term:'Ex-date (Ex-dividende)', def:'Date à partir de laquelle acheter l\'action ne donne plus droit au prochain dividende. Pour toucher le dividende, il faut posséder l\'action AVANT cette date.', ex:'Ex-date CABC : 15 juin. Si vous achetez le 14 juin → vous touchez le dividende. Si vous achetez le 16 juin → vous le ratez pour cette année.' },
+  { term:'Frontière efficiente', def:'Concept de Markowitz : ensemble des portefeuilles offrant le meilleur rendement possible pour chaque niveau de risque. Aucun portefeuille ne peut offrir plus de rendement pour le même risque.', ex:'Un portefeuille sur la frontière avec 12% de rendement et 8% de volatilité est "efficient" — impossible de faire mieux à risque égal.' },
+  { term:'Graham (Score)', def:'Critères de Benjamin Graham, le père de l\'analyse fondamentale : P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, stabilité des bénéfices. La "formule de Graham" = √(22.5 × BNA × BVPA).', ex:'Graham score SIBC = 10/10 car BNA élevé, P/E très faible (1.3×), P/B < 1.5 → tous les critères sont respectés.' },
+  { term:'P/B (Price-to-Book)', def:'Cours ÷ Valeur comptable par action (BVPA). Mesure si l\'action est chère par rapport à ce que possède réellement la société (actifs nets). Graham recommande P/B ≤ 1.5.', ex:'P/B = 0.8 signifie que vous achetez 1 XOF d\'actifs nets pour 0.80 XOF. Vous payez moins que la valeur des actifs → opportunité potentielle.' },
+  { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
+  { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
+  { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
+  { term:'Score /80 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) moins une éventuelle pénalité géopolitique. Score ≥ 65 = excellente opportunité, ≥ 50 = bonne société, < 40 = prudence.', ex:'SIBC 68/80 : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9 = 68. Tous les modèles s\'accordent.' },
+  { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
+  { term:'Verdict POSITIF / NEUTRE / NÉGATIF', def:'Résultat de l\'analyse IA (Claude) des rapports annuels de la société. POSITIF = la situation financière est bonne et en amélioration. NEUTRE = stable sans signal fort. NÉGATIF = des points d\'inquiétude identifiés.', ex:'Verdict POSITIF SIBC basé sur : croissance du BNA, dividende stable, faible endettement et bonne gouvernance identifiés dans le rapport annuel.' },
+  { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },
+  { term:'YTD (Year-to-Date)', def:'Performance depuis le 1er janvier de l\'année en cours. Permet de comparer les performances sur la même période pour tous les acteurs du marché.', ex:'BRVM-COMPOSITE YTD +8.3% au 13 mai signifie que l\'indice a gagné 8.3% depuis le 1er janvier de cette année.' },
+];
+
+let _glossFiltered = [..._glossTerms];
+
+function initGlossaire() {
+  _glossFiltered = [..._glossTerms].sort((a,b)=>a.term.localeCompare(b.term));
+  renderGlossaire();
+}
+
+function filterGlossaire(q) {
+  q = q.toLowerCase();
+  _glossFiltered = _glossTerms
+    .filter(t => !q || t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q))
+    .sort((a,b)=>a.term.localeCompare(b.term));
+  renderGlossaire();
+}
+
+function renderGlossaire() {
+  const el = document.getElementById('gloss-list');
+  if (!el) return;
+  if (!_glossFiltered.length) {
+    el.innerHTML = '<p style="color:var(--t2);padding:20px">Aucun terme trouvé.</p>';
+    return;
+  }
+  el.innerHTML = _glossFiltered.map(t => `
+    <div class="gloss-card">
+      <div class="gloss-term">${t.term}</div>
+      <div class="gloss-def">${t.def}</div>
+      ${t.ex ? `<div class="gloss-ex">📌 ${t.ex}</div>` : ''}
+    </div>`).join('');
+}
+
 // ── Aide contextuelle — contenu par page ───────────────────────────────────
 const _helpContent = {
   dash: {
