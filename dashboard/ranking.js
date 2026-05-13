@@ -84,7 +84,7 @@ function renderRankLive() {
         <span class="star ${isFav ? 'fav' : ''}">★</span></td>
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name || ''}</td>
-      <td>${x.price ? x.price.toLocaleString('fr-FR') : 'N/D'}</td>
+      <td>${x.price ? (typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')) : 'N/D'}</td>
       <td style="padding:2px 4px;vertical-align:middle">${_spk}</td>
       <td style="color:${chgC}">${chg ? chg.toFixed(1) + '%' : '—'}</td>
       <td style="color:var(--t2)">${pe}</td>

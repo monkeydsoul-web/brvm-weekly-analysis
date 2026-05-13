@@ -98,20 +98,29 @@ function buildKpiCards(s) {
   const ca  = entry.pdf_ca_mfcfa;
   const rn  = entry.pdf_rn_mfcfa;
 
+  const _fmtXOF = typeof fmtXOF === 'function' ? fmtXOF : (n => n != null ? Number(n).toLocaleString('fr-FR') + ' XOF' : '—');
   const kpis = [
-    ['P/E', pe ? pe.toFixed(1)+'×' : '—', pe && pe < 15 ? 'var(--green)' : pe && pe < 25 ? 'var(--amber)' : 'var(--red)', 'Price/Earnings'],
-    ['P/B', pb ? pb.toFixed(1)+'×' : '—', pb && pb < 1.5 ? 'var(--green)' : pb && pb < 3 ? 'var(--amber)' : 'var(--red)', 'Price/Book'],
-    ['ROE', roe ? roe.toFixed(1)+'%' : '—', roe && roe > 15 ? 'var(--green)' : roe && roe > 8 ? 'var(--amber)' : 'var(--red)', 'Return on Equity'],
-    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', div && div > 5 ? 'var(--green)' : div && div > 2 ? 'var(--amber)' : 'var(--t2)', 'Rendement dividende'],
-    ['BNA', eps ? Math.round(eps).toLocaleString('fr-FR')+' F' : '—', 'var(--blue)', 'Bénéfice Net par Action'],
-    ['BVPA', bvpa ? Math.round(bvpa).toLocaleString('fr-FR')+' F' : '—', 'var(--blue)', 'Book Value par Action'],
-    ['CA', ca ? (ca/1000).toFixed(0)+' Mrd' : '—', 'var(--t2)', 'Chiffre d\'affaires'],
-    ['RN', rn ? (rn/1000).toFixed(0)+' Mrd' : '—', 'var(--t2)', 'Résultat net'],
+    ['P/E', pe ? pe.toFixed(1)+'×' : '—', pe && pe < 15 ? 'var(--green)' : pe && pe < 25 ? 'var(--amber)' : 'var(--red)',
+      'Price/Earnings (cours ÷ BNA). Seuil Graham : ≤ 15. Un P/E élevé = action chère par rapport aux bénéfices.'],
+    ['P/B', pb ? pb.toFixed(1)+'×' : '—', pb && pb < 1.5 ? 'var(--green)' : pb && pb < 3 ? 'var(--amber)' : 'var(--red)',
+      'Price/Book (cours ÷ valeur comptable). Seuil Graham : ≤ 1.5. P/B < 1 = l\'action se traite sous sa valeur comptable.'],
+    ['ROE', roe ? roe.toFixed(1)+'%' : '—', roe && roe > 15 ? 'var(--green)' : roe && roe > 8 ? 'var(--amber)' : 'var(--red)',
+      'Return On Equity = Résultat net ÷ Capitaux propres. Mesure la rentabilité. ≥ 15% = excellent, ≥ 8% = correct.'],
+    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', div && div > 5 ? 'var(--green)' : div && div > 2 ? 'var(--amber)' : 'var(--t2)',
+      'Rendement du dividende = dividende annuel ÷ cours actuel. Un rendement élevé peut signaler une sous-évaluation ou un risque de coupe.'],
+    ['BNA', eps ? _fmtXOF(Math.round(eps)) : '—', 'var(--blue)',
+      'Bénéfice Net par Action (EPS) — BNA issu des données BOC ou PDF. Utilisé pour calculer P/E, Graham et EPV.'],
+    ['BVPA', bvpa ? _fmtXOF(Math.round(bvpa)) : '—', 'var(--blue)',
+      'Book Value par Action (valeur comptable / nombre d\'actions). Utilisé pour P/B et la cible Graham = √(22.5 × BNA × BVPA).'],
+    ['CA', ca ? (ca/1000).toFixed(0)+' Mrd' : '—', 'var(--t2)',
+      'Chiffre d\'Affaires annuel en milliards de FCFA (source : rapports PDF analysés par IA).'],
+    ['RN', rn ? (rn/1000).toFixed(0)+' Mrd' : '—', 'var(--t2)',
+      'Résultat Net annuel en milliards de FCFA (source : rapports PDF analysés par IA).'],
   ];
 
   return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
     ${kpis.map(([l,v,c,tip]) => `
-      <div class="kpi" title="${tip}" style="cursor:help">
+      <div class="kpi tt" data-tt="${tip}">
         <div class="kl">${l}</div>
         <div class="kv" style="color:${c};font-size:14px">${v}</div>
       </div>`).join('')}

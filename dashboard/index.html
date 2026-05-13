@@ -80,6 +80,14 @@ input[type=range]{padding:0;height:20px}
 .search-box{display:flex;gap:8px;margin-bottom:14px}
 .search-box input{flex:1}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+/* ── Tooltips CSS-purs ───────────────────────────────────────────────────── */
+.tt{position:relative}
+.tt[data-tt]::after{content:attr(data-tt);position:absolute;bottom:calc(100%+8px);left:50%;transform:translateX(-50%);background:#0F172A;color:#F1F5F9;font-size:10px;padding:5px 9px;border-radius:6px;white-space:normal;width:190px;border:1px solid #334155;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;font-weight:400;line-height:1.5;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.tt[data-tt]:hover::after{opacity:1}
+.tt-r[data-tt]::after{left:auto;right:0;transform:none}
+/* ── Convertisseur devise ────────────────────────────────────────────────── */
+.curr-btn{font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .1s}
+.curr-btn.on{background:var(--border);color:var(--text);font-weight:600}
 </style></head>
 <body><div class="app">
 <aside class="sb">
@@ -91,6 +99,12 @@ input[type=range]{padding:0;height:20px}
         <span id="live-dot" style="width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block"></span>
         <span id="live-label">—</span>
       </div>
+      <div style="margin-top:5px;display:flex;align-items:center;gap:2px">
+        <button id="cb-xof" class="curr-btn on" onclick="setCurrency('XOF')">XOF</button>
+        <button id="cb-eur" class="curr-btn" onclick="setCurrency('EUR')">EUR</button>
+        <button id="cb-usd" class="curr-btn" onclick="setCurrency('USD')">USD</button>
+      </div>
+      <div id="curr-rate" style="font-size:8px;color:var(--t3);margin-top:2px"></div>
     </div>
     <button class="btn-o btn" onclick="toggleTheme()" style="margin-left:auto;padding:4px 8px;font-size:11px" title="Thème">🌙</button>
   </div>
@@ -211,7 +225,26 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <div class="card" style="padding:0;overflow-x:auto">
-    <table><thead><tr><th>#</th><th>⭐</th><th>Ticker</th><th>Société</th><th>Cours</th><th>30j</th><th>Var%</th><th>P/E</th><th>P/B</th><th>Div%</th><th>ROE</th><th>Verdict</th><th>Score</th><th>G</th><th>DCF</th><th>DDM</th><th>EPV</th><th>Buf</th><th>Rev</th><th>Rel</th><th>Tech</th></tr></thead>
+    <table><thead><tr>
+      <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
+      <th class="tt" data-tt="Cours de clôture BOC BRVM (XOF). Toggle XOF/EUR/USD en haut à gauche.">Cours</th>
+      <th class="tt" data-tt="Sparkline 30 derniers jours — tendance graphique du cours BOC">30j</th>
+      <th class="tt" data-tt="Variation journalière du cours en %">Var%</th>
+      <th class="tt" data-tt="P/E : cours / bénéfice par action. Seuil Graham : ≤ 15 (idéal ≤ 10)">P/E</th>
+      <th class="tt" data-tt="P/B : cours / valeur comptable. Seuil Graham : ≤ 1.5 (idéal ≤ 1.0)">P/B</th>
+      <th class="tt" data-tt="Rendement du dividende = dividende annuel / cours actuel">Div%</th>
+      <th class="tt" data-tt="ROE (Return On Equity) = résultat net / capitaux propres. ≥ 15% = excellent">ROE</th>
+      <th class="tt" data-tt="Verdict IA issu de l'analyse des rapports annuels PDF (POSITIF / NEUTRE / NÉGATIF)">Verdict</th>
+      <th class="tt" data-tt="Score composite /80 : somme pondérée des 8 modèles de valorisation">Score</th>
+      <th class="tt" data-tt="Graham /10 — P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, résultats stables">G</th>
+      <th class="tt" data-tt="DCF/FCF /10 — Rendement des bénéfices (1/PE) × qualité ROE × stabilité FCF">DCF</th>
+      <th class="tt" data-tt="DDM /10 — Dividend Discount Model Gordon : D1/(r−g) vs cours actuel">DDM</th>
+      <th class="tt" data-tt="EPV /10 — Earnings Power Value (Greenwald) : EPS normalisé / WACC vs cours">EPV</th>
+      <th class="tt" data-tt="Buffett /10 — ROE ≥ 15%, croissance BNA, avantage concurrentiel (moat), faible dette">Buf</th>
+      <th class="tt" data-tt="Reverse DCF /10 — Taux de croissance implicite dans le cours vs WACC">Rev</th>
+      <th class="tt" data-tt="Relatif /10 — P/E et EV/EBITDA vs médianes sectorielles BRVM">Rel</th>
+      <th class="tt" data-tt="Technique /10 — Momentum (var. jour, tendance 30j), volume, perf. annuelle BOC">Tech</th>
+    </tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
 </div>
@@ -544,12 +577,15 @@ input[type=range]{padding:0;height:20px}
       <div class="ct">🚀 Outils d'optimisation</div>
       <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Optimisez votre portefeuille BRVM avec Markowitz et le backtesting.</p>
       <button onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))"
+        class="tt tt-r" data-tt="Frontière efficiente de Markowitz : simule 3 000 portefeuilles aléatoires pour trouver le ratio Sharpe optimal parmi les Top 8 actions."
         style="width:100%;padding:14px;background:linear-gradient(135deg,#8B5CF6,#60A5FA);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px">
         📐 Optimisation Markowitz (Top 8)</button>
       <button onclick="openBacktest((window.scores||[]).slice(0,5).map(x=>x.ticker))"
+        class="tt tt-r" data-tt="Backtesting historique : simule la performance passée de votre portefeuille sur l'historique de prix BOC disponible."
         style="width:100%;padding:10px;background:linear-gradient(135deg,#60A5FA,#4ADE80);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:8px">
         📊 Backtesting portefeuille</button>
       <button onclick="openCompareAnalysis((window.scores||[]).slice(0,4).map(x=>x.ticker))"
+        class="tt tt-r" data-tt="Analyse comparative par Claude AI : évalue et classe plusieurs actions BRVM en termes de valorisation, dividendes, risques et attractivité."
         style="width:100%;padding:10px;background:linear-gradient(135deg,#4ADE80,#22D3EE);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer">
         🤖 Analyse comparative IA</button>
     </div>
@@ -589,7 +625,79 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
-function fmtXOF(n){return n!=null?Number(n).toLocaleString('fr-FR')+' XOF':'—'}
+
+// ── Convertisseur de devises ───────────────────────────────────────────────
+window._currency = 'XOF';
+window._rates = { EUR: null, USD: null };
+
+function fetchExchangeRates() {
+  fetch('https://api.exchangerate-api.com/v4/latest/XOF')
+    .then(r => r.json())
+    .then(d => {
+      window._rates.EUR = d.rates.EUR;
+      window._rates.USD = d.rates.USD;
+      _updateCurrencyUI();
+    })
+    .catch(() => {
+      // Taux de secours BCEAO (1 EUR ≈ 655.96 XOF)
+      window._rates.EUR = 1 / 655.96;
+      window._rates.USD = 1 / 600;
+      _updateCurrencyUI();
+    });
+  // Rafraîchir toutes les heures
+  setTimeout(fetchExchangeRates, 3600000);
+}
+
+function _updateCurrencyUI() {
+  const el = document.getElementById('curr-rate');
+  if (el && window._rates.EUR) {
+    const eur = (1000 * window._rates.EUR).toFixed(2);
+    const usd = window._rates.USD ? (1000 * window._rates.USD).toFixed(2) : '?';
+    el.textContent = `1 000 XOF = ${eur}€ / $${usd}`;
+  }
+}
+
+function setCurrency(c) {
+  window._currency = c;
+  ['xof','eur','usd'].forEach(id => {
+    const btn = document.getElementById('cb-' + id);
+    if (btn) btn.classList.toggle('on', id === c.toLowerCase());
+  });
+  // Re-rendu de la page active
+  const active = document.querySelector('.page.on')?.id?.replace('page-','');
+  if (active === 'rank') renderRankLive();
+  else if (active === 'dash') renderDash({});
+  else if (active === 'div') renderDiv();
+  else if (active === 'targets') renderTargets();
+  else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
+}
+
+function convertXOF(n) {
+  const num = Number(n);
+  if (!num || isNaN(num)) return num;
+  if (window._currency === 'EUR' && window._rates.EUR) return num * window._rates.EUR;
+  if (window._currency === 'USD' && window._rates.USD) return num * window._rates.USD;
+  return num;
+}
+
+function currencySymbol() {
+  if (window._currency === 'EUR') return '€';
+  if (window._currency === 'USD') return '$';
+  return 'XOF';
+}
+
+// Formate un montant XOF dans la devise active
+function fmtXOF(n) {
+  if (n == null) return '—';
+  const raw = Number(n);
+  const sym = currencySymbol();
+  if (sym === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
+  const val = convertXOF(raw);
+  const str = val >= 100
+    ? val.toLocaleString('fr-FR', {maximumFractionDigits: 0})
+    : val.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  return sym === '€' ? str + ' €' : '$ ' + str;
+}
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 let dark=true;
@@ -721,7 +829,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();
     setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
@@ -757,11 +865,11 @@ function renderDash(m){
   const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   const wd=scores.filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
   document.getElementById('kpis').innerHTML=[
-    ['Actions analysées',scores.length,'var(--blue)'],
-    ['Score fort (≥60)',s.filter(x=>(x.composite_adj||0)>=60).length,'var(--green)'],
-    ['Avec dividende',wd.length,'var(--amber)'],
-    ['Top rendement',wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—','var(--amber)'],
-  ].map(([l,v,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
+    ['Actions analysées',scores.length,'var(--blue)','Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'],
+    ['Score fort (≥60)',s.filter(x=>(x.composite_adj||0)>=60).length,'var(--green)','Actions avec score composite ≥ 60/80 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
+    ['Avec dividende',wd.length,'var(--amber)','Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'],
+    ['Top rendement',wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—','var(--amber)','Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
+  ].map(([l,v,c,tip])=>`<div class="kpi tt" data-tt="${tip}"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
   document.getElementById('podium').innerHTML=s.slice(0,3).map((x,i)=>`
     <div class="card" style="border-top:3px solid ${['#FBBF24','#94A3B8','#CD7C3C'][i]};cursor:pointer;margin-bottom:0" onclick="showStock('${x.ticker}')">
       <div style="font-size:18px;margin-bottom:4px">${['🥇','🥈','🥉'][i]}</div>
@@ -1026,7 +1134,7 @@ async function renderDiv(){
       </div>
       <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px">
         <span>📅 Ex-div: <strong style="color:var(--t1)">${x.ex_div_date}</strong></span>
-        <span>💰 ${fmt(x.div_per_share)} XOF/action</span>
+        <span>💰 ${fmtXOF(x.div_per_share)}/action</span>
         ${x.eps?`<span>BNA: ${Math.round(x.eps).toLocaleString('fr-FR')} XOF</span>`:''}
       </div>
     </div>`;
@@ -1039,7 +1147,7 @@ async function renderDiv(){
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
-      <td style="font-weight:600">${fmt(x.div_per_share)} XOF</td>
+      <td style="font-weight:600">${fmtXOF(x.div_per_share)}</td>
       <td><span style="font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span></td>
       <td style="font-size:10px;color:var(--t2)">${x.ex_div_date||'N/D'}</td>
       <td style="font-size:10px;color:var(--t2)">${pe}</td>
@@ -1079,11 +1187,11 @@ async function renderTargets(){
     const vb=up>=30?'bg':up<0?'br':'ba';
     return`<tr onclick="showStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
-      <td>${fmt(t.current_price)}</td>
-      <td style="color:var(--t2)">${t.graham_target?fmt(t.graham_target):'—'}</td>
-      <td style="color:var(--t2)">${t.epv_target?fmt(t.epv_target):'—'}</td>
-      <td style="color:var(--t2)">${t.pb_target?fmt(t.pb_target):'—'}</td>
-      <td style="font-weight:600;color:${vc}">${t.avg_target?fmt(t.avg_target):'—'}</td>
+      <td>${fmtXOF(t.current_price)}</td>
+      <td style="color:var(--t2)">${t.graham_target?fmtXOF(t.graham_target):'—'}</td>
+      <td style="color:var(--t2)">${t.epv_target?fmtXOF(t.epv_target):'—'}</td>
+      <td style="color:var(--t2)">${t.pb_target?fmtXOF(t.pb_target):'—'}</td>
+      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}">${up?up.toFixed(1)+'%':'—'}</td>
       <td><span class="b ${bcls(t.score||0)}">${(t.score||0).toFixed(0)}</span></td>
       <td><span class="b ${vb}" style="font-size:9px">${t.verdict||''}</span></td>
@@ -1291,7 +1399,7 @@ async function showStock(ticker){
     </div>`:'' }
         </div>
         <div style="text-align:right">
-          <div style="font-size:22px;font-weight:700">${s.price?s.price.toLocaleString('fr-FR'):'N/D'} <span style="font-size:12px;color:var(--t2)">XOF</span></div>
+          <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
           <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
           <div id="live-score-container" style="margin-top:8px"></div>
@@ -1306,7 +1414,7 @@ async function showStock(ticker){
       ${(s.div_per_share&&s.div_per_share>0)||(entry&&entry.div_per_share>0)?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[
-            ['Par action',fmt(s.div_per_share||entry?.div_per_share||0)+' XOF','var(--amber)'],
+            ['Par action',fmtXOF(s.div_per_share||entry?.div_per_share||0),'var(--amber)'],
             ['Rendement',((s.div_yield||entry?.div_yield||0)).toFixed(2)+'%','var(--amber)'],
             ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
@@ -1314,7 +1422,7 @@ async function showStock(ticker){
         </div></div>`:''}
       <div class="card" style="margin-bottom:12px"><div class="ct">Scores détaillés — 8 modèles</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-          ${models.map(([l,mv,det])=>{const mc=mv>=7?'var(--green)':mv>=4?'var(--amber)':'var(--red)';return`<div style="background:var(--bg3);border-radius:8px;padding:10px" title="${det}"><div style="font-size:10px;color:var(--t2);margin-bottom:3px">${l}</div><div class="mbar"><div class="mfill" style="width:${mv*10}%;background:${mc}"></div></div><div style="font-size:14px;font-weight:700;color:${mc}">${mv.toFixed(1)}</div></div>`;}).join('')}
+          ${models.map(([l,mv,det])=>{const mc=mv>=7?'var(--green)':mv>=4?'var(--amber)':'var(--red)';return`<div class="tt" data-tt="${det||l+' /10'}" style="background:var(--bg3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t2);margin-bottom:3px">${l}</div><div class="mbar"><div class="mfill" style="width:${mv*10}%;background:${mc}"></div></div><div style="font-size:14px;font-weight:700;color:${mc}">${mv.toFixed(1)}</div></div>`;}).join('')}
         </div></div>
       ${fi.strengths||fi.risks?`<div class="g2" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
