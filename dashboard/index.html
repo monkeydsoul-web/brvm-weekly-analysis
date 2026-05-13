@@ -409,7 +409,7 @@ input[type=range]{padding:0;height:20px}
   <div class="ph"><h2>Mon portefeuille</h2>
     <button class="btn btn-g" onclick="showAddPosition()">+ Ajouter position</button>
   </div>
-  <div id="portSummary" class="g4" style="margin-bottom:14px"></div>
+  <div id="portSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
 <div class="card" style="margin-bottom:12px" id="simPortCard">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="ct">Simulateur portefeuille live</div>
@@ -441,29 +441,30 @@ input[type=range]{padding:0;height:20px}
   <div id="sim-warning" style="font-size:10px;color:var(--red);margin-top:6px;display:none">Poids total doit etre 100%</div>
 </div>
   <div id="addPositionForm" style="display:none" class="card" style="margin-bottom:12px">
-    <div class="ct">Ajouter / modifier une position</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+    <div class="ct">Ajouter une position</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;flex-wrap:wrap">
       <div><label style="font-size:10px;color:var(--t2)">Ticker</label>
         <select id="portTicker"><option value="">Sélectionner...</option></select></div>
       <div><label style="font-size:10px;color:var(--t2)">Nombre d'actions</label>
-        <input type="number" id="portShares" placeholder="Ex: 100"></div>
-      <div><label style="font-size:10px;color:var(--t2)">Prix d'achat moyen XOF</label>
-        <input type="number" id="portPrice" placeholder="Ex: 28500"></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-g" onclick="addPosition('buy')">Acheter</button>
-        <button class="btn btn-r" onclick="addPosition('sell')">Vendre</button>
+        <input type="number" id="portShares" placeholder="Ex: 100" min="1"></div>
+      <div><label style="font-size:10px;color:var(--t2)">Prix d'achat XOF</label>
+        <input type="number" id="portPrice" placeholder="Ex: 28500" min="1"></div>
+      <div><label style="font-size:10px;color:var(--t2)">Date d'achat</label>
+        <input type="date" id="portDate"></div>
+      <div style="display:flex;gap:6px;align-self:flex-end">
+        <button class="btn btn-g" onclick="addPositionLS()">Acheter</button>
         <button class="btn btn-o" onclick="hideAddPosition()">✕</button>
       </div>
     </div>
   </div>
   <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct">Positions</div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Actions</th><th>Px moy.</th><th>Cours</th><th>Valeur</th><th>G/P</th><th>G/P%</th><th>Poids</th><th>Div ann.</th><th></th></tr></thead>
+    <div class="card" style="margin-bottom:0"><div class="ct">Positions actuelles</div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nom</th><th>Qté</th><th>Px achat</th><th>Cours</th><th>Valeur</th><th>G/P XOF</th><th>G/P%</th><th>Poids</th><th>Div/an</th><th>Date</th><th></th></tr></thead>
       <tbody id="portTable"></tbody></table></div></div>
     <div class="card" style="margin-bottom:0">
-      <div class="ct">Répartition sectorielle</div>
+      <div class="ct">Répartition par secteur</div>
       <div id="portSectDiv" style="width:100%;height:220px"></div>
-      <div class="ct" style="margin-top:12px">Transactions récentes</div>
+      <div class="ct" style="margin-top:12px">Historique transactions</div>
       <div id="portTransactions" style="max-height:200px;overflow-y:auto"></div>
     </div>
   </div>
@@ -1361,6 +1362,145 @@ function renderRank(){
     </tr>`;}).join('');
 }
 
+// ── Portfolio localStorage ─────────────────────────────────────────────────
+const _LS_PORT = 'brvm_portfolio_v2';
+const _LS_TX   = 'brvm_transactions_v2';
+
+function _portData(){ try{return JSON.parse(localStorage.getItem(_LS_PORT)||'[]');}catch{return[];} }
+function _txData(){   try{return JSON.parse(localStorage.getItem(_LS_TX)||'[]');}catch{return[];} }
+function _portSave(data){ localStorage.setItem(_LS_PORT,JSON.stringify(data)); }
+function _txSave(data){ localStorage.setItem(_LS_TX,JSON.stringify(data)); }
+
+function loadPortfolio(){
+  const positions = _portData();
+  const txs       = _txData();
+  const sc        = window.scores || [];
+
+  // Enrichir avec prix live
+  const enriched = positions.map(pos => {
+    const live = sc.find(x=>x.ticker===pos.ticker) || {};
+    const curPrice = live.price || pos.avg_price;
+    const value    = curPrice * pos.shares;
+    const cost     = pos.avg_price * pos.shares;
+    const gain     = value - cost;
+    const gainPct  = cost ? +((gain/cost)*100).toFixed(2) : 0;
+    const annDiv   = (live.div_yield||0)/100 * value;
+    return {...pos, current_price:curPrice, value, gain, gain_pct:gainPct, annual_div:annDiv,
+            sector:live.sector||'', name:live.name||pos.ticker};
+  });
+
+  const totalValue = enriched.reduce((s,p)=>s+p.value,0);
+  const totalCost  = enriched.reduce((s,p)=>s+p.avg_price*p.shares,0);
+  const totalGain  = totalValue - totalCost;
+  const totalGainPct = totalCost ? +((totalGain/totalCost)*100).toFixed(2) : 0;
+  const annDivTotal  = enriched.reduce((s,p)=>s+p.annual_div,0);
+
+  // Meilleure / pire
+  const sorted = [...enriched].sort((a,b)=>b.gain_pct-a.gain_pct);
+  const best = sorted[0], worst = sorted[sorted.length-1];
+
+  const gainC = totalGain >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('portSummary').innerHTML = [
+    ['Valeur totale',     fmtXOF(totalValue),    'var(--blue)'],
+    ['Gain / Perte',      `${fmtXOF(totalGain)} (${totalGainPct > 0 ? '+' : ''}${totalGainPct}%)`, gainC],
+    ['Meilleure position',best ? `${best.ticker} +${best.gain_pct}%` : '—', 'var(--green)'],
+    ['Pire position',     worst && worst!==best ? `${worst.ticker} ${worst.gain_pct}%` : '—', 'var(--red)'],
+    ['Div. annuels',      fmtXOF(annDivTotal),   'var(--amber)'],
+    ['Rend. sur coût',    totalCost ? ((annDivTotal/totalCost)*100).toFixed(2)+'%' : '—', 'var(--amber)'],
+  ].map(([l,v,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c};font-size:15px">${v}</div></div>`).join('');
+
+  document.getElementById('portTable').innerHTML = enriched.length
+    ? enriched.map(pos => {
+        const w = totalValue ? ((pos.value/totalValue)*100).toFixed(1) : 0;
+        const gc = pos.gain>=0?'var(--green)':'var(--red)';
+        return`<tr onclick="showStock('${pos.ticker}')">
+          <td><strong>${pos.ticker}</strong></td>
+          <td style="font-size:11px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis">${pos.name||''}</td>
+          <td>${pos.shares}</td>
+          <td>${fmt(pos.avg_price)}</td>
+          <td style="font-weight:600">${fmt(pos.current_price)}</td>
+          <td>${fmt(Math.round(pos.value))}</td>
+          <td style="color:${gc}">${pos.gain>=0?'+':''}${fmt(Math.round(pos.gain))}</td>
+          <td style="color:${gc};font-weight:700">${pos.gain>=0?'+':''}${pos.gain_pct}%</td>
+          <td style="color:var(--t2)">${w}%</td>
+          <td style="color:var(--amber)">${fmt(Math.round(pos.annual_div))}</td>
+          <td style="color:var(--t3);font-size:10px">${pos.date||'—'}</td>
+          <td><button class="btn btn-r" style="font-size:9px;padding:2px 6px" onclick="event.stopPropagation();removePositionLS('${pos.ticker}')">✕</button></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="12" style="text-align:center;color:var(--t2);padding:20px">Aucune position. Ajoutez des actions.</td></tr>';
+
+  // Donut sectoriel
+  if(enriched.length){
+    const secs={};
+    enriched.forEach(p=>{if(p.sector)secs[p.sector]=(secs[p.sector]||0)+p.value;});
+    if(Object.keys(secs).length)svgDonut(document.getElementById('portSectDiv'),Object.keys(secs),Object.values(secs).map(v=>Math.round(v/1000)),220);
+  }
+
+  // Transactions récentes
+  document.getElementById('portTransactions').innerHTML = txs.slice(-15).reverse().map(tx=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--row-border);font-size:11px">
+      <span><strong>${tx.ticker}</strong> <span class="b ${tx.action==='buy'?'bg':'br'}">${tx.action==='buy'?'Achat':'Vente'}</span></span>
+      <span style="color:var(--t2)">${tx.shares} × ${fmt(tx.price)} XOF</span>
+      <span style="color:var(--t3)">${tx.date||''}</span>
+    </div>`).join('') || '<p style="font-size:11px;color:var(--t2)">Aucune transaction.</p>';
+}
+
+function showAddPosition(ticker=''){
+  document.getElementById('addPositionForm').style.display='block';
+  const today = new Date().toISOString().slice(0,10);
+  const dtEl = document.getElementById('portDate');
+  if(dtEl && !dtEl.value) dtEl.value = today;
+  if(ticker){const sel=document.getElementById('portTicker');if(sel)sel.value=ticker;}
+}
+function hideAddPosition(){ document.getElementById('addPositionForm').style.display='none'; }
+
+function addPositionLS(){
+  const ticker = document.getElementById('portTicker').value;
+  const shares = parseFloat(document.getElementById('portShares').value);
+  const price  = parseFloat(document.getElementById('portPrice').value);
+  const date   = document.getElementById('portDate').value || new Date().toISOString().slice(0,10);
+  if(!ticker || !shares || !price){ if(typeof showNotif==='function')showNotif('Remplissez tous les champs','red'); return; }
+
+  const positions = _portData();
+  const existing  = positions.findIndex(p=>p.ticker===ticker);
+  if(existing>=0){
+    const old = positions[existing];
+    const totalShares = old.shares + shares;
+    const avgPrice = (old.avg_price*old.shares + price*shares) / totalShares;
+    positions[existing] = {...old, shares:totalShares, avg_price:+avgPrice.toFixed(2)};
+  } else {
+    positions.push({ ticker, shares, avg_price:price, date });
+  }
+  _portSave(positions);
+
+  const txs = _txData();
+  txs.push({ ticker, action:'buy', shares, price, total:shares*price, date });
+  _txSave(txs);
+
+  hideAddPosition();
+  document.getElementById('portShares').value='';
+  document.getElementById('portPrice').value='';
+  loadPortfolio();
+  if(typeof showNotif==='function') showNotif(`${ticker} ajouté au portefeuille`,'green');
+}
+
+function removePositionLS(ticker){
+  if(!confirm(`Supprimer ${ticker} du portefeuille ?`)) return;
+  const positions = _portData().filter(p=>p.ticker!==ticker);
+  _portSave(positions);
+  const txs = _txData();
+  txs.push({ ticker, action:'sell', shares:0, price:0, total:0, date:new Date().toISOString().slice(0,10) });
+  _txSave(txs);
+  loadPortfolio();
+  if(typeof showNotif==='function') showNotif(`${ticker} supprimé`,'red');
+}
+
+// Garder removePosition (ancienne API) pour backward compat
+function removePosition(ticker){ removePositionLS(ticker); }
+// Garder addPosition (ancienne API) pour backward compat
+function addPosition(){ addPositionLS(); }
+
 function navToRank(ticker){
   nav('rank');
   setTimeout(()=>{
@@ -1372,61 +1512,7 @@ function navToRank(ticker){
   },50);
 }
 
-// ── Portfolio ──────────────────────────────────────────────────────────────
-async function loadPortfolio(){
-  const p=await fetch('/api/portfolio').then(r=>r.json());
-  portfolio=p;
-  const gainC=p.total_gain>=0?'var(--green)':'var(--red)';
-  document.getElementById('portSummary').innerHTML=[
-    ['Valeur totale',fmtXOF(p.total_value),'var(--blue)'],
-    ['Gain/Perte',`${fmtXOF(p.total_gain)} (${p.total_gain_pct}%)`,'gainC'],
-    ['Dividendes annuels',fmtXOF(p.annual_div),'var(--amber)'],
-    ['Rend. sur coût',p.div_yield_on_cost+'%','var(--amber)'],
-  ].map(([l,v,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c==='gainC'?gainC:c};font-size:16px">${v}</div></div>`).join('');
-  document.getElementById('portTable').innerHTML=(p.positions||[]).length?
-    p.positions.map(pos=>`<tr>
-      <td><strong>${pos.ticker}</strong></td><td>${pos.shares}</td>
-      <td>${fmt(pos.avg_price)}</td><td>${fmt(pos.current_price)}</td>
-      <td style="font-weight:600">${fmt(pos.value)}</td>
-      <td style="color:${pos.gain>=0?'var(--green)':'var(--red)'}">${pos.gain>=0?'+':''}${fmt(pos.gain)}</td>
-      <td style="color:${pos.gain_pct>=0?'var(--green)':'var(--red)'}">${pos.gain_pct}%</td>
-      <td style="color:var(--t2)">${pos.weight_pct}%</td>
-      <td style="color:var(--amber)">${fmt(pos.annual_div)}</td>
-      <td><button class="btn btn-r" style="font-size:9px;padding:2px 6px" onclick="removePosition('${pos.ticker}')">✕</button></td>
-    </tr>`).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--t2);padding:20px">Aucune position. Ajoutez des actions pour suivre votre portefeuille.</td></tr>';
-
-  // Sector donut for portfolio
-  if(p.positions?.length){
-    const secs={};
-    p.positions.forEach(pos=>{const s=scores.find(x=>x.ticker===pos.ticker);if(s?.sector)secs[s.sector]=(secs[s.sector]||0)+pos.value;});
-    svgDonut(document.getElementById('portSectDiv'),Object.keys(secs),Object.values(secs).map(v=>Math.round(v/1000)),220);
-  }
-
-  // Transactions
-  const t=await fetch('/api/transactions').then(r=>r.json());
-  document.getElementById('portTransactions').innerHTML=t.slice(-10).reverse().map(tx=>`
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
-      <span><strong>${tx.ticker}</strong> <span class="b ${tx.action==='buy'?'bg':'br'}">${tx.action==='buy'?'Achat':'Vente'}</span></span>
-      <span style="color:var(--t2)">${tx.shares} × ${fmt(tx.price)} = ${fmt(tx.total)} XOF</span>
-      <span style="color:var(--t3)">${tx.date}</span>
-    </div>`).join('')||'<p style="font-size:11px;color:var(--t2)">Aucune transaction.</p>';
-}
-
-function showAddPosition(){document.getElementById('addPositionForm').style.display='block';}
-function hideAddPosition(){document.getElementById('addPositionForm').style.display='none';}
-async function addPosition(action){
-  const ticker=document.getElementById('portTicker').value;
-  const shares=parseFloat(document.getElementById('portShares').value);
-  const price=parseFloat(document.getElementById('portPrice').value);
-  if(!ticker||!shares||!price)return;
-  await fetch('/api/transactions',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ticker,action,shares,price})});
-  hideAddPosition();loadPortfolio();
-}
-async function removePosition(ticker){
-  await fetch('/api/portfolio/'+ticker,{method:'DELETE'});
-  loadPortfolio();
-}
+// (portfolio remplacé par localStorage ci-dessus)
 
 // ── Dividendes ─────────────────────────────────────────────────────────────
 async function renderDiv(){
