@@ -1345,7 +1345,7 @@ function renderRank(){
     const ph = window._priceHistory || {};
     const hist30 = (ph[x.ticker]||[]).filter(p=>p.source==='boc').slice(-30);
     const spk = hist30.length>=2 ? sparkline(hist30, 80, 26) : '<span id="spk-'+x.ticker+'" style="color:var(--t3);font-size:9px;display:inline-block;width:80px"></span>';
-    return`<tr onclick="showStock('${x.ticker}')">
+    return`<tr id="rank-row-${x.ticker}" onclick="showStock('${x.ticker}')">
       <td style="color:var(--t2)">${i+1}</td>
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
       <td><strong>${x.ticker}</strong></td>
@@ -1359,6 +1359,17 @@ function renderRank(){
       <td><span class="b ${bcls(v)}">${v.toFixed(0)}</span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td style="color:${sc};font-weight:600">${sv.toFixed(0)}</td>`;}).join('')}
     </tr>`;}).join('');
+}
+
+function navToRank(ticker){
+  nav('rank');
+  setTimeout(()=>{
+    renderRankLive&&renderRankLive();
+    setTimeout(()=>{
+      const row=document.getElementById('rank-row-'+ticker);
+      if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.style.outline='2px solid var(--blue)';setTimeout(()=>row.style.outline='',2000);}
+    },300);
+  },50);
 }
 
 // ── Portfolio ──────────────────────────────────────────────────────────────
@@ -1735,11 +1746,13 @@ async function showStock(ticker){
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
           <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
           <div id="live-score-container" style="margin-top:8px"></div>
+          <div id="stock-spark-mini" style="margin:6px 0;display:flex;justify-content:flex-end"></div>
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
       <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px;background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(34,211,238,0.2));border-color:var(--green)" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
       <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
+      <button class="btn btn-o" style="margin-top:4px;display:block;font-size:10px" onclick="navToRank('${ticker}')">📊 Voir classement</button>
         </div>
       </div>
       ${buildKpiCards(s)}
@@ -1796,6 +1809,25 @@ async function showStock(ticker){
         <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">${ai}</div>
         ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong> <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fi.upside_pct>=0?'+':''}${fi.upside_pct}%)</span></div>`:''}</div>`:''}
       ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
+      <div class="g2" style="margin-bottom:12px">
+        <div class="card" style="margin-bottom:0;border-left:3px solid var(--purple)">
+          <div class="ct">📰 Actualités récentes</div>
+          ${(()=>{
+            const tickNews=(window.news||[]).filter(n=>(n.tickers||[]).includes(ticker)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3);
+            if(!tickNews.length) return '<p style="font-size:11px;color:var(--t2)">Aucune actualité récente.</p>';
+            return tickNews.map(n=>`<div class="news-item"><div class="news-t" style="font-size:11px;font-weight:600;line-height:1.4;margin-bottom:2px">${n.title}</div><div style="font-size:10px;color:var(--t3);display:flex;gap:6px;align-items:center"><span>${n.source||''}</span><span>${n.date||''}</span>${n.is_dividend_news?'<span class="b ba" style="font-size:9px">Div</span>':''}${n.is_results_news?'<span class="b bp" style="font-size:9px">Résultats</span>':''}</div></div>`).join('');
+          })()}
+        </div>
+        <div class="card" style="margin-bottom:0;border-left:3px solid var(--blue)">
+          <div class="ct">🔗 Sociétés similaires</div>
+          ${(()=>{
+            const sect=s.sector||'';const sc0=s.composite_adj||0;
+            const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
+            if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
+            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="showStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${pv.toFixed(0)}/80</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+          })()}
+        </div>
+      </div>
       <div class="g2">
         <div>
           ${ci?`<div class="card" style="margin-bottom:12px"><div class="ct">🌍 Commodités — Exposition ${ci.exp}</div>
@@ -1818,6 +1850,22 @@ async function showStock(ticker){
     window._openTicker = ticker;
     renderLiveRankBadge(ticker);
     loadReports(ticker);
+    // Mini sparkline 30j BOC dans l'en-tête
+    const _miniSpkEl = document.getElementById('stock-spark-mini');
+    if(_miniSpkEl){
+      const _ph=window._priceHistory||{};
+      const _hist30=(_ph[ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-30);
+      if(_hist30.length>=3){_miniSpkEl.innerHTML=sparkline(_hist30,120,40);}
+      else{
+        // Try loading price history
+        fetch('/api/price-history/'+ticker).then(r=>r.json()).then(data=>{
+          if(data&&data.length>=3){
+            const svg=sparkline(data.slice(-30),120,40);
+            if(_miniSpkEl)_miniSpkEl.innerHTML=svg;
+          }
+        }).catch(()=>{});
+      }
+    }
   }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
 
