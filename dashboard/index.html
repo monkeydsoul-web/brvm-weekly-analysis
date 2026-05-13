@@ -177,6 +177,9 @@ input[type=range]{padding:0;height:20px}
     <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
     <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
   </div>
+  <div style="padding:4px 8px;border-top:1px solid var(--border)">
+    <button onclick="startTour()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">🎓 Revoir le tour guidé</button>
+  </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
   <div id="live-src" style="color:var(--t3)">Source : —</div>
@@ -956,7 +959,7 @@ async function init(){
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
+    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
     setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
@@ -1925,6 +1928,91 @@ setInterval(updateLiveStatus, 300000);
 </div>
 
 <script>
+// ── Tour guidé au premier lancement ───────────────────────────────────────
+const _tourSteps = [
+  {
+    title: '👋 Bienvenue sur BRVM Analyzer !',
+    body: 'Ce dashboard vous permet d\'analyser les 47 actions cotées sur la Bourse Régionale des Valeurs Mobilières d\'Afrique de l\'Ouest.<br><br>Ce tour rapide (5 étapes) vous explique les fonctionnalités essentielles. Cliquez sur <strong>Suivant →</strong> pour commencer.',
+    highlight: null,
+    btn: 'Commencer →'
+  },
+  {
+    title: '🏆 Les scores /80 — comprendre d\'un coup d\'œil',
+    body: 'Chaque société reçoit un <strong>score sur 80 points</strong> calculé par 8 modèles financiers reconnus (Graham, DCF, Buffett…).<br><br>🟢 ≥ 60/80 = Excellente opportunité<br>🟡 40–60/80 = Société correcte<br>🔴 &lt; 40/80 = Prudence recommandée<br><br>Le classement complet est dans l\'onglet <strong>🏆 Classement</strong>.',
+    highlight: '#page-dash .g3',
+    btn: 'Suivant →'
+  },
+  {
+    title: '💎 Les Opportunités du moment',
+    body: 'Ce widget identifie automatiquement les <strong>meilleures affaires potentielles</strong> : sociétés avec un bon score, un dividende attrayant et un prix raisonnable.<br><br>Critères : Score ≥ 55 + Dividende ≥ 5% + P/E &lt; 10<br><br>Cliquez sur une carte pour voir la fiche détaillée.',
+    highlight: '#opportunities-widget',
+    btn: 'Suivant →'
+  },
+  {
+    title: '💱 Changer de devise (XOF / EUR / USD)',
+    body: 'Tous les prix sont en <strong>Francs CFA (XOF)</strong> par défaut. Vous pouvez basculer en Euros ou en Dollars américains en cliquant sur les boutons <strong>XOF · EUR · USD</strong> en haut de la barre latérale.<br><br>Les taux sont mis à jour automatiquement via l\'API de change.',
+    highlight: '.logo',
+    btn: 'Suivant →'
+  },
+  {
+    title: '🎉 Vous êtes prêt !',
+    body: 'Vous connaissez maintenant l\'essentiel. Voici vos prochaines étapes :<br><br>① Cliquez sur <strong>🏆 Classement</strong> pour voir toutes les 47 sociétés<br>② Cliquez sur une société pour ouvrir sa fiche détaillée<br>③ Cliquez sur <strong>❓</strong> (bas à droite) pour l\'aide contextuelle<br>④ Explorez le <strong>📚 Glossaire</strong> si un terme vous échappe<br><br><em>Bonne analyse !</em>',
+    highlight: null,
+    btn: '✓ Commencer'
+  }
+];
+
+let _tourStep = 0;
+let _tourActive = false;
+let _tourHighlightEl = null;
+
+function startTour() {
+  _tourStep = 0;
+  _tourActive = true;
+  document.getElementById('tour-overlay').classList.add('show');
+  renderTourStep();
+}
+
+function endTour() {
+  document.getElementById('tour-overlay').classList.remove('show');
+  _tourActive = false;
+  localStorage.setItem('brvm_tour_done', '1');
+  _clearTourHighlight();
+}
+
+function tourNext() {
+  _tourStep++;
+  if (_tourStep >= _tourSteps.length) { endTour(); return; }
+  renderTourStep();
+}
+
+function _clearTourHighlight() {
+  if (_tourHighlightEl) { _tourHighlightEl.classList.remove('tour-highlight'); _tourHighlightEl = null; }
+}
+
+function renderTourStep() {
+  const step = _tourSteps[_tourStep];
+  if (!step) return;
+  _clearTourHighlight();
+  // Highlight
+  if (step.highlight) {
+    const el = document.querySelector(step.highlight);
+    if (el) { el.classList.add('tour-highlight'); _tourHighlightEl = el; el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  }
+  // Dots
+  document.getElementById('tour-dots').innerHTML = _tourSteps.map((_,i)=>`<span class="tour-step-dot${i===_tourStep?' on':''}"></span>`).join('');
+  // Content
+  document.getElementById('tour-content').innerHTML = `
+    <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:8px">Étape ${_tourStep+1} / ${_tourSteps.length}</div>
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:12px;line-height:1.3">${step.title}</h3>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">${step.body}</div>`;
+  document.getElementById('tour-next-btn').textContent = step.btn || 'Suivant →';
+}
+
+function checkTourFirst() {
+  if (!localStorage.getItem('brvm_tour_done')) setTimeout(startTour, 1500);
+}
+
 // ── Glossaire financier ────────────────────────────────────────────────────
 const _glossTerms = [
   { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
