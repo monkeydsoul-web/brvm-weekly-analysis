@@ -371,19 +371,19 @@ input[type=range]{padding:0;height:20px}
   <nav class="nav">
     <div class="ni on" onclick="nav('dash')"><span>🏠</span> <span class="ni-label">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
     <div class="ni" onclick="nav('rank')"><span>🏆</span> <span class="ni-label">Classement</span></div>
-    <div class="ni" onclick="nav('screener');initScreener()"><span>🔍</span> <span class="ni-label">Screener</span></div>
+    <div class="ni" onclick="nav('screener')"><span>🔍</span> <span class="ni-label">Screener</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('sectors');renderSectorPage()"><span>📊</span> <span class="ni-label">Secteurs</span></div>
+      <div class="ni ni-sub" onclick="nav('sectors')"><span>📊</span> <span class="ni-label">Secteurs</span></div>
       <div class="ni ni-sub" onclick="nav('news')"><span>📰</span> <span class="ni-label">Actualités</span></div>
       <div class="ni ni-sub" onclick="nav('comm')"><span>🌍</span> <span class="ni-label">Commodités</span></div>
-      <div class="ni ni-sub" onclick="nav('macro');renderMacroPage()"><span>🏦</span> <span class="ni-label">Macro UEMOA</span></div>
-      <div class="ni ni-sub" onclick="nav('calendar');renderCalendarPage()"><span>📅</span> <span class="ni-label">Calendrier</span></div>
+      <div class="ni ni-sub" onclick="nav('macro')"><span>🏦</span> <span class="ni-label">Macro UEMOA</span></div>
+      <div class="ni ni-sub" onclick="nav('calendar')"><span>📅</span> <span class="ni-label">Calendrier</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
-      <div class="ni ni-sub" onclick="nav('analyse');setTimeout(renderCorrelMatrix,200)"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
-      <div class="ni ni-sub" onclick="nav('previsions');renderPrevisionsPage()"><span>🔮</span> <span class="ni-label">Prévisions IA</span></div>
+      <div class="ni ni-sub" onclick="nav('analyse')"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
+      <div class="ni ni-sub" onclick="nav('previsions')"><span>🔮</span> <span class="ni-label">Prévisions IA</span></div>
       <div class="ni ni-sub" onclick="nav('score-custom')"><span>⚖️</span> <span class="ni-label">Score personnalisé</span></div>
       <div class="ni ni-sub" onclick="nav('targets')"><span>🎯</span> <span class="ni-label">Prix cibles</span></div>
       <div class="ni ni-sub" onclick="nav('perf')"><span>📈</span> <span class="ni-label">Performances</span></div>
@@ -4290,7 +4290,18 @@ async function loadStatus(){
 }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
-const pageLoaders={port:loadPortfolio,alerts:()=>{if(typeof loadAlertsLocal!=="undefined"){loadAlertsLocal();renderAlertsPanel();}},sim:()=>{simBuildSliders();simCalc();},sectors:()=>{if(typeof renderSectorPage!=="undefined")renderSectorPage();},perf:()=>{if(typeof renderPerfPage!=="undefined")renderPerfPage();},screener:()=>{if(typeof initScreener!=="undefined")initScreener();},analyse:()=>renderCorrelMatrix(),previsions:()=>{if(typeof renderPrevisionsPage!=="undefined")renderPrevisionsPage();}};
+const pageLoaders={
+  port:     loadPortfolio,
+  alerts:   ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
+  sim:      ()=>{simBuildSliders();simCalc();},
+  sectors:  ()=>{if(typeof renderSectorPage!=='undefined')renderSectorPage();},
+  perf:     ()=>{if(typeof renderPerfPage!=='undefined')renderPerfPage();},
+  screener: ()=>{if(typeof initScreener!=='undefined')initScreener();},
+  analyse:  ()=>renderCorrelMatrix(),
+  previsions:()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
+  macro:    ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
+  calendar: ()=>{if(typeof renderCalendarPage!=='undefined')renderCalendarPage();},
+};
 
 // ── Matrice de corrélation ─────────────────────────────────────────────────
 function renderCorrelMatrix() {
@@ -5131,12 +5142,13 @@ function _showKbdHint(label) {
   el._timer = setTimeout(() => { el.style.display = 'none'; }, 1500);
 }
 
-// Breadcrumb mis à jour par nav()
+// Breadcrumb + pageLoaders déclenchés par nav()
 const _origNav = nav;
 nav = function(id) {
   _origNav(id);
   const bcEl = document.getElementById('bc-page');
   if (bcEl) bcEl.textContent = _bcLabels[id] || id;
+  if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
 };
 
 // Bouton changelog dans sidebar
