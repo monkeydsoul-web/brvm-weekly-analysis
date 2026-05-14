@@ -2020,6 +2020,7 @@ async function renderDividendesVenir() {
   const el = document.getElementById('dividendes-venir-content');
   if (!el) return;
   let items;
+  let isEstimated = false;
   try {
     const data = await fetch('/api/dividends').then(r => r.json());
     const today = new Date(); today.setHours(0,0,0,0);
@@ -2039,7 +2040,6 @@ async function renderDividendesVenir() {
       const d = new Date(s); return isNaN(d) ? null : d;
     }
     const withDates = data.filter(x => x.ex_div_date && x.ex_div_date !== 'N/D' && (x.div_yield||0) > 0);
-    let isEstimated = false;
     // Try future dates first
     items = withDates
       .map(x => ({ ...x, _date: parseFr(x.ex_div_date) }))
