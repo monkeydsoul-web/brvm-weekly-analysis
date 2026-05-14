@@ -436,13 +436,18 @@ input[type=range]{padding:0;height:20px}
       </div>
     </div>
     <div id="heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:60px"></div>
-    <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--t3)">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>&gt;+2%</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block"></span>0%→+2%</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block"></span>Stable</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#f87171;display:inline-block"></span>0%→-2%</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2%</span>
-      <span style="margin-left:auto;color:var(--t3)">Taille = Score · Couleur = Var%</span>
+    <div style="margin-top:8px">
+      <div style="font-size:9px;color:var(--t3);margin-bottom:4px;font-style:italic">
+        💡 <strong>Comment lire la heatmap :</strong> chaque bloc représente une action — sa <strong>taille</strong> reflète son score /80 (plus gros = mieux noté), sa <strong>couleur</strong> reflète la variation du cours aujourd'hui.
+      </div>
+      <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>&gt;+2% Forte hausse</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block"></span>0%→+2% Hausse</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block"></span>Stable 0%</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#f87171;display:inline-block"></span>0%→-2% Baisse</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2% Forte baisse</span>
+        <span style="margin-left:auto;color:var(--t3);font-size:9px">Taille = Score /80 · Couleur = Var%</span>
+      </div>
     </div>
   </div>
   <!-- Flux de capitaux -->
@@ -476,6 +481,26 @@ input[type=range]{padding:0;height:20px}
       <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openCompareAnalysis(_compareAnalysisTickers.length?_compareAnalysisTickers:(window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">🤖 Analyse IA</button>
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
+    </div>
+  </div>
+  <!-- Guide de lecture classement -->
+  <div style="margin-bottom:8px">
+    <button onclick="(function(b){const d=document.getElementById('rank-guide');const open=d.style.display!=='none';d.style.display=open?'none':'block';b.textContent=open?'📖 Guide de lecture du classement ▼':'📖 Guide de lecture ▲';})(this)"
+      style="font-size:10px;color:var(--blue);background:none;border:1px solid var(--blue);border-radius:5px;padding:3px 10px;cursor:pointer">📖 Guide de lecture du classement ▼</button>
+    <div id="rank-guide" style="display:none;margin-top:8px;background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--t2);line-height:1.8;border-left:3px solid var(--blue)">
+      <strong style="color:var(--t1);font-size:12px">Comment lire ce classement ?</strong>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:8px">
+        <div><strong style="color:var(--green)">Score /80</strong> — Note composite issue de 8 modèles de valorisation (Graham, DCF, DDM, EPV, Buffett, Rev.DCF, Relatif, Technique). ≥60 = excellente opportunité, 40-60 = correct, &lt;40 = risqué.</div>
+        <div><strong style="color:var(--t1)">G / D / Dm / E / B / R / Rel / T</strong> — Scores détaillés /10 par modèle. Cliquez "Afficher scores détaillés" pour les voir.</div>
+        <div><strong style="color:var(--t1)">P/E</strong> — Prix / Bénéfice. &lt;15 = bon (Graham), &lt;10 = excellent. Plus le P/E est bas, moins vous payez cher les bénéfices.</div>
+        <div><strong style="color:var(--t1)">P/B</strong> — Prix / Valeur comptable. &lt;1.5 = correct, &lt;1.0 = potentiellement sous-évalué.</div>
+        <div><strong style="color:var(--amber)">Div%</strong> — Rendement du dividende = dividende annuel ÷ cours actuel. ≥4% = solide pour la BRVM.</div>
+        <div><strong style="color:var(--green)">ROE</strong> — Rentabilité des capitaux propres. ≥15% = excellente gestion, ≥10% = correcte.</div>
+        <div><strong style="color:var(--t1)">Verdict</strong> — Analyse IA des rapports annuels PDF. ACHETER / NEUTRE / VENDRE.</div>
+        <div><strong style="color:var(--t1)">30j</strong> — Sparkline (mini-graphe) de l'évolution du cours sur 30 jours (données BOC officielles).</div>
+        <div><strong style="color:var(--t1)">Var%</strong> — Variation du cours aujourd'hui en %. Vert = hausse, rouge = baisse.</div>
+        <div><strong style="color:var(--blue)">▲/▼</strong> — Badges de mouvement de rang depuis le dernier tri. ▲3 = a gagné 3 places.</div>
+      </div>
     </div>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
@@ -989,11 +1014,20 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <!-- Presets stratégies -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <button class="chat-chip" onclick="screenerPreset('value')">📦 Value</button>
-    <button class="chat-chip" onclick="screenerPreset('croissance')">🚀 Croissance</button>
-    <button class="chat-chip" onclick="screenerPreset('revenus')">💰 Revenus</button>
-    <button class="chat-chip" onclick="screenerPreset('defensif')">🛡️ Défensif</button>
+  <div style="margin-bottom:12px">
+    <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Filtres : Score ≥45 · P/E ≤15 · P/B ≤1.5 — Cherche les actions sous-évaluées selon Benjamin Graham">💎 Value</button>
+      <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Filtres : Score ≥50 · ROE ≥15% — Cherche les sociétés à forte rentabilité avec potentiel de croissance">📈 Croissance</button>
+      <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Filtres : Score ≥40 · Dividende ≥5% — Cherche les actions à haut rendement pour des revenus passifs réguliers">💰 Revenus</button>
+      <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Filtres : Score ≥40 · P/E ≤20 · Div ≥3% · ROE ≥10% — Cherche des valeurs stables et peu risquées pour préserver le capital">🛡️ Défensif</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:9px;color:var(--t3)">
+      <span>Score≥45 · P/E≤15 · P/B≤1.5<br>Sous-évaluation Benjamin Graham</span>
+      <span>Score≥50 · ROE≥15%<br>Rentabilité et dynamisme</span>
+      <span>Score≥40 · Div≥5%<br>Revenus passifs réguliers</span>
+      <span>Score≥40 · P/E≤20 · Div≥3%<br>Stabilité et préservation capital</span>
+    </div>
   </div>
   <div class="card" style="margin-bottom:12px">
     <div class="ct" style="margin-bottom:10px">Filtres combinables</div>
@@ -1094,6 +1128,32 @@ input[type=range]{padding:0;height:20px}
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#22c55e;display:inline-block;border-radius:2px"></span> ≥ 0.7 Forte+</span>
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#64748b;display:inline-block;border-radius:2px"></span> ≈ 0 Neutre</span>
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#ef4444;display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
+    </div>
+  </div>
+  <!-- Markowitz guide étape par étape -->
+  <div class="card" style="margin-bottom:16px;border-left:3px solid #8B5CF6;background:rgba(139,92,246,0.06)">
+    <div class="ct" style="color:#a78bfa">📐 Comment utiliser l'optimisation Markowitz — Guide étape par étape</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px">
+      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+        <div style="font-size:10px;font-weight:700;color:#8B5CF6;margin-bottom:4px">Étape 1 — Lancer</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"📐 Optimisation Markowitz (Top 8)"</strong>. L'outil charge automatiquement les 8 meilleures actions du classement.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+        <div style="font-size:10px;font-weight:700;color:#60A5FA;margin-bottom:4px">Étape 2 — Choisir</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.6">Ajustez votre sélection d'actions (cochez/décochez) et cliquez <strong>"Calculer"</strong>. L'algorithme simule 3 000 portefeuilles.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+        <div style="font-size:10px;font-weight:700;color:#4ADE80;margin-bottom:4px">Étape 3 — Analyser</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.6">Sur le graphe, repérez <strong style="color:#fbbf24">⭐ Max Sharpe</strong> (meilleur ratio rendement/risque) et <strong style="color:#60A5FA">⬟ Min Risque</strong> (portefeuille le plus stable).</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+        <div style="font-size:10px;font-weight:700;color:#f59e0b;margin-bottom:4px">Étape 4 — Backtester</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"Tester →"</strong> sur le portefeuille Max Sharpe pour simuler ses performances passées sur l'historique BOC réel.</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:var(--t3);font-style:italic">
+      💡 <strong>Ratio de Sharpe</strong> = (rendement attendu − taux sans risque) ÷ volatilité. Plus il est élevé, mieux vous êtes rémunéré pour chaque unité de risque prise.
+      &nbsp;·&nbsp; <strong>Volatilité</strong> = dispersion des rendements journaliers (annualisée). Faible = stable, élevée = fluctuant.
     </div>
   </div>
   <div class="g2" style="margin-bottom:16px">
@@ -1746,15 +1806,40 @@ function _renderDaySignal(sorted) {
   const bestScore = sorted[0];
   const bestDiv = (window.scores||scores||[]).filter(x=>(x.div_yield||0)>0).sort((a,b)=>b.div_yield-a.div_yield)[0];
 
+  // Top 3 du jour par variation positive
+  const top3 = [...gainers].sort((a,b)=>(b.change_pct||0)-(a.change_pct||0)).slice(0,3);
+  const sentPct = Math.round(breadth * 100);
+
   el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
-    <div style="flex:1;min-width:200px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
-      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:4px">${emoji} Marché ${label}</div>
-      <div style="font-size:11px;color:var(--t1);line-height:1.6">
-        <strong style="color:var(--green)">${gainers.length} ↑</strong> haussiers · <strong style="color:var(--red)">${losers.length} ↓</strong> baissiers · <strong style="color:var(--t2)">${flat.length} →</strong> stables
+    <div style="flex:1;min-width:220px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
+      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:6px">${emoji} Marché ${label}</div>
+      <div style="font-size:11px;color:var(--t1);line-height:1.8">
+        <strong style="color:var(--green)">${gainers.length} ↑ haussiers</strong> · <strong style="color:var(--red)">${losers.length} ↓ baissiers</strong> · <strong style="color:var(--t2)">${flat.length} → stables</strong>
+        <br><span style="font-size:10px;color:var(--t3)">↑ haussiers = actions dont le cours monte ce jour · ↓ = en baisse · → = inchangé</span>
         ${topSec ? `<br>Secteur leader : <strong style="color:var(--blue)">${topSec[0]}</strong> (moy. ${(topSec[1].s/topSec[1].n).toFixed(0)}/80)` : ''}
       </div>
+      <!-- Barre de sentiment -->
+      <div style="margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px">
+          <span>Sentiment marché</span><span style="color:${color};font-weight:700">${sentPct}% haussier</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden">
+          <div style="height:100%;width:${sentPct}%;background:${color};border-radius:3px;transition:width .4s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-top:2px">
+          <span>Baissier</span><span>Neutre 50%</span><span>Haussier</span>
+        </div>
+      </div>
+      ${top3.length ? `<div style="margin-top:8px;border-top:1px solid ${color}33;padding-top:6px">
+        <div style="font-size:9px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">🏆 Top 3 du jour</div>
+        ${top3.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;cursor:pointer" onclick="showStock('${x.ticker}')">
+          <span style="font-weight:700;font-size:11px">${x.ticker}</span>
+          <span style="font-size:10px;color:var(--t2)">${x.name?x.name.substring(0,18)+'…':''}</span>
+          <span style="color:var(--green);font-weight:700;font-size:11px">+${(x.change_pct||0).toFixed(2)}%</span>
+        </div>`).join('')}
+      </div>` : ''}
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;min-width:160px">
+    <div style="display:flex;flex-direction:column;gap:6px;min-width:150px">
       ${bestScore ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="showStock('${bestScore.ticker}')">
         <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur score</div>
         <div style="font-size:13px;font-weight:700;color:var(--green)">${bestScore.ticker} <span style="font-size:11px">${(bestScore.composite_adj||0).toFixed(0)}/80</span></div>
@@ -3233,23 +3318,63 @@ function _stockTab(id){
 
 function _genVerdict(s){
   const v=s.composite_adj||0;
-  const qual=v>=65?'une excellente opportunité':v>=55?'une opportunité intéressante':v>=45?'une société correcte':v>=35?'une société à surveiller':'une société risquée';
-  const reasons=[];
-  if(s.pe_ref&&s.pe_ref<15) reasons.push(`P/E faible (${s.pe_ref.toFixed(1)}×)`);
-  else if(s.pe_ref&&s.pe_ref<25) reasons.push(`P/E modéré (${s.pe_ref.toFixed(1)}×)`);
-  if((s.div_yield||0)>5) reasons.push(`dividende solide (${s.div_yield.toFixed(1)}%)`);
-  else if((s.div_yield||0)>2) reasons.push(`dividende correct (${s.div_yield.toFixed(1)}%)`);
-  if((s.roe||0)>15) reasons.push(`ROE élevé (${s.roe}%)`);
-  else if((s.roe||0)>10) reasons.push(`ROE correct (${s.roe}%)`);
-  if((s.pb_ref||99)<1.2) reasons.push(`P/B attractive (${s.pb_ref.toFixed(2)}×)`);
-  if(s.pdf_verdict==='POSITIF') reasons.push('verdict IA positif');
-  if(!reasons.length) reasons.push(`score composite ${v.toFixed(0)}/80`);
   const col=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
-  const bg=v>=60?'rgba(74,222,128,.1)':v>=45?'rgba(251,191,36,.08)':'rgba(248,113,113,.08)';
-  return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col}">
-    <strong style="color:${col}">📋 Verdict analyste :</strong>
-    <span style="color:var(--t1)"> <strong>${s.ticker}</strong> est ${qual}</span>
-    ${reasons.length?`<span style="color:var(--t2)"> — ${reasons.join(', ')}.</span>`:''}
+  const bg=v>=60?'rgba(74,222,128,.08)':v>=45?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)';
+  const label=v>=65?'ACHETER':v>=55?'ACCUMULER':v>=45?'CONSERVER':v>=35?'SURVEILLER':'ALLÉGER';
+
+  // Points forts
+  const forts=[];
+  if(s.pe_ref&&s.pe_ref<15) forts.push(`P/E attractif (${s.pe_ref.toFixed(1)}× &lt; seuil Graham 15×)`);
+  else if(s.pe_ref&&s.pe_ref<22) forts.push(`P/E raisonnable (${s.pe_ref.toFixed(1)}×)`);
+  if((s.div_yield||0)>=5) forts.push(`Dividende élevé (${s.div_yield.toFixed(1)}% — revenu passif solide)`);
+  else if((s.div_yield||0)>=2) forts.push(`Dividende présent (${s.div_yield.toFixed(1)}%)`);
+  if((s.roe||0)>=15) forts.push(`ROE excellent (${s.roe}% — rentabilité supérieure à la moyenne)`);
+  else if((s.roe||0)>=10) forts.push(`ROE correct (${s.roe}%)`);
+  if((s.pb_ref||99)<1.2) forts.push(`Décote sur actif net (P/B ${s.pb_ref.toFixed(2)}× &lt; 1.2)`);
+  if(s.pdf_verdict==='POSITIF') forts.push('Rapport annuel jugé positif par l\'analyse IA');
+  if((s.score_graham||0)>=7) forts.push(`Critères Graham validés (${s.score_graham}/10)`);
+  if((s.score_technique||0)>=7) forts.push(`Signal technique favorable (${s.score_technique}/10)`);
+
+  // Points de vigilance
+  const vigil=[];
+  if(s.pe_ref&&s.pe_ref>25) vigil.push(`P/E élevé (${s.pe_ref.toFixed(1)}× — valorisation chère)`);
+  if(!(s.div_yield>0)) vigil.push('Pas de dividende versé');
+  if((s.roe||0)<8) vigil.push(`ROE faible (${(s.roe||0).toFixed(1)}% — rentabilité insuffisante)`);
+  if((s.pb_ref||99)>2.5) vigil.push(`P/B élevé (${(s.pb_ref||0).toFixed(2)}× — prime sur actif net)`);
+  if(s.pdf_verdict==='NÉGATIF'||s.pdf_verdict==='NEGATIF') vigil.push('Rapport annuel avec signaux négatifs (IA)');
+  if(v<45) vigil.push('Score composite faible — données limitées ou fondamentaux dégradés');
+
+  // Conclusion
+  const concl=v>=65?`${s.ticker} présente un profil fondamental solide. Tous les principaux ratios sont favorables.`
+    :v>=55?`${s.ticker} est une opportunité intéressante avec des fondamentaux globalement positifs.`
+    :v>=45?`${s.ticker} est une position de conviction modérée. À suivre avant de renforcer.`
+    :v>=35?`${s.ticker} demande une surveillance accrue. Les fondamentaux sont fragiles.`
+    :`${s.ticker} présente des risques significatifs. Une position légère ou absence de position est conseillée.`;
+
+  const secBg='rgba(255,255,255,0.04)';
+  return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col};border-radius:8px;padding:12px 16px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <strong style="color:${col};font-size:13px">📋 Verdict analyste — ${s.ticker}</strong>
+      <span style="background:${col};color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">${label}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+        <div style="font-size:9px;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:5px">✅ Points forts</div>
+        ${forts.length
+          ? forts.map(f=>`<div style="font-size:10px;color:var(--t1);line-height:1.6;padding:1px 0">• ${f}</div>`).join('')
+          : '<div style="font-size:10px;color:var(--t3)">Aucun point fort significatif identifié.</div>'}
+      </div>
+      <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+        <div style="font-size:9px;color:var(--amber);text-transform:uppercase;font-weight:700;margin-bottom:5px">⚠️ Points de vigilance</div>
+        ${vigil.length
+          ? vigil.map(f=>`<div style="font-size:10px;color:var(--t1);line-height:1.6;padding:1px 0">• ${f}</div>`).join('')
+          : '<div style="font-size:10px;color:var(--t3)">Aucun risque majeur identifié.</div>'}
+      </div>
+    </div>
+    <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+      <div style="font-size:9px;color:var(--blue);text-transform:uppercase;font-weight:700;margin-bottom:4px">📌 Conclusion</div>
+      <div style="font-size:11px;color:var(--t1);line-height:1.6">${concl}</div>
+    </div>
   </div>`;
 }
 
