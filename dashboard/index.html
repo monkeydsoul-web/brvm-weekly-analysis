@@ -1791,29 +1791,49 @@ async function renderDividendesVenir() {
   try {
     const data = await fetch('/api/dividends').then(r => r.json());
     const today = new Date(); today.setHours(0,0,0,0);
-    const in30 = new Date(today); in30.setDate(in30.getDate() + 90);
-    // Parse French date format "30-sept.-25" or ISO
+    // Parse French date "30-sept.-25" or ISO
     function parseFr(s) {
       if (!s || s === 'N/D') return null;
-      const mois = {jan:0,fév:1,'fev':1,mar:2,avr:3,mai:4,jun:5,jui:6,jul:6,aoû:7,'aou':7,sep:8,oct:9,nov:10,déc:11,'dec':11};
-      const m = s.match(/(\d+)[.\-]([a-zéûôàèî]+)[.\-](\d+)/i);
+      // 4-char keys first to disambiguate juin(Jun) vs juil(Jul)
+      const mois4 = {juin:5,juil:6,aout:7,sept:8,janv:0,fevr:1,mars:2,avri:3,octo:9,nove:10,dece:11};
+      const mois3 = {jan:0,fev:1,mar:2,avr:3,mai:4,jun:5,jul:6,aou:7,sep:8,oct:9,nov:10,dec:11};
+      const m = s.match(/(\d+)[.\-]([a-zéûôàèî]+)[.\-]+(\d+)/i);
       if (m) {
-        const day=parseInt(m[1]), mon=mois[(m[2].toLowerCase().substring(0,3))], yr=2000+parseInt(m[3]);
+        const day=parseInt(m[1]), k=m[2].toLowerCase().replace(/[éèê]/g,'e').replace(/[ûù]/g,'u');
+        const mon = mois4[k.substring(0,4)] !== undefined ? mois4[k.substring(0,4)] : mois3[k.substring(0,3)];
+        const yr=2000+parseInt(m[3]);
         if (mon !== undefined) return new Date(yr, mon, day);
       }
       const d = new Date(s); return isNaN(d) ? null : d;
     }
-    items = data
+    const withDates = data.filter(x => x.ex_div_date && x.ex_div_date !== 'N/D' && (x.div_yield||0) > 0);
+    let isEstimated = false;
+    // Try future dates first
+    items = withDates
       .map(x => ({ ...x, _date: parseFr(x.ex_div_date) }))
       .filter(x => x._date && x._date >= today)
       .sort((a, b) => a._date - b._date)
       .slice(0, 3);
+    // Fallback: estimate next cycle (+1 year) from most recent past dates
+    if (!items.length) {
+      isEstimated = true;
+      items = withDates
+        .map(x => {
+          const d = parseFr(x.ex_div_date);
+          if (!d) return null;
+          const next = new Date(d); next.setFullYear(next.getFullYear() + 1);
+          return { ...x, _date: next, _orig: d };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a._date - b._date)
+        .slice(0, 3);
+    }
   } catch(e) {
     el.innerHTML = '<span style="color:var(--t3);font-size:11px">Données indisponibles.</span>';
     return;
   }
   if (!items.length) {
-    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucun détachement imminent dans les données disponibles.</span>';
+    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucun détachement dans les données disponibles.</span>';
     return;
   }
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
@@ -1821,21 +1841,22 @@ async function renderDividendesVenir() {
       const d = x._date;
       const label = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
       const daysLeft = Math.ceil((d - new Date()) / 86400000);
-      const urgCol = daysLeft <= 7 ? 'var(--red)' : daysLeft <= 30 ? 'var(--amber)' : 'var(--t2)';
+      const urgCol = daysLeft <= 14 ? 'var(--red)' : daysLeft <= 60 ? 'var(--amber)' : 'var(--t2)';
       return `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer" onclick="showStock('${x.ticker}')">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="font-weight:700;font-size:13px">${x.ticker}</span>
           <span style="font-size:10px;color:var(--amber);font-weight:700">${(x.div_yield||0).toFixed(1)}%</span>
         </div>
         <div style="font-size:10px;color:var(--t2);margin-bottom:4px">${(x.name||'').substring(0,22)}</div>
-        <div style="font-size:10px;color:${urgCol}">📅 Ex-div : ${label}</div>
-        <div style="font-size:9px;color:${urgCol};margin-top:2px">Dans ${daysLeft} jour${daysLeft>1?'s':''}</div>
+        <div style="font-size:10px;color:${urgCol}">📅 ${isEstimated?'~':''}${label}${isEstimated?' (estimé)':''}</div>
+        <div style="font-size:9px;color:${urgCol};margin-top:2px">Dans ~${daysLeft} jour${daysLeft>1?'s':''}</div>
         ${x.div_per_share ? `<div style="font-size:9px;color:var(--t3);margin-top:3px">Dividende : ${Math.round(x.div_per_share).toLocaleString('fr-FR')} XOF/action</div>` : ''}
       </div>`;
     }).join('')}
   </div>
   <div style="font-size:9px;color:var(--t3);margin-top:6px;font-style:italic">
     💡 L'ex-date est la date à partir de laquelle il faut détenir l'action pour recevoir le dividende. Achetez <strong>avant</strong> cette date.
+    ${isEstimated ? ' · <strong>Dates estimées</strong> sur la base du cycle dividende 2025 (+1 an).' : ''}
   </div>`;
 }
 
