@@ -309,6 +309,8 @@ input[type=range]{padding:0;height:20px}
     <div class="ni" onclick="nav('sectors');renderSectorPage()"><span>📊</span> Secteurs</div>
     <div class="ni" onclick="nav('news')"><span>📰</span> Actualités</div>
     <div class="ni" onclick="nav('comm')"><span>🌍</span> Commodités</div>
+    <div class="ni" onclick="nav('macro');renderMacroPage()"><span>🏦</span> Macro UEMOA</div>
+    <div class="ni" onclick="nav('calendar');renderCalendarPage()"><span>📅</span> Calendrier</div>
     <div class="sb-grp">Analyse</div>
     <div class="ni" onclick="nav('screener');initScreener()"><span>🔍</span> Screener</div>
     <div class="ni" onclick="nav('analyse');setTimeout(renderCorrelMatrix,200)"><span>📐</span> Analyse &amp; Optim</div>
@@ -789,6 +791,119 @@ input[type=range]{padding:0;height:20px}
     </div>
     <div class="card" style="margin-bottom:0"><div class="ct">Sentiment par action</div>
       <div id="cSentDiv" style="width:100%;height:320px"></div></div>
+  </div>
+</div>
+
+<!-- MACRO UEMOA -->
+<div class="page" id="page-macro">
+  <div class="ph"><h2>🏦 Macro UEMOA — Contexte économique</h2></div>
+  <div id="macroContent">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+      <div class="card" style="margin-bottom:0;text-align:center">
+        <div style="font-size:10px;color:var(--t3)">Taux directeur BCEAO</div>
+        <div style="font-size:28px;font-weight:700;color:var(--amber)">6,5%</div>
+        <div style="font-size:10px;color:var(--t2)">Inchangé depuis mars 2024</div>
+      </div>
+      <div class="card" style="margin-bottom:0;text-align:center">
+        <div style="font-size:10px;color:var(--t3)">Inflation UEMOA estimée</div>
+        <div style="font-size:28px;font-weight:700;color:var(--amber)">~3,1%</div>
+        <div style="font-size:10px;color:var(--t2)">Sous la cible 3% BCEAO</div>
+      </div>
+      <div class="card" style="margin-bottom:0;text-align:center">
+        <div style="font-size:10px;color:var(--t3)">BRVM-COMPOSITE YTD</div>
+        <div id="macro-brvm-ytd" style="font-size:28px;font-weight:700;color:var(--green)">+1,7%</div>
+        <div style="font-size:10px;color:var(--t2)">Depuis janvier 2026</div>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:0">
+        <div class="ct" style="margin-bottom:10px">🌍 PIB principaux pays BRVM</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg3);border-radius:6px">
+            <div><div style="font-weight:600">&#127368; Côte d'Ivoire</div><div style="font-size:10px;color:var(--t2)">Croissance ~6.5% · 36 listings BRVM</div></div>
+            <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--green)">74 Md$</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg3);border-radius:6px">
+            <div><div style="font-weight:600">&#127480;&#127475; Sénégal</div><div style="font-size:10px;color:var(--t2)">Croissance ~7% (pétrole) · 4 listings BRVM</div></div>
+            <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--blue)">35 Md$</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg3);border-radius:6px">
+            <div><div style="font-weight:600">&#127463;&#127467; Burkina Faso</div><div style="font-size:10px;color:var(--t2)">Croissance ~3% · 3 listings BRVM</div></div>
+            <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--amber)">20 Md$</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg3);border-radius:6px">
+            <div><div style="font-weight:600">&#127481;&#127468; Togo</div><div style="font-size:10px;color:var(--t2)">Croissance ~5% · 2 listings BRVM</div></div>
+            <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--t2)">10 Md$</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct" style="margin-bottom:10px">📊 Impact taux BCEAO sur la BRVM</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:rgba(251,191,36,.1);border-left:3px solid var(--amber);border-radius:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--amber)">Taux directeur 6,5% → Impact P/E</div>
+            <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Taux élevé = coût du capital élevé = P/E compressés. Un P/E de 10× devient "cher" quand le sans-risque (OAT) rend 6,5%+. Préférer les actions avec dividendes > 8%.</p>
+          </div>
+          <div style="padding:10px;background:rgba(96,165,250,.1);border-left:3px solid var(--blue);border-radius:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--blue)">Zone FCFA = protection change</div>
+            <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Le FCFA est arrimé à l'euro (655,96 FCFA/€). Pas de risque de change vs EUR. Exposition USD via commodités (cacao, coton, pétrole).</p>
+          </div>
+          <div style="padding:10px;background:rgba(74,222,128,.1);border-left:3px solid var(--green);border-radius:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--green)">Opportunité : banques et telecoms</div>
+            <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Secteur bancaire bénéficie de marges d'intérêt élevées avec taux BCEAO haut. Telecoms = croissance mobile money régionale forte.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Risque pays -->
+    <div class="card">
+      <div class="ct" style="margin-bottom:10px">🔐 Risque pays — Sociétés cotées BRVM</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--amber)">
+          <div style="font-size:12px;font-weight:700">&#127368; Côte d'Ivoire</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin:4px 0">Modéré</div>
+          <div style="font-size:10px;color:var(--t2);line-height:1.4">Stabilité politique post-2011, économie diversifiée</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--green)">
+          <div style="font-size:12px;font-weight:700">&#127480;&#127475; Sénégal</div>
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin:4px 0">Faible</div>
+          <div style="font-size:10px;color:var(--t2);line-height:1.4">Démocratie stable, boom pétrole/gaz</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--red)">
+          <div style="font-size:12px;font-weight:700">&#127463;&#127467; Burkina Faso</div>
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin:4px 0">Élevé</div>
+          <div style="font-size:10px;color:var(--t2);line-height:1.4">Transition militaire, insécurité nord</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--red)">
+          <div style="font-size:12px;font-weight:700">&#127475;&#127466; Niger</div>
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin:4px 0">Très élevé</div>
+          <div style="font-size:10px;color:var(--t2);line-height:1.4">Sanctions CEDEAO levées, reconstruction</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDRIER BRVM -->
+<div class="page" id="page-calendar">
+  <div class="ph">
+    <h2>📅 Calendrier BRVM</h2>
+    <div style="display:flex;gap:8px">
+      <button class="chat-chip" id="cal-btn-list" onclick="calSetView('list')" style="background:var(--blue);color:#fff">Liste</button>
+      <button class="chat-chip" id="cal-btn-month" onclick="calSetView('month')">Mois</button>
+    </div>
+  </div>
+  <!-- Légende -->
+  <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#60A5FA;display:inline-block"></span>Assemblée Générale</span>
+    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#4ADE80;display:inline-block"></span>Ex-dividende</span>
+    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#FBBF24;display:inline-block"></span>Résultats / Autre</span>
+  </div>
+  <div id="cal-list-view">
+    <div id="calEventsList"><p style="color:var(--t2)">Chargement...</p></div>
+  </div>
+  <div id="cal-month-view" style="display:none">
+    <div id="calMonthGrid"></div>
   </div>
 </div>
 
@@ -3321,6 +3436,128 @@ document.querySelectorAll('.ni').forEach(ni=>{
   const orig=ni.getAttribute('onclick');
   ni.setAttribute('onclick',orig+`;if(pageLoaders[arguments[0]]||pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']) (pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']||function(){})();`);
 });
+
+// ── Macro UEMOA ──────────────────────────────────────────────────────────────
+function renderMacroPage() {
+  const el = document.getElementById('macro-brvm-ytd');
+  if (!el) return;
+  const all = (window.scores || scores || []);
+  if (!all.length) return;
+  const avgChg = all.reduce((s, x) => s + (x.change_pct || 0), 0) / all.length;
+  const sign = avgChg >= 0 ? '+' : '';
+  el.textContent = sign + avgChg.toFixed(2) + '%';
+  el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ── Calendrier BRVM ──────────────────────────────────────────────────────────
+let _calEvents = null;
+
+function calSetView(view) {
+  const listDiv = document.getElementById('cal-list-view');
+  const monthDiv = document.getElementById('cal-month-view');
+  const listBtn = document.getElementById('cal-btn-list');
+  const monthBtn = document.getElementById('cal-btn-month');
+  if (listDiv) listDiv.style.display = view === 'list' ? '' : 'none';
+  if (monthDiv) monthDiv.style.display = view === 'month' ? '' : 'none';
+  if (listBtn) { listBtn.style.background = view === 'list' ? 'var(--blue)' : ''; listBtn.style.color = view === 'list' ? '#fff' : ''; }
+  if (monthBtn) { monthBtn.style.background = view === 'month' ? 'var(--blue)' : ''; monthBtn.style.color = view === 'month' ? '#fff' : ''; }
+  if (view === 'month' && _calEvents) _renderCalMonth();
+}
+
+async function renderCalendarPage() {
+  const listEl = document.getElementById('calEventsList');
+  if (_calEvents) { _renderCalList(); return; }
+  if (listEl) listEl.innerHTML = '<p style="color:var(--t2)">Chargement...</p>';
+  try {
+    const res = await fetch('/api/calendar');
+    _calEvents = await res.json();
+    _renderCalList();
+  } catch(e) {
+    if (listEl) listEl.innerHTML = '<p style="color:var(--red)">Erreur de chargement du calendrier.</p>';
+  }
+}
+
+function _calTypeColor(e) { return e.color || '#FBBF24'; }
+function _calTypeBg(e) {
+  const c = e.color || '#FBBF24';
+  if (c === '#60A5FA') return 'rgba(96,165,250,0.1)';
+  if (c === '#4ADE80') return 'rgba(74,222,128,0.1)';
+  return 'rgba(251,191,36,0.1)';
+}
+
+function _calEventCard(e, isPast) {
+  const col = _calTypeColor(e);
+  const bg = _calTypeBg(e);
+  const dayNum = e.date ? e.date.slice(8) : '?';
+  const monStr = e.date ? new Date(e.date + 'T00:00:00').toLocaleDateString('fr-FR', {month:'short'}) : '';
+  const click = e.ticker ? `onclick="showStock('${e.ticker}')"` : '';
+  const typeShort = (e.type||'').replace('convocations-assemblees-generales','AG').replace('evenement','Autre').substring(0,12);
+  return `<div ${click} style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;background:${bg};border-left:3px solid ${col};border-radius:6px;cursor:${e.ticker?'pointer':'default'};opacity:${isPast?'0.55':'1'}">
+    <div style="min-width:48px;text-align:center;background:var(--bg3);border-radius:6px;padding:4px">
+      <div style="font-size:18px;font-weight:700;color:${col};line-height:1">${dayNum}</div>
+      <div style="font-size:9px;color:var(--t2);text-transform:uppercase">${monStr}</div>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.ticker?`<strong style="color:${col}">${e.ticker}</strong> — `:''}${e.label||e.type||'Événement'}</div>
+    </div>
+    <span style="font-size:9px;padding:2px 7px;border-radius:8px;border:1px solid ${col}50;color:${col};white-space:nowrap">${typeShort}</span>
+  </div>`;
+}
+
+function _renderCalList() {
+  const el = document.getElementById('calEventsList');
+  if (!el || !_calEvents) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const sorted = [..._calEvents].sort((a, b) => (a.date||'').localeCompare(b.date||''));
+  const upcoming = sorted.filter(e => (e.date||'') >= today);
+  const past = sorted.filter(e => (e.date||'') < today).reverse();
+  let html = '';
+  if (upcoming.length) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">À venir — ${upcoming.length} événements</div>`;
+    html += upcoming.map(e => _calEventCard(e, false)).join('');
+  }
+  if (past.length) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.5px">Passés — ${past.length} événements</div>`;
+    html += past.slice(0, 15).map(e => _calEventCard(e, true)).join('');
+  }
+  if (!sorted.length) html = '<p style="color:var(--t2);text-align:center;padding:24px">Aucun événement dans le calendrier.</p>';
+  el.innerHTML = html;
+}
+
+function _renderCalMonth() {
+  const el = document.getElementById('calMonthGrid');
+  if (!el || !_calEvents) return;
+  const today = new Date();
+  const year = today.getFullYear(), month = today.getMonth();
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday=0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = today.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+  const byDay = {};
+  _calEvents.forEach(e => {
+    if (!e.date) return;
+    const d = new Date(e.date + 'T00:00:00');
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const k = d.getDate();
+      if (!byDay[k]) byDay[k] = [];
+      byDay[k].push(e);
+    }
+  });
+  const hdrs = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  let html = `<div style="text-align:center;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--text)">${monthName}</div>`;
+  html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
+  hdrs.forEach(h => { html += `<div style="text-align:center;font-size:10px;font-weight:600;color:var(--t3);padding:4px 0">${h}</div>`; });
+  for (let i = 0; i < firstDow; i++) html += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today.getDate();
+    const evts = byDay[d] || [];
+    html += `<div style="min-height:54px;background:var(--bg3);border-radius:5px;padding:4px;border:1px solid ${isToday?'var(--blue)':'var(--border)'}">
+      <div style="font-size:11px;font-weight:${isToday?700:500};color:${isToday?'var(--blue)':'var(--t2)'};margin-bottom:2px">${d}</div>
+      ${evts.map(e=>`<div style="font-size:8px;padding:1px 3px;margin-top:1px;border-radius:2px;background:${_calTypeBg(e)};color:${_calTypeColor(e)};overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.ticker||''} ${e.label||e.type||''}">${e.ticker||'•'}</div>`).join('')}
+    </div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
 
 init();
 </script>

@@ -1217,40 +1217,53 @@ def api_analyses_ticker(ticker):
 @app.route("/api/calendar")
 def api_calendar():
     """Événements calendrier : ex-div + AG + résultats depuis dividends + announcements."""
+    from datetime import datetime
+
+    def _to_iso(raw):
+        if not raw or raw == "N/D":
+            return None
+        s = str(raw).strip()
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+        return None
+
     events = []
     try:
-        # Ex-dividendes
         from valuation import STOCK_FUNDAMENTALS
         for ticker, row in STOCK_FUNDAMENTALS.items():
-            exd = row.get("ex_div_date") or row.get("ex_div")
-            if exd and exd != "N/D":
+            exd = _to_iso(row.get("ex_div_date") or row.get("ex_div"))
+            if exd:
+                div = row.get("div_per_share")
                 events.append({
                     "type": "ex-div",
                     "ticker": ticker,
-                    "date": str(exd),
-                    "label": f"Ex-div {ticker}",
+                    "date": exd,
+                    "label": f"Ex-dividende {ticker}" + (f" ({div} XOF)" if div else ""),
                     "color": "#4ADE80",
-                    "div_per_share": row.get("div_per_share"),
                 })
     except Exception:
         pass
     try:
-        # Annonces
         ann_path = os.path.join(os.path.dirname(__file__), "data", "announcements.json")
         if os.path.exists(ann_path):
             with open(ann_path) as f:
                 anns = json.load(f)
             for a in (anns if isinstance(anns, list) else []):
-                if a.get("date"):
-                    t = a.get("type", "").lower()
-                    color = "#60A5FA" if "ag" in t or "assembl" in t else "#FBBF24"
-                    events.append({
-                        "type": t or "evenement",
-                        "ticker": a.get("ticker", ""),
-                        "date": str(a["date"]),
-                        "label": a.get("title") or a.get("label") or t,
-                        "color": color,
-                    })
+                iso = _to_iso(a.get("date"))
+                if not iso:
+                    continue
+                t = a.get("type", "").lower()
+                color = "#60A5FA" if ("ag" in t or "assembl" in t) else "#FBBF24"
+                events.append({
+                    "type": t or "evenement",
+                    "ticker": a.get("ticker", ""),
+                    "date": iso,
+                    "label": a.get("title") or a.get("label") or t,
+                    "color": color,
+                })
     except Exception:
         pass
     events.sort(key=lambda x: x.get("date", ""))
