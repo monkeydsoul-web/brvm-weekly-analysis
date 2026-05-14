@@ -111,6 +111,7 @@ function renderRankLive() {
 
 // ── Auto-refresh global toutes les 5min ───────────────────────────────────
 function startAutoRefresh() {
+  if (window._ecoMode) return; // Mode économie désactivé
   if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
   _autoRefreshTimer = setInterval(async () => {
     try {

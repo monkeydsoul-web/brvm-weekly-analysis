@@ -339,8 +339,9 @@ input[type=range]{padding:0;height:20px}
     <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
     <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
   </div>
-  <div style="padding:4px 8px;border-top:1px solid var(--border)">
+  <div style="padding:4px 8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px">
     <button onclick="startTour()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">🎓 Revoir le tour guidé</button>
+    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">🔋 Mode économie : OFF</button>
   </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
@@ -355,6 +356,7 @@ input[type=range]{padding:0;height:20px}
     <h2>Tableau de bord BRVM</h2>
     <div style="display:flex;gap:8px;align-items:center">
       <span id="lastUp" style="font-size:11px;color:var(--t2)"></span>
+      <span id="freshness-badge" style="font-size:10px;color:var(--t3);display:none"></span>
       <button class="btn btn-g" onclick="doRefresh()"><span id="ri">↻</span> Actualiser</button>
     </div>
   </div>
@@ -1530,18 +1532,72 @@ function showNotif(msg,color){
 
 // compare gérée par compare.js
 
+// ── Cache sessionStorage (TTL 5min) ────────────────────────────────────────
+const _CACHE_TTL = 5 * 60 * 1000;
+const _LS_ECO = 'brvm_eco_mode_v1';
+let _ecoMode = localStorage.getItem(_LS_ECO) === '1';
+
+async function _cachedFetch(url, ttl = _CACHE_TTL) {
+  const key = 'brvm_ss_' + url;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (raw) {
+      const { ts, data } = JSON.parse(raw);
+      if (Date.now() - ts < ttl) {
+        _updateFreshness(ts);
+        return data;
+      }
+    }
+  } catch {}
+  const data = await fetch(url).then(r => r.json());
+  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  _updateFreshness(Date.now());
+  return data;
+}
+
+function _updateFreshness(ts) {
+  const el = document.getElementById('freshness-badge');
+  if (!el) return;
+  const age = Math.round((Date.now() - ts) / 1000);
+  if (age < 10) { el.style.display = 'none'; return; }
+  const label = age < 60 ? `${age}s` : age < 3600 ? `${Math.floor(age/60)}min` : `${Math.floor(age/3600)}h`;
+  el.textContent = `⏱ données : ${label}`;
+  el.style.display = '';
+  el.style.color = age > 300 ? 'var(--amber)' : 'var(--t3)';
+}
+
+function toggleEcoMode() {
+  _ecoMode = !_ecoMode;
+  localStorage.setItem(_LS_ECO, _ecoMode ? '1' : '0');
+  const btn = document.getElementById('eco-mode-btn');
+  if (btn) btn.textContent = `🔋 Mode économie : ${_ecoMode ? 'ON' : 'OFF'}`;
+  if (_ecoMode) {
+    if (window._autoRefreshTimer) { clearInterval(window._autoRefreshTimer); window._autoRefreshTimer = null; }
+    showNotif('Mode économie activé — auto-refresh désactivé', 'amber');
+  } else {
+    startAutoRefresh();
+    showNotif('Mode économie désactivé', 'green');
+  }
+}
+
+function _initEcoModeUI() {
+  const btn = document.getElementById('eco-mode-btn');
+  if (btn) btn.textContent = `🔋 Mode économie : ${_ecoMode ? 'ON' : 'OFF'}`;
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init(){
   gSpinShow();
+  _initEcoModeUI();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
     const[s,n,c,m,f,tp]=await Promise.all([
-      fetch('/api/scores').then(r=>r.json()),
-      fetch('/api/news').then(r=>r.json()),
-      fetch('/api/commodities').then(r=>r.json()),
-      fetch('/api/macro').then(r=>r.json()),
+      _cachedFetch('/api/scores'),
+      _cachedFetch('/api/news'),
+      _cachedFetch('/api/commodities'),
+      _cachedFetch('/api/macro'),
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
-      fetch('/api/top_performers').then(r=>r.json()).catch(()=>[]),
+      _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
     setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
@@ -3493,13 +3549,21 @@ function gSpinShow(){ const el=document.getElementById('g-spin'); if(el)el.style
 function gSpinHide(){ const el=document.getElementById('g-spin'); if(el)el.style.display='none'; }
 
 async function doRefresh(){
+  // Vider le cache sessionStorage pour forcer un rechargement frais
+  try { Object.keys(sessionStorage).filter(k=>k.startsWith('brvm_ss_')).forEach(k=>sessionStorage.removeItem(k)); } catch {}
+  document.getElementById('freshness-badge').style.display = 'none';
   document.getElementById('ri').classList.add('spin');
   gSpinShow();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
     await fetch('/api/refresh',{method:'POST'});
     setTimeout(async()=>{
-      const[s,n,c,m]=await Promise.all([fetch('/api/scores').then(r=>r.json()),fetch('/api/news').then(r=>r.json()),fetch('/api/commodities').then(r=>r.json()),fetch('/api/macro').then(r=>r.json())]);
+      const[s,n,c,m]=await Promise.all([
+        _cachedFetch('/api/scores'),
+        _cachedFetch('/api/news'),
+        _cachedFetch('/api/commodities'),
+        _cachedFetch('/api/macro'),
+      ]);
       scores=s;window.scores=s;news=n;comms=c;
       renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
       document.getElementById('ri').classList.remove('spin');
