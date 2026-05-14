@@ -441,11 +441,48 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <div class="g4" id="kpis"></div>
+  <!-- Widgets dashboard : portefeuille, alertes, agenda -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px">
+    <!-- Mon portefeuille -->
+    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('port');loadPortfolio()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="ct" style="margin:0">💼 Mon portefeuille</div>
+        <span style="font-size:9px;color:var(--t3)">→ Voir</span>
+      </div>
+      <div id="dash-port-widget">
+        <p style="font-size:11px;color:var(--t3)">Aucune position.</p>
+      </div>
+    </div>
+    <!-- À surveiller (alertes proches) -->
+    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="ct" style="margin:0">🔔 À surveiller</div>
+        <span id="dash-alerts-count" style="font-size:9px;color:var(--t3)"></span>
+      </div>
+      <div id="dash-alerts-widget">
+        <p style="font-size:11px;color:var(--t3)">Aucune alerte définie.</p>
+      </div>
+    </div>
+    <!-- Agenda de la semaine -->
+    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('calendar');renderCalendarPage()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="ct" style="margin:0">📅 Agenda</div>
+        <span style="font-size:9px;color:var(--t3)">→ Calendrier</span>
+      </div>
+      <div id="dash-agenda-widget">
+        <p style="font-size:11px;color:var(--t3)">Chargement...</p>
+      </div>
+    </div>
+  </div>
   <!-- Signal du jour -->
   <div class="card" style="margin-bottom:12px;padding:12px 16px" id="signal-widget">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
       <div class="ct" style="margin:0">⚡ Signal du jour</div>
-      <span id="signal-date" style="font-size:10px;color:var(--t3)"></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="signal-confidence" style="font-size:10px;font-weight:700;display:none"></span>
+        <span id="signal-composite-spk" style="display:inline-flex;align-items:center;gap:4px"></span>
+        <span id="signal-date" style="font-size:10px;color:var(--t3)"></span>
+      </div>
     </div>
     <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
   </div>
@@ -1922,8 +1959,12 @@ function renderDash(m){
     ['Top rendement', wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', 'var(--amber)', 'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
   ].map(([l,v,c,tip])=>`<div class="kpi tt" data-tt="${tip}"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
 
-  // Signal du jour
+  // Signal du jour + widgets S4
   _renderDaySignal(s);
+  _renderSignalSparkline(s);
+  _renderDashPortWidget();
+  _renderDashAlertsWidget();
+  _renderDashAgendaWidget();
   document.getElementById('podium').innerHTML=s.slice(0,3).map((x,i)=>`
     <div class="card" style="border-top:3px solid ${['#FBBF24','#94A3B8','#CD7C3C'][i]};cursor:pointer;margin-bottom:0" onclick="_openStock('${x.ticker}')">
       <div style="font-size:18px;margin-bottom:4px">${['🥇','🥈','🥉'][i]}</div>
@@ -2073,6 +2114,15 @@ function _renderDaySignal(sorted) {
   // Top 3 du jour par variation positive
   const top3 = [...gainers].sort((a,b)=>(b.change_pct||0)-(a.change_pct||0)).slice(0,3);
   const sentPct = Math.round(breadth * 100);
+  // Confidence score: based on breadth + avg score quality
+  const avgScore = all.length ? all.reduce((s,x)=>s+(x.composite_adj||0),0)/all.length : 0;
+  const confidence = Math.round((breadth * 60 + (avgScore/80) * 40));
+  const confEl = document.getElementById('signal-confidence');
+  if (confEl) {
+    confEl.textContent = `Confiance ${confidence}%`;
+    confEl.style.color = confidence >= 60 ? 'var(--green)' : confidence >= 40 ? 'var(--amber)' : 'var(--red)';
+    confEl.style.display = '';
+  }
 
   el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
     <div style="flex:1;min-width:220px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
@@ -2114,6 +2164,116 @@ function _renderDaySignal(sorted) {
       </div>` : ''}
     </div>
   </div>`;
+}
+
+// ── Dashboard widgets (S4) ────────────────────────────────────────────────────
+
+function _renderDashPortWidget(){
+  const el = document.getElementById('dash-port-widget');
+  if (!el) return;
+  try {
+    const positions = JSON.parse(localStorage.getItem('brvm_portfolio_v2') || '[]');
+    if (!positions.length) return;
+    const sc = window.scores || [];
+    let totalCost = 0, totalVal = 0;
+    const rows = positions.map(p => {
+      const live = sc.find(x => x.ticker === p.ticker);
+      const price = live?.price || p.avg_price || 0;
+      const val = price * (p.qty || 0);
+      const cost = (p.avg_price || 0) * (p.qty || 0);
+      totalCost += cost; totalVal += val;
+      const pnl = cost > 0 ? ((val - cost) / cost * 100) : 0;
+      const pnlC = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+      return { ticker: p.ticker, val, pnl, pnlC };
+    }).sort((a,b) => b.val - a.val).slice(0,4);
+    const totalPnl = totalCost > 0 ? ((totalVal - totalCost) / totalCost * 100) : 0;
+    const totalC = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;color:var(--t2)">${(totalVal/1e6).toFixed(1)} M XOF</span>
+        <span style="font-size:11px;font-weight:700;color:${totalC}">${totalPnl>=0?'+':''}${totalPnl.toFixed(1)}%</span>
+      </div>
+      ${rows.map(r=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px">
+        <span style="color:var(--t1);font-weight:600">${r.ticker}</span>
+        <span style="color:${r.pnlC}">${r.pnl>=0?'+':''}${r.pnl.toFixed(1)}%</span>
+      </div>`).join('')}
+      ${positions.length>4?`<div style="font-size:10px;color:var(--t3);margin-top:4px">+${positions.length-4} autres…</div>`:''}`;
+  } catch(e) {}
+}
+
+function _renderDashAlertsWidget(){
+  const el = document.getElementById('dash-alerts-widget');
+  const cnt = document.getElementById('dash-alerts-count');
+  if (!el) return;
+  try {
+    const alerts = JSON.parse(localStorage.getItem('brvm_alerts_v2') || '[]');
+    if (!alerts.length) { if(cnt) cnt.textContent=''; return; }
+    const sc = window.scores || [];
+    const enriched = alerts.map(a => {
+      const live = sc.find(x => x.ticker === a.ticker);
+      const price = live?.price || 0;
+      const pct = a.target && price ? Math.abs((price - a.target) / a.target * 100) : 999;
+      return { ...a, price, pct };
+    }).sort((a,b) => a.pct - b.pct).slice(0,4);
+    if(cnt) cnt.textContent = `${alerts.length} alerte${alerts.length>1?'s':''}`;
+    el.innerHTML = enriched.map(a => {
+      const near = a.pct < 5;
+      const col = near ? 'var(--amber)' : 'var(--t2)';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid var(--border)">
+        <span style="font-weight:600;color:var(--t1)">${a.ticker}</span>
+        <span style="color:var(--t2)">${a.price?a.price.toLocaleString('fr-FR'):'—'}</span>
+        <span style="color:${col}">${near?'⚠️ ':''} cible ${(a.target||0).toLocaleString('fr-FR')}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+async function _renderDashAgendaWidget(){
+  const el = document.getElementById('dash-agenda-widget');
+  if (!el) return;
+  try {
+    const events = _calEvents || await fetch('/api/calendar').then(r=>r.json()).then(d=>{_calEvents=d;return d;}).catch(()=>[]);
+    const today = new Date().toISOString().slice(0,10);
+    const upcoming = events.filter(e => (e.date||'') >= today).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
+    if (!upcoming.length) { el.innerHTML = '<p style="font-size:11px;color:var(--t3)">Aucun événement à venir.</p>'; return; }
+    el.innerHTML = upcoming.map(e => {
+      const col = e.color || '#FBBF24';
+      const d = e.date ? new Date(e.date+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '?';
+      const isToday = e.date === today;
+      return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <span style="min-width:36px;font-weight:${isToday?'700':'400'};color:${isToday?col:'var(--t3)'}">${d}</span>
+        <span style="width:4px;height:4px;border-radius:50%;background:${col};flex-shrink:0"></span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)">${e.title||e.type||''}</span>
+        ${e.ticker?`<span style="font-size:10px;color:var(--blue);font-weight:700">${e.ticker}</span>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<p style="font-size:11px;color:var(--t3)">—</p>'; }
+}
+
+function _renderSignalSparkline(sorted){
+  // BRVM-COMPOSITE proxy: moyenne des cours des 10 meilleures actions sur 7j
+  const spkEl = document.getElementById('signal-composite-spk');
+  if (!spkEl) return;
+  const ph = window._priceHistory || {};
+  const top10 = (sorted||[]).slice(0,10).map(x=>x.ticker);
+  if (!top10.length) return;
+  // Gather last 7 BOC points averaged across top10
+  const byDate = {};
+  top10.forEach(tk => {
+    (ph[tk]||[]).filter(p=>p.source==='boc'&&p.price).slice(-15).forEach(p => {
+      if (!byDate[p.date]) byDate[p.date] = {sum:0,n:0};
+      byDate[p.date].sum += p.price; byDate[p.date].n++;
+    });
+  });
+  const pts = Object.entries(byDate).sort((a,b)=>a[0].localeCompare(b[0])).slice(-7)
+    .map(([date,v])=>({date,price:v.sum/v.n,source:'boc'}));
+  if (pts.length >= 2) {
+    const chg = (pts[pts.length-1].price - pts[0].price) / pts[0].price * 100;
+    const chgC = chg >= 0 ? 'var(--green)' : 'var(--red)';
+    spkEl.innerHTML = `<span style="font-size:9px;color:var(--t3)">COMPOSITE 7j</span>`
+      + sparkline(pts, 60, 22)
+      + `<span style="font-size:10px;font-weight:700;color:${chgC}">${chg>=0?'+':''}${chg.toFixed(1)}%</span>`;
+  }
 }
 
 // ── Flux de capitaux ─────────────────────────────────────────────────────────
