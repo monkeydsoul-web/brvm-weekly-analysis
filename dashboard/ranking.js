@@ -78,7 +78,7 @@ function renderRankLive() {
 
     const scoreC = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
 
-    return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
+    return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td style="color:var(--t2);white-space:nowrap">${rank} ${badge}</td>
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')">
         <span class="star ${isFav ? 'fav' : ''}">★</span></td>

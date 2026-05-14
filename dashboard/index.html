@@ -261,9 +261,64 @@ input[type=range]{padding:0;height:20px}
 .gloss-def{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:4px}
 .gloss-ex{font-size:11px;color:var(--t3);border-left:2px solid var(--border);padding-left:8px;line-height:1.5}
 #cmp-modal-inner{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:900px;width:95%;max-height:90vh;overflow-y:auto}
+/* ── Page transitions ────────────────────────────────────────────────────── */
+@keyframes page-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page.on{animation:page-in .18s ease}
+/* ── Skeleton loader ─────────────────────────────────────────────────────── */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg2) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;display:inline-block}
+.sk-row{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border)}
+.sk-row .skeleton:nth-child(1){width:40px;height:11px}
+.sk-row .skeleton:nth-child(2){width:70px;height:11px}
+.sk-row .skeleton:nth-child(3){flex:1;height:11px}
+.sk-row .skeleton:nth-child(4){width:55px;height:11px}
+.sk-row .skeleton:nth-child(5){width:45px;height:11px}
+/* ── Sidebar compact mode ────────────────────────────────────────────────── */
+.sb{transition:width .22s ease}
+.sb.compact{width:52px}
+.sb.compact .ni-label,.sb.compact .sb-grp,.sb.compact .logo h1,.sb.compact .logo p,
+.sb.compact #live-badge,.sb.compact #curr-rate,.sb.compact .curr-btn-wrap,
+.sb.compact #searchInp,.sb.compact .compact-hide{display:none!important}
+.sb.compact .logo{padding:12px 8px;justify-content:center}
+.sb.compact .ni{justify-content:center;padding:10px 0;font-size:18px}
+.sb.compact .ni span:first-child{font-size:16px;margin:0}
+.sb.compact .nav{overflow:visible}
+/* Compact toggle btn */
+#sb-compact-btn{position:absolute;bottom:60px;left:0;width:100%;text-align:center;background:none;border:none;cursor:pointer;padding:8px;color:var(--t3);font-size:11px;transition:color .15s}
+#sb-compact-btn:hover{color:var(--text)}
+.sb.compact #sb-compact-btn{font-size:14px}
+/* ── Slide-over fiche société ────────────────────────────────────────────── */
+#stock-slideover{position:fixed;top:0;right:-100%;width:min(780px,96vw);height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:4500;display:flex;flex-direction:column;transition:right .25s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.4);overflow:hidden}
+#stock-slideover.open{right:0}
+#sso-overlay{display:none;position:fixed;inset:0;z-index:4400;background:rgba(0,0,0,.35);backdrop-filter:blur(2px)}
+#sso-overlay.open{display:block}
+#sso-head{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+#sso-body{flex:1;overflow-y:auto;padding:16px 20px}
+.sso-nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--t2);font-size:12px;transition:all .15s}
+.sso-nav-btn:hover:not(:disabled){background:var(--blue);color:#fff;border-color:var(--blue)}
+.sso-nav-btn:disabled{opacity:.35;cursor:not-allowed}
+/* Sidebar badges */
+.sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:0 4px;margin-left:auto}
+.sb-live-tag{font-size:7px;background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3);border-radius:4px;padding:1px 4px;margin-left:auto;font-weight:700;letter-spacing:.03em}
 </style></head>
 <body>
 <div id="g-spin"></div>
+
+<!-- Slide-over fiche société -->
+<div id="sso-overlay" onclick="closeStockSlideover()"></div>
+<div id="stock-slideover">
+  <div id="sso-head">
+    <button class="sso-nav-btn" id="sso-prev" onclick="ssoNavPrev()" disabled title="Action précédente">←</button>
+    <button class="sso-nav-btn" id="sso-next" onclick="ssoNavNext()" disabled title="Action suivante">→</button>
+    <span id="sso-ticker-label" style="font-weight:700;font-size:14px;color:var(--text);margin-left:4px"></span>
+    <span id="sso-hist-label" style="font-size:10px;color:var(--t3);margin-left:6px"></span>
+    <span style="margin-left:auto;display:flex;gap:6px">
+      <button class="sso-nav-btn" onclick="ssoOpenFullPage()" title="Ouvrir en page entière" style="font-size:11px">⛶ Plein écran</button>
+      <button onclick="closeStockSlideover()" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:4px 8px">✕</button>
+    </span>
+  </div>
+  <div id="sso-body"><div style="padding:40px;text-align:center;color:var(--t2)">Chargement...</div></div>
+</div>
 
 <!-- Recherche globale Cmd+K -->
 <div id="g-search-overlay" onclick="if(event.target===this)closeGSearch()">
@@ -304,8 +359,8 @@ input[type=range]{padding:0;height:20px}
   </div>
   <nav class="nav">
     <div class="sb-grp">Marché</div>
-    <div class="ni on" onclick="nav('dash')"><span>🏠</span> Tableau de bord</div>
-    <div class="ni" onclick="nav('rank')"><span>🏆</span> Classement</div>
+    <div class="ni on" onclick="nav('dash')"><span>🏠</span> <span class="ni-label">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
+    <div class="ni" onclick="nav('rank')"><span>🏆</span> <span class="ni-label">Classement</span></div>
     <div class="ni" onclick="nav('sectors');renderSectorPage()"><span>📊</span> Secteurs</div>
     <div class="ni" onclick="nav('news')"><span>📰</span> Actualités</div>
     <div class="ni" onclick="nav('comm')"><span>🌍</span> Commodités</div>
@@ -322,7 +377,7 @@ input[type=range]{padding:0;height:20px}
     <div class="ni" onclick="nav('port')"><span>💼</span> Portefeuille</div>
     <div class="ni" onclick="nav('sim')"><span>🧮</span> Simulateur div.</div>
     <div class="ni" onclick="nav('div')"><span>💰</span> Dividendes</div>
-    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> Alertes<span id="alert-badge"></span></div>
+    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none"></span></div>
     <div class="sb-grp">Outils</div>
     <div class="ni" onclick="nav('chat')"><span>💬</span> Chat IA</div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()"><span>📚</span> Glossaire</div>
@@ -341,8 +396,9 @@ input[type=range]{padding:0;height:20px}
     <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
   </div>
   <div style="padding:4px 8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px">
-    <button onclick="startTour()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">🎓 Revoir le tour guidé</button>
-    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">🔋 Mode économie : OFF</button>
+    <button onclick="startTour()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left" class="compact-hide">🎓 Revoir le tour guidé</button>
+    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
+    <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:4px 0;width:100%;text-align:left;border-top:1px solid var(--border);margin-top:4px">⟨ Réduire la sidebar</button>
   </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
@@ -1448,8 +1504,36 @@ function runGSearch(q){
     </div>`).join('');
   }
 
+  // ── Récents (uniquement si pas de query)
+  if(!q){
+    const recent=JSON.parse(localStorage.getItem('brvm_recent_tickers')||'[]').slice(0,5);
+    const recStocks=recent.map(tk=>(window.scores||[]).find(x=>x.ticker===tk)).filter(Boolean);
+    if(recStocks.length){
+      html=`<div class="gsr-section">⏱ Consultés récemment</div>`+recStocks.map(x=>{
+        const v=x.composite_adj||0;
+        const chg=x.change_pct||0;const chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+        return`<div class="gsr-item" data-action="stock" data-val="${x.ticker}">
+          <div class="gsr-icon" style="background:rgba(251,191,36,.12)">⏱</div>
+          <div style="flex:1">
+            <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
+            <div class="gsr-sub">${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
+          </div>
+          <span class="b ${bcls(v)}">${v.toFixed(0)}/80</span>
+        </div>`;
+      }).join('')+html;
+    }
+  }
+
   if(!html) html='<div style="padding:20px;text-align:center;color:var(--t2);font-size:12px">Aucun résultat pour "'+q+'"</div>';
   res.innerHTML=html;
+}
+
+function _trackRecentTicker(ticker){
+  const key='brvm_recent_tickers';
+  let arr=JSON.parse(localStorage.getItem(key)||'[]');
+  arr=arr.filter(t=>t!==ticker);
+  arr.unshift(ticker);
+  localStorage.setItem(key,JSON.stringify(arr.slice(0,10)));
 }
 
 function gsKeyNav(e){
@@ -1468,7 +1552,7 @@ function gsActivate(el){
   const action=el.getAttribute('data-action');
   const val=el.getAttribute('data-val');
   closeGSearch();
-  if(action==='stock'){ showStock(val); }
+  if(action==='stock'){ _openStock(val); }
   else if(action==='page'){
     nav(val);
     if(pageLoaders[val]) pageLoaders[val]();
@@ -1482,10 +1566,14 @@ document.addEventListener('click',e=>{
   const item=e.target.closest('.gsr-item');
   if(item) gsActivate(item);
 });
-// Cmd+K / Ctrl+K
+// Cmd+K / Ctrl+K + "G TICKER" shortcut
+let _gBuffer='',_gBufTimer=null;
 document.addEventListener('keydown',e=>{
-  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();}
-  else if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();return;}
+  if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();return;}
+  // "G TICKER" shortcut: type G then a ticker (ignores input fields)
+  if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA') return;
+  if(e.key==='g'||e.key==='G'){_gBuffer='';clearTimeout(_gBufTimer);openGSearch();return;}
 });
 
 // ── Theme dark/light ───────────────────────────────────────────────────────
@@ -1506,12 +1594,54 @@ _applyTheme();
 function nav(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('page-'+id)?.classList.add('on');
+  const pg = document.getElementById('page-'+id);
+  if (pg) pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')});
   document.querySelector('.main').scrollTop=0;
-  // Mettre à jour la page courante pour l'aide contextuelle
   if(typeof _currentPage!=='undefined') _currentPage=id;
   if(_helpOpen) openHelpDrawer(id);
+}
+
+// ── Sidebar compact mode ────────────────────────────────────────────────────
+function toggleSidebarCompact(){
+  const sb = document.querySelector('.sb');
+  const btn = document.getElementById('sb-compact-btn');
+  if (!sb) return;
+  const compact = sb.classList.toggle('compact');
+  localStorage.setItem('brvm_sb_compact', compact ? '1' : '');
+  if (btn) btn.textContent = compact ? '⟩ Agrandir' : '⟨ Réduire la sidebar';
+}
+(function(){
+  const sb = document.querySelector('.sb');
+  if (sb && localStorage.getItem('brvm_sb_compact')) {
+    sb.classList.add('compact');
+    const btn = document.getElementById('sb-compact-btn');
+    if (btn) btn.textContent = '⟩ Agrandir';
+  }
+})();
+
+// ── Alert badge count ───────────────────────────────────────────────────────
+function _updateAlertBadge(){
+  try {
+    const alerts = JSON.parse(localStorage.getItem('brvm_alerts_v2') || '[]');
+    const badge = document.getElementById('alert-badge');
+    if (!badge) return;
+    if (alerts.length > 0) {
+      badge.textContent = alerts.length;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(e){}
+}
+setTimeout(_updateAlertBadge, 1000);
+
+// ── Skeleton loader helper ──────────────────────────────────────────────────
+function skeletonRows(n=5){
+  return Array.from({length:n}, (_,i)=>`<div class="sk-row" style="opacity:${1-i*0.12}">
+    <div class="skeleton"></div><div class="skeleton"></div>
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>`).join('');
 }
 
 // ── SVG Charts ─────────────────────────────────────────────────────────────
@@ -1747,7 +1877,7 @@ function renderDash(m){
   // Signal du jour
   _renderDaySignal(s);
   document.getElementById('podium').innerHTML=s.slice(0,3).map((x,i)=>`
-    <div class="card" style="border-top:3px solid ${['#FBBF24','#94A3B8','#CD7C3C'][i]};cursor:pointer;margin-bottom:0" onclick="showStock('${x.ticker}')">
+    <div class="card" style="border-top:3px solid ${['#FBBF24','#94A3B8','#CD7C3C'][i]};cursor:pointer;margin-bottom:0" onclick="_openStock('${x.ticker}')">
       <div style="font-size:18px;margin-bottom:4px">${['🥇','🥈','🥉'][i]}</div>
       <div style="font-size:16px;font-weight:700">${x.ticker} <button class="star ${favorites.includes(x.ticker)?'fav':''}" onclick="event.stopPropagation();toggleFav('${x.ticker}')">★</button></div>
       <div style="font-size:10px;color:var(--t2);margin-bottom:6px">${x.name||''}</div>
@@ -1842,7 +1972,7 @@ async function renderDividendesVenir() {
       const label = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
       const daysLeft = Math.ceil((d - new Date()) / 86400000);
       const urgCol = daysLeft <= 14 ? 'var(--red)' : daysLeft <= 60 ? 'var(--amber)' : 'var(--t2)';
-      return `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer" onclick="showStock('${x.ticker}')">
+      return `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer" onclick="_openStock('${x.ticker}')">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="font-weight:700;font-size:13px">${x.ticker}</span>
           <span style="font-size:10px;color:var(--amber);font-weight:700">${(x.div_yield||0).toFixed(1)}%</span>
@@ -1918,7 +2048,7 @@ function _renderDaySignal(sorted) {
       </div>
       ${top3.length ? `<div style="margin-top:8px;border-top:1px solid ${color}33;padding-top:6px">
         <div style="font-size:9px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">🏆 Top 3 du jour</div>
-        ${top3.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;cursor:pointer" onclick="showStock('${x.ticker}')">
+        ${top3.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;cursor:pointer" onclick="_openStock('${x.ticker}')">
           <span style="font-weight:700;font-size:11px">${x.ticker}</span>
           <span style="font-size:10px;color:var(--t2)">${x.name?x.name.substring(0,18)+'…':''}</span>
           <span style="color:var(--green);font-weight:700;font-size:11px">+${(x.change_pct||0).toFixed(2)}%</span>
@@ -1926,11 +2056,11 @@ function _renderDaySignal(sorted) {
       </div>` : ''}
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;min-width:150px">
-      ${bestScore ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="showStock('${bestScore.ticker}')">
+      ${bestScore ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="_openStock('${bestScore.ticker}')">
         <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur score</div>
         <div style="font-size:13px;font-weight:700;color:var(--green)">${bestScore.ticker} <span style="font-size:11px">${(bestScore.composite_adj||0).toFixed(0)}/80</span></div>
       </div>` : ''}
-      ${bestDiv ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="showStock('${bestDiv.ticker}')">
+      ${bestDiv ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="_openStock('${bestDiv.ticker}')">
         <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur dividende</div>
         <div style="font-size:13px;font-weight:700;color:var(--amber)">${bestDiv.ticker} <span style="font-size:11px">${(bestDiv.div_yield||0).toFixed(1)}%</span></div>
       </div>` : ''}
@@ -1970,7 +2100,7 @@ async function renderFluxCapitaux() {
       const pct = Math.min(100, Math.abs(x.flow) / maxAbs * 100);
       const col = positive ? 'var(--green)' : 'var(--red)';
       const sign = positive ? '+' : '';
-      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="showStock('${x.ticker}')">
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="_openStock('${x.ticker}')">
         <div style="width:42px;font-size:11px;font-weight:700;color:${col}">${x.ticker}</div>
         <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;position:relative">
           <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}22;border-radius:3px;transition:width .4s"></div>
@@ -2070,7 +2200,7 @@ function renderHeatmap(){
     const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
     const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${sc.toFixed(0)}/80`;
     const delay=i*18; // vague d'animation
-    return `<div onclick="showStock('${x.ticker}')"
+    return `<div onclick="_openStock('${x.ticker}')"
       title="${tip}"
       style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${borderCol};border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;box-sizing:border-box;opacity:0;transform:scale(0.7);transition:transform .15s,box-shadow .15s,opacity .3s ${delay}ms,transform .3s ${delay}ms ease-out"
       onmouseenter="this.style.transform='scale(1.12)';this.style.zIndex='10';this.style.boxShadow='0 6px 20px rgba(0,0,0,.55)'"
@@ -2126,13 +2256,13 @@ function renderOpportunities(){
     const cardId='opp-'+x.ticker;
     return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div style="cursor:pointer" onclick="showStock('${x.ticker}')">
+        <div style="cursor:pointer" onclick="_openStock('${x.ticker}')">
           <span style="font-weight:700;font-size:14px">${x.ticker}</span>
           ${isUndervalued?'<span style="font-size:9px;background:rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:600">💎 Sous-évaluée</span>':''}
         </div>
         <span style="font-size:14px;font-weight:700;color:${scC}">${sc.toFixed(0)}/80</span>
       </div>
-      <div style="font-size:10px;color:var(--t2);margin-bottom:6px;cursor:pointer" onclick="showStock('${x.ticker}')">${x.name||''}</div>
+      <div style="font-size:10px;color:var(--t2);margin-bottom:6px;cursor:pointer" onclick="_openStock('${x.ticker}')">${x.name||''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin-bottom:6px">
         ${(x.div_yield||0)>0?`<span style="color:var(--amber)">Div <strong>${x.div_yield.toFixed(1)}%</strong></span>`:''}
         ${pe?`<span style="color:var(--t2)">P/E <strong>${pe.toFixed(1)}×</strong></span>`:''}
@@ -2222,8 +2352,8 @@ function loadMarketWidget(){
     _renderMarketWeather(comp?comp.change:0, window.scores||scores||[]);
     var top5=document.getElementById('market-top5');
     var flop5=document.getElementById('market-flop5');
-    if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="showStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
-    if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="showStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
+    if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
+    if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
   }).catch(()=>{});
 }
 
@@ -2236,7 +2366,7 @@ function loadSidebar(){
     return`<div class="tb" style="display:flex;align-items:center;gap:3px">
       <input type="checkbox" class="cmp-cb" data-ticker="${x.ticker}" ${checked} title="Comparer" onchange="toggleCompare('${x.ticker}')" style="flex-shrink:0"/>
       <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 3px 0 0">★</button>
-      <span onclick="showStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
+      <span onclick="_openStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
       <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v.toFixed(0)}</span>
     </div>`;}).join('');
 }
@@ -2247,7 +2377,7 @@ function filterSidebar(q){
     .filter(x=>!q||x.ticker.includes(q)||((x.name||'').toUpperCase().includes(q)));
   document.getElementById('tlItems').innerHTML=s.map(x=>{
     const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
-    return`<button class="tb" onclick="showStock('${x.ticker}')">
+    return`<button class="tb" onclick="_openStock('${x.ticker}')">
       <span style="font-weight:600;font-size:11px">${x.ticker}</span>
       <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v.toFixed(0)}</span>
     </button>`;}).join('');
@@ -2323,7 +2453,7 @@ function renderRank(){
       momBadge=avg5>avg20*1.01?'<span class="mom-up">🚀</span>':avg5<avg20*0.99?'<span class="mom-dn">📉</span>':'';
     }
     const verdC=x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)';
-    return`<tr id="rank-row-${x.ticker}" onclick="showStock('${x.ticker}')">
+    return`<tr id="rank-row-${x.ticker}" onclick="_openStock('${x.ticker}')">
       <td style="color:var(--t2)">${i+1}</td>
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
       <td><strong>${x.ticker}</strong>${momBadge}</td>
@@ -2431,7 +2561,7 @@ function loadPortfolio(){
     ? enriched.map(pos => {
         const w = totalValue ? ((pos.value/totalValue)*100).toFixed(1) : 0;
         const gc = pos.gain>=0?'var(--green)':'var(--red)';
-        return`<tr onclick="showStock('${pos.ticker}')">
+        return`<tr onclick="_openStock('${pos.ticker}')">
           <td><strong>${pos.ticker}</strong></td>
           <td style="font-size:11px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis">${pos.name||''}</td>
           <td>${pos.shares}</td>
@@ -2775,9 +2905,9 @@ function renderSectorPage(){
     const top3html = top3.map(x=>{
       const sc=x.composite_adj||0;
       const col=sc>=60?'var(--green)':sc>=45?'var(--amber)':'var(--red)';
-      return `<span onclick="showStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${sc.toFixed(0)}</span></span>`;
+      return `<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${sc.toFixed(0)}</span></span>`;
     }).join('');
-    const flophtml = flop.map(x=>`<span onclick="showStock('${x.ticker}')" style="cursor:pointer;background:rgba(248,113,113,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${(x.composite_adj||0).toFixed(0)}</span>`).join('');
+    const flophtml = flop.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:rgba(248,113,113,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${(x.composite_adj||0).toFixed(0)}</span>`).join('');
 
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
@@ -2894,7 +3024,7 @@ async function renderDiv(){
     const dy = x.div_yield||0;
     const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
     const dyBg = dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
-    return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="showStock('${x.ticker}')">
+    return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="_openStock('${x.ticker}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <strong style="font-size:12px">${x.ticker}</strong>
@@ -2916,7 +3046,7 @@ async function renderDiv(){
     const dyC = dy>=10?'#22c55e':dy>=5?'var(--amber)':'var(--t2)';
     const dyBg = dy>=10?'rgba(34,197,94,.15)':dy>=5?'rgba(251,191,36,.1)':'transparent';
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
-    return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
+    return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
       <td style="font-weight:600">${fmtXOF(x.div_per_share)}</td>
       <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span></td>
@@ -2940,7 +3070,7 @@ function renderPerf(){
   const top5=['SGBC','SIBC','SNTS','CBIBF','NSBC'];
   svgLine(document.getElementById('cPriceDiv'),YEARS,top5.map((t,i)=>({label:t,data:HIST_PRICES[t]})),260);
   svgLine(document.getElementById('cDivHistDiv'),YEARS,top5.map((t,i)=>({label:t,data:HIST_DIV[t]})),220);
-  document.getElementById('perfTable').innerHTML=topPerf.map(x=>`<tr onclick="showStock('${x.ticker}')">
+  document.getElementById('perfTable').innerHTML=topPerf.map(x=>`<tr onclick="_openStock('${x.ticker}')">
     <td><strong>${x.ticker}</strong></td><td style="color:var(--t2)">${fmt(x.start_price)}</td>
     <td style="font-weight:600">${fmt(x.current_price)}</td>
     <td style="color:${(x.price_gain_pct||0)>=0?'var(--green)':'var(--red)'};font-weight:600">${(x.price_gain_pct||0)>=0?'+':''}${(x.price_gain_pct||0).toFixed(0)}%</td>
@@ -2956,7 +3086,7 @@ async function renderTargets(){
     const cls=up>=30?'target-up':up<0?'target-dn':'';
     const vc=up>=30?'var(--green)':up<0?'var(--red)':'var(--amber)';
     const vb=up>=30?'bg':up<0?'br':'ba';
-    return`<tr onclick="showStock('${t.ticker}')">
+    return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
       <td style="color:var(--t2)">${t.graham_target?fmtXOF(t.graham_target):'—'}</td>
@@ -3000,7 +3130,7 @@ async function applyCustomScores(){
   document.getElementById('customRankBody').innerHTML=result.map((x,i)=>{
     const diff=x.composite_custom-(x.composite_adj||0);
     const dc=diff>0?'var(--green)':diff<0?'var(--red)':'var(--t2)';
-    return`<tr onclick="showStock('${x.ticker}')">
+    return`<tr onclick="_openStock('${x.ticker}')">
       <td>${i+1}</td><td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px">${x.name||''}</td>
       <td style="color:var(--t2)">${(x.composite_adj||0).toFixed(0)}</td>
@@ -3069,7 +3199,7 @@ function simBuildSliders(){
     const w=_simWeights[x.ticker]||0;
     return`<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
-        <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="showStock('${x.ticker}')">${x.ticker}</span>
+        <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
         <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${(x.composite_adj||0).toFixed(0)}/80</span>
         <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
       </div>
@@ -3154,7 +3284,7 @@ function simCalc(){
   // Tableau détail
   const tbody=document.getElementById('simTable2');
   if(tbody){
-    tbody.innerHTML=details.sort((a,b)=>b.div_yr1-a.div_yr1).map(p=>`<tr onclick="showStock('${p.ticker}')" style="cursor:pointer">
+    tbody.innerHTML=details.sort((a,b)=>b.div_yr1-a.div_yr1).map(p=>`<tr onclick="_openStock('${p.ticker}')" style="cursor:pointer">
       <td><strong>${p.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px">${p.sector||'—'}</td>
       <td>${fmtXOF(Math.round(p.alloc))}</td>
@@ -3361,7 +3491,7 @@ function renderComm(){
   document.getElementById('commTable').innerHTML=exp.map(x=>{
     const ci=COMM_PROD[x.ticker],v=x.composite_adj||0;
     const ec=ci.exp==='Forte'?'var(--red)':ci.exp==='Modérée'?'var(--amber)':'var(--green)';
-    return`<tr onclick="showStock('${x.ticker}')"><td><strong>${x.ticker}</strong></td>
+    return`<tr onclick="_openStock('${x.ticker}')"><td><strong>${x.ticker}</strong></td>
       <td style="font-size:11px;color:var(--t2)">${ci.prod}</td>
       <td><span class="ctag"><span class="cdot" style="background:${ci.col}"></span>${ci.com[0]}</span></td>
       <td style="color:${ec};font-weight:600">${ci.exp}</td>
@@ -3521,13 +3651,80 @@ function _shareStockText(s){
   navigator.clipboard.writeText(text).then(()=>showNotif('Fiche copiée ✓','green')).catch(()=>prompt('Copiez ce texte :',text));
 }
 
+// ── Slide-over (fiche société desktop) ───────────────────────────────────────
+let _ssoHistory = [], _ssoIdx = -1, _stockRenderTarget = 'stockDetail';
+
+function _addToSSOHistory(ticker){
+  if (_ssoHistory[_ssoIdx] === ticker) return;
+  _ssoHistory = _ssoHistory.slice(0, _ssoIdx + 1);
+  _ssoHistory.push(ticker);
+  _ssoIdx = _ssoHistory.length - 1;
+  _ssoUpdateNav();
+}
+function _ssoUpdateNav(){
+  const prev = document.getElementById('sso-prev');
+  const next = document.getElementById('sso-next');
+  const hist = document.getElementById('sso-hist-label');
+  if (prev) prev.disabled = _ssoIdx <= 0;
+  if (next) next.disabled = _ssoIdx >= _ssoHistory.length - 1;
+  if (hist && _ssoHistory.length > 1) hist.textContent = `${_ssoIdx+1}/${_ssoHistory.length}`;
+  else if (hist) hist.textContent = '';
+}
+function ssoNavPrev(){ if(_ssoIdx>0){_ssoIdx--;_ssoUpdateNav();_loadInSlideover(_ssoHistory[_ssoIdx]);} }
+function ssoNavNext(){ if(_ssoIdx<_ssoHistory.length-1){_ssoIdx++;_ssoUpdateNav();_loadInSlideover(_ssoHistory[_ssoIdx]);} }
+function ssoOpenFullPage(){
+  const ticker = _ssoHistory[_ssoIdx];
+  closeStockSlideover();
+  if (ticker) { nav('stock'); _stockRenderTarget='stockDetail'; showStock(ticker); }
+}
+function openStockSlideover(ticker){
+  const sso = document.getElementById('stock-slideover');
+  const ov  = document.getElementById('sso-overlay');
+  if (!sso || window.innerWidth < 800) { nav('stock'); showStock(ticker); return; }
+  sso.classList.add('open');
+  ov.classList.add('open');
+  document.getElementById('sso-ticker-label').textContent = ticker;
+  _addToSSOHistory(ticker);
+  _trackRecentTicker(ticker);
+  _loadInSlideover(ticker);
+  document.addEventListener('keydown', _ssoEscHandler);
+}
+function _loadInSlideover(ticker){
+  _stockRenderTarget = 'sso-body';
+  document.getElementById('sso-ticker-label').textContent = ticker;
+  window._openTicker = ticker;
+  showStock(ticker);
+}
+function closeStockSlideover(){
+  document.getElementById('stock-slideover')?.classList.remove('open');
+  document.getElementById('sso-overlay')?.classList.remove('open');
+  document.removeEventListener('keydown', _ssoEscHandler);
+}
+function _ssoEscHandler(e){ if(e.key==='Escape') closeStockSlideover(); }
+
+// Route stock clicks: slide-over on desktop ≥800px, full page on mobile
+function _openStock(ticker){
+  if (window.innerWidth >= 800) openStockSlideover(ticker);
+  else showStock(ticker);
+}
+
 async function showStock(ticker){
-  nav('stock');
-  document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.textContent.trim().startsWith(ticker)));
-  document.getElementById('stockDetail').innerHTML='<div style="padding:40px;text-align:center;color:var(--t2)">Chargement...</div>';
+  _trackRecentTicker(ticker);
+  const useSlide = _stockRenderTarget === 'sso-body' && document.getElementById('stock-slideover')?.classList.contains('open');
+  if (!useSlide) {
+    nav('stock');
+    _stockRenderTarget = 'stockDetail';
+  }
+  if (!useSlide) document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.textContent.trim().startsWith(ticker)));
+  if (useSlide) {
+    const lbl = document.getElementById('sso-ticker-label');
+    if (lbl) lbl.textContent = ticker;
+    _addToSSOHistory(ticker);
+  }
+  document.getElementById(_stockRenderTarget).innerHTML='<div style="padding:40px;text-align:center;color:var(--t2)">Chargement...</div>';
   try{
     const[d,cd]=await Promise.all([fetch('/api/stock/'+ticker).then(r=>r.json()),fetch('/api/company/'+ticker).then(r=>r.json()).catch(()=>({}))]);
-    if(d.error){document.getElementById('stockDetail').innerHTML=`<p>${d.error}</p>`;return;}
+    if(d.error){document.getElementById(_stockRenderTarget).innerHTML=`<p>${d.error}</p>`;return;}
     const s=d.stock,v=s.composite_adj||0;
     const fi=cd.financials||{},ai=cd.ai_analysis||'';
     const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
@@ -3536,7 +3733,7 @@ async function showStock(ticker){
     const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
     const hasCompany=co&&co.description&&co.description.length>10;
     const isFav=favorites.includes(ticker);
-    document.getElementById('stockDetail').innerHTML=`
+    document.getElementById(_stockRenderTarget).innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
         <div>
           <h2 style="font-size:20px;font-weight:700">${s.ticker}
@@ -3681,7 +3878,7 @@ async function showStock(ticker){
             const sect=s.sector||'';const sc0=s.composite_adj||0;
             const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
             if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
-            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="showStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${pv.toFixed(0)}/80</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${pv.toFixed(0)}/80</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
           })()}
         </div>
       </div>
@@ -3743,7 +3940,7 @@ async function showStock(ticker){
         }).catch(()=>{});
       }
     }
-  }catch(e){document.getElementById('stockDetail').innerHTML='<p style="color:var(--t2)">Erreur</p>';}
+  }catch(e){document.getElementById(_stockRenderTarget).innerHTML='<p style="color:var(--t2)">Erreur</p>';}
 }
 
 function _loadStockHistory(ticker){
@@ -4018,7 +4215,7 @@ function _calEventCard(e, isPast) {
   const bg = _calTypeBg(e);
   const dayNum = e.date ? e.date.slice(8) : '?';
   const monStr = e.date ? new Date(e.date + 'T00:00:00').toLocaleDateString('fr-FR', {month:'short'}) : '';
-  const click = e.ticker ? `onclick="showStock('${e.ticker}')"` : '';
+  const click = e.ticker ? `onclick="_openStock('${e.ticker}')"` : '';
   const typeShort = (e.type||'').replace('convocations-assemblees-generales','AG').replace('evenement','Autre').substring(0,12);
   return `<div ${click} style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;background:${bg};border-left:3px solid ${col};border-radius:6px;cursor:${e.ticker?'pointer':'default'};opacity:${isPast?'0.55':'1'}">
     <div style="min-width:48px;text-align:center;background:var(--bg3);border-radius:6px;padding:4px">
