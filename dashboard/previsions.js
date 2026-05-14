@@ -254,34 +254,63 @@ async function _prevRunBacktest() {
 function _prevDrawBacktest(el) {
   if (!_prevBacktest) return;
   const bt = _prevBacktest;
-  const accColor = bt.directional_accuracy >= 60 ? 'var(--green)' : bt.directional_accuracy >= 50 ? 'var(--amber)' : 'var(--red)';
+  const acc = bt.directional_accuracy_recent ?? bt.directional_accuracy ?? 0;
+  const accHist = bt.directional_accuracy ?? 0;
+  const accC = acc >= 60 ? 'var(--green)' : acc >= 50 ? 'var(--amber)' : 'var(--red)';
+  const alphaC = (bt.avg_alpha || 0) >= 0 ? 'var(--green)' : 'var(--red)';
+  const sharpeC = (bt.sharpe_model || 0) >= 0.5 ? 'var(--green)' : (bt.sharpe_model || 0) >= 0 ? 'var(--amber)' : 'var(--red)';
 
-  // Mini SVG chart prévision vs réalité
+  // Yearly bar chart
+  const yearly = bt.yearly_results || {};
+  const yrs = Object.keys(yearly).sort();
+  let yearBars = '';
+  if (yrs.length) {
+    const maxRet = Math.max(...yrs.map(y => Math.abs(yearly[y].avg_return_acheter || 0)), 10);
+    yearBars = `<div style="margin-top:10px">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📅 Rendement simulé "ACHETER" par année</div>
+      ${yrs.map(y => {
+        const v = yearly[y];
+        const ret = v.avg_return_acheter ?? 0;
+        const pct = Math.min(100, Math.abs(ret) / maxRet * 100);
+        const col = ret >= 0 ? 'var(--green)' : 'var(--red)';
+        const acc = v.directional_accuracy || 0;
+        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span style="width:30px;font-size:10px;color:var(--t2)">${y}</span>
+          <div style="flex:1;background:var(--bg3);border-radius:3px;height:18px;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}44;border-radius:3px"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 6px;font-size:9px;gap:8px">
+              <span style="color:${col};font-weight:700">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>
+              <span style="color:var(--t3)">· ${v.n_acheter} ACHETER / ${v.n_tickers} · précision ${acc}%</span>
+              <span style="color:${(v.alpha||0)>=0?'var(--green)':'var(--red)'}">alpha ${(v.alpha||0)>=0?'+':''}${(v.alpha||0).toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // Recent split SVG chart
   const chartData = (bt.results || []).slice(0, 15).filter(r => r.actual_return != null);
   let svgChart = '';
   if (chartData.length > 3) {
-    const maxAbs = Math.max(...chartData.map(r => Math.max(Math.abs(r.actual_return), Math.abs(r.predicted_return))), 1);
+    const maxAbs = Math.max(...chartData.map(r => Math.max(Math.abs(r.actual_return), Math.abs(r.predicted_return || 0))), 1);
     const W = 400, H = 120, pad = { l: 50, r: 10, t: 10, b: 20 };
     const cw = (W - pad.l - pad.r) / chartData.length;
     const yMid = pad.t + (H - pad.t - pad.b) / 2;
     const yScale = v => yMid - (v / maxAbs) * ((H - pad.t - pad.b) / 2);
-
     let actualLine = '', predLine = '';
     chartData.forEach((r, i) => {
       const x = pad.l + i * cw + cw / 2;
-      if (i === 0) { actualLine += `M${x},${yScale(r.actual_return)}`; predLine += `M${x},${yScale(r.predicted_return)}`; }
-      else { actualLine += ` L${x},${yScale(r.actual_return)}`; predLine += ` L${x},${yScale(r.predicted_return)}`; }
+      const pred = r.predicted_return ?? 0;
+      if (i === 0) { actualLine += `M${x},${yScale(r.actual_return)}`; predLine += `M${x},${yScale(pred)}`; }
+      else { actualLine += ` L${x},${yScale(r.actual_return)}`; predLine += ` L${x},${yScale(pred)}`; }
     });
-
-    svgChart = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-bottom:12px">
+    svgChart = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-bottom:10px">
       <line x1="${pad.l}" y1="${yMid}" x2="${W-pad.r}" y2="${yMid}" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4,3"/>
       <text x="${pad.l-4}" y="${yMid+4}" font-size="8" fill="rgba(255,255,255,0.3)" text-anchor="end">0%</text>
       <path d="${actualLine}" fill="none" stroke="#4ADE80" stroke-width="1.5" opacity="0.9"/>
       <path d="${predLine}" fill="none" stroke="#60A5FA" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.7"/>
-      ${chartData.map((r, i) => {
-        const x = pad.l + i * cw + cw/2;
-        return `<text x="${x}" y="${H}" font-size="7" fill="rgba(255,255,255,0.3)" text-anchor="middle">${r.ticker}</text>`;
-      }).join('')}
+      ${chartData.map((r, i) => `<text x="${pad.l + i*cw + cw/2}" y="${H}" font-size="7" fill="rgba(255,255,255,0.3)" text-anchor="middle">${r.ticker}</text>`).join('')}
       <circle cx="${W-90}" cy="14" r="4" fill="#4ADE80"/>
       <text x="${W-83}" y="18" font-size="8" fill="#4ADE80">Réel</text>
       <line x1="${W-58}" y1="14" x2="${W-44}" y2="14" stroke="#60A5FA" stroke-dasharray="3,2" stroke-width="1.5"/>
@@ -290,41 +319,64 @@ function _prevDrawBacktest(el) {
   }
 
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+    <div style="background:rgba(96,165,250,0.06);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:10px;color:var(--t3)">
+      <strong style="color:var(--blue)">Modèle :</strong> ${bt.model_description || 'Composite 4 facteurs'}
+      &nbsp;·&nbsp; Seuil ACHETER : score ≥ ${(bt.seuil_acheter||0.65)*100}%
+      &nbsp;·&nbsp; Seuil ALLÉGER : score ≤ ${(bt.seuil_alleger||0.35)*100}%
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
       <div class="card" style="margin-bottom:0;text-align:center">
-        <div style="font-size:10px;color:var(--t3)">Précision directionnelle</div>
-        <div style="font-size:28px;font-weight:700;color:${accColor}">${bt.directional_accuracy}%</div>
-        <div style="font-size:9px;color:var(--t2)">${bt.directional_accuracy>=60?'Bon modèle':bt.directional_accuracy>=50?'Modèle passable':'Modèle faible'}</div>
+        <div style="font-size:9px;color:var(--t3)">Précision directionnelle<br><span style="font-size:8px">(split récent)</span></div>
+        <div style="font-size:26px;font-weight:700;color:${accC}">${acc}%</div>
+        <div style="font-size:8px;color:var(--t2)">${acc>=60?'Bon modèle':acc>=50?'Passable':'Faible — dépasse le hasard ?'}</div>
       </div>
       <div class="card" style="margin-bottom:0;text-align:center">
-        <div style="font-size:10px;color:var(--t3)">MAE (erreur absolue)</div>
-        <div style="font-size:28px;font-weight:700;color:var(--amber)">${bt.mae}%</div>
-        <div style="font-size:9px;color:var(--t2)">Erreur moyenne de prévision</div>
+        <div style="font-size:9px;color:var(--t3)">Alpha moyen<br><span style="font-size:8px">vs marché (2019-2024)</span></div>
+        <div style="font-size:26px;font-weight:700;color:${alphaC}">${(bt.avg_alpha||0)>=0?'+':''}${(bt.avg_alpha||0).toFixed(1)}%</div>
+        <div style="font-size:8px;color:var(--t2)">Surperformance annuelle moy.</div>
       </div>
       <div class="card" style="margin-bottom:0;text-align:center">
-        <div style="font-size:10px;color:var(--t3)">Actions testées</div>
-        <div style="font-size:28px;font-weight:700;color:var(--blue)">${bt.total_tested}</div>
-        <div style="font-size:9px;color:var(--t2)">${bt.test_period}</div>
+        <div style="font-size:9px;color:var(--t3)">Sharpe modèle<br><span style="font-size:8px">(taux sans risque 6.5%)</span></div>
+        <div style="font-size:26px;font-weight:700;color:${sharpeC}">${(bt.sharpe_model||0).toFixed(2)}</div>
+        <div style="font-size:8px;color:var(--t2)">${(bt.sharpe_model||0)>=0.5?'Solide':'>0 = rendement ajusté risque positif':'Risque non rémunéré'}</div>
       </div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      ${bt.best_year ? `<div style="background:rgba(74,222,128,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--green)">
+        <div style="font-size:9px;color:var(--green);text-transform:uppercase;margin-bottom:2px">🏆 Meilleure année</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green)">${bt.best_year} · +${(bt.best_year_return||0).toFixed(1)}%</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille ACHETER</div>
+      </div>` : ''}
+      ${bt.worst_year ? `<div style="background:rgba(248,113,113,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--red)">
+        <div style="font-size:9px;color:var(--red);text-transform:uppercase;margin-bottom:2px">📉 Pire année</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red)">${bt.worst_year} · ${(bt.worst_year_return||0).toFixed(1)}%</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille ACHETER</div>
+      </div>` : ''}
+    </div>
     <div class="card" style="margin-bottom:12px">
-      <div class="ct" style="margin-bottom:8px">📊 Prévisions vs Réalité (top mouvements)</div>
+      <div class="ct" style="margin-bottom:4px">📅 Validation historique 2019–2024</div>
+      <div style="font-size:9px;color:var(--t3);margin-bottom:8px;font-style:italic">Simule "au 1er janvier de l'année N, quels tickers auraient score ≥ 0.65 ?" et compare avec la performance réelle sur 12 mois.</div>
+      ${yearBars}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct" style="margin-bottom:8px">🔬 Split train/test — données BOC récentes</div>
+      <div style="font-size:9px;color:var(--t3);margin-bottom:6px">Précision : <strong style="color:${accC}">${acc}%</strong> · MAE : ${bt.mae_recent ?? bt.mae}% · ${bt.total_tested} actions testées</div>
       ${svgChart}
-      <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
+      <div style="overflow-x:auto;max-height:250px;overflow-y:auto">
         <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr>
-            ${['Ticker','Score','Momentum entrainement','Prédit','Réel','Correct'].map(h=>`<th style="padding:6px 8px;text-align:center;border-bottom:2px solid var(--border);color:var(--t3);font-size:9px;white-space:nowrap">${h}</th>`).join('')}
-          </tr></thead>
-          <tbody>
-            ${(bt.results||[]).map(r=>`<tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:6px 8px;font-weight:700;cursor:pointer;color:var(--blue)" onclick="showStock('${r.ticker}')">${r.ticker}</td>
-              <td style="padding:6px 8px;text-align:center">${r.score.toFixed(0)}/80</td>
-              <td style="padding:6px 8px;text-align:center;color:${r.train_momentum>=0?'var(--green)':'var(--red)'}">${r.train_momentum>=0?'+':''}${r.train_momentum}%</td>
-              <td style="padding:6px 8px;text-align:center"><span style="padding:1px 6px;border-radius:8px;font-size:9px;background:${r.predicted==='hausse'?'rgba(74,222,128,.15)':'rgba(248,113,113,.15)'};color:${r.predicted==='hausse'?'var(--green)':'var(--red)'}">${r.predicted==='hausse'?'↑ hausse':'↓ baisse'}</span></td>
-              <td style="padding:6px 8px;text-align:center;font-weight:600;color:${r.actual_return>=0?'var(--green)':'var(--red)'}">${r.actual_return>=0?'+':''}${r.actual_return}%</td>
-              <td style="padding:6px 8px;text-align:center">${r.correct?'✅':'❌'}</td>
-            </tr>`).join('')}
-          </tbody>
+          <thead><tr>${['Ticker','Score prév.','Signal','Réel','Correct'].map(h=>`<th style="padding:5px 6px;text-align:center;border-bottom:2px solid var(--border);color:var(--t3);font-size:9px">${h}</th>`).join('')}</tr></thead>
+          <tbody>${(bt.results||[]).map(r=>{
+            const sp = r.score_prevision ?? 0;
+            const sig = r.signal || (sp > 0.65 ? 'ACHETER' : sp < 0.35 ? 'ALLÉGER' : 'CONSERVER');
+            const sigC = sig==='ACHETER'?'var(--green)':sig==='ALLÉGER'?'var(--red)':'var(--amber)';
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:5px 6px;font-weight:700;cursor:pointer;color:var(--blue)" onclick="showStock('${r.ticker}')">${r.ticker}</td>
+              <td style="padding:5px 6px;text-align:center;font-size:10px">${(sp*100).toFixed(0)}%</td>
+              <td style="padding:5px 6px;text-align:center"><span style="color:${sigC};font-size:9px;font-weight:600">${sig}</span></td>
+              <td style="padding:5px 6px;text-align:center;font-weight:600;color:${(r.actual_return||0)>=0?'var(--green)':'var(--red)'}">${(r.actual_return||0)>=0?'+':''}${(r.actual_return||0).toFixed(1)}%</td>
+              <td style="padding:5px 6px;text-align:center">${r.correct?'✅':'❌'}</td>
+            </tr>`;
+          }).join('')}</tbody>
         </table>
       </div>
     </div>

@@ -1537,10 +1537,11 @@ def api_prevision_signaux():
 @app.route("/api/previsions/backtest", methods=["GET", "POST"])
 def api_prevision_backtest():
     try:
-        from backtest_previsionnel import compute_backtest_previsionnel
+        import importlib, backtest_previsionnel as _bp
+        importlib.reload(_bp)
         scores = _get_live_scores_list()
         ph = _get_price_history_dict()
-        result = compute_backtest_previsionnel(scores, ph)
+        result = _bp.compute_backtest_previsionnel(scores, ph)
         return jsonify(result)
     except Exception as e:
         logger.error(f"previsions/backtest: {e}")
