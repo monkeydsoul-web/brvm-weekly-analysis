@@ -797,6 +797,11 @@ input[type=range]{padding:0;height:20px}
       </select>
     </div>
   </div>
+  <!-- À la une -->
+  <div id="news-alune" style="margin-bottom:12px;display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔥 À la une</div>
+    <div id="news-alune-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px"></div>
+  </div>
   <div class="g2">
     <div class="card" style="max-height:65vh;overflow-y:auto;margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -2972,13 +2977,25 @@ function _newsSentimentScore(article){
   return s;
 }
 
+function _newsAutoTags(x) {
+  const tags = [];
+  if (x.is_dividend_news) tags.push({label:'💰 Dividende', col:'var(--amber)'});
+  if (x.is_results_news)  tags.push({label:'📊 Résultats',  col:'var(--blue)'});
+  const t = (x.title||'').toLowerCase() + ' ' + (x.description||'').toLowerCase();
+  if (/assembl|ag\b|convoc/i.test(t))      tags.push({label:'🏛 AG',        col:'#60A5FA'});
+  if (/acquisition|fusion|rachat|merger/i.test(t)) tags.push({label:'🤝 M&A',      col:'#C084FC'});
+  if (/obligation|emprunt|bond/i.test(t))  tags.push({label:'📄 Obligation', col:'var(--t2)'});
+  if (/opa|offre\s+publique/i.test(t))     tags.push({label:'📢 OPA',        col:'var(--red)'});
+  if (/croissance|hausse|bénéfice/i.test(t)) tags.push({label:'📈 Croissance', col:'var(--green)'});
+  return tags;
+}
+
 function renderNews(f=''){
   _newsInitFilters();
   const ticker  = f || document.getElementById('nFil')?.value || '';
   const sect    = document.getElementById('nSectFil')?.value||'';
   const sentFil = document.getElementById('nSentFil')?.value||'';
 
-  // Map ticker→sector
   const tickerSect={};
   (window.scores||scores||[]).forEach(x=>{ if(x.ticker&&x.sector) tickerSect[x.ticker]=x.sector; });
 
@@ -2997,19 +3014,43 @@ function renderNews(f=''){
   const cntEl=document.getElementById('news-count');
   if(cntEl) cntEl.textContent=`${sorted.length} article${sorted.length!==1?'s':''}`;
 
+  // À la une — top 3 articles (most recent + with tickers)
+  const alune = sorted.filter(x=>(x.tickers||[]).length>0).slice(0,3);
+  const aluneEl = document.getElementById('news-alune');
+  const aluneList = document.getElementById('news-alune-list');
+  if (aluneEl && aluneList && alune.length && !ticker && !sect && !sentFil) {
+    aluneEl.style.display = '';
+    aluneList.innerHTML = alune.map(x => {
+      const sc = _newsSentimentScore(x);
+      const border = sc>0?'var(--green)':sc<0?'var(--red)':'var(--amber)';
+      const tags = _newsAutoTags(x);
+      return `<div onclick="${x.url?`window.open('${x.url}','_blank')`:'void 0'}" style="background:var(--bg3);border-radius:8px;padding:12px;border-top:3px solid ${border};cursor:${x.url?'pointer':'default'}">
+        <div style="font-size:12px;font-weight:600;color:var(--t1);line-height:1.4;margin-bottom:6px">${x.title}</div>
+        ${x.description?`<div style="font-size:10px;color:var(--t2);line-height:1.4;margin-bottom:6px">${x.description.substring(0,100)}${x.description.length>100?'…':''}</div>`:''}
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          ${(x.tickers||[]).map(t=>`<span onclick="event.stopPropagation();showStock('${t}')" class="b bg" style="cursor:pointer;font-size:9px">${t}</span>`).join('')}
+          ${tags.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}
+          ${x.date?`<span style="margin-left:auto;font-size:9px;color:var(--t3)">${x.date}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } else if (aluneEl) {
+    aluneEl.style.display = 'none';
+  }
+
   document.getElementById('newsList').innerHTML=sorted.length?sorted.slice(0,50).map(x=>{
     const sc=_newsSentimentScore(x);
     const sentBadge = sc>0?'<span style="font-size:10px">🟢</span>':sc<0?'<span style="font-size:10px">🔴</span>':'<span style="font-size:10px">🟡</span>';
+    const tags = _newsAutoTags(x);
     return `<div class="news-item" style="border-bottom:1px solid var(--border);padding:10px 0;cursor:pointer" ${x.url?`onclick="window.open('${x.url}','_blank')"`:''}>
       <div class="news-t" style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4">${sentBadge} ${x.title}</div>
       ${x.description?`<div style="font-size:11px;color:var(--t2);margin-bottom:4px;line-height:1.4">${x.description.substring(0,150)}${x.description.length>150?'...':''}</div>`:''}
-      <div class="news-m" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <div class="news-m" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
         <span class="src" style="font-size:10px;color:var(--t3)">${x.source}</span>
         ${x.date?`<span style="font-size:10px;color:var(--t3)">${x.date}</span>`:''}
         ${(x.tickers||[]).map(t=>`<span onclick="event.stopPropagation();showStock('${t}')" class="b bg" style="margin-right:2px;cursor:pointer;font-size:9px">${t}</span>`).join('')}
-        ${x.is_dividend_news?'<span class="b ba" style="font-size:9px">💰 Div</span>':''}
-        ${x.is_results_news?'<span class="b bp" style="font-size:9px">📊 Résultats</span>':''}
-        ${x.url?'<span style="font-size:9px;color:var(--blue)">↗ Lire</span>':''}
+        ${tags.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}
+        ${x.url?'<span style="font-size:9px;color:var(--blue);margin-left:auto">↗ Lire</span>':''}
       </div>
     </div>`;}).join('')
     :'<p style="color:var(--t2)">Aucune actualité.</p>';
@@ -3300,7 +3341,10 @@ async function showStock(ticker){
           ${(()=>{
             const tickNews=(window.news||[]).filter(n=>(n.tickers||[]).includes(ticker)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3);
             if(!tickNews.length) return '<p style="font-size:11px;color:var(--t2)">Aucune actualité récente.</p>';
-            return tickNews.map(n=>`<div class="news-item"><div class="news-t" style="font-size:11px;font-weight:600;line-height:1.4;margin-bottom:2px">${n.title}</div><div style="font-size:10px;color:var(--t3);display:flex;gap:6px;align-items:center"><span>${n.source||''}</span><span>${n.date||''}</span>${n.is_dividend_news?'<span class="b ba" style="font-size:9px">Div</span>':''}${n.is_results_news?'<span class="b bp" style="font-size:9px">Résultats</span>':''}</div></div>`).join('');
+            return tickNews.map(n=>{const tgs=typeof _newsAutoTags==='function'?_newsAutoTags(n):[];return`<div class="news-item" ${n.url?`onclick="window.open('${n.url}','_blank')" style="cursor:pointer"`:''}>
+              <div class="news-t" style="font-size:11px;font-weight:600;line-height:1.4;margin-bottom:2px">${n.title}</div>
+              <div style="font-size:10px;color:var(--t3);display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span>${n.source||''}</span><span>${n.date||''}</span>${tgs.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}${n.url?'<span style="color:var(--blue);margin-left:auto">↗</span>':''}</div>
+            </div>`}).join('');
           })()}
         </div>
         <div class="card" style="margin-bottom:0;border-left:3px solid var(--blue)">
@@ -3325,7 +3369,10 @@ async function showStock(ticker){
             <div id="stockChartDiv" style="width:100%;min-height:220px"></div></div>
         </div>
         <div class="card" style="max-height:580px;overflow-y:auto;margin-bottom:0"><div class="ct">📰 Actualités (${(d.news||[]).length})</div>
-          ${(d.news||[]).length?(d.news||[]).map(n=>`<div class="news-item"><div class="news-t">${n.title}</div><div class="news-m"><span class="src">${n.source}</span>${n.is_dividend_news?'<span class="b ba">Div</span>':''}${n.is_results_news?'<span class="b bp">Résultats</span>':''}</div></div>`).join(''):'<p style="font-size:12px;color:var(--t2);padding:10px 0">Aucune actualité.</p>'}
+          ${(d.news||[]).length?(d.news||[]).map(n=>{const tgs=typeof _newsAutoTags==='function'?_newsAutoTags(n):[];return`<div class="news-item" ${n.url?`onclick="window.open('${n.url}','_blank')" style="cursor:pointer"`:''}>
+            <div class="news-t" style="line-height:1.4;margin-bottom:2px">${n.title}</div>
+            <div class="news-m" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="src">${n.source}</span>${tgs.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}${n.url?'<span style="font-size:9px;color:var(--blue);margin-left:auto">↗ Lire</span>':''}</div>
+          </div>`}).join(''):'<p style="font-size:12px;color:var(--t2);padding:10px 0">Aucune actualité.</p>'}
         </div>
       </div>
       </div><!-- /stab-general -->
