@@ -1484,6 +1484,97 @@ def api_rapport_pdf(ticker):
         return jsonify({"error": str(e)}), 500
 
 
+def _get_live_scores_list():
+    """Retourne la liste de scores live (ranking ou calcul à la volée)."""
+    try:
+        from live_ranker import load_ranking
+        rd = load_ranking()
+        if rd and rd.get("ranking"):
+            return rd["ranking"]
+    except Exception:
+        pass
+    try:
+        live_cache = get_live_data()
+        return compute_all_live_scores(STOCK_FUNDAMENTALS, live_cache)
+    except Exception:
+        return []
+
+
+def _get_price_history_dict():
+    ph_path = os.path.join(os.path.dirname(__file__), "data", "price_history.json")
+    with open(ph_path) as f:
+        return json.load(f)
+
+
+# ── Prévisions & signaux ──────────────────────────────────────────────────────
+
+@app.route("/api/previsions/portfolios")
+def api_prevision_portfolios():
+    try:
+        from backtest_previsionnel import generate_portfolios
+        scores = _get_live_scores_list()
+        ph = _get_price_history_dict()
+        result = generate_portfolios(scores, ph)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"previsions/portfolios: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/previsions/signaux")
+def api_prevision_signaux():
+    try:
+        from backtest_previsionnel import compute_signals
+        scores = _get_live_scores_list()
+        ph = _get_price_history_dict()
+        result = compute_signals(scores, ph)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"previsions/signaux: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/previsions/backtest", methods=["GET", "POST"])
+def api_prevision_backtest():
+    try:
+        from backtest_previsionnel import compute_backtest_previsionnel
+        scores = _get_live_scores_list()
+        ph = _get_price_history_dict()
+        result = compute_backtest_previsionnel(scores, ph)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"previsions/backtest: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/prevision-accuracy")
+def api_prevision_accuracy():
+    acc_path = os.path.join(os.path.dirname(__file__), "data", "prevision_accuracy.json")
+    if os.path.exists(acc_path):
+        with open(acc_path) as f:
+            return jsonify(json.load(f))
+    return jsonify({"error": "Aucun backtest calculé — lancez /api/previsions/backtest"}), 404
+
+
+@app.route("/api/rapport-mensuel")
+def api_rapport_mensuel():
+    try:
+        from backtest_previsionnel import generate_rapport_pdf
+        scores = _get_live_scores_list()
+        ph = _get_price_history_dict()
+        pdf_bytes = generate_rapport_pdf(scores, ph)
+        from flask import Response
+        month = datetime.now().strftime("%Y-%m")
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=BRVM_Rapport_{month}.pdf"}
+        )
+    except Exception as e:
+        logger.error(f"rapport-mensuel: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     import socket
     import os as _os
