@@ -359,6 +359,14 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <div class="g4" id="kpis"></div>
+  <!-- Signal du jour -->
+  <div class="card" style="margin-bottom:12px;padding:12px 16px" id="signal-widget">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0">⚡ Signal du jour</div>
+      <span id="signal-date" style="font-size:10px;color:var(--t3)"></span>
+    </div>
+    <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
+  </div>
   <div class="g3" id="podium"></div>
   <div class="card" style="margin-bottom:12px" id="opportunities-widget">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -429,6 +437,14 @@ input[type=range]{padding:0;height:20px}
       <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2%</span>
       <span style="margin-left:auto;color:var(--t3)">Taille = Score · Couleur = Var%</span>
     </div>
+  </div>
+  <!-- Flux de capitaux -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0">💸 Flux de capitaux — Pression achat / vente</div>
+      <span style="font-size:10px;color:var(--t3)">volume × cours</span>
+    </div>
+    <div id="flux-content"><p style="color:var(--t2);font-size:11px">Chargement flux...</p></div>
   </div>
   <div class="card"><div class="ct">💡 Insights</div><div id="insights" style="font-size:12px;color:var(--t2);line-height:1.7">—</div></div>
 </div>
@@ -1555,16 +1571,36 @@ function populateSelects(){
 }
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
+const _LS_KPI_PREV = 'brvm_kpi_prev_v1';
+
+function _kpiArrow(curr, prev) {
+  if (prev == null || curr == null) return '';
+  if (curr > prev) return `<span style="color:var(--green);font-size:12px;font-weight:700"> ↑</span>`;
+  if (curr < prev) return `<span style="color:var(--red);font-size:12px;font-weight:700"> ↓</span>`;
+  return `<span style="color:var(--t3);font-size:11px"> →</span>`;
+}
+
 function renderDash(m){
   if(!scores.length)return;
   const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   const wd=scores.filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
+
+  // KPI trend arrows
+  const nStrong = s.filter(x=>(x.composite_adj||0)>=60).length;
+  const nDiv = wd.length;
+  let prevKpi = {};
+  try { prevKpi = JSON.parse(localStorage.getItem(_LS_KPI_PREV)||'{}'); } catch{}
+  localStorage.setItem(_LS_KPI_PREV, JSON.stringify({strong:nStrong, div:nDiv, total:scores.length}));
+
   document.getElementById('kpis').innerHTML=[
-    ['Actions analysées',scores.length,'var(--blue)','Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'],
-    ['Score fort (≥60)',s.filter(x=>(x.composite_adj||0)>=60).length,'var(--green)','Actions avec score composite ≥ 60/80 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
-    ['Avec dividende',wd.length,'var(--amber)','Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'],
-    ['Top rendement',wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—','var(--amber)','Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
+    ['Actions analysées', scores.length + _kpiArrow(scores.length, prevKpi.total), 'var(--blue)', 'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'],
+    ['Score fort (≥60)', nStrong + _kpiArrow(nStrong, prevKpi.strong), 'var(--green)', 'Actions avec score composite ≥ 60/80 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
+    ['Avec dividende', nDiv + _kpiArrow(nDiv, prevKpi.div), 'var(--amber)', 'Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'],
+    ['Top rendement', wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', 'var(--amber)', 'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
   ].map(([l,v,c,tip])=>`<div class="kpi tt" data-tt="${tip}"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
+
+  // Signal du jour
+  _renderDaySignal(s);
   document.getElementById('podium').innerHTML=s.slice(0,3).map((x,i)=>`
     <div class="card" style="border-top:3px solid ${['#FBBF24','#94A3B8','#CD7C3C'][i]};cursor:pointer;margin-bottom:0" onclick="showStock('${x.ticker}')">
       <div style="font-size:18px;margin-bottom:4px">${['🥇','🥈','🥉'][i]}</div>
@@ -1598,6 +1634,115 @@ function renderDash(m){
   ].filter(Boolean).join('<br>');
   renderHeatmap();
   renderOpportunities();
+  renderFluxCapitaux();
+}
+
+// ── Signal du jour ──────────────────────────────────────────────────────────
+function _renderDaySignal(sorted) {
+  const el = document.getElementById('signal-content');
+  const dateEl = document.getElementById('signal-date');
+  if (!el) return;
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+
+  const all = window.scores || scores || [];
+  const withChg = all.filter(x => x.change_pct != null);
+  const gainers = withChg.filter(x => x.change_pct > 0);
+  const losers  = withChg.filter(x => x.change_pct < 0);
+  const flat    = withChg.filter(x => x.change_pct === 0);
+  const breadth = gainers.length / (withChg.length || 1);
+
+  // Top sector by average score
+  const secs = {};
+  all.forEach(x => { if (x.sector) { if (!secs[x.sector]) secs[x.sector]={n:0,s:0}; secs[x.sector].n++; secs[x.sector].s+=(x.composite_adj||0); }});
+  const topSec = Object.entries(secs).sort((a,b)=>b[1].s/b[1].n - a[1].s/a[1].n)[0];
+
+  // Signal strength
+  let emoji, label, color, bg;
+  if (breadth >= 0.6) {
+    emoji='🟢'; label='Haussier'; color='var(--green)'; bg='rgba(74,222,128,0.08)';
+  } else if (breadth >= 0.4) {
+    emoji='🟡'; label='Neutre'; color='var(--amber)'; bg='rgba(251,191,36,0.08)';
+  } else {
+    emoji='🔴'; label='Baissier'; color='var(--red)'; bg='rgba(248,113,113,0.08)';
+  }
+
+  const bestScore = sorted[0];
+  const bestDiv = (window.scores||scores||[]).filter(x=>(x.div_yield||0)>0).sort((a,b)=>b.div_yield-a.div_yield)[0];
+
+  el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1;min-width:200px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
+      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:4px">${emoji} Marché ${label}</div>
+      <div style="font-size:11px;color:var(--t1);line-height:1.6">
+        <strong style="color:var(--green)">${gainers.length} ↑</strong> haussiers · <strong style="color:var(--red)">${losers.length} ↓</strong> baissiers · <strong style="color:var(--t2)">${flat.length} →</strong> stables
+        ${topSec ? `<br>Secteur leader : <strong style="color:var(--blue)">${topSec[0]}</strong> (moy. ${(topSec[1].s/topSec[1].n).toFixed(0)}/80)` : ''}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;min-width:160px">
+      ${bestScore ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="showStock('${bestScore.ticker}')">
+        <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur score</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green)">${bestScore.ticker} <span style="font-size:11px">${(bestScore.composite_adj||0).toFixed(0)}/80</span></div>
+      </div>` : ''}
+      ${bestDiv ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="showStock('${bestDiv.ticker}')">
+        <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur dividende</div>
+        <div style="font-size:13px;font-weight:700;color:var(--amber)">${bestDiv.ticker} <span style="font-size:11px">${(bestDiv.div_yield||0).toFixed(1)}%</span></div>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Flux de capitaux ─────────────────────────────────────────────────────────
+async function renderFluxCapitaux() {
+  const el = document.getElementById('flux-content');
+  if (!el) return;
+  let prices;
+  try {
+    const res = await fetch('/api/live');
+    const data = await res.json();
+    prices = data.prices || {};
+  } catch(e) { el.innerHTML = '<p style="color:var(--t2);font-size:11px">Données live indisponibles.</p>'; return; }
+
+  // Compute flow = change_pct × volume × price (positive = inflow, negative = outflow)
+  const flows = Object.entries(prices).map(([ticker, d]) => {
+    const flow = (d.change_pct || 0) * (d.volume || 0) * (d.price || 0) / 1e6;
+    return { ticker, flow, chg: d.change_pct || 0, volume: d.volume || 0, price: d.price || 0 };
+  }).filter(x => x.volume > 0);
+
+  const sorted = [...flows].sort((a, b) => b.flow - a.flow);
+  const inflow  = sorted.filter(x => x.flow > 0).slice(0, 5);
+  const outflow = sorted.filter(x => x.flow < 0).reverse().slice(0, 5);
+
+  if (!inflow.length && !outflow.length) {
+    el.innerHTML = '<p style="color:var(--t2);font-size:11px">Aucun volume disponible pour calculer les flux.</p>';
+    return;
+  }
+
+  function flowBar(items, positive) {
+    const maxAbs = Math.max(...items.map(x => Math.abs(x.flow)), 0.001);
+    return items.map(x => {
+      const pct = Math.min(100, Math.abs(x.flow) / maxAbs * 100);
+      const col = positive ? 'var(--green)' : 'var(--red)';
+      const sign = positive ? '+' : '';
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="showStock('${x.ticker}')">
+        <div style="width:42px;font-size:11px;font-weight:700;color:${col}">${x.ticker}</div>
+        <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;position:relative">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}22;border-radius:3px;transition:width .4s"></div>
+          <div style="position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:9px;color:var(--t2)">${sign}${x.chg.toFixed(2)}% · ${(x.volume||0).toLocaleString('fr-FR')} titres</div>
+        </div>
+        <div style="width:50px;text-align:right;font-size:10px;font-weight:600;color:${col}">${sign}${Math.abs(x.flow).toFixed(1)} M</div>
+      </div>`;
+    }).join('');
+  }
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux (achat)</div>
+      ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:11px">Aucun afflux</p>'}
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux (vente)</div>
+      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:11px">Aucun reflux</p>'}
+    </div>
+  </div>`;
 }
 
 // ── Heatmap BRVM ───────────────────────────────────────────────────────────
