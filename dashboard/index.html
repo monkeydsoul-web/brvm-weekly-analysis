@@ -24,7 +24,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .app{display:flex;height:100vh}
 .sb{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:transform .25s ease;z-index:500}
 .main{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column}
-.main>:not(#app-footer){flex:1}
+.main>:not(#app-footer):not(#breadcrumb){flex:1}
+#breadcrumb{flex:none}
 /* ══ Sidebar ════════════════════════════════════════════════════════════════ */
 .logo{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .logo h1{font-size:14px;font-weight:700;color:var(--green)}
@@ -284,7 +285,7 @@ input[type=range]{padding:0;height:20px}
 .sb.compact .ni span:first-child{font-size:16px;margin:0}
 .sb.compact .nav{overflow:visible}
 /* Compact toggle btn */
-#sb-compact-btn{position:absolute;bottom:60px;left:0;width:100%;text-align:center;background:none;border:none;cursor:pointer;padding:8px;color:var(--t3);font-size:11px;transition:color .15s}
+#sb-compact-btn{width:100%;background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;transition:color .15s}
 #sb-compact-btn:hover{color:var(--text)}
 .sb.compact #sb-compact-btn{font-size:14px}
 /* Accordion sidebar groups */
