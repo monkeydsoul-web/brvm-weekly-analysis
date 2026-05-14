@@ -13,11 +13,11 @@ async function renderPrevisionsPage() {
   container.innerHTML = `
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
-        ['portfolios','💼 Portefeuilles IA'],
-        ['signaux','📡 Signaux'],
-        ['backtest','🔬 Backtesting'],
-        ['rapport','📄 Rapport'],
-      ].map(([id,lbl])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')">${lbl}</div>`).join('')}
+        ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique'],
+        ['signaux','📡 Signaux','Recommandation Acheter / Conserver / Vendre pour chaque société'],
+        ['backtest','🔬 Backtesting','Test de la stratégie sur données historiques réelles BOC'],
+        ['rapport','📄 Rapport','Synthèse complète des prévisions et signaux exportable'],
+      ].map(([id,lbl,tip])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}">${lbl}</div>`).join('')}
     </div>
     <div id="prev-portfolios-panel"  class="stock-tab-panel${_prevTab==='portfolios'?' active':''}"></div>
     <div id="prev-signaux-panel"     class="stock-tab-panel${_prevTab==='signaux'?' active':''}"></div>
