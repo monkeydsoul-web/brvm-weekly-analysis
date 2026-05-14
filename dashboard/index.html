@@ -411,14 +411,14 @@ input[type=range]{padding:0;height:20px}
   <div id="cmp-bar">
     <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
   </div>
-  <div id="sb-bottom" style="padding:6px 8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;padding-bottom:8px">
-    <div id="push-notif-bar" style="display:none">
+  <div id="sb-bottom" style="padding:6px 8px 8px;border-top:1px solid var(--border);flex-shrink:0">
+    <div id="push-notif-bar" style="display:none;margin-bottom:6px">
       <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
       <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
     </div>
-    <button onclick="startTour()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left" class="compact-hide">🎓 Revoir le tour guidé</button>
-    <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left">⟨ Réduire la sidebar</button>
-    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
+    <button onclick="startTour()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left;margin-bottom:4px" class="compact-hide">🎓 Revoir le tour guidé</button>
+    <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left;margin-bottom:4px">⟨ Réduire la sidebar</button>
+    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
   </div>
   <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
   <div id="live-time" style="color:var(--t3)">MàJ : —</div>
