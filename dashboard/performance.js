@@ -41,6 +41,18 @@ async function renderPerfPage() {
   }
   performers.sort((a,b) => b.perf - a.perf);
 
+  // Enrichir avec Total Return (price + dividendes accumulés estimés)
+  const scoreMap = Object.fromEntries((all).map(x=>[x.ticker,x]));
+  performers.forEach(p => {
+    const sc = scoreMap[p.ticker];
+    const divAnnuel = (sc?.div_per_share || 0);
+    const yearsApprox = p.pts > 200 ? 5 : p.pts > 100 ? 3 : p.pts > 50 ? 2 : 1;
+    const totalDivs = divAnnuel * yearsApprox;
+    const totalReturn = p.first > 0 ? ((p.last + totalDivs - p.first) / p.first * 100) : p.perf;
+    p.totalReturn = totalReturn;
+    p.totalDivsXof = totalDivs;
+  });
+
   // Sélection par défaut: Top 5
   if (_perfSelected.length === 0) {
     _perfSelected = performers.slice(0,5).map(p=>p.ticker);
@@ -60,7 +72,7 @@ async function renderPerfPage() {
     </div>
     <div class="g2" style="margin-bottom:12px">
       <div class="card" style="margin-bottom:0">
-        <div class="ct">🏆 Meilleures performances</div>
+        <div class="ct">🏆 Meilleures performances (Total Return)</div>
         <div id="perf-top-list"></div>
       </div>
       <div class="card" style="margin-bottom:0">
@@ -68,15 +80,23 @@ async function renderPerfPage() {
         <div id="perf-flop-list"></div>
       </div>
     </div>
+    <!-- Palmarès annuel -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct" style="margin-bottom:10px">🏅 Palmarès annuel — Top 3 / Flop 3 par année</div>
+      <div id="perf-palmares" style="overflow-x:auto"></div>
+    </div>
     <div class="card">
       <div class="ct">Sélectionner actions à comparer (max 8)</div>
       <div id="perf-selector" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
       <div id="perf-chart2" style="width:100%;height:220px"></div>
     </div>`;
 
-  // Remplir top/flop
+  // Remplir top/flop (avec Total Return)
   _renderPerfList('perf-top-list', performers.slice(0,8), true);
   _renderPerfList('perf-flop-list', [...performers].sort((a,b)=>a.perf-b.perf).slice(0,8), false);
+
+  // Palmarès annuel
+  _renderPalmaresAnnuel(performers);
 
   // Sélecteur
   _renderPerfSelector(all, performers);
@@ -113,16 +133,68 @@ function _renderPerfList(id, performers, isTop) {
   el.innerHTML = performers.map((p,i) => {
     const c = p.perf >= 0 ? 'var(--green)' : 'var(--red)';
     const sign = p.perf >= 0 ? '+' : '';
-    const p1y = p.perf1y != null ? `<span style="font-size:9px;color:var(--t2);margin-left:4px">1an: ${p.perf1y>=0?'+':''}${p.perf1y.toFixed(0)}%</span>` : '';
-    return `<div onclick="togglePerfTicker('${p.ticker}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">
+    const tr = p.totalReturn != null ? p.totalReturn : p.perf;
+    const trSign = tr >= 0 ? '+' : '';
+    const trDiff = p.totalReturn != null && p.totalDivsXof > 0
+      ? `<span style="font-size:9px;color:var(--amber)"> +div</span>`
+      : '';
+    const p1y = p.perf1y != null ? `<span style="font-size:9px;color:var(--t3);margin-left:4px">1an: ${p.perf1y>=0?'+':''}${p.perf1y.toFixed(0)}%</span>` : '';
+    return `<div onclick="showStock('${p.ticker}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
       <div>
         <span style="font-weight:700;font-size:12px">${p.ticker}</span>
-        <span style="font-size:10px;color:var(--t2);margin-left:4px">${p.name.substring(0,20)}</span>
+        <span style="font-size:10px;color:var(--t2);margin-left:4px">${p.name.substring(0,18)}</span>
         ${p1y}
       </div>
-      <span style="color:${c};font-weight:700;font-size:12px">${sign}${p.perf.toFixed(1)}%</span>
+      <div style="text-align:right">
+        <div style="color:${c};font-weight:700;font-size:12px">${trSign}${tr.toFixed(1)}%${trDiff}</div>
+        <div style="font-size:9px;color:var(--t3)">cours: ${sign}${p.perf.toFixed(1)}%</div>
+      </div>
     </div>`;
   }).join('');
+}
+
+function _renderPalmaresAnnuel(performers) {
+  const el = document.getElementById('perf-palmares');
+  if (!el) return;
+
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear - 1; y >= currentYear - 5; y--) years.push(y);
+
+  // For each year, compute return
+  const yearlyPerf = years.map(year => {
+    const startCut = `${year}-01-01`, endCut = `${year}-12-31`;
+    const results = performers.map(p => {
+      const pts = (_perfData[p.ticker]||[]).sort((a,b)=>a.date.localeCompare(b.date));
+      const yearPts = pts.filter(x=>x.date>=startCut && x.date<=endCut);
+      if (yearPts.length < 2) return null;
+      const first = yearPts[0].price, last = yearPts[yearPts.length-1].price;
+      const perf = first > 0 ? ((last-first)/first*100) : 0;
+      return {ticker:p.ticker, name:p.name, perf};
+    }).filter(Boolean);
+    results.sort((a,b)=>b.perf-a.perf);
+    return {year, top3: results.slice(0,3), flop3: results.slice(-3).reverse()};
+  }).filter(y => y.top3.length > 0);
+
+  if (!yearlyPerf.length) { el.innerHTML = '<p style="color:var(--t2);font-size:11px">Historique annuel insuffisant.</p>'; return; }
+
+  let html = `<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">`;
+  yearlyPerf.forEach(({year, top3, flop3}) => {
+    html += `<div style="min-width:160px;background:var(--bg3);border-radius:8px;padding:10px;flex-shrink:0">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center">${year}</div>
+      ${top3.map((p,i)=>`<div onclick="showStock('${p.ticker}')" style="display:flex;justify-content:space-between;padding:3px 0;cursor:pointer;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;font-weight:600;color:var(--green)">${['🥇','🥈','🥉'][i]} ${p.ticker}</span>
+        <span style="font-size:10px;color:var(--green)">+${p.perf.toFixed(0)}%</span>
+      </div>`).join('')}
+      <div style="margin:6px 0 2px;font-size:9px;color:var(--t3);text-transform:uppercase">Flop</div>
+      ${flop3.map(p=>`<div onclick="showStock('${p.ticker}')" style="display:flex;justify-content:space-between;padding:3px 0;cursor:pointer">
+        <span style="font-size:10px;color:var(--red)">${p.ticker}</span>
+        <span style="font-size:10px;color:var(--red)">${p.perf.toFixed(0)}%</span>
+      </div>`).join('')}
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function _renderPerfSelector(all, performers) {
