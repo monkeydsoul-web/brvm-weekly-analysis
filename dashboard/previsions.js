@@ -338,7 +338,7 @@ function _prevDrawBacktest(el) {
       <div class="card" style="margin-bottom:0;text-align:center">
         <div style="font-size:9px;color:var(--t3)">Sharpe modèle<br><span style="font-size:8px">(taux sans risque 6.5%)</span></div>
         <div style="font-size:26px;font-weight:700;color:${sharpeC}">${(bt.sharpe_model||0).toFixed(2)}</div>
-        <div style="font-size:8px;color:var(--t2)">${(bt.sharpe_model||0)>=0.5?'Solide':'>0 = rendement ajusté risque positif':'Risque non rémunéré'}</div>
+        <div style="font-size:8px;color:var(--t2)">${(bt.sharpe_model||0)>=0.5?'Solide':(bt.sharpe_model||0)>0?'>0 = rendement ajusté risque positif':'Risque non rémunéré'}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
@@ -422,3 +422,5 @@ async function _prevGenererRapport(btn) {
     if (btn) btn.disabled = false;
   }
 }
+
+window.renderPrevisionsPage = renderPrevisionsPage;

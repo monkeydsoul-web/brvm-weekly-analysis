@@ -691,6 +691,10 @@ def serve_sectors_js():
 def serve_screener_js():
     return send_from_directory("dashboard", "screener.js", mimetype="application/javascript")
 
+@app.route("/previsions.js")
+def serve_previsions_js():
+    return send_from_directory("dashboard", "previsions.js", mimetype="application/javascript")
+
 
 @app.route("/api/reports/<ticker>")
 def api_reports(ticker):

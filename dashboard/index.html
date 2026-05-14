@@ -1365,6 +1365,15 @@ const HIST_DIV={SGBC:[202,270,527,261,297,331,904,1107,1398,2293],SIBC:[120,140,
 const YEARS=[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
 const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB923C','#A78BFA'];
 
+// ── Fallbacks pour fonctions définies dans les fichiers JS externes ────────
+// (au cas où un fichier externe échoue à charger ou contient une erreur)
+['loadAlertsLocal','updateAlertBadge','renderAlertsPanel','renderSmartAlertsPanel',
+ 'checkSmartAlerts','initRankHistory','startAutoRefresh','renderPerfPage',
+ 'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
+ 'simBuildSliders','simCalc'].forEach(fn=>{
+  if(typeof window[fn]==='undefined') window[fn]=()=>{console.warn('[fallback]',fn,'non défini');};
+});
+
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
@@ -1978,20 +1987,24 @@ function renderDash(m){
     </div>`).join('');
   const bkts={'0–20':0,'20–35':0,'35–50':0,'50–65':0,'65–80':0};
   scores.forEach(x=>{const v=x.composite_adj||0;bkts[v<20?'0–20':v<35?'20–35':v<50?'35–50':v<65?'50–65':'65–80']++;});
-  svgBar(document.getElementById('cDistDiv'),Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#4ADE80','#22D3EE'],170);
+  const cDistEl=document.getElementById('cDistDiv');
+  if(cDistEl) svgBar(cDistEl,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#4ADE80','#22D3EE'],170);
   const secs={};scores.forEach(x=>{if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
-  svgDonut(document.getElementById('cSectDiv'),Object.keys(secs),Object.values(secs),170);
+  const cSectEl=document.getElementById('cSectDiv');
+  if(cSectEl) svgDonut(cSectEl,Object.keys(secs),Object.values(secs),170);
   if(m&&Object.keys(m).length){
     const items=[];
     if(m.BRVM_COMPOSITE)items.push(`BRVM Composite <strong>${m.BRVM_COMPOSITE}</strong>`);
     if(m.FCFA_per_USD)items.push(`FCFA/USD <strong>${m.FCFA_per_USD}</strong>`);
     if(m.EUR_USD)items.push(`EUR/USD <strong>${m.EUR_USD}</strong>`);
-    document.getElementById('macroTxt').innerHTML=items.join(' &nbsp;·&nbsp; ')||'—';
+    const macroEl=document.getElementById('macroTxt');
+    if(macroEl) macroEl.innerHTML=items.join(' &nbsp;·&nbsp; ')||'—';
   }
   const top3=s.slice(0,3);
   const highDiv=wd.filter(x=>(x.div_yield||0)>=8).slice(0,2);
   const exSoon=scores.filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D').slice(0,3);
-  document.getElementById('insights').innerHTML=[
+  const insightsEl=document.getElementById('insights');
+  if(insightsEl) insightsEl.innerHTML=[
     `🏆 <strong style="color:var(--text)">Top 3 :</strong> ${top3.map(x=>x.ticker+' ('+((x.composite_adj||0).toFixed(0))+'/80)').join(', ')}`,
     highDiv.length?`💰 <strong style="color:var(--text)">Hauts rendements :</strong> ${highDiv.map(x=>x.ticker+' '+x.div_yield.toFixed(1)+'%').join(', ')}`:'',
     exSoon.length?`📅 <strong style="color:var(--text)">Prochains ex-div :</strong> ${exSoon.map(x=>x.ticker+' le '+x.ex_div_date).join(' · ')}`:'',
@@ -4939,12 +4952,6 @@ function closeHelpDrawer() {
 function toggleHelpDrawer() {
   _helpOpen ? closeHelpDrawer() : openHelpDrawer(_currentPage);
 }
-
-// Intercept nav() pour mettre à jour la page courante
-const _origNav = window.nav;
-document.addEventListener('DOMContentLoaded', () => {
-  // Patch nav après chargement
-});
 
 // ── Comparaison rapide sidebar ──────────────────────────────────────────────
 let _cmpSelected = new Set();
