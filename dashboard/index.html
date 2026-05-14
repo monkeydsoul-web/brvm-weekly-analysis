@@ -375,6 +375,14 @@ input[type=range]{padding:0;height:20px}
     <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
   </div>
   <div class="g3" id="podium"></div>
+  <!-- Top 3 dividendes à venir -->
+  <div class="card" style="margin-bottom:12px" id="dividendes-venir-widget">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0">📅 Prochains détachements de dividendes</div>
+      <button class="btn btn-o" style="font-size:10px;padding:3px 8px" onclick="nav('calendar');renderCalendarPage()">Calendrier →</button>
+    </div>
+    <div id="dividendes-venir-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
+  </div>
   <div class="card" style="margin-bottom:12px" id="opportunities-widget">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div class="ct">💎 Opportunités du moment</div>
@@ -1772,6 +1780,63 @@ function renderDash(m){
   renderHeatmap();
   renderOpportunities();
   renderFluxCapitaux();
+  renderDividendesVenir();
+}
+
+// ── Top 3 dividendes à venir ────────────────────────────────────────────────
+async function renderDividendesVenir() {
+  const el = document.getElementById('dividendes-venir-content');
+  if (!el) return;
+  let items;
+  try {
+    const data = await fetch('/api/dividends').then(r => r.json());
+    const today = new Date(); today.setHours(0,0,0,0);
+    const in30 = new Date(today); in30.setDate(in30.getDate() + 90);
+    // Parse French date format "30-sept.-25" or ISO
+    function parseFr(s) {
+      if (!s || s === 'N/D') return null;
+      const mois = {jan:0,fév:1,'fev':1,mar:2,avr:3,mai:4,jun:5,jui:6,jul:6,aoû:7,'aou':7,sep:8,oct:9,nov:10,déc:11,'dec':11};
+      const m = s.match(/(\d+)[.\-]([a-zéûôàèî]+)[.\-](\d+)/i);
+      if (m) {
+        const day=parseInt(m[1]), mon=mois[(m[2].toLowerCase().substring(0,3))], yr=2000+parseInt(m[3]);
+        if (mon !== undefined) return new Date(yr, mon, day);
+      }
+      const d = new Date(s); return isNaN(d) ? null : d;
+    }
+    items = data
+      .map(x => ({ ...x, _date: parseFr(x.ex_div_date) }))
+      .filter(x => x._date && x._date >= today)
+      .sort((a, b) => a._date - b._date)
+      .slice(0, 3);
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Données indisponibles.</span>';
+    return;
+  }
+  if (!items.length) {
+    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucun détachement imminent dans les données disponibles.</span>';
+    return;
+  }
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+    ${items.map(x => {
+      const d = x._date;
+      const label = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+      const daysLeft = Math.ceil((d - new Date()) / 86400000);
+      const urgCol = daysLeft <= 7 ? 'var(--red)' : daysLeft <= 30 ? 'var(--amber)' : 'var(--t2)';
+      return `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer" onclick="showStock('${x.ticker}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-weight:700;font-size:13px">${x.ticker}</span>
+          <span style="font-size:10px;color:var(--amber);font-weight:700">${(x.div_yield||0).toFixed(1)}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--t2);margin-bottom:4px">${(x.name||'').substring(0,22)}</div>
+        <div style="font-size:10px;color:${urgCol}">📅 Ex-div : ${label}</div>
+        <div style="font-size:9px;color:${urgCol};margin-top:2px">Dans ${daysLeft} jour${daysLeft>1?'s':''}</div>
+        ${x.div_per_share ? `<div style="font-size:9px;color:var(--t3);margin-top:3px">Dividende : ${Math.round(x.div_per_share).toLocaleString('fr-FR')} XOF/action</div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>
+  <div style="font-size:9px;color:var(--t3);margin-top:6px;font-style:italic">
+    💡 L'ex-date est la date à partir de laquelle il faut détenir l'action pour recevoir le dividende. Achetez <strong>avant</strong> cette date.
+  </div>`;
 }
 
 // ── Signal du jour ──────────────────────────────────────────────────────────
@@ -1895,16 +1960,45 @@ async function renderFluxCapitaux() {
     }).join('');
   }
 
+  // Agrégation par secteur
+  const sectorFlows = {};
+  const all = window.scores || scores || [];
+  flows.forEach(f => {
+    const st = all.find(x => x.ticker === f.ticker);
+    const sec = (st && st.sector) || 'Autre';
+    if (!sectorFlows[sec]) sectorFlows[sec] = 0;
+    sectorFlows[sec] += f.flow;
+  });
+  const secArr = Object.entries(sectorFlows).sort((a,b)=>b[1]-a[1]);
+  const maxSecFlow = Math.max(...secArr.map(([,v])=>Math.abs(v)), 0.001);
+  const secBars = secArr.map(([sec, flow]) => {
+    const col = flow > 0 ? 'var(--green)' : 'var(--red)';
+    const pct = Math.min(100, Math.abs(flow) / maxSecFlow * 100);
+    const sign = flow > 0 ? '+' : '';
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="width:72px;font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:3px;height:12px;position:relative">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}33;border-radius:3px"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 5px;font-size:9px;color:${col};font-weight:600">${sign}${Math.abs(flow).toFixed(1)}M XOF</div>
+      </div>
+    </div>`;
+  }).join('');
+
   el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div>
-      <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux (achat)</div>
+      <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (achat)</div>
       ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:11px">Aucun afflux</p>'}
     </div>
     <div>
-      <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux (vente)</div>
+      <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux par action (vente)</div>
       ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:11px">Aucun reflux</p>'}
     </div>
-  </div>`;
+  </div>
+  ${secArr.length ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+    <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🏭 Flux par secteur</div>
+    <div style="font-size:9px;color:var(--t3);margin-bottom:6px;font-style:italic">Somme des flux (var% × volume × cours) par secteur — positif = pression acheteuse nette, négatif = pression vendeuse</div>
+    ${secBars}
+  </div>` : ''}`;
 }
 
 // ── Heatmap BRVM ───────────────────────────────────────────────────────────
@@ -1999,20 +2093,36 @@ function renderOpportunities(){
     const scC=sc>=60?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
     const isUndervalued=pb&&pb<1;
     const verdC=(x.pdf_verdict||'').toLowerCase().includes('achet')?'var(--green)':(x.pdf_verdict||'').toLowerCase().includes('vend')?'var(--red)':'var(--amber)';
-    return `<div onclick="showStock('${x.ticker}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
+    // Raison principale de l'opportunité
+    const raisons=[];
+    if((x.div_yield||0)>=5) raisons.push(`dividende élevé (${x.div_yield.toFixed(1)}%)`);
+    if(pe&&pe<10) raisons.push(`P/E très bas (${pe.toFixed(1)}× — bénéfices peu chers)`);
+    else if(pe&&pe<15) raisons.push(`P/E attractif (${pe.toFixed(1)}×)`);
+    if(pb&&pb<1) raisons.push(`P/B<1 (action sous sa valeur comptable)`);
+    if(x.pdf_verdict==='POSITIF') raisons.push('rapport annuel positif');
+    if((x.score_graham||0)>=7) raisons.push(`Graham validé (${x.score_graham}/10)`);
+    const pourquoi=raisons.length?`Critères : ${raisons.join(' · ')}.`:`Score composite fort (${sc.toFixed(0)}/80).`;
+    const cardId='opp-'+x.ticker;
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div>
+        <div style="cursor:pointer" onclick="showStock('${x.ticker}')">
           <span style="font-weight:700;font-size:14px">${x.ticker}</span>
           ${isUndervalued?'<span style="font-size:9px;background:rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:600">💎 Sous-évaluée</span>':''}
         </div>
         <span style="font-size:14px;font-weight:700;color:${scC}">${sc.toFixed(0)}/80</span>
       </div>
-      <div style="font-size:10px;color:var(--t2);margin-bottom:8px">${x.name||''}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px">
+      <div style="font-size:10px;color:var(--t2);margin-bottom:6px;cursor:pointer" onclick="showStock('${x.ticker}')">${x.name||''}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin-bottom:6px">
         ${(x.div_yield||0)>0?`<span style="color:var(--amber)">Div <strong>${x.div_yield.toFixed(1)}%</strong></span>`:''}
         ${pe?`<span style="color:var(--t2)">P/E <strong>${pe.toFixed(1)}×</strong></span>`:''}
         ${pb?`<span style="color:var(--t2)">P/B <strong>${pb.toFixed(1)}×</strong></span>`:''}
         ${x.pdf_verdict?`<span style="color:${verdC};font-size:10px;font-weight:600">${x.pdf_verdict}</span>`:''}
+      </div>
+      <button onclick="(function(b){const d=document.getElementById('${cardId}');const o=d.style.display!=='none';d.style.display=o?'none':'block';b.textContent=o?'💡 Pourquoi ?':'✕ Masquer';})(this)"
+        style="font-size:9px;background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;color:var(--blue)">💡 Pourquoi ?</button>
+      <div id="${cardId}" style="display:none;margin-top:6px;font-size:10px;color:var(--t2);background:rgba(96,165,250,0.08);border-radius:5px;padding:6px 8px;line-height:1.6">
+        <strong style="color:var(--blue)">Pourquoi cette opportunité ?</strong><br>${pourquoi}
+        <br><span style="color:var(--t3)">Cliquez sur le ticker pour voir la fiche complète.</span>
       </div>
     </div>`;
   }).join('');
