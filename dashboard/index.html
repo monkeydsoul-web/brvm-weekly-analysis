@@ -349,6 +349,10 @@ input[type=range]{padding:0;height:20px}
 </div>
 </aside>
 <main class="main">
+<!-- Breadcrumb -->
+<div id="breadcrumb" style="padding:4px 16px 0;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px">
+  <span>BRVM</span><span>›</span><span id="bc-page" style="color:var(--text)">Tableau de bord</span>
+</div>
 
 <!-- DASHBOARD -->
 <div class="page on" id="page-dash">
@@ -4367,6 +4371,106 @@ function closeCompareModal() {
 }
 document.getElementById('cmp-modal').addEventListener('click', function(e){
   if(e.target===this) closeCompareModal();
+});
+</script>
+
+<!-- Keyboard hint -->
+<div id="kbd-hint" style="display:none"></div>
+
+<!-- Changelog modal -->
+<div id="changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:480px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:700">📋 Changelog BRVM Dashboard</h3>
+      <button onclick="document.getElementById('changelog-modal').style.display='none'" class="btn btn-o" style="padding:4px 12px;font-size:12px">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--t1);line-height:1.8">
+      <div style="font-weight:700;color:var(--green);font-size:13px;margin-bottom:6px">v9.0 — Mai 2026</div>
+      <ul style="margin:0 0 12px;padding-left:16px;color:var(--t2)">
+        <li>⚡ Signal du jour IA + Flux de capitaux sur le dashboard</li>
+        <li>📊 KPI arrows (↑ ↓ →) comparatifs session précédente</li>
+        <li>🏅 Palmarès annuel + Total Return dans les Performances</li>
+        <li>📰 "À la une" top 3 + auto-tags dans les Actualités</li>
+        <li>🏦 Page Macro UEMOA + 📅 Calendrier BRVM</li>
+        <li>💼 Portefeuille : graphique évolution + bilan mensuel + Markowitz</li>
+        <li>🔬 Fiche société : 3 onglets (Général / Historique / Analyse IA)</li>
+        <li>🔋 Mode économie, cache 5min, indicateur fraîcheur</li>
+        <li>⌨️ Raccourcis clavier (G/R/A/P/D/S/C/?) + breadcrumb</li>
+      </ul>
+      <div style="font-weight:700;color:var(--t2);font-size:12px;margin-bottom:4px">v8.x — Précédent</div>
+      <ul style="margin:0;padding-left:16px;color:var(--t3);font-size:11px">
+        <li>Screener avancé avec 4 presets + export CSV</li>
+        <li>Score personnalisé avec profils d'investissement</li>
+        <li>Heatmap BRVM + matrice de corrélation</li>
+        <li>Chat IA + alertes prix + tour guidé</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Raccourcis clavier ────────────────────────────────────────────────────
+const _kbdMap = {
+  'g': {fn: ()=>{nav('dash');}, label: 'G → Dashboard'},
+  'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
+  'a': {fn: ()=>{nav('actualites') || nav('news');}, label: 'A → Actualités'},
+  'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
+  'd': {fn: ()=>{nav('div');renderDiv();}, label: 'D → Dividendes'},
+  's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
+  'c': {fn: ()=>{nav('chat');}, label: 'C → Chat IA'},
+  '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
+};
+
+const _bcLabels = {
+  dash:'Tableau de bord', rank:'Classement', news:'Actualités', comm:'Commodités',
+  macro:'Macro UEMOA', calendar:'Calendrier', screener:'Screener', analyse:'Analyse & Optim',
+  'score-custom':'Score personnalisé', targets:'Prix cibles', perf:'Performances',
+  port:'Portefeuille', sim:'Simulateur div.', div:'Dividendes', alerts:'Alertes',
+  chat:'Chat IA', glossaire:'Glossaire', sectors:'Secteurs',
+};
+
+document.addEventListener('keydown', function(e) {
+  // Ignorer si focus sur input/textarea/select
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const key = e.key.toLowerCase();
+  if (_kbdMap[key]) {
+    e.preventDefault();
+    _kbdMap[key].fn();
+    _showKbdHint(_kbdMap[key].label);
+  }
+});
+
+function _showKbdHint(label) {
+  const el = document.getElementById('kbd-hint');
+  if (!el) return;
+  el.textContent = label;
+  el.style.display = '';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.style.display = 'none'; }, 1500);
+}
+
+// Breadcrumb mis à jour par nav()
+const _origNav = nav;
+nav = function(id) {
+  _origNav(id);
+  const bcEl = document.getElementById('bc-page');
+  if (bcEl) bcEl.textContent = _bcLabels[id] || id;
+};
+
+// Bouton changelog dans sidebar
+(function() {
+  const btn = document.createElement('button');
+  btn.textContent = '📋 Changelog v9.0';
+  btn.style.cssText = 'background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left';
+  btn.onclick = () => { document.getElementById('changelog-modal').style.display = 'flex'; };
+  const container = document.querySelector('[onclick="startTour()"]')?.parentElement;
+  if (container) container.appendChild(btn);
+})();
+
+document.getElementById('changelog-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
 });
 </script>
 
