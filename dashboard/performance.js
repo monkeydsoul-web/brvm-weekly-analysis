@@ -203,7 +203,7 @@ function togglePerfTicker(ticker) {
   if (_perfSelected.includes(ticker)) {
     _perfSelected = _perfSelected.filter(t => t !== ticker);
   } else {
-    if (_perfSelected.length >= 8) { showNotif('Maximum 8 actions', 'red'); return; }
+    if (_perfSelected.length >= 8) { return; }
     _perfSelected.push(ticker);
   }
   const all = window.scores || scores || [];

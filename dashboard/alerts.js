@@ -14,12 +14,11 @@ function saveAlertsLocal() {
 
 function setAlert(ticker, threshold, direction) {
   threshold = parseFloat(threshold);
-  if (!threshold || isNaN(threshold)) { showNotif('Prix invalide', 'red'); return; }
+  if (!threshold || isNaN(threshold)) { return; }
   if (!priceAlerts[ticker]) priceAlerts[ticker] = [];
   priceAlerts[ticker].push({ threshold, direction, active: true, created: Date.now() });
   saveAlertsLocal();
   updateAlertBadge();
-  showNotif(`Alerte ${ticker} ${direction === 'above' ? '↑' : '↓'} ${threshold.toLocaleString('fr-FR')} XOF`, 'green');
 }
 
 function deleteAlertLocal(ticker, idx) {
@@ -52,10 +51,6 @@ function checkAlertsWithPrices(prices) {
   });
   if (triggered.length) {
     saveAlertsLocal();
-    triggered.forEach(t => showNotif(
-      `🔔 ${t.ticker} ${t.dir} de ${t.threshold.toLocaleString('fr-FR')} — Cours: ${t.price.toLocaleString('fr-FR')} XOF`,
-      t.dir.includes('↑') ? 'green' : 'red'
-    ));
     updateAlertBadge();
   }
 }
@@ -143,9 +138,6 @@ function checkSmartAlerts() {
 
   if (newAlerts.length) {
     window._smartAlerts.push(...newAlerts);
-    newAlerts.forEach(a => {
-      showNotif(a.msg, a.color === 'var(--red)' ? 'red' : 'green');
-    });
     updateAlertBadge();
   }
 }

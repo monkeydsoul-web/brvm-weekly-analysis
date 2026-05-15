@@ -20,8 +20,8 @@ function simAddTicker() {
   var t = prompt('Ticker BRVM (ex: ORAC, BOAB, NTLC)');
   if (!t) return;
   t = t.toUpperCase().trim();
-  if (simData[t]) { showNotif(t + ' deja dans le simulateur', 'red'); return; }
-  if (Object.keys(simData).length >= 8) { showNotif('Maximum 8 actions', 'red'); return; }
+  if (simData[t]) { return; }
+  if (Object.keys(simData).length >= 8) { return; }
   var n = Object.keys(simData).length + 1;
   var base = Math.floor(100 / n);
   var rem = 100 - base * n;

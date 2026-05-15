@@ -187,7 +187,7 @@ async function launchSectorAnalysis(sector) {
       .replace(/^---$/gm,'<hr style="border-color:var(--border);margin:6px 0">');
     resultDiv.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:8px">
       <strong style="color:var(--green)">📊 ${sector} — ${data.nb_stocks} sociétés</strong>
-      <button onclick="navigator.clipboard.writeText(document.getElementById('_sa_text').textContent).then(()=>showNotif('Copié!','green'))" 
+      <button onclick="navigator.clipboard.writeText(document.getElementById('_sa_text').textContent)"
         style="font-size:10px;padding:2px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--t2)">📋 Copier</button>
     </div>
     <div>${html}</div>

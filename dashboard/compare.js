@@ -5,11 +5,9 @@ let compareList = [];
 function toggleCompare(ticker) {
   if (compareList.includes(ticker)) {
     compareList = compareList.filter(t => t !== ticker);
-    showNotif(ticker + ' retiré de la comparaison', 'green');
   } else {
-    if (compareList.length >= 4) { showNotif('Maximum 4 actions', 'red'); return; }
+    if (compareList.length >= 4) { return; }
     compareList.push(ticker);
-    showNotif(ticker + ' ajouté à la comparaison', 'green');
   }
   updateCompareBadge();
   if (compareList.length >= 2) renderCompare();
@@ -118,10 +116,9 @@ function clearCompare() {
   compareList = [];
   updateCompareBadge();
   closeCompare();
-  showNotif('Comparaison effacée', 'green');
 }
 
 function openCompare() {
-  if (compareList.length < 2) { showNotif('Ajoutez au moins 2 actions à comparer', 'red'); return; }
+  if (compareList.length < 2) { return; }
   renderCompare();
 }

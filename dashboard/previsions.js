@@ -123,29 +123,23 @@ function _prevDrawPortfolios(el) {
 }
 
 function _prevAdopter(pf) {
-  if (typeof showNotif !== 'function') return;
   const total = parseInt(prompt(`Montant total à investir en XOF pour "${pf.name}" ?`, '1000000') || '0');
-  if (!total || total < 1000) { showNotif('Montant invalide', 'red'); return; }
+  if (!total || total < 1000) { return; }
   const existing = JSON.parse(localStorage.getItem('brvm_portfolio_v2') || '[]');
-  const added = [];
   (pf.stocks || []).forEach(s => {
     const alloc = total * (s.weight / 100);
     const shares = s.price > 0 ? Math.floor(alloc / s.price) : 0;
     if (shares > 0) {
       existing.push({ ticker: s.ticker, shares, buy_price: s.price, date: new Date().toISOString().slice(0, 10), note: `Portefeuille ${pf.name}` });
-      added.push(s.ticker);
     }
   });
   localStorage.setItem('brvm_portfolio_v2', JSON.stringify(existing));
-  showNotif(`${added.length} positions ajoutées → Portefeuille`, 'green');
   setTimeout(() => { nav('port'); if (typeof loadPortfolio === 'function') loadPortfolio(); }, 1000);
 }
 
 function _prevBacktestPortfolio(tickers) {
   if (typeof openBacktest === 'function') {
     openBacktest(tickers);
-  } else {
-    showNotif('Backtesting non disponible', 'amber');
   }
 }
 

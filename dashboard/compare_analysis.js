@@ -120,7 +120,7 @@ function caToggleTicker(ticker) {
   if (_compareAnalysisTickers.includes(ticker)) {
     _compareAnalysisTickers = _compareAnalysisTickers.filter(t=>t!==ticker);
   } else {
-    if (_compareAnalysisTickers.length >= 6) { showNotif('Maximum 6 sociétés', 'red'); return; }
+    if (_compareAnalysisTickers.length >= 6) { return; }
     _compareAnalysisTickers.push(ticker);
   }
   refreshCASelector();
@@ -143,9 +143,7 @@ function caSelectGroup(group) {
 }
 
 async function launchCompareAnalysis() {
-  if (_compareAnalysisTickers.length < 2) {
-    showNotif('Sélectionnez au moins 2 sociétés', 'red'); return;
-  }
+  if (_compareAnalysisTickers.length < 2) { return; }
   
   const btn = document.getElementById('ca-launch-btn');
   const resultDiv = document.getElementById('ca-result');
@@ -215,9 +213,7 @@ async function launchCompareAnalysis() {
 
 function caExportText() {
   if (!_compareAnalysisResult) return;
-  navigator.clipboard.writeText(_compareAnalysisResult.analysis)
-    .then(() => showNotif('Analyse copiée !', 'green'))
-    .catch(() => showNotif('Erreur copie', 'red'));
+  navigator.clipboard.writeText(_compareAnalysisResult.analysis).catch(()=>{});
 }
 
 function closeCompareAnalysis() {

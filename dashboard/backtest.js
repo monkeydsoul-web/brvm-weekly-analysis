@@ -165,7 +165,7 @@ function btUpdateWeights() {
 
 function btToggle(t) {
   if (_btTickers.includes(t)) _btTickers = _btTickers.filter(x=>x!==t);
-  else { if (_btTickers.length >= 8) { showNotif('Max 8 actions','red'); return; } _btTickers.push(t); }
+  else { if (_btTickers.length >= 8) { return; } _btTickers.push(t); }
   _refreshBTSelector();
 }
 function btRemove(t) { _btTickers = _btTickers.filter(x=>x!==t); _refreshBTSelector(); }
@@ -189,7 +189,7 @@ function setBTPeriod(p) {
 function closeBT() { const m = document.getElementById('bt-modal'); if (m) m.style.display='none'; }
 
 async function launchBacktest() {
-  if (_btTickers.length < 2) { showNotif('Sélectionnez au moins 2 actions','red'); return; }
+  if (_btTickers.length < 2) { return; }
   btUpdateWeights();
   const resultDiv = document.getElementById('bt-result');
   document.getElementById('bt-kpis').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--t2)">⏳ Calcul en cours...</div>';

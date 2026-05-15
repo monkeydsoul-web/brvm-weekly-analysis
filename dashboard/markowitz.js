@@ -109,7 +109,7 @@ function _refreshMrkSelector() {
 
 function mrkToggle(t) {
   if (_mrkTickers.includes(t)) _mrkTickers = _mrkTickers.filter(x=>x!==t);
-  else { if (_mrkTickers.length >= 10) { showNotif('Max 10 actions','red'); return; } _mrkTickers.push(t); }
+  else { if (_mrkTickers.length >= 10) { return; } _mrkTickers.push(t); }
   _refreshMrkSelector();
 }
 function mrkRemove(t) { _mrkTickers = _mrkTickers.filter(x=>x!==t); _refreshMrkSelector(); }
@@ -126,7 +126,7 @@ function mrkGroup(g) {
 function closeMrk() { const m = document.getElementById('mrk-modal'); if (m) m.style.display='none'; }
 
 async function launchMarkowitz() {
-  if (_mrkTickers.length < 2) { showNotif('Minimum 2 actions','red'); return; }
+  if (_mrkTickers.length < 2) { return; }
   const resultDiv = document.getElementById('mrk-result');
   const portfoliosDiv = document.getElementById('mrk-portfolios');
   portfoliosDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--t2)">⏳ Calcul Monte Carlo en cours...</div>';
@@ -281,7 +281,6 @@ function saveMrkToPortfolio(weights, totalXOF) {
   });
 
   localStorage.setItem('brvm_portfolio_v2', JSON.stringify(existing));
-  if(typeof showNotif==='function') showNotif(`Markowitz : ${added} action${added>1?'s':''} ajoutée${added>1?'s':''} au portefeuille`, 'green');
   closeMrk();
   if(typeof loadPortfolio==='function') loadPortfolio();
 }

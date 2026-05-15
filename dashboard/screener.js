@@ -186,7 +186,7 @@ function screenerReset() {
 }
 
 function screenerExportCSV() {
-  if (!_scrResults.length) { if(typeof showNotif==='function') showNotif('Aucun résultat à exporter', 'red'); return; }
+  if (!_scrResults.length) { return; }
   const cols = ['Ticker','Nom','Secteur','Score/10','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Verdict IA','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
   const rows = _scrResults.map(x => [
     x.ticker,
@@ -214,13 +214,12 @@ function screenerExportCSV() {
   a.download = `BRVM_Screener_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  if(typeof showNotif==='function') showNotif(`${_scrResults.length} sociétés exportées`, 'green');
 }
 
 async function screenerAnalyseAI() {
   const checked = [...document.querySelectorAll('.sc-chk:checked')].map(el => el.value);
   const tickers = checked.length ? checked : _scrResults.slice(0, 6).map(x => x.ticker);
-  if (!tickers.length) { showNotif('Aucune action sélectionnée', 'red'); return; }
+  if (!tickers.length) { return; }
 
   const btn = document.getElementById('sc-ai-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Analyse en cours...'; }
@@ -240,7 +239,7 @@ async function screenerAnalyseAI() {
         <div style="font-size:12px;color:var(--t1);line-height:1.7;white-space:pre-wrap">${data.analysis || data.error || 'Erreur'}</div>`;
     }
   } catch(e) {
-    showNotif('Erreur analyse IA', 'red');
+    console.error('Erreur analyse IA', e);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Analyser avec IA'; }
   }

@@ -1131,7 +1131,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="border-left:3px solid var(--red)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="ct">🤖 Alertes intelligentes</div>
-      <button class="btn" onclick="checkSmartAlerts();renderSmartAlertsPanel()"
+      <button class="btn" onclick="renderSmartAlertsPanel()"
         style="font-size:10px;padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--t2);cursor:pointer">Vérifier</button>
     </div>
     <p style="font-size:11px;color:var(--t3);margin-bottom:8px" title="Alertes automatiques basées sur nos modèles · 💡 Aucune configuration requise">Ex-div dans 7 jours · Cours &gt; Cible Graham · Score change · Cours &gt; EPV</p>
@@ -1642,7 +1642,7 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 // ── Fallbacks pour fonctions définies dans les fichiers JS externes ────────
 // (au cas où un fichier externe échoue à charger ou contient une erreur)
 ['loadAlertsLocal','updateAlertBadge','renderAlertsPanel','renderSmartAlertsPanel',
- 'checkSmartAlerts','initRankHistory','startAutoRefresh','renderPerfPage',
+ 'initRankHistory','startAutoRefresh','renderPerfPage',
  'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
  'simBuildSliders','simCalc'].forEach(fn=>{
   if(typeof window[fn]==='undefined') window[fn]=()=>{console.warn('[fallback]',fn,'non défini');};
@@ -2113,42 +2113,7 @@ function showTooltip(evt,text){
 }
 function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
 
-// alertes gérées par alerts.js
-function _getNotifContainer(){
-  var c=document.getElementById('notif-stack');
-  if(!c){c=document.createElement('div');c.id='notif-stack';c.style='position:fixed;top:8px;right:8px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:min(280px,calc(100vw - 240px))';document.body.appendChild(c);}
-  return c;
-}
-window._suppressNotifs = true;
-setTimeout(function(){window._suppressNotifs=false;}, 7000);
-function showNotif(msg,color){
-  if(window._suppressNotifs)return;
-  var c=_getNotifContainer();
-  if(c.children.length>=3){setTimeout(function(){showNotif(msg,color);},3000);return;}
-  var bc=color==='green'?'var(--bull)':color==='amber'?'var(--gold)':'var(--bear)';
-  var n=document.createElement('div');
-  n.setAttribute('data-tip',msg);
-  n.style='background:var(--bg-elevated);border:1px solid '+bc+';border-radius:var(--radius-sm);padding:10px 16px;font-size:12px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:var(--shadow-md);animation:slideInRight .25s ease;cursor:default';
-  n.textContent=msg;c.appendChild(n);
-  if(typeof _attachTooltip==='function')_attachTooltip(n);
-  setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);
-}
 function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
-
-// Scheduler alertes — UN SEUL point d'appel, 60s après chargement puis toutes les 5min
-let _alertTimer = null;
-function startAlertScheduler() {
-  if (_alertTimer) return;
-  _alertTimer = setTimeout(function() {
-    if (typeof checkSmartAlerts === 'function') { checkSmartAlerts(); renderSmartAlertsPanel && renderSmartAlertsPanel(); }
-    if (typeof checkAlertsWithPrices === 'function') {
-      fetch('/api/live').then(r=>r.json()).then(d=>{ checkAlertsWithPrices(d.prices); }).catch(()=>{});
-    }
-    setInterval(function() {
-      if (typeof checkSmartAlerts === 'function') { checkSmartAlerts(); }
-    }, 300000);
-  }, 60000);
-}
 
 function showChangelog(){
   var m=document.createElement('div');
@@ -2158,17 +2123,7 @@ function showChangelog(){
   document.body.appendChild(m);
 }
 
-function showToast(msg, type) {
-  var colors={success:'var(--green)',error:'var(--red)',warning:'var(--amber)',info:'var(--blue)'};
-  var bc=colors[type]||colors.info;
-  var icons={success:'✓',error:'✕',warning:'⚠',info:'ℹ'};
-  var ic=icons[type]||icons.info;
-  var t=document.createElement('div');
-  t.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 14px;font-size:12px;color:var(--t1);max-width:300px;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;animation:slideInRight .25s ease';
-  t.innerHTML='<span style="color:'+bc+';font-weight:700">'+ic+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+msg+'</span>';
-  document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},3500);
-}
+
 // showAlertModal gérée par alerts.js
 
 // compare gérée par compare.js
@@ -2214,10 +2169,8 @@ function toggleEcoMode() {
   if (btn) btn.textContent = `🔋 Mode économie : ${_ecoMode ? 'ON' : 'OFF'}`;
   if (_ecoMode) {
     if (window._autoRefreshTimer) { clearInterval(window._autoRefreshTimer); window._autoRefreshTimer = null; }
-    showNotif('Mode économie activé — auto-refresh désactivé', 'amber');
   } else {
     startAutoRefresh();
-    showNotif('Mode économie désactivé', 'green');
   }
 }
 
@@ -2241,7 +2194,6 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
-    startAlertScheduler();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -3243,14 +3195,12 @@ function _portWhyTicker(ticker, signal, score10, divYield) {
 
 function sharePortfolioURL(){
   const positions = _portData().map(_normPos).filter(p=>p.ticker&&p.shares>0);
-  if(!positions.length){ showNotif('Portefeuille vide', 'red'); return; }
+  if(!positions.length){ return; }
   // Encoder les positions en base64 (données minimales)
   const payload = positions.map(p=>({t:p.ticker, s:p.shares, p:Math.round(p.avg_price), d:p.date||''}));
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const url = `${location.origin}${location.pathname}?port=${b64}`;
-  navigator.clipboard.writeText(url).then(()=>{
-    showNotif('Lien copié dans le presse-papiers ✓', 'green');
-  }).catch(()=>{
+  navigator.clipboard.writeText(url).catch(()=>{
     prompt('Copiez ce lien de partage :', url);
   });
 }
@@ -3268,7 +3218,6 @@ function _importPortfolioFromURL(){
       if(!existing.find(e=>e.ticker===pos.ticker)) existing.push(pos);
     });
     _portSave(existing);
-    showNotif(`Portefeuille importé : ${positions.length} positions`, 'green');
     // Nettoyer l'URL
     const clean = location.pathname;
     history.replaceState({}, '', clean);
@@ -3416,10 +3365,9 @@ function _portMonthlyTable(positions){
 
 function portOptimize(){
   const positions=_portData().map(_normPos).filter(p=>p.ticker&&p.shares>0);
-  if(!positions.length){ showNotif('Portefeuille vide','red'); return; }
+  if(!positions.length){ return; }
   const tickers=positions.map(p=>p.ticker);
   if(typeof openMarkowitz==='function') openMarkowitz(tickers);
-  else showNotif('Module Markowitz non chargé','red');
 }
 
 function showAddPosition(ticker=''){
@@ -3436,7 +3384,7 @@ function addPositionLS(){
   const shares = parseFloat(document.getElementById('portShares').value);
   const price  = parseFloat(document.getElementById('portPrice').value);
   const date   = document.getElementById('portDate').value || new Date().toISOString().slice(0,10);
-  if(!ticker || !shares || !price){ if(typeof showNotif==='function')showNotif('Remplissez tous les champs','red'); return; }
+  if(!ticker || !shares || !price){ return; }
 
   const positions = _portData();
   const existing  = positions.findIndex(p=>p.ticker===ticker);
@@ -3458,8 +3406,6 @@ function addPositionLS(){
   document.getElementById('portShares').value='';
   document.getElementById('portPrice').value='';
   loadPortfolio();
-  if(typeof showToast==='function') showToast(`💼 ${ticker} ajouté au portefeuille`,'success');
-  else if(typeof showNotif==='function') showNotif(`${ticker} ajouté au portefeuille`,'green');
 }
 
 function removePositionLS(ticker){
@@ -3470,7 +3416,6 @@ function removePositionLS(ticker){
   txs.push({ ticker, action:'sell', shares:0, price:0, total:0, date:new Date().toISOString().slice(0,10) });
   _txSave(txs);
   loadPortfolio();
-  if(typeof showNotif==='function') showNotif(`${ticker} supprimé`,'red');
 }
 
 // Garder removePosition (ancienne API) pour backward compat
@@ -3816,7 +3761,7 @@ function simReset2(){
 // Répartition optimale : Max Sharpe heuristique = pondérer par score×divYield
 function simMarkowitz(){
   const divStocks=(window.scores||[]).filter(x=>(x.div_yield||0)>0).slice(0,15);
-  if(!divStocks.length){if(typeof showNotif==='function')showNotif('Données insuffisantes','red');return;}
+  if(!divStocks.length){return;}
   const raw=divStocks.map(x=>{
     const sc=x.composite_adj||1;
     const dy=x.div_yield||0;
@@ -3831,8 +3776,8 @@ function simMarkowitz(){
   if(keys.length&&sum!==100) _simWeights[keys[0]]+=100-sum;
   simBuildSliders();
   simCalc();
-  if(typeof showNotif==='function')showNotif('Répartition Max Sharpe appliquée','green');
 }
+
 
 function simBuildSliders(){
   const sc=window.scores||[];
@@ -3994,7 +3939,7 @@ async function createAlert(){
 
 function addPortfolioAlerts(){
   const positions = _portData().map(_normPos);
-  if(!positions.length){ showNotif('Portefeuille vide', 'red'); return; }
+  if(!positions.length){ return; }
   let created = 0;
   positions.forEach(p=>{
     if(!p.ticker||!p.avg_price) return;
@@ -4008,7 +3953,6 @@ function addPortfolioAlerts(){
       }
     }
   });
-  showNotif(created>0?`${created} alerte${created>1?'s':''} créée${created>1?'s':''} (+15% vs achat)`:'Alertes déjà existantes', created>0?'green':'amber');
   if(typeof loadAlertsLocal==='function') loadAlertsLocal();
   if(typeof renderAlertsPanel==='function') renderAlertsPanel();
 }
@@ -4294,7 +4238,7 @@ function _shareStockText(s){
     `${s.roe?'ROE : '+s.roe+'%':''}\n`+
     `Verdict IA : ${s.pdf_verdict||'—'}\n`+
     `📈 Analysé sur BRVM Dashboard`;
-  navigator.clipboard.writeText(text).then(()=>showNotif('Fiche copiée ✓','green')).catch(()=>prompt('Copiez ce texte :',text));
+  navigator.clipboard.writeText(text).catch(()=>prompt('Copiez ce texte :',text));
 }
 
 // ── Slide-over (fiche société desktop) ───────────────────────────────────────
