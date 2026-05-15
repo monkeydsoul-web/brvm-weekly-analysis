@@ -129,8 +129,8 @@ function _renderScatterPE(){
   if(peMax>0 && dyMax>0){
     const zx=pad.l, zy=pad.t+(1-Math.min(5,dyMax)/dyMax)*gH;
     const zw=Math.min(15/peMax,1)*gW, zh=gH-(1-Math.min(5,dyMax)/dyMax)*gH;
-    ctx.fillStyle='rgba(20,184,166,0.07)'; ctx.fillRect(zx,zy,zw,zh);
-    ctx.strokeStyle='rgba(20,184,166,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(45,212,191,0.07)'; ctx.fillRect(zx,zy,zw,zh);
+    ctx.strokeStyle='rgba(45,212,191,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
   }
 
   // Labels axes
@@ -159,7 +159,7 @@ function _renderScatterPE(){
     const cy=pad.t+(1-Math.min(1,(x.div_yield||0)/dyMax))*gH;
     const sc=x.composite_adj||0;
     // Seuils /10: ≥7 (56/80) → vert, 5-7 (40-56) → teal, <5 (<40) → rouge
-    const col=sc>=56?'#10b981':sc>=40?'#14b8a6':'#f43f5e';
+    const col=sc>=56?'#22c55e':sc>=40?'#2dd4bf':'#f43f5e';
     ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
     ctx.fillStyle=col+'cc'; ctx.fill();
     ctx.strokeStyle=col; ctx.lineWidth=1; ctx.stroke();
@@ -169,7 +169,7 @@ function _renderScatterPE(){
 
   // Légende avec seuils /10
   ctx.font='9px sans-serif'; ctx.textAlign='left';
-  [['#10b981','Note ≥ 7'],['#14b8a6','Note 5–7'],['#f43f5e','Note < 5']].forEach(([c,l],i)=>{
+  [['#22c55e','Note ≥ 7'],['#2dd4bf','Note 5–7'],['#f43f5e','Note < 5']].forEach(([c,l],i)=>{
     ctx.fillStyle=c; ctx.beginPath(); ctx.arc(pad.l+5,pad.t+8+i*14,4,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#9ca3af'; ctx.fillText(l, pad.l+12, pad.t+11+i*14);
   });
