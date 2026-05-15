@@ -2,22 +2,43 @@
 <style>
 /* ══ Variables ══════════════════════════════════════════════════════════════ */
 :root{
-  --bg:#0F172A;--bg2:#1E293B;--bg3:#293548;
-  --text:#F1F5F9;--t1:#F1F5F9;--t2:#94A3B8;--t3:#64748B;
-  --border:#334155;--row-hover:rgba(255,255,255,.035);--row-border:rgba(255,255,255,.06);
-  --r:10px;
-  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#60A5FA;--purple:#C084FC;
-  --accent:#6366f1;--muted:rgba(255,255,255,0.45);
-  --shadow:0 4px 16px rgba(0,0,0,.3);
+  /* Fonds Navy */
+  --bg-base:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2236;
+  --bg-hover:rgba(20,184,166,0.06);
+  /* Alias backward-compat */
+  --bg:#0a0f1e;--bg2:#111827;--bg3:#1a2236;
+  /* Accent Teal */
+  --accent:#14b8a6;--accent-dim:rgba(20,184,166,0.15);
+  /* Or/Gold */
+  --gold:#f59e0b;--gold-dim:rgba(245,158,11,0.12);
+  --amber:#f59e0b;
+  /* Finance */
+  --up:#10b981;--green:#10b981;
+  --down:#f43f5e;--red:#f43f5e;
+  --neutral:#94a3b8;
+  /* Texte */
+  --text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#475569;
+  --text:#f1f5f9;--t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;
+  --muted:rgba(148,163,184,0.8);
+  /* Bordures */
+  --border:rgba(20,184,166,0.12);--border-dim:rgba(255,255,255,0.06);
+  --row-hover:rgba(20,184,166,0.04);--row-border:rgba(255,255,255,0.04);
+  /* Autres */
+  --blue:#60A5FA;--purple:#C084FC;--r:10px;
+  --shadow:0 4px 20px rgba(0,0,0,.5);
 }
 :root.light{
-  --bg:#F1F5F9;--bg2:#FFFFFF;--bg3:#F8FAFC;
+  --bg:#F1F5F9;--bg2:#FFFFFF;--bg3:#F8FAFC;--bg-base:#F1F5F9;--bg-card:#FFFFFF;--bg-card2:#F8FAFC;
   --text:#0F172A;--t1:#0F172A;--t2:#475569;--t3:#94A3B8;
-  --border:#E2E8F0;--row-hover:rgba(0,0,0,.025);--row-border:rgba(0,0,0,.06);
+  --text-primary:#0F172A;--text-secondary:#475569;--text-muted:#94A3B8;
+  --border:#E2E8F0;--border-dim:rgba(0,0,0,.06);
+  --row-hover:rgba(0,0,0,.025);--row-border:rgba(0,0,0,.06);
   --r:10px;
-  --green:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563EB;--purple:#7C3AED;
-  --accent:#4f46e5;--muted:rgba(0,0,0,0.45);
-  --shadow:0 4px 16px rgba(0,0,0,.08);
+  --up:#059669;--green:#059669;--down:#dc2626;--red:#dc2626;
+  --accent:#0d9488;--accent-dim:rgba(13,148,136,0.12);
+  --gold:#d97706;--gold-dim:rgba(217,119,6,0.1);--amber:#d97706;
+  --blue:#2563EB;--purple:#7C3AED;
+  --muted:rgba(0,0,0,0.45);--shadow:0 4px 16px rgba(0,0,0,.08);
 }
 /* ══ Reset + base ═══════════════════════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -30,12 +51,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #breadcrumb{flex:none}
 /* ══ Sidebar ════════════════════════════════════════════════════════════════ */
 .logo{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.logo h1{font-size:14px;font-weight:700;color:var(--green)}
+.logo h1{font-size:14px;font-weight:700;color:var(--accent)}
 .logo p{font-size:9px;color:var(--t2)}
 .nav{padding:5px 0;border-bottom:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 200px)}
 .ni{display:flex;align-items:center;gap:8px;padding:0 16px;height:36px;cursor:pointer;font-size:12px;color:var(--t2);border-left:3px solid transparent;transition:all .12s;user-select:none;border-radius:0 6px 6px 0;margin-right:6px}
 .ni:hover{background:rgba(255,255,255,.06);color:var(--text)}
-.ni.on{background:rgba(99,102,241,.15);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.ni.on{background:var(--accent-dim);color:var(--accent);border-left-color:var(--accent);font-weight:600}
 .ni-kbd{margin-left:auto;font-size:9px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-family:monospace}
 .ni-sub>.ni-label:first-of-type{color:var(--t3);font-size:10px}
 .ni.ni-sub span:first-child{font-size:8px;opacity:.4;flex-shrink:0}
@@ -71,17 +92,17 @@ td{padding:7px 10px;border-bottom:1px solid var(--row-border);white-space:nowrap
 tr:hover td{background:var(--row-hover);cursor:pointer}
 /* ══ Badges ═════════════════════════════════════════════════════════════════ */
 .b{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
-.bg{background:rgba(74,222,128,.15);color:var(--green)}
-.ba{background:rgba(251,191,36,.15);color:var(--amber)}
-.br{background:rgba(248,113,113,.15);color:var(--red)}
+.bg{background:var(--gold-dim);color:var(--gold)}
+.ba{background:var(--accent-dim);color:var(--accent)}
+.br{background:rgba(244,63,94,0.12);color:var(--down)}
 .bb{background:rgba(96,165,250,.15);color:var(--blue)}
 .bp{background:rgba(192,132,252,.15);color:var(--purple)}
 /* ══ Buttons ════════════════════════════════════════════════════════════════ */
 .btn{padding:6px 13px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;min-height:32px}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .btn:active{transform:translateY(0);box-shadow:none}
-.btn-g{background:var(--accent);color:#fff;border:1px solid var(--accent)}
-.btn-g:hover{background:rgba(99,102,241,.85)}
+.btn-g{background:var(--accent);color:#0a0f1e;border:1px solid var(--accent);font-weight:600}
+.btn-g:hover{background:rgba(20,184,166,.85);color:#0a0f1e}
 .btn-o{background:transparent;color:var(--t2);border:1px solid rgba(255,255,255,.15)}
 .btn-o:hover{background:rgba(255,255,255,.06);color:var(--text)}
 .btn-r{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3)}
@@ -101,7 +122,7 @@ tr:hover td{background:var(--row-hover);cursor:pointer}
 .skeleton{position:relative;overflow:hidden;background:var(--bg3);border-radius:4px;color:transparent!important}
 .skeleton::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.06) 50%,transparent 100%);background-size:400px 100%;animation:shimmer 1.6s infinite}
 /* ══ Global spinner ══════════════════════════════════════════════════════════ */
-#g-spin{display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));z-index:9000;animation:gbar 1.6s ease-in-out infinite}
+#g-spin{display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--up));z-index:9000;animation:gbar 1.6s ease-in-out infinite}
 @keyframes gbar{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}51%{transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
 /* ══ Typography ══════════════════════════════════════════════════════════════ */
 h1.page-title{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
@@ -116,7 +137,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--row-border);white-space:nowrap
 /* ══ Sidebar groupes ════════════════════════════════════════════════════════ */
 .sb-grp{padding:5px 16px 3px;font-size:10px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;border-top:1px solid rgba(255,255,255,.06)}
 .sb-grp:first-child{border-top:none;margin-top:0}
-.sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:16px;padding:0 4px;border-radius:8px;font-size:9px;font-weight:700;background:rgba(99,102,241,.25);color:var(--accent);margin-left:auto}
+.sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:16px;padding:0 4px;border-radius:8px;font-size:9px;font-weight:700;background:var(--accent-dim);color:var(--accent);margin-left:auto}
 /* ══ Footer ══════════════════════════════════════════════════════════════════ */
 #app-footer{position:fixed;bottom:0;left:220px;right:0;z-index:50;background:var(--bg2);border-top:1px solid var(--border);padding:5px 20px;font-size:10px;color:var(--t3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 /* ══ Misc ════════════════════════════════════════════════════════════════════ */
@@ -172,7 +193,7 @@ input[type=range]{padding:0;height:20px}
 .stock-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto}
 .stock-tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .15s}
 .stock-tab:hover{color:var(--text)}
-.stock-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.stock-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .stock-tab-panel{display:none}
 .stock-tab-panel.active{display:block}
 /* ── Verdict analyste ──────────────────────────────────────────────────── */
@@ -252,7 +273,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 #cmp-modal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.7);align-items:center;justify-content:center}
 #cmp-modal.show{display:flex}
 /* ── Aide contextuelle ───────────────────────────────────────────────────── */
-#help-fab{position:fixed;bottom:24px;right:24px;z-index:2000;width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
+#help-fab{position:fixed;bottom:24px;right:24px;z-index:2000;width:44px;height:44px;border-radius:50%;background:var(--accent);color:#0a0f1e;border:none;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
 #help-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(0,0,0,.5)}
 #help-drawer{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:2100;display:flex;flex-direction:column;transition:right .25s ease;box-shadow:-4px 0 24px rgba(0,0,0,.3);overflow:hidden}
 #help-drawer.open{right:0}
@@ -403,35 +424,35 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="btn-o btn" onclick="toggleTheme()" style="margin-left:auto;padding:4px 8px;font-size:11px" title="Thème">🌙</button>
   </div>
   <nav class="nav">
-    <div class="ni on" onclick="nav('dash')"><span>🏠</span> <span class="ni-label">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span><span class="ni-kbd compact-hide">D</span></div>
-    <div class="ni" onclick="nav('rank')"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
-    <div class="ni" onclick="nav('screener')"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
+    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span><span class="ni-kbd compact-hide">D</span></div>
+    <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
+    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('sectors')"><span>◈</span> <span class="ni-label">Secteurs</span></div>
-      <div class="ni ni-sub" onclick="nav('news')"><span>◈</span> <span class="ni-label">Actualités</span></div>
-      <div class="ni ni-sub" onclick="nav('comm')"><span>◈</span> <span class="ni-label">Commodités</span></div>
-      <div class="ni ni-sub" onclick="nav('macro')"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
-      <div class="ni ni-sub" onclick="nav('calendar')"><span>◈</span> <span class="ni-label">Calendrier</span></div>
+      <div class="ni ni-sub" onclick="nav('sectors')" data-tip="Comparez les performances par secteur économique · utile pour diversifier votre portefeuille"><span>◈</span> <span class="ni-label">Secteurs</span></div>
+      <div class="ni ni-sub" onclick="nav('news')" data-tip="Dernières nouvelles des sociétés BRVM avec analyse automatique du sentiment (positif/négatif)"><span>◈</span> <span class="ni-label">Actualités</span></div>
+      <div class="ni ni-sub" onclick="nav('comm')" data-tip="Impact des prix des matières premières (pétrole, cacao, or) sur les sociétés BRVM"><span>◈</span> <span class="ni-label">Commodités</span></div>
+      <div class="ni ni-sub" onclick="nav('macro')" data-tip="Indicateurs économiques de la zone UEMOA : taux d'intérêt, croissance, risque pays"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
+      <div class="ni ni-sub" onclick="nav('calendar')" data-tip="Dates des assemblées générales et événements importants des sociétés BRVM"><span>◈</span> <span class="ni-label">Calendrier</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
-      <div class="ni ni-sub" onclick="nav('analyse')"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
-      <div class="ni ni-sub" onclick="nav('previsions')"><span>◈</span> <span class="ni-label">Prévisions IA</span></div>
-      <div class="ni ni-sub" onclick="nav('score-custom')"><span>◈</span> <span class="ni-label">Score personnalisé</span></div>
-      <div class="ni ni-sub" onclick="nav('targets')"><span>◈</span> <span class="ni-label">Prix cibles</span></div>
-      <div class="ni ni-sub" onclick="nav('perf')"><span>◈</span> <span class="ni-label">Performances</span></div>
+      <div class="ni ni-sub" onclick="nav('analyse')" data-tip="Optimisez votre portefeuille pour maximiser le rendement en réduisant le risque"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
+      <div class="ni ni-sub" onclick="nav('previsions')" data-tip="Signaux d'achat/vente générés par intelligence artificielle pour chaque société"><span>◈</span> <span class="ni-label">Prévisions IA</span></div>
+      <div class="ni ni-sub" onclick="nav('score-custom')" data-tip="Créez votre propre score en ajustant l'importance de chaque modèle d'analyse"><span>◈</span> <span class="ni-label">Score personnalisé</span></div>
+      <div class="ni ni-sub" onclick="nav('targets')" data-tip="Valeur 'juste' estimée de chaque action selon 3 méthodes · utile pour détecter les sous-évaluations"><span>◈</span> <span class="ni-label">Prix cibles</span></div>
+      <div class="ni ni-sub" onclick="nav('perf')" data-tip="Évolution historique des cours depuis 2016 · comparez qui a le plus progressé"><span>◈</span> <span class="ni-label">Performances</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Portefeuille &amp; Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
-      <div class="ni ni-sub" onclick="nav('port')"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
-      <div class="ni ni-sub" onclick="nav('sim')"><span>◈</span> <span class="ni-label">Simulateur div.</span></div>
-      <div class="ni ni-sub" onclick="nav('div')"><span>◈</span> <span class="ni-label">Dividendes</span></div>
+      <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
+      <div class="ni ni-sub" onclick="nav('sim')" data-tip="Projetez la valeur future de votre investissement sur 1 à 10 ans"><span>◈</span> <span class="ni-label">Simulateur div.</span></div>
+      <div class="ni ni-sub" onclick="nav('div')" data-tip="Calendrier des versements de dividendes · simulez vos revenus passifs annuels"><span>◈</span> <span class="ni-label">Dividendes</span></div>
     </div>
-    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
+    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-outils')"><span>💬</span> <span class="ni-label">Outils</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-outils">
-      <div class="ni ni-sub" onclick="nav('chat')"><span>◈</span> <span class="ni-label">Chat IA</span></div>
+      <div class="ni ni-sub" onclick="nav('chat')" data-tip="Posez vos questions sur n'importe quelle société BRVM à notre assistant IA"><span>◈</span> <span class="ni-label">Chat IA</span></div>
       <div class="ni ni-sub" onclick="nav('glossaire');initGlossaire()"><span>◈</span> <span class="ni-label">Glossaire</span></div>
     </div>
   </nav>
@@ -478,6 +499,18 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span id="freshness-badge" style="font-size:10px;color:var(--t3);display:none"></span>
       <button class="btn btn-g" onclick="doRefresh()"><span id="ri">↻</span> Actualiser</button>
     </div>
+  </div>
+  <!-- Intro BRVM — visible une seule fois -->
+  <div id="brvm-intro" style="background:linear-gradient(135deg,var(--accent-dim),var(--gold-dim));border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;display:flex;gap:20px;align-items:flex-start">
+    <div style="font-size:32px;line-height:1;flex-shrink:0">🌍</div>
+    <div style="flex:1">
+      <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Bienvenue sur BRVM Analyzer</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7">
+        La <strong style="color:var(--accent)">BRVM</strong> (Bourse Régionale des Valeurs Mobilières) est la bourse commune de <strong>8 pays d'Afrique de l'Ouest</strong> (Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Niger, Togo, Guinée-Bissau). Elle regroupe <strong>47 sociétés cotées</strong> dans des secteurs variés : banques, industrie, télécoms, agriculture et énergie.<br>
+        <span style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">Ce dashboard analyse chaque société sur 8 modèles financiers pour vous aider à identifier les meilleures opportunités d'investissement.</span>
+      </div>
+    </div>
+    <button onclick="document.getElementById('brvm-intro').style.display='none';localStorage.setItem('brvm_intro_seen','1')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:22px;padding:0;line-height:1;flex-shrink:0" title="Fermer">×</button>
   </div>
   <div class="g4" id="kpis"></div>
   <!-- Widgets dashboard : portefeuille, alertes, agenda -->
@@ -529,7 +562,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px">
         <span>Eviter</span><span>Faible</span><span>Modéré</span><span>Fort</span>
       </div>
-      <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 40%,#10b981 75%,#6366f1 100%);position:relative">
+      <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#f43f5e 0%,#f59e0b 40%,#10b981 75%,#14b8a6 100%);position:relative">
         <div id="signal-gauge-cursor" style="position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--bg2);box-shadow:0 0 6px rgba(0,0,0,.4);transform:translateX(-50%);transition:left .5s;left:50%"></div>
       </div>
       <div style="text-align:center;margin-top:4px;font-size:10px;font-weight:600;color:var(--t2)" id="signal-gauge-label">—</div>
@@ -667,13 +700,13 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
       <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
-      <th class="tt" data-tt="Valeur totale de la société cotée en bourse · Cours × nombre d'actions">Capitalisation</th>
+      <th class="tt" data-tt="Valeur totale de la société cotée en bourse · Cours × nombre d'actions">Valeur totale</th>
       <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Cours</th>
-      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">Tendance 30j</th>
-      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">Var. jour</th>
+      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">Trend 30j</th>
+      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">Aujourd'hui</th>
       <th class="tt" data-tt="Cours ÷ bénéfice par action · 💡 Bon signe : ≤ 15 — plus bas = action moins chère">P/E</th>
       <th class="tt" data-tt="Cours ÷ valeur comptable · 💡 Bon signe : ≤ 1.5 — sous 1 = action bradée">P/B</th>
-      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Rend. div.</th>
+      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an</th>
       <th class="tt" data-tt="Rentabilité des capitaux propres · 💡 ≥ 15% = gestion excellente">ROE</th>
       <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Signal</th>
       <th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th>
@@ -1426,10 +1459,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="gloss-list" style="max-width:800px"></div>
 </div>
 <footer id="app-footer">
-  <span>📈 BRVM Dashboard v2 · <span id="footer-date"></span></span>
-  <span id="footer-boc">BOC : — tickers</span>
-  <span id="footer-live">MàJ live : —</span>
-  <span style="color:var(--t3)">Données BRVM · Cours indicatifs</span>
+  <span>BRVM Analyzer · Données BOC · <span id="footer-date"></span> · Cours indicatifs — pas de conseil en investissement</span>
+  <span id="footer-live" style="color:var(--t3)">MàJ : —</span>
 </footer>
 </main></div>
 <script src="/simulator.js"></script>
@@ -1929,14 +1960,17 @@ function _getNotifContainer(){
   return c;
 }
 function showNotif(msg,color){
+  var c=_getNotifContainer();
+  if(c.children.length>=3){setTimeout(function(){showNotif(msg,color);},3000);return;}
   var bc=color==='green'?'var(--green)':color==='amber'?'var(--amber)':'var(--red)';
   var n=document.createElement('div');
   n.setAttribute('data-tip',msg);
   n.style='background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease;cursor:default';
-  n.textContent=msg;_getNotifContainer().appendChild(n);
+  n.textContent=msg;c.appendChild(n);
   if(typeof _attachTooltip==='function')_attachTooltip(n);
-  setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},3500);
+  setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);
 }
+function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
 
 function showChangelog(){
   var m=document.createElement('div');
@@ -2082,12 +2116,13 @@ function renderDash(m){
   try { prevKpi = JSON.parse(localStorage.getItem(_LS_KPI_PREV)||'{}'); } catch{}
   localStorage.setItem(_LS_KPI_PREV, JSON.stringify({strong:nStrong, div:nDiv, total:scores.length}));
 
-  document.getElementById('kpis').innerHTML=[
-    ['Actions analysées', scores.length + _kpiArrow(scores.length, prevKpi.total), 'var(--blue)', 'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'],
-    ['Score fort (≥7.5)', nStrong + _kpiArrow(nStrong, prevKpi.strong), 'var(--green)', 'Actions avec score composite ≥ 7.5/10 (= 60/80) — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
-    ['Avec dividende', nDiv + _kpiArrow(nDiv, prevKpi.div), 'var(--amber)', 'Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'],
-    ['Top rendement', wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', 'var(--amber)', 'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
-  ].map(([l,v,c,tip])=>`<div class="kpi tt" data-tt="${tip}"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
+  const _kpiCards = [
+    {l:'Actions analysées', v:scores.length+_kpiArrow(scores.length,prevKpi.total), vc:'var(--accent)', border:'var(--accent)', icon:'📊', tip:'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'},
+    {l:'Score fort (≥7.5)', v:nStrong+_kpiArrow(nStrong,prevKpi.strong), vc:'var(--gold)', border:'var(--gold)', icon:'⭐', tip:'Actions avec score composite ≥ 7.5/10 (= 60/80) — zone d\'achat potentielle selon notre méthodologie multi-modèles.'},
+    {l:'Avec dividende', v:nDiv+_kpiArrow(nDiv,prevKpi.div), vc:'var(--green)', border:'var(--green)', icon:'💰', tip:'Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'},
+    {l:'Top rendement', v:wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', vc:'var(--gold)', border:'var(--down)', icon:'🏆', tip:'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'},
+  ];
+  document.getElementById('kpis').innerHTML=_kpiCards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="border-left:3px solid ${k.border};position:relative;overflow:hidden"><span style="position:absolute;top:6px;right:10px;font-size:28px;opacity:0.18;pointer-events:none">${k.icon}</span><div class="kl">${k.l}</div><div class="kv" style="color:${k.vc}">${k.v}</div></div>`).join('');
 
   // Signal du jour + widgets S4
   _renderDaySignal(s);
@@ -4870,8 +4905,9 @@ function testPushNotification() {
 
 // Lancement au demarrage et toutes les 5 min
 updateLiveStatus();
-fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);}).catch(function(){});
+(function(){var _sv=showNotif;showNotif=function(){};fetch('/api/live').then(function(r){return r.json();}).then(function(d){if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);else checkAlerts(d.prices);showNotif=_sv;}).catch(function(){showNotif=_sv;});})();
 setInterval(updateLiveStatus, 300000);
+if(localStorage.getItem('brvm_intro_seen')){var _bi=document.getElementById('brvm-intro');if(_bi)_bi.style.display='none';}
 </script>
 
 <!-- ── Modal Comparaison ──────────────────────────────────────────────────── -->
@@ -5168,13 +5204,17 @@ function openHelpDrawer(page) {
   page = page || _currentPage;
   const content = _helpContent[page] || _helpContent['dash'];
   document.getElementById('help-page-title').textContent = content.title;
-  document.getElementById('help-drawer-body').innerHTML = content.sections.map(s => {
+  const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
+    <div style="font-weight:700;color:var(--accent);margin-bottom:4px">🚀 Pour commencer</div>
+    <div style="color:var(--t2)">Score <span style="color:var(--gold);font-weight:700">≥ 7.5/10</span> = opportunité forte · <span style="color:var(--green);font-weight:700">✅ Acheter</span> = signal IA positif · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+  </div>`;
+  document.getElementById('help-drawer-body').innerHTML = _universalHelp + content.sections.map(s => {
     if (s.h) return `<h3>${s.h}</h3>${s.p ? `<p>${s.p.replace(/\n/g,'<br>')}</p>` : ''}`;
     if (s.tip) return `<div class="help-tip">${s.tip}</div>`;
     if (s.ex) return `<div class="help-example">${s.ex}</div>`;
     return '';
   }).join('') + `<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3)">
-    Vous avez une question ? Rendez-vous sur la page <strong>💬 Chat IA</strong> pour poser vos questions à Claude en français.
+    Question ? Page <strong style="color:var(--accent)">💬 Chat IA</strong> — posez vos questions en français.
   </div>`;
   document.getElementById('help-drawer').classList.add('open');
   document.getElementById('help-overlay').style.display = 'block';

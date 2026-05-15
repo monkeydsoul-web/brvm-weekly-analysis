@@ -114,8 +114,10 @@ function _renderScatterPE(){
   canvas.style.display='';
   if(emptyEl){emptyEl.style.display='none';}
 
-  const peMax=Math.min(40, Math.max(...pts.map(x=>x.pe_ref||0))*1.1)||40;
-  const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.1||20;
+  // Axe X dynamique basé sur les vrais max P/E
+  const peRawMax = Math.max(...pts.map(x=>x.pe_ref||0));
+  const peMax = pts.length===1 ? peRawMax*2 : peRawMax*1.2 || 40;
+  const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.2||20;
   const pad={l:40,r:20,t:20,b:35};
   const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
 
@@ -124,18 +126,23 @@ function _renderScatterPE(){
   ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+gH); ctx.lineTo(pad.l+gW,pad.t+gH); ctx.stroke();
 
   // Zone idéale (P/E<15, Div>5)
-  const zx=pad.l, zy=pad.t+(1-5/dyMax)*gH;
-  const zw=(15/peMax)*gW, zh=gH-(1-5/dyMax)*gH;
-  ctx.fillStyle='rgba(74,222,128,0.07)'; ctx.fillRect(zx,zy,zw,zh);
-  ctx.strokeStyle='rgba(74,222,128,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+  if(peMax>0 && dyMax>0){
+    const zx=pad.l, zy=pad.t+(1-Math.min(5,dyMax)/dyMax)*gH;
+    const zw=Math.min(15/peMax,1)*gW, zh=gH-(1-Math.min(5,dyMax)/dyMax)*gH;
+    ctx.fillStyle='rgba(20,184,166,0.07)'; ctx.fillRect(zx,zy,zw,zh);
+    ctx.strokeStyle='rgba(20,184,166,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+  }
 
   // Labels axes
   ctx.fillStyle='#9ca3af'; ctx.font='9px sans-serif'; ctx.textAlign='center';
   ctx.fillText('P/E →',pad.l+gW/2, H-5);
   ctx.save(); ctx.translate(10,pad.t+gH/2); ctx.rotate(-Math.PI/2); ctx.fillText('Div% ↑',0,0); ctx.restore();
 
-  // Graduations
-  [0,10,20,30].filter(v=>v<=peMax).forEach(v=>{
+  // Graduations X — adaptées au peMax
+  const xTicks = [];
+  const xStep = peMax<=20?5:peMax<=40?10:20;
+  for(let v=0;v<=peMax;v+=xStep) xTicks.push(v);
+  xTicks.forEach(v=>{
     const x=pad.l+(v/peMax)*gW;
     ctx.fillStyle='#6b7280'; ctx.textAlign='center'; ctx.fillText(v,x,pad.t+gH+12);
     ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+gH); ctx.stroke();
@@ -146,12 +153,13 @@ function _renderScatterPE(){
     ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+gW,y); ctx.stroke();
   });
 
-  // Points
+  // Points — couleurs /10
   pts.forEach(x=>{
-    const cx=pad.l+(x.pe_ref/peMax)*gW;
-    const cy=pad.t+(1-(x.div_yield||0)/dyMax)*gH;
+    const cx=pad.l+Math.min(1,x.pe_ref/peMax)*gW;
+    const cy=pad.t+(1-Math.min(1,(x.div_yield||0)/dyMax))*gH;
     const sc=x.composite_adj||0;
-    const col=sc>=60?'#4ADE80':sc>=45?'#FBBF24':'#F87171';
+    // Seuils /10: ≥7 (56/80) → vert, 5-7 (40-56) → teal, <5 (<40) → rouge
+    const col=sc>=56?'#10b981':sc>=40?'#14b8a6':'#f43f5e';
     ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
     ctx.fillStyle=col+'cc'; ctx.fill();
     ctx.strokeStyle=col; ctx.lineWidth=1; ctx.stroke();
@@ -159,9 +167,9 @@ function _renderScatterPE(){
     ctx.fillText(x.ticker, cx+7, cy+3);
   });
 
-  // Légende
+  // Légende avec seuils /10
   ctx.font='9px sans-serif'; ctx.textAlign='left';
-  [['#4ADE80','Score ≥60'],['#FBBF24','Score 45-59'],['#F87171','Score <45']].forEach(([c,l],i)=>{
+  [['#10b981','Note ≥ 7'],['#14b8a6','Note 5–7'],['#f43f5e','Note < 5']].forEach(([c,l],i)=>{
     ctx.fillStyle=c; ctx.beginPath(); ctx.arc(pad.l+5,pad.t+8+i*14,4,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#9ca3af'; ctx.fillText(l, pad.l+12, pad.t+11+i*14);
   });
