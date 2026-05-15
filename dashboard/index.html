@@ -1474,10 +1474,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div style="font-size:10px;color:var(--t2);margin-bottom:6px">Chaque point = une action dans les résultats. Zone idéale : P/E &lt; 15 et Div &gt; 5%</div>
     <div id="sc-scatter-wrap" style="position:relative">
       <canvas id="sc-scatter" width="600" height="260" style="width:100%;max-height:260px"></canvas>
-      <div id="sc-scatter-empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--t2);font-size:12px;background:var(--bg3);border-radius:6px">
-        <span style="font-size:24px">📊</span>
-        <span>Données P/E et Div% requises dans les résultats</span>
-        <span style="font-size:10px;color:var(--t3)">Appliquez un filtre moins restrictif ou vérifiez les données</span>
+      <div id="sc-scatter-empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:var(--bg-elevated);border-radius:var(--radius-md)">
+        <div style="text-align:center;padding:24px 16px;color:var(--text-3);font-size:12px;border:1px dashed var(--border-1);border-radius:var(--radius-md);margin:8px">
+          📊 Le graphique s'affiche avec au moins 5 sociétés dans les résultats.<br>
+          <span style="font-size:11px;margin-top:4px;display:block">Élargissez vos filtres pour voir la distribution P/E vs Dividende.</span>
+        </div>
       </div>
     </div>
   </div>

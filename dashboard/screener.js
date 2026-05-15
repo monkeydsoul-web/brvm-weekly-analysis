@@ -106,7 +106,7 @@ function _renderScatterPE(){
   // Données valides (P/E > 0 et Div% > 0)
   const pts = _scrResults.filter(x=>(x.pe_ref||0)>0&&(x.pe_ref||0)<60&&(x.div_yield||0)>0);
   const emptyEl = document.getElementById('sc-scatter-empty');
-  if(pts.length<1){
+  if(pts.length<5){
     canvas.style.display='none';
     if(emptyEl){emptyEl.style.display='flex';}
     return;
