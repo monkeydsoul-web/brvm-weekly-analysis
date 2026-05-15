@@ -74,7 +74,7 @@ async function renderSectorPage() {
       <span style="width:10px;height:10px;border-radius:2px;background:${d.color};flex-shrink:0"></span>
       <span style="color:var(--t2);flex:1">${d.label}</span>
       <span style="font-weight:600">${d.count}</span>
-      <span style="color:${d.avgScore>=55?'var(--green)':d.avgScore>=40?'var(--amber)':'var(--red)'};min-width:36px;text-align:right">${d.avgScore.toFixed(0)}/80</span>
+      <span style="color:${d.avgScore>=55?'var(--green)':d.avgScore>=40?'var(--amber)':'var(--red)'};min-width:36px;text-align:right">${(d.avgScore/80*10).toFixed(1)}/10</span>
     </div>`).join('');
 
   // Cards secteurs détaillées
@@ -94,7 +94,7 @@ async function renderSectorPage() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div>
           <div style="font-weight:700;font-size:13px;color:${color}">${s}</div>
-          <div style="font-size:10px;color:var(--t2);margin-top:2px">${items.length} sociétés · Score moy. ${avgScore.toFixed(0)}/80</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">${items.length} sociétés · Score moy. ${(avgScore/80*10).toFixed(1)}/10</div>
           ${idx?`<div style="font-size:10px;margin-top:3px">
             <span style="color:var(--t2)">Indice BRVM: </span>
             <span style="font-weight:600">${idx.current.toFixed(2)}</span>
@@ -122,7 +122,7 @@ async function renderSectorPage() {
               <div style="font-weight:700;font-size:12px">${x.ticker}</div>
               <div style="font-size:9px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">${x.name||''}</div>
             </div>
-            <span style="font-weight:700;font-size:12px;color:${vc}">${sc.toFixed(0)}</span>
+            <span style="font-weight:700;font-size:12px;color:${vc}">${(sc/80*10).toFixed(1)}</span>
           </div>`;
         }).join('')}
       </div>

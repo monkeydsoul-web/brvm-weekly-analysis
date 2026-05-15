@@ -201,6 +201,10 @@ input[type=range]{padding:0;height:20px}
   .kv{font-size:15px}
   .kl{font-size:9px}
 }
+/* ── Floating tooltip ────────────────────────────────────────────────────── */
+#floating-tooltip{position:fixed;z-index:9999;background:#1e293b;color:#f1f5f9;padding:8px 12px;border-radius:8px;font-size:12px;max-width:260px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.4);pointer-events:none;opacity:0;transition:opacity 0.15s;border:1px solid rgba(255,255,255,0.1);}
+abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none;}
+[data-tip]{cursor:default;}
 /* ── Tooltips CSS-purs ───────────────────────────────────────────────────── */
 .tt{position:relative}
 .tt[data-tt]::after{content:attr(data-tt);position:absolute;bottom:calc(100%+8px);left:50%;transform:translateX(-50%);background:var(--bg);color:var(--text);font-size:10px;padding:5px 9px;border-radius:6px;white-space:normal;width:190px;border:1px solid var(--border);z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;font-weight:400;line-height:1.5;text-align:left;box-shadow:var(--shadow)}
@@ -315,6 +319,7 @@ input[type=range]{padding:0;height:20px}
 </style></head>
 <body>
 <div id="g-spin"></div>
+<div id="floating-tooltip"></div>
 
 <!-- Slide-over fiche société -->
 <div id="sso-overlay" onclick="closeStockSlideover()"></div>
@@ -355,7 +360,7 @@ input[type=range]{padding:0;height:20px}
   <div class="logo">
     <div>
       <h1>📈 BRVM</h1>
-      <p>Dashboard · Analyse locale</p>
+      <p><abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">BRVM</abbr> · Analyse locale</p>
       <div id="live-badge" style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:10px;font-weight:600;color:#6b7280">
         <span id="live-dot" style="width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block"></span>
         <span id="live-label">—</span>
@@ -378,7 +383,7 @@ input[type=range]{padding:0;height:20px}
       <div class="ni ni-sub" onclick="nav('sectors')"><span>📊</span> <span class="ni-label">Secteurs</span></div>
       <div class="ni ni-sub" onclick="nav('news')"><span>📰</span> <span class="ni-label">Actualités</span></div>
       <div class="ni ni-sub" onclick="nav('comm')"><span>🌍</span> <span class="ni-label">Commodités</span></div>
-      <div class="ni ni-sub" onclick="nav('macro')"><span>🏦</span> <span class="ni-label">Macro UEMOA</span></div>
+      <div class="ni ni-sub" onclick="nav('macro')"><span>🏦</span> <span class="ni-label">Macro <abbr data-tip="Union Économique et Monétaire Ouest-Africaine · zone des 8 pays BRVM" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">UEMOA</abbr></span></div>
       <div class="ni ni-sub" onclick="nav('calendar')"><span>📅</span> <span class="ni-label">Calendrier</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
@@ -428,7 +433,7 @@ input[type=range]{padding:0;height:20px}
 <main class="main">
 <!-- Breadcrumb -->
 <div id="breadcrumb" style="padding:4px 16px 0;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px">
-  <span>BRVM</span><span>›</span><span id="bc-page" style="color:var(--text)">Tableau de bord</span>
+  <span style="cursor:pointer;color:var(--blue)" onclick="nav('dash')">BRVM</span><span>›</span><span id="bc-page" style="color:var(--text)">Tableau de bord</span>
 </div>
 
 <!-- DASHBOARD -->
@@ -506,7 +511,7 @@ input[type=range]{padding:0;height:20px}
     </div>
   </div>
   <div class="g2" style="margin-bottom:12px">
-    <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /80</div>
+    <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
       <div id="cDistDiv" style="width:100%;height:170px"></div></div>
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="cSectDiv" style="width:100%;height:170px"></div></div>
@@ -559,7 +564,7 @@ input[type=range]{padding:0;height:20px}
     <div id="heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:60px"></div>
     <div style="margin-top:8px">
       <div style="font-size:9px;color:var(--t3);margin-bottom:4px;font-style:italic">
-        💡 <strong>Comment lire la heatmap :</strong> chaque bloc représente une action — sa <strong>taille</strong> reflète son score /80 (plus gros = mieux noté), sa <strong>couleur</strong> reflète la variation du cours aujourd'hui.
+        🔴 en baisse · 🟢 en hausse · taille = Score /10 · 💡 <strong>Comment lire la heatmap :</strong> chaque bloc représente une action — sa <strong>taille</strong> reflète son score /10 (plus gros = mieux noté), sa <strong>couleur</strong> reflète la variation du cours aujourd'hui. Cliquez sur un bloc pour ouvrir la fiche.
       </div>
       <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);flex-wrap:wrap">
         <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>&gt;+2% Forte hausse</span>
@@ -567,7 +572,7 @@ input[type=range]{padding:0;height:20px}
         <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block"></span>Stable 0%</span>
         <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#f87171;display:inline-block"></span>0%→-2% Baisse</span>
         <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2% Forte baisse</span>
-        <span style="margin-left:auto;color:var(--t3);font-size:9px">Taille = Score /80 · Couleur = Var%</span>
+        <span style="margin-left:auto;color:var(--t3);font-size:9px">Taille = Score /10 · Couleur = Var%</span>
       </div>
     </div>
   </div>
@@ -589,7 +594,7 @@ input[type=range]{padding:0;height:20px}
     <div style="display:flex;gap:8px">
       <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
       <select id="fSort" onchange="renderRankLive()">
-        <option value="composite_adj">Score /80</option><option value="div_yield">Dividende</option>
+        <option value="composite_adj">Score /10</option><option value="div_yield">Dividende</option>
         <option value="roe">ROE</option><option value="pe_ref">P/E</option>
       </select>
       <select id="fVerdict" onchange="renderRankLive()">
@@ -611,14 +616,14 @@ input[type=range]{padding:0;height:20px}
     <div id="rank-guide" style="display:none;margin-top:8px;background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--t2);line-height:1.8;border-left:3px solid var(--blue)">
       <strong style="color:var(--t1);font-size:12px">Comment lire ce classement ?</strong>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:8px">
-        <div><strong style="color:var(--green)">Score /80</strong> — Note composite issue de 8 modèles de valorisation (Graham, DCF, DDM, EPV, Buffett, Rev.DCF, Relatif, Technique). ≥60 = excellente opportunité, 40-60 = correct, &lt;40 = risqué.</div>
+        <div><strong style="color:var(--green)">Score /10</strong> — Note composite issue de 8 modèles de valorisation (<abbr data-tip="Méthode Benjamin Graham · sous-évaluation + solidité financière" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">Graham</abbr>, <abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">DCF</abbr>, <abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">DDM</abbr>, <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">EPV</abbr>, Buffett, Rev.DCF, Relatif, Technique). ≥7.5/10 = excellente opportunité, 5-7.5 = correct, &lt;5 = risqué.</div>
         <div><strong style="color:var(--t1)">G / D / Dm / E / B / R / Rel / T</strong> — Scores détaillés /10 par modèle. Cliquez "Afficher scores détaillés" pour les voir.</div>
         <div><strong style="color:var(--t1)">P/E</strong> — Prix / Bénéfice. &lt;15 = bon (Graham), &lt;10 = excellent. Plus le P/E est bas, moins vous payez cher les bénéfices.</div>
         <div><strong style="color:var(--t1)">P/B</strong> — Prix / Valeur comptable. &lt;1.5 = correct, &lt;1.0 = potentiellement sous-évalué.</div>
         <div><strong style="color:var(--amber)">Div%</strong> — Rendement du dividende = dividende annuel ÷ cours actuel. ≥4% = solide pour la BRVM.</div>
-        <div><strong style="color:var(--green)">ROE</strong> — Rentabilité des capitaux propres. ≥15% = excellente gestion, ≥10% = correcte.</div>
+        <div><strong style="color:var(--green)"><abbr data-tip="Rentabilité des capitaux propres · plus c'est élevé, plus la société est rentable" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">ROE</abbr></strong> — Rentabilité des capitaux propres. ≥15% = excellente gestion, ≥10% = correcte.</div>
         <div><strong style="color:var(--t1)">Verdict</strong> — Analyse IA des rapports annuels PDF. ACHETER / NEUTRE / VENDRE.</div>
-        <div><strong style="color:var(--t1)">30j</strong> — Sparkline (mini-graphe) de l'évolution du cours sur 30 jours (données BOC officielles).</div>
+        <div><strong style="color:var(--t1)">30j</strong> — Sparkline (mini-graphe) de l'évolution du cours sur 30 jours (données <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">BOC</abbr> officielles).</div>
         <div><strong style="color:var(--t1)">Var%</strong> — Variation du cours aujourd'hui en %. Vert = hausse, rouge = baisse.</div>
         <div><strong style="color:var(--blue)">▲/▼</strong> — Badges de mouvement de rang depuis le dernier tri. ▲3 = a gagné 3 places.</div>
       </div>
@@ -640,15 +645,15 @@ input[type=range]{padding:0;height:20px}
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Div%</th>
       <th class="tt" data-tt="Rentabilité des capitaux propres · 💡 ≥ 15% = gestion excellente">ROE</th>
       <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Verdict</th>
-      <th class="tt" data-tt="Score global sur 8 modèles d'analyse financière · 💡 Au-dessus de 60 = signal fort">Score</th>
-      <th class="adv-col tt" data-tt="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
-      <th class="adv-col tt" data-tt="DCF /10 — valeur basée sur les flux de trésorerie futurs">DCF</th>
-      <th class="adv-col tt" data-tt="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)">DDM</th>
-      <th class="adv-col tt" data-tt="EPV /10 — valeur basée sur les bénéfices normalisés · 💡 Greenwald">EPV</th>
-      <th class="adv-col tt" data-tt="Buffett /10 — qualité + avantage concurrentiel + ROE ≥ 15%">Buf</th>
-      <th class="adv-col tt" data-tt="Rev.DCF /10 — taux de croissance implicite dans le cours actuel">Rev</th>
-      <th class="adv-col tt" data-tt="Relatif /10 — comparaison avec les médianes sectorielles BRVM">Rel</th>
-      <th class="adv-col tt" data-tt="Technique /10 — dynamique haussière récente, volume, tendance 30 jours">Tech</th>
+      <th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th>
+      <th class="adv-col" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
+      <th class="adv-col" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
+      <th class="adv-col" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
+      <th class="adv-col" data-tip="EPV /10 — valeur basée sur les bénéfices normalisés · Greenwald"><abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th>
+      <th class="adv-col" data-tip="Buffett /10 — qualité + avantage concurrentiel + ROE ≥ 15%">Buf</th>
+      <th class="adv-col" data-tip="RevDCF /10 — taux de croissance implicite dans le cours actuel">Rev</th>
+      <th class="adv-col" data-tip="Relatif /10 — comparaison avec les médianes sectorielles BRVM">Rel</th>
+      <th class="adv-col" data-tip="Technique /10 — dynamique haussière récente, volume, tendance 30 jours">Tech</th>
       <th></th>
     </tr></thead>
     <tbody id="rankBody"></tbody></table>
@@ -665,6 +670,12 @@ input[type=range]{padding:0;height:20px}
 
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div style="background:rgba(99,102,241,0.1);border-left:3px solid var(--blue);padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+    <strong>🧠 Comment les titres sont-ils sélectionnés ?</strong><br>
+    Les sociétés affichées combinent 8 modèles d'analyse : valeur intrinsèque (<abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham">Graham</abbr>, <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société">EPV</abbr>), rentabilité (<abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle">DCF</abbr>, <abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs">DDM</abbr>), momentum technique et dividendes. Seules les sociétés avec un Score ≥ 6/10 et un signal positif sont incluses.
+    <span data-tip="Cliquez sur un titre pour voir sa fiche détaillée" style="color:var(--blue);cursor:help;"> En savoir plus ↗</span>
+  </div>
   <div class="ph"><h2>Mon portefeuille</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px">⚡ Optimiser</button>
@@ -701,7 +712,7 @@ input[type=range]{padding:0;height:20px}
       <div id="sim-value" style="font-size:13px;font-weight:700;color:var(--blue)">---</div>
     </div>
     <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Rdt dividende</div>
+      <div style="font-size:10px;color:var(--t3)">Rendement div.</div>
       <div id="sim-yield" style="font-size:13px;font-weight:700">---</div>
     </div>
     <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
@@ -748,6 +759,7 @@ input[type=range]{padding:0;height:20px}
 
 <!-- DIVIDENDES -->
 <div class="page" id="page-div">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>💰 Dividendes 2026</h2></div>
   <!-- Calendrier 12 mois visuel -->
   <div class="card" style="margin-bottom:10px">
@@ -789,6 +801,7 @@ input[type=range]{padding:0;height:20px}
 
 <!-- PERFORMANCES HISTORIQUES -->
 <div class="page" id="page-perf">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>Performances historiques</h2>
     <span style="font-size:11px;color:var(--t2)" title="Toutes les courbes partent du même point pour comparer équitablement · 💡 Base 100 = valeur normalisée à la date de départ">Base 100 · Cours réels BRVM</span></div>
   <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
@@ -796,15 +809,17 @@ input[type=range]{padding:0;height:20px}
 
 <!-- PRIX CIBLES -->
 <div class="page" id="page-targets">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>Prix cibles & prévisions</h2>
     <span style="font-size:11px;color:var(--t2)">Graham · EPV · P/B warranté</span></div>
   <div class="card" style="padding:0;overflow-x:auto">
-    <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th title="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible Graham</th><th title="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible EPV</th><th title="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible P/B</th><th title="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th title="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th title="Score global sur 8 modèles · 💡 Au-dessus de 60 = signal fort">Score</th><th title="Recommandation IA issue des rapports PDF">Verdict</th></tr></thead>
+    <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th data-tip="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible <abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">Graham</abbr></th><th data-tip="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th><th data-tip="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible <abbr data-tip="Prix / Valeur comptable · compare le cours au patrimoine net de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">P/B</abbr></th><th data-tip="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th data-tip="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th><th data-tip="Signal IA issu des rapports PDF · ACHETER / NEUTRE / VENDRE">Signal</th></tr></thead>
     <tbody id="targetsTable"></tbody></table></div>
 </div>
 
 <!-- SCORE PERSONNALISÉ -->
 <div class="page" id="page-score-custom">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>Score personnalisé</h2></div>
   <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0">
@@ -813,6 +828,16 @@ input[type=range]{padding:0;height:20px}
       <div class="ct" title="Ajustez l'importance de chaque modèle selon votre style d'investissement · 💡 Le total doit faire 100%">Ajuster les poids</div>
       <div id="weightSliders"></div>
       <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
+      <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
+        <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
+        <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
+          <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
+          <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
+          <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
+          <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
+          <em>Le score technique est la moyenne pondérée de ces 4 indicateurs, sur 10 points.</em>
+        </div>
+      </details>
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="ct">Classement personnalisé</div>
@@ -824,11 +849,21 @@ input[type=range]{padding:0;height:20px}
 
 <!-- SIMULATEUR DIVIDENDES -->
 <div class="page" id="page-sim">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>Simulateur de revenus dividendes</h2>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
       <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
     </div>
+  </div>
+  <!-- Explication simulateur -->
+  <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
+    <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
+    <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
+    <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
+    <div>3️⃣ <strong>Dividendes</strong> → estimés sur la base des taux historiques <abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BRVM</abbr></div>
+    <div>4️⃣ <strong>Croissance</strong> → basée sur les Prévisions IA composite 4 facteurs</div>
+    <div style="margin-top:8px;color:var(--t2);">⚠️ Simulation indicative · Les performances passées ne garantissent pas les résultats futurs</div>
   </div>
   <!-- Paramètres haut -->
   <div class="g3" style="margin-bottom:12px">
@@ -874,7 +909,7 @@ input[type=range]{padding:0;height:20px}
   <div class="card">
     <div class="ct">Détail par action — projection an 1</div>
     <div style="overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rend. div</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /80</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rendement div.</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /10</th></tr></thead>
       <tbody id="simTable2"></tbody></table>
     </div>
   </div>
@@ -882,6 +917,7 @@ input[type=range]{padding:0;height:20px}
 
 <!-- ALERTES -->
 <div class="page" id="page-alerts">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>🔔 Alertes</h2>
     <div style="display:flex;gap:8px">
       <button class="btn btn-o" onclick="addPortfolioAlerts()" style="font-size:11px">📦 Alertes portefeuille</button>
@@ -896,8 +932,8 @@ input[type=range]{padding:0;height:20px}
       <div><label style="font-size:10px;color:var(--t2)">Type</label>
         <select id="alertType" onchange="_alertTypeChanged()" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
           <option value="price" title="Soyez notifié quand le cours atteint votre seuil">Prix XOF</option>
-          <option value="score" title="Soyez notifié quand le score global change de seuil">Score /80</option>
-          <option value="div_yield" title="Soyez notifié quand le rendement dividende franchit votre seuil">Rendement Div%</option>
+          <option value="score" title="Soyez notifié quand le score global change de seuil">Score /10</option>
+          <option value="div_yield" title="Soyez notifié quand le rendement dividende franchit votre seuil">Rendement div.</option>
           <option value="change_pct" title="Soyez notifié quand la variation journalière est atteinte">Variation jour%</option>
         </select>
       </div>
@@ -1138,24 +1174,24 @@ input[type=range]{padding:0;height:20px}
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-      <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥45, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
-      <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Sociétés très rentables en expansion · Score≥50, ROE≥15% · 💡 Dynamisme et potentiel de hausse">📈 Croissance</button>
-      <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Haut dividende pour revenus passifs réguliers · Score≥40, Div≥5% · 💡 Encaissement annuel garanti">💰 Revenus</button>
-      <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥40, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
+      <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
+      <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Sociétés très rentables en expansion · Score≥6.5/10, ROE≥15% · 💡 Dynamisme et potentiel de hausse">📈 Croissance</button>
+      <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Haut dividende pour revenus passifs réguliers · Score≥5/10, Div≥5% · 💡 Encaissement annuel garanti">💰 Revenus</button>
+      <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥5/10, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:9px;color:var(--t3)">
-      <span>Score≥45 · P/E≤15 · P/B≤1.5<br>Sous-évaluation Benjamin Graham</span>
-      <span>Score≥50 · ROE≥15%<br>Rentabilité et dynamisme</span>
-      <span>Score≥40 · Div≥5%<br>Revenus passifs réguliers</span>
-      <span>Score≥40 · P/E≤20 · Div≥3%<br>Stabilité et préservation capital</span>
+      <span>Score≥5.5/10 · P/E≤15 · P/B≤1.5<br>Sous-évaluation Benjamin Graham</span>
+      <span>Score≥6.5/10 · ROE≥15%<br>Rentabilité et dynamisme</span>
+      <span>Score≥5/10 · Div≥5%<br>Revenus passifs réguliers</span>
+      <span>Score≥5/10 · P/E≤20 · Div≥3%<br>Stabilité et préservation capital</span>
     </div>
   </div>
   <div class="card" style="margin-bottom:12px">
     <div class="ct" style="margin-bottom:10px">Filtres combinables</div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px">
       <div>
-        <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Score min /80</label>
-        <input id="sc-score" type="number" placeholder="0" min="0" max="80" oninput="runScreener()"
+        <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Score min /10</label>
+        <input id="sc-score" type="number" placeholder="0" min="0" max="10" step="0.5" oninput="runScreener()"
           title="Score minimum sur 80 · 💡 Saisir 60 pour cibler les meilleures opportunités"
           style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
       </div>
@@ -1201,7 +1237,7 @@ input[type=range]{padding:0;height:20px}
       <thead id="screener-thead"><tr style="font-size:10px;color:var(--t3);background:var(--bg3)">
         <th style="padding:8px 12px;text-align:left">Action</th>
         <th style="padding:8px 12px;text-align:left">Société</th>
-        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Score global sur 8 modèles · ≥ 60 = signal fort">Score<span class="sort-ind"> ↓</span></th>
+        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10<span class="sort-ind"> ↓</span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pb_ref" onclick="screenerSortBy('pb_ref')" title="Cours ÷ valeur comptable · Bon signe : ≤ 1.5">P/B<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
@@ -1222,8 +1258,9 @@ input[type=range]{padding:0;height:20px}
 
 <!-- PRÉVISIONS IA -->
 <div class="page" id="page-previsions">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>🔮 Prévisions IA — Portefeuilles &amp; Signaux</h2>
-    <span style="font-size:11px;color:var(--t2)">Basé sur scores /80 + historique BOC 30j</span>
+    <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
   <div id="page-previsions-content">
     <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Prévisions IA pour charger...</div>
@@ -1232,6 +1269,7 @@ input[type=range]{padding:0;height:20px}
 
 <!-- ANALYSE & OPTIM -->
 <div class="page" id="page-analyse">
+  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><h2>📐 Analyse &amp; Optimisation</h2></div>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
@@ -1476,7 +1514,7 @@ let _gsIdx = -1;
 
 const _PAGES = [
   {id:'dash',  icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
-  {id:'rank',  icon:'🏆', label:'Classement',          desc:'Scores /80 toutes les actions'},
+  {id:'rank',  icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
   {id:'sectors',icon:'📊',label:'Secteurs',            desc:'Analyse par secteur BRVM'},
   {id:'screener',icon:'🔍',label:'Screener',           desc:'Filtres avancés P/E, score, dividende'},
   {id:'port',  icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
@@ -1537,7 +1575,7 @@ function runGSearch(q){
           <div class="gsr-sub">${x.sector||'—'} · ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${v.toFixed(0)}/80</span>
+          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${(v/80*10).toFixed(1)}/10</span>
           <span style="font-size:9px;color:${verdC}">${verdict}</span>
         </div>
       </div>`;
@@ -1588,7 +1626,7 @@ function runGSearch(q){
             <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
             <div class="gsr-sub">${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
           </div>
-          <span class="b ${bcls(v)}">${v.toFixed(0)}/80</span>
+          <span class="b ${bcls(v)}">${(v/80*10).toFixed(1)}/10</span>
         </div>`;
       }).join('')+html;
     }
@@ -1968,7 +2006,7 @@ function renderDash(m){
 
   document.getElementById('kpis').innerHTML=[
     ['Actions analysées', scores.length + _kpiArrow(scores.length, prevKpi.total), 'var(--blue)', 'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'],
-    ['Score fort (≥60)', nStrong + _kpiArrow(nStrong, prevKpi.strong), 'var(--green)', 'Actions avec score composite ≥ 60/80 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
+    ['Score fort (≥7.5)', nStrong + _kpiArrow(nStrong, prevKpi.strong), 'var(--green)', 'Actions avec score composite ≥ 7.5/10 (= 60/80) — zone d\'achat potentielle selon notre méthodologie multi-modèles.'],
     ['Avec dividende', nDiv + _kpiArrow(nDiv, prevKpi.div), 'var(--amber)', 'Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'],
     ['Top rendement', wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', 'var(--amber)', 'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'],
   ].map(([l,v,c,tip])=>`<div class="kpi tt" data-tt="${tip}"><div class="kl">${l}</div><div class="kv" style="color:${c}">${v}</div></div>`).join('');
@@ -1984,7 +2022,7 @@ function renderDash(m){
       <div style="font-size:18px;margin-bottom:4px">${['🥇','🥈','🥉'][i]}</div>
       <div style="font-size:16px;font-weight:700">${x.ticker} <button class="star ${favorites.includes(x.ticker)?'fav':''}" onclick="event.stopPropagation();toggleFav('${x.ticker}')">★</button></div>
       <div style="font-size:10px;color:var(--t2);margin-bottom:6px">${x.name||''}</div>
-      <div style="font-size:17px;font-weight:700;color:${col(x.composite_adj||0)}">${(x.composite_adj||0).toFixed(0)}<span style="font-size:10px;color:var(--t2)">/80</span></div>
+      <div style="font-size:17px;font-weight:700;color:${col(x.composite_adj||0)}">${((x.composite_adj||0)/80*10).toFixed(1)}<span style="font-size:10px;color:var(--t2)">/10</span></div>
       <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
         ${(x.div_yield||0)>0?`<span class="b ba">Div ${(x.div_yield).toFixed(1)}%</span>`:''}
         <span class="b bb">ROE ${x.roe||'?'}%</span>
@@ -2010,7 +2048,7 @@ function renderDash(m){
   const exSoon=scores.filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D').slice(0,3);
   const insightsEl=document.getElementById('insights');
   if(insightsEl) insightsEl.innerHTML=[
-    `🏆 <strong style="color:var(--text)">Top 3 :</strong> ${top3.map(x=>x.ticker+' ('+((x.composite_adj||0).toFixed(0))+'/80)').join(', ')}`,
+    `🏆 <strong style="color:var(--text)">Top 3 :</strong> ${top3.map(x=>x.ticker+' ('+((x.composite_adj||0)/80*10).toFixed(1)+'/10)').join(', ')}`,
     highDiv.length?`💰 <strong style="color:var(--text)">Hauts rendements :</strong> ${highDiv.map(x=>x.ticker+' '+x.div_yield.toFixed(1)+'%').join(', ')}`:'',
     exSoon.length?`📅 <strong style="color:var(--text)">Prochains ex-div :</strong> ${exSoon.map(x=>x.ticker+' le '+x.ex_div_date).join(' · ')}`:'',
   ].filter(Boolean).join('<br>');
@@ -2148,7 +2186,7 @@ function _renderDaySignal(sorted) {
       <div style="font-size:11px;color:var(--t1);line-height:1.8">
         <strong style="color:var(--green)">${gainers.length} ↑ haussiers</strong> · <strong style="color:var(--red)">${losers.length} ↓ baissiers</strong> · <strong style="color:var(--t2)">${flat.length} → stables</strong>
         <br><span style="font-size:10px;color:var(--t3)">↑ haussiers = actions dont le cours monte ce jour · ↓ = en baisse · → = inchangé</span>
-        ${topSec ? `<br>Secteur leader : <strong style="color:var(--blue)">${topSec[0]}</strong> (moy. ${(topSec[1].s/topSec[1].n).toFixed(0)}/80)` : ''}
+        ${topSec ? `<br>Secteur leader : <strong style="color:var(--blue)">${topSec[0]}</strong> (moy. ${((topSec[1].s/topSec[1].n)/80*10).toFixed(1)}/10)` : ''}
       </div>
       <!-- Barre de sentiment -->
       <div style="margin-top:8px">
@@ -2174,7 +2212,7 @@ function _renderDaySignal(sorted) {
     <div style="display:flex;flex-direction:column;gap:6px;min-width:150px">
       ${bestScore ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="_openStock('${bestScore.ticker}')">
         <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur score</div>
-        <div style="font-size:13px;font-weight:700;color:var(--green)">${bestScore.ticker} <span style="font-size:11px">${(bestScore.composite_adj||0).toFixed(0)}/80</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--green)">${bestScore.ticker} <span style="font-size:11px">${((bestScore.composite_adj||0)/80*10).toFixed(1)}/10</span></div>
       </div>` : ''}
       ${bestDiv ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 10px;cursor:pointer" onclick="_openStock('${bestDiv.ticker}')">
         <div style="font-size:9px;color:var(--t3);text-transform:uppercase">Meilleur dividende</div>
@@ -2424,7 +2462,7 @@ function renderHeatmap(){
     const sign=chg>0?'+':'';
     const capFmt=cap>1e12?`${(cap/1e12).toFixed(1)}T`:cap>1e9?`${(cap/1e9).toFixed(1)}Md`:`${(cap/1e6).toFixed(0)}M`;
     const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
-    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${sc.toFixed(0)}/80`;
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${(sc/80*10).toFixed(1)}/10`;
     const delay=i*18; // vague d'animation
     return `<div onclick="_openStock('${x.ticker}')"
       title="${tip}"
@@ -2433,7 +2471,7 @@ function renderHeatmap(){
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
       <span style="font-size:${Math.max(8,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
       <span style="font-size:${Math.max(7,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
-      ${sz>=52?`<span style="font-size:${Math.max(6,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${sc.toFixed(0)}/80</span>`:''}
+      ${sz>=52?`<span style="font-size:${Math.max(6,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${(sc/80*10).toFixed(1)}</span>`:''}
     </div>`;
   }).join('');
   // Déclencher animation après inject DOM
@@ -2478,7 +2516,7 @@ function renderOpportunities(){
     if(pb&&pb<1) raisons.push(`P/B<1 (action sous sa valeur comptable)`);
     if(x.pdf_verdict==='POSITIF') raisons.push('rapport annuel positif');
     if((x.score_graham||0)>=7) raisons.push(`Graham validé (${x.score_graham}/10)`);
-    const pourquoi=raisons.length?`Critères : ${raisons.join(' · ')}.`:`Score composite fort (${sc.toFixed(0)}/80).`;
+    const pourquoi=raisons.length?`Critères : ${raisons.join(' · ')}.`:`Score composite fort (${(sc/80*10).toFixed(1)}/10).`;
     const cardId='opp-'+x.ticker;
     return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
@@ -2486,7 +2524,7 @@ function renderOpportunities(){
           <span style="font-weight:700;font-size:14px">${x.ticker}</span>
           ${isUndervalued?'<span style="font-size:9px;background:rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:600">💎 Sous-évaluée</span>':''}
         </div>
-        <span style="font-size:14px;font-weight:700;color:${scC}">${sc.toFixed(0)}/80</span>
+        <span style="font-size:14px;font-weight:700;color:${scC}" data-tip="Score composite sur 8 modèles · /10">${(sc/80*10).toFixed(1)}/10</span>
       </div>
       <div style="font-size:10px;color:var(--t2);margin-bottom:6px;cursor:pointer" onclick="_openStock('${x.ticker}')">${x.name||''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin-bottom:6px">
@@ -2787,8 +2825,12 @@ function loadPortfolio(){
     ? enriched.map(pos => {
         const w = totalValue ? ((pos.value/totalValue)*100).toFixed(1) : 0;
         const gc = pos.gain>=0?'var(--green)':'var(--red)';
+        const sc = (window.scores||[]).find(x=>x.ticker===pos.ticker);
+        const sc10 = sc ? ((sc.composite_adj||0)/80*10).toFixed(1) : '—';
+        const sig = sc?.pdf_verdict || '—';
+        const div = sc?.div_yield ? sc.div_yield.toFixed(1)+'%' : '—';
         return`<tr onclick="_openStock('${pos.ticker}')">
-          <td><strong>${pos.ticker}</strong></td>
+          <td><strong style="cursor:pointer">${pos.ticker}</strong></td>
           <td style="font-size:11px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis">${pos.name||''}</td>
           <td>${pos.shares}</td>
           <td>${fmt(pos.avg_price)}</td>
@@ -2799,7 +2841,10 @@ function loadPortfolio(){
           <td style="color:var(--t2)">${w}%</td>
           <td style="color:var(--amber)">${fmt(Math.round(pos.annual_div))}</td>
           <td style="color:var(--t3);font-size:10px">${pos.date||'—'}</td>
-          <td><button class="btn btn-r" style="font-size:9px;padding:2px 6px" onclick="event.stopPropagation();removePositionLS('${pos.ticker}')">✕</button></td>
+          <td>
+            <button class="btn btn-o" style="font-size:9px;padding:2px 5px;margin-bottom:2px" onclick="event.stopPropagation();_portWhyTicker('${pos.ticker}','${sig}','${sc10}','${div}')">ℹ️</button>
+            <button class="btn btn-r" style="font-size:9px;padding:2px 6px" onclick="event.stopPropagation();removePositionLS('${pos.ticker}')">✕</button>
+          </td>
         </tr>`;
       }).join('')
     : '<tr><td colspan="12" style="text-align:center;color:var(--t2);padding:20px">Aucune position. Ajoutez des actions.</td></tr>';
@@ -2832,6 +2877,41 @@ function loadPortfolio(){
       _portMonthlyTable(positions);
     }).catch(()=>{});
   }
+}
+
+function _portWhyTicker(ticker, signal, score10, divYield) {
+  const sc = (window.scores||[]).find(x => x.ticker === ticker);
+  const reasons = [];
+  if (sc) {
+    if ((sc.div_yield||0) >= 5) reasons.push(`Dividende élevé (${(sc.div_yield).toFixed(1)}%) — revenu passif régulier`);
+    if ((sc.pe_ref||0) > 0 && sc.pe_ref < 15) reasons.push(`P/E attractif (${sc.pe_ref.toFixed(1)}×) — bénéfices peu chers`);
+    if ((sc.score_graham||0) >= 7) reasons.push(`Validé par Graham (${sc.score_graham}/10) — décote sur valeur intrinsèque`);
+    if ((sc.roe||0) >= 15) reasons.push(`ROE fort (${(sc.roe).toFixed(1)}%) — gestion rentable`);
+    if ((sc.pb_ref||0) > 0 && sc.pb_ref < 1) reasons.push(`P/B < 1 — action sous sa valeur comptable`);
+  }
+  const mainReason = reasons.length ? reasons[0] : 'Score composite fort sur 8 modèles d\'analyse';
+  const sigColor = signal.toLowerCase().includes('achet') || signal === 'POSITIF' ? 'var(--green)' : signal.toLowerCase().includes('vend') || signal === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
+  const scoreColor = parseFloat(score10) >= 7.5 ? 'var(--green)' : parseFloat(score10) >= 5 ? 'var(--amber)' : 'var(--red)';
+  const n = document.createElement('div');
+  n.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;max-width:360px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.5)';
+  n.innerHTML = `
+    <div style="font-size:16px;font-weight:700;margin-bottom:14px">ℹ️ Pourquoi <span style="color:var(--blue)">${ticker}</span> ?</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sigColor}22;color:${sigColor}">Signal : ${signal}</span>
+      <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${scoreColor}22;color:${scoreColor}">Score : ${score10}/10</span>
+      <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(251,191,36,.15);color:var(--amber)">Div : ${divYield}</span>
+    </div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+      <strong style="color:var(--text)">Raison principale :</strong> ${mainReason}
+      ${reasons.length > 1 ? `<br><br><em style="font-size:11px;color:var(--t3)">${reasons.slice(1).join(' · ')}</em>` : ''}
+    </div>
+    <button onclick="this.closest('div').remove();document.getElementById('_port-why-overlay').remove()" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 14px;cursor:pointer;color:var(--text);font-size:12px;width:100%">Fermer</button>`;
+  const overlay = document.createElement('div');
+  overlay.id = '_port-why-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.4)';
+  overlay.onclick = () => { n.remove(); overlay.remove(); };
+  document.body.appendChild(overlay);
+  document.body.appendChild(n);
 }
 
 function sharePortfolioURL(){
@@ -3144,7 +3224,7 @@ function renderSectorPage(){
         <div style="display:flex;gap:10px;align-items:center">
           <div style="text-align:center">
             <div style="font-size:9px;color:var(--t3)">Score moy.</div>
-            <div style="font-size:15px;font-weight:700;color:${scoreCol}">${avgScore.toFixed(0)}<span style="font-size:9px;color:var(--t3)">/80</span></div>
+            <div style="font-size:15px;font-weight:700;color:${scoreCol}">${(avgScore/80*10).toFixed(1)}<span style="font-size:9px;color:var(--t3)">/10</span></div>
           </div>
           <div style="text-align:center">
             <div style="font-size:9px;color:var(--t3)">Div. moy.</div>
@@ -3426,7 +3506,7 @@ function simBuildSliders(){
     return`<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
-        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${(x.composite_adj||0).toFixed(0)}/80</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${((x.composite_adj||0)/80*10).toFixed(1)}/10</span>
         <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
       </div>
       <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
@@ -3532,7 +3612,7 @@ function _alertTypeChanged(){
   const lbl = document.getElementById('alertThresholdLabel');
   const inp = document.getElementById('alertThreshold');
   const placeholders = { price:'Ex: 30 000 XOF', score:'Ex: 60 (sur 80)', div_yield:'Ex: 8 (en %)', change_pct:'Ex: 5 (en %)' };
-  if(lbl) lbl.textContent = { price:'Seuil Prix (XOF)', score:'Seuil Score /80', div_yield:'Seuil Div%', change_pct:'Variation %' }[type]||'Seuil';
+  if(lbl) lbl.textContent = { price:'Seuil Prix (XOF)', score:'Seuil Score /10', div_yield:'Seuil Div%', change_pct:'Variation %' }[type]||'Seuil';
   if(inp) inp.placeholder = placeholders[type]||'Seuil';
 }
 
@@ -3550,7 +3630,7 @@ function testAlertNow(){
   const current = stock[field]||0;
   const triggered = direction==='above' ? current>=threshold : current<=threshold;
   const col = triggered?'var(--green)':'var(--amber)';
-  const symbol = { price:'XOF', score:'/80', div_yield:'%', change_pct:'%' }[type]||'';
+  const symbol = { price:'XOF', score:'/10', div_yield:'%', change_pct:'%' }[type]||'';
   if(resEl){
     resEl.style.display='block';
     resEl.innerHTML=`<span style="color:${col}">${triggered?'✅ Alerte déclenchée':'⏳ Pas encore déclenchée'}</span>
@@ -3867,7 +3947,7 @@ function _genVerdict(s){
 
 function _shareStockText(s){
   const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
-    `Score BRVM : ${(s.composite_adj||0).toFixed(0)}/80\n`+
+    `Score BRVM : ${((s.composite_adj||0)/80*10).toFixed(1)}/10\n`+
     `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
     `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× | ':''}`+
     `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% | ':''}`+
@@ -4013,7 +4093,7 @@ async function showStock(ticker){
         <div style="text-align:right">
           <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
           <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
-          <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block">${v.toFixed(0)}/80</span>
+          <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block" data-tip="Score composite sur 8 modèles · /10">${(v/80*10).toFixed(1)}/10</span>
           <div id="live-score-container" style="margin-top:8px"></div>
           <div id="stock-spark-mini" style="margin:6px 0;display:flex;justify-content:flex-end"></div>
           <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
@@ -4046,7 +4126,7 @@ async function showStock(ticker){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
           <div class="ct" style="margin-bottom:0">Scores détaillés — 8 modèles de valorisation</div>
           <div style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:${v>=65?'rgba(74,222,128,.15)':v>=50?'rgba(251,191,36,.15)':'rgba(248,113,113,.15)'};color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">
-            Score ${v.toFixed(0)}/80 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
+            Score ${(v/80*10).toFixed(1)}/10 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:7px">
@@ -4104,7 +4184,7 @@ async function showStock(ticker){
             const sect=s.sector||'';const sc0=s.composite_adj||0;
             const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
             if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
-            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${pv.toFixed(0)}/80</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${(pv/80*10).toFixed(1)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
           })()}
         </div>
       </div>
@@ -4673,8 +4753,8 @@ const _tourSteps = [
     btn: 'Commencer →'
   },
   {
-    title: '🏆 Les scores /80 — comprendre d\'un coup d\'œil',
-    body: 'Chaque société reçoit un <strong>score sur 80 points</strong> calculé par 8 modèles financiers reconnus (Graham, DCF, Buffett…).<br><br>🟢 ≥ 60/80 = Excellente opportunité<br>🟡 40–60/80 = Société correcte<br>🔴 &lt; 40/80 = Prudence recommandée<br><br>Le classement complet est dans l\'onglet <strong>🏆 Classement</strong>.',
+    title: '🏆 Les scores /10 — comprendre d\'un coup d\'œil',
+    body: 'Chaque société reçoit un <strong>score sur 10 points</strong> calculé par 8 modèles financiers reconnus (Graham, DCF, Buffett…).<br><br>🟢 ≥ 7.5/10 = Excellente opportunité<br>🟡 5–7.5/10 = Société correcte<br>🔴 &lt; 5/10 = Prudence recommandée<br><br>Le classement complet est dans l\'onglet <strong>🏆 Classement</strong>.',
     highlight: '#page-dash .g3',
     btn: 'Suivant →'
   },
@@ -4767,7 +4847,7 @@ const _glossTerms = [
   { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
   { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
   { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
-  { term:'Score /80 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) moins une éventuelle pénalité géopolitique. Score ≥ 65 = excellente opportunité, ≥ 50 = bonne société, < 40 = prudence.', ex:'SIBC 68/80 : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9 = 68. Tous les modèles s\'accordent.' },
+  { term:'Score /10 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) ÷ 8, affiché /10. Score ≥ 8.1/10 = excellente opportunité, ≥ 6.25/10 = bonne société, < 5/10 = prudence.', ex:'SIBC 8.5/10 (68/80) : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9 = 68. Tous les modèles s\'accordent.' },
   { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
   { term:'Verdict POSITIF / NEUTRE / NÉGATIF', def:'Résultat de l\'analyse IA (Claude) des rapports annuels de la société. POSITIF = la situation financière est bonne et en amélioration. NEUTRE = stable sans signal fort. NÉGATIF = des points d\'inquiétude identifiés.', ex:'Verdict POSITIF SIBC basé sur : croissance du BNA, dividende stable, faible endettement et bonne gouvernance identifiés dans le rapport annuel.' },
   { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },
@@ -4811,22 +4891,22 @@ const _helpContent = {
     sections: [
       { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
       { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre score sur 80 points. Plus le score est élevé, plus la société est financièrement attractive.' },
-      { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 55/80 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
+      { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 6.9/10 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
       { h: '🌡️ Heatmap BRVM', p: 'Chaque carré = une société. La taille = la capitalisation boursière. La couleur = la performance du jour. Vert vif = forte hausse. Rouge vif = forte baisse.' },
       { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus grandes). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
       { tip: '💡 Que faire ? Cliquez sur n\'importe quel carré de la heatmap ou sur une société dans les podiums pour voir sa fiche détaillée complète.' },
-      { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 68/80, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
+      { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 8.5/10, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
     ]
   },
   rank: {
     title: 'Classement',
     sections: [
-      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /80 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. Au-dessus de 60 = excellente opportunité potentielle.' },
+      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /10 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. Au-dessus de 7.5/10 = excellente opportunité potentielle.' },
       { h: '📊 Les 8 modèles (colonnes G à Tech)', p: '• G = Graham : valeur intrinsèque classique\n• DCF = flux trésorerie actualisés\n• DDM = valorisation par les dividendes\n• EPV = pouvoir de gain normalisé\n• BUF = critères Warren Buffett\n• Rev = taux de croissance implicite\n• Rel = comparaison sectorielle\n• Tech = tendance technique' },
       { h: '📈 Sparklines 30 jours', p: 'Le mini-graphique dans la colonne "30j" montre l\'évolution du cours sur les 30 derniers jours. Ligne verte = hausse globale sur la période, rouge = baisse.' },
       { h: '🔍 Filtres en haut', p: 'Filtrez par secteur (Banque, Industrie…), par critère de tri (Score, Dividende, ROE, P/E), ou par verdict IA (POSITIF / NEUTRE / NÉGATIF).' },
       { tip: '💡 Que faire ? Cliquez sur une ligne pour voir la fiche complète. Cochez les cases à gauche du ticker pour comparer plusieurs sociétés côte-à-côte (bouton "⚖️ Comparer" en bas de la barre).' },
-      { ex: '📌 Exemple : Filtrez "Verdict = POSITIF" + tri "Score /80" → vous verrez les meilleures sociétés validées par l\'IA en haut.' },
+      { ex: '📌 Exemple : Filtrez "Verdict = POSITIF" + tri "Score /10" → vous verrez les meilleures sociétés validées par l\'IA en haut.' },
     ]
   },
   sectors: {
@@ -4834,7 +4914,7 @@ const _helpContent = {
     sections: [
       { h: '📊 Analyse par groupe d\'activité', p: 'La BRVM est divisée en secteurs : Banque, Industrie, Distribution, Agriculture, Énergie, Télécoms, Utilités. Chaque secteur a ses propres cycles économiques.' },
       { h: '📈 Indice sectoriel YTD', p: 'YTD = Year To Date = performance depuis le 1er janvier. Si le secteur Banque affiche +12% YTD, les banques cotées ont globalement gagné 12% depuis janvier.' },
-      { h: '⭐ Score moyen sectoriel', p: 'La moyenne des scores /80 de toutes les sociétés du secteur. Utile pour savoir quels secteurs sont les plus attractifs en ce moment.' },
+      { h: '⭐ Score moyen sectoriel', p: 'La moyenne des scores /10 de toutes les sociétés du secteur. Utile pour savoir quels secteurs sont les plus attractifs en ce moment.' },
       { tip: '💡 Que faire ? Cliquez sur un bouton secteur en haut pour lancer une analyse IA complète de ce secteur — forces, faiblesses, opportunités.' },
     ]
   },
@@ -4956,12 +5036,14 @@ function openHelpDrawer(page) {
   </div>`;
   document.getElementById('help-drawer').classList.add('open');
   document.getElementById('help-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
   _helpOpen = true;
 }
 
 function closeHelpDrawer() {
   document.getElementById('help-drawer').classList.remove('open');
   document.getElementById('help-overlay').style.display = 'none';
+  document.body.style.overflow = '';
   _helpOpen = false;
 }
 
@@ -5008,7 +5090,7 @@ function openCompareModal() {
   if (!rows.length) return;
 
   const kpis = [
-    ['Score /80', x => (x.composite_adj||0).toFixed(0)+'/80', x => x.composite_adj||0, true],
+    ['Score /10', x => ((x.composite_adj||0)/80*10).toFixed(1)+'/10', x => x.composite_adj||0, true],
     ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
     ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
@@ -5169,6 +5251,48 @@ nav = function(id) {
 document.getElementById('changelog-modal').addEventListener('click', function(e) {
   if (e.target === this) this.style.display = 'none';
 });
+
+// ── Floating tooltip (data-tip) ──────────────────────────────────────────────
+(function() {
+  const tip = document.getElementById('floating-tooltip');
+  if (!tip) return;
+  function show(e) {
+    const el = e.currentTarget;
+    tip.innerHTML = el.dataset.tip || '';
+    tip.style.opacity = '1';
+    position(e);
+  }
+  function position(e) {
+    const w = 260, margin = 14;
+    let x = e.clientX + margin;
+    let y = e.clientY + margin;
+    if (x + w > window.innerWidth - 8) x = e.clientX - w - margin;
+    if (y + 100 > window.innerHeight - 8) y = e.clientY - 60;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hide() { tip.style.opacity = '0'; }
+  function attach() {
+    document.querySelectorAll('[data-tip]').forEach(el => {
+      if (el.dataset._tipAttached) return;
+      el.dataset._tipAttached = '1';
+      el.addEventListener('mouseenter', show);
+      el.addEventListener('mousemove', position);
+      el.addEventListener('mouseleave', hide);
+    });
+  }
+  attach();
+  // Re-attach on DOM mutations (for dynamically rendered content)
+  new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
+})();
+
+// ── g-spin safety: auto-hide after 12s ───────────────────────────────────────
+const _origGSpinShow = gSpinShow;
+gSpinShow = function() {
+  _origGSpinShow();
+  clearTimeout(window._gSpinSafety);
+  window._gSpinSafety = setTimeout(gSpinHide, 12000);
+};
 </script>
 
 </body></html>

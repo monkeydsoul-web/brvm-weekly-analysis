@@ -69,7 +69,7 @@ async function _fetchLiveScoreFallback(ticker){
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
       '<div><div style="font-size:11px;color:var(--t2);margin-bottom:3px">Score live '+badge+'</div>'+
       '<div style="font-size:12px">'+price+' <span style="color:'+chgCol+'">'+chgStr+'</span></div></div>'+
-      '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+sc.toFixed(1)+'<span style="font-size:13px;color:var(--t2)">/80</span></div>'+
+      '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+(sc/80*10).toFixed(1)+'<span style="font-size:13px;color:var(--t2)">/10</span></div>'+
       '<div style="font-size:11px;font-weight:600;color:'+col+'">'+tier+'</div></div></div>'+
       '<div style="background:var(--border);border-radius:4px;height:5px;margin-bottom:10px">'+
       '<div style="width:'+(sc/80*100).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+

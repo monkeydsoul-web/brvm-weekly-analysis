@@ -110,7 +110,7 @@ function _prevDrawPortfolios(el) {
                   </div>
                 </div>
                 <span style="font-size:10px;font-weight:600;min-width:34px;text-align:right">${s.weight}%</span>
-                <span style="font-size:9px;color:var(--t2);min-width:52px;text-align:right">score ${s.score.toFixed(0)}</span>
+                <span style="font-size:9px;color:var(--t2);min-width:52px;text-align:right">score ${(s.score/80*10).toFixed(1)}/10</span>
                 <span style="font-size:9px;color:var(--amber);min-width:36px;text-align:right">${(s.div_yield||0).toFixed(1)}%</span>
               </div>`).join('')}
           </div>
@@ -198,7 +198,7 @@ function _prevDrawSignaux(el) {
               <td style="padding:8px;text-align:center">
                 <span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${sigBg[s.signal]||''};color:${sigCol[s.signal]||'var(--t2)'}">${s.emoji} ${s.signal}</span>
               </td>
-              <td style="padding:8px;text-align:right;font-weight:600">${s.score.toFixed(0)}/80</td>
+              <td style="padding:8px;text-align:right;font-weight:600">${(s.score/80*10).toFixed(1)}/10</td>
               <td style="padding:8px;text-align:right">
                 <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
                   <div style="width:40px;background:var(--bg3);border-radius:2px;height:6px">

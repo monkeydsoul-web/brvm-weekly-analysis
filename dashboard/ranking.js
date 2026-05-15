@@ -53,6 +53,7 @@ function renderRankLive() {
       : `<span style="color:var(--t2);font-size:9px">—</span>`;
 
     const v    = x.composite_adj || 0;
+    const v10  = (v / 80 * 10).toFixed(1);
     const chg  = x.change_pct || 0;
     const chgC = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
     const isFav = (window.favorites || []).includes(x.ticker);
@@ -77,6 +78,8 @@ function renderRankLive() {
     const div = x.div_yield && x.div_yield > 0 ? x.div_yield.toFixed(1) + '%' : '—';
 
     const scoreC = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
+    const miniBarW = Math.round(v / 80 * 100);
+    const miniBarC = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
 
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td style="color:var(--t2);white-space:nowrap">${rank} ${badge}</td>
@@ -92,7 +95,10 @@ function renderRankLive() {
       <td style="color:var(--amber)">${div}</td>
       <td style="color:var(--green)">${roe}</td>
       <td>${verdBadge}</td>
-      <td><span style="font-weight:700;color:${scoreC}">${v.toFixed(0)}/80</span></td>
+      <td>
+        <span style="font-weight:700;color:${scoreC}" data-tip="Score composite sur 8 modèles · /10">${v10}/10</span>
+        <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px;width:52px"><div style="height:100%;width:${miniBarW}%;background:${miniBarC};border-radius:2px;transition:width 0.3s"></div></div>
+      </td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k => {
         const sv = x[k] || 0;
         const sc = sv >= 7 ? 'var(--green)' : sv >= 4 ? 'var(--amber)' : 'var(--red)';

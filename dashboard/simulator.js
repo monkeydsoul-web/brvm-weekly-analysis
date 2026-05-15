@@ -78,7 +78,7 @@ function simRender() {
     html += '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block"></span>';
     html += '<span style="font-weight:600;font-size:12px;cursor:pointer" onclick="showStock(\'' + t + '\')">' + t + '</span>';
     html += '<span style="font-size:10px;color:var(--t3)">' + price + '</span>';
-    if (score) html += '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.07)">' + score + '/80</span>';
+    if (score) html += '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.07)">' + (score/80*10).toFixed(1) + '/10</span>';
     html += '</div>';
     html += '<div style="display:flex;align-items:center;gap:8px">';
     html += '<span style="font-size:12px;font-weight:700;color:' + color + ';min-width:36px;text-align:right" id="sim-pct-' + t + '">' + w + '%</span>';

@@ -16,7 +16,7 @@ function initScreener() {
 function runScreener() {
   _screenerSaveFilters();
   const all = window.scores || scores || [];
-  const scoreMin = parseFloat(document.getElementById('sc-score')?.value) || 0;
+  const scoreMin = (parseFloat(document.getElementById('sc-score')?.value) || 0) * 8;
   const peMax    = parseFloat(document.getElementById('sc-pe')?.value)    || Infinity;
   const divMin   = parseFloat(document.getElementById('sc-div')?.value)   || 0;
   const roeMin   = parseFloat(document.getElementById('sc-roe')?.value)   || 0;
@@ -57,7 +57,9 @@ function _renderScreenerTable() {
 
   tbody.innerHTML = _scrResults.map(x => {
     const sc  = x.composite_adj || 0;
+    const sc10 = (sc / 80 * 10).toFixed(1);
     const scC = sc >= 60 ? 'var(--green)' : sc >= 45 ? 'var(--amber)' : 'var(--red)';
+    const scBarW = Math.round(sc / 80 * 100);
     const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
     const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
@@ -78,7 +80,10 @@ function _renderScreenerTable() {
         <div style="font-size:9px;color:var(--t2)">${(x.sector || '').substring(0, 14)}</div>
       </td>
       <td style="font-size:11px;color:var(--t2)">${x.name ? x.name.substring(0, 18) : '—'}</td>
-      <td style="text-align:right;font-weight:700;color:${scC}">${sc.toFixed(0)}</td>
+      <td style="text-align:right">
+        <span style="font-weight:700;color:${scC}">${sc10}/10</span>
+        <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px"><div style="height:100%;width:${scBarW}%;background:${scC};border-radius:2px;transition:width 0.3s"></div></div>
+      </td>
       <td style="text-align:right;color:var(--t1)">${pe}</td>
       <td style="text-align:right;color:var(--t1)">${pb}</td>
       <td style="text-align:right;font-weight:600;color:${dyC}">${dy}</td>
@@ -195,10 +200,10 @@ function _screenerLoadFilters(){
 function screenerPreset(name){
   screenerReset();
   const presets = {
-    value:      { 'sc-score': 45, 'sc-pe': 15, 'sc-pb': 1.5 },
-    croissance: { 'sc-score': 50, 'sc-roe': 15 },
-    revenus:    { 'sc-score': 40, 'sc-div': 5 },
-    defensif:   { 'sc-score': 40, 'sc-pe': 20, 'sc-div': 3, 'sc-roe': 10 },
+    value:      { 'sc-score': 5.5, 'sc-pe': 15, 'sc-pb': 1.5 },
+    croissance: { 'sc-score': 6.5, 'sc-roe': 15 },
+    revenus:    { 'sc-score': 5, 'sc-div': 5 },
+    defensif:   { 'sc-score': 5, 'sc-pe': 20, 'sc-div': 3, 'sc-roe': 10 },
   };
   const p = presets[name] || {};
   Object.entries(p).forEach(([id,val])=>{
@@ -232,12 +237,12 @@ function screenerReset() {
 
 function screenerExportCSV() {
   if (!_scrResults.length) { if(typeof showNotif==='function') showNotif('Aucun résultat à exporter', 'red'); return; }
-  const cols = ['Ticker','Nom','Secteur','Score/80','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Verdict IA','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
+  const cols = ['Ticker','Nom','Secteur','Score/10','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Verdict IA','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
   const rows = _scrResults.map(x => [
     x.ticker,
     (x.name||'').replace(/,/g,''),
     (x.sector||'').replace(/,/g,''),
-    (x.composite_adj||0).toFixed(1),
+    ((x.composite_adj||0)/80*10).toFixed(2),
     x.pe_ref ? x.pe_ref.toFixed(2) : '',
     x.pb_ref ? x.pb_ref.toFixed(2) : '',
     x.div_yield ? x.div_yield.toFixed(2) : '',

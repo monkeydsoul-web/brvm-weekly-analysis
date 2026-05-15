@@ -27,7 +27,7 @@ function renderCompare() {
   if (items.length < 2) return;
 
   const metrics = [
-    ['Score /80',    x => (x.composite_adj||0).toFixed(0),          x => x.composite_adj||0,  true],
+    ['Score /10',    x => ((x.composite_adj||0)/80*10).toFixed(1),   x => x.composite_adj||0,  true],
     ['P/E',         x => x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—', x => -(x.pe_ref||999),    true],
     ['P/B',         x => x.pb_ref ? x.pb_ref.toFixed(1)+'×' : '—', x => -(x.pb_ref||999),    true],
     ['ROE %',       x => x.roe ? x.roe.toFixed(1)+'%' : '—',        x => x.roe||0,             true],
@@ -47,7 +47,7 @@ function renderCompare() {
     <th style="text-align:center;padding:8px 12px;min-width:110px">
       <div style="font-weight:700;font-size:13px">${x.ticker}</div>
       <div style="font-size:10px;color:var(--t2)">${x.name||''}</div>
-      <span style="font-size:11px;font-weight:700;color:${scoreC(x.composite_adj||0)}">${(x.composite_adj||0).toFixed(0)}/80</span>
+      <span style="font-size:11px;font-weight:700;color:${scoreC(x.composite_adj||0)}">${((x.composite_adj||0)/80*10).toFixed(1)}/10</span>
       <button onclick="toggleCompare('${x.ticker}')" style="display:block;margin:4px auto 0;font-size:9px;padding:1px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--t2);cursor:pointer">✕ Retirer</button>
     </th>`).join('');
 
