@@ -47,7 +47,6 @@ function runScreener() {
   }
 
   _renderScreenerTable();
-  _renderScatterPE();
 }
 
 function _renderScreenerTable() {
@@ -110,106 +109,6 @@ function _renderScreenerTable() {
   }).join('');
 }
 
-function _renderScatterPE(){
-  const canvas = document.getElementById('sc-scatter');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-
-  // Données valides (P/E > 0 et Div% > 0)
-  const pts = _scrResults.filter(x=>(x.pe_ref||0)>0&&(x.pe_ref||0)<60&&(x.div_yield||0)>0);
-  const emptyEl = document.getElementById('sc-scatter-empty');
-  const descEl  = document.getElementById('sc-scatter-desc');
-  if(pts.length<5){
-    canvas.style.display='none';
-    if(emptyEl) emptyEl.style.display='block';
-    if(descEl)  descEl.style.display='none';
-    return;
-  }
-  canvas.style.display='';
-  if(emptyEl) emptyEl.style.display='none';
-  if(descEl)  descEl.style.display='';
-
-  // Axe X dynamique — jamais de valeur fixe
-  const rawMax = Math.max(...pts.map(p => p.pe_ref).filter(v => v > 0));
-  const peMax = pts.length === 1 ? rawMax * 2 : (rawMax > 0 ? Math.ceil(rawMax * 1.4) : 20);
-  const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.2||20;
-  const pad={l:40,r:20,t:20,b:35};
-  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
-
-  // Axes
-  ctx.strokeStyle='#374151'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+gH); ctx.lineTo(pad.l+gW,pad.t+gH); ctx.stroke();
-
-  // Zone idéale (P/E<15, Div>5)
-  if(peMax>0 && dyMax>0){
-    const zx=pad.l, zy=pad.t+(1-Math.min(5,dyMax)/dyMax)*gH;
-    const zw=Math.min(15/peMax,1)*gW, zh=gH-(1-Math.min(5,dyMax)/dyMax)*gH;
-    ctx.fillStyle='rgba(34,197,94,0.06)'; ctx.fillRect(zx,zy,zw,zh);
-    ctx.strokeStyle='rgba(34,197,94,0.2)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
-    // Label "Zone idéale"
-    ctx.fillStyle='rgba(34,197,94,0.7)'; ctx.font='8px sans-serif'; ctx.textAlign='left';
-    ctx.fillText('Zone idéale', zx+3, zy+10);
-  }
-  // Ligne verticale pointillée P/E=15 (seuil Graham)
-  if(peMax > 0 && 15 <= peMax){
-    const lx = pad.l + (15/peMax)*gW;
-    ctx.strokeStyle='rgba(251,191,36,0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(lx,pad.t); ctx.lineTo(lx,pad.t+gH); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle='rgba(251,191,36,0.8)'; ctx.font='8px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('P/E 15', lx, pad.t+6);
-  }
-  // Ligne horizontale pointillée Div%=5
-  if(dyMax > 0 && 5 <= dyMax){
-    const ly = pad.t + (1 - 5/dyMax)*gH;
-    ctx.strokeStyle='rgba(251,191,36,0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(pad.l,ly); ctx.lineTo(pad.l+gW,ly); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle='rgba(251,191,36,0.8)'; ctx.font='8px sans-serif'; ctx.textAlign='right';
-    ctx.fillText('5% div', pad.l+gW-2, ly-3);
-  }
-
-  // Labels axes
-  ctx.fillStyle='#9ca3af'; ctx.font='9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('P/E →',pad.l+gW/2, H-5);
-  ctx.save(); ctx.translate(10,pad.t+gH/2); ctx.rotate(-Math.PI/2); ctx.fillText('Div% ↑',0,0); ctx.restore();
-
-  // Graduations X — adaptées au peMax
-  const xTicks = [];
-  const xStep = peMax<=20?5:peMax<=40?10:20;
-  for(let v=0;v<=peMax;v+=xStep) xTicks.push(v);
-  xTicks.forEach(v=>{
-    const x=pad.l+(v/peMax)*gW;
-    ctx.fillStyle='#6b7280'; ctx.textAlign='center'; ctx.fillText(v,x,pad.t+gH+12);
-    ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+gH); ctx.stroke();
-  });
-  [0,5,10,15].filter(v=>v<=dyMax).forEach(v=>{
-    const y=pad.t+(1-v/dyMax)*gH;
-    ctx.fillStyle='#6b7280'; ctx.textAlign='right'; ctx.fillText(v+'%',pad.l-4,y+3);
-    ctx.strokeStyle='#1f2937'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+gW,y); ctx.stroke();
-  });
-
-  // Points — couleurs /10
-  pts.forEach(x=>{
-    const cx=pad.l+Math.min(1,x.pe_ref/peMax)*gW;
-    const cy=pad.t+(1-Math.min(1,(x.div_yield||0)/dyMax))*gH;
-    const sc=x.composite_adj||0;
-    // Seuils /10: ≥7 (56/80) → vert, 5-7 (40-56) → teal, <5 (<40) → rouge
-    const col=sc>=56?'#22c55e':sc>=40?'#2dd4bf':'#f43f5e';
-    ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
-    ctx.fillStyle=col+'cc'; ctx.fill();
-    ctx.strokeStyle=col; ctx.lineWidth=1; ctx.stroke();
-    ctx.fillStyle='#e5e7eb'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
-    ctx.fillText(x.ticker, cx+7, cy+3);
-  });
-
-  // Légende couleurs distinctes
-  ctx.font='9px sans-serif'; ctx.textAlign='left';
-  [['#22c55e','Note ≥ 7/10 · Fort'],['#2dd4bf','Note 5–7/10 · Correct'],['#f43f5e','Note < 5/10 · Faible']].forEach(([c,l],i)=>{
-    ctx.fillStyle=c; ctx.beginPath(); ctx.arc(pad.l+5,pad.t+8+i*14,4,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#9ca3af'; ctx.fillText(l, pad.l+12, pad.t+11+i*14);
-  });
-}
 
 function screenerSortBy(col) {
   if (_scrSort.col === col) {
