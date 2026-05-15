@@ -85,7 +85,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .logo h1{font-size:14px;font-weight:700;color:var(--text-1)}
 .logo p{font-size:9px;color:var(--text-3)}
 .nav{padding:4px 0;border-bottom:1px solid var(--border-1);overflow-y:auto;max-height:calc(100vh - 200px)}
-.ni{display:flex;align-items:center;gap:10px;padding:0 12px;height:34px;cursor:pointer;font-size:13px;color:var(--text-2);border-left:2px solid transparent;transition:all .1s;user-select:none;border-radius:var(--radius-sm);margin:1px 8px}
+.ni{display:flex;align-items:center;gap:8px;padding:0 12px;height:34px;cursor:pointer;font-size:12px;color:var(--text-2);border-left:2px solid transparent;transition:all .1s;user-select:none;border-radius:var(--radius-sm);margin:1px 8px;overflow:hidden}
 .ni:hover{background:var(--bg-overlay);color:var(--text-1)}
 .ni.on{background:var(--accent-dim);color:var(--accent);border-left-color:var(--accent);font-weight:500;padding-left:10px}
 .ni-kbd{margin-left:auto;font-size:9px;color:var(--text-3);background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:3px;padding:1px 4px;font-family:var(--font-mono)}
@@ -376,6 +376,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .sb-sub.collapsed{max-height:0}
 .sb-acc.collapsed .sb-acc-arrow{transform:rotate(-90deg)}
 .ni-sub{padding-left:26px!important;font-size:12px;color:var(--text-2)}
+.ni-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .ni-sub span:first-child{font-size:12px}
 .sb.compact .sb-acc{justify-content:center;padding:10px 0}
 .sb.compact .sb-sub{display:none}
@@ -454,7 +455,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div id="curr-rate" style="font-size:8px;color:var(--text-3);padding:2px 14px 4px" class="compact-hide"></div>
   <nav class="nav">
-    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span><span class="ni-kbd compact-hide">D</span></div>
+    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
@@ -511,9 +512,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
     <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;cursor:pointer;white-space:nowrap" onclick="nav('dash')">BRVM <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Tableau de bord</span></span>
-    <span id="msb-composite" style="color:var(--text-2);white-space:nowrap">BRVM-C <span style="color:var(--text-1)">—</span></span>
-    <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap">BRVM-30 <span style="color:var(--text-1)">—</span></span>
-    <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-family:-apple-system,sans-serif">BOC —</span>
+    <span id="msb-composite" style="color:var(--text-2);white-space:nowrap"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
+    <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
+    <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
   </div>
   <span id="msb-time" style="color:var(--text-3);font-size:11px;white-space:nowrap;font-family:-apple-system,sans-serif">MàJ —</span>
 </div>
@@ -1987,13 +1988,16 @@ function _getNotifContainer(){
   if(!c){c=document.createElement('div');c.id='notif-stack';c.style='position:fixed;top:8px;right:8px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:min(280px,calc(100vw - 240px))';document.body.appendChild(c);}
   return c;
 }
+window._suppressNotifs = true;
+setTimeout(function(){window._suppressNotifs=false;}, 7000);
 function showNotif(msg,color){
+  if(window._suppressNotifs)return;
   var c=_getNotifContainer();
   if(c.children.length>=3){setTimeout(function(){showNotif(msg,color);},3000);return;}
-  var bc=color==='green'?'var(--green)':color==='amber'?'var(--amber)':'var(--red)';
+  var bc=color==='green'?'var(--bull)':color==='amber'?'var(--gold)':'var(--bear)';
   var n=document.createElement('div');
   n.setAttribute('data-tip',msg);
-  n.style='background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease;cursor:default';
+  n.style='background:var(--bg-elevated);border:1px solid '+bc+';border-radius:var(--radius-sm);padding:10px 16px;font-size:12px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:var(--shadow-md);animation:slideInRight .25s ease;cursor:default';
   n.textContent=msg;c.appendChild(n);
   if(typeof _attachTooltip==='function')_attachTooltip(n);
   setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);
