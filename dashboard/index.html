@@ -21,7 +21,7 @@
 }
 /* ══ Reset + base ═══════════════════════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:auto;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:auto;-webkit-font-smoothing:antialiased;font-size:13px;line-height:1.5}
 /* ══ Layout ═════════════════════════════════════════════════════════════════ */
 .app{display:flex;height:100vh}
 .sb{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:transform .25s ease;z-index:500}
@@ -37,6 +37,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .ni:hover{background:rgba(255,255,255,.06);color:var(--text)}
 .ni.on{background:rgba(99,102,241,.15);color:var(--accent);border-left-color:var(--accent);font-weight:600}
 .ni-kbd{margin-left:auto;font-size:9px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-family:monospace}
+.ni-sub>.ni-label:first-of-type{color:var(--t3);font-size:10px}
+.ni.ni-sub span:first-child{font-size:8px;opacity:.4;flex-shrink:0}
 .tl{flex:1;overflow-y:auto;padding:6px 0}
 .tl-h{padding:8px 14px 3px;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center}
 .tb{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;cursor:pointer;font-size:11px;color:var(--t2);background:none;border:none;width:100%}
@@ -52,9 +54,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .ph h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
 .page-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
 /* ══ Grids ══════════════════════════════════════════════════════════════════ */
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 /* ══ Cards + KPIs ═══════════════════════════════════════════════════════════ */
 .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:box-shadow .15s}
 .kpi:hover{box-shadow:var(--shadow)}
@@ -78,11 +80,14 @@ tr:hover td{background:var(--row-hover);cursor:pointer}
 .btn{padding:6px 13px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;min-height:32px}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .btn:active{transform:translateY(0);box-shadow:none}
-.btn-g{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.3)}
-.btn-g:hover{background:rgba(16,185,129,.22)}
-.btn-o{background:transparent;color:var(--t2);border:1px solid var(--border)}
-.btn-o:hover{background:var(--bg3);color:var(--text)}
-.btn-r{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.btn-g{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.btn-g:hover{background:rgba(99,102,241,.85)}
+.btn-o{background:transparent;color:var(--t2);border:1px solid rgba(255,255,255,.15)}
+.btn-o:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.btn-r{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.btn-r:hover{background:rgba(239,68,68,.1)}
+:root.light .btn-o{border-color:rgba(0,0,0,.15)}
+:root.light .btn-o:hover{background:rgba(0,0,0,.04)}
 /* ══ Animations ═════════════════════════════════════════════════════════════ */
 .spin{animation:spin 1s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -403,31 +408,31 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('screener')"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('sectors')"><span>📊</span> <span class="ni-label">Secteurs</span></div>
-      <div class="ni ni-sub" onclick="nav('news')"><span>📰</span> <span class="ni-label">Actualités</span></div>
-      <div class="ni ni-sub" onclick="nav('comm')"><span>🌍</span> <span class="ni-label">Commodités</span></div>
-      <div class="ni ni-sub" onclick="nav('macro')"><span>🏦</span> <span class="ni-label">Macro <abbr data-tip="Union Économique et Monétaire Ouest-Africaine · zone des 8 pays BRVM" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">UEMOA</abbr></span></div>
-      <div class="ni ni-sub" onclick="nav('calendar')"><span>📅</span> <span class="ni-label">Calendrier</span></div>
+      <div class="ni ni-sub" onclick="nav('sectors')"><span>◈</span> <span class="ni-label">Secteurs</span></div>
+      <div class="ni ni-sub" onclick="nav('news')"><span>◈</span> <span class="ni-label">Actualités</span></div>
+      <div class="ni ni-sub" onclick="nav('comm')"><span>◈</span> <span class="ni-label">Commodités</span></div>
+      <div class="ni ni-sub" onclick="nav('macro')"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
+      <div class="ni ni-sub" onclick="nav('calendar')"><span>◈</span> <span class="ni-label">Calendrier</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
-      <div class="ni ni-sub" onclick="nav('analyse')"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
-      <div class="ni ni-sub" onclick="nav('previsions')"><span>🔮</span> <span class="ni-label">Prévisions IA</span></div>
-      <div class="ni ni-sub" onclick="nav('score-custom')"><span>⚖️</span> <span class="ni-label">Score personnalisé</span></div>
-      <div class="ni ni-sub" onclick="nav('targets')"><span>🎯</span> <span class="ni-label">Prix cibles</span></div>
-      <div class="ni ni-sub" onclick="nav('perf')"><span>📈</span> <span class="ni-label">Performances</span></div>
+      <div class="ni ni-sub" onclick="nav('analyse')"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
+      <div class="ni ni-sub" onclick="nav('previsions')"><span>◈</span> <span class="ni-label">Prévisions IA</span></div>
+      <div class="ni ni-sub" onclick="nav('score-custom')"><span>◈</span> <span class="ni-label">Score personnalisé</span></div>
+      <div class="ni ni-sub" onclick="nav('targets')"><span>◈</span> <span class="ni-label">Prix cibles</span></div>
+      <div class="ni ni-sub" onclick="nav('perf')"><span>◈</span> <span class="ni-label">Performances</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Portefeuille &amp; Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
-      <div class="ni ni-sub" onclick="nav('port')"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
-      <div class="ni ni-sub" onclick="nav('sim')"><span>🧮</span> <span class="ni-label">Simulateur div.</span></div>
-      <div class="ni ni-sub" onclick="nav('div')"><span>💰</span> <span class="ni-label">Dividendes</span></div>
+      <div class="ni ni-sub" onclick="nav('port')"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
+      <div class="ni ni-sub" onclick="nav('sim')"><span>◈</span> <span class="ni-label">Simulateur div.</span></div>
+      <div class="ni ni-sub" onclick="nav('div')"><span>◈</span> <span class="ni-label">Dividendes</span></div>
     </div>
     <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-outils')"><span>💬</span> <span class="ni-label">Outils</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-outils">
-      <div class="ni ni-sub" onclick="nav('chat')"><span>💬</span> <span class="ni-label">Chat IA</span></div>
-      <div class="ni ni-sub" onclick="nav('glossaire');initGlossaire()"><span>📚</span> <span class="ni-label">Glossaire</span></div>
+      <div class="ni ni-sub" onclick="nav('chat')"><span>◈</span> <span class="ni-label">Chat IA</span></div>
+      <div class="ni ni-sub" onclick="nav('glossaire');initGlossaire()"><span>◈</span> <span class="ni-label">Glossaire</span></div>
     </div>
   </nav>
   <div class="tl">
@@ -447,11 +452,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button onclick="startTour()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🎓 Revoir le tour guidé</button>
     <button id="eco-mode-btn" onclick="toggleEcoMode()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
     <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left">⟨ Réduire la sidebar</button>
+    <button onclick="showChangelog()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide" data-tip="Historique des mises à jour et nouvelles fonctionnalités">📋 Changelog v9.0</button>
   </div>
-  <div class="status" id="status" style="font-size:9px;padding:4px 8px;line-height:1.6">
-  <div id="live-time" style="color:var(--t3)">MàJ : —</div>
-  <div id="live-src" style="color:var(--t3)">Source : —</div>
-</div>
 </aside>
 <main class="main">
 <!-- Breadcrumb + Market status bar -->
@@ -634,9 +636,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div><h2>Classement complet</h2><p class="page-sub">47 sociétés classées par score composite sur 8 modèles de valorisation</p></div>
     <div style="display:flex;gap:8px">
       <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
-      <select id="fSort" onchange="renderRankLive()">
-        <option value="composite_adj">Score /10</option><option value="div_yield">Dividende</option>
-        <option value="roe">ROE</option><option value="pe_ref">P/E</option>
+      <select id="fSort" onchange="renderRankLive()" title="Trier par...">
+        <option value="composite_adj">Trier : Score</option><option value="div_yield">Trier : Dividende</option>
+        <option value="roe">Trier : ROE</option><option value="pe_ref">Trier : P/E</option>
       </select>
       <select id="fVerdict" onchange="renderRankLive()">
         <option value="">Tous verdicts</option>
@@ -650,25 +652,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
-  <!-- Guide de lecture classement -->
+  <!-- Guide de lecture classement (compact) -->
   <div style="margin-bottom:8px">
-    <button onclick="(function(b){const d=document.getElementById('rank-guide');const open=d.style.display!=='none';d.style.display=open?'none':'block';b.textContent=open?'📖 Guide de lecture du classement ▼':'📖 Guide de lecture ▲';})(this)"
-      style="font-size:10px;color:var(--blue);background:none;border:1px solid var(--blue);border-radius:5px;padding:3px 10px;cursor:pointer">📖 Guide de lecture du classement ▼</button>
-    <div id="rank-guide" style="display:none;margin-top:8px;background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--t2);line-height:1.8;border-left:3px solid var(--blue)">
-      <strong style="color:var(--t1);font-size:12px">Comment lire ce classement ?</strong>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:8px">
-        <div><strong style="color:var(--green)">Score /10</strong> — Note composite issue de 8 modèles de valorisation (<abbr data-tip="Méthode Benjamin Graham · sous-évaluation + solidité financière" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">Graham</abbr>, <abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">DCF</abbr>, <abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">DDM</abbr>, <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">EPV</abbr>, Buffett, Rev.DCF, Relatif, Technique). ≥7.5/10 = excellente opportunité, 5-7.5 = correct, &lt;5 = risqué.</div>
-        <div><strong style="color:var(--t1)">G / D / Dm / E / B / R / Rel / T</strong> — Scores détaillés /10 par modèle. Cliquez "Afficher scores détaillés" pour les voir.</div>
-        <div><strong style="color:var(--t1)">P/E</strong> — Prix / Bénéfice. &lt;15 = bon (Graham), &lt;10 = excellent. Plus le P/E est bas, moins vous payez cher les bénéfices.</div>
-        <div><strong style="color:var(--t1)">P/B</strong> — Prix / Valeur comptable. &lt;1.5 = correct, &lt;1.0 = potentiellement sous-évalué.</div>
-        <div><strong style="color:var(--amber)">Div%</strong> — Rendement du dividende = dividende annuel ÷ cours actuel. ≥4% = solide pour la BRVM.</div>
-        <div><strong style="color:var(--green)"><abbr data-tip="Rentabilité des capitaux propres · plus c'est élevé, plus la société est rentable" style="border-bottom:1px dotted var(--green);cursor:help;text-decoration:none">ROE</abbr></strong> — Rentabilité des capitaux propres. ≥15% = excellente gestion, ≥10% = correcte.</div>
-        <div><strong style="color:var(--t1)">Verdict</strong> — Analyse IA des rapports annuels PDF. ACHETER / NEUTRE / VENDRE.</div>
-        <div><strong style="color:var(--t1)">30j</strong> — Sparkline (mini-graphe) de l'évolution du cours sur 30 jours (données <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">BOC</abbr> officielles).</div>
-        <div><strong style="color:var(--t1)">Var%</strong> — Variation du cours aujourd'hui en %. Vert = hausse, rouge = baisse.</div>
-        <div><strong style="color:var(--blue)">▲/▼</strong> — Badges de mouvement de rang depuis le dernier tri. ▲3 = a gagné 3 places.</div>
-      </div>
-    </div>
+    <span style="font-size:10px;color:var(--accent);cursor:pointer"
+      data-tip="Score /10 : composite 8 modèles · ≥7.5 excellent · P/E : Cours÷Bénéfice &lt;15 idéal · P/B : Cours÷Comptable &lt;1.5 · Div% : rendement annuel · ROE : rentabilité ≥15% · Verdict : analyse IA des PDF · 30j : sparkline cours BOC">
+      ℹ️ Comment lire ce tableau ?</span>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
     <span id="rank-counter" style="font-size:11px;color:var(--t2)">Affichage : — / 47 sociétés</span>
@@ -866,7 +854,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="margin-bottom:0">
       <div class="ct">Profil d'investissement</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
-      <div class="ct" title="Ajustez l'importance de chaque modèle selon votre style d'investissement · 💡 Le total doit faire 100%">Ajuster les poids</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
+        <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
       <div id="weightSliders"></div>
       <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
       <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
@@ -1178,18 +1170,18 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="btn btn-o" onclick="clearChat()">Effacer</button></div>
   <div class="card" style="height:calc(100vh - 220px);display:flex;flex-direction:column">
     <div id="chatMessages" style="flex:1;overflow-y:auto;padding:4px 0">
-      <div class="chat-msg chat-ai">Bonjour ! Je suis votre analyste BRVM. Posez-moi vos questions sur les actions, les scores, les dividendes ou le marché en général.</div>
+      <div class="chat-msg chat-ai">Posez une question sur une société BRVM ou le marché. <span style="font-size:10px;color:var(--muted)">💬 5 échanges mémorisés</span></div>
     </div>
     <div class="chat-input-row">
-      <input id="chatInput" placeholder="Pourquoi SNTS est en tête ? Quel est le meilleur dividende ?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+      <input id="chatInput" placeholder="Ex : Analyse SIBC, meilleures opportunités, top dividendes..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
       <button class="btn btn-g" onclick="sendChat()" id="chatBtn">Envoyer</button>
     </div>
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-      <button class="chat-chip" onclick="quickChat('💎 Quelles sont les meilleures opportunités d\'investissement en ce moment sur la BRVM ?')" title="Questions suggérées pour démarrer rapidement · 💡 L'IA se souvient des 5 derniers échanges">💎 Meilleures opportunités ?</button>
-      <button class="chat-chip" onclick="quickChat('📊 Analyse SIBC pour moi — score, valorisation, dividende et recommandation.')" title="Demande une analyse complète d'une action · score, valorisation, dividende, recommandation">📊 Analyse SIBC</button>
-      <button class="chat-chip" onclick="quickChat('🔮 Quelle est ta prévision pour le marché BRVM dans les prochains mois ?')" title="Demande une vision prospective du marché BRVM">🔮 Prévision marché BRVM ?</button>
-      <button class="chat-chip" onclick="quickChat('💰 Comment investir intelligemment 1 million XOF sur la BRVM ?')" title="Guide personnalisé d'allocation selon votre budget">💰 Investir 1M XOF ?</button>
-      <button class="chat-chip" onclick="quickChat('📈 Quelles sont les actions avec les meilleurs dividendes BRVM en 2025 ?')" title="Top des rendements dividendes disponibles sur la BRVM">📈 Top dividendes 2025</button>
+      <button class="chat-chip" onclick="quickChat('Quelles sont les meilleures opportunités en ce moment ?')">Opportunités</button>
+      <button class="chat-chip" onclick="quickChat('Analyse SIBC — score, dividende, recommandation.')">Analyse SIBC</button>
+      <button class="chat-chip" onclick="quickChat('Prévision marché BRVM prochains mois ?')">Prévision marché</button>
+      <button class="chat-chip" onclick="quickChat('Comment investir 1 million XOF sur la BRVM ?')">Investir 1M XOF</button>
+      <button class="chat-chip" onclick="quickChat('Top dividendes BRVM 2025 ?')">Top dividendes</button>
     </div>
   </div>
 </div>
@@ -1222,10 +1214,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥5/10, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:9px;color:var(--t3)">
-      <span>Score≥5.5/10 · P/E≤15 · P/B≤1.5<br>Sous-évaluation Benjamin Graham</span>
-      <span>Score≥6.5/10 · ROE≥15%<br>Rentabilité et dynamisme</span>
-      <span>Score≥5/10 · Div≥5%<br>Revenus passifs réguliers</span>
-      <span>Score≥5/10 · P/E≤20 · Div≥3%<br>Stabilité et préservation capital</span>
+      <span>P/E &lt; 15 · P/B &lt; 1.5</span>
+      <span>ROE &gt; 15% · Score &gt; 6.5</span>
+      <span>Div &gt; 5% · Score &gt; 5</span>
+      <span>P/E &lt; 20 · Div &gt; 3%</span>
     </div>
   </div>
   <div class="card" style="margin-bottom:12px">
@@ -1465,6 +1457,8 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 
 function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
+function bcls10(v){return v>=7.5?'bg':v>=5.6?'ba':'br'}
+function v10fmt(v){return (v/80*10).toFixed(1)}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
 
 // ── Convertisseur de devises ───────────────────────────────────────────────
@@ -1923,8 +1917,19 @@ function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.set
 function showNotif(msg,color){
   var bc=color==='green'?'var(--green)':color==='amber'?'var(--amber)':'var(--red)';
   var n=document.createElement('div');
-  n.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);max-width:300px;width:max-content;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease';
-  n.textContent=msg;document.body.appendChild(n);setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},3500);
+  n.setAttribute('data-tip',msg);
+  n.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease;cursor:default';
+  n.textContent=msg;document.body.appendChild(n);
+  if(typeof _attachTooltip==='function')_attachTooltip(n);
+  setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},3500);
+}
+
+function showChangelog(){
+  var m=document.createElement('div');
+  m.style='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative"><button onclick="this.closest(\'div\').parentElement.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--t2);font-size:16px;cursor:pointer">✕</button><h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Changelog v9.0</h3><div style="font-size:12px;color:var(--t2);line-height:1.8"><strong style="color:var(--text)">Mai 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Refonte UX complète — footer, sidebar, typographie</li><li>Badges score /10 unifiés partout</li><li>Gauge signal du jour · barre statut marché</li><li>Score personnalisé : indicateur total poids</li><li>Toast notifications avec animation slideInRight</li><li>Skeleton loading · hover buttons</li></ul><strong style="color:var(--text)">Avril 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Tooltips flottants data-tip sur tout le dashboard</li><li>Boutons ← Retour sur toutes les pages secondaires</li><li>Portfolio : modal Pourquoi ce titre ?</li><li>Optimisation Markowitz intégrée</li></ul></div></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+  document.body.appendChild(m);
 }
 
 function showToast(msg, type) {
@@ -2299,7 +2304,7 @@ function _renderDashPortWidget(){
   if (!el) return;
   try {
     const positions = JSON.parse(localStorage.getItem('brvm_portfolio_v2') || '[]');
-    if (!positions.length) return;
+    if (!positions.length) { el.innerHTML = '<div style="text-align:center;padding:16px 8px;color:var(--muted);font-size:12px">Aucune position · <span onclick="nav(\'port\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Ouvrir mon portefeuille →</span></div>'; return; }
     const sc = window.scores || [];
     let totalCost = 0, totalVal = 0;
     const rows = positions.map(p => {
@@ -2333,7 +2338,7 @@ function _renderDashAlertsWidget(){
   if (!el) return;
   try {
     const alerts = JSON.parse(localStorage.getItem('brvm_alerts_v2') || '[]');
-    if (!alerts.length) { if(cnt) cnt.textContent=''; return; }
+    if (!alerts.length) { if(cnt) cnt.textContent=''; el.innerHTML = '<div style="font-size:11px;color:var(--muted)">Aucune alerte — <span onclick="nav(\'alerts\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Ajouter des alertes →</span></div>'; return; }
     const sc = window.scores || [];
     const enriched = alerts.map(a => {
       const live = sc.find(x => x.ticker === a.ticker);
@@ -2361,7 +2366,7 @@ async function _renderDashAgendaWidget(){
     const events = _calEvents || await fetch('/api/calendar').then(r=>r.json()).then(d=>{_calEvents=d;return d;}).catch(()=>[]);
     const today = new Date().toISOString().slice(0,10);
     const upcoming = events.filter(e => (e.date||'') >= today).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
-    if (!upcoming.length) { el.innerHTML = '<p style="font-size:11px;color:var(--t3)">Aucun événement à venir.</p>'; return; }
+    if (!upcoming.length) { el.innerHTML = '<div style="font-size:11px;color:var(--muted)">Aucun événement proche — <span onclick="nav(\'calendar\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Calendrier complet →</span></div>'; return; }
     el.innerHTML = upcoming.map(e => {
       const col = e.color || '#FBBF24';
       const d = e.date ? new Date(e.date+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '?';
@@ -2568,7 +2573,7 @@ function renderOpportunities(){
   }
   opps=opps.sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0)).slice(0,3);
   if(!opps.length){
-    el.innerHTML='<p style="color:var(--t2);font-size:12px;grid-column:1/-1">Aucune opportunité selon les critères actuels (Score≥55, Div≥5%, P/E<10).</p>';
+    el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px 16px;color:var(--muted);font-size:12px">💎 Aucune opportunité strict actuellement · <span onclick="nav(\'screener\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Explorer le screener →</span></div>';
     return;
   }
   el.innerHTML=opps.map(x=>{
@@ -2709,7 +2714,7 @@ function loadSidebar(){
       <input type="checkbox" class="cmp-cb" data-ticker="${x.ticker}" ${checked} title="Comparer" onchange="toggleCompare('${x.ticker}')" style="flex-shrink:0"/>
       <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 3px 0 0">★</button>
       <span onclick="_openStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
-      <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v.toFixed(0)}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v10fmt(v)}</span>
     </div>`;}).join('');
 }
 
@@ -2721,7 +2726,7 @@ function filterSidebar(q){
     const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
     return`<button class="tb" onclick="_openStock('${x.ticker}')">
       <span style="font-weight:600;font-size:11px">${x.ticker}</span>
-      <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v.toFixed(0)}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v10fmt(v)}</span>
     </button>`;}).join('');
 }
 
@@ -2808,8 +2813,8 @@ function renderRank(){
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="color:var(--green)">${x.roe||'—'}%</td>
       <td><span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${x.pdf_verdict||'—'}</span></td>
-      <td><span class="b ${bcls(v)}">${v.toFixed(0)}</span></td>
-      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(0)}</td>`;}).join('')}
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Score composite /10 · ≥7.5 excellent · 5–7.5 correct · <5 risqué">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
       <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+📦</button></td>
     </tr>`;}).join('');
   // Masquer par défaut les colonnes avancées
@@ -3290,9 +3295,9 @@ function renderSectorPage(){
     const top3html = top3.map(x=>{
       const sc=x.composite_adj||0;
       const col=sc>=60?'var(--green)':sc>=45?'var(--amber)':'var(--red)';
-      return `<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${sc.toFixed(0)}</span></span>`;
+      return `<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${v10fmt(sc)}</span></span>`;
     }).join('');
-    const flophtml = flop.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:rgba(248,113,113,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${(x.composite_adj||0).toFixed(0)}</span>`).join('');
+    const flophtml = flop.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:rgba(239,68,68,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${v10fmt(x.composite_adj||0)}</span>`).join('');
 
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
@@ -3479,7 +3484,7 @@ async function renderTargets(){
       <td style="color:var(--t2)">${t.pb_target?fmtXOF(t.pb_target):'—'}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}">${up?up.toFixed(1)+'%':'—'}</td>
-      <td><span class="b ${bcls(t.score||0)}">${(t.score||0).toFixed(0)}</span></td>
+      <td><span class="b ${bcls10(v10fmt(t.score||0))}">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td><span class="b ${vb}" style="font-size:9px">${t.verdict||''}</span></td>
     </tr>`;}).join('');
 }
@@ -3500,15 +3505,27 @@ function setProfile(name){
     applyCustomScores();
   });
 }
+function _updateWeightTotalBadge(){
+  const keys=['graham','dcf','ddm','epv','buffett','rev_dcf','relatif','technique'];
+  const total=keys.reduce((s,k)=>s+(customWeights[k]||1),0);
+  const badge=document.getElementById('weight-total-badge');
+  if(!badge)return;
+  const isEven=Math.abs(total-8)<0.01;
+  badge.textContent='Total : '+total.toFixed(1);
+  badge.style.background=isEven?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)';
+  badge.style.color=isEven?'var(--green)':'var(--amber)';
+}
 function renderWeightSliders(){
   const keys=['graham','dcf','ddm','epv','buffett','rev_dcf','relatif','technique'];
+  const labels={graham:'Graham',dcf:'DCF',ddm:'DDM',epv:'EPV',buffett:'Buffett',rev_dcf:'Rev.DCF',relatif:'Relatif',technique:'Technique'};
   document.getElementById('weightSliders').innerHTML=keys.map(k=>`
     <div class="weight-row">
-      <span class="weight-label">${k}</span>
+      <span class="weight-label">${labels[k]||k}</span>
       <input type="range" min="0" max="3" step="0.5" value="${customWeights[k]||1}" style="flex:1"
-        oninput="customWeights['${k}']=parseFloat(this.value);document.getElementById('wv_${k}').textContent=this.value">
+        oninput="customWeights['${k}']=parseFloat(this.value);document.getElementById('wv_${k}').textContent=this.value;_updateWeightTotalBadge()">
       <span class="weight-val" id="wv_${k}">${customWeights[k]||1}</span>
     </div>`).join('');
+  _updateWeightTotalBadge();
 }
 async function applyCustomScores(){
   const result=await fetch('/api/scores/custom',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(customWeights)}).then(r=>r.json());
@@ -3518,9 +3535,9 @@ async function applyCustomScores(){
     return`<tr onclick="_openStock('${x.ticker}')">
       <td>${i+1}</td><td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px">${x.name||''}</td>
-      <td style="color:var(--t2)">${(x.composite_adj||0).toFixed(0)}</td>
-      <td style="font-weight:600;color:${col(x.composite_custom)}">${x.composite_custom.toFixed(0)}</td>
-      <td style="color:${dc}">${diff>=0?'+':''}${diff.toFixed(1)}</td>
+      <td style="color:var(--t2)">${v10fmt(x.composite_adj||0)}/10</td>
+      <td style="font-weight:600;color:${col(x.composite_custom)}">${v10fmt(x.composite_custom)}/10</td>
+      <td style="color:${dc}">${diff>=0?'+':''}${(diff/80*10).toFixed(2)}</td>
     </tr>`;}).join('');
 }
 
@@ -3676,7 +3693,7 @@ function simCalc(){
       <td style="color:var(--amber);font-weight:600">${p.dy_pct.toFixed(2)}%</td>
       <td style="color:var(--green);font-weight:700">${fmtXOF(Math.round(p.div_yr1))}</td>
       <td style="color:var(--t3);font-size:10px">${p.ex_div}</td>
-      <td><span class="b ${bcls(p.score)}">${p.score.toFixed(0)}</span></td>
+      <td><span class="b ${bcls10(p.score/80*10)}">${v10fmt(p.score)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
     </tr>`).join('');
   }
 
@@ -3880,7 +3897,7 @@ function renderComm(){
       <td style="font-size:11px;color:var(--t2)">${ci.prod}</td>
       <td><span class="ctag"><span class="cdot" style="background:${ci.col}"></span>${ci.com[0]}</span></td>
       <td style="color:${ec};font-weight:600">${ci.exp}</td>
-      <td><span class="b ${bcls(v)}">${v.toFixed(0)}</span></td></tr>`;}).join('');
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Score /10">${v10fmt(v)}/10</span></td></tr>`;}).join('');
 }
 
 // ── Chat IA ────────────────────────────────────────────────────────────────
