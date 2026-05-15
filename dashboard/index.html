@@ -4596,7 +4596,7 @@ function renderCorrelMatrix() {
   // Extraire les rendements journaliers BOC (30 derniers points)
   const returns = {};
   top.forEach(t => {
-    const pts = (ph[t] || []).filter(p => p.source === 'boc' && p.price).slice(-31);
+    const pts = (ph[t] || []).filter(p => p.price).slice(-31);
     if (pts.length < 3) return;
     const r = [];
     for (let i = 1; i < pts.length; i++) {
