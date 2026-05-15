@@ -1442,9 +1442,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <span id="sc-count" style="font-size:12px;color:var(--t2);font-weight:600">— résultats</span>
+      <div id="sc-count"><span style="font-size:15px;font-weight:700;color:var(--accent)">—</span> <span style="font-size:12px;color:var(--text-2)">sociétés correspondent à vos critères</span></div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span style="font-size:10px;color:var(--t3)">Cocher des actions ou IA prend les 6 premiers</span>
         <button id="sc-ai-btn" onclick="screenerAnalyseAI()"
           style="padding:6px 12px;background:linear-gradient(135deg,#8B5CF6,#60A5FA);border:none;border-radius:6px;color:#fff;font-weight:700;font-size:11px;cursor:pointer">
           🤖 Analyser avec IA</button>
@@ -1455,9 +1454,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="padding:0;overflow-x:auto;margin-bottom:12px">
     <table style="width:100%">
       <thead id="screener-thead"><tr style="font-size:10px;color:var(--t3);background:var(--bg3)">
-        <th style="padding:8px 12px;text-align:left">Action</th>
+        <th style="padding:8px 12px;text-align:left">Ticker</th>
         <th style="padding:8px 12px;text-align:left">Société</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10<span class="sort-ind"> ↓</span></th>
+        <th style="padding:8px 12px;text-align:right" title="Prix cible estimé selon Graham ou EPV · vert = cours sous la cible">Cible</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pb_ref" onclick="screenerSortBy('pb_ref')" title="Cours ÷ valeur comptable · Bon signe : ≤ 1.5">P/B<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
@@ -1469,17 +1469,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     </table>
   </div>
   <div id="sc-ai-result" class="card" style="display:none"></div>
-  <div class="card" style="margin-top:10px">
-    <div class="ct" style="margin-bottom:8px">📈 Scatter P/E vs Rendement Div%</div>
-    <div style="font-size:10px;color:var(--t2);margin-bottom:6px">Chaque point = une action dans les résultats. Zone idéale : P/E &lt; 15 et Div &gt; 5%</div>
-    <div id="sc-scatter-wrap" style="position:relative">
+  <div class="card" id="sc-scatter-card" style="margin-top:10px">
+    <div class="ct" style="margin-bottom:8px">📊 Distribution P/E vs Dividende</div>
+    <div id="sc-scatter-desc" style="font-size:10px;color:var(--t2);margin-bottom:6px">Chaque point = une action dans les résultats. Zone idéale : P/E &lt; 15 et Div &gt; 5%</div>
+    <div id="sc-scatter-empty" style="display:none;padding:16px;text-align:center;color:var(--text-3);font-size:12px">
+      📊 Élargissez vos filtres pour voir le graphique P/E vs Dividende (min. 5 sociétés requises)
+    </div>
+    <div id="sc-scatter-wrap">
       <canvas id="sc-scatter" width="600" height="260" style="width:100%;max-height:260px"></canvas>
-      <div id="sc-scatter-empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:var(--bg-elevated);border-radius:var(--radius-md)">
-        <div style="text-align:center;padding:24px 16px;color:var(--text-3);font-size:12px;border:1px dashed var(--border-1);border-radius:var(--radius-md);margin:8px">
-          📊 Le graphique s'affiche avec au moins 5 sociétés dans les résultats.<br>
-          <span style="font-size:11px;margin-top:4px;display:block">Élargissez vos filtres pour voir la distribution P/E vs Dividende.</span>
-        </div>
-      </div>
     </div>
   </div>
 </div>

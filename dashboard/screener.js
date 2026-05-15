@@ -40,7 +40,11 @@ function runScreener() {
   });
 
   const count = document.getElementById('sc-count');
-  if (count) count.textContent = `${_scrResults.length} résultat${_scrResults.length !== 1 ? 's' : ''}`;
+  if (count) {
+    const numSpan = count.querySelector('span:first-child');
+    if (numSpan) numSpan.textContent = _scrResults.length;
+    else count.innerHTML = `<span style="font-size:15px;font-weight:700;color:var(--accent)">${_scrResults.length}</span> <span style="font-size:12px;color:var(--text-2)">sociétés correspondent à vos critères</span>`;
+  }
 
   _renderScreenerTable();
   _renderScatterPE();
@@ -51,9 +55,11 @@ function _renderScreenerTable() {
   if (!tbody) return;
 
   if (!_scrResults.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--t2);padding:20px">Aucun résultat — ajustez les filtres.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--t2);padding:20px">Aucun résultat — ajustez les filtres.</td></tr>';
     return;
   }
+
+  const showSector = !document.getElementById('sc-sect')?.value;
 
   tbody.innerHTML = _scrResults.map(x => {
     const sc  = x.composite_adj || 0;
@@ -70,27 +76,35 @@ function _renderScreenerTable() {
     const roe = x.roe ? x.roe + '%' : '—';
     const verd = x.pdf_verdict || '—';
     const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
+    // Prix cible Graham ou EPV
+    const eps = x.eps || 0; const bvpa = x.bvpa || 0;
+    const grahamT = (eps > 0 && bvpa > 0) ? Math.round(Math.sqrt(22.5 * eps * bvpa)) : 0;
+    const epvT = eps > 0 ? Math.round(eps / 0.10) : 0;
+    const target = grahamT || epvT;
+    const price = x.price || 0;
+    const targetStr = target > 0 ? target.toLocaleString('fr-FR') + ' XOF' : '—';
+    const targetC = target > 0 && price > 0 ? (price < target ? 'var(--bull)' : 'var(--bear)') : 'var(--text-2)';
+    const targetArrow = target > 0 && price > 0 ? (price < target ? ' ↑' : ' ↓') : '';
 
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="checkbox" class="sc-chk" value="${x.ticker}" onclick="event.stopPropagation()">
-          <strong>${x.ticker}</strong>
-        </div>
-        <div style="font-size:9px;color:var(--t2)">${(x.sector || '').substring(0, 14)}</div>
+      <td style="padding:8px 12px">
+        <strong style="font-size:12px">${x.ticker}</strong>
+        ${showSector ? `<div style="font-size:9px;color:var(--t2)">${(x.sector || '').substring(0, 14)}</div>` : ''}
       </td>
-      <td style="font-size:11px;color:var(--t2)">${x.name ? x.name.substring(0, 18) : '—'}</td>
-      <td style="text-align:right">
+      <td style="padding:8px 12px;font-size:11px;color:var(--t2)">${x.name ? x.name.substring(0, 20) : '—'}</td>
+      <td style="padding:8px 12px;text-align:right">
         <span style="font-weight:700;color:${scC}">${sc10}/10</span>
-        <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px"><div style="height:100%;width:${scBarW}%;background:${scC};border-radius:2px;transition:width 0.3s"></div></div>
+        <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px"><div style="height:100%;width:${scBarW}%;background:${scC};border-radius:2px"></div></div>
       </td>
-      <td style="text-align:right;color:var(--t1)">${pe}</td>
-      <td style="text-align:right;color:var(--t1)">${pb}</td>
-      <td style="text-align:right;font-weight:600;color:${dyC}">${dy}</td>
-      <td style="text-align:right;color:var(--t2)">${roe}</td>
-      <td style="text-align:right;color:${chgC};font-weight:600">${chgS}</td>
-      <td style="text-align:center">
+      <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${target>0?'600':'400'}">${targetStr}${targetArrow}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pe}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pb}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:600;color:${dyC}">${dy}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--t2)">${roe}</td>
+      <td style="padding:8px 12px;text-align:right;color:${chgC};font-weight:600">${chgS}</td>
+      <td style="padding:8px 12px;text-align:center;white-space:nowrap">
         <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${verd==='POSITIF'?'rgba(74,222,128,0.15)':verd==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${verd}</span>
+        <button onclick="event.stopPropagation();showStock('${x.ticker}')" style="background:none;border:1px solid var(--border-1);color:var(--text-2);font-size:11px;padding:2px 7px;border-radius:var(--radius-sm);cursor:pointer;margin-left:4px">Fiche →</button>
       </td>
     </tr>`;
   }).join('');
@@ -106,13 +120,16 @@ function _renderScatterPE(){
   // Données valides (P/E > 0 et Div% > 0)
   const pts = _scrResults.filter(x=>(x.pe_ref||0)>0&&(x.pe_ref||0)<60&&(x.div_yield||0)>0);
   const emptyEl = document.getElementById('sc-scatter-empty');
+  const descEl  = document.getElementById('sc-scatter-desc');
   if(pts.length<5){
     canvas.style.display='none';
-    if(emptyEl){emptyEl.style.display='flex';}
+    if(emptyEl) emptyEl.style.display='block';
+    if(descEl)  descEl.style.display='none';
     return;
   }
   canvas.style.display='';
-  if(emptyEl){emptyEl.style.display='none';}
+  if(emptyEl) emptyEl.style.display='none';
+  if(descEl)  descEl.style.display='';
 
   // Axe X dynamique — jamais de valeur fixe
   const rawMax = Math.max(...pts.map(p => p.pe_ref).filter(v => v > 0));
