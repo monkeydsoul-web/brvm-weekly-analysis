@@ -81,7 +81,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .main>:not(#app-footer):not(#breadcrumb){flex:1}
 #breadcrumb{flex:none}
 /* ══ Sidebar ════════════════════════════════════════════════════════════════ */
-.logo{padding:14px 16px 10px;border-bottom:1px solid var(--border-1);display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.logo{display:flex;flex-direction:column;border-bottom:1px solid var(--border-1);margin-bottom:4px}
 .logo h1{font-size:14px;font-weight:700;color:var(--text-1)}
 .logo p{font-size:9px;color:var(--text-3)}
 .nav{padding:4px 0;border-bottom:1px solid var(--border-1);overflow-y:auto;max-height:calc(100vh - 200px)}
@@ -286,8 +286,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .tt[data-tt]:hover::after{opacity:1}
 .tt-r[data-tt]::after{left:auto;right:0;transform:none}
 /* ── Convertisseur devise ────────────────────────────────────────────────── */
-.curr-btn{font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .1s}
-.curr-btn.on{background:var(--border);color:var(--text);font-weight:600}
+.curr-btn{font-size:11px;font-weight:600;padding:3px 0;border-radius:4px;border:1px solid var(--border-1);background:var(--bg-overlay);color:var(--text-2);cursor:pointer;transition:all .1s;flex:1;min-width:44px;text-align:center}
+.curr-btn.on{background:var(--accent);color:#0d1117;border-color:var(--accent)}
 /* ── Heatmap filtres ─────────────────────────────────────────────────────── */
 .hf-btn{font-size:10px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s}
 .hf-btn:hover{background:var(--bg3);color:var(--text)}
@@ -436,27 +436,30 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div id="mob-overlay" onclick="toggleMobMenu()"></div>
 <aside class="sb">
   <div class="logo">
-    <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:14px;font-weight:700;color:var(--text-1)">BRVM</div>
-      <div style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
-        <span>Analyzer</span>
-        <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:rgba(34,197,94,0.15);color:#22c55e;padding:1px 6px;border-radius:10px;font-weight:600">
-          <span id="live-dot" style="width:5px;height:5px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
-          <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
-        </span>
+    <!-- Ligne 1 : logo + titre + bouton lune -->
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 8px">
+      <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:var(--text-1);line-height:1.2">BRVM</div>
+        <div style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
+          <span>Analyzer</span>
+          <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:rgba(34,197,94,0.15);color:#22c55e;padding:1px 6px;border-radius:10px;font-weight:600">
+            <span id="live-dot" style="width:5px;height:5px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
+            <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
+          </span>
+        </div>
       </div>
+      <button onclick="toggleTheme()" class="compact-hide" style="margin-left:auto;flex-shrink:0;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm);color:var(--text-2);padding:3px 7px;font-size:13px;cursor:pointer;line-height:1" title="Thème">🌙</button>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
-      <button class="btn-o btn compact-hide" onclick="toggleTheme()" style="padding:3px 6px;font-size:10px;min-height:0" title="Thème">🌙</button>
-      <div style="display:flex;align-items:center;gap:1px" class="compact-hide">
-        <button id="cb-xof" class="curr-btn on" onclick="setCurrency('XOF')">XOF</button>
-        <button id="cb-eur" class="curr-btn" onclick="setCurrency('EUR')">EUR</button>
-        <button id="cb-usd" class="curr-btn" onclick="setCurrency('USD')">USD</button>
-      </div>
+    <!-- Ligne 2 : boutons devises -->
+    <div style="display:flex;gap:4px;padding:0 14px 10px" class="compact-hide">
+      <button id="cb-xof" class="curr-btn on" onclick="setCurrency('XOF')">XOF</button>
+      <button id="cb-eur" class="curr-btn" onclick="setCurrency('EUR')">EUR</button>
+      <button id="cb-usd" class="curr-btn" onclick="setCurrency('USD')">USD</button>
     </div>
+    <!-- Ligne 3 : taux de change -->
+    <div id="curr-rate" style="padding:0 14px 10px;font-size:10px;color:var(--text-3)" class="compact-hide"></div>
   </div>
-  <div id="curr-rate" style="font-size:8px;color:var(--text-3);padding:2px 14px 4px" class="compact-hide"></div>
   <nav class="nav">
     <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
