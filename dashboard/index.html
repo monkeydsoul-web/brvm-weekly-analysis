@@ -466,11 +466,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('sectors')" data-tip="Comparez les performances par secteur économique · utile pour diversifier votre portefeuille"><span>◈</span> <span class="ni-label">Secteurs</span></div>
       <div class="ni ni-sub" onclick="nav('news')" data-tip="Dernières nouvelles des sociétés BRVM avec analyse automatique du sentiment (positif/négatif)"><span>◈</span> <span class="ni-label">Actualités</span></div>
       <div class="ni ni-sub" onclick="nav('comm')" data-tip="Impact des prix des matières premières (pétrole, cacao, or) sur les sociétés BRVM"><span>◈</span> <span class="ni-label">Commodités</span></div>
       <div class="ni ni-sub" onclick="nav('macro')" data-tip="Indicateurs économiques de la zone UEMOA : taux d'intérêt, croissance, risque pays"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
-      <div class="ni ni-sub" onclick="nav('calendar')" data-tip="Dates des assemblées générales et événements importants des sociétés BRVM"><span>◈</span> <span class="ni-label">Calendrier</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
@@ -573,7 +571,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div class="ct" style="margin:0" id="dash-agenda-title" title="Événements de la semaine ou données marché en temps réel">📅 Agenda</div>
-        <span onclick="nav('calendar');renderCalendarPage()" style="font-size:9px;color:var(--accent);cursor:pointer">→ Calendrier</span>
       </div>
       <div id="dash-agenda-widget">
         <p style="font-size:11px;color:var(--t3)">Chargement...</p>
@@ -608,7 +605,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="margin-bottom:12px" id="dividendes-venir-widget">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="ct" style="margin:0">📅 Prochains détachements de dividendes</div>
-      <button class="btn btn-o" style="font-size:10px;padding:3px 8px" onclick="nav('calendar');renderCalendarPage()">Calendrier →</button>
     </div>
     <div id="dividendes-venir-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
   </div>
@@ -761,21 +757,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <!-- SECTEURS -->
-<div class="page" id="page-sectors">
-  <div class="ph">
-    <div><h2>📊 Analyse sectorielle</h2><p class="page-sub">Répartition · scores moyens par secteur · indices BRVM sectoriels</p></div>
-  </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Chaque secteur affiche sa performance depuis le 1er janvier<br>
-      · Cliquez sur "Analyse IA" pour obtenir une synthèse du secteur<br>
-      · Comparez les secteurs pour identifier lesquels surperforment
-    </div>
-  </details>
-  <div id="sectorContent"><p style="color:var(--t2)">Chargement...</p></div>
-</div>
-
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
@@ -1277,37 +1258,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
 </div>
 
-<!-- CALENDRIER BRVM -->
-<div class="page" id="page-calendar">
-  <div class="ph">
-    <div><h2>📅 Calendrier BRVM</h2><p class="page-sub">Ex-dividendes · assemblées générales · résultats à venir</p></div>
-    <div style="display:flex;gap:8px">
-      <button class="chat-chip" id="cal-btn-list" onclick="calSetView('list')" style="background:var(--blue);color:#fff" title="Vue chronologique de tous les événements BRVM à venir">Liste</button>
-      <button class="chat-chip" id="cal-btn-month" onclick="calSetView('month')" title="Vue mensuelle — basculez entre liste et calendrier visuel">Mois</button>
-    </div>
-  </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · AG = Assemblée Générale : vote des actionnaires sur les dividendes<br>
-      · Les dates en rouge = déjà passées · En vert = à venir<br>
-      · Cliquez sur un événement pour voir les détails
-    </div>
-  </details>
-  <!-- Légende -->
-  <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)" title="Assemblées Générales confirmées avec date officielle · Vote sur dividendes et stratégie"><span style="width:10px;height:10px;border-radius:2px;background:#60A5FA;display:inline-block"></span>Assemblée Générale</span>
-    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)" title="Date à partir de laquelle acheter l'action ne donne plus droit au prochain dividende · 💡 Il faut posséder l'action AVANT cette date"><span style="width:10px;height:10px;border-radius:2px;background:#4ADE80;display:inline-block"></span>Ex-dividende</span>
-    <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#FBBF24;display:inline-block"></span>Résultats / Autre</span>
-  </div>
-  <div id="cal-list-view">
-    <div id="calEventsList"><p style="color:var(--t2)">Chargement...</p></div>
-  </div>
-  <div id="cal-month-view" style="display:none">
-    <div id="calMonthGrid"></div>
-  </div>
-</div>
-
 <!-- COMMODITÉS -->
 <div class="page" id="page-comm">
   <div class="ph"><div><h2>Commodités internationales</h2><p class="page-sub">Or · pétrole · cacao · coton · matières premières liées à l'UEMOA</p></div>
@@ -1625,7 +1575,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/compare.js"></script>
 <script src="/alerts.js"></script>
 <script src="/screener.js"></script>
-<script src="/sectors.js"></script>
 <script src="/performance.js"></script>
 <script src="/compare_analysis.js"></script>
 <script src="/backtest.js"></script>
@@ -1748,7 +1697,6 @@ let _gsIdx = -1;
 const _PAGES = [
   {id:'dash',  icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
   {id:'rank',  icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
-  {id:'sectors',icon:'📊',label:'Secteurs',            desc:'Analyse par secteur BRVM'},
   {id:'screener',icon:'🔍',label:'Screener',           desc:'Filtres avancés P/E, score, dividende'},
   {id:'port',  icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
   {id:'sim',   icon:'🧮', label:'Simulateur dividendes',desc:'Projection revenus, Markowitz'},
@@ -2535,7 +2483,7 @@ async function _renderDashAgendaWidget(){
   const el = document.getElementById('dash-agenda-widget');
   if (!el) return;
   try {
-    const events = _calEvents || await fetch('/api/calendar').then(r=>r.json()).then(d=>{_calEvents=d;return d;}).catch(()=>[]);
+    const events = await fetch('/api/calendar').then(r=>r.json()).catch(()=>[]);
     const today = new Date().toISOString().slice(0,10);
     const upcoming = events.filter(e => (e.date||'') >= today).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
     if (!upcoming.length) {
@@ -3436,99 +3384,6 @@ function navToRank(ticker){
 
 // (portfolio remplacé par localStorage ci-dessus)
 
-// ── Secteurs ────────────────────────────────────────────────────────────────
-function renderSectorPage(){
-  const all = window.scores || scores || [];
-  if(!all.length){ document.getElementById('sectorContent').innerHTML='<p style="color:var(--t2)">Données indisponibles.</p>'; return; }
-
-  // Grouper par secteur
-  const byS = {};
-  all.forEach(x=>{
-    const s = x.sector || 'Autre';
-    if(!byS[s]) byS[s] = [];
-    byS[s].push(x);
-  });
-  const sectors = Object.keys(byS).sort();
-
-  // Bar chart YTD par secteur (var_annee moyenne)
-  const ytdData = sectors.map(s=>{
-    const vals = byS[s].map(x=>x.var_annee||0).filter(v=>v!==0);
-    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
-  });
-  const maxYTD = Math.max(...ytdData.map(Math.abs), 1);
-
-  const chartBars = sectors.map((s,i)=>{
-    const v = ytdData[i];
-    const pct = Math.round(Math.abs(v)/maxYTD*100);
-    const col = v>=0?'var(--green)':'var(--red)';
-    const sign = v>=0?'+':'';
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer" onclick="_sectorInvest('${s}')">
-      <div style="width:90px;font-size:10px;color:var(--t2);text-align:right;flex-shrink:0">${s.length>14?s.slice(0,13)+'…':s}</div>
-      <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;overflow:hidden">
-        <div style="width:${pct}%;height:100%;background:${col};border-radius:3px;transition:width .4s"></div>
-      </div>
-      <div style="width:48px;text-align:right;font-size:11px;font-weight:700;color:${col}">${sign}${v.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
-
-  // Carte par secteur avec top3 + flop1
-  const sectorCards = sectors.map(s=>{
-    const stocks = byS[s];
-    const sorted = [...stocks].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
-    const top3 = sorted.slice(0,3);
-    const flop = [...stocks].sort((a,b)=>(a.composite_adj||0)-(b.composite_adj||0)).slice(0,1);
-    const avgScore = stocks.reduce((a,b)=>a+(b.composite_adj||0),0)/stocks.length;
-    const avgDiv = stocks.reduce((a,b)=>a+(b.div_yield||0),0)/stocks.length;
-    const scoreCol = avgScore>=55?'var(--green)':avgScore>=40?'var(--amber)':'var(--red)';
-
-    const top3html = top3.map(x=>{
-      const sc=x.composite_adj||0;
-      const col=sc>=60?'var(--green)':sc>=45?'var(--amber)':'var(--red)';
-      return `<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px;color:${col};font-weight:700">${x.ticker} <span style="color:var(--t2);font-weight:400">${v10fmt(sc)}</span></span>`;
-    }).join('');
-    const flophtml = flop.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;background:rgba(239,68,68,.12);padding:2px 7px;border-radius:10px;font-size:10px;color:var(--red)">${x.ticker} ${v10fmt(x.composite_adj||0)}</span>`).join('');
-
-    return `<div class="card" style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-        <div>
-          <div style="font-weight:700;font-size:14px">${s}</div>
-          <div style="font-size:10px;color:var(--t2)">${stocks.length} société${stocks.length>1?'s':''}</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div style="text-align:center">
-            <div style="font-size:9px;color:var(--t3)">Score moy.</div>
-            <div style="font-size:15px;font-weight:700;color:${scoreCol}">${(avgScore/80*10).toFixed(1)}<span style="font-size:9px;color:var(--t3)">/10</span></div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:9px;color:var(--t3)">Div. moy.</div>
-            <div style="font-size:15px;font-weight:700;color:var(--amber)">${avgDiv.toFixed(1)}%</div>
-          </div>
-          <button class="btn btn-g" style="font-size:10px;padding:5px 11px" onclick="_sectorInvest('${s}')">Investir ↗</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
-        <span style="font-size:9px;color:var(--t3);padding-right:4px" title="Meilleures sociétés du secteur selon le score global">Top :</span>${top3html}
-        <span style="font-size:9px;color:var(--t3);padding:0 4px;margin-left:4px" title="Société la moins bien notée du secteur · À surveiller ou éviter">Attention :</span>${flophtml}
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('sectorContent').innerHTML = `
-    <div class="card" style="margin-bottom:12px">
-      <div class="ct" style="margin-bottom:12px" title="Performance depuis le 1er janvier de l'année · YTD = Year To Date · 💡 Comparez les secteurs pour orienter votre allocation">Performance annuelle moyenne par secteur (YTD)</div>
-      ${chartBars}
-    </div>
-    ${sectorCards}`;
-}
-
-function _sectorInvest(sector){
-  // Naviguer au screener avec filtre secteur présélectionné
-  nav('screener');
-  setTimeout(()=>{
-    const sel = document.getElementById('sc-sect');
-    if(sel){ sel.value = sector; if(typeof runScreener==='function') runScreener(); }
-  }, 100);
-}
 
 // ── Dividendes ─────────────────────────────────────────────────────────────
 let _divData = [];
@@ -4665,13 +4520,11 @@ const pageLoaders={
   port:     loadPortfolio,
   alerts:   ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
   sim:      ()=>{simBuildSliders();simCalc();},
-  sectors:  ()=>{if(typeof renderSectorPage!=='undefined')renderSectorPage();},
   perf:     ()=>{if(typeof renderPerfPage!=='undefined')renderPerfPage();},
   screener: ()=>{if(typeof initScreener!=='undefined')initScreener();},
   analyse:  ()=>renderCorrelMatrix(),
   previsions:()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
   macro:    ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
-  calendar: ()=>{if(typeof renderCalendarPage!=='undefined')renderCalendarPage();},
 };
 
 // ── Matrice de corrélation ─────────────────────────────────────────────────
@@ -4775,140 +4628,6 @@ function renderMacroPage() {
   const sign = avgChg >= 0 ? '+' : '';
   el.textContent = sign + avgChg.toFixed(2) + '%';
   el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
-}
-
-// ── Calendrier BRVM ──────────────────────────────────────────────────────────
-let _calEvents = null;
-
-function calSetView(view) {
-  const listDiv = document.getElementById('cal-list-view');
-  const monthDiv = document.getElementById('cal-month-view');
-  const listBtn = document.getElementById('cal-btn-list');
-  const monthBtn = document.getElementById('cal-btn-month');
-  if (listDiv) listDiv.style.display = view === 'list' ? '' : 'none';
-  if (monthDiv) monthDiv.style.display = view === 'month' ? '' : 'none';
-  if (listBtn) { listBtn.style.background = view === 'list' ? 'var(--blue)' : ''; listBtn.style.color = view === 'list' ? '#fff' : ''; }
-  if (monthBtn) { monthBtn.style.background = view === 'month' ? 'var(--blue)' : ''; monthBtn.style.color = view === 'month' ? '#fff' : ''; }
-  if (view === 'month' && _calEvents) _renderCalMonth();
-}
-
-async function renderCalendarPage() {
-  const listEl = document.getElementById('calEventsList');
-  if (_calEvents) { _renderCalList(); return; }
-  if (listEl) listEl.innerHTML = '<p style="color:var(--t2)">Chargement...</p>';
-  try {
-    const res = await fetch('/api/calendar');
-    _calEvents = await res.json();
-    _renderCalList();
-  } catch(e) {
-    if (listEl) listEl.innerHTML = '<p style="color:var(--red)">Erreur de chargement du calendrier.</p>';
-  }
-}
-
-function _calTypeColor(e) { return e.color || '#FBBF24'; }
-function _calTypeBg(e) {
-  const c = e.color || '#FBBF24';
-  if (c === '#60A5FA') return 'rgba(96,165,250,0.1)';
-  if (c === '#4ADE80') return 'rgba(74,222,128,0.1)';
-  return 'rgba(251,191,36,0.1)';
-}
-
-function _calEventCard(e, isPast) {
-  const col = _calTypeColor(e);
-  const bg = _calTypeBg(e);
-  const dayNum = e.date ? e.date.slice(8) : '?';
-  const monStr = e.date ? new Date(e.date + 'T00:00:00').toLocaleDateString('fr-FR', {month:'short'}) : '';
-  const click = e.ticker ? `onclick="_openStock('${e.ticker}')"` : '';
-  const typeShort = (e.type||'').replace('convocations-assemblees-generales','AG').replace('evenement','Autre').substring(0,12);
-  return `<div ${click} style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;background:${bg};border-left:3px solid ${col};border-radius:6px;cursor:${e.ticker?'pointer':'default'};opacity:${isPast?'0.55':'1'}">
-    <div style="min-width:48px;text-align:center;background:var(--bg3);border-radius:6px;padding:4px">
-      <div style="font-size:18px;font-weight:700;color:${col};line-height:1">${dayNum}</div>
-      <div style="font-size:9px;color:var(--t2);text-transform:uppercase">${monStr}</div>
-    </div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.ticker?`<strong style="color:${col}">${e.ticker}</strong> — `:''}${e.label||e.type||'Événement'}</div>
-    </div>
-    <span style="font-size:9px;padding:2px 7px;border-radius:8px;border:1px solid ${col}50;color:${col};white-space:nowrap">${typeShort}</span>
-  </div>`;
-}
-
-function _renderCalList() {
-  const el = document.getElementById('calEventsList');
-  if (!el || !_calEvents) return;
-  const today = new Date().toISOString().slice(0, 10);
-  const sorted = [..._calEvents].sort((a, b) => (a.date||'').localeCompare(b.date||''));
-  if (!sorted.length) { el.innerHTML = '<p style="color:var(--t2);text-align:center;padding:24px">Aucun événement dans le calendrier.</p>'; return; }
-
-  const upcoming = sorted.filter(e => (e.date||'') >= today);
-  const past = sorted.filter(e => (e.date||'') < today).reverse();
-
-  function groupByMonth(events) {
-    const byMonth = {};
-    events.forEach(e => {
-      const key = (e.date||'').slice(0, 7);
-      if (!byMonth[key]) byMonth[key] = [];
-      byMonth[key].push(e);
-    });
-    return byMonth;
-  }
-
-  function monthLabel(key) {
-    if (!key) return '—';
-    return new Date(key + '-01T00:00:00').toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
-  }
-
-  let html = '';
-  if (upcoming.length) {
-    const groups = groupByMonth(upcoming);
-    Object.entries(groups).forEach(([key, evts]) => {
-      html += `<div style="font-size:10px;font-weight:700;color:var(--t3);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.5px">${monthLabel(key)} — ${evts.length} événement${evts.length>1?'s':''}</div>`;
-      html += evts.map(e => _calEventCard(e, false)).join('');
-    });
-  }
-  if (past.length) {
-    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin:14px 0 2px;text-transform:uppercase;letter-spacing:.5px">Événements passés</div>`;
-    const groups = groupByMonth(past.slice(0, 20));
-    Object.entries(groups).forEach(([key, evts]) => {
-      html += `<div style="font-size:10px;color:var(--t3);margin:8px 0 4px;font-style:italic">${monthLabel(key)}</div>`;
-      html += evts.map(e => _calEventCard(e, true)).join('');
-    });
-  }
-  el.innerHTML = html;
-}
-
-function _renderCalMonth() {
-  const el = document.getElementById('calMonthGrid');
-  if (!el || !_calEvents) return;
-  const today = new Date();
-  const year = today.getFullYear(), month = today.getMonth();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday=0
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName = today.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
-  const byDay = {};
-  _calEvents.forEach(e => {
-    if (!e.date) return;
-    const d = new Date(e.date + 'T00:00:00');
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const k = d.getDate();
-      if (!byDay[k]) byDay[k] = [];
-      byDay[k].push(e);
-    }
-  });
-  const hdrs = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-  let html = `<div style="text-align:center;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--text)">${monthName}</div>`;
-  html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
-  hdrs.forEach(h => { html += `<div style="text-align:center;font-size:10px;font-weight:600;color:var(--t3);padding:4px 0">${h}</div>`; });
-  for (let i = 0; i < firstDow; i++) html += '<div></div>';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = d === today.getDate();
-    const evts = byDay[d] || [];
-    html += `<div style="min-height:54px;background:var(--bg3);border-radius:5px;padding:4px;border:1px solid ${isToday?'var(--blue)':'var(--border)'}">
-      <div style="font-size:11px;font-weight:${isToday?700:500};color:${isToday?'var(--blue)':'var(--t2)'};margin-bottom:2px">${d}</div>
-      ${evts.map(e=>`<div style="font-size:8px;padding:1px 3px;margin-top:1px;border-radius:2px;background:${_calTypeBg(e)};color:${_calTypeColor(e)};overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.ticker||''} ${e.label||e.type||''}">${e.ticker||'•'}</div>`).join('')}
-    </div>`;
-  }
-  html += '</div>';
-  el.innerHTML = html;
 }
 
 init();
@@ -5224,15 +4943,6 @@ const _helpContent = {
       { ex: '📌 Exemple : Filtrez "Verdict = POSITIF" + tri "Score /10" → vous verrez les meilleures sociétés validées par l\'IA en haut.' },
     ]
   },
-  sectors: {
-    title: 'Secteurs',
-    sections: [
-      { h: '📊 Analyse par groupe d\'activité', p: 'La BRVM est divisée en secteurs : Banque, Industrie, Distribution, Agriculture, Énergie, Télécoms, Utilités. Chaque secteur a ses propres cycles économiques.' },
-      { h: '📈 Indice sectoriel YTD', p: 'YTD = Year To Date = performance depuis le 1er janvier. Si le secteur Banque affiche +12% YTD, les banques cotées ont globalement gagné 12% depuis janvier.' },
-      { h: '⭐ Score moyen sectoriel', p: 'La moyenne des scores /10 de toutes les sociétés du secteur. Utile pour savoir quels secteurs sont les plus attractifs en ce moment.' },
-      { tip: '💡 Que faire ? Cliquez sur un bouton secteur en haut pour lancer une analyse IA complète de ce secteur — forces, faiblesses, opportunités.' },
-    ]
-  },
   div: {
     title: 'Dividendes',
     sections: [
@@ -5520,10 +5230,10 @@ const _kbdMap = {
 
 const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', news:'Actualités', comm:'Commodités',
-  macro:'Macro UEMOA', calendar:'Calendrier', screener:'Screener', analyse:'Analyse & Optim',
+  macro:'Macro UEMOA', screener:'Screener', analyse:'Analyse & Optim',
   previsions:'Prévisions IA', 'score-custom':'Score personnalisé', targets:'Prix cibles',
   perf:'Performances', port:'Portefeuille', sim:'Simulateur div.', div:'Dividendes',
-  alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire', sectors:'Secteurs',
+  alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
 };
 
 document.addEventListener('keydown', function(e) {
