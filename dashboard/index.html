@@ -1816,7 +1816,13 @@ function nav(id){
   document.querySelector('.main').scrollTop=0;
   if(typeof _currentPage!=='undefined') _currentPage=id;
   if(_helpOpen) openHelpDrawer(id);
+  try{history.replaceState(null,'','#'+id);}catch(e){}
 }
+// Support navigation par hash URL
+(function(){
+  var h=(location.hash||'').replace('#','');
+  if(h) window.addEventListener('load',function(){setTimeout(function(){if(typeof nav==='function'&&document.getElementById('page-'+h))nav(h);},800);});
+})();
 
 // ── Sidebar compact mode ────────────────────────────────────────────────────
 function toggleSidebarCompact(){
