@@ -105,7 +105,14 @@ function _renderScatterPE(){
 
   // Données valides (P/E > 0 et Div% > 0)
   const pts = _scrResults.filter(x=>(x.pe_ref||0)>0&&(x.pe_ref||0)<60&&(x.div_yield||0)>0);
-  if(pts.length<2){ ctx.fillStyle='#6b7280'; ctx.font='13px sans-serif'; ctx.fillText('Données insuffisantes (P/E et Div% requis)',W/2-120,H/2); return; }
+  const emptyEl = document.getElementById('sc-scatter-empty');
+  if(pts.length<1){
+    canvas.style.display='none';
+    if(emptyEl){emptyEl.style.display='flex';}
+    return;
+  }
+  canvas.style.display='';
+  if(emptyEl){emptyEl.style.display='none';}
 
   const peMax=Math.min(40, Math.max(...pts.map(x=>x.pe_ref||0))*1.1)||40;
   const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.1||20;

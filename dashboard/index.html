@@ -533,6 +533,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div id="signal-gauge-cursor" style="position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--bg2);box-shadow:0 0 6px rgba(0,0,0,.4);transform:translateX(-50%);transition:left .5s;left:50%"></div>
       </div>
       <div style="text-align:center;margin-top:4px;font-size:10px;font-weight:600;color:var(--t2)" id="signal-gauge-label">—</div>
+      <p class="help-text" style="text-align:center;margin-top:4px">Score moyen du marché · ≥ 7.5 = signal fort · positionné selon la proportion d'actions en zone favorable</p>
     </div>
   </div>
   <div class="g3" id="podium"></div>
@@ -555,7 +556,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
-      <div id="cDistDiv" style="width:100%;height:170px"></div></div>
+      <div id="cDistDiv" style="width:100%;height:170px"></div>
+      <p class="help-text">Répartition des 47 sociétés par score · vert = achat possible · rouge = éviter</p></div>
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="cSectDiv" style="width:100%;height:170px"></div></div>
   </div>
@@ -665,15 +667,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
       <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
-      <th class="tt" data-tt="Valeur totale de la société cotée en bourse · Cours × nombre d'actions">CAP</th>
+      <th class="tt" data-tt="Valeur totale de la société cotée en bourse · Cours × nombre d'actions">Capitalisation</th>
       <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Cours</th>
-      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">30j</th>
-      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">Var%</th>
+      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">Tendance 30j</th>
+      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">Var. jour</th>
       <th class="tt" data-tt="Cours ÷ bénéfice par action · 💡 Bon signe : ≤ 15 — plus bas = action moins chère">P/E</th>
       <th class="tt" data-tt="Cours ÷ valeur comptable · 💡 Bon signe : ≤ 1.5 — sous 1 = action bradée">P/B</th>
-      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Div%</th>
+      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Rend. div.</th>
       <th class="tt" data-tt="Rentabilité des capitaux propres · 💡 ≥ 15% = gestion excellente">ROE</th>
-      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Verdict</th>
+      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Signal</th>
       <th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th>
       <th class="adv-col" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
@@ -699,7 +701,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div style="background:rgba(99,102,241,0.1);border-left:3px solid var(--blue);padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;">
     <strong>🧠 Comment les titres sont-ils sélectionnés ?</strong><br>
     Les sociétés affichées combinent 8 modèles d'analyse : valeur intrinsèque (<abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham">Graham</abbr>, <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société">EPV</abbr>), rentabilité (<abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle">DCF</abbr>, <abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs">DDM</abbr>), momentum technique et dividendes. Seules les sociétés avec un Score ≥ 6/10 et un signal positif sont incluses.
@@ -788,7 +790,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- DIVIDENDES -->
 <div class="page" id="page-div">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>💰 Dividendes 2026</h2><p class="page-sub">Tableau de bord dividendes · rendements · ex-dates · revenus estimés</p></div></div>
   <!-- Calendrier 12 mois visuel -->
   <div class="card" style="margin-bottom:10px">
@@ -830,15 +832,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- PERFORMANCES HISTORIQUES -->
 <div class="page" id="page-perf">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>Performances historiques</h2><p class="page-sub">Évolution des cours normalisée · base 100 · cours réels BRVM-BOC</p></div>
-    <span style="font-size:11px;color:var(--t2)" title="Toutes les courbes partent du même point pour comparer équitablement · 💡 Base 100 = valeur normalisée à la date de départ">Base 100 · Cours réels BRVM</span></div>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div class="ph"><div><h2>Performances historiques</h2><p class="page-sub">Évolution des cours · données historiques BRVM</p></div></div>
   <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
 </div>
 
 <!-- PRIX CIBLES -->
 <div class="page" id="page-targets">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Prix cibles &amp; prévisions</h2><p class="page-sub">Objectifs de cours · Graham · EPV · P/B warranté · upside potentiel</p></div>
     <span style="font-size:11px;color:var(--t2)">Graham · EPV · P/B warranté</span></div>
   <div class="card" style="padding:0;overflow-x:auto">
@@ -848,7 +849,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- SCORE PERSONNALISÉ -->
 <div class="page" id="page-score-custom">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Score personnalisé</h2><p class="page-sub">Pondérez les 8 modèles selon votre stratégie d'investissement</p></div></div>
   <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0">
@@ -882,7 +883,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- SIMULATEUR DIVIDENDES -->
 <div class="page" id="page-sim">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Simulateur de revenus dividendes</h2><p class="page-sub">Projetez vos revenus passifs selon votre capital et les rendements actuels</p></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
@@ -950,7 +951,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- ALERTES -->
 <div class="page" id="page-alerts">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>🔔 Alertes</h2><p class="page-sub">Soyez notifié quand un cours atteint votre seuil cible</p></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-o" onclick="addPortfolioAlerts()" style="font-size:11px">📦 Alertes portefeuille</button>
@@ -1191,7 +1192,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- FICHE ACTION -->
 <div class="page" id="page-stock">
-  <button class="btn btn-o" onclick="nav('rank')" style="margin-bottom:12px">← Retour</button>
+  <button class="btn btn-o" onclick="navBack()" style="margin-bottom:12px">← Retour</button>
   <div id="stockDetail"><p style="color:var(--t2)">Sélectionne une action.</p></div>
 </div>
 
@@ -1290,13 +1291,20 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="margin-top:10px">
     <div class="ct" style="margin-bottom:8px">📈 Scatter P/E vs Rendement Div%</div>
     <div style="font-size:10px;color:var(--t2);margin-bottom:6px">Chaque point = une action dans les résultats. Zone idéale : P/E &lt; 15 et Div &gt; 5%</div>
-    <canvas id="sc-scatter" width="600" height="260" style="width:100%;max-height:260px"></canvas>
+    <div id="sc-scatter-wrap" style="position:relative">
+      <canvas id="sc-scatter" width="600" height="260" style="width:100%;max-height:260px"></canvas>
+      <div id="sc-scatter-empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--t2);font-size:12px;background:var(--bg3);border-radius:6px">
+        <span style="font-size:24px">📊</span>
+        <span>Données P/E et Div% requises dans les résultats</span>
+        <span style="font-size:10px;color:var(--t3)">Appliquez un filtre moins restrictif ou vérifiez les données</span>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- PRÉVISIONS IA -->
 <div class="page" id="page-previsions">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>🔮 Prévisions IA</h2><p class="page-sub">Portefeuilles recommandés · signaux tendanciels · projections de revenus</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
@@ -1307,7 +1315,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- ANALYSE & OPTIM -->
 <div class="page" id="page-analyse">
-  <button onclick="history.length>2?history.back():nav('dash')" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
@@ -1823,7 +1831,8 @@ function skeletonRows(n=5){
 
 // ── SVG Charts ─────────────────────────────────────────────────────────────
 function svgBar(el,labels,values,colors,height=170,horizontal=false){
-  if(!el||!values.length)return;
+  if(!el)return;
+  if(!values.length){el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:${height}px;gap:6px;color:var(--t2);font-size:12px"><span style="font-size:22px">📊</span><span>Aucune donnée disponible</span></div>`;return;}
   if(horizontal){
     const max=Math.max(...values)||1;
     const bh=Math.min(22,Math.floor((height-20)/values.length));
@@ -1914,12 +1923,17 @@ function showTooltip(evt,text){
 function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
 
 // alertes gérées par alerts.js
+function _getNotifContainer(){
+  var c=document.getElementById('notif-stack');
+  if(!c){c=document.createElement('div');c.id='notif-stack';c.style='position:fixed;top:8px;right:8px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:min(280px,calc(100vw - 240px))';document.body.appendChild(c);}
+  return c;
+}
 function showNotif(msg,color){
   var bc=color==='green'?'var(--green)':color==='amber'?'var(--amber)':'var(--red)';
   var n=document.createElement('div');
   n.setAttribute('data-tip',msg);
-  n.style='position:fixed;top:16px;right:16px;z-index:9999;background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease;cursor:default';
-  n.textContent=msg;document.body.appendChild(n);
+  n.style='background:var(--bg2);border:1px solid '+bc+';border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:slideInRight .25s ease;cursor:default';
+  n.textContent=msg;_getNotifContainer().appendChild(n);
   if(typeof _attachTooltip==='function')_attachTooltip(n);
   setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},3500);
 }
@@ -2540,7 +2554,7 @@ function renderHeatmap(){
     const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${(sc/80*10).toFixed(1)}/10`;
     const delay=i*18; // vague d'animation
     return `<div onclick="_openStock('${x.ticker}')"
-      title="${tip}"
+      data-tip="${tip}"
       style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${borderCol};border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;box-sizing:border-box;opacity:0;transform:scale(0.7);transition:transform .15s,box-shadow .15s,opacity .3s ${delay}ms,transform .3s ${delay}ms ease-out"
       onmouseenter="this.style.transform='scale(1.12)';this.style.zIndex='10';this.style.boxShadow='0 6px 20px rgba(0,0,0,.55)'"
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
@@ -2630,9 +2644,9 @@ function openScreenerOpportunities(){
 }
 
 function sparkline(prices, w=80, h=28) {
-  if (!prices || prices.length < 2) return '<svg width="'+w+'" height="'+h+'"></svg>';
+  if (!prices || prices.length < 2) return '<span style="color:var(--t3);font-size:9px">—</span>';
   const vals = prices.map(p => p.price || p).filter(Boolean);
-  if (vals.length < 2) return '<svg width="'+w+'" height="'+h+'"></svg>';
+  if (vals.length < 2) return '<span style="color:var(--t3);font-size:9px">—</span>';
   const mn = Math.min(...vals), mx = Math.max(...vals);
   const range = mx - mn || 1;
   const pts = vals.map((v,i) => {
@@ -2641,8 +2655,11 @@ function sparkline(prices, w=80, h=28) {
     return x+','+y;
   }).join(' ');
   const last = vals[vals.length-1], first = vals[0];
+  const perf = first > 0 ? ((last-first)/first*100) : 0;
   const color = last >= first ? '#4ADE80' : '#F87171';
-  return `<svg width="${w}" height="${h}" style="display:block"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" opacity="0.9"/></svg>`;
+  const sign = perf >= 0 ? '+' : '';
+  const tip = `Min: ${Math.round(mn).toLocaleString('fr-FR')} · Max: ${Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg width="${w}" height="${h}" style="display:block"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" opacity="0.9"/></svg></span>`;
 }
 
 function _renderMarketWeather(compChange, scores){
@@ -2768,7 +2785,10 @@ function _sparklineDots(hist30, w, h){
   const last=pts[pts.length-1].split(',');
   const dot=`<circle cx="${last[0]}" cy="${last[1]}" r="2.5" fill="${col}"/>`;
   const priceLabel=`<text x="${+last[0]>w/2?+last[0]-2:+last[0]+3}" y="${+last[1]-3}" font-size="7" fill="${col}" text-anchor="${+last[0]>w/2?'end':'start'}">${Math.round(vals[vals.length-1]).toLocaleString('fr-FR')}</text>`;
-  return `<svg width="${w}" height="${h}" style="overflow:visible">${line}${dot}${priceLabel}</svg>`;
+  const perf=vals[0]>0?((vals[vals.length-1]-vals[0])/vals[0]*100):0;
+  const sign=perf>=0?'+':'';
+  const tip=`Min: ${Math.round(min).toLocaleString('fr-FR')} · Max: ${Math.round(max).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg width="${w}" height="${h}" style="overflow:visible">${line}${dot}${priceLabel}</svg></span>`;
 }
 
 function renderRank(){
@@ -4649,18 +4669,42 @@ function _renderCalList() {
   if (!el || !_calEvents) return;
   const today = new Date().toISOString().slice(0, 10);
   const sorted = [..._calEvents].sort((a, b) => (a.date||'').localeCompare(b.date||''));
+  if (!sorted.length) { el.innerHTML = '<p style="color:var(--t2);text-align:center;padding:24px">Aucun événement dans le calendrier.</p>'; return; }
+
   const upcoming = sorted.filter(e => (e.date||'') >= today);
   const past = sorted.filter(e => (e.date||'') < today).reverse();
+
+  function groupByMonth(events) {
+    const byMonth = {};
+    events.forEach(e => {
+      const key = (e.date||'').slice(0, 7);
+      if (!byMonth[key]) byMonth[key] = [];
+      byMonth[key].push(e);
+    });
+    return byMonth;
+  }
+
+  function monthLabel(key) {
+    if (!key) return '—';
+    return new Date(key + '-01T00:00:00').toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+  }
+
   let html = '';
   if (upcoming.length) {
-    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">À venir — ${upcoming.length} événements</div>`;
-    html += upcoming.map(e => _calEventCard(e, false)).join('');
+    const groups = groupByMonth(upcoming);
+    Object.entries(groups).forEach(([key, evts]) => {
+      html += `<div style="font-size:10px;font-weight:700;color:var(--t3);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.5px">${monthLabel(key)} — ${evts.length} événement${evts.length>1?'s':''}</div>`;
+      html += evts.map(e => _calEventCard(e, false)).join('');
+    });
   }
   if (past.length) {
-    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.5px">Passés — ${past.length} événements</div>`;
-    html += past.slice(0, 15).map(e => _calEventCard(e, true)).join('');
+    html += `<div style="font-size:11px;font-weight:700;color:var(--t3);margin:14px 0 2px;text-transform:uppercase;letter-spacing:.5px">Événements passés</div>`;
+    const groups = groupByMonth(past.slice(0, 20));
+    Object.entries(groups).forEach(([key, evts]) => {
+      html += `<div style="font-size:10px;color:var(--t3);margin:8px 0 4px;font-style:italic">${monthLabel(key)}</div>`;
+      html += evts.map(e => _calEventCard(e, true)).join('');
+    });
   }
-  if (!sorted.length) html = '<p style="color:var(--t2);text-align:center;padding:24px">Aucun événement dans le calendrier.</p>';
   el.innerHTML = html;
 }
 
@@ -5328,23 +5372,21 @@ function _showKbdHint(label) {
 }
 
 // Breadcrumb + pageLoaders déclenchés par nav()
+const navHistory = [];
 const _origNav = nav;
-nav = function(id) {
+nav = function(id, pushHistory) {
+  if (pushHistory !== false) navHistory.push(id);
   _origNav(id);
   const bcEl = document.getElementById('bc-page');
   if (bcEl) bcEl.textContent = _bcLabels[id] || id;
   if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
 };
+function navBack() {
+  navHistory.pop();
+  const prev = navHistory.pop() || 'dash';
+  nav(prev, false);
+}
 
-// Bouton changelog dans sidebar
-(function() {
-  const btn = document.createElement('button');
-  btn.textContent = '📋 Changelog v9.0';
-  btn.style.cssText = 'background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:2px 0;width:100%;text-align:left';
-  btn.onclick = () => { document.getElementById('changelog-modal').style.display = 'flex'; };
-  const container = document.querySelector('[onclick="startTour()"]')?.parentElement;
-  if (container) container.appendChild(btn);
-})();
 
 document.getElementById('changelog-modal').addEventListener('click', function(e) {
   if (e.target === this) this.style.display = 'none';
