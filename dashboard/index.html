@@ -376,7 +376,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .sb-sub.collapsed{max-height:0}
 .sb-acc.collapsed .sb-acc-arrow{transform:rotate(-90deg)}
 .ni-sub{padding-left:26px!important;font-size:12px;color:var(--text-2)}
-.ni-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ni-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:140px}
 .ni-sub span:first-child{font-size:12px}
 .sb.compact .sb-acc{justify-content:center;padding:10px 0}
 .sb.compact .sb-sub{display:none}
@@ -440,8 +440,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div style="font-size:14px;font-weight:700;color:var(--text-1)">BRVM</div>
       <div style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
         <span>Analyzer</span>
-        <span id="live-dot" style="width:6px;height:6px;border-radius:50%;background:var(--text-3);display:inline-block;flex-shrink:0"></span>
-        <span id="live-label" style="font-size:9px">—</span>
+        <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:rgba(34,197,94,0.15);color:#22c55e;padding:1px 6px;border-radius:10px;font-weight:600">
+          <span id="live-dot" style="width:5px;height:5px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
+          <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
+        </span>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
@@ -554,21 +556,20 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <p style="font-size:11px;color:var(--t3)">Aucune position.</p>
       </div>
     </div>
-    <!-- À surveiller (alertes proches) -->
-    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct" style="margin:0" title="Alertes proches du seuil · 💡 Soyez notifié quand le cours atteint votre objectif">🔔 À surveiller</div>
-        <span id="dash-alerts-count" style="font-size:9px;color:var(--t3)"></span>
+    <!-- Top opportunités du jour -->
+    <div class="card" style="margin-bottom:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="ct" style="margin:0" title="Meilleures opportunités détectées par nos 8 modèles · Score ≥ 7/10 et signal positif">⚡ TOP DU JOUR</div>
+        <span onclick="nav('rank')" style="font-size:9px;color:var(--accent);cursor:pointer">→ Classement</span>
       </div>
-      <div id="dash-alerts-widget">
-        <p style="font-size:11px;color:var(--t3)">Aucune alerte définie.</p>
-      </div>
+      <div style="font-size:10px;color:var(--text-3);margin-bottom:8px">Meilleures opportunités selon nos modèles</div>
+      <div id="dash-alerts-widget"></div>
     </div>
-    <!-- Agenda de la semaine -->
-    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('calendar');renderCalendarPage()">
+    <!-- Agenda / Marché aujourd'hui -->
+    <div class="card" style="margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct" style="margin:0" title="Événements de la semaine : ex-dividendes, assemblées générales, résultats">📅 Agenda</div>
-        <span style="font-size:9px;color:var(--t3)">→ Calendrier</span>
+        <div class="ct" style="margin:0" id="dash-agenda-title" title="Événements de la semaine ou données marché en temps réel">📅 Agenda</div>
+        <span onclick="nav('calendar');renderCalendarPage()" style="font-size:9px;color:var(--accent);cursor:pointer">→ Calendrier</span>
       </div>
       <div id="dash-agenda-widget">
         <p style="font-size:11px;color:var(--t3)">Chargement...</p>
@@ -716,12 +717,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
-  <!-- Guide de lecture classement (compact) -->
-  <div style="margin-bottom:8px">
-    <span style="font-size:10px;color:var(--accent);cursor:pointer"
-      data-tip="Score /10 : composite 8 modèles · ≥7.5 excellent · P/E : Cours÷Bénéfice &lt;15 idéal · P/B : Cours÷Comptable &lt;1.5 · Div% : rendement annuel · ROE : rentabilité ≥15% · Verdict : analyse IA des PDF · 30j : sparkline cours BOC">
-      ℹ️ Comment lire ce tableau ?</span>
-  </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Cliquez sur une société pour voir sa fiche complète<br>
+      · Utilisez "Trier par" pour classer par dividende, P/E ou ROE<br>
+      · Le score /10 combine 8 modèles financiers — au-dessus de 7 = signal fort
+    </div>
+  </details>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
     <span id="rank-counter" style="font-size:11px;color:var(--t2)">Affichage : — / 47 sociétés</span>
     <button class="rank-tog-btn" id="rank-adv-tog" onclick="toggleRankAdv()">Afficher scores détaillés</button>
@@ -758,6 +761,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="ph">
     <div><h2>📊 Analyse sectorielle</h2><p class="page-sub">Répartition · scores moyens par secteur · indices BRVM sectoriels</p></div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Chaque secteur affiche sa performance depuis le 1er janvier<br>
+      · Cliquez sur "Analyse IA" pour obtenir une synthèse du secteur<br>
+      · Comparez les secteurs pour identifier lesquels surperforment
+    </div>
+  </details>
   <div id="sectorContent"><p style="color:var(--t2)">Chargement...</p></div>
 </div>
 
@@ -769,6 +780,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     Les sociétés affichées combinent 8 modèles d'analyse : valeur intrinsèque (<abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham">Graham</abbr>, <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société">EPV</abbr>), rentabilité (<abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle">DCF</abbr>, <abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs">DDM</abbr>), momentum technique et dividendes. Seules les sociétés avec un Score ≥ 6/10 et un signal positif sont incluses.
     <span data-tip="Cliquez sur un titre pour voir sa fiche détaillée" style="color:var(--blue);cursor:help;"> En savoir plus ↗</span>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Cliquez sur "+ Ajouter une position" pour saisir un achat<br>
+      · Cliquez sur "ℹ️ Pourquoi ce titre ?" pour voir l'analyse IA de la société<br>
+      · Le rendement sur coût = dividendes reçus / prix d'achat initial
+    </div>
+  </details>
   <div class="ph"><div><h2>Mon portefeuille</h2><p class="page-sub">Suivez vos positions, votre P&L et les recommandations par titre</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px">⚡ Optimiser</button>
@@ -854,6 +873,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-div">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>💰 Dividendes 2026</h2><p class="page-sub">Tableau de bord dividendes · rendements · ex-dates · revenus estimés</p></div></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Les dates en vert = prochains versements prévus<br>
+      · Utilisez le simulateur pour estimer vos revenus selon votre mise<br>
+      · Un dividende élevé n'est pas toujours bon — vérifiez aussi le score /10
+    </div>
+  </details>
   <!-- Calendrier 12 mois visuel -->
   <div class="card" style="margin-bottom:10px">
     <div class="ct" style="margin-bottom:10px" title="Dates de détachement et paiement des dividendes sur 12 mois · 💡 Il faut posséder l'action AVANT la date ex-div pour toucher le dividende">📅 Calendrier annuel des détachements</div>
@@ -896,6 +923,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-perf">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Performances historiques</h2><p class="page-sub">Évolution des cours · données historiques BRVM</p></div></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Toutes les courbes partent de 100 pour comparer équitablement<br>
+      · Une valeur de 500 = le cours a été multiplié par 5 depuis le départ<br>
+      · Cliquez sur un nom dans la légende pour masquer/afficher cette courbe
+    </div>
+  </details>
   <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
 </div>
 
@@ -904,6 +939,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Prix cibles &amp; prévisions</h2><p class="page-sub">Objectifs de cours · Graham · EPV · P/B warranté · upside potentiel</p></div>
     <span style="font-size:11px;color:var(--t2)">Graham · EPV · P/B warranté</span></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Graham = valeur selon la formule classique de Benjamin Graham<br>
+      · EPV = valeur basée sur les bénéfices actuels normalisés<br>
+      · Si le cours actuel est sous le prix cible → potentiellement sous-évalué
+    </div>
+  </details>
   <div class="card" style="padding:0;overflow-x:auto">
     <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th data-tip="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible <abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">Graham</abbr></th><th data-tip="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th><th data-tip="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible <abbr data-tip="Prix / Valeur comptable · compare le cours au patrimoine net de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">P/B</abbr></th><th data-tip="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th data-tip="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th><th data-tip="Signal IA issu des rapports PDF · ACHETER / NEUTRE / VENDRE">Signal</th></tr></thead>
     <tbody id="targetsTable"></tbody></table></div>
@@ -913,6 +956,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-score-custom">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>Score personnalisé</h2><p class="page-sub">Pondérez les 8 modèles selon votre stratégie d'investissement</p></div></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Faites glisser les curseurs pour ajuster l'importance de chaque modèle<br>
+      · Graham et EPV = valeur intrinsèque · DCF = flux futurs · Technique = momentum<br>
+      · Cliquez "Appliquer" pour recalculer le classement avec vos poids
+    </div>
+  </details>
   <div class="g2" style="margin-bottom:12px">
     <div class="card" style="margin-bottom:0">
       <div class="ct">Profil d'investissement</div>
@@ -952,6 +1003,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
     </div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Entrez votre mise de départ et la durée souhaitée<br>
+      · La croissance estimée vient des Prévisions IA composite 4 facteurs<br>
+      · Les dividendes sont réinvestis automatiquement dans la simulation
+    </div>
+  </details>
   <!-- Explication simulateur -->
   <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
     <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
@@ -1020,6 +1079,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-g" onclick="showAddAlert()">+ Nouvelle alerte</button>
     </div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Entrez un prix cible pour recevoir une notification quand il est atteint<br>
+      · L'alerte "Ex-dividende" vous prévient avant la date de détachement<br>
+      · Les alertes sont stockées dans votre navigateur (pas de compte nécessaire)
+    </div>
+  </details>
   <div id="addAlertForm" style="display:none" class="card" style="margin-bottom:10px">
     <div class="ct" style="margin-bottom:10px">Créer une alerte</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:8px;align-items:end">
@@ -1082,6 +1149,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </select>
     </div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · 🟢 = article positif pour la société · 🔴 = négatif · 🟡 = neutre<br>
+      · Cliquez sur un article pour le lire complet<br>
+      · Filtrez par société avec la barre de recherche
+    </div>
+  </details>
   <!-- À la une -->
   <div id="news-alune" style="margin-bottom:12px;display:none">
     <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔥 À la une</div>
@@ -1103,6 +1178,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- MACRO UEMOA -->
 <div class="page" id="page-macro">
   <div class="ph"><div><h2>🏦 Macro UEMOA</h2><p class="page-sub">Contexte économique régional · indicateurs BCEAO · taux directeurs</p></div></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Le taux BCEAO influence le coût du crédit pour les entreprises BRVM<br>
+      · Un PIB en hausse = économie en croissance = généralement favorable aux actions<br>
+      · Le risque pays mesure la stabilité politique et économique de chaque pays
+    </div>
+  </details>
   <div id="macroContent">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
       <div class="card" style="margin-bottom:0;text-align:center">
@@ -1199,6 +1282,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="chat-chip" id="cal-btn-month" onclick="calSetView('month')" title="Vue mensuelle — basculez entre liste et calendrier visuel">Mois</button>
     </div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · AG = Assemblée Générale : vote des actionnaires sur les dividendes<br>
+      · Les dates en rouge = déjà passées · En vert = à venir<br>
+      · Cliquez sur un événement pour voir les détails
+    </div>
+  </details>
   <!-- Légende -->
   <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
     <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)" title="Assemblées Générales confirmées avec date officielle · Vote sur dividendes et stratégie"><span style="width:10px;height:10px;border-radius:2px;background:#60A5FA;display:inline-block"></span>Assemblée Générale</span>
@@ -1217,6 +1308,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-comm">
   <div class="ph"><div><h2>Commodités internationales</h2><p class="page-sub">Or · pétrole · cacao · coton · matières premières liées à l'UEMOA</p></div>
     <span style="font-size:11px;color:var(--t2)">Produit principal uniquement</span></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Indique quelles sociétés BRVM sont exposées aux matières premières<br>
+      · Ex : une hausse du cacao bénéficie aux sociétés agro-industrielles<br>
+      · Utile pour comprendre les risques sectoriels indirects
+    </div>
+  </details>
   <div id="commPrices" class="g4" style="margin-bottom:14px"></div>
   <div class="g2">
     <div class="card" style="margin-bottom:0"><div class="ct">Score des sociétés exposées</div>
@@ -1231,7 +1330,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-chat">
   <div class="ph"><div><h2>Chat IA — Analyste BRVM</h2><p class="page-sub">Posez vos questions sur les actions, secteurs et opportunités BRVM</p></div>
     <button class="btn btn-o" onclick="clearChat()">Effacer</button></div>
-  <div class="card" style="height:calc(100vh - 220px);display:flex;flex-direction:column">
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Posez n'importe quelle question sur une société : "Analyse SIBC"<br>
+      · Vous pouvez aussi demander : "Quelles sont les meilleures banques BRVM ?"<br>
+      · L'IA utilise les données réelles du BOC pour répondre
+    </div>
+  </details>
+  <div class="card" style="height:calc(100vh - 280px);display:flex;flex-direction:column">
     <div id="chatMessages" style="flex:1;overflow-y:auto;padding:4px 0">
       <div class="chat-msg chat-ai">Posez une question sur une société BRVM ou le marché. <span style="font-size:10px;color:var(--muted)">💬 5 échanges mémorisés</span></div>
     </div>
@@ -1267,6 +1374,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-g" onclick="runScreener()">Filtrer</button>
     </div>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Laissez un filtre vide pour ne pas l'appliquer<br>
+      · Cliquez sur une stratégie prédéfinie pour appliquer des filtres optimisés<br>
+      · Le graphique Scatter montre les sociétés filtrées : zone idéale = P/E&lt;15 et Div&gt;5%
+    </div>
+  </details>
   <!-- Presets stratégies -->
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
@@ -1370,6 +1485,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="ph"><div><h2>🔮 Prévisions IA</h2><p class="page-sub">Portefeuilles recommandés · signaux tendanciels · projections de revenus</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · ✅ Acheter = les modèles détectent un signal haussier<br>
+      · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
+      · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
+      · Ces prévisions sont indicatives — pas de conseil en investissement
+    </div>
+  </details>
   <div id="page-previsions-content">
     <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Prévisions IA pour charger...</div>
   </div>
@@ -1379,6 +1503,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-analyse">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Le graphique montre 3 000 portefeuilles simulés aléatoirement<br>
+      · Plus un point est en haut à gauche = meilleur rendement pour moins de risque<br>
+      · Cliquez sur "Optimiser" pour voir le portefeuille recommandé
+    </div>
+  </details>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="ct" title="Coefficient de Pearson · +1 = évoluent ensemble, -1 = évoluent en sens contraire · 💡 Choisissez des actions peu corrélées pour diversifier">🔗 Matrice de corrélation — Top 15 actions (30j BOC)</div>
@@ -2010,6 +2142,21 @@ function showNotif(msg,color){
 }
 function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
 
+// Scheduler alertes — UN SEUL point d'appel, 60s après chargement puis toutes les 5min
+let _alertTimer = null;
+function startAlertScheduler() {
+  if (_alertTimer) return;
+  _alertTimer = setTimeout(function() {
+    if (typeof checkSmartAlerts === 'function') { checkSmartAlerts(); renderSmartAlertsPanel && renderSmartAlertsPanel(); }
+    if (typeof checkAlertsWithPrices === 'function') {
+      fetch('/api/live').then(r=>r.json()).then(d=>{ checkAlertsWithPrices(d.prices); }).catch(()=>{});
+    }
+    setInterval(function() {
+      if (typeof checkSmartAlerts === 'function') { checkSmartAlerts(); }
+    }, 300000);
+  }, 60000);
+}
+
 function showChangelog(){
   var m=document.createElement('div');
   m.style='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';
@@ -2101,7 +2248,7 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
-    setTimeout(()=>{if(typeof checkSmartAlerts==='function'){checkSmartAlerts();renderSmartAlertsPanel();}},1000);
+    startAlertScheduler();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -2391,7 +2538,7 @@ function _renderDashPortWidget(){
   if (!el) return;
   try {
     const positions = JSON.parse(localStorage.getItem('brvm_portfolio_v2') || '[]');
-    if (!positions.length) { el.innerHTML = '<div style="text-align:center;padding:16px 8px;color:var(--muted);font-size:12px">Aucune position · <span onclick="nav(\'port\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Ouvrir mon portefeuille →</span></div>'; return; }
+    if (!positions.length) { el.innerHTML = '<div style="text-align:center;padding:20px 12px"><div style="font-size:28px;margin-bottom:8px">📊</div><div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">Commencez à suivre vos titres</div><div style="font-size:12px;color:var(--text-2);margin-bottom:12px">Ajoutez vos actions BRVM pour suivre vos gains et dividendes</div><button onclick="event.stopPropagation();nav(\'port\')" style="background:var(--accent);color:#0d1117;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);border:none;cursor:pointer">+ Ajouter une position</button></div>'; return; }
     const sc = window.scores || [];
     let totalCost = 0, totalVal = 0;
     const rows = positions.map(p => {
@@ -2421,26 +2568,19 @@ function _renderDashPortWidget(){
 
 function _renderDashAlertsWidget(){
   const el = document.getElementById('dash-alerts-widget');
-  const cnt = document.getElementById('dash-alerts-count');
   if (!el) return;
   try {
-    const alerts = JSON.parse(localStorage.getItem('brvm_alerts_v2') || '[]');
-    if (!alerts.length) { if(cnt) cnt.textContent=''; el.innerHTML = '<div style="font-size:11px;color:var(--muted)">Aucune alerte — <span onclick="nav(\'alerts\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Ajouter des alertes →</span></div>'; return; }
     const sc = window.scores || [];
-    const enriched = alerts.map(a => {
-      const live = sc.find(x => x.ticker === a.ticker);
-      const price = live?.price || 0;
-      const pct = a.target && price ? Math.abs((price - a.target) / a.target * 100) : 999;
-      return { ...a, price, pct };
-    }).sort((a,b) => a.pct - b.pct).slice(0,4);
-    if(cnt) cnt.textContent = `${alerts.length} alerte${alerts.length>1?'s':''}`;
-    el.innerHTML = enriched.map(a => {
-      const near = a.pct < 5;
-      const col = near ? 'var(--amber)' : 'var(--t2)';
-      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid var(--border)">
-        <span style="font-weight:600;color:var(--t1)">${a.ticker}</span>
-        <span style="color:var(--t2)">${a.price?a.price.toLocaleString('fr-FR'):'—'}</span>
-        <span style="color:${col}">${near?'⚠️ ':''} cible ${(a.target||0).toLocaleString('fr-FR')}</span>
+    const top = sc.filter(x => (x.composite_adj||0) >= 56).slice(0, 3);
+    if (!top.length) { el.innerHTML = '<div style="font-size:11px;color:var(--text-3)">Chargement des opportunités…</div>'; return; }
+    el.innerHTML = top.map(x => {
+      const score = ((x.composite_adj||0)/80*10).toFixed(1);
+      const div = x.div_yield ? x.div_yield.toFixed(1)+'%' : '—';
+      return `<div onclick="showStock('${x.ticker}')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-2);font-size:11px" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        <span style="font-weight:700;color:var(--text-1);min-width:44px">${x.ticker}</span>
+        <span style="color:var(--gold);font-weight:600">${score}/10</span>
+        <span style="color:var(--bull)">${div}</span>
+        <span style="color:var(--bull);font-size:10px">✅ Acheter</span>
       </div>`;
     }).join('');
   } catch(e) {}
@@ -2453,7 +2593,24 @@ async function _renderDashAgendaWidget(){
     const events = _calEvents || await fetch('/api/calendar').then(r=>r.json()).then(d=>{_calEvents=d;return d;}).catch(()=>[]);
     const today = new Date().toISOString().slice(0,10);
     const upcoming = events.filter(e => (e.date||'') >= today).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
-    if (!upcoming.length) { el.innerHTML = '<div style="font-size:11px;color:var(--muted)">Aucun événement proche — <span onclick="nav(\'calendar\')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Calendrier complet →</span></div>'; return; }
+    if (!upcoming.length) {
+      // Fallback : afficher les données marché du jour
+      const sc = window.scores || [];
+      const mkt = window._marketData || {};
+      const comp = mkt.composite || {};
+      const b30  = mkt.brvm30   || {};
+      const bull = sc.filter(x => (x.change_pct||0) > 0).length;
+      const bear = sc.filter(x => (x.change_pct||0) < 0).length;
+      const compC = (comp.change||0) >= 0 ? 'var(--bull)' : 'var(--bear)';
+      const b30C  = (b30.change||0)  >= 0 ? 'var(--bull)' : 'var(--bear)';
+      const agTitle = document.getElementById('dash-agenda-title'); if(agTitle) agTitle.textContent = '📈 MARCHÉ';
+      el.innerHTML = `<div style="font-size:11px;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">BRVM-C</span><span style="color:${compC};font-weight:700">${comp.current?Number(comp.current).toFixed(2):'—'} <span style="font-size:10px">${comp.change!=null?(comp.change>=0?'+':'')+Number(comp.change).toFixed(2)+'%':'—'}</span></span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">BRVM-30</span><span style="color:${b30C};font-weight:700">${b30.current?Number(b30.current).toFixed(2):'—'} <span style="font-size:10px">${b30.change!=null?(b30.change>=0?'+':'')+Number(b30.change).toFixed(2)+'%':'—'}</span></span></div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px">${bull} ↑ haussiers · ${bear} ↓ baissiers · ${sc.length} sociétés</div>
+      </div>`;
+      return;
+    }
     el.innerHTML = upcoming.map(e => {
       const col = e.color || '#FBBF24';
       const d = e.date ? new Date(e.date+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '?';
@@ -2761,6 +2918,7 @@ function loadMarketWidget(){
   fetch('/api/market').then(r=>r.json()).then(d=>{
     var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
     var b30  = (d.indices||[]).find(i=>i.name&&i.name.includes('30'));
+    window._marketData = {composite: comp||{}, brvm30: b30||{}};
     var cap  = (d.market_activity||{})['Capitalisation Actions']||(d.market_activity||{})['BRVM-C']||'—';
     function fmt(v,chg){
       var c=chg>=0?'var(--green)':'var(--red)';
@@ -4828,11 +4986,16 @@ function updateLiveStatus() {
       var open = d.market_open;
       var dot   = document.getElementById('live-dot');
       var label = document.getElementById('live-label');
+      var pill  = document.getElementById('live-pill');
       var time  = document.getElementById('live-time');
       var src   = document.getElementById('live-src');
       if (dot) {
         dot.style.background = open ? '#22c55e' : '#f59e0b';
-        dot.style.boxShadow  = open ? '0 0 6px #22c55e' : 'none';
+        dot.style.animation  = open ? 'pulse 2s infinite' : 'none';
+      }
+      if (pill) {
+        pill.style.background = open ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)';
+        pill.style.color = open ? '#22c55e' : '#f59e0b';
       }
       if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
       if (time && d.updated_at) {
@@ -4941,18 +5104,8 @@ function testPushNotification() {
   }
 }
 
-// Lancement au demarrage et toutes les 5 min
+// Lancement statut live + auto-refresh toutes les 5 min
 updateLiveStatus();
-(function(){
-  if(window._alertCheckRunning)return;
-  window._alertCheckRunning=true;
-  var _sv=showNotif;showNotif=function(){};
-  fetch('/api/live').then(function(r){return r.json();}).then(function(d){
-    if(typeof checkAlertsWithPrices==='function')checkAlertsWithPrices(d.prices);
-    else if(typeof checkAlerts==='function')checkAlerts(d.prices);
-    showNotif=_sv;window._alertCheckRunning=false;
-  }).catch(function(){showNotif=_sv;window._alertCheckRunning=false;});
-})();
 setInterval(updateLiveStatus, 300000);
 if(localStorage.getItem('brvm_intro_seen')){var _bi=document.getElementById('brvm-intro');if(_bi)_bi.style.display='none';}
 </script>

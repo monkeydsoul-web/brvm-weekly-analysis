@@ -114,9 +114,10 @@ function _renderScatterPE(){
   canvas.style.display='';
   if(emptyEl){emptyEl.style.display='none';}
 
-  // Axe X dynamique basé sur les vrais max P/E
-  const peRawMax = Math.max(...pts.map(x=>x.pe_ref||0));
-  const peMax = pts.length===1 ? peRawMax*2 : peRawMax*1.2 || 40;
+  // Axe X dynamique — jamais de valeur fixe
+  const peValues = pts.map(p => p.pe_ref).filter(v => v > 0);
+  const peRawMax = peValues.length > 0 ? Math.max(...peValues) : 20;
+  const peMax = pts.length === 1 ? peRawMax * 2 : Math.ceil(peRawMax * 1.3);
   const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.2||20;
   const pad={l:40,r:20,t:20,b:35};
   const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
@@ -129,8 +130,27 @@ function _renderScatterPE(){
   if(peMax>0 && dyMax>0){
     const zx=pad.l, zy=pad.t+(1-Math.min(5,dyMax)/dyMax)*gH;
     const zw=Math.min(15/peMax,1)*gW, zh=gH-(1-Math.min(5,dyMax)/dyMax)*gH;
-    ctx.fillStyle='rgba(45,212,191,0.07)'; ctx.fillRect(zx,zy,zw,zh);
-    ctx.strokeStyle='rgba(45,212,191,0.25)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(34,197,94,0.06)'; ctx.fillRect(zx,zy,zw,zh);
+    ctx.strokeStyle='rgba(34,197,94,0.2)'; ctx.setLineDash([3,3]); ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
+    // Label "Zone idéale"
+    ctx.fillStyle='rgba(34,197,94,0.7)'; ctx.font='8px sans-serif'; ctx.textAlign='left';
+    ctx.fillText('Zone idéale', zx+3, zy+10);
+  }
+  // Ligne verticale pointillée P/E=15 (seuil Graham)
+  if(peMax > 0 && 15 <= peMax){
+    const lx = pad.l + (15/peMax)*gW;
+    ctx.strokeStyle='rgba(251,191,36,0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(lx,pad.t); ctx.lineTo(lx,pad.t+gH); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(251,191,36,0.8)'; ctx.font='8px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('P/E 15', lx, pad.t+6);
+  }
+  // Ligne horizontale pointillée Div%=5
+  if(dyMax > 0 && 5 <= dyMax){
+    const ly = pad.t + (1 - 5/dyMax)*gH;
+    ctx.strokeStyle='rgba(251,191,36,0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.l,ly); ctx.lineTo(pad.l+gW,ly); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(251,191,36,0.8)'; ctx.font='8px sans-serif'; ctx.textAlign='right';
+    ctx.fillText('5% div', pad.l+gW-2, ly-3);
   }
 
   // Labels axes
@@ -167,9 +187,9 @@ function _renderScatterPE(){
     ctx.fillText(x.ticker, cx+7, cy+3);
   });
 
-  // Légende avec seuils /10
+  // Légende couleurs distinctes
   ctx.font='9px sans-serif'; ctx.textAlign='left';
-  [['#22c55e','Note ≥ 7'],['#2dd4bf','Note 5–7'],['#f43f5e','Note < 5']].forEach(([c,l],i)=>{
+  [['#22c55e','Note ≥ 7/10 · Fort'],['#2dd4bf','Note 5–7/10 · Correct'],['#f43f5e','Note < 5/10 · Faible']].forEach(([c,l],i)=>{
     ctx.fillStyle=c; ctx.beginPath(); ctx.arc(pad.l+5,pad.t+8+i*14,4,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#9ca3af'; ctx.fillText(l, pad.l+12, pad.t+11+i*14);
   });
