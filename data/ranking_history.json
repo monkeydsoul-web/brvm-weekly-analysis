@@ -1,16 +1,16 @@
 [
   {
-    "ts": "2026-05-13T23:03:52.422859+00:00",
+    "ts": "2026-05-15T15:39:22.821259+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -19,54 +19,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:04:10.955493+00:00",
+    "ts": "2026-05-15T15:40:18.925813+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -75,54 +75,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:04:22.818590+00:00",
+    "ts": "2026-05-15T15:40:25.821299+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -131,54 +131,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:05:18.950254+00:00",
+    "ts": "2026-05-15T15:40:31.832586+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -187,54 +187,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:05:25.818620+00:00",
+    "ts": "2026-05-15T15:40:54.257372+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -243,54 +243,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:05:54.231033+00:00",
+    "ts": "2026-05-15T15:42:18.580261+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -299,54 +299,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:07:19.054172+00:00",
+    "ts": "2026-05-15T15:43:11.267630+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -355,54 +355,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:08:11.278013+00:00",
+    "ts": "2026-05-15T15:43:16.665400+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -411,54 +411,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:08:13.340215+00:00",
+    "ts": "2026-05-15T15:43:52.411926+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -467,54 +467,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:08:16.667473+00:00",
+    "ts": "2026-05-15T15:44:10.966558+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -523,54 +523,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:08:52.417200+00:00",
+    "ts": "2026-05-15T15:44:22.802974+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -579,54 +579,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:09:10.983708+00:00",
+    "ts": "2026-05-15T15:45:18.944819+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -635,54 +635,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:09:22.821934+00:00",
+    "ts": "2026-05-15T15:45:25.802226+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -691,54 +691,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:10:18.948731+00:00",
+    "ts": "2026-05-15T15:45:31.828436+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -747,54 +747,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:10:25.812294+00:00",
+    "ts": "2026-05-15T15:45:54.258713+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -803,54 +803,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:10:54.231931+00:00",
+    "ts": "2026-05-15T15:47:17.053003+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -859,54 +859,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:12:17.026445+00:00",
+    "ts": "2026-05-15T15:48:11.294019+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -915,54 +915,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:13:11.266388+00:00",
+    "ts": "2026-05-15T15:48:16.662706+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -971,54 +971,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:13:13.348275+00:00",
+    "ts": "2026-05-15T15:48:54.329215+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1027,54 +1027,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:13:16.706369+00:00",
+    "ts": "2026-05-15T15:49:10.955301+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1083,54 +1083,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:13:53.686004+00:00",
+    "ts": "2026-05-15T15:49:22.809541+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1139,54 +1139,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:14:10.964161+00:00",
+    "ts": "2026-05-15T15:50:18.934849+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1195,54 +1195,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:14:22.816972+00:00",
+    "ts": "2026-05-15T15:50:25.808278+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1251,54 +1251,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:15:18.937667+00:00",
+    "ts": "2026-05-15T15:50:31.837763+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1307,54 +1307,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:15:25.810026+00:00",
+    "ts": "2026-05-15T15:50:54.218262+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1363,54 +1363,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:15:54.231799+00:00",
+    "ts": "2026-05-15T15:52:17.019307+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1419,54 +1419,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:17:17.036066+00:00",
+    "ts": "2026-05-15T15:53:11.309408+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1475,54 +1475,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:18:11.283136+00:00",
+    "ts": "2026-05-15T15:53:16.660214+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1531,54 +1531,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:18:13.341469+00:00",
+    "ts": "2026-05-15T15:53:52.416583+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1587,54 +1587,54 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
   },
   {
-    "ts": "2026-05-13T23:18:16.679673+00:00",
+    "ts": "2026-05-15T15:54:10.962177+00:00",
     "trigger": "scheduler",
     "top10": [
       {
         "ticker": "SIBC",
-        "score": 68.0,
+        "score": 69.0,
         "rank": 1
       },
       {
-        "ticker": "CABC",
-        "score": 65.3,
+        "ticker": "SMBC",
+        "score": 65.5,
         "rank": 2
       },
       {
@@ -1643,38 +1643,38 @@
         "rank": 3
       },
       {
-        "ticker": "BICC",
-        "score": 65.0,
+        "ticker": "SNTS",
+        "score": 64.5,
         "rank": 4
       },
       {
-        "ticker": "SNTS",
+        "ticker": "BICC",
         "score": 64.5,
         "rank": 5
       },
       {
-        "ticker": "BICB",
-        "score": 62.0,
+        "ticker": "CABC",
+        "score": 62.8,
         "rank": 6
       },
       {
-        "ticker": "SMBC",
-        "score": 61.0,
+        "ticker": "BICB",
+        "score": 61.5,
         "rank": 7
       },
       {
         "ticker": "SPHC",
-        "score": 61.0,
+        "score": 60.0,
         "rank": 8
       },
       {
         "ticker": "SDSC",
-        "score": 60.5,
+        "score": 58.5,
         "rank": 9
       },
       {
         "ticker": "ETIT",
-        "score": 60.1,
+        "score": 57.1,
         "rank": 10
       }
     ]
