@@ -377,6 +377,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .sb-acc.collapsed .sb-acc-arrow{transform:rotate(-90deg)}
 .ni-sub{padding-left:26px!important;font-size:12px;color:var(--text-2)}
 .ni-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:140px}
+.sb-acc .ni-label{max-width:none}
 .ni-sub span:first-child{font-size:12px}
 .sb.compact .sb-acc{justify-content:center;padding:10px 0}
 .sb.compact .sb-sub{display:none}
@@ -476,7 +477,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div class="ni ni-sub" onclick="nav('targets')" data-tip="Valeur 'juste' estimée de chaque action selon 3 méthodes · utile pour détecter les sous-évaluations"><span>◈</span> <span class="ni-label">Prix cibles</span></div>
       <div class="ni ni-sub" onclick="nav('perf')" data-tip="Évolution historique des cours depuis 2016 · comparez qui a le plus progressé"><span>◈</span> <span class="ni-label">Performances</span></div>
     </div>
-    <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Portefeuille &amp; Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
+    <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
       <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
       <div class="ni ni-sub" onclick="nav('sim')" data-tip="Projetez la valeur future de votre investissement sur 1 à 10 ans"><span>◈</span> <span class="ni-label">Simulateur div.</span></div>

@@ -115,9 +115,8 @@ function _renderScatterPE(){
   if(emptyEl){emptyEl.style.display='none';}
 
   // Axe X dynamique — jamais de valeur fixe
-  const peValues = pts.map(p => p.pe_ref).filter(v => v > 0);
-  const peRawMax = peValues.length > 0 ? Math.max(...peValues) : 20;
-  const peMax = pts.length === 1 ? peRawMax * 2 : Math.ceil(peRawMax * 1.3);
+  const rawMax = Math.max(...pts.map(p => p.pe_ref).filter(v => v > 0));
+  const peMax = pts.length === 1 ? rawMax * 2 : (rawMax > 0 ? Math.ceil(rawMax * 1.4) : 20);
   const dyMax=Math.max(...pts.map(x=>x.div_yield||0))*1.2||20;
   const pad={l:40,r:20,t:20,b:35};
   const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
