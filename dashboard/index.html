@@ -570,6 +570,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
       <div style="font-size:10px;color:var(--text-3);margin-bottom:8px">Meilleures opportunités selon nos modèles</div>
       <div id="dash-alerts-widget"></div>
+      <div style="margin-top:8px">
+        <button onclick="nav('rank')" class="btn btn-g" style="font-size:11px;width:100%">Voir les 47 sociétés →</button>
+      </div>
     </div>
     <!-- Agenda / Marché aujourd'hui -->
     <div class="card" style="margin-bottom:0">
@@ -707,7 +710,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
       <select id="fSort" onchange="renderRankLive()" title="Trier par...">
         <option value="composite_adj">Trier : Score</option><option value="div_yield">Trier : Dividende</option>
-        <option value="roe">Trier : ROE</option><option value="pe_ref">Trier : P/E</option>
+        <option value="pe_ref">Trier : P/E</option>
       </select>
       <select id="fVerdict" onchange="renderRankLive()">
         <option value="">Tous verdicts</option>
@@ -725,27 +728,28 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
       · Cliquez sur une société pour voir sa fiche complète<br>
-      · Utilisez "Trier par" pour classer par dividende, P/E ou ROE<br>
-      · Le score /10 combine 8 modèles financiers — au-dessus de 7 = signal fort
+      · Utilisez "Trier par" pour classer les actions par dividende ou P/E<br>
+      · La Note /10 combine 8 critères financiers — au-dessus de 7 = bonne opportunité<br>
+      · Conseil "✅ Acheter" = signal positif · "⚠️ Éviter" = signal négatif
     </div>
   </details>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
     <span id="rank-counter" style="font-size:11px;color:var(--t2)">Affichage : — / 47 sociétés</span>
     <button class="rank-tog-btn" id="rank-adv-tog" onclick="toggleRankAdv()">Afficher scores détaillés</button>
   </div>
+  <div style="font-size:11px;color:var(--t2);margin-bottom:8px">
+    <span style="color:var(--green)">✅ Note ≥ 7.5 = Excellent</span> · <span style="color:var(--amber)">⏳ Note 5–7 = Correct</span> · <span style="color:var(--red)">⚠️ Note &lt; 5 = À éviter</span>
+  </div>
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
       <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
-      <th class="tt" data-tt="Valeur totale de la société cotée en bourse · Cours × nombre d'actions">Valeur totale</th>
-      <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Cours</th>
-      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">Trend 30j</th>
-      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">Aujourd'hui</th>
-      <th class="tt" data-tt="Cours ÷ bénéfice par action · 💡 Bon signe : ≤ 15 — plus bas = action moins chère">P/E</th>
-      <th class="tt" data-tt="Cours ÷ valeur comptable · 💡 Bon signe : ≤ 1.5 — sous 1 = action bradée">P/B</th>
-      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an</th>
-      <th class="tt" data-tt="Rentabilité des capitaux propres · 💡 ≥ 15% = gestion excellente">ROE</th>
-      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Signal</th>
-      <th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th>
+      <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Prix</th>
+      <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">1 mois</th>
+      <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">+/- aujourd'hui</th>
+      <th class="tt" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
+      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
+      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Conseil</th>
+      <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
       <th class="adv-col" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
       <th class="adv-col" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
@@ -992,13 +996,13 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
       <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
       <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · Graham = valeur selon la formule classique de Benjamin Graham<br>
-        · EPV = valeur basée sur les bénéfices actuels normalisés<br>
-        · Si le cours actuel est sous le prix cible → potentiellement sous-évalué
+        · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
+        · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée (opportunité d'achat potentielle)<br>
+        · "🟢 Bonne affaire" = potentiel ≥ 30% · "👀 À surveiller" = potentiel modéré · "⚖️ Prix correct" = juste prix
       </div>
     </details>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th data-tip="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible <abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">Graham</abbr></th><th data-tip="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th><th data-tip="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible <abbr data-tip="Prix / Valeur comptable · compare le cours au patrimoine net de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">P/B</abbr></th><th data-tip="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th data-tip="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th><th data-tip="Signal IA issu des rapports PDF · ACHETER / NEUTRE / VENDRE">Signal</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -1295,6 +1299,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       · Le graphique Scatter montre les sociétés filtrées : zone idéale = P/E&lt;15 et Div&gt;5%
     </div>
   </details>
+  <div style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--t2)">
+    💡 <strong>Comment trouver une bonne action ?</strong> Cliquez sur une stratégie ci-dessous, ou réglez les filtres à la main. Une Note ≥ 6/10 avec un Conseil "✅ Acheter" est un bon point de départ.
+  </div>
   <!-- Presets stratégies -->
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
@@ -2385,7 +2392,8 @@ function _renderDaySignal(sorted) {
 
   el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
     <div style="flex:1;min-width:220px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
-      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:6px">${emoji} Marché ${label}</div>
+      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:2px">${emoji} Marché ${label}</div>
+      <div style="font-size:10px;color:var(--t2);margin-bottom:6px">${label==='Haussier'?'Plus de 60% des actions progressent ce jour':label==='Baissier'?'Plus de 60% des actions reculent ce jour':'Marché sans tendance claire — attendre'}</div>
       <div style="font-size:11px;color:var(--t1);line-height:1.8">
         <strong style="color:var(--green)">${gainers.length} ↑ haussiers</strong> · <strong style="color:var(--red)">${losers.length} ↓ baissiers</strong> · <strong style="color:var(--t2)">${flat.length} → stables</strong>
         <br><span style="font-size:10px;color:var(--t3)">↑ haussiers = actions dont le cours monte ce jour · ↓ = en baisse · → = inchangé</span>
@@ -2950,17 +2958,15 @@ function renderRank(){
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
       <td><strong>${x.ticker}</strong>${momBadge}</td>
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
-      <td style="font-size:10px;color:var(--t3)">${_capFmt(x)}</td>
       <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
       <td style="padding:2px 4px">${spk}</td>
       <td style="color:${chgC}">${chg?chg.toFixed(1)+'%':'—'}</td>
-      <td>${x.pe_ref||'—'}×</td><td style="color:var(--t2)">${x.pb_ref||'—'}×</td>
+      <td>${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
-      <td style="color:var(--green)">${x.roe||'—'}%</td>
-      <td><span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${x.pdf_verdict||'—'}</span></td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Score composite /10 · ≥7.5 excellent · 5–7.5 correct · <5 risqué">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td style="font-size:10px">${fmtVerdict(x.pdf_verdict)}</td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
-      <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+📦</button></td>
+      <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+ Portef.</button></td>
     </tr>`;}).join('');
   // Masquer par défaut les colonnes avancées
   if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
@@ -3530,17 +3536,15 @@ async function renderTargets(){
     const up=t.upside_pct||0;
     const cls=up>=30?'target-up':up<0?'target-dn':'';
     const vc=up>=30?'var(--green)':up<0?'var(--red)':'var(--amber)';
-    const vb=up>=30?'bg':up<0?'br':'ba';
+    const fmtAvis=(v)=>v==='Fort potentiel'?'✅ Bonne affaire':v==='Potentiel modéré'?'👀 À surveiller':v==='Proche valeur juste'?'⚖️ Prix correct':v?'⚠️ Trop cher':'—';
+    const fmtOpp=up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`;
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
-      <td style="color:var(--t2)">${t.graham_target?fmtXOF(t.graham_target):'—'}</td>
-      <td style="color:var(--t2)">${t.epv_target?fmtXOF(t.epv_target):'—'}</td>
-      <td style="color:var(--t2)">${t.pb_target?fmtXOF(t.pb_target):'—'}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
-      <td class="${cls}">${up?up.toFixed(1)+'%':'—'}</td>
-      <td><span class="b ${bcls10(v10fmt(t.score||0))}">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
-      <td><span class="b ${vb}" style="font-size:9px">${t.verdict||''}</span></td>
+      <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
+      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td style="font-size:11px">${fmtAvis(t.verdict)}</td>
     </tr>`;}).join('');
 }
 
@@ -5073,8 +5077,17 @@ function openHelpDrawer(page) {
   const content = _helpContent[page] || _helpContent['dash'];
   document.getElementById('help-page-title').textContent = content.title;
   const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
-    <div style="font-weight:700;color:var(--accent);margin-bottom:4px">🚀 Pour commencer</div>
-    <div style="color:var(--t2)">Score <span style="color:var(--gold);font-weight:700">≥ 7.5/10</span> = opportunité forte · <span style="color:var(--green);font-weight:700">✅ Acheter</span> = signal IA positif · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+    <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🚀 Pour commencer</div>
+    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--gold);font-weight:700">≥ 7.5/10</span> = bonne opportunité · <span style="color:var(--green);font-weight:700">✅ Acheter</span> = signal positif · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+    <div style="font-weight:700;color:var(--accent);margin-bottom:4px">📖 Mini-lexique</div>
+    <div style="color:var(--t2);line-height:2.1">
+      <strong>Note /10</strong> — qualité globale de l'action selon 8 critères financiers<br>
+      <strong>P/E</strong> — prix divisé par le bénéfice · bas = action moins chère<br>
+      <strong>Dividende</strong> — revenu versé chaque année par la société à ses actionnaires<br>
+      <strong>Prix juste estimé</strong> — valeur calculée à partir des bénéfices réels de la société<br>
+      <strong>Opportunité</strong> — écart entre le prix actuel et le prix juste (positif = potentiel de hausse)<br>
+      <strong>✅ Acheter / ⏳ Attendre / ⚠️ Éviter</strong> — conseil issu de l'analyse IA
+    </div>
   </div>`;
   document.getElementById('help-drawer-body').innerHTML = _universalHelp + content.sections.map(s => {
     if (s.h) return `<h3>${s.h}</h3>${s.p ? `<p>${s.p.replace(/\n/g,'<br>')}</p>` : ''}`;

@@ -14,9 +14,9 @@ async function renderPrevisionsPage() {
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
         ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique'],
-        ['signaux','📡 Signaux','Recommandation Acheter / Conserver / Vendre pour chaque société'],
-        ['backtest','🔬 Backtesting','Test de la stratégie sur données historiques réelles BOC'],
-        ['rapport','📄 Rapport','Synthèse complète des prévisions et signaux exportable'],
+        ['signaux','🔔 Par société','Recommandation Acheter / Conserver / Vendre pour chaque société'],
+        ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC'],
+        ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable'],
       ].map(([id,lbl,tip])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}">${lbl}</div>`).join('')}
     </div>
     <div id="prev-portfolios-panel"  class="stock-tab-panel${_prevTab==='portfolios'?' active':''}"></div>
@@ -76,7 +76,8 @@ function _prevDrawPortfolios(el) {
         <div class="card" style="margin-bottom:0;border-top:3px solid ${_riskColor[pf.risk]||'var(--blue)'}">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
             <div>
-              <div style="font-size:15px;font-weight:700;color:var(--text)">${pf.name}</div>
+              <div style="font-size:15px;font-weight:700;color:var(--text)">${pf.name==='Conservateur'?'🛡️ Prudent':pf.name==='Équilibré'?'⚖️ Équilibré':pf.name==='Croissance'?'🚀 Dynamique':pf.name}</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:2px">${pf.name==='Conservateur'?'Je veux protéger mon capital':pf.name==='Équilibré'?'Je veux croissance + sécurité':pf.name==='Croissance'?"J'accepte plus de risque":''}</div>
               <div style="font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;background:${_riskBg[pf.risk]||''};color:${_riskColor[pf.risk]||'var(--t2)'};margin-top:3px">Risque ${pf.risk}</div>
             </div>
             <div style="text-align:right">
@@ -85,19 +86,9 @@ function _prevDrawPortfolios(el) {
             </div>
           </div>
           <div style="font-size:10px;color:var(--t2);margin-bottom:10px;line-height:1.5">${pf.rationale}</div>
-          <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-            <div style="text-align:center">
-              <div style="font-size:9px;color:var(--t3)">Rend. attendu</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green)">${pf.exp_return}%</div>
-            </div>
-            <div style="text-align:center">
-              <div style="font-size:9px;color:var(--t3)">Volatilité</div>
-              <div style="font-size:14px;font-weight:700;color:var(--amber)">${pf.volatility}%</div>
-            </div>
-            <div style="text-align:center">
-              <div style="font-size:9px;color:var(--t3)">Sharpe</div>
-              <div style="font-size:14px;font-weight:700;color:var(--blue)">${pf.sharpe}</div>
-            </div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:10px;padding:6px 10px;background:var(--bg3);border-radius:6px">
+            📈 Rendement visé : <strong style="color:${_riskColor[pf.risk]||'var(--green)'}">+${pf.target_min}–${pf.target_max}%</strong> sur 12 mois estimés
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">⚠️ Estimation indicative — les performances passées ne garantissent pas les performances futures.</div>
           </div>
           <div style="margin-bottom:10px">
             ${(pf.stocks||[]).map(s => `
