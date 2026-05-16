@@ -471,6 +471,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
+    <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
       <div class="ni ni-sub" onclick="nav('news')" data-tip="Dernières nouvelles des sociétés BRVM avec analyse automatique du sentiment (positif/négatif)"><span>◈</span> <span class="ni-label">Actualités</span></div>
@@ -489,11 +490,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Revenus</span></div>
     </div>
     <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
-    <div class="sb-grp sb-acc" onclick="sbToggle('grp-outils')"><span>💬</span> <span class="ni-label">Outils</span><span class="sb-acc-arrow ni-label">▾</span></div>
-    <div class="sb-sub" id="grp-outils">
-      <div class="ni ni-sub" onclick="nav('chat')" data-tip="Posez vos questions sur n'importe quelle société BRVM à notre assistant IA"><span>◈</span> <span class="ni-label">Chat IA</span></div>
-      <div class="ni ni-sub" onclick="nav('glossaire');initGlossaire()"><span>◈</span> <span class="ni-label">Glossaire</span></div>
-    </div>
+    <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -509,6 +506,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
       <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
     </div>
+    <button onclick="toggleBeginnerMode()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide"><span id="beginner-icon">🌱</span> <span id="beginner-label">Mode débutant : OFF</span></button>
     <button onclick="startTour()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🎓 Revoir le tour guidé</button>
     <button id="eco-mode-btn" onclick="toggleEcoMode()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
     <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left">⟨ Réduire la sidebar</button>
@@ -537,62 +535,36 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-g" onclick="doRefresh()"><span id="ri">↻</span> Actualiser</button>
     </div>
   </div>
-  <!-- Intro BRVM — visible une seule fois -->
-  <div id="brvm-intro" style="background:linear-gradient(135deg,var(--accent-dim),var(--gold-dim));border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;display:flex;gap:20px;align-items:flex-start">
-    <div style="font-size:32px;line-height:1;flex-shrink:0">🌍</div>
-    <div style="flex:1">
-      <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Bienvenue sur BRVM Analyzer</div>
-      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7">
-        La <strong style="color:var(--accent)">BRVM</strong> (Bourse Régionale des Valeurs Mobilières) est la bourse commune de <strong>8 pays d'Afrique de l'Ouest</strong> (Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Niger, Togo, Guinée-Bissau). Elle regroupe <strong>47 sociétés cotées</strong> dans des secteurs variés : banques, industrie, télécoms, agriculture et énergie.<br>
-        <span style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">Ce dashboard analyse chaque société sur 8 modèles financiers pour vous aider à identifier les meilleures opportunités d'investissement.</span>
-      </div>
+  <!-- Hero bannière accueil -->
+  <div style="background:linear-gradient(135deg,rgba(45,212,191,0.08),rgba(251,191,36,0.05));border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:32px 36px;margin-bottom:24px">
+    <div style="font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:8px">📈 Bienvenue sur BRVM Analyzer</div>
+    <div style="font-size:14px;color:var(--text-2);line-height:1.8;max-width:700px;margin-bottom:20px">
+      Ce dashboard analyse en temps réel les <strong style="color:var(--accent)">47 sociétés</strong> cotées à la BRVM — la bourse commune des <strong style="color:var(--accent)">8 pays d'Afrique de l'Ouest</strong>. Il vous aide à identifier les meilleures opportunités d'investissement, suivre vos revenus et comprendre le marché, même sans expérience financière.
     </div>
-    <button onclick="document.getElementById('brvm-intro').style.display='none';localStorage.setItem('brvm_intro_seen','1')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:22px;padding:0;line-height:1;flex-shrink:0" title="Fermer">×</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="nav('rank')" style="background:var(--accent);color:#0d1117;font-weight:700;font-size:13px;padding:10px 20px;border-radius:var(--radius-sm);border:none;cursor:pointer">🏆 Voir le classement →</button>
+      <button onclick="nav('screener')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 20px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer">🔍 Trouver une action</button>
+      <button onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 20px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer">🤖 Voir les signaux IA</button>
+    </div>
   </div>
   <div class="g4" id="kpis"></div>
-  <!-- Widgets dashboard : portefeuille, alertes, agenda -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px">
-    <!-- Mon portefeuille -->
-    <div class="card" style="margin-bottom:0;cursor:pointer" onclick="nav('port');loadPortfolio()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct" style="margin:0" title="Résumé rapide de vos positions actuelles · Cliquez pour ouvrir le portefeuille complet">💼 Mon portefeuille</div>
-        <span style="font-size:9px;color:var(--t3)">→ Voir</span>
-      </div>
-      <div id="dash-port-widget">
-        <p style="font-size:11px;color:var(--t3)">Aucune position.</p>
-      </div>
+  <!-- IDs conservés pour compatibilité JS -->
+  <div id="dash-port-widget" style="display:none"></div>
+  <div id="dash-alerts-widget" style="display:none"></div>
+  <!-- Agenda -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0" id="dash-agenda-title" title="Événements de la semaine ou données marché en temps réel">📅 Agenda</div>
     </div>
-    <!-- Top opportunités du jour -->
-    <div class="card" style="margin-bottom:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <div class="ct" style="margin:0" title="Meilleures opportunités détectées par nos 8 modèles · Score ≥ 7/10 et signal positif">⚡ TOP DU JOUR</div>
-        <span onclick="nav('rank')" style="font-size:9px;color:var(--accent);cursor:pointer">→ Classement</span>
-      </div>
-      <div style="font-size:10px;color:var(--text-3);margin-bottom:8px">Meilleures opportunités selon nos modèles</div>
-      <div id="dash-alerts-widget"></div>
-      <div style="margin-top:8px">
-        <button onclick="nav('rank')" class="btn btn-g" style="font-size:11px;width:100%">Voir les 47 sociétés →</button>
-      </div>
-    </div>
-    <!-- Agenda / Marché aujourd'hui -->
-    <div class="card" style="margin-bottom:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct" style="margin:0" id="dash-agenda-title" title="Événements de la semaine ou données marché en temps réel">📅 Agenda</div>
-      </div>
-      <div id="dash-agenda-widget">
-        <p style="font-size:11px;color:var(--t3)">Chargement...</p>
-      </div>
-    </div>
+    <div id="dash-agenda-widget"><p style="font-size:11px;color:var(--t3)">Chargement...</p></div>
   </div>
   <!-- Signal du jour -->
   <div class="card" style="margin-bottom:12px;padding:12px 16px" id="signal-widget">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
       <div class="ct" style="margin:0" title="Meilleure opportunité détectée aujourd'hui par l'IA · 💡 Mis à jour à chaque actualisation">⚡ Signal du jour</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="signal-confidence" style="font-size:10px;font-weight:700;display:none"></span>
-        <span id="signal-composite-spk" style="display:inline-flex;align-items:center;gap:4px"></span>
-        <span id="signal-date" style="font-size:10px;color:var(--t3)"></span>
-      </div>
+      <span id="signal-date" style="font-size:10px;color:var(--t3)"></span>
+      <span id="signal-confidence" style="display:none"></span>
+      <span id="signal-composite-spk" style="display:none"></span>
     </div>
     <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
     <!-- Gauge score global du marché -->
@@ -605,6 +577,42 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
       <div style="text-align:center;margin-top:4px;font-size:10px;font-weight:600;color:var(--t2)" id="signal-gauge-label">—</div>
       <p class="help-text" style="text-align:center;margin-top:4px">Score moyen du marché · ≥ 7.5 = signal fort · positionné selon la proportion d'actions en zone favorable</p>
+    </div>
+  </div>
+  <!-- Guide 4 étapes -->
+  <div style="margin-bottom:24px">
+    <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:14px">Par où commencer ?</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('rank')">
+        <div style="font-size:20px;margin-bottom:8px">🏆</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">1. Voir le classement</div>
+        <div style="font-size:12px;color:var(--text-2)">Toutes les sociétés notées de 1 à 10. Commencez ici pour avoir une vue d'ensemble.</div>
+      </div>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('screener')">
+        <div style="font-size:20px;margin-bottom:8px">🔍</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">2. Filtrer par critères</div>
+        <div style="font-size:12px;color:var(--text-2)">Cherchez selon votre profil : dividende élevé, prix attractif, forte croissance.</div>
+      </div>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()">
+        <div style="font-size:20px;margin-bottom:8px">🤖</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">3. Consulter les signaux IA</div>
+        <div style="font-size:12px;color:var(--text-2)">Notre IA analyse chaque société et suggère Acheter, Attendre ou Éviter.</div>
+      </div>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('port')">
+        <div style="font-size:20px;margin-bottom:8px">💼</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">4. Suivre son portefeuille</div>
+        <div style="font-size:12px;color:var(--text-2)">Enregistrez vos positions pour suivre vos gains et dividendes reçus.</div>
+      </div>
+    </div>
+  </div>
+  <!-- Chiffres clés BRVM -->
+  <div style="margin-bottom:24px;background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px 20px">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:12px">La BRVM en chiffres</div>
+    <div style="display:flex;gap:32px;flex-wrap:wrap">
+      <div><div style="font-size:20px;font-weight:700;color:var(--accent);font-family:var(--font-mono)">47</div><div style="font-size:11px;color:var(--t3)">sociétés cotées</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:var(--font-mono)">8</div><div style="font-size:11px;color:var(--t3)">pays membres</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:var(--bull);font-family:var(--font-mono)">6 secteurs</div><div style="font-size:11px;color:var(--t3)">Banque · Industrie · Télécoms · Agri · Énergie · Utilities</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:var(--text-1);font-family:var(--font-mono)">BOC</div><div style="font-size:11px;color:var(--t3)">données officielles quotidiennes</div></div>
     </div>
   </div>
   <div class="g3" id="podium"></div>
@@ -631,40 +639,16 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="cSectDiv" style="width:100%;height:170px"></div></div>
   </div>
-  <div class="card" style="margin-bottom:12px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-    <div class="ct">📊 Marché BRVM — Aujourd'hui</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span id="market-weather">—</span>
-      <span id="market-time" style="font-size:10px;color:var(--t3)">—</span>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px" id="market-indices">
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">BRVM-COMPOSITE</div>
-      <div id="idx-composite" style="font-size:15px;font-weight:700">—</div>
-    </div>
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">BRVM-30</div>
-      <div id="idx-brvm30" style="font-size:15px;font-weight:700">—</div>
-    </div>
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Capitalisation</div>
-      <div id="idx-cap" style="font-size:13px;font-weight:700;color:var(--blue)">—</div>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div>
-      <div style="font-size:10px;color:var(--t3);margin-bottom:4px">🏆 Top 5 du jour</div>
-      <div id="market-top5" style="font-size:11px"></div>
-    </div>
-    <div>
-      <div style="font-size:10px;color:var(--t3);margin-bottom:4px">📉 Flop 5 du jour</div>
-      <div id="market-flop5" style="font-size:11px"></div>
-    </div>
-  </div>
-  <div id="macroTxt" style="font-size:11px;color:var(--t2);margin-top:8px;display:none">—</div>
-</div>
+  <!-- IDs marché conservés pour compatibilité JS -->
+  <div id="market-indices" style="display:none"></div>
+  <div id="market-top5" style="display:none"></div>
+  <div id="market-flop5" style="display:none"></div>
+  <div id="macroTxt" style="display:none"></div>
+  <span id="market-weather" style="display:none"></span>
+  <span id="market-time" style="display:none"></span>
+  <div id="idx-composite" style="display:none"></div>
+  <div id="idx-brvm30" style="display:none"></div>
+  <div id="idx-cap" style="display:none"></div>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
       <div class="ct" title="Vue d'ensemble des 47 sociétés · taille = score, couleur = variation du jour">🌡️ Heatmap BRVM — Performance du jour</div>
@@ -1395,8 +1379,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
   <div class="tab-bar">
-    <button class="tab-btn on" onclick="switchTab('signals','previsions',this)">🔮 Prévisions IA</button>
-    <button class="tab-btn" onclick="switchTab('signals','score',this);loadCustomScores()">⚙️ Score personnalisé</button>
+    <button class="tab-btn on" onclick="switchTab('signals','previsions',this)">🎯 Mes stratégies</button>
+    <button class="tab-btn" onclick="switchTab('signals','parsociete',this);renderSignauxParSociete()">🔔 Par société</button>
   </div>
   <div class="tab-content on" id="signals-tab-previsions">
     <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -1412,7 +1396,21 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Signaux pour charger...</div>
     </div>
   </div>
-  <div class="tab-content" id="signals-tab-score">
+  <div class="tab-content" id="signals-tab-parsociete">
+    <div style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--t2)">
+      💡 Cliquez sur n'importe quelle société pour voir sa fiche complète avec prix, dividende et analyse IA.
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table><thead><tr>
+        <th>Ticker</th><th>Société</th>
+        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
+        <th>Conseil</th>
+        <th>Dividende/an</th>
+      </tr></thead>
+      <tbody id="signaux-parsociete-body"></tbody></table>
+    </div>
+  </div>
+  <div class="tab-content" id="signals-tab-score" style="display:none">
     <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
       <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
       <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
@@ -1464,6 +1462,17 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       · Cliquez sur "Optimiser" pour voir le portefeuille recommandé
     </div>
   </details>
+  <!-- Explication corrélation -->
+  <div style="background:var(--bg-elevated);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:20px">
+    <div style="font-weight:600;color:var(--text-1);margin-bottom:6px;font-size:13px">🔗 À quoi sert cette page ?</div>
+    <div style="font-size:12px;color:var(--text-2);line-height:1.8">
+      Elle vous aide à <strong>ne pas mettre tous vos œufs dans le même panier</strong>.<br>
+      🟢 <strong style="color:var(--bull)">Vert</strong> = ces deux actions montent et baissent ensemble → risqué de les avoir toutes les deux.<br>
+      🔴 <strong style="color:var(--bear)">Rouge</strong> = elles évoluent en sens inverse → bonne diversification.<br>
+      ⬜ <strong>Gris</strong> = pas de lien entre elles → neutre.<br>
+      <span style="color:var(--t3);font-size:11px">Conseil : construisez un portefeuille avec peu de cases vertes.</span>
+    </div>
+  </div>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="ct" title="Coefficient de Pearson · +1 = évoluent ensemble, -1 = évoluent en sens contraire · 💡 Choisissez des actions peu corrélées pour diversifier">🔗 Matrice de corrélation — Top 15 actions (30j BOC)</div>
@@ -1484,6 +1493,13 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#22c55e;display:inline-block;border-radius:2px"></span> ≥ 0.7 Forte+</span>
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#64748b;display:inline-block;border-radius:2px"></span> ≈ 0 Neutre</span>
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#ef4444;display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
+    </div>
+  </div>
+  <!-- Résumé actionnable corrélation -->
+  <div style="margin-bottom:16px;background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:14px 18px">
+    <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:8px">💡 Ce que ça signifie pour votre portefeuille</div>
+    <div style="font-size:12px;color:var(--text-2);line-height:1.8">
+      Pour réduire le risque, choisissez des sociétés de <strong>secteurs différents</strong> (ex: une banque + une société agro-industrielle + une télécoms). Utilisez l'outil Optimisation ci-dessous pour trouver la meilleure combinaison.
     </div>
   </div>
   <!-- Markowitz guide étape par étape -->
@@ -2203,10 +2219,10 @@ function renderDash(m){
   localStorage.setItem(_LS_KPI_PREV, JSON.stringify({strong:nStrong, div:nDiv, total:scores.length}));
 
   const _kpiCards = [
-    {l:'Actions analysées', v:scores.length+_kpiArrow(scores.length,prevKpi.total), vc:'var(--text-1)', top:'var(--accent)', ctx:'47 sociétés · BOC live', tip:'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'},
-    {l:'Score fort ≥7.5', v:nStrong+_kpiArrow(nStrong,prevKpi.strong), vc:'var(--gold)', top:'var(--gold)', ctx:'Note /10 · signal fort', tip:'Actions avec score composite ≥ 7.5/10 (= 60/80) — zone d\'achat potentielle selon notre méthodologie multi-modèles.'},
-    {l:'Avec dividende', v:nDiv+_kpiArrow(nDiv,prevKpi.div), vc:'var(--bull)', top:'var(--bull)', ctx:'versent un dividende', tip:'Actions versant un dividende annuel connu (dividende par action > 0 dans les données BOC ou PDF).'},
-    {l:'Top rendement', v:wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', vc:'var(--gold)', top:'var(--gold)', ctx:'meilleur rendement BRVM', tip:'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'},
+    {l:'Sociétés analysées', v:scores.length+_kpiArrow(scores.length,prevKpi.total), vc:'var(--text-1)', top:'var(--accent)', ctx:'47 sociétés · BOC live', tip:'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'},
+    {l:'Avec signal fort ≥7.5', v:nStrong+_kpiArrow(nStrong,prevKpi.strong), vc:'var(--gold)', top:'var(--gold)', ctx:'Note /10 · opportunité forte', tip:'Actions avec note composite ≥ 7.5/10 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'},
+    {l:'Versent un dividende', v:nDiv+_kpiArrow(nDiv,prevKpi.div), vc:'var(--bull)', top:'var(--bull)', ctx:'revenu passif annuel', tip:'Actions versant un dividende annuel connu — revenu régulier pour l\'actionnaire.'},
+    {l:'Meilleur dividende', v:wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', vc:'var(--gold)', top:'var(--gold)', ctx:'meilleur rendement BRVM', tip:'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'},
   ];
   document.getElementById('kpis').innerHTML=_kpiCards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="border-top:2px solid ${k.top}"><div class="kl">${k.l}</div><div class="kv" style="color:${k.vc}">${k.v}</div><div style="font-size:11px;color:var(--text-3);margin-top:6px">${k.ctx}</div></div>`).join('');
 
@@ -2887,6 +2903,26 @@ async function toggleFav(ticker){
   document.querySelectorAll('.star').forEach(b=>{
     if(b.textContent==='★') b.classList.toggle('fav',favorites.includes(b.closest('[onclick]')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||''));
   });
+}
+
+// ── Signaux par société ────────────────────────────────────────────────────
+function renderSignauxParSociete(){
+  const tab = document.getElementById('signals-tab-parsociete');
+  if (!tab) return;
+  const all = (window.scores || scores || []).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const body = document.getElementById('signaux-parsociete-body');
+  if (!body) return;
+  if (!all.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--t2)">Chargement...</td></tr>'; return; }
+  body.innerHTML = all.map(x => {
+    const v = x.composite_adj || 0;
+    return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
+      <td><strong>${x.ticker}</strong></td>
+      <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note sur 8 critères · ≥7.5 excellent">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td style="font-size:11px">${fmtVerdict(x.pdf_verdict)}</td>
+      <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Classement ─────────────────────────────────────────────────────────────
@@ -5353,6 +5389,60 @@ gSpinShow = function() {
   clearTimeout(window._gSpinSafety);
   window._gSpinSafety = setTimeout(gSpinHide, 12000);
 };
+</script>
+
+<!-- Onboarding modal -->
+<div id="onboarding-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:32px;max-width:440px;width:90%">
+    <div id="ob-step-1">
+      <div style="font-size:32px;margin-bottom:12px">👋</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Bienvenue sur BRVM Analyzer !</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">Ce dashboard vous aide à investir à la BRVM même sans expérience. En 3 clics, vous trouverez les meilleures opportunités du marché.</div>
+      <button onclick="document.getElementById('ob-step-1').style.display='none';document.getElementById('ob-step-2').style.display='block'" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Commencer →</button>
+    </div>
+    <div id="ob-step-2" style="display:none">
+      <div style="font-size:32px;margin-bottom:12px">🏆</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Étape 1 : Le Classement</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">Chaque société reçoit une <strong>note de 1 à 10</strong>. Plus la note est haute, meilleure est la société selon nos 8 critères financiers.<br><br>✅ <strong>Note ≥ 7</strong> = signal d'achat potentiel<br>⏳ <strong>Note 5–7</strong> = à surveiller<br>⚠️ <strong>Note &lt; 5</strong> = à éviter</div>
+      <button onclick="document.getElementById('ob-step-2').style.display='none';document.getElementById('ob-step-3').style.display='block'" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Suivant →</button>
+    </div>
+    <div id="ob-step-3" style="display:none">
+      <div style="font-size:32px;margin-bottom:12px">🚀</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Vous êtes prêt !</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">💬 Cliquez sur <strong>Assistant IA</strong> dans le menu pour poser vos questions.<br><br>🔍 Utilisez le <strong>Screener</strong> pour filtrer selon vos critères.<br><br>❓ Le bouton <strong>?</strong> en bas à droite contient le lexique complet.</div>
+      <button onclick="document.getElementById('onboarding-modal').style.display='none';localStorage.setItem('onboarding_done','1')" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Accéder au dashboard →</button>
+    </div>
+    <div style="text-align:center;margin-top:12px">
+      <button onclick="document.getElementById('onboarding-modal').style.display='none';localStorage.setItem('onboarding_done','1')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer">Passer →</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if (!localStorage.getItem('onboarding_done')) {
+    const m = document.getElementById('onboarding-modal');
+    if (m) { m.style.display = 'flex'; }
+  }
+  function toggleBeginnerMode() {
+    const on = localStorage.getItem('beginner_mode') === '1';
+    const lbl = document.getElementById('beginner-label');
+    if (on) {
+      localStorage.removeItem('beginner_mode');
+      if (lbl) lbl.textContent = 'Mode débutant : OFF';
+      document.querySelectorAll('details').forEach(el => el.removeAttribute('open'));
+    } else {
+      localStorage.setItem('beginner_mode', '1');
+      if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';
+      document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
+    }
+  }
+  window.toggleBeginnerMode = toggleBeginnerMode;
+  if (localStorage.getItem('beginner_mode') === '1') {
+    const lbl = document.getElementById('beginner-label');
+    if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';
+    document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
+  }
+})();
 </script>
 
 </body></html>
