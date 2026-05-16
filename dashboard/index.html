@@ -381,6 +381,13 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .ni-sub span:first-child{font-size:12px}
 .sb.compact .sb-acc{justify-content:center;padding:10px 0}
 .sb.compact .sb-sub{display:none}
+/* ── Onglets de page ─────────────────────────────────────────────────────── */
+.tab-bar{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--border-2);padding-bottom:0}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-2);font-size:12px;padding:7px 14px;cursor:pointer;margin-bottom:-1px;font-weight:500;white-space:nowrap;transition:color .15s}
+.tab-btn.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab-btn:hover:not(.on){color:var(--text)}
+.tab-content{display:none}
+.tab-content.on{display:block}
 /* ── Slide-over fiche société ────────────────────────────────────────────── */
 #stock-slideover{position:fixed;top:0;right:-100%;width:min(780px,96vw);height:100vh;background:var(--bg-surface);border-left:1px solid var(--border-1);z-index:4500;display:flex;flex-direction:column;transition:right .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);overflow:hidden}
 #stock-slideover.open{right:0}
@@ -472,17 +479,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
-      <div class="ni ni-sub" onclick="nav('analyse')" data-tip="Optimisez votre portefeuille pour maximiser le rendement en réduisant le risque"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
-      <div class="ni ni-sub" onclick="nav('previsions')" data-tip="Signaux d'achat/vente générés par intelligence artificielle pour chaque société"><span>◈</span> <span class="ni-label">Prévisions IA</span></div>
-      <div class="ni ni-sub" onclick="nav('score-custom')" data-tip="Créez votre propre score en ajustant l'importance de chaque modèle d'analyse"><span>◈</span> <span class="ni-label">Score personnalisé</span></div>
-      <div class="ni ni-sub" onclick="nav('targets')" data-tip="Valeur 'juste' estimée de chaque action selon 3 méthodes · utile pour détecter les sous-évaluations"><span>◈</span> <span class="ni-label">Prix cibles</span></div>
-      <div class="ni ni-sub" onclick="nav('perf')" data-tip="Évolution historique des cours depuis 2016 · comparez qui a le plus progressé"><span>◈</span> <span class="ni-label">Performances</span></div>
+      <div class="ni ni-sub" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>◈</span> <span class="ni-label">Signaux</span></div>
+      <div class="ni ni-sub" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>◈</span> <span class="ni-label">Valorisation</span></div>
+      <div class="ni ni-sub" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
       <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
-      <div class="ni ni-sub" onclick="nav('sim')" data-tip="Projetez la valeur future de votre investissement sur 1 à 10 ans"><span>◈</span> <span class="ni-label">Simulateur div.</span></div>
-      <div class="ni ni-sub" onclick="nav('div')" data-tip="Calendrier des versements de dividendes · simulez vos revenus passifs annuels"><span>◈</span> <span class="ni-label">Dividendes</span></div>
+      <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Dividendes & Simulateur</span></div>
     </div>
     <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-outils')"><span>💬</span> <span class="ni-label">Outils</span><span class="sb-acc-arrow ni-label">▾</span></div>
@@ -854,204 +858,159 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
 </div>
 
-<!-- DIVIDENDES -->
-<div class="page" id="page-div">
+<!-- REVENUS (Dividendes + Simulateur) -->
+<div class="page" id="page-income">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>💰 Dividendes 2026</h2><p class="page-sub">Tableau de bord dividendes · rendements · ex-dates · revenus estimés</p></div></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Les dates en vert = prochains versements prévus<br>
-      · Utilisez le simulateur pour estimer vos revenus selon votre mise<br>
-      · Un dividende élevé n'est pas toujours bon — vérifiez aussi le score /10
-    </div>
-  </details>
-  <!-- Calendrier 12 mois visuel -->
-  <div class="card" style="margin-bottom:10px">
-    <div class="ct" style="margin-bottom:10px" title="Dates de détachement et paiement des dividendes sur 12 mois · 💡 Il faut posséder l'action AVANT la date ex-div pour toucher le dividende">📅 Calendrier annuel des détachements</div>
-    <div id="divCalMonths" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
+  <div class="ph"><div><h2>💰 Revenus</h2><p class="page-sub">Dividendes · calendrier · simulateur de revenus passifs</p></div></div>
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="switchTab('income','dividendes',this)">💰 Dividendes</button>
+    <button class="tab-btn" onclick="switchTab('income','simulateur',this);simBuildSliders();simCalc()">📊 Simulateur</button>
   </div>
-  <!-- Simulateur inline -->
-  <div class="card" style="margin-bottom:10px">
-    <div class="ct" style="margin-bottom:10px" title="Estimez vos revenus selon votre mise de départ · 💡 Modifiez l'action et le montant pour simuler différents scénarios">🧮 Simulateur de revenus dividendes</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-      <div>
-        <label style="font-size:10px;color:var(--t2)">Action</label>
-        <select id="divSimTicker" onchange="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px">
-          <option value="">— Choisir —</option>
-        </select>
+  <div class="tab-content on" id="income-tab-dividendes">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Les dates en vert = prochains versements prévus<br>
+        · Utilisez le simulateur pour estimer vos revenus selon votre mise<br>
+        · Un dividende élevé n'est pas toujours bon — vérifiez aussi le score /10
       </div>
-      <div>
-        <label style="font-size:10px;color:var(--t2)">Montant investi (XOF)</label>
-        <input id="divSimAmount" type="number" value="1000000" oninput="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;width:140px">
-      </div>
-      <div id="divSimResult" style="padding:8px 14px;border-radius:8px;background:var(--bg3);min-width:160px">
-        <div style="font-size:10px;color:var(--t2)">Revenus annuels estimés</div>
-        <div id="divSimOut" style="font-size:18px;font-weight:700;color:var(--amber)">—</div>
-        <div id="divSimDetail" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
-      </div>
+    </details>
+    <div class="card" style="margin-bottom:10px">
+      <div class="ct" style="margin-bottom:10px" title="Dates de détachement et paiement des dividendes sur 12 mois · 💡 Il faut posséder l'action AVANT la date ex-div pour toucher le dividende">📅 Calendrier annuel des détachements</div>
+      <div id="divCalMonths" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
     </div>
-  </div>
-  <div class="g2">
-    <div>
-      <div class="card"><div class="ct">📋 Prochains détachements</div><div id="divCal"></div></div>
-      <div class="card"><div class="ct">Rendements Top 15</div>
-        <div id="cDivDiv" style="width:100%;height:250px"></div></div>
-    </div>
-    <div class="card"><div class="ct">Top 15 rendements</div>
-      <table><thead><tr><th>Ticker</th><th>Dividende XOF</th><th>Rdt%</th><th>Ex-div</th><th>P/E</th><th>Verdict</th></tr></thead>
-      <tbody id="divTable"></tbody></table></div>
-  </div>
-</div>
-
-<!-- PERFORMANCES HISTORIQUES -->
-<div class="page" id="page-perf">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>Performances historiques</h2><p class="page-sub">Évolution des cours · données historiques BRVM</p></div></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Toutes les courbes partent de 100 pour comparer équitablement<br>
-      · Une valeur de 500 = le cours a été multiplié par 5 depuis le départ<br>
-      · Cliquez sur un nom dans la légende pour masquer/afficher cette courbe
-    </div>
-  </details>
-  <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
-</div>
-
-<!-- PRIX CIBLES -->
-<div class="page" id="page-targets">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>Prix cibles &amp; prévisions</h2><p class="page-sub">Objectifs de cours · Graham · EPV · P/B warranté · upside potentiel</p></div>
-    <span style="font-size:11px;color:var(--t2)">Graham · EPV · P/B warranté</span></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Graham = valeur selon la formule classique de Benjamin Graham<br>
-      · EPV = valeur basée sur les bénéfices actuels normalisés<br>
-      · Si le cours actuel est sous le prix cible → potentiellement sous-évalué
-    </div>
-  </details>
-  <div class="card" style="padding:0;overflow-x:auto">
-    <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th data-tip="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible <abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">Graham</abbr></th><th data-tip="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th><th data-tip="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible <abbr data-tip="Prix / Valeur comptable · compare le cours au patrimoine net de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">P/B</abbr></th><th data-tip="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th data-tip="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th><th data-tip="Signal IA issu des rapports PDF · ACHETER / NEUTRE / VENDRE">Signal</th></tr></thead>
-    <tbody id="targetsTable"></tbody></table></div>
-</div>
-
-<!-- SCORE PERSONNALISÉ -->
-<div class="page" id="page-score-custom">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>Score personnalisé</h2><p class="page-sub">Pondérez les 8 modèles selon votre stratégie d'investissement</p></div></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Faites glisser les curseurs pour ajuster l'importance de chaque modèle<br>
-      · Graham et EPV = valeur intrinsèque · DCF = flux futurs · Technique = momentum<br>
-      · Cliquez "Appliquer" pour recalculer le classement avec vos poids
-    </div>
-  </details>
-  <div class="g2" style="margin-bottom:12px">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">Profil d'investissement</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
-        <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
-      </div>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
-      <div id="weightSliders"></div>
-      <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
-      <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
-        <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
-        <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
-          <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
-          <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
-          <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
-          <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
-          <em>Le score technique est la moyenne pondérée de ces 4 indicateurs, sur 10 points.</em>
+    <div class="card" style="margin-bottom:10px">
+      <div class="ct" style="margin-bottom:10px" title="Estimez vos revenus selon votre mise de départ · 💡 Modifiez l'action et le montant pour simuler différents scénarios">🧮 Simulateur de revenus dividendes</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div>
+          <label style="font-size:10px;color:var(--t2)">Action</label>
+          <select id="divSimTicker" onchange="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px">
+            <option value="">— Choisir —</option>
+          </select>
         </div>
-      </details>
+        <div>
+          <label style="font-size:10px;color:var(--t2)">Montant investi (XOF)</label>
+          <input id="divSimAmount" type="number" value="1000000" oninput="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;width:140px">
+        </div>
+        <div id="divSimResult" style="padding:8px 14px;border-radius:8px;background:var(--bg3);min-width:160px">
+          <div style="font-size:10px;color:var(--t2)">Revenus annuels estimés</div>
+          <div id="divSimOut" style="font-size:18px;font-weight:700;color:var(--amber)">—</div>
+          <div id="divSimDetail" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
+        </div>
+      </div>
     </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">Classement personnalisé</div>
-      <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
-        <table><thead><tr><th>#</th><th>Ticker</th><th>Société</th><th>Score std</th><th>Score perso</th><th>Variation</th></tr></thead>
-        <tbody id="customRankBody"></tbody></table></div></div>
+    <div class="g2">
+      <div>
+        <div class="card"><div class="ct">📋 Prochains détachements</div><div id="divCal"></div></div>
+        <div class="card"><div class="ct">Rendements Top 15</div>
+          <div id="cDivDiv" style="width:100%;height:250px"></div></div>
+      </div>
+      <div class="card"><div class="ct">Top 15 rendements</div>
+        <table><thead><tr><th>Ticker</th><th>Dividende XOF</th><th>Rdt%</th><th>Ex-div</th><th>P/E</th><th>Verdict</th></tr></thead>
+        <tbody id="divTable"></tbody></table></div>
+    </div>
   </div>
-</div>
-
-<!-- SIMULATEUR DIVIDENDES -->
-<div class="page" id="page-sim">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>Simulateur de revenus dividendes</h2><p class="page-sub">Projetez vos revenus passifs selon votre capital et les rendements actuels</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
+  <div class="tab-content" id="income-tab-simulateur">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">
       <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
       <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
     </div>
-  </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Entrez votre mise de départ et la durée souhaitée<br>
-      · La croissance estimée vient des Prévisions IA composite 4 facteurs<br>
-      · Les dividendes sont réinvestis automatiquement dans la simulation
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Entrez votre mise de départ et la durée souhaitée<br>
+        · La croissance estimée vient des Prévisions IA composite 4 facteurs<br>
+        · Les dividendes sont réinvestis automatiquement dans la simulation
+      </div>
+    </details>
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
+      <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
+      <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
+      <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
+      <div>3️⃣ <strong>Dividendes</strong> → estimés sur la base des taux historiques <abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BRVM</abbr></div>
+      <div>4️⃣ <strong>Croissance</strong> → basée sur les Prévisions IA composite 4 facteurs</div>
+      <div style="margin-top:8px;color:var(--t2);">⚠️ Simulation indicative · Les performances passées ne garantissent pas les résultats futurs</div>
     </div>
-  </details>
-  <!-- Explication simulateur -->
-  <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
-    <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
-    <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
-    <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
-    <div>3️⃣ <strong>Dividendes</strong> → estimés sur la base des taux historiques <abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BRVM</abbr></div>
-    <div>4️⃣ <strong>Croissance</strong> → basée sur les Prévisions IA composite 4 facteurs</div>
-    <div style="margin-top:8px;color:var(--t2);">⚠️ Simulation indicative · Les performances passées ne garantissent pas les résultats futurs</div>
-  </div>
-  <!-- Paramètres haut -->
-  <div class="g3" style="margin-bottom:12px">
-    <div class="kpi">
-      <div class="kl">Montant à investir</div>
-      <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-        <input type="number" id="simInv2" value="1000000" min="10000" step="10000" oninput="simCalc()" style="flex:1">
-        <div style="display:flex;gap:2px">
-          <button id="simCurXOF" class="curr-btn on" onclick="simSetCur('XOF')">XOF</button>
-          <button id="simCurEUR" class="curr-btn" onclick="simSetCur('EUR')">EUR</button>
-          <button id="simCurUSD" class="curr-btn" onclick="simSetCur('USD')">USD</button>
+    <div class="g3" style="margin-bottom:12px">
+      <div class="kpi">
+        <div class="kl">Montant à investir</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+          <input type="number" id="simInv2" value="1000000" min="10000" step="10000" oninput="simCalc()" style="flex:1">
+          <div style="display:flex;gap:2px">
+            <button id="simCurXOF" class="curr-btn on" onclick="simSetCur('XOF')">XOF</button>
+            <button id="simCurEUR" class="curr-btn" onclick="simSetCur('EUR')">EUR</button>
+            <button id="simCurUSD" class="curr-btn" onclick="simSetCur('USD')">USD</button>
+          </div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kl">Horizon (années) : <span id="simYearsVal">5</span></div>
+        <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;simCalc()" style="margin-top:8px" title="Durée de votre investissement · 💡 Plus long = plus de dividendes cumulés grâce aux intérêts composés">
+      </div>
+      <div class="kpi" style="display:flex;align-items:center;gap:10px">
+        <div>
+          <div class="kl">Réinvest. dividendes</div>
+          <input type="checkbox" id="simReinvest2" checked onchange="simCalc()" style="width:auto;margin-top:6px;transform:scale(1.4)" title="Les dividendes reçus sont réinvestis chaque année · 💡 Effet boule de neige — accélère la croissance du capital">
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:10px;flex:1">
+          <div class="kl">Taux croissance div/an</div>
+          <input type="number" id="simGrowth" value="3" min="0" max="20" step="0.5" oninput="simCalc()" style="margin-top:4px" title="Progression estimée du dividende par action chaque année · 💡 Historique BRVM : 2-5% en moyenne">
         </div>
       </div>
     </div>
-    <div class="kpi">
-      <div class="kl">Horizon (années) : <span id="simYearsVal">5</span></div>
-      <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;simCalc()" style="margin-top:8px" title="Durée de votre investissement · 💡 Plus long = plus de dividendes cumulés grâce aux intérêts composés">
-    </div>
-    <div class="kpi" style="display:flex;align-items:center;gap:10px">
-      <div>
-        <div class="kl">Réinvest. dividendes</div>
-        <input type="checkbox" id="simReinvest2" checked onchange="simCalc()" style="width:auto;margin-top:6px;transform:scale(1.4)" title="Les dividendes reçus sont réinvestis chaque année · 💡 Effet boule de neige — accélère la croissance du capital">
+    <div class="g4" id="simKPIs" style="margin-bottom:12px"></div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:0">
+        <div class="ct">Répartition par action (sliders)</div>
+        <div id="simSliders2" style="max-height:320px;overflow-y:auto"></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--t2)">Poids total : <span id="simTotalW" style="font-weight:700;color:var(--text)">0%</span></div>
       </div>
-      <div style="border-left:1px solid var(--border);padding-left:10px;flex:1">
-        <div class="kl">Taux croissance div/an</div>
-        <input type="number" id="simGrowth" value="3" min="0" max="20" step="0.5" oninput="simCalc()" style="margin-top:4px" title="Progression estimée du dividende par action chaque année · 💡 Historique BRVM : 2-5% en moyenne">
+      <div class="card" style="margin-bottom:0">
+        <div class="ct" title="Estimation de vos dividendes cumulés sur 5 ans · 💡 Inclut réinvestissement si coché">Dividendes projetés sur 5 ans (XOF)</div>
+        <div id="cSimDiv" style="width:100%;height:260px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">Détail par action — projection an 1</div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rendement div.</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /10</th></tr></thead>
+        <tbody id="simTable2"></tbody></table>
       </div>
     </div>
   </div>
-  <!-- KPI résultats -->
-  <div class="g4" id="simKPIs" style="margin-bottom:12px"></div>
-  <div class="g2" style="margin-bottom:12px">
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">Répartition par action (sliders)</div>
-      <div id="simSliders2" style="max-height:320px;overflow-y:auto"></div>
-      <div style="margin-top:8px;font-size:11px;color:var(--t2)">Poids total : <span id="simTotalW" style="font-weight:700;color:var(--text)">0%</span></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct" title="Estimation de vos dividendes cumulés sur 5 ans · 💡 Inclut réinvestissement si coché">Dividendes projetés sur 5 ans (XOF)</div>
-      <div id="cSimDiv" style="width:100%;height:260px"></div>
-    </div>
+</div>
+
+<!-- VALORISATION (Prix cibles + Performances) -->
+<div class="page" id="page-valuation">
+  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div class="ph"><div><h2>📊 Valorisation</h2><p class="page-sub">Prix cibles · performances historiques · upside potentiel</p></div></div>
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="switchTab('valuation','cibles',this)">🎯 Prix cibles</button>
+    <button class="tab-btn" onclick="switchTab('valuation','perf',this);if(typeof renderPerfPage!=='undefined')renderPerfPage()">📈 Performances</button>
   </div>
-  <div class="card">
-    <div class="ct">Détail par action — projection an 1</div>
-    <div style="overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rendement div.</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /10</th></tr></thead>
-      <tbody id="simTable2"></tbody></table>
-    </div>
+  <div class="tab-content on" id="valuation-tab-cibles">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Graham = valeur selon la formule classique de Benjamin Graham<br>
+        · EPV = valeur basée sur les bénéfices actuels normalisés<br>
+        · Si le cours actuel est sous le prix cible → potentiellement sous-évalué
+      </div>
+    </details>
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Cours actuel</th><th data-tip="Prix juste selon la formule de Benjamin Graham · Cours ÷ racine(22.5 × BNA × VCA)">Cible <abbr data-tip="Méthode d'analyse fondée sur la marge de sécurité · Benjamin Graham" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">Graham</abbr></th><th data-tip="Valeur basée sur les bénéfices normalisés · Earnings Power Value (Greenwald)">Cible <abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th><th data-tip="Prix cible basé sur le ratio Prix / Valeur comptable · 💡 Juste quand P/B ≤ 1.5">Cible <abbr data-tip="Prix / Valeur comptable · compare le cours au patrimoine net de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">P/B</abbr></th><th data-tip="Moyenne des 3 méthodes de valorisation · Donne une fourchette de prix raisonnable">Cible moy.</th><th data-tip="Écart entre le cours actuel et la cible moyenne · 💡 Positif = action encore sous-évaluée">Potentiel</th><th data-tip="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10</th><th data-tip="Signal IA issu des rapports PDF · ACHETER / NEUTRE / VENDRE">Signal</th></tr></thead>
+      <tbody id="targetsTable"></tbody></table></div>
+  </div>
+  <div class="tab-content" id="valuation-tab-perf">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Toutes les courbes partent de 100 pour comparer équitablement<br>
+        · Une valeur de 500 = le cours a été multiplié par 5 depuis le départ<br>
+        · Cliquez sur un nom dans la légende pour masquer/afficher cette courbe
+      </div>
+    </details>
+    <div id="perfPageContent"><div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Performances pour charger...</div></div>
   </div>
 </div>
 
@@ -1422,28 +1381,72 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 </div>
 
-<!-- PRÉVISIONS IA -->
-<div class="page" id="page-previsions">
+<!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
+<div class="page" id="page-signals">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
-  <div class="ph"><div><h2>🔮 Prévisions IA</h2><p class="page-sub">Portefeuilles recommandés · signaux tendanciels · projections de revenus</p></div>
+  <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · ✅ Acheter = les modèles détectent un signal haussier<br>
-      · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
-      · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
-      · Ces prévisions sont indicatives — pas de conseil en investissement
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="switchTab('signals','previsions',this)">🔮 Prévisions IA</button>
+    <button class="tab-btn" onclick="switchTab('signals','score',this);loadCustomScores()">⚙️ Score personnalisé</button>
+  </div>
+  <div class="tab-content on" id="signals-tab-previsions">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · ✅ Acheter = les modèles détectent un signal haussier<br>
+        · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
+        · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
+        · Ces prévisions sont indicatives — pas de conseil en investissement
+      </div>
+    </details>
+    <div id="page-previsions-content">
+      <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Signaux pour charger...</div>
     </div>
-  </details>
-  <div id="page-previsions-content">
-    <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Prévisions IA pour charger...</div>
+  </div>
+  <div class="tab-content" id="signals-tab-score">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Faites glisser les curseurs pour ajuster l'importance de chaque modèle<br>
+        · Graham et EPV = valeur intrinsèque · DCF = flux futurs · Technique = momentum<br>
+        · Cliquez "Appliquer" pour recalculer le classement avec vos poids
+      </div>
+    </details>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:0">
+        <div class="ct">Profil d'investissement</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
+          <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
+        <div id="weightSliders"></div>
+        <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
+        <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
+          <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
+          <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
+            <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
+            <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
+            <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
+            <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
+            <em>Le score technique est la moyenne pondérée de ces 4 indicateurs, sur 10 points.</em>
+          </div>
+        </details>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct">Classement personnalisé</div>
+        <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
+          <table><thead><tr><th>#</th><th>Ticker</th><th>Société</th><th>Score std</th><th>Score perso</th><th>Variation</th></tr></thead>
+          <tbody id="customRankBody"></tbody></table></div></div>
+    </div>
   </div>
 </div>
 
-<!-- ANALYSE & OPTIM -->
-<div class="page" id="page-analyse">
+<!-- OPTIMISATION & ANALYSE -->
+<div class="page" id="page-optim">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
   <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -1644,8 +1647,8 @@ function setCurrency(c) {
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
   if (active === 'rank') renderRankLive();
   else if (active === 'dash') renderDash({});
-  else if (active === 'div') renderDiv();
-  else if (active === 'targets') renderTargets();
+  else if (active === 'income') renderDiv();
+  else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
 }
 
@@ -1695,21 +1698,19 @@ document.querySelectorAll('.ni').forEach(el => {
 let _gsIdx = -1;
 
 const _PAGES = [
-  {id:'dash',  icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
-  {id:'rank',  icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
-  {id:'screener',icon:'🔍',label:'Screener',           desc:'Filtres avancés P/E, score, dividende'},
-  {id:'port',  icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
-  {id:'sim',   icon:'🧮', label:'Simulateur dividendes',desc:'Projection revenus, Markowitz'},
-  {id:'div',   icon:'💰', label:'Dividendes',           desc:'Calendrier, rendements 2026'},
-  {id:'targets',icon:'🎯',label:'Prix cibles',          desc:'Graham, EPV, P/B cible'},
-  {id:'perf',  icon:'📈', label:'Performances',         desc:'Historique cours, base 100'},
-  {id:'alerts',icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
-  {id:'news',  icon:'📰', label:'Actualités',           desc:'News marché et résultats'},
-  {id:'chat',  icon:'💬', label:'Chat IA',              desc:'Analyste IA BRVM'},
-  {id:'analyse',icon:'📐',label:'Analyse & Optim',      desc:'Corrélation, Markowitz'},
-  {id:'glossaire',icon:'📚',label:'Glossaire',          desc:'Termes financiers expliqués'},
-  {id:'comm',  icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
-  {id:'score-custom',icon:'⚖️',label:'Score personnalisé',desc:'Ajuster les poids des modèles'},
+  {id:'dash',     icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
+  {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
+  {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
+  {id:'port',     icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
+  {id:'income',   icon:'💰', label:'Dividendes & Simulateur', desc:'Calendrier dividendes, revenus passifs'},
+  {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
+  {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
+  {id:'optim',    icon:'📐', label:'Analyse & Optim',      desc:'Corrélation, Markowitz, frontière efficiente'},
+  {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
+  {id:'news',     icon:'📰', label:'Actualités',           desc:'News marché et résultats'},
+  {id:'chat',     icon:'💬', label:'Chat IA',              desc:'Analyste IA BRVM'},
+  {id:'glossaire',icon:'📚', label:'Glossaire',            desc:'Termes financiers expliqués'},
+  {id:'comm',     icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
 ];
 
 function openGSearch(){
@@ -4517,15 +4518,25 @@ async function loadStatus(){
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
-  port:     loadPortfolio,
-  alerts:   ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
-  sim:      ()=>{simBuildSliders();simCalc();},
-  perf:     ()=>{if(typeof renderPerfPage!=='undefined')renderPerfPage();},
-  screener: ()=>{if(typeof initScreener!=='undefined')initScreener();},
-  analyse:  ()=>renderCorrelMatrix(),
-  previsions:()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
-  macro:    ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
+  port:      loadPortfolio,
+  alerts:    ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
+  income:    ()=>{renderDiv();},
+  valuation: ()=>{renderTargets();},
+  signals:   ()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
+  optim:     ()=>renderCorrelMatrix(),
+  screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
+  macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
 };
+
+function switchTab(pageId, tabId, btn) {
+  const page = document.getElementById('page-' + pageId);
+  if (!page) return;
+  page.querySelectorAll('.tab-content').forEach(t => t.classList.remove('on'));
+  page.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  const tabEl = document.getElementById(pageId + '-tab-' + tabId);
+  if (tabEl) tabEl.classList.add('on');
+  if (btn) btn.classList.add('on');
+}
 
 // ── Matrice de corrélation ─────────────────────────────────────────────────
 function renderCorrelMatrix() {
@@ -5222,7 +5233,7 @@ const _kbdMap = {
   'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
   'a': {fn: ()=>{nav('actualites') || nav('news');}, label: 'A → Actualités'},
   'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
-  'd': {fn: ()=>{nav('div');renderDiv();}, label: 'D → Dividendes'},
+  'd': {fn: ()=>{nav('income');renderDiv();}, label: 'D → Dividendes'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
   'c': {fn: ()=>{nav('chat');}, label: 'C → Chat IA'},
   '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
@@ -5230,10 +5241,9 @@ const _kbdMap = {
 
 const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', news:'Actualités', comm:'Commodités',
-  macro:'Macro UEMOA', screener:'Screener', analyse:'Analyse & Optim',
-  previsions:'Prévisions IA', 'score-custom':'Score personnalisé', targets:'Prix cibles',
-  perf:'Performances', port:'Portefeuille', sim:'Simulateur div.', div:'Dividendes',
-  alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
+  macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
+  signals:'Signaux', valuation:'Valorisation', income:'Dividendes & Simulateur',
+  port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
 };
 
 document.addEventListener('keydown', function(e) {
