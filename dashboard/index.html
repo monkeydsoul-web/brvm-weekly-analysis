@@ -2388,12 +2388,7 @@ function _renderDaySignal(sorted) {
   // Confidence score: based on breadth + avg score quality
   const avgScore = all.length ? all.reduce((s,x)=>s+(x.composite_adj||0),0)/all.length : 0;
   const confidence = Math.round((breadth * 60 + (avgScore/80) * 40));
-  const confEl = document.getElementById('signal-confidence');
-  if (confEl) {
-    confEl.textContent = `Confiance ${confidence}%`;
-    confEl.style.color = confidence >= 60 ? 'var(--green)' : confidence >= 40 ? 'var(--amber)' : 'var(--red)';
-    confEl.style.display = '';
-  }
+  // signal-confidence volontairement masqué (display:none conservé)
 
   // Update gauge
   const gaugeWrap = document.getElementById('signal-gauge-wrap');
@@ -2512,21 +2507,7 @@ async function _renderDashAgendaWidget(){
     const today = new Date().toISOString().slice(0,10);
     const upcoming = events.filter(e => (e.date||'') >= today).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
     if (!upcoming.length) {
-      // Fallback : afficher les données marché du jour
-      const sc = window.scores || [];
-      const mkt = window._marketData || {};
-      const comp = mkt.composite || {};
-      const b30  = mkt.brvm30   || {};
-      const bull = sc.filter(x => (x.change_pct||0) > 0).length;
-      const bear = sc.filter(x => (x.change_pct||0) < 0).length;
-      const compC = (comp.change||0) >= 0 ? 'var(--bull)' : 'var(--bear)';
-      const b30C  = (b30.change||0)  >= 0 ? 'var(--bull)' : 'var(--bear)';
-      const agTitle = document.getElementById('dash-agenda-title'); if(agTitle) agTitle.textContent = '📈 MARCHÉ';
-      el.innerHTML = `<div style="font-size:11px;display:flex;flex-direction:column;gap:5px">
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">BRVM-C</span><span style="color:${compC};font-weight:700">${comp.current?Number(comp.current).toFixed(2):'—'} <span style="font-size:10px">${comp.change!=null?(comp.change>=0?'+':'')+Number(comp.change).toFixed(2)+'%':'—'}</span></span></div>
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">BRVM-30</span><span style="color:${b30C};font-weight:700">${b30.current?Number(b30.current).toFixed(2):'—'} <span style="font-size:10px">${b30.change!=null?(b30.change>=0?'+':'')+Number(b30.change).toFixed(2)+'%':'—'}</span></span></div>
-        <div style="font-size:10px;color:var(--text-3);margin-top:2px">${bull} ↑ haussiers · ${bear} ↓ baissiers · ${sc.length} sociétés</div>
-      </div>`;
+      el.innerHTML = '<p style="font-size:11px;color:var(--t3)">Aucun événement à venir</p>';
       return;
     }
     el.innerHTML = upcoming.map(e => {
