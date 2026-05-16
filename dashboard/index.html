@@ -486,7 +486,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
       <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
-      <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Dividendes & Simulateur</span></div>
+      <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Revenus</span></div>
     </div>
     <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-outils')"><span>💬</span> <span class="ni-label">Outils</span><span class="sb-acc-arrow ni-label">▾</span></div>
@@ -1702,7 +1702,7 @@ const _PAGES = [
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
   {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
   {id:'port',     icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
-  {id:'income',   icon:'💰', label:'Dividendes & Simulateur', desc:'Calendrier dividendes, revenus passifs'},
+  {id:'income',   icon:'💰', label:'Revenus',                  desc:'Dividendes, calendrier, simulateur revenus passifs'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
   {id:'optim',    icon:'📐', label:'Analyse & Optim',      desc:'Corrélation, Markowitz, frontière efficiente'},
@@ -3431,9 +3431,19 @@ async function renderDiv(){
 
   // Calendrier 12 mois visuel
   const MONTHS_FR = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  // Résout mois depuis format DD-MMM.-YY (ex: "30-sept.-25") ou ISO YYYY-MM-DD
+  const _FR_MON = {jan:0,janv:0,'fév':1,févr:1,fev:1,fevr:1,mar:2,mars:2,avr:3,mai:4,juin:5,juil:6,'aoû':7,aou:7,'août':7,sep:8,sept:8,oct:9,nov:10,'déc':11,dec:11};
+  function _exDivMonth(d) {
+    if (!d || d==='N/D') return -1;
+    const iso = d.match(/^(\d{4})-(\d{2})/);
+    if (iso) return parseInt(iso[2]) - 1;
+    const parts = d.split('-');
+    if (parts.length >= 2) { const k = parts[1].replace(/\./g,'').toLowerCase(); return _FR_MON[k]??-1; }
+    return -1;
+  }
   const byMonth = {};
   wdate.forEach(x=>{
-    const m = parseInt((x.ex_div_date||'').split('-')[1]||'0')-1;
+    const m = _exDivMonth(x.ex_div_date);
     if(m>=0){ if(!byMonth[m]) byMonth[m]=[]; byMonth[m].push(x); }
   });
   const calMonthsEl = document.getElementById('divCalMonths');
@@ -5242,7 +5252,7 @@ const _kbdMap = {
 const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', news:'Actualités', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
-  signals:'Signaux', valuation:'Valorisation', income:'Dividendes & Simulateur',
+  signals:'Signaux', valuation:'Valorisation', income:'Revenus',
   port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
 };
 
