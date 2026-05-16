@@ -551,13 +551,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <!-- IDs conservés pour compatibilité JS -->
   <div id="dash-port-widget" style="display:none"></div>
   <div id="dash-alerts-widget" style="display:none"></div>
-  <!-- Agenda -->
-  <div class="card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="ct" style="margin:0" id="dash-agenda-title" title="Événements de la semaine ou données marché en temps réel">📅 Agenda</div>
-    </div>
-    <div id="dash-agenda-widget"><p style="font-size:11px;color:var(--t3)">Chargement...</p></div>
-  </div>
+  <!-- Agenda masqué — widget conservé pour compatibilité JS -->
+  <div id="dash-agenda-title" style="display:none"></div>
+  <div id="dash-agenda-widget" style="display:none"></div>
   <!-- Signal du jour -->
   <div class="card" style="margin-bottom:12px;padding:12px 16px" id="signal-widget">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
@@ -2304,14 +2300,15 @@ async function renderDividendesVenir() {
       .filter(x => x._date && x._date >= today)
       .sort((a, b) => a._date - b._date)
       .slice(0, 3);
-    // Fallback: estimate next cycle (+1 year) from most recent past dates
+    // Fallback: avance par années jusqu'à ce que la date soit dans le futur
     if (!items.length) {
       isEstimated = true;
       items = withDates
         .map(x => {
           const d = parseFr(x.ex_div_date);
           if (!d) return null;
-          const next = new Date(d); next.setFullYear(next.getFullYear() + 1);
+          const next = new Date(d);
+          while (next < today) next.setFullYear(next.getFullYear() + 1);
           return { ...x, _date: next, _orig: d };
         })
         .filter(Boolean)
@@ -2322,15 +2319,17 @@ async function renderDividendesVenir() {
     el.innerHTML = '<span style="color:var(--t3);font-size:11px">Données indisponibles.</span>';
     return;
   }
+  // Filtre final : ne garder que les dates futures (daysLeft >= 0)
+  items = items.filter(x => x._date >= today);
   if (!items.length) {
-    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucun détachement dans les données disponibles.</span>';
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px">📅 Aucun détachement de dividende prévu prochainement.<br><span style="font-size:11px;margin-top:4px;display:block">Les prochaines dates seront affichées dès qu'elles seront disponibles.</span></div>`;
     return;
   }
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
     ${items.map(x => {
       const d = x._date;
       const label = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
-      const daysLeft = Math.ceil((d - new Date()) / 86400000);
+      const daysLeft = Math.max(0, Math.ceil((d - new Date()) / 86400000));
       const urgCol = daysLeft <= 14 ? 'var(--red)' : daysLeft <= 60 ? 'var(--amber)' : 'var(--t2)';
       return `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer" onclick="_openStock('${x.ticker}')">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
