@@ -54,9 +54,8 @@ async function renderPerfPage() {
     p.totalDivsXof = totalDivs;
   });
 
-  if (_perfSelected.length === 0) {
-    _perfSelected = performers.slice(0,5).map(p=>p.ticker);
-  }
+  // Always reselect top 5 performers on fresh page load
+  _perfSelected = performers.slice(0,5).map(p=>p.ticker);
 
   container.innerHTML = `
     <div class="card" style="margin-bottom:12px">
@@ -225,6 +224,21 @@ function setPerfPeriod(period) {
   });
   const btn = document.getElementById(`btn-period-${period}`);
   if (btn) { btn.style.background = 'var(--blue)22'; btn.style.color = 'var(--blue)'; btn.style.borderColor = 'var(--blue)'; }
+
+  // Recompute top 5 performers for this period
+  const top5ForPeriod = Object.entries(_perfData)
+    .map(([ticker, rawPts]) => {
+      const pts = _filterByPeriod([...rawPts].sort((a,b)=>a.date.localeCompare(b.date)));
+      if (pts.length < 2) return null;
+      const first = pts[0].price, last = pts[pts.length-1].price;
+      return first > 0 ? {ticker, perf:(last-first)/first*100} : null;
+    })
+    .filter(Boolean)
+    .sort((a,b) => b.perf - a.perf)
+    .slice(0,5)
+    .map(p=>p.ticker);
+  if (top5ForPeriod.length >= 2) _perfSelected = top5ForPeriod;
+
   _drawPerfChart('perf-chart', _perfSelected);
 }
 

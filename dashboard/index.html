@@ -1315,7 +1315,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div class="card" style="margin-bottom:12px">
     <div class="ct" style="margin-bottom:10px">Filtres combinables</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px">
+    <!-- sc-roe conservé caché pour les presets (Croissance, Défensif) -->
+    <input type="hidden" id="sc-roe" value="">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Score min /10</label>
         <input id="sc-score" type="number" placeholder="ex: 6" min="0" max="10" step="0.5" oninput="runScreener()"
@@ -1336,13 +1338,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
           title="Rendement dividende minimum en % · 💡 ≥ 5% = bon revenu passif annuel"
           style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
         <div class="help-text">Revenu passif · ≥ 5% = excellent</div>
-      </div>
-      <div>
-        <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">ROE% min</label>
-        <input id="sc-roe" type="number" placeholder="ex: 15" min="0" oninput="runScreener()"
-          title="Rentabilité des capitaux propres minimum · 💡 ≥ 15% = gestion solide et profitable"
-          style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
-        <div class="help-text">Rentabilité · ≥ 15% = solide</div>
       </div>
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Secteur</label>
@@ -2986,11 +2981,14 @@ function renderRank(){
   if(ctr) ctr.textContent=`Affichage : ${d.length} / ${scores.length} sociétés`;
 
   const ph=window._priceHistory||{};
+  const _dow = new Date().getDay(); // 0=dim, 6=sam
+  const _isWeekend = _dow === 0 || _dow === 6;
+  const _staleLbl = `<span style="color:var(--t3);font-size:9px">(ven.)</span>`;
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
     const hist30=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-30);
-    const spk=hist30.length>=2?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">—</span>`;
+    const spk=hist30.length>=2?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
     // Momentum badge (5j vs 20j)
     const boc20=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-20);
     let momBadge='';
@@ -3008,7 +3006,7 @@ function renderRank(){
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
       <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
       <td style="padding:2px 4px">${spk}</td>
-      <td style="color:${chgC}">${chg?chg.toFixed(1)+'%':'—'}</td>
+      <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
       <td>${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtVerdict(x.pdf_verdict)}</td>
