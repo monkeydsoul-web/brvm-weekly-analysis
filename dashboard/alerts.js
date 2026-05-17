@@ -234,7 +234,15 @@ function renderAlertsPanel() {
   const all = window.scores || scores || [];
   const entries = Object.entries(priceAlerts).filter(([,a]) => a.length > 0);
   if (!entries.length) {
-    panel.innerHTML = '<p style="color:var(--t2);font-size:12px;padding:12px 0">Aucune alerte configurée.</p>';
+    panel.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🔔</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">Aucune alerte configurée</div>
+      <div style="font-size:13px;color:var(--t2);max-width:340px;margin:0 auto 20px;line-height:1.7">
+        Créez une alerte pour être notifié quand une action atteint votre prix cible.<br>
+        <span style="font-size:11px;color:var(--t3)">Ex : SIBC atteint 8 000 XOF → notification.</span>
+      </div>
+      <button onclick="showAddAlert()" style="background:var(--accent);color:#0d1117;font-weight:600;padding:10px 24px;border-radius:6px;border:none;cursor:pointer;font-size:13px">+ Créer ma première alerte</button>
+    </div>`;
     return;
   }
   panel.innerHTML = entries.map(([ticker, alerts]) => {
