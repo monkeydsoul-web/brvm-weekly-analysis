@@ -518,8 +518,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
     <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;cursor:pointer;white-space:nowrap" onclick="nav('dash')">BRVM <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Tableau de bord</span></span>
-    <span id="msb-composite" style="color:var(--text-2);white-space:nowrap"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
-    <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
+    <span id="msb-composite" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
+    <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
   </div>
   <span id="msb-time" style="color:var(--text-3);font-size:11px;white-space:nowrap;font-family:-apple-system,sans-serif">MàJ —</span>
@@ -2208,17 +2208,23 @@ function renderDash(m){
   const wd=scores.filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
 
   // KPI trend arrows
-  const nStrong = s.filter(x=>(x.composite_adj||0)>=60).length;
+  // Données valides = plus de 20 sociétés avec un score composite > 0
+  const _validScores = s.filter(x => (x.composite_adj||0) > 0);
+  const _dataOk = _validScores.length >= 20;
+  const nStrong = _dataOk ? s.filter(x=>(x.composite_adj||0)>=60).length : null;
   const nDiv = wd.length;
+  // Meilleur dividende : div_yield > 50% est aberrant (données stale)
+  const _topDiv = wd.find(x => (x.div_yield||0) > 0 && (x.div_yield||0) <= 50);
   let prevKpi = {};
   try { prevKpi = JSON.parse(localStorage.getItem(_LS_KPI_PREV)||'{}'); } catch{}
-  localStorage.setItem(_LS_KPI_PREV, JSON.stringify({strong:nStrong, div:nDiv, total:scores.length}));
+  if (_dataOk) localStorage.setItem(_LS_KPI_PREV, JSON.stringify({strong:nStrong, div:nDiv, total:scores.length}));
 
+  const _kpiMktClosed = !_dataOk ? '<span style="font-size:10px;color:var(--t3)">Marché fermé</span>' : null;
   const _kpiCards = [
     {l:'Sociétés analysées', v:scores.length+_kpiArrow(scores.length,prevKpi.total), vc:'var(--text-1)', top:'var(--accent)', ctx:'47 sociétés · BOC live', tip:'Nombre total d\'actions BRVM analysées par les 8 modèles de valorisation fondamentale et technique.'},
-    {l:'Avec signal fort ≥7.5', v:nStrong+_kpiArrow(nStrong,prevKpi.strong), vc:'var(--gold)', top:'var(--gold)', ctx:'Note /10 · opportunité forte', tip:'Actions avec note composite ≥ 7.5/10 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'},
+    {l:'Avec signal fort ≥7.5', v:nStrong!=null?nStrong+_kpiArrow(nStrong,prevKpi.strong):_kpiMktClosed, vc:'var(--gold)', top:'var(--gold)', ctx:'Note /10 · opportunité forte', tip:'Actions avec note composite ≥ 7.5/10 — zone d\'achat potentielle selon notre méthodologie multi-modèles.'},
     {l:'Versent un dividende', v:nDiv+_kpiArrow(nDiv,prevKpi.div), vc:'var(--bull)', top:'var(--bull)', ctx:'revenu passif annuel', tip:'Actions versant un dividende annuel connu — revenu régulier pour l\'actionnaire.'},
-    {l:'Meilleur dividende', v:wd[0]?wd[0].ticker+' '+(wd[0].div_yield||0).toFixed(1)+'%':'—', vc:'var(--gold)', top:'var(--gold)', ctx:'meilleur rendement BRVM', tip:'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'},
+    {l:'Meilleur dividende', v:_topDiv?_topDiv.ticker+' '+(_topDiv.div_yield||0).toFixed(1)+'%':'—', vc:'var(--gold)', top:'var(--gold)', ctx:'meilleur rendement BRVM', tip:'Meilleur rendement dividende = dividende annuel / cours actuel. Attention : rendement élevé peut signaler un risque.'},
   ];
   document.getElementById('kpis').innerHTML=_kpiCards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="border-top:2px solid ${k.top}"><div class="kl">${k.l}</div><div class="kv" style="color:${k.vc}">${k.v}</div><div style="font-size:11px;color:var(--text-3);margin-top:6px">${k.ctx}</div></div>`).join('');
 
@@ -2361,6 +2367,19 @@ function _renderDaySignal(sorted) {
   const gainers = withChg.filter(x => x.change_pct > 0);
   const losers  = withChg.filter(x => x.change_pct < 0);
   const flat    = withChg.filter(x => x.change_pct === 0);
+
+  // Détection marché fermé : >10 sociétés connues mais 0 hausse ET 0 baisse
+  const marketClosed = withChg.length > 10 && gainers.length === 0 && losers.length === 0;
+  if (marketClosed) {
+    // Détermine si c'est samedi ou dimanche pour adapter le message
+    const dow = new Date().getDay(); // 0=dim, 6=sam
+    const nextOpen = dow === 0 ? 'lundi' : dow === 6 ? 'lundi' : 'demain';
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">📴 Marché fermé · Données du dernier jour de bourse<br><span style="font-size:11px;margin-top:4px;display:block">Les cours seront mis à jour à la prochaine ouverture (${nextOpen})</span></div>`;
+    const gaugeWrap = document.getElementById('signal-gauge-wrap');
+    if (gaugeWrap) gaugeWrap.style.display = 'none';
+    return;
+  }
+
   const breadth = gainers.length / (withChg.length || 1);
 
   // Top sector by average score
