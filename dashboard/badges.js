@@ -32,12 +32,12 @@ function updateRankHistory(ranking) {
 
 function getRankBadge(ticker, currentRank) {
   const hist = _rankHistory[ticker];
-  if (!hist || hist.length < 2) return '<span style="color:var(--t2);font-size:10px">—</span>';
+  if (!hist || hist.length < 2) return '';
   const prev = hist[hist.length - 2].rank;
   const delta = prev - currentRank;
   if (delta > 0) return `<span style="color:var(--green);font-size:10px;font-weight:700">▲${delta}</span>`;
   if (delta < 0) return `<span style="color:var(--red);font-size:10px;font-weight:700">▼${Math.abs(delta)}</span>`;
-  return '<span style="color:var(--t2);font-size:10px">—</span>';
+  return '';
 }
 
 // ── Badge rang dans la fiche société ─────────────────────────────────────
@@ -60,7 +60,7 @@ function renderLiveRankBadge(ticker) {
         🏆 Rang <strong style="color:${scoreC}">#${rank}</strong>/${total} ${badge}
       </span>
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
-        Score <strong style="color:${scoreC}">${(entry.composite_adj||0).toFixed(0)}/80</strong>
+        Note <strong style="color:${scoreC}">${((entry.composite_adj||0)/80*10).toFixed(1)}/10</strong>
       </span>
       ${verdict ? `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${verdC}22;color:${verdC};font-weight:700">${verdict}</span>` : ''}
       ${entry.eps ? `<span style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3)">BNA <strong>${entry.eps.toLocaleString('fr-FR')} XOF</strong></span>` : ''}

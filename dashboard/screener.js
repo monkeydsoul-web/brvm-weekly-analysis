@@ -54,7 +54,7 @@ function _renderScreenerTable() {
   if (!tbody) return;
 
   if (!_scrResults.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--t2);padding:20px">Aucun résultat — ajustez les filtres.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--t2);padding:20px">Aucun résultat — ajustez les filtres.</td></tr>';
     return;
   }
 
@@ -72,8 +72,8 @@ function _renderScreenerTable() {
     const chg = x.change_pct || 0;
     const chgC = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
     const chgS = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
-    const roe = x.roe ? x.roe + '%' : '—';
-    const verd = x.pdf_verdict || '—';
+    const verd = x.pdf_verdict || '';
+    const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
     const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
     // Prix cible Graham ou EPV
     const eps = x.eps || 0; const bvpa = x.bvpa || 0;
@@ -97,12 +97,10 @@ function _renderScreenerTable() {
       </td>
       <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${target>0?'600':'400'}">${targetStr}${targetArrow}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pe}</td>
-      <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pb}</td>
       <td style="padding:8px 12px;text-align:right;font-weight:600;color:${dyC}">${dy}</td>
-      <td style="padding:8px 12px;text-align:right;color:var(--t2)">${roe}</td>
       <td style="padding:8px 12px;text-align:right;color:${chgC};font-weight:600">${chgS}</td>
       <td style="padding:8px 12px;text-align:center;white-space:nowrap">
-        <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${verd==='POSITIF'?'rgba(74,222,128,0.15)':verd==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${verd}</span>
+        <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${verd==='POSITIF'?'rgba(74,222,128,0.15)':verd==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${verdLabel}</span>
         <button onclick="event.stopPropagation();showStock('${x.ticker}')" style="background:none;border:1px solid var(--border-1);color:var(--text-2);font-size:11px;padding:2px 7px;border-radius:var(--radius-sm);cursor:pointer;margin-left:4px">Fiche →</button>
       </td>
     </tr>`;

@@ -1097,8 +1097,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <span id="news-count" style="font-size:10px;color:var(--t2)"></span>
       </div>
       <div id="newsList"><p style="color:var(--t2)">Lance une mise à jour.</p></div>
+      <div id="news-sent-note" style="display:none;font-size:11px;color:var(--t3);padding:8px 0;margin-top:8px">
+        📰 Articles analysés automatiquement · Sentiment basé sur les mots-clés dans les titres
+      </div>
     </div>
-    <div class="card" style="margin-bottom:0"><div class="ct">Sentiment par action</div>
+    <div id="news-sent-panel" class="card" style="margin-bottom:0"><div class="ct">Sentiment par action</div>
       <div id="cSentDiv" style="width:100%;height:320px"></div></div>
   </div>
 </div>
@@ -1120,16 +1123,19 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="font-size:10px;color:var(--t3)" title="Taux directeur de la banque centrale · impact direct sur le coût du crédit et les valorisations boursières">Taux directeur BCEAO</div>
         <div style="font-size:28px;font-weight:700;color:var(--amber)">6,5%</div>
         <div style="font-size:10px;color:var(--t2)">Inchangé depuis mars 2024</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5">Taux élevé = crédit plus cher pour les entreprises → peut peser sur leurs bénéfices et dividendes</div>
       </div>
       <div class="card" style="margin-bottom:0;text-align:center">
         <div style="font-size:10px;color:var(--t3)">Inflation UEMOA estimée</div>
         <div style="font-size:28px;font-weight:700;color:var(--amber)">~3,1%</div>
         <div style="font-size:10px;color:var(--t2)">Sous la cible 3% BCEAO</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5">Proche de la cible BCEAO de 3% · situation stable · une inflation basse protège le pouvoir d'achat</div>
       </div>
       <div class="card" style="margin-bottom:0;text-align:center">
         <div style="font-size:10px;color:var(--t3)" title="Performance depuis le 1er janvier de l'année · YTD = Year To Date">BRVM-COMPOSITE YTD</div>
         <div id="macro-brvm-ytd" style="font-size:28px;font-weight:700;color:var(--green)">+1,7%</div>
         <div style="font-size:10px;color:var(--t2)">Depuis janvier 2026</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5">Performance de la bourse depuis janvier 2026 · positif = le marché global est en hausse</div>
       </div>
     </div>
     <div class="g2" style="margin-bottom:12px">
@@ -1355,11 +1361,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10<span class="sort-ind"> ↓</span></th>
         <th style="padding:8px 12px;text-align:right" title="Prix cible estimé selon Graham ou EPV · vert = cours sous la cible">Cible</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pb_ref" onclick="screenerSortBy('pb_ref')" title="Cours ÷ valeur comptable · Bon signe : ≤ 1.5">P/B<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="roe" onclick="screenerSortBy('roe')" title="Rentabilité des capitaux propres · ≥ 15% = excellent">ROE<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="change_pct" onclick="screenerSortBy('change_pct')" title="Variation de cours depuis la clôture d'hier">Var. j.<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:center" title="Recommandation IA issue des rapports PDF · ACHETER / NEUTRE / VENDRE">Verdict</th>
+        <th style="padding:8px 12px;text-align:center" title="Recommandation IA issue des rapports PDF · Acheter / Attendre / Éviter">Conseil</th>
       </tr></thead>
       <tbody id="screener-table"></tbody>
     </table>
@@ -3248,7 +3252,14 @@ function _portValueSeries(positions){
 
 function _portDrawChart(series, positions){
   const el = document.getElementById('port-value-chart');
-  if(!el||series.length<2) { if(el) el.innerHTML='<p style="color:var(--t2);padding:20px;text-align:center">Données historiques insuffisantes.</p>'; return; }
+  if(!el||series.length<2) {
+    if(el) el.innerHTML=`<div style="text-align:center;padding:32px 16px;color:var(--t3);font-size:13px">
+      <div style="font-size:28px;margin-bottom:10px">📈</div>
+      <div style="font-weight:600;color:var(--t2);margin-bottom:6px">Le graphique apparaîtra ici</div>
+      <div style="font-size:12px;line-height:1.6">L'évolution de votre portefeuille sera tracée<br>au fur et à mesure que vous ajoutez des positions<br>et que les cours évoluent.</div>
+    </div>`;
+    return;
+  }
 
   const W=el.clientWidth||700, H=160;
   const pad={l:60,r:20,t:10,b:28};
@@ -3913,7 +3924,8 @@ function renderNews(f=''){
   const tickerSect={};
   (window.scores||scores||[]).forEach(x=>{ if(x.ticker&&x.sector) tickerSect[x.ticker]=x.sector; });
 
-  let n = [...news];
+  const _SPAM = ['identifiant oublié','créer un compte','se connecter','mot de passe','inscription','login','register'];
+  let n = [...news].filter(x => !_SPAM.some(w => (x.title||'').toLowerCase().includes(w)));
   if(ticker) n=n.filter(x=>x.tickers?.includes(ticker));
   if(sect)   n=n.filter(x=>(x.tickers||[]).some(t=>tickerSect[t]===sect));
   if(sentFil){
@@ -3969,7 +3981,16 @@ function renderNews(f=''){
     </div>`;}).join('')
     :'<p style="color:var(--t2)">Aucune actualité.</p>';
   const sd=scores.filter(x=>x.sentiment_score!==0&&x.sentiment_score!=null).sort((a,b)=>(b.sentiment_score||0)-(a.sentiment_score||0)).slice(0,12);
-  if(sd.length) svgBar(document.getElementById('cSentDiv'),sd.map(x=>x.ticker),sd.map(x=>Math.abs(x.sentiment_score||0)),sd.map(x=>(x.sentiment_score||0)>0?'#4ADE80':'#F87171'),320,true);
+  const sentPanel = document.getElementById('news-sent-panel');
+  const sentNote  = document.getElementById('news-sent-note');
+  if(sd.length){
+    if(sentPanel) sentPanel.style.display = '';
+    if(sentNote)  sentNote.style.display  = 'none';
+    svgBar(document.getElementById('cSentDiv'),sd.map(x=>x.ticker),sd.map(x=>Math.abs(x.sentiment_score||0)),sd.map(x=>(x.sentiment_score||0)>0?'#4ADE80':'#F87171'),320,true);
+  } else {
+    if(sentPanel) sentPanel.style.display = 'none';
+    if(sentNote)  sentNote.style.display  = '';
+  }
 }
 function filterNews(){renderNews();}
 
@@ -4316,7 +4337,7 @@ async function showStock(ticker){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
           <div class="ct" style="margin-bottom:0">Scores détaillés — 8 modèles de valorisation</div>
           <div style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:${v>=65?'rgba(74,222,128,.15)':v>=50?'rgba(251,191,36,.15)':'rgba(248,113,113,.15)'};color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">
-            Score ${(v/80*10).toFixed(1)}/10 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
+            Note ${(v/80*10).toFixed(1)}/10 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:7px">
