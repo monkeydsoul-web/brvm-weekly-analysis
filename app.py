@@ -1192,10 +1192,44 @@ def api_dividends():
 
 @app.route("/api/price-history")
 def api_price_history():
-    """Historique de prix pour le graphique performances."""
+    """Historique de prix pour le graphique performances.
+    Enrichit avec des points synthétiques boc_data pour les tickers sans historique."""
     try:
+        import datetime as _dt
         from price_history_builder import load_history
-        return jsonify(load_history())
+        history = load_history()
+
+        boc_path = os.path.join(DATA_DIR, "boc_data.json")
+        if os.path.exists(boc_path):
+            with open(boc_path) as _f:
+                boc = json.load(_f)
+            _today = _dt.date.today().isoformat()
+            _yesterday = (_dt.date.today() - _dt.timedelta(days=1)).isoformat()
+            _year_start = f"{_dt.date.today().year}-01-01"
+
+            for ticker, entry in boc.items():
+                if not isinstance(entry, dict):
+                    continue
+                close = entry.get("cours_clot") or 0
+                prev  = entry.get("cours_prev") or close
+                var_a = entry.get("var_annee") or 0
+                if close <= 0 or var_a == -100:
+                    continue
+                real_pts = history.get(ticker, [])
+                if len(real_pts) >= 3:
+                    continue
+                year_price = round(close / (1 + var_a / 100), 2)
+                synthetic = [
+                    {"date": _year_start, "price": float(year_price), "source": "synthetic"},
+                    {"date": _yesterday,  "price": float(prev),       "source": "boc"},
+                    {"date": _today,      "price": float(close),      "source": "boc"},
+                ]
+                real_dates = {p["date"] for p in real_pts}
+                merged = synthetic + [p for p in real_pts if p["date"] not in {_year_start, _yesterday, _today}]
+                merged.sort(key=lambda x: x["date"])
+                history[ticker] = merged
+
+        return jsonify(history)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

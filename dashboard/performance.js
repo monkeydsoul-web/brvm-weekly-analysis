@@ -30,6 +30,7 @@ async function renderPerfPage() {
     const sorted = [...pts].sort((a,b) => a.date.localeCompare(b.date));
     const first = sorted[0].price, last = sorted[sorted.length-1].price;
     if (first > 0) {
+      const isSynthetic = sorted.some(p => p.source === 'synthetic');
       performers.push({
         ticker,
         perf: ((last - first) / first * 100),
@@ -37,6 +38,7 @@ async function renderPerfPage() {
         perf3y: _perfNy(sorted, 3),
         first, last,
         pts: sorted.length,
+        isSynthetic,
         name: (all.find(x=>x.ticker===ticker)||{}).name || ''
       });
     }
@@ -130,13 +132,15 @@ function _renderPerfList(id, performers, isTop) {
     const pSign = p.perf >= 0 ? '+' : '';
     const trDiff = p.totalReturn != null && p.totalDivsXof > 0
       ? `<span style="font-size:9px;color:var(--amber)"> +div</span>` : '';
+    const ytdTag = p.isSynthetic
+      ? `<span style="font-size:9px;color:var(--t3);margin-left:3px">YTD</span>` : '';
     return `<div onclick="showStock('${p.ticker}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
       <div>
         <span style="font-weight:700;font-size:12px">${p.ticker}</span>
         <span style="font-size:10px;color:var(--t2);margin-left:4px">${p.name.substring(0,18)}</span>
       </div>
       <div style="text-align:right">
-        <div style="color:${c};font-weight:700;font-size:13px">${trSign}${tr.toFixed(1)}%${trDiff}</div>
+        <div style="color:${c};font-weight:700;font-size:13px">${trSign}${tr.toFixed(1)}%${trDiff}${ytdTag}</div>
         <div style="font-size:9px;color:var(--t3)">cours: ${pSign}${p.perf.toFixed(1)}%</div>
       </div>
     </div>`;
@@ -148,11 +152,13 @@ function _renderPalmaresAnnuel(performers) {
   if (!el) return;
 
   const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let y = currentYear - 1; y >= currentYear - 5; y--) years.push(y);
+  const years = [currentYear];
+  for (let y = currentYear - 1; y >= currentYear - 4; y--) years.push(y);
 
+  const _cy = new Date().getFullYear();
   const yearlyPerf = years.map(year => {
-    const startCut = `${year}-01-01`, endCut = `${year}-12-31`;
+    const startCut = `${year}-01-01`;
+    const endCut   = year === _cy ? new Date().toISOString().slice(0,10) : `${year}-12-31`;
     const results = performers.map(p => {
       const pts = (_perfData[p.ticker]||[]).sort((a,b)=>a.date.localeCompare(b.date));
       const yearPts = pts.filter(x=>x.date>=startCut && x.date<=endCut);
@@ -162,15 +168,16 @@ function _renderPalmaresAnnuel(performers) {
       return {ticker:p.ticker, name:p.name, perf};
     }).filter(Boolean);
     results.sort((a,b)=>b.perf-a.perf);
-    return {year, top3: results.slice(0,3), flop3: results.slice(-3).reverse()};
+    return {year, isCurrentYear: year === _cy, top3: results.slice(0,3), flop3: results.slice(-3).reverse()};
   }).filter(y => y.top3.length > 0);
 
   if (!yearlyPerf.length) { el.innerHTML = '<p style="color:var(--t2);font-size:11px">Historique annuel insuffisant.</p>'; return; }
 
   let html = `<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">`;
-  yearlyPerf.forEach(({year, top3, flop3}) => {
+  yearlyPerf.forEach(({year, isCurrentYear, top3, flop3}) => {
+    const yearLabel = isCurrentYear ? `${year} <span style="font-size:9px;color:var(--t3)">YTD</span>` : year;
     html += `<div style="min-width:160px;background:var(--bg3);border-radius:8px;padding:10px;flex-shrink:0">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center">${year}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center">${yearLabel}</div>
       ${top3.map((p,i)=>`<div onclick="showStock('${p.ticker}')" style="display:flex;justify-content:space-between;padding:3px 0;cursor:pointer;border-bottom:1px solid var(--border)">
         <span style="font-size:11px;font-weight:600;color:var(--green)">${['🥇','🥈','🥉'][i]} ${p.ticker}</span>
         <span style="font-size:10px;color:var(--green)">+${p.perf.toFixed(0)}%</span>
