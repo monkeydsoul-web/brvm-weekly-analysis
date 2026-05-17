@@ -3438,14 +3438,15 @@ function divSimCalc(){
   if(!ticker||!amount){ if(outEl) outEl.textContent='—'; return; }
   const stock = _divData.find(x=>x.ticker===ticker);
   if(!stock){ if(outEl) outEl.textContent='—'; return; }
-  const dy = stock.div_yield||0;
-  const price = stock.price||1;
-  const shares = Math.floor(amount/price);
-  const divPS = stock.div_per_share||0;
-  const annRev = shares * divPS;
-  const monthRev = annRev/12;
+  let dy = stock.div_yield||0;
+  const warnCap = dy > 50;
+  if (warnCap) dy = 50;
+  const annRev = amount * (dy / 100);
+  const monthRev = annRev / 12;
   if(outEl) outEl.textContent = fmtXOF(Math.round(annRev));
-  if(detEl) detEl.innerHTML = `${shares.toLocaleString('fr-FR')} actions × ${fmtXOF(Math.round(divPS))} = ${dy.toFixed(1)}% rdt<br>≈ ${fmtXOF(Math.round(monthRev))}/mois`;
+  if(detEl) detEl.innerHTML = `${amount.toLocaleString('fr-FR')} XOF × ${dy.toFixed(1)}% de rendement annuel`
+    + `<br>≈ ${fmtXOF(Math.round(monthRev))}/mois`
+    + (warnCap ? `<br><span style="color:var(--amber)">⚠️ Rendement plafonné à 50% (valeur source anormale)</span>` : '');
 }
 
 async function renderDiv(){
@@ -4594,7 +4595,12 @@ function renderCorrelMatrix() {
   const ph = window._priceHistory || {};
   const all = window.scores || scores || [];
   if (!all.length || !Object.keys(ph).length) {
-    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Données historiques indisponibles.</p>';
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:12px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">Données historiques indisponibles</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto">Les données BOC se chargent au fil des séances de marché. Revenez lors d'un jour de bourse.</div>
+      <button class="btn btn-o" onclick="nav('classement')" style="font-size:12px">Voir le classement →</button>
+    </div>`;
     return;
   }
 
@@ -4616,7 +4622,12 @@ function renderCorrelMatrix() {
 
   const tickers = Object.keys(returns);
   if (tickers.length < 2) {
-    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Pas assez de données BOC pour calculer les corrélations (min. 3 points par action).</p>';
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:12px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">Pas encore assez de données</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto">La matrice de corrélation nécessite au moins 3 séances de cours par action. Les données s'accumuleront automatiquement.</div>
+      <button class="btn btn-o" onclick="nav('classement')" style="font-size:12px">Voir le classement par secteur →</button>
+    </div>`;
     return;
   }
 

@@ -9,20 +9,21 @@ let _sigFilter = '';
 async function renderPrevisionsPage() {
   const container = document.getElementById('page-previsions-content');
   if (!container) return;
+  if (_prevTab === 'backtest' || _prevTab === 'rapport') _prevTab = 'portfolios';
 
   container.innerHTML = `
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
-        ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique'],
-        ['signaux','🔔 Par société','Recommandation Acheter / Conserver / Vendre pour chaque société'],
-        ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC'],
-        ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable'],
-      ].map(([id,lbl,tip])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}">${lbl}</div>`).join('')}
+        ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique', false],
+        ['signaux','🔔 Par société','Recommandation Acheter / Conserver / Vendre pour chaque société', false],
+        ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC', true],
+        ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable', true],
+      ].map(([id,lbl,tip,hidden])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}"${hidden?' style="display:none"':''}>${lbl}</div>`).join('')}
     </div>
     <div id="prev-portfolios-panel"  class="stock-tab-panel${_prevTab==='portfolios'?' active':''}"></div>
     <div id="prev-signaux-panel"     class="stock-tab-panel${_prevTab==='signaux'?' active':''}"></div>
-    <div id="prev-backtest-panel"    class="stock-tab-panel${_prevTab==='backtest'?' active':''}"></div>
-    <div id="prev-rapport-panel"     class="stock-tab-panel${_prevTab==='rapport'?' active':''}"></div>`;
+    <div id="prev-backtest-panel"    class="stock-tab-panel" style="display:none"></div>
+    <div id="prev-rapport-panel"     class="stock-tab-panel" style="display:none"></div>`;
 
   _prevLoadTab(_prevTab);
 }
