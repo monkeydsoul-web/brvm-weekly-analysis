@@ -8,21 +8,53 @@ const PERF_COLORS = ['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399'
 const _perfChartStates = {};
 const _perfVisible = {}; // containerId -> Set of visible tickers
 
+// Synthèse YTD côté JS : enrichit _perfData pour les tickers sans historique (<3 pts)
+// en utilisant var_annee + price + change_pct depuis window.scores
+function _enrichPerfDataFromScores(all) {
+  if (!all || !all.length) return;
+  const today     = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yearStart = `${new Date().getFullYear()}-01-01`;
+
+  for (const sc of all) {
+    const ticker   = sc.ticker;
+    const price    = sc.price || 0;
+    const varAnnee = sc.var_annee || 0;
+    if (price <= 0) continue;
+    const pts = _perfData[ticker] || [];
+    if (pts.length >= 3) continue;
+    const yearPrice  = varAnnee > -100 ? +(price / (1 + varAnnee / 100)).toFixed(2) : price;
+    const prevPrice  = sc.change_pct ? +(price / (1 + sc.change_pct / 100)).toFixed(2) : price;
+    const skipDates  = new Set([yearStart, yesterday, today]);
+    const synthetic  = [
+      {date: yearStart, price: yearPrice, source: 'synthetic'},
+      {date: yesterday, price: prevPrice, source: 'boc'},
+      {date: today,     price: price,     source: 'boc'},
+    ];
+    const merged = [...synthetic, ...pts.filter(p => !skipDates.has(p.date))];
+    merged.sort((a, b) => a.date.localeCompare(b.date));
+    _perfData[ticker] = merged;
+  }
+}
+
 async function renderPerfPage() {
   const container = document.getElementById('perfPageContent');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t2)">Chargement historique...</div>';
 
-  const all = window.scores || scores || [];
+  const all = window.scores || (typeof scores !== 'undefined' ? scores : []);
   if (!all.length) return;
 
   try {
-    const res = await fetch('/api/price-history');
+    const res = await fetch('/api/price-history?v=' + Date.now());
     _perfData = await res.json();
   } catch(e) {
     container.innerHTML = '<div style="color:var(--red);padding:20px">Erreur chargement historique</div>';
     return;
   }
+
+  // Enrichissement JS côté client : synthèse YTD pour tickers sans historique
+  _enrichPerfDataFromScores(all);
 
   const performers = [];
   for (const [ticker, pts] of Object.entries(_perfData)) {
@@ -45,6 +77,10 @@ async function renderPerfPage() {
   }
   performers.sort((a,b) => b.perf - a.perf);
 
+  // Always reselect top 5 performers on fresh page load
+  _perfSelected = performers.slice(0,5).map(p=>p.ticker);
+  console.log('Top 5 sélectionnés:', _perfSelected, performers.slice(0,5).map(p=>p.perf.toFixed(1)+'%'));
+
   const scoreMap = Object.fromEntries((all).map(x=>[x.ticker,x]));
   performers.forEach(p => {
     const sc = scoreMap[p.ticker];
@@ -55,9 +91,6 @@ async function renderPerfPage() {
     p.totalReturn = totalReturn;
     p.totalDivsXof = totalDivs;
   });
-
-  // Always reselect top 5 performers on fresh page load
-  _perfSelected = performers.slice(0,5).map(p=>p.ticker);
 
   container.innerHTML = `
     <div class="card" style="margin-bottom:12px">
