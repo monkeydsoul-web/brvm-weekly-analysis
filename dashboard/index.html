@@ -563,17 +563,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span id="signal-composite-spk" style="display:none"></span>
     </div>
     <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
-    <!-- Gauge score global du marché -->
-    <div id="signal-gauge-wrap" style="margin-top:10px;display:none">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px">
-        <span>Eviter</span><span>Faible</span><span>Modéré</span><span>Fort</span>
-      </div>
-      <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#f43f5e 0%,#f59e0b 40%,#10b981 75%,#14b8a6 100%);position:relative">
-        <div id="signal-gauge-cursor" style="position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--bg2);box-shadow:0 0 6px rgba(0,0,0,.4);transform:translateX(-50%);transition:left .5s;left:50%"></div>
-      </div>
-      <div style="text-align:center;margin-top:4px;font-size:10px;font-weight:600;color:var(--t2)" id="signal-gauge-label">—</div>
-      <p class="help-text" style="text-align:center;margin-top:4px">Score moyen du marché · ≥ 7.5 = signal fort · positionné selon la proportion d'actions en zone favorable</p>
-    </div>
   </div>
   <!-- Guide 4 étapes -->
   <div style="margin-bottom:24px">
@@ -2383,8 +2372,6 @@ function _renderDaySignal(sorted) {
     const dow = new Date().getDay(); // 0=dim, 6=sam
     const nextOpen = dow === 0 ? 'lundi' : dow === 6 ? 'lundi' : 'demain';
     el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">📴 Marché fermé · Données du dernier jour de bourse<br><span style="font-size:11px;margin-top:4px;display:block">Les cours seront mis à jour à la prochaine ouverture (${nextOpen})</span></div>`;
-    const gaugeWrap = document.getElementById('signal-gauge-wrap');
-    if (gaugeWrap) gaugeWrap.style.display = 'none';
     return;
   }
 
@@ -2410,23 +2397,6 @@ function _renderDaySignal(sorted) {
 
   // Top 3 du jour par variation positive
   const top3 = [...gainers].sort((a,b)=>(b.change_pct||0)-(a.change_pct||0)).slice(0,3);
-  const sentPct = Math.round(breadth * 100);
-  // Confidence score: based on breadth + avg score quality
-  const avgScore = all.length ? all.reduce((s,x)=>s+(x.composite_adj||0),0)/all.length : 0;
-  const confidence = Math.round((breadth * 60 + (avgScore/80) * 40));
-  // signal-confidence volontairement masqué (display:none conservé)
-
-  // Update gauge
-  const gaugeWrap = document.getElementById('signal-gauge-wrap');
-  const gaugeCursor = document.getElementById('signal-gauge-cursor');
-  const gaugeLabel = document.getElementById('signal-gauge-label');
-  if (gaugeWrap && gaugeCursor && gaugeLabel) {
-    gaugeWrap.style.display = '';
-    gaugeCursor.style.left = confidence + '%';
-    gaugeLabel.textContent = label + ' · ' + confidence + '%';
-    gaugeLabel.style.color = color;
-  }
-
   el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
     <div style="flex:1;min-width:220px;background:${bg};border-left:3px solid ${color};border-radius:6px;padding:10px 14px">
       <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:2px">${emoji} Marché ${label}</div>
@@ -2435,18 +2405,6 @@ function _renderDaySignal(sorted) {
         <strong style="color:var(--green)">${gainers.length} ↑ haussiers</strong> · <strong style="color:var(--red)">${losers.length} ↓ baissiers</strong> · <strong style="color:var(--t2)">${flat.length} → stables</strong>
         <br><span style="font-size:10px;color:var(--t3)">↑ haussiers = actions dont le cours monte ce jour · ↓ = en baisse · → = inchangé</span>
         ${topSec ? `<br>Secteur leader : <strong style="color:var(--blue)">${topSec[0]}</strong> (moy. ${((topSec[1].s/topSec[1].n)/80*10).toFixed(1)}/10)` : ''}
-      </div>
-      <!-- Barre de sentiment -->
-      <div style="margin-top:8px">
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px">
-          <span>Sentiment marché</span><span style="color:${color};font-weight:700">${sentPct}% haussier</span>
-        </div>
-        <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden">
-          <div style="height:100%;width:${sentPct}%;background:${color};border-radius:3px;transition:width .4s"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-top:2px">
-          <span>Baissier</span><span>Neutre 50%</span><span>Haussier</span>
-        </div>
       </div>
       ${top3.length ? `<div style="margin-top:8px;border-top:1px solid ${color}33;padding-top:6px">
         <div style="font-size:9px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">🏆 Top 3 du jour</div>
