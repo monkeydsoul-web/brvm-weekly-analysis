@@ -79,7 +79,6 @@ async function renderPerfPage() {
 
   // Always reselect top 5 performers on fresh page load
   _perfSelected = performers.slice(0,5).map(p=>p.ticker);
-  console.log('Top 5 sélectionnés:', _perfSelected, performers.slice(0,5).map(p=>p.perf.toFixed(1)+'%'));
 
   const scoreMap = Object.fromEntries((all).map(x=>[x.ticker,x]));
   performers.forEach(p => {
