@@ -1279,17 +1279,23 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <!-- Presets stratégies -->
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-      <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
-      <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Sociétés très rentables en expansion · Score≥6.5/10, ROE≥15% · 💡 Dynamisme et potentiel de hausse">📈 Croissance</button>
-      <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Haut dividende pour revenus passifs réguliers · Score≥5/10, Div≥5% · 💡 Encaissement annuel garanti">💰 Revenus</button>
-      <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥5/10, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:9px;color:var(--t3)">
-      <span>P/E &lt; 15 · P/B &lt; 1.5</span>
-      <span>ROE &gt; 15% · Score &gt; 6.5</span>
-      <span>Div &gt; 5% · Score &gt; 5</span>
-      <span>P/E &lt; 20 · Div &gt; 3%</span>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
+        <span style="font-size:9px;color:var(--t3);text-align:center">P/E &lt; 15 · P/B &lt; 1.5</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Sociétés très rentables en expansion · Score≥6.5/10, ROE≥15% · 💡 Dynamisme et potentiel de hausse">📈 Croissance</button>
+        <span style="font-size:9px;color:var(--t3);text-align:center">ROE &gt; 15% · Score &gt; 6.5</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Haut dividende pour revenus passifs réguliers · Score≥5/10, Div≥5% · 💡 Encaissement annuel garanti">💰 Revenus</button>
+        <span style="font-size:9px;color:var(--t3);text-align:center">Div &gt; 5% · Score &gt; 5</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥5/10, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
+        <span style="font-size:9px;color:var(--t3);text-align:center">P/E &lt; 20 · Div &gt; 3%</span>
+      </div>
     </div>
   </div>
   <div class="card" style="margin-bottom:12px">
