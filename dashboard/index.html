@@ -1231,20 +1231,20 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <!-- Presets stratégies -->
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
         <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
         <span style="font-size:9px;color:var(--t3);text-align:center">P/E &lt; 15 · P/B &lt; 1.5</span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
         <button class="chat-chip tt" onclick="screenerPreset('croissance')" data-tt="Sociétés très rentables en expansion · Score≥6.5/10, ROE≥15% · 💡 Dynamisme et potentiel de hausse">📈 Croissance</button>
         <span style="font-size:9px;color:var(--t3);text-align:center">ROE &gt; 15% · Score &gt; 6.5</span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
         <button class="chat-chip tt" onclick="screenerPreset('revenus')" data-tt="Haut dividende pour revenus passifs réguliers · Score≥5/10, Div≥5% · 💡 Encaissement annuel garanti">💰 Revenus</button>
         <span style="font-size:9px;color:var(--t3);text-align:center">Div &gt; 5% · Score &gt; 5</span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
         <button class="chat-chip tt" onclick="screenerPreset('defensif')" data-tt="Valeurs stables et peu risquées · Score≥5/10, P/E≤20, Div≥3% · 💡 Préserver le capital en toute sérénité">🛡️ Défensif</button>
         <span style="font-size:9px;color:var(--t3);text-align:center">P/E &lt; 20 · Div &gt; 3%</span>
       </div>
@@ -3134,33 +3134,35 @@ function _importPortfolioFromURL(){
 // ── Portfolio évolution de valeur ──────────────────────────────────────────
 function _portValueSeries(positions){
   const ph = window._priceHistory || {};
-  // Trouver date de début = la plus ancienne date d'achat
   const buydates = positions.map(p=>p.date).filter(Boolean).sort();
   if(!buydates.length) return [];
   const startDate = buydates[0];
 
-  // Collecter toutes les dates disponibles dans l'historique des positions
   const allDates = new Set();
+  const realDates = new Set();
   positions.forEach(p=>{
-    (ph[p.ticker]||[]).filter(d=>d.date>=startDate&&d.price).forEach(d=>allDates.add(d.date));
+    (ph[p.ticker]||[]).filter(d=>d.date>=startDate&&d.price).forEach(d=>{
+      allDates.add(d.date);
+      if(d.source !== 'synthetic') realDates.add(d.date);
+    });
   });
-  const dates = [...allDates].sort();
+  const limited = realDates.size < 7;
+  const dates = [...(limited ? realDates : allDates)].sort();
   if(dates.length<2) return [];
 
-  // Pour chaque date, calculer la valeur totale du portefeuille
-  return dates.map(date=>{
+  const series = dates.map(date=>{
     const val = positions.reduce((sum,p)=>{
-      if(p.date && date < p.date) return sum; // pas encore acheté
+      if(p.date && date < p.date) return sum;
       const hist = (ph[p.ticker]||[]).filter(d=>d.price&&d.date<=date);
-      if(!hist.length) {
-        // Utiliser prix d'achat si pas de données historiques antérieures
-        return sum + (p.shares * p.avg_price);
-      }
+      if(!hist.length) return sum + (p.shares * p.avg_price);
       const price = hist[hist.length-1].price;
       return sum + p.shares * price;
     }, 0);
     return {date, val};
   });
+  series._limited = limited;
+  series._firstDate = dates[0];
+  return series;
 }
 
 function _portDrawChart(series, positions){
@@ -3221,7 +3223,8 @@ function _portDrawChart(series, positions){
     svg+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+gW}" y2="${y}" stroke="#1f2937" stroke-width="0.5"/>`;
   });
   svg+='</svg>';
-  el.innerHTML=svg;
+  el.innerHTML=svg
+    + (series._limited ? `<div style="font-size:10px;color:var(--t3);margin-top:6px;text-align:center">📊 Historique en cours de constitution · données depuis le ${series._firstDate||''}</div>` : '');
 
   // Badge perf
   const badge=document.getElementById('port-perf-badge');
@@ -3363,6 +3366,7 @@ function divSimCalc(){
   const stock = _divData.find(x=>x.ticker===ticker);
   if(!stock){ if(outEl) outEl.textContent='—'; return; }
   let dy = stock.div_yield||0;
+  const realDy = dy;
   const warnCap = dy > 50;
   if (warnCap) dy = 50;
   const annRev = amount * (dy / 100);
@@ -3370,7 +3374,7 @@ function divSimCalc(){
   if(outEl) outEl.textContent = fmtXOF(Math.round(annRev));
   if(detEl) detEl.innerHTML = `${amount.toLocaleString('fr-FR')} XOF × ${dy.toFixed(1)}% de rendement annuel`
     + `<br>≈ ${fmtXOF(Math.round(monthRev))}/mois`
-    + (warnCap ? `<br><span style="color:var(--amber)">⚠️ Rendement plafonné à 50% (valeur source anormale)</span>` : '');
+    + (warnCap ? `<br><span style="color:var(--amber)">⚠️ Rendement plafonné à 50% · Le rendement réel de ${ticker} (${realDy.toFixed(1)}%) semble anormalement élevé (données à vérifier). Calcul effectué avec 50% par prudence.</span>` : '');
 }
 
 async function renderDiv(){
@@ -3813,7 +3817,7 @@ function renderComm(){
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px;text-align:center">
       <div style="font-size:10px;color:var(--t2);margin-bottom:2px">${n}</div>
       <div style="font-size:14px;font-weight:700">${typeof d.price==='number'?d.price.toLocaleString('fr-FR'):d.price}</div>
-      <div style="font-size:10px;color:${(d.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(d.change_pct||0)>=0?'+':''}${(d.change_pct||0).toFixed(1)}%</div>
+      <div style="font-size:10px;color:${(d.change_pct||0)===0?'var(--t3)':(d.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(d.change_pct||0)===0?'—':`${(d.change_pct||0)>=0?'+':''}${(d.change_pct||0).toFixed(1)}%`}</div>
       <div style="font-size:9px;color:var(--t3)">${d.unit||''}</div>
     </div>`).join('');
   const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
