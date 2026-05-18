@@ -174,10 +174,6 @@ tr:nth-child(even) td{background:rgba(255,255,255,.012)}
 input,select,textarea{background:var(--bg-base);color:var(--text-1);border:1px solid var(--border-1);border-radius:var(--radius-sm);padding:6px 10px;font-size:13px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 input[type=range]{padding:0;height:20px}
-.news-item{padding:9px 0;border-bottom:1px solid var(--row-border)}
-.news-item:last-child{border-bottom:none}
-.news-t{font-size:12px;font-weight:500;margin-bottom:3px;line-height:1.4}
-.news-m{font-size:10px;color:var(--t2)}
 .src{background:var(--bg3);padding:1px 6px;border-radius:8px;margin-right:5px;font-size:9px}
 .ctag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:var(--bg3);font-size:11px;margin:2px}
 .cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -225,8 +221,6 @@ input[type=range]{padding:0;height:20px}
 .stock-tab-panel.active{display:block}
 /* ── Verdict analyste ──────────────────────────────────────────────────── */
 .analyst-verdict{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:12px}
-/* ── Tag news ──────────────────────────────────────────────────────────── */
-.news-tag{font-size:9px;padding:1px 6px;border-radius:8px;background:var(--bg3);color:var(--t3);border:1px solid var(--border)}
 /* ── Raccourcis clavier ────────────────────────────────────────────────── */
 #kbd-hint{position:fixed;bottom:8px;right:8px;font-size:9px;color:var(--t3);pointer-events:none;z-index:50}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
@@ -474,7 +468,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('news')" data-tip="Dernières nouvelles des sociétés BRVM avec analyse automatique du sentiment (positif/négatif)"><span>◈</span> <span class="ni-label">Actualités</span></div>
       <div class="ni ni-sub" onclick="nav('comm')" data-tip="Impact des prix des matières premières (pétrole, cacao, or) sur les sociétés BRVM"><span>◈</span> <span class="ni-label">Commodités</span></div>
       <div class="ni ni-sub" onclick="nav('macro')" data-tip="Indicateurs économiques de la zone UEMOA : taux d'intérêt, croissance, risque pays"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
     </div>
@@ -1044,47 +1037,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <!-- ACTUALITÉS -->
-<div class="page" id="page-news">
-  <div class="ph"><div><h2>📰 Actualités BRVM</h2><p class="page-sub">Dernières nouvelles des sociétés cotées · flux agences · communiqués officiels</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <select id="nFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px"><option value="">Tous tickers</option></select>
-      <select id="nSectFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px"><option value="">Tous secteurs</option></select>
-      <select id="nSentFil" onchange="filterNews()" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:11px" title="Tonalité de l'article détectée automatiquement par l'IA · Positif = bonne nouvelle, Négatif = risque">
-        <option value="">Tous sentiments</option>
-        <option value="pos">🟢 Positif</option>
-        <option value="neg">🔴 Négatif</option>
-        <option value="neu">🟡 Neutre</option>
-      </select>
-    </div>
-  </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · 🟢 = article positif pour la société · 🔴 = négatif · 🟡 = neutre<br>
-      · Cliquez sur un article pour le lire complet<br>
-      · Filtrez par société avec la barre de recherche
-    </div>
-  </details>
-  <!-- À la une -->
-  <div id="news-alune" style="margin-bottom:12px;display:none">
-    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔥 À la une</div>
-    <div id="news-alune-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px"></div>
-  </div>
-  <div class="g2">
-    <div class="card" style="max-height:65vh;overflow-y:auto;margin-bottom:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="ct">Articles</div>
-        <span id="news-count" style="font-size:10px;color:var(--t2)"></span>
-      </div>
-      <div id="newsList"><p style="color:var(--t2)">Lance une mise à jour.</p></div>
-      <div id="news-sent-note" style="display:none;font-size:11px;color:var(--t3);padding:8px 0;margin-top:8px">
-        📰 Articles analysés automatiquement · Sentiment basé sur les mots-clés dans les titres
-      </div>
-    </div>
-    <div id="news-sent-panel" class="card" style="margin-bottom:0"><div class="ct">Sentiment par action</div>
-      <div id="cSentDiv" style="width:100%;height:320px"></div></div>
-  </div>
-</div>
 
 <!-- MACRO UEMOA -->
 <div class="page" id="page-macro">
@@ -1596,7 +1548,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/markowitz.js"></script>
 <script src="/previsions.js"></script>
 <script>
-let scores=[],news=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
+let scores=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
 const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
 const HIST_PRICES={SGBC:[3500,3800,5200,5670,7760,9120,11090,19435,33000,34995],SIBC:[843,900,1100,1350,2000,2500,2700,3300,4800,6950],SNTS:[14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],CBIBF:[8000,8500,9000,9800,9900,9885,9900,10000,13500,16490],NSBC:[5000,5200,5350,5400,5350,5350,5500,7500,9000,13900]};
 const HIST_DIV={SGBC:[202,270,527,261,297,331,904,1107,1398,2293],SIBC:[120,140,162,175,180,180,202,247,338,425],SNTS:[1107,1188,1214,1260,1134,1225,1400,1500,1740,1740],CBIBF:[360,380,430,450,430,450,540,630,810,900],NSBC:[0,0,0,0,0,0,0,404,505,759]};
@@ -1719,7 +1671,6 @@ const _PAGES = [
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
   {id:'optim',    icon:'📐', label:'Analyse & Optim',      desc:'Corrélation, Markowitz, frontière efficiente'},
   {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
-  {id:'news',     icon:'📰', label:'Actualités',           desc:'News marché et résultats'},
   {id:'chat',     icon:'💬', label:'Chat IA',              desc:'Analyste IA BRVM'},
   {id:'glossaire',icon:'📚', label:'Glossaire',            desc:'Termes financiers expliqués'},
   {id:'comm',     icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
@@ -2146,15 +2097,14 @@ async function init(){
   _initEcoModeUI();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
-    const[s,n,c,m,f,tp]=await Promise.all([
+    const[s,c,m,f,tp]=await Promise.all([
       _cachedFetch('/api/scores'),
-      _cachedFetch('/api/news'),
       _cachedFetch('/api/commodities'),
       _cachedFetch('/api/macro'),
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
-    scores=s;window.scores=s;news=n;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
+    scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -2163,7 +2113,7 @@ async function init(){
       const boc = snts.filter(p=>p.source==='boc');
       console.log('SNTS BOC points:', boc.length, 'sample:', boc.slice(-2));
     }).catch(e=>{window._priceHistory={};console.error('Price history error:',e);}).finally(()=>{
-      renderDash(m);initRanking();renderRankLive();renderDiv();renderNews();renderComm();startAutoRefresh();
+      renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
     });
@@ -3856,123 +3806,6 @@ function addPortfolioAlerts(){
 
 // loadAlerts/checkAlerts/deleteAlert gérées par alerts.js
 
-// ── Actualités ─────────────────────────────────────────────────────────────
-function _newsInitFilters(){
-  // Secteur
-  const sectSel = document.getElementById('nSectFil');
-  if(sectSel && sectSel.options.length<=1){
-    const sects=[...new Set((window.scores||scores||[]).map(x=>x.sector).filter(Boolean))].sort();
-    sects.forEach(s=>sectSel.add(new Option(s,s)));
-  }
-  // Tickers populaires (ceux avec news)
-  const nFil = document.getElementById('nFil');
-  if(nFil && nFil.options.length<=1){
-    const tks=[...new Set(news.flatMap(x=>x.tickers||[]))].sort();
-    tks.forEach(t=>nFil.add(new Option(t,t)));
-  }
-}
-
-function _newsSentimentScore(article){
-  const title = (article.title||'').toLowerCase();
-  const pos=['hausse','croissance','bénéfice','dividende','record','solide','positif','optimiste','progression','fort'];
-  const neg=['baisse','perte','chute','déficit','recul','crise','négatif','risque','faible','difficile'];
-  let s=0;
-  pos.forEach(w=>{if(title.includes(w))s++;});
-  neg.forEach(w=>{if(title.includes(w))s--;});
-  return s;
-}
-
-function _newsAutoTags(x) {
-  const tags = [];
-  if (x.is_dividend_news) tags.push({label:'💰 Dividende', col:'var(--amber)'});
-  if (x.is_results_news)  tags.push({label:'📊 Résultats',  col:'var(--blue)'});
-  const t = (x.title||'').toLowerCase() + ' ' + (x.description||'').toLowerCase();
-  if (/assembl|ag\b|convoc/i.test(t))      tags.push({label:'🏛 AG',        col:'#60A5FA'});
-  if (/acquisition|fusion|rachat|merger/i.test(t)) tags.push({label:'🤝 M&A',      col:'#C084FC'});
-  if (/obligation|emprunt|bond/i.test(t))  tags.push({label:'📄 Obligation', col:'var(--t2)'});
-  if (/opa|offre\s+publique/i.test(t))     tags.push({label:'📢 OPA',        col:'var(--red)'});
-  if (/croissance|hausse|bénéfice/i.test(t)) tags.push({label:'📈 Croissance', col:'var(--green)'});
-  return tags;
-}
-
-function renderNews(f=''){
-  _newsInitFilters();
-  const ticker  = f || document.getElementById('nFil')?.value || '';
-  const sect    = document.getElementById('nSectFil')?.value||'';
-  const sentFil = document.getElementById('nSentFil')?.value||'';
-
-  const tickerSect={};
-  (window.scores||scores||[]).forEach(x=>{ if(x.ticker&&x.sector) tickerSect[x.ticker]=x.sector; });
-
-  const _SPAM = ['identifiant oublié','créer un compte','se connecter','mot de passe','inscription','login','register'];
-  let n = [...news].filter(x => !_SPAM.some(w => (x.title||'').toLowerCase().includes(w)));
-  if(ticker) n=n.filter(x=>x.tickers?.includes(ticker));
-  if(sect)   n=n.filter(x=>(x.tickers||[]).some(t=>tickerSect[t]===sect));
-  if(sentFil){
-    n=n.filter(x=>{
-      const sc=_newsSentimentScore(x);
-      if(sentFil==='pos') return sc>0;
-      if(sentFil==='neg') return sc<0;
-      return sc===0;
-    });
-  }
-  const sorted=[...n].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  const cntEl=document.getElementById('news-count');
-  if(cntEl) cntEl.textContent=`${sorted.length} article${sorted.length!==1?'s':''}`;
-
-  // À la une — top 3 articles (most recent + with tickers)
-  const alune = sorted.filter(x=>(x.tickers||[]).length>0).slice(0,3);
-  const aluneEl = document.getElementById('news-alune');
-  const aluneList = document.getElementById('news-alune-list');
-  if (aluneEl && aluneList && alune.length && !ticker && !sect && !sentFil) {
-    aluneEl.style.display = '';
-    aluneList.innerHTML = alune.map(x => {
-      const sc = _newsSentimentScore(x);
-      const border = sc>0?'var(--green)':sc<0?'var(--red)':'var(--amber)';
-      const tags = _newsAutoTags(x);
-      return `<div onclick="${x.url?`window.open('${x.url}','_blank')`:'void 0'}" style="background:var(--bg3);border-radius:8px;padding:12px;border-top:3px solid ${border};cursor:${x.url?'pointer':'default'}">
-        <div style="font-size:12px;font-weight:600;color:var(--t1);line-height:1.4;margin-bottom:6px">${x.title}</div>
-        ${x.description?`<div style="font-size:10px;color:var(--t2);line-height:1.4;margin-bottom:6px">${x.description.substring(0,100)}${x.description.length>100?'…':''}</div>`:''}
-        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
-          ${(x.tickers||[]).map(t=>`<span onclick="event.stopPropagation();showStock('${t}')" class="b bg" style="cursor:pointer;font-size:9px">${t}</span>`).join('')}
-          ${tags.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}
-          ${x.date?`<span style="margin-left:auto;font-size:9px;color:var(--t3)">${x.date}</span>`:''}
-        </div>
-      </div>`;
-    }).join('');
-  } else if (aluneEl) {
-    aluneEl.style.display = 'none';
-  }
-
-  document.getElementById('newsList').innerHTML=sorted.length?sorted.slice(0,50).map(x=>{
-    const sc=_newsSentimentScore(x);
-    const sentBadge = sc>0?'<span style="font-size:10px">🟢</span>':sc<0?'<span style="font-size:10px">🔴</span>':'<span style="font-size:10px">🟡</span>';
-    const tags = _newsAutoTags(x);
-    return `<div class="news-item" style="border-bottom:1px solid var(--border);padding:10px 0;cursor:pointer" ${x.url?`onclick="window.open('${x.url}','_blank')"`:''}>
-      <div class="news-t" style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4">${sentBadge} ${x.title}</div>
-      ${x.description?`<div style="font-size:11px;color:var(--t2);margin-bottom:4px;line-height:1.4">${x.description.substring(0,150)}${x.description.length>150?'...':''}</div>`:''}
-      <div class="news-m" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
-        <span class="src" style="font-size:10px;color:var(--t3)">${x.source}</span>
-        ${x.date?`<span style="font-size:10px;color:var(--t3)">${x.date}</span>`:''}
-        ${(x.tickers||[]).map(t=>`<span onclick="event.stopPropagation();showStock('${t}')" class="b bg" style="margin-right:2px;cursor:pointer;font-size:9px">${t}</span>`).join('')}
-        ${tags.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}
-        ${x.url?'<span style="font-size:9px;color:var(--blue);margin-left:auto">↗ Lire</span>':''}
-      </div>
-    </div>`;}).join('')
-    :'<p style="color:var(--t2)">Aucune actualité.</p>';
-  const sd=scores.filter(x=>x.sentiment_score!==0&&x.sentiment_score!=null).sort((a,b)=>(b.sentiment_score||0)-(a.sentiment_score||0)).slice(0,12);
-  const sentPanel = document.getElementById('news-sent-panel');
-  const sentNote  = document.getElementById('news-sent-note');
-  if(sd.length){
-    if(sentPanel) sentPanel.style.display = '';
-    if(sentNote)  sentNote.style.display  = 'none';
-    svgBar(document.getElementById('cSentDiv'),sd.map(x=>x.ticker),sd.map(x=>Math.abs(x.sentiment_score||0)),sd.map(x=>(x.sentiment_score||0)>0?'#4ADE80':'#F87171'),320,true);
-  } else {
-    if(sentPanel) sentPanel.style.display = 'none';
-    if(sentNote)  sentNote.style.display  = '';
-  }
-}
-function filterNews(){renderNews();}
 
 // ── Commodités ─────────────────────────────────────────────────────────────
 function renderComm(){
@@ -4383,17 +4216,6 @@ async function showStock(ticker){
         ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong> <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fi.upside_pct>=0?'+':''}${fi.upside_pct}%)</span></div>`:''}</div>`:''}
       ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
       <div class="g2" style="margin-bottom:12px">
-        <div class="card" style="margin-bottom:0;border-left:3px solid var(--purple)">
-          <div class="ct">📰 Actualités récentes</div>
-          ${(()=>{
-            const tickNews=(window.news||[]).filter(n=>(n.tickers||[]).includes(ticker)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3);
-            if(!tickNews.length) return '<p style="font-size:11px;color:var(--t2)">Aucune actualité récente.</p>';
-            return tickNews.map(n=>{const tgs=typeof _newsAutoTags==='function'?_newsAutoTags(n):[];return`<div class="news-item" ${n.url?`onclick="window.open('${n.url}','_blank')" style="cursor:pointer"`:''}>
-              <div class="news-t" style="font-size:11px;font-weight:600;line-height:1.4;margin-bottom:2px">${n.title}</div>
-              <div style="font-size:10px;color:var(--t3);display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span>${n.source||''}</span><span>${n.date||''}</span>${tgs.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}${n.url?'<span style="color:var(--blue);margin-left:auto">↗</span>':''}</div>
-            </div>`}).join('');
-          })()}
-        </div>
         <div class="card" style="margin-bottom:0;border-left:3px solid var(--blue)">
           <div class="ct">🔗 Sociétés similaires</div>
           ${(()=>{
@@ -4414,12 +4236,6 @@ async function showStock(ticker){
             <div id="stockProfitDiv" style="width:100%;height:140px"></div></div>`:''}
           <div class="card" style="margin-bottom:0"><div class="ct">📈 Cours historique</div>
             <div id="stockChartDiv" style="width:100%;min-height:220px"></div></div>
-        </div>
-        <div class="card" style="max-height:580px;overflow-y:auto;margin-bottom:0"><div class="ct">📰 Actualités (${(d.news||[]).length})</div>
-          ${(d.news||[]).length?(d.news||[]).map(n=>{const tgs=typeof _newsAutoTags==='function'?_newsAutoTags(n):[];return`<div class="news-item" ${n.url?`onclick="window.open('${n.url}','_blank')" style="cursor:pointer"`:''}>
-            <div class="news-t" style="line-height:1.4;margin-bottom:2px">${n.title}</div>
-            <div class="news-m" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="src">${n.source}</span>${tgs.map(tg=>`<span class="news-tag" style="color:${tg.col};border-color:${tg.col}30">${tg.label}</span>`).join('')}${n.url?'<span style="font-size:9px;color:var(--blue);margin-left:auto">↗ Lire</span>':''}</div>
-          </div>`}).join(''):'<p style="font-size:12px;color:var(--t2);padding:10px 0">Aucune actualité.</p>'}
         </div>
       </div>
       </div><!-- /stab-general -->
@@ -4549,14 +4365,13 @@ async function doRefresh(){
   try{
     await fetch('/api/refresh',{method:'POST'});
     setTimeout(async()=>{
-      const[s,n,c,m]=await Promise.all([
+      const[s,c,m]=await Promise.all([
         _cachedFetch('/api/scores'),
-        _cachedFetch('/api/news'),
         _cachedFetch('/api/commodities'),
         _cachedFetch('/api/macro'),
       ]);
-      scores=s;window.scores=s;news=n;comms=c;
-      renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderNews();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
+      scores=s;window.scores=s;comms=c;
+      renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
       document.getElementById('ri').classList.remove('spin');
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
@@ -5125,13 +4940,6 @@ const _helpContent = {
       { tip: '💡 Activez d\'abord les notifications push (bouton en bas de la barre latérale) pour recevoir les alertes même quand l\'onglet est fermé.' },
     ]
   },
-  news: {
-    title: 'Actualités',
-    sections: [
-      { h: '📰 Actualités financières BRVM', p: 'Flux d\'actualités agrégées depuis les sources spécialisées en finance africaine et BRVM. Mis à jour automatiquement toutes les heures.' },
-      { tip: '💡 Filtrez par ticker pour voir les actualités d\'une société spécifique. Les événements d\'entreprise peuvent impacter les cours — restez informé.' },
-    ]
-  },
   comm: {
     title: 'Commodités',
     sections: [
@@ -5326,7 +5134,6 @@ document.getElementById('cmp-modal').addEventListener('click', function(e){
 const _kbdMap = {
   'g': {fn: ()=>{nav('dash');}, label: 'G → Dashboard'},
   'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
-  'a': {fn: ()=>{nav('actualites') || nav('news');}, label: 'A → Actualités'},
   'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
   'd': {fn: ()=>{nav('income');renderDiv();}, label: 'D → Dividendes'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
@@ -5335,7 +5142,7 @@ const _kbdMap = {
 };
 
 const _bcLabels = {
-  dash:'Tableau de bord', rank:'Classement', news:'Actualités', comm:'Commodités',
+  dash:'Tableau de bord', rank:'Classement', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
   signals:'Signaux', valuation:'Valorisation', income:'Revenus',
   port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
