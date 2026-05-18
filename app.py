@@ -1215,8 +1215,10 @@ def api_price_history():
                 var_a = entry.get("var_annee") or 0
                 if close <= 0 or var_a == -100:
                     continue
-                real_pts = history.get(ticker, [])
-                if len(real_pts) >= 3:
+                real_pts = sorted(history.get(ticker, []), key=lambda x: x["date"])
+                # Enrichir si pas d'historique remontant avant février (que des pts live récents)
+                _feb = f"{_dt.date.today().year}-02-01"
+                if real_pts and real_pts[0]["date"] < _feb:
                     continue
                 year_price = round(close / (1 + var_a / 100), 2)
                 synthetic = [
@@ -1224,8 +1226,8 @@ def api_price_history():
                     {"date": _yesterday,  "price": float(prev),       "source": "boc"},
                     {"date": _today,      "price": float(close),      "source": "boc"},
                 ]
-                real_dates = {p["date"] for p in real_pts}
-                merged = synthetic + [p for p in real_pts if p["date"] not in {_year_start, _yesterday, _today}]
+                skip = {_year_start, _yesterday, _today}
+                merged = synthetic + [p for p in real_pts if p["date"] not in skip]
                 merged.sort(key=lambda x: x["date"])
                 history[ticker] = merged
 

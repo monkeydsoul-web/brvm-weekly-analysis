@@ -21,8 +21,10 @@ function _enrichPerfDataFromScores(all) {
     const price    = sc.price || 0;
     const varAnnee = sc.var_annee || 0;
     if (price <= 0) continue;
-    const pts = _perfData[ticker] || [];
-    if (pts.length >= 3) continue;
+    const pts = (_perfData[ticker] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+    // Enrichir uniquement si pas d'historique remontant avant février
+    const febStart = `${new Date().getFullYear()}-02-01`;
+    if (pts.length > 0 && pts[0].date < febStart) continue;
     const yearPrice  = varAnnee > -100 ? +(price / (1 + varAnnee / 100)).toFixed(2) : price;
     const prevPrice  = sc.change_pct ? +(price / (1 + sc.change_pct / 100)).toFixed(2) : price;
     const skipDates  = new Set([yearStart, yesterday, today]);
