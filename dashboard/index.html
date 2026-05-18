@@ -2935,10 +2935,10 @@ function renderRank(){
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
-    const hist30=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-30);
-    const spk=hist30.length>=2?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
+    const hist30=(ph[x.ticker]||[]).filter(p=>p.price).sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+    const spk=hist30.length>=3?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
     // Momentum badge (5j vs 20j)
-    const boc20=(ph[x.ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-20);
+    const boc20=(ph[x.ticker]||[]).filter(p=>p.price).sort((a,b)=>a.date.localeCompare(b.date)).slice(-20);
     let momBadge='';
     if(boc20.length>=6){
       const p5=boc20.slice(-5).map(p=>p.price); const p20=boc20.map(p=>p.price);
@@ -4444,7 +4444,7 @@ async function showStock(ticker){
     const _miniSpkEl = document.getElementById('stock-spark-mini');
     if(_miniSpkEl){
       const _ph=window._priceHistory||{};
-      const _hist30=(_ph[ticker]||[]).filter(p=>p.source==='boc'&&p.price).slice(-30);
+      const _hist30=(_ph[ticker]||[]).filter(p=>p.price).sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
       if(_hist30.length>=3){_miniSpkEl.innerHTML=sparkline(_hist30,120,40);}
       else{
         // Try loading price history
