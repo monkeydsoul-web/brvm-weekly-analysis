@@ -2108,15 +2108,13 @@ async function init(){
     // Charger historique prix PUIS rendu
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
-      console.log('Price history loaded:', Object.keys(ph).length, 'tickers');
-      const snts = ph['SNTS']||[];
-      const boc = snts.filter(p=>p.source==='boc');
-      console.log('SNTS BOC points:', boc.length, 'sample:', boc.slice(-2));
     }).catch(e=>{window._priceHistory={};console.error('Price history error:',e);}).finally(()=>{
       renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
     });
+    // Charger sparklines étendus (BOC quotidien) en parallèle
+    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(()=>{});
     renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget, 500);
 
     populateSelects();
@@ -2885,16 +2883,22 @@ function renderRank(){
   if(ctr) ctr.textContent=`Affichage : ${d.length} / ${scores.length} sociétés`;
 
   const ph=window._priceHistory||{};
+  const extSp=window._extSparklines||{};
   const _dow = new Date().getDay(); // 0=dim, 6=sam
   const _isWeekend = _dow === 0 || _dow === 6;
   const _staleLbl = `<span style="color:var(--t3);font-size:9px">(ven.)</span>`;
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
-    const hist30=(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+    // Préférer sparklines étendu (BOC quotidien) si disponible
+    const _extPts=extSp[x.ticker];
+    const hist30=_extPts&&_extPts.length>=3
+      ?_extPts.map(p=>({price:p.close}))
+      :(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
     const spk=hist30.length>=3?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
-    // Momentum badge (5j vs 20j)
-    const boc20=(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-20);
+    // Momentum badge (5j vs 20j) — utiliser extended si dispo
+    const _boc20src=_extPts&&_extPts.length>=6?_extPts.map(p=>({price:p.close})):(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date));
+    const boc20=_boc20src.slice(-20);
     let momBadge='';
     if(boc20.length>=6){
       const p5=boc20.slice(-5).map(p=>p.price); const p20=boc20.map(p=>p.price);
@@ -3480,17 +3484,213 @@ async function renderDiv(){
     250, true);
 }
 
-// ── Performances ───────────────────────────────────────────────────────────
-function renderPerf(){
-  const top5=['SGBC','SIBC','SNTS','CBIBF','NSBC'];
-  svgLine(document.getElementById('cPriceDiv'),YEARS,top5.map((t,i)=>({label:t,data:HIST_PRICES[t]})),260);
-  svgLine(document.getElementById('cDivHistDiv'),YEARS,top5.map((t,i)=>({label:t,data:HIST_DIV[t]})),220);
-  document.getElementById('perfTable').innerHTML=topPerf.map(x=>`<tr onclick="_openStock('${x.ticker}')">
-    <td><strong>${x.ticker}</strong></td><td style="color:var(--t2)">${fmt(x.start_price)}</td>
-    <td style="font-weight:600">${fmt(x.current_price)}</td>
-    <td style="color:${(x.price_gain_pct||0)>=0?'var(--green)':'var(--red)'};font-weight:600">${(x.price_gain_pct||0)>=0?'+':''}${(x.price_gain_pct||0).toFixed(0)}%</td>
-    <td style="color:var(--amber)">${fmt(x.total_divs_xof)}</td>
-  </tr>`).join('');
+// ── Performances (graphique Base 100 — données BOC réelles) ────────────────
+let _perfPeriod = '1an';
+let _perfLoaded = false;
+
+function renderPerf(){} // legacy no-op
+
+async function renderPerfPage(){
+  const el = document.getElementById('perfPageContent');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      ${['6m','1an','3ans','tout'].map(p=>`<button id="perf-btn-${p}" onclick="_setPerfPeriod('${p}')" style="font-size:11px;padding:4px 13px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:${p===_perfPeriod?'var(--accent)':'transparent'};color:${p===_perfPeriod?'white':'var(--t2)'}">${p}</button>`).join('')}
+      <span id="perf-subtitle" style="font-size:10px;color:var(--t3);margin-left:6px"></span>
+    </div>
+    <div id="perf-chart-area" style="min-height:280px;display:flex;align-items:center;justify-content:center">
+      <div style="color:var(--t2);font-size:12px">Chargement…</div>
+    </div>
+    <div id="perf-table-area" style="margin-top:14px"></div>`;
+  await _loadPerfChart();
+}
+
+function _setPerfPeriod(p){
+  _perfPeriod = p;
+  ['6m','1an','3ans','tout'].forEach(x=>{
+    const b=document.getElementById('perf-btn-'+x);
+    if(!b) return;
+    b.style.background = x===p?'var(--accent)':'transparent';
+    b.style.color      = x===p?'white':'var(--t2)';
+  });
+  _loadPerfChart();
+}
+
+async function _loadPerfChart(){
+  const chartArea = document.getElementById('perf-chart-area');
+  const tableArea = document.getElementById('perf-table-area');
+  const subtitle  = document.getElementById('perf-subtitle');
+  if(!chartArea) return;
+  chartArea.innerHTML = '<div style="color:var(--t2);font-size:12px">Chargement…</div>';
+  try {
+    const tops = await fetch(`/api/price-history-extended/top-performers?n=8&period=${_perfPeriod}`).then(r=>r.json());
+    if(!tops||tops.error||!tops.length){ chartArea.innerHTML='<p style="text-align:center;color:var(--t2);padding:40px">Aucune donnée disponible.</p>'; return; }
+
+    const tickers = tops.map(t=>t.ticker);
+    const datasets = await Promise.all(tickers.map(t=>
+      fetch(`/api/price-history-extended/${t}?period=${_perfPeriod}`).then(r=>r.json())
+    ));
+
+    // Build Base-100 series
+    const series = [];
+    for(let i=0;i<tickers.length;i++){
+      const pts = datasets[i].points||[];
+      if(pts.length<2) continue;
+      const base = pts[0].close;
+      if(!base) continue;
+      series.push({ticker:tickers[i], points:pts.map(p=>({date:p.date,close:p.close,b100:Math.round(p.close/base*1000)/10}))});
+    }
+    if(!series.length){ chartArea.innerHTML='<p style="text-align:center;color:var(--t2);padding:40px">Données insuffisantes.</p>'; return; }
+
+    const totalPts = series.reduce((s,x)=>s+x.points.length,0);
+    if(subtitle) subtitle.textContent = `${totalPts.toLocaleString('fr-FR')} points · ${series.length} actions · Données BOC`;
+
+    window._perfChartSeries = series;
+    chartArea.innerHTML = _buildPerfSVG(series);
+    if(tableArea) tableArea.innerHTML = _buildPerfTable(tops, series);
+  } catch(e) {
+    chartArea.innerHTML = '<p style="color:var(--t2);text-align:center;padding:40px">Erreur de chargement</p>';
+  }
+}
+
+const _PERF_COLORS = ['#4ADE80','#60A5FA','#F59E0B','#EC4899','#A78BFA','#34D399','#FB923C','#38BDF8'];
+
+function _buildPerfSVG(series){
+  const W=580,H=300,PL=46,PR=10,PT=20,PB=38;
+  const CW=W-PL-PR, CH=H-PT-PB;
+  const allDates=[...new Set(series.flatMap(s=>s.points.map(p=>p.date)))].sort();
+  const allB=[...series.flatMap(s=>s.points.map(p=>p.b100))];
+  const minB=Math.min(...allB)*0.97, maxB=Math.max(...allB)*1.03, rangeB=maxB-minB||1;
+  const xS=d=>{const i=allDates.indexOf(d);return PL+(i/Math.max(allDates.length-1,1))*CW;};
+  const yS=v=>PT+CH-((v-minB)/rangeB)*CH;
+
+  let g='';
+  // Grid lines Y
+  for(let i=0;i<=4;i++){
+    const v=minB+(maxB-minB)*i/4;
+    const y=yS(v);
+    g+=`<line x1="${PL}" y1="${y}" x2="${PL+CW}" y2="${y}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+    g+=`<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="#475569">${Math.round(v)}</text>`;
+  }
+  // Base 100 dashed line
+  if(100>=minB&&100<=maxB){
+    const y0=yS(100);
+    g+=`<line x1="${PL}" y1="${y0}" x2="${PL+CW}" y2="${y0}" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="4,3"/>`;
+  }
+  // X labels (max 7)
+  const step=Math.max(1,Math.ceil(allDates.length/7));
+  allDates.forEach((d,i)=>{
+    if(i%step!==0&&i!==allDates.length-1) return;
+    g+=`<text x="${xS(d)}" y="${H-PB+14}" text-anchor="middle" font-size="9" fill="#475569">${d.substring(2,10).replace(/-/g,'/')}</text>`;
+  });
+  // Series lines + end labels
+  series.forEach((s,si)=>{
+    const col=_PERF_COLORS[si%_PERF_COLORS.length];
+    const pts=s.points.map(p=>`${xS(p.date).toFixed(1)},${yS(p.b100).toFixed(1)}`).join(' ');
+    g+=`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" opacity="0.9"/>`;
+    const last=s.points[s.points.length-1];
+    const lx=xS(last.date), ly=yS(last.b100);
+    g+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="${col}"/>`;
+  });
+  // Legend row
+  series.forEach((s,si)=>{
+    const col=_PERF_COLORS[si%_PERF_COLORS.length];
+    const lx=PL+si*(CW/Math.max(series.length,1));
+    g+=`<rect x="${lx}" y="${H-11}" width="12" height="3" rx="1.5" fill="${col}"/>`;
+    g+=`<text x="${lx+15}" y="${H-7}" font-size="9" fill="#94A3B8">${s.ticker}</text>`;
+  });
+  // Tooltip overlay elements
+  const ttId='ptt'+Date.now();
+  g+=`<line id="${ttId}vl" x1="0" y1="${PT}" x2="0" y2="${PT+CH}" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="4,3" opacity="0" pointer-events="none"/>`;
+  g+=`<rect id="${ttId}bg" rx="4" fill="rgba(10,15,25,0.92)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5" opacity="0" pointer-events="none"/>`;
+  for(let i=0;i<series.length;i++){
+    g+=`<text id="${ttId}t${i}" font-size="9" fill="${_PERF_COLORS[i%_PERF_COLORS.length]}" opacity="0" pointer-events="none"></text>`;
+  }
+  g+=`<text id="${ttId}td" font-size="9" fill="#94A3B8" opacity="0" pointer-events="none"></text>`;
+
+  return `<div style="overflow-x:auto">
+  <svg id="${ttId}svg" width="100%" viewBox="0 0 ${W} ${H}" height="${H}" style="display:block;overflow:visible"
+    onmousemove="_perfHover(event,'${ttId}',${PL},${CW},${PT},${CH},${JSON.stringify(allDates)},${minB},${rangeB})"
+    onmouseleave="_perfLeave('${ttId}',${series.length})">
+    <rect x="${PL}" y="${PT}" width="${CW}" height="${CH}" fill="transparent"/>
+    ${g}
+  </svg></div>`;
+}
+
+function _perfHover(evt,id,PL,CW,PT,CH,dates,minB,rangeB){
+  const series=window._perfChartSeries||[];
+  if(!series.length) return;
+  const svgEl=evt.currentTarget;
+  const rect=svgEl.getBoundingClientRect();
+  const mx=(evt.clientX-rect.left)*(580/Math.max(rect.width,1));
+  const ratio=Math.max(0,Math.min(1,(mx-PL)/CW));
+  const idx=Math.round(ratio*(dates.length-1));
+  const hdate=dates[idx];
+  if(!hdate) return;
+  const vx=PL+(idx/(Math.max(dates.length-1,1)))*CW;
+  const el=n=>document.getElementById(id+n);
+  const vl=el('vl');if(vl){vl.setAttribute('x1',vx);vl.setAttribute('x2',vx);vl.setAttribute('opacity','1');}
+
+  const lines=[];
+  series.forEach((s,si)=>{
+    const pt=s.points.find(p=>p.date===hdate)||(()=>{
+      const sorted=[...s.points].sort((a,b)=>Math.abs(a.date.localeCompare(hdate))-Math.abs(b.date.localeCompare(hdate)));
+      return sorted[0];
+    })();
+    if(!pt) return;
+    const txt=`${s.ticker}: ${pt.b100.toFixed(1)} · ${pt.close.toLocaleString('fr-FR')} XOF`;
+    lines.push({si,txt});
+    const tel=el('t'+si);
+    if(tel){tel.textContent=txt;tel.setAttribute('opacity','1');}
+  });
+
+  // Position tooltip box
+  const tipH=lines.length*13+18, tipW=160;
+  const tipX=vx+5+tipW>(PL+CW)?vx-tipW-5:vx+5;
+  const tipY=PT+4;
+  const bg=el('bg');
+  if(bg){bg.setAttribute('x',tipX);bg.setAttribute('y',tipY);bg.setAttribute('width',tipW);bg.setAttribute('height',tipH);bg.setAttribute('opacity','1');}
+  const td=el('td');if(td){td.textContent=hdate;td.setAttribute('x',tipX+6);td.setAttribute('y',tipY+11);td.setAttribute('opacity','1');}
+  lines.forEach((ln,i)=>{
+    const tel=el('t'+ln.si);
+    if(tel){tel.setAttribute('x',tipX+6);tel.setAttribute('y',tipY+24+i*13);}
+  });
+}
+
+function _perfLeave(id,n){
+  const el=k=>document.getElementById(id+k);
+  const vl=el('vl');if(vl)vl.setAttribute('opacity','0');
+  const bg=el('bg');if(bg)bg.setAttribute('opacity','0');
+  const td=el('td');if(td)td.setAttribute('opacity','0');
+  for(let i=0;i<(n||8);i++){const t=el('t'+i);if(t)t.setAttribute('opacity','0');}
+}
+
+function _buildPerfTable(tops,series){
+  const b100map={};
+  series.forEach(s=>{
+    const last=s.points[s.points.length-1];
+    if(last) b100map[s.ticker]=last.b100;
+  });
+  return `<div class="card">
+    <div class="ct">🏆 Top performances — ${_perfPeriod}</div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th>#</th><th>Ticker</th><th>Départ</th><th>Actuel</th><th>Base 100</th><th>Perf.</th>
+    </tr></thead><tbody>
+    ${tops.map((t,i)=>{
+      const b100=b100map[t.ticker]!==undefined?b100map[t.ticker]:(100+t.perf_pct);
+      const c=t.perf_pct>=0?'var(--green)':'var(--red)';
+      const s=t.perf_pct>=0?'+':'';
+      return`<tr onclick="_openStock('${t.ticker}')">
+        <td style="color:var(--t3)">${i+1}</td>
+        <td><strong>${t.ticker}</strong></td>
+        <td style="color:var(--t2);font-size:11px">${(t.first_close||0).toLocaleString('fr-FR')}</td>
+        <td style="font-weight:600">${(t.last_close||0).toLocaleString('fr-FR')}</td>
+        <td style="font-weight:700;color:${b100>=100?'var(--green)':'var(--red)'}">${b100.toFixed(1)}</td>
+        <td style="font-weight:700;color:${c}">${s}${t.perf_pct.toFixed(1)}%</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>
+  </div>`;
 }
 
 // ── Prix cibles ────────────────────────────────────────────────────────────
@@ -4266,20 +4466,24 @@ async function showStock(ticker){
     window._openTicker = ticker;
     renderLiveRankBadge(ticker);
     loadReports(ticker);
-    // Mini sparkline 30j BOC dans l'en-tête
+    // Mini sparkline 30j dans l'en-tête (préférer données BOC étendues)
     const _miniSpkEl = document.getElementById('stock-spark-mini');
     if(_miniSpkEl){
-      const _ph=window._priceHistory||{};
-      const _hist30=(_ph[ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
-      if(_hist30.length>=3){_miniSpkEl.innerHTML=sparkline(_hist30,120,40);}
-      else{
-        // Try loading price history
-        fetch('/api/price-history/'+ticker).then(r=>r.json()).then(data=>{
-          if(data&&data.length>=3){
-            const svg=sparkline(data.slice(-30),120,40);
-            if(_miniSpkEl)_miniSpkEl.innerHTML=svg;
-          }
-        }).catch(()=>{});
+      const _extSp=window._extSparklines||{};
+      if(_extSp[ticker]&&_extSp[ticker].length>=3){
+        _miniSpkEl.innerHTML=sparkline(_extSp[ticker].map(p=>({price:p.close})),120,40);
+      } else {
+        const _ph=window._priceHistory||{};
+        const _hist30=(_ph[ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+        if(_hist30.length>=3){_miniSpkEl.innerHTML=sparkline(_hist30,120,40);}
+        else{
+          fetch('/api/price-history-extended/'+ticker+'?period=6m').then(r=>r.json()).then(data=>{
+            if(data&&data.points&&data.points.length>=3){
+              const svg=sparkline(data.points.slice(-30).map(p=>({price:p.close})),120,40);
+              if(_miniSpkEl)_miniSpkEl.innerHTML=svg;
+            }
+          }).catch(()=>{});
+        }
       }
     }
   }catch(e){document.getElementById(_stockRenderTarget).innerHTML='<p style="color:var(--t2)">Erreur</p>';}

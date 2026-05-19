@@ -114,34 +114,50 @@ function _setAttr(id, attrs) {
 }
 
 // ── Chargement et affichage du graphique dans showStock ───────────────────
-async function loadPriceChart(ticker, containerId) {
+async function loadPriceChart(ticker, containerId, period) {
+  period = period || '1an';
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px">Chargement...</div>';
+
+  const selHtml = `<div style="display:flex;gap:5px;margin-bottom:8px">
+    ${['6m','1an','3ans'].map(p=>`<button onclick="loadPriceChart('${ticker}','${containerId}','${p}')" style="font-size:10px;padding:2px 9px;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:${p===period?'var(--accent)':'transparent'};color:${p===period?'white':'var(--t2)'}">${p}</button>`).join('')}
+  </div>`;
+
   try {
-    const res = await fetch(`/api/stock/${ticker}`);
+    const res = await fetch(`/api/price-history-extended/${ticker}?period=${period}`);
     const data = await res.json();
-    const history = data.price_history || [];
-    if (history.length < 2) {
-      container.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px">Historique insuffisant</div>';
-      return;
+    let labels, prices;
+
+    if (data.points && data.points.length >= 2) {
+      labels = data.points.map(p => p.date);
+      prices = data.points.map(p => p.close);
+    } else {
+      // Fallback: weekly data from /api/stock
+      const res2 = await fetch(`/api/stock/${ticker}`);
+      const d2 = await res2.json();
+      const history = d2.price_history || [];
+      if (history.length < 2) {
+        container.innerHTML = selHtml + '<div style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px">Historique insuffisant</div>';
+        return;
+      }
+      labels = history.map(p => p.date || p.week || '');
+      prices = history.map(p => p.price);
     }
-    const labels = history.map(p => p.date || p.week || '');
-    const prices = history.map(p => p.price);
-    const first = prices[0], last = prices[prices.length-1];
+
+    const first = prices[0], last = prices[prices.length - 1];
     const perf = ((last - first) / first * 100).toFixed(1);
     const perfColor = last >= first ? '#4ADE80' : '#F87171';
     const perfSign = last >= first ? '+' : '';
 
-    // Header performance
-    container.innerHTML = `
+    container.innerHTML = selHtml + `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:11px;color:var(--t2)">${history.length} points · ${labels[0].substring(0,4)}→${labels[labels.length-1].substring(0,10)}</span>
+        <span style="font-size:11px;color:var(--t2)">${prices.length} pts · ${labels[0].substring(0,7)}→${labels[labels.length-1].substring(0,7)}</span>
         <span style="font-size:12px;font-weight:700;color:${perfColor}">${perfSign}${perf}%</span>
       </div>
       <div id="${containerId}_svg"></div>`;
-    drawPriceChart(document.getElementById(containerId+'_svg'), labels, prices, ticker);
+    drawPriceChart(document.getElementById(containerId + '_svg'), labels, prices, ticker);
   } catch(e) {
-    container.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px">Erreur chargement</div>';
+    container.innerHTML = selHtml + '<div style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px">Erreur chargement</div>';
   }
 }

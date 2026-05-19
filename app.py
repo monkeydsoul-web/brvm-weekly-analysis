@@ -1236,6 +1236,96 @@ def api_price_history():
         return jsonify({"error": str(e)}), 500
 
 
+# ── Historique étendu (BOC PDFs 2023→) ──────────────────────────────────────
+
+_EXTENDED_HISTORY_CACHE = None
+_EXTENDED_HISTORY_MTIME = 0.0
+
+def _load_extended_history():
+    global _EXTENDED_HISTORY_CACHE, _EXTENDED_HISTORY_MTIME
+    path = os.path.join(DATA_DIR, "price_history_extended.json")
+    try:
+        mtime = os.path.getmtime(path)
+        if _EXTENDED_HISTORY_CACHE is None or mtime != _EXTENDED_HISTORY_MTIME:
+            with open(path) as f:
+                _EXTENDED_HISTORY_CACHE = json.load(f)
+            _EXTENDED_HISTORY_MTIME = mtime
+    except Exception:
+        _EXTENDED_HISTORY_CACHE = _EXTENDED_HISTORY_CACHE or {}
+    return _EXTENDED_HISTORY_CACHE
+
+
+def _filter_by_period(points, period):
+    """Filtre une liste [{date, close, volume}] selon period (6m|1an|3ans|tout)."""
+    import datetime as _dt
+    if not points or period == "tout":
+        return points
+    today = _dt.date.today()
+    if period == "6m":
+        cutoff = (today - _dt.timedelta(days=183)).isoformat()
+    elif period == "1an":
+        cutoff = (today - _dt.timedelta(days=365)).isoformat()
+    elif period == "3ans":
+        cutoff = (today - _dt.timedelta(days=3 * 365)).isoformat()
+    else:
+        return points
+    return [p for p in points if p["date"] >= cutoff]
+
+
+@app.route("/api/price-history-extended/<ticker>")
+def api_price_history_extended(ticker):
+    ticker = ticker.upper()
+    period = request.args.get("period", "1an")
+    history = _load_extended_history()
+    raw = sorted(history.get(ticker, []), key=lambda x: x["date"])
+    points = _filter_by_period(raw, period)
+    return jsonify({"ticker": ticker, "period": period, "points": points, "count": len(points)})
+
+
+@app.route("/api/price-history-extended/top-performers")
+def api_price_history_extended_top():
+    try:
+        n = int(request.args.get("n", 5))
+        period = request.args.get("period", "1an")
+        history = _load_extended_history()
+        results = []
+        for ticker, raw in history.items():
+            points = _filter_by_period(sorted(raw, key=lambda x: x["date"]), period)
+            if len(points) < 5:
+                continue
+            first_close = points[0]["close"]
+            last_close  = points[-1]["close"]
+            if first_close and first_close > 0:
+                perf = round((last_close - first_close) / first_close * 100, 2)
+                results.append({
+                    "ticker": ticker,
+                    "perf_pct": perf,
+                    "first_close": first_close,
+                    "last_close": last_close,
+                    "first_date": points[0]["date"],
+                    "last_date": points[-1]["date"],
+                    "count": len(points),
+                })
+        results.sort(key=lambda x: x["perf_pct"], reverse=True)
+        return jsonify(results[:n])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/sparklines")
+def api_sparklines():
+    """Retourne les 30 derniers jours de cotation pour toutes les actions (sparklines légères)."""
+    import datetime as _dt
+    history = _load_extended_history()
+    cutoff = (_dt.date.today() - _dt.timedelta(days=50)).isoformat()
+    result = {}
+    for ticker, points in history.items():
+        recent = sorted([p for p in points if p["date"] >= cutoff], key=lambda x: x["date"])[-30:]
+        if len(recent) >= 3:
+            result[ticker] = [{"date": p["date"], "close": p["close"]} for p in recent]
+    return jsonify(result)
+
+
 @app.route("/api/analyses/<ticker>")
 def api_analyses_ticker(ticker):
     """Analyse IA complète depuis analyses_summary.json pour un ticker."""
