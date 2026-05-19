@@ -4591,8 +4591,8 @@ async function doRefresh(){
     setTimeout(async()=>{
       const[s,c,m]=await Promise.all([
         _cachedFetch('/api/scores'),
-        _cachedFetch('/api/commodities'),
-        _cachedFetch('/api/macro'),
+        _cachedFetch('/api/commodities').catch(()=>({})),
+        _cachedFetch('/api/macro').catch(()=>({})),
       ]);
       scores=s;window.scores=s;comms=c;
       renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);

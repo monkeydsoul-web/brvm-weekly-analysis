@@ -161,8 +161,16 @@ COMMODITY_COLORS = {
 }
 
 
+_COMM_CACHE = {"data": {}, "ts": 0.0}
+_COMM_TTL   = 300  # 5 minutes
+
 def fetch_commodity_prices():
-    """Récupère les prix des commodités depuis Yahoo Finance (via yfinance si dispo)"""
+    """Récupère les prix des commodités (cache 5 min, fetches parallèles, timeout 3s/ticker)."""
+    import time
+    now = time.time()
+    if _COMM_CACHE["data"] and now - _COMM_CACHE["ts"] < _COMM_TTL:
+        return _COMM_CACHE["data"]
+
     commodities = {
         "Cacao":        {"symbol": "CC=F",  "unit": "USD/tonne"},
         "Café":         {"symbol": "KC=F",  "unit": "USD/livre"},
@@ -179,15 +187,17 @@ def fetch_commodity_prices():
     prices = {}
     try:
         import yfinance as yf
-        for name, info in commodities.items():
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def _fetch_one(name, info):
             try:
                 ticker = yf.Ticker(info["symbol"])
-                hist = ticker.history(period="5d")
+                hist = ticker.history(period="5d", timeout=3)
                 if not hist.empty:
                     last = float(hist["Close"].iloc[-1])
                     prev = float(hist["Close"].iloc[-2]) if len(hist) > 1 else last
                     change = (last / prev - 1) * 100
-                    prices[name] = {
+                    return name, {
                         "price": round(last, 2),
                         "change_pct": round(change, 2),
                         "unit": info["unit"],
@@ -195,8 +205,19 @@ def fetch_commodity_prices():
                     }
             except Exception:
                 pass
+            return name, None
+
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            futures = {pool.submit(_fetch_one, n, i): n for n, i in commodities.items()}
+            for fut in as_completed(futures, timeout=8):
+                try:
+                    name, result = fut.result()
+                    if result:
+                        prices[name] = result
+                except Exception:
+                    pass
+
     except ImportError:
-        # yfinance non installé — utiliser données statiques de démonstration
         prices = {
             "Cacao":         {"price": 7842, "change_pct": -1.2, "unit": "USD/tonne"},
             "Café Arabica":  {"price": 3.15, "change_pct": +0.8, "unit": "USD/livre"},
@@ -209,6 +230,12 @@ def fetch_commodity_prices():
             "Blé":           {"price": 5.42, "change_pct": -0.9, "unit": "USD/boisseau"},
             "Gaz naturel":   {"price": 3.85, "change_pct": +2.3, "unit": "USD/MMBtu"},
         }
+
+    if prices:
+        _COMM_CACHE["data"] = prices
+        _COMM_CACHE["ts"]   = now
+    elif _COMM_CACHE["data"]:
+        return _COMM_CACHE["data"]
 
     return prices
 
