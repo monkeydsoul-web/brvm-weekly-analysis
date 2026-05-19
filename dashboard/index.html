@@ -1548,6 +1548,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/markowitz.js"></script>
 <script src="/previsions.js"></script>
 <script>
+window.onerror = (msg, src, line, col, err) => {
+  console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
+};
+window.onunhandledrejection = (e) => {
+  console.error('[BRVM UNHANDLED]', e.reason);
+};
 let scores=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
 const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
 const HIST_PRICES={SGBC:[3500,3800,5200,5670,7760,9120,11090,19435,33000,34995],SIBC:[843,900,1100,1350,2000,2500,2700,3300,4800,6950],SNTS:[14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],CBIBF:[8000,8500,9000,9800,9900,9885,9900,10000,13500,16490],NSBC:[5000,5200,5350,5400,5350,5350,5500,7500,9000,13900]};
@@ -2097,43 +2103,61 @@ async function init(){
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
 
   try{
-    const[s,c,m,f,tp]=await Promise.all([
-      _cachedFetch('/api/scores'),
+    // ── Étape 1 : scores seuls — rendu immédiat, sans attendre les APIs lentes ──
+    let s;
+    try {
+      s = await _cachedFetch('/api/scores');
+    } catch(e) {
+      console.warn('[BRVM] /api/scores failed, fallback live-scores:', e);
+      const ls = await fetch('/api/live-scores').then(r=>r.json()).catch(()=>({}));
+      s = ls.ranking || ls.scores || [];
+    }
+    if (!Array.isArray(s) || !s.length) {
+      const ls = await fetch('/api/live-scores').then(r=>r.json()).catch(()=>({}));
+      s = ls.ranking || ls.scores || [];
+    }
+    scores=s; window.scores=s;
+    window._priceHistory={};
+    window._extSparklines={};
+
+    loadAlertsLocal(); updateAlertBadge(); initRankHistory();
+    fetchExchangeRates(); initServiceWorker(); checkTourFirst(); _importPortfolioFromURL();
+
+    // Rendu immédiat avec scores seuls — plus jamais de "Chargement..." infini
+    renderDash({}); initRanking(); renderRankLive(); renderDiv(); renderComm();
+    document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+    gSpinHide();
+    populateSelects();
+    renderTargets(); loadCustomScores(); loadSidebar(); updateAlertBadge(); loadStatus();
+    setTimeout(loadMarketWidget, 500);
+    startAutoRefresh();
+
+    // ── Étape 2 : données optionnelles en arrière-plan (ne bloquent plus le rendu) ──
+    Promise.all([
       _cachedFetch('/api/commodities').catch(()=>({})),
       _cachedFetch('/api/macro').catch(()=>({})),
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       _cachedFetch('/api/top_performers').catch(()=>[]),
-    ]);
-    scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
-    // Charger historique prix PUIS rendu — timeout 8s pour ne pas bloquer le Signal du jour
-    window._priceHistory = {};
-    let _dashRendered = false;
-    function _renderAfterPH() {
-      if (_dashRendered) return;
-      _dashRendered = true;
-      renderDash(m); initRanking(); renderRankLive(); renderDiv(); renderComm(); startAutoRefresh();
-      document.querySelectorAll('#kpis .kpi').forEach(el => el.classList.remove('loading'));
-      gSpinHide();
-    }
-    const _phTimer = setTimeout(() => {
-      console.warn('[BRVM] /api/price-history timeout (8s) — rendu sans historique de prix');
-      _renderAfterPH();
-    }, 8000);
-    fetch('/api/price-history').then(r => r.json()).then(ph => {
-      window._priceHistory = ph;
-    }).catch(e => {
-      window._priceHistory = {};
-      console.error('[BRVM] Price history error:', e);
-    }).finally(() => {
-      clearTimeout(_phTimer);
-      _renderAfterPH();
-    });
-    // Charger sparklines étendus (BOC quotidien) en parallèle
-    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(()=>{});
-    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget, 500);
+    ]).then(([c,m,f,tp])=>{
+      comms=c; topPerf=tp; favorites=f.map(x=>x.ticker);
+      renderComm();
+      renderDash(m); initRanking(); renderRankLive();
+    }).catch(()=>{});
 
-    populateSelects();
-  }catch(e){console.error(e)}
+    // ── Étape 3 : historique de prix en arrière-plan ────────────────────────────
+    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
+      window._priceHistory=ph;
+    }).catch(()=>{});
+
+    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{
+      window._extSparklines=sp; renderRankLive();
+    }).catch(()=>{});
+
+  }catch(e){
+    console.error('[BRVM] init fatal:', e);
+    gSpinHide();
+    document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+  }
 }
 
 function populateSelects(){
