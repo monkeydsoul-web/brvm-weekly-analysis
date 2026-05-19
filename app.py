@@ -1749,5 +1749,7 @@ if __name__ == "__main__":
         logger.info(f"Auto-scheduler démarré — {len(_sched.get_jobs())} jobs")
     except Exception as e:
         logger.warning(f"Scheduler non démarré: {e}")
+    # Préchauffage du cache commodités en arrière-plan (évite 2.5s au premier appel)
+    threading.Thread(target=fetch_commodity_prices, daemon=True).start()
     app.run(host='0.0.0.0', port=PORT, debug=False)
 

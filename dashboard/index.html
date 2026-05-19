@@ -2101,60 +2101,37 @@ async function init(){
   gSpinShow();
   _initEcoModeUI();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
-
   try{
-    // ── Étape 1 : scores seuls — rendu immédiat, sans attendre les APIs lentes ──
-    let s;
-    try {
-      s = await _cachedFetch('/api/scores');
-    } catch(e) {
-      console.warn('[BRVM] /api/scores failed, fallback live-scores:', e);
-      const ls = await fetch('/api/live-scores').then(r=>r.json()).catch(()=>({}));
-      s = ls.ranking || ls.scores || [];
-    }
-    if (!Array.isArray(s) || !s.length) {
-      const ls = await fetch('/api/live-scores').then(r=>r.json()).catch(()=>({}));
-      s = ls.ranking || ls.scores || [];
-    }
-    scores=s; window.scores=s;
-    window._priceHistory={};
-    window._extSparklines={};
-
-    loadAlertsLocal(); updateAlertBadge(); initRankHistory();
-    fetchExchangeRates(); initServiceWorker(); checkTourFirst(); _importPortfolioFromURL();
-
-    // Rendu immédiat avec scores seuls — plus jamais de "Chargement..." infini
-    renderDash({}); initRanking(); renderRankLive(); renderDiv(); renderComm();
-    document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
-    gSpinHide();
-    populateSelects();
-    renderTargets(); loadCustomScores(); loadSidebar(); updateAlertBadge(); loadStatus();
-    setTimeout(loadMarketWidget, 500);
-    startAutoRefresh();
-
-    // ── Étape 2 : données optionnelles en arrière-plan (ne bloquent plus le rendu) ──
-    Promise.all([
+    const[s,c,m,f,tp]=await Promise.all([
+      _cachedFetch('/api/scores'),
       _cachedFetch('/api/commodities').catch(()=>({})),
       _cachedFetch('/api/macro').catch(()=>({})),
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       _cachedFetch('/api/top_performers').catch(()=>[]),
-    ]).then(([c,m,f,tp])=>{
-      comms=c; topPerf=tp; favorites=f.map(x=>x.ticker);
-      renderComm();
-      renderDash(m); initRanking(); renderRankLive();
-    }).catch(()=>{});
-
-    // ── Étape 3 : historique de prix en arrière-plan ────────────────────────────
+    ]);
+    scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
+    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
+    window._priceHistory={};
+    window._extSparklines={};
+    // Charger historique prix PUIS rendu — .finally() garantit le rendu même si l'API échoue
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
-    }).catch(()=>{});
-
-    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{
-      window._extSparklines=sp; renderRankLive();
-    }).catch(()=>{});
-
+    }).catch(e=>{
+      window._priceHistory={};
+      console.error('[BRVM] price-history error:',e);
+    }).finally(()=>{
+      try{
+        renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
+      }catch(e2){console.error('[BRVM] renderDash error:',e2);}
+      document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+      gSpinHide();
+    });
+    // Sparklines BOC en parallèle
+    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(()=>{});
+    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget,500);
+    populateSelects();
   }catch(e){
-    console.error('[BRVM] init fatal:', e);
+    console.error('[BRVM] init fatal:',e);
     gSpinHide();
     document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
   }
