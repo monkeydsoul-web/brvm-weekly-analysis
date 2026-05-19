@@ -1830,7 +1830,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // ── Theme dark/light ───────────────────────────────────────────────────────
-let dark = localStorage.getItem('brvm_theme') !== 'light';
+let dark = localStorage.getItem('brvm_theme') === 'dark';
 function _applyTheme() {
   document.documentElement.classList.toggle('light', !dark);
   const btn = document.querySelector('button[onclick="toggleTheme()"]');
@@ -2105,13 +2105,28 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
-    // Charger historique prix PUIS rendu
-    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
-      window._priceHistory=ph;
-    }).catch(e=>{window._priceHistory={};console.error('Price history error:',e);}).finally(()=>{
-      renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
-      document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+    // Charger historique prix PUIS rendu — timeout 8s pour ne pas bloquer le Signal du jour
+    window._priceHistory = {};
+    let _dashRendered = false;
+    function _renderAfterPH() {
+      if (_dashRendered) return;
+      _dashRendered = true;
+      renderDash(m); initRanking(); renderRankLive(); renderDiv(); renderComm(); startAutoRefresh();
+      document.querySelectorAll('#kpis .kpi').forEach(el => el.classList.remove('loading'));
       gSpinHide();
+    }
+    const _phTimer = setTimeout(() => {
+      console.warn('[BRVM] /api/price-history timeout (8s) — rendu sans historique de prix');
+      _renderAfterPH();
+    }, 8000);
+    fetch('/api/price-history').then(r => r.json()).then(ph => {
+      window._priceHistory = ph;
+    }).catch(e => {
+      window._priceHistory = {};
+      console.error('[BRVM] Price history error:', e);
+    }).finally(() => {
+      clearTimeout(_phTimer);
+      _renderAfterPH();
     });
     // Charger sparklines étendus (BOC quotidien) en parallèle
     fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(()=>{});

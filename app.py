@@ -1707,21 +1707,14 @@ def api_rapport_mensuel():
 
 
 if __name__ == "__main__":
-    import socket
-    import os as _os
     try:
         from dotenv import load_dotenv as _ldenv
         _ldenv()
     except ImportError:
         pass
-    port = 5000
-    for p in range(5000, 5010):
-        try:
-            s = socket.socket(); s.bind(("127.0.0.1", p)); s.close(); port = p; break
-        except:
-            pass
+    PORT = 5000
     print("\n" + "="*50)
-    print(f"  BRVM Dashboard — http://localhost:{port}")
+    print(f"  BRVM Dashboard — http://localhost:{PORT}")
     print("="*50 + "\n")
     try:
         from auto_scheduler import start_scheduler as _start_auto
@@ -1729,5 +1722,5 @@ if __name__ == "__main__":
         logger.info(f"Auto-scheduler démarré — {len(_sched.get_jobs())} jobs")
     except Exception as e:
         logger.warning(f"Scheduler non démarré: {e}")
-    app.run(debug=False, port=port, host="127.0.0.1")
+    app.run(host='0.0.0.0', port=PORT, debug=False)
 
