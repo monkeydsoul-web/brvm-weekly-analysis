@@ -2099,8 +2099,8 @@ async function init(){
   try{
     const[s,c,m,f,tp]=await Promise.all([
       _cachedFetch('/api/scores'),
-      _cachedFetch('/api/commodities'),
-      _cachedFetch('/api/macro'),
+      _cachedFetch('/api/commodities').catch(()=>({})),
+      _cachedFetch('/api/macro').catch(()=>({})),
       fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
@@ -4799,7 +4799,7 @@ function loadSignalDuJour() {
     });
 }
 
-loadSignalDuJour();
+try { loadSignalDuJour(); } catch(e) { console.warn('[BRVM] signal du jour:', e); }
 init();
 </script>
 
