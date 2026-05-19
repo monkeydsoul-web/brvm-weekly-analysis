@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>BRVM Dashboard</title>
+<!DOCTYPE html><html lang="fr" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>BRVM Dashboard</title>
 <style>
 /* ══ Variables ══════════════════════════════════════════════════════════════ */
 :root{
@@ -2096,37 +2096,6 @@ async function init(){
   _initEcoModeUI();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
 
-  // ── Signal du jour : chargement immédiat, indépendant du reste ──────────
-  (function _loadSignalEarly() {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => {
-      ctrl.abort();
-      const el = document.getElementById('signal-content');
-      if (el && el.textContent.includes('Chargement'))
-        el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px">Données live indisponibles — marché fermé ou hors connexion</div>';
-    }, 5000);
-    fetch('/api/live-scores', { signal: ctrl.signal })
-      .then(r => r.json())
-      .then(d => {
-        clearTimeout(t);
-        const ranking = d.ranking || d.scores || [];
-        if (!ranking.length) return;
-        const sorted = [...ranking].sort((a, b) => (b.composite_adj || 0) - (a.composite_adj || 0));
-        // Mettre à jour window.scores si pas encore chargé
-        if (!(window.scores || []).length) { window.scores = ranking; scores = ranking; }
-        _renderDaySignal(sorted);
-        _renderSignalSparkline(sorted);
-      })
-      .catch(e => {
-        clearTimeout(t);
-        if (e.name === 'AbortError') return;
-        console.error('[BRVM] live-scores early load error:', e);
-        const el = document.getElementById('signal-content');
-        if (el && el.textContent.includes('Chargement'))
-          el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px">Données live indisponibles — marché fermé ou hors connexion</div>';
-      });
-  })();
-
   try{
     const[s,c,m,f,tp]=await Promise.all([
       _cachedFetch('/api/scores'),
@@ -2349,7 +2318,8 @@ function _renderDaySignal(sorted) {
   if (!el) return;
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
 
-  const all = window.scores || scores || [];
+  // Utiliser sorted directement — pas de dépendance à window.scores
+  const all = (sorted && sorted.length) ? sorted : (window.scores || scores || []);
   const withChg = all.filter(x => x.change_pct != null);
   const gainers = withChg.filter(x => x.change_pct > 0);
   const losers  = withChg.filter(x => x.change_pct < 0);
@@ -4796,6 +4766,40 @@ function renderMacroPage() {
   el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
+// ── Signal du jour — chargement standalone, indépendant de init() ──────────
+function loadSignalDuJour() {
+  const el = document.getElementById('signal-content');
+  if (!el) return;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => {
+    ctrl.abort();
+    if (el.textContent.includes('Chargement'))
+      el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px">Données live indisponibles — marché fermé ou hors connexion</div>';
+  }, 5000);
+  fetch('/api/live-scores', { signal: ctrl.signal })
+    .then(r => r.json())
+    .then(d => {
+      clearTimeout(t);
+      const ranking = d.ranking || d.scores || [];
+      if (!ranking.length) {
+        el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px">Aucune donnée disponible</div>';
+        return;
+      }
+      const sorted = [...ranking].sort((a, b) => (b.composite_adj || 0) - (a.composite_adj || 0));
+      if (!window.scores || !window.scores.length) { window.scores = ranking; scores = ranking; }
+      _renderDaySignal(sorted);
+      _renderSignalSparkline(sorted);
+    })
+    .catch(e => {
+      clearTimeout(t);
+      if (e.name === 'AbortError') return;
+      console.error('[BRVM] loadSignalDuJour error:', e);
+      if (el.textContent.includes('Chargement'))
+        el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px">Données live indisponibles — marché fermé ou hors connexion</div>';
+    });
+}
+
+loadSignalDuJour();
 init();
 </script>
 
