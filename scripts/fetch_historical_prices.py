@@ -141,20 +141,22 @@ def parse_boc_pdf(content: bytes, fallback_date: str) -> dict:
 
                         # Détecter le format
                         if col0 in SECTOR_CODES:
-                            # Format B : SECT TICKER NAME '' PREV OUV CLOT VAR% VOL VAL REF
+                            # Format B (2023+) : SECT TICKER NAME '' PREV OUV CLOT VAR% VOL VAL REF
                             ticker = col1
                             if ticker not in TICKER_SET:
                                 continue
+                            # Format B prend priorité — si déjà enregistré depuis un autre Format B, conserver
                             prev = _parse_num(row[4]) if len(row) > 4 else None
-                            ouv  = row[5] if len(row) > 5 else None
                             clot = row[6] if len(row) > 6 else None
                             vol  = _parse_num(row[8]) if len(row) > 8 else None
                             ref  = _parse_num(row[10]) if len(row) > 10 else None
                         elif col0 in TICKER_SET:
-                            # Format A : TICKER NAME '' PREV OUV CLOT VAR% VOL VAL REF
+                            # Format A (≤2022) : TICKER NAME '' PREV OUV CLOT VAR% VOL VAL REF
+                            # Ne pas écraser un résultat Format B déjà trouvé
                             ticker = col0
+                            if ticker in results:
+                                continue
                             prev = _parse_num(row[3]) if len(row) > 3 else None
-                            ouv  = row[4] if len(row) > 4 else None
                             clot = row[5] if len(row) > 5 else None
                             vol  = _parse_num(row[7]) if len(row) > 7 else None
                             ref  = _parse_num(row[9]) if len(row) > 9 else None
@@ -164,9 +166,9 @@ def parse_boc_pdf(content: bytes, fallback_date: str) -> dict:
                         # Résoudre le cours de clôture
                         close = _parse_num(clot)
                         if close is None:
-                            # NC/SP : utiliser cours de référence ou cours précédent
                             close = ref if ref else prev
-                        if not close or close <= 0:
+                        # Rejeter les cours invraisemblablement bas (artefact de parsing)
+                        if not close or close < 10:
                             continue
 
                         results[ticker] = {
