@@ -224,51 +224,64 @@ input[type=range]{padding:0;height:20px}
 /* ── Raccourcis clavier ────────────────────────────────────────────────── */
 #kbd-hint{position:fixed;bottom:8px;right:8px;font-size:9px;color:var(--t3);pointer-events:none;z-index:50}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
+/* ── table-scroll wrapper ──────────────────────────────────────────────── */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media(max-width:900px){
-  .g4{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:768px){
-  /* Layout */
+  /* Hamburger + sidebar overlay */
+  #mob-menu-btn{display:flex}
   .app{flex-direction:column;height:auto;min-height:100vh}
   .sb{position:fixed;top:0;left:0;height:100vh;width:240px;transform:translateX(-100%);z-index:500;box-shadow:4px 0 24px rgba(0,0,0,.3)}
   .sb.mob-open{transform:translateX(0)}
-  .main{width:100%;padding-top:54px} /* espace sous la top-bar mob */
-  #app-footer{left:0}
-  #mob-menu-btn{display:flex}
   #mob-overlay.show{display:block}
+  .main{margin-left:0;padding-top:54px;width:100%}
+  #app-footer{left:0}
   /* Grids */
+  .g4{grid-template-columns:repeat(2,1fr)}
+  /* Table scroll */
+  .table-scroll table{min-width:580px}
+}
+@media(max-width:768px){
+  /* Ajustements fins sous 768px */
   .g4{grid-template-columns:repeat(2,1fr);gap:8px}
   .g3{grid-template-columns:repeat(2,1fr);gap:8px}
   .g2{grid-template-columns:1fr}
-  /* Pages */
   .page{padding:12px 14px}
   .ph h2{font-size:15px}
-  /* Tables : scroll horizontal */
-  .card.card-table{padding:0;overflow-x:auto}
   table{font-size:11px}
   th,td{padding:6px 8px}
-  /* KPIs */
   .kv{font-size:16px}
-  /* Sidebar modèle scores */
   #sidebarList .si{padding:4px 8px}
-  /* Heatmap full width */
   #heatmap-grid{gap:2px}
-  /* Comparaison modal */
   #cmp-modal-inner{padding:14px;width:98%}
-  /* Help FAB + drawer */
   #help-fab{bottom:16px;right:16px;width:40px;height:40px;font-size:17px}
   #help-drawer{width:88vw}
-  /* Tour */
   #tour-box{padding:20px;margin:12px}
 }
+@media(max-width:600px){
+  .g4{grid-template-columns:1fr;gap:6px}
+  .g3{grid-template-columns:1fr;gap:6px}
+  .g2{grid-template-columns:1fr}
+  .kpi{padding:12px 14px}
+  .kv{font-size:14px}
+  .card{padding:12px}
+  .page{padding:10px 10px}
+  .ph{flex-direction:column;align-items:flex-start;gap:6px}
+  .ph>div{flex-wrap:wrap;gap:4px}
+  /* Onglets (tabs) scrollables */
+  .tab-bar,.annc-tabs-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  /* Formulaire portefeuille en 2 cols */
+  #addPositionForm>div[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
+}
 @media(max-width:480px){
-  .g4{grid-template-columns:repeat(2,1fr);gap:6px}
+  .g4{grid-template-columns:1fr;gap:6px}
   .g3{grid-template-columns:1fr}
   .ph{flex-direction:column;align-items:flex-start}
   .ph>div{flex-wrap:wrap;gap:4px}
   .btn{padding:5px 10px;font-size:11px}
-  .kv{font-size:15px}
+  .kv{font-size:13px}
   .kl{font-size:9px}
+  /* Formulaire portefeuille en 1 col */
+  #addPositionForm>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
 }
 /* ── Floating tooltip ────────────────────────────────────────────────────── */
 #floating-tooltip{position:fixed;z-index:9999;background:var(--bg-overlay);color:var(--text-1);padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;max-width:260px;line-height:1.5;box-shadow:var(--shadow-md);pointer-events:none;opacity:0;transition:opacity 0.15s;border:1px solid var(--border-1);}
@@ -1804,6 +1817,28 @@ window.onerror = (msg, src, line, col, err) => {
 window.onunhandledrejection = (e) => {
   console.error('[BRVM UNHANDLED]', e.reason);
 };
+
+// ── Table scroll wrapper (mobile) ─────────────────────────────────────────
+function _wrapTables(){
+  document.querySelectorAll('table').forEach(t=>{
+    if(t.parentElement.classList.contains('table-scroll')) return;
+    const wrap=document.createElement('div');
+    wrap.className='table-scroll';
+    t.parentNode.insertBefore(wrap,t);
+    wrap.appendChild(t);
+  });
+}
+let _wrapTimer=null;
+const _tableObs=new MutationObserver(()=>{
+  clearTimeout(_wrapTimer);
+  _wrapTimer=setTimeout(_wrapTables,250);
+});
+// Démarrer l'observation après le premier rendu
+window.addEventListener('load',()=>{
+  _wrapTables();
+  const main=document.querySelector('.main');
+  if(main) _tableObs.observe(main,{childList:true,subtree:true});
+});
 let scores=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
 const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
 const HIST_PRICES={SGBC:[3500,3800,5200,5670,7760,9120,11090,19435,33000,34995],SIBC:[843,900,1100,1350,2000,2500,2700,3300,4800,6950],SNTS:[14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],CBIBF:[8000,8500,9000,9800,9900,9885,9900,10000,13500,16490],NSBC:[5000,5200,5350,5400,5350,5350,5500,7500,9000,13900]};
@@ -1904,10 +1939,10 @@ function toggleMobMenu() {
   document.querySelector('.sb').classList.toggle('mob-open');
   document.getElementById('mob-overlay').classList.toggle('show');
 }
-// Close sidebar when a nav item is tapped on mobile
+// Close sidebar when a nav item is tapped on mobile (<= 900px)
 document.querySelectorAll('.ni').forEach(el => {
   el.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 900) {
       document.querySelector('.sb').classList.remove('mob-open');
       document.getElementById('mob-overlay').classList.remove('show');
     }
