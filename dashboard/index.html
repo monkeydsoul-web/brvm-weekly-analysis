@@ -380,6 +380,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-2);font-size:12px;padding:7px 14px;cursor:pointer;margin-bottom:-1px;font-weight:500;white-space:nowrap;transition:color .15s}
 .tab-btn.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .tab-btn:hover:not(.on){color:var(--text)}
+.annc-tab{font-size:11px;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--t2);transition:all .15s;white-space:nowrap}
+.annc-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.annc-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.annc-card:hover{border-color:var(--accent)}
+.gnews-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:8px;transition:border-color .15s}
+.gnews-card:hover{border-color:var(--accent)}
 .tab-content{display:none}
 .tab-content.on{display:block}
 /* ── Slide-over fiche société ────────────────────────────────────────────── */
@@ -466,6 +472,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
+    <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge compact-hide" style="display:none"></span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-marche">
       <div class="ni ni-sub" onclick="nav('comm')" data-tip="Impact des prix des matières premières (pétrole, cacao, or) sur les sociétés BRVM"><span>◈</span> <span class="ni-label">Commodités</span></div>
@@ -556,6 +563,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span id="signal-composite-spk" style="display:none"></span>
     </div>
     <div id="signal-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
+  </div>
+  <!-- Widget Dernières annonces BRVM -->
+  <div class="card" style="margin-bottom:12px" id="annc-widget">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0">📢 Dernières annonces BRVM</div>
+      <button onclick="nav('news');renderNewsPage()" style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;padding:0">Voir tout →</button>
+    </div>
+    <div id="annc-widget-content" style="font-size:12px;color:var(--t2)">Chargement...</div>
   </div>
   <!-- Guide 4 étapes -->
   <div style="margin-bottom:24px">
@@ -1529,6 +1544,48 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div id="gloss-list" style="max-width:800px"></div>
 </div>
+<!-- ── Actualités ─────────────────────────────────────────────────────────── -->
+<div class="page" id="page-news">
+  <div class="ph">
+    <div><h2>📰 Actualités BRVM</h2><p class="page-sub">Annonces officielles et presse financière</p></div>
+    <select id="news-ticker-filter" onchange="renderNewsPage()" style="padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);min-width:140px">
+      <option value="">Tous les tickers</option>
+    </select>
+  </div>
+
+  <!-- Section A : Annonces officielles -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="ct" style="margin-bottom:12px">🏛 Annonces officielles BRVM</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="annc-tabs">
+      <button class="annc-tab on" onclick="switchAnncTab('dividendes',this)">💰 Dividendes</button>
+      <button class="annc-tab" onclick="switchAnncTab('convocations_ag',this)">📋 AG</button>
+      <button class="annc-tab" onclick="switchAnncTab('notations',this)">⭐ Notations</button>
+      <button class="annc-tab" onclick="switchAnncTab('communiques',this)">📣 Communiqués</button>
+      <button class="annc-tab" onclick="switchAnncTab('dirigeants',this)">👔 Dirigeants</button>
+      <button class="annc-tab" onclick="switchAnncTab('franchissements',this)">📊 Franchissements</button>
+      <button class="annc-tab" onclick="switchAnncTab('avis',this)">ℹ️ Avis</button>
+      <button class="annc-tab" onclick="switchAnncTab('rapports',this)">📄 Rapports</button>
+    </div>
+    <div id="annc-list" style="min-height:80px"></div>
+  </div>
+
+  <!-- Section B : Google News -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="ct" style="margin:0">📡 Presse financière — Google News</div>
+    </div>
+    <div id="gnews-list" style="min-height:80px"></div>
+  </div>
+</div>
+
+<!-- Modal détail annonce -->
+<div id="annc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:600px;width:92%;max-height:80vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('annc-modal').style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--t2)">✕</button>
+    <div id="annc-modal-body"></div>
+  </div>
+</div>
+
 <footer id="app-footer">
   <span>BRVM Analyzer · Données BOC · <span id="footer-date"></span> · Cours indicatifs — pas de conseil en investissement</span>
   <span id="footer-live">MàJ : —</span>
@@ -4381,6 +4438,7 @@ async function showStock(ticker){
         <div class="stock-tab active" data-tab="general" onclick="_stockTab('general')">📊 Général</div>
         <div class="stock-tab" data-tab="history" onclick="_stockTab('history');_loadStockHistory('${ticker}')">📅 Historique 30j</div>
         <div class="stock-tab" data-tab="aianalysis" onclick="_stockTab('aianalysis');_loadStockAI('${ticker}')">🤖 Analyse IA complète</div>
+        <div class="stock-tab" data-tab="news" onclick="_stockTab('news');loadStockNews('${ticker}')">📰 Actualités</div>
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
@@ -4476,6 +4534,14 @@ async function showStock(ticker){
       <!-- Onglet Analyse IA complète -->
       <div id="stab-aianalysis" class="stock-tab-panel">
         <div id="stock-ai-full"><div style="padding:30px;text-align:center;color:var(--t2)">Chargement de l'analyse IA...</div></div>
+      </div>
+
+      <!-- Onglet Actualités -->
+      <div id="stab-news" class="stock-tab-panel">
+        <div class="card">
+          <div class="ct" style="margin-bottom:10px">📰 Annonces &amp; Presse financière</div>
+          <div id="stock-news-section"><p style="font-size:12px;color:var(--t2)">Chargement...</p></div>
+        </div>
       </div>`;
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
@@ -4597,7 +4663,7 @@ async function doRefresh(){
         _cachedFetch('/api/macro').catch(()=>({})),
       ]);
       scores=s;window.scores=s;comms=c;
-      renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);
+      renderDash(m);initRanking();renderRankLive();renderDiv();renderPerf();renderComm();startAutoRefresh();renderTargets();loadStatus();setTimeout(loadMarketWidget,300);setTimeout(()=>{if(typeof _loadAnncWidget!=='undefined')_loadAnncWidget();},800);
       document.getElementById('ri').classList.remove('spin');
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
@@ -4643,6 +4709,7 @@ const pageLoaders={
   optim:     ()=>renderCorrelMatrix(),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
+  news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
 };
 
 function switchTab(pageId, tabId, btn) {
@@ -4766,6 +4833,209 @@ function renderMacroPage() {
   const sign = avgChg >= 0 ? '+' : '';
   el.textContent = sign + avgChg.toFixed(2) + '%';
   el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ── Actualités BRVM + Google News ────────────────────────────────────────────
+let _anncCurrentTab = 'dividendes';
+
+const _ANNC_LABELS = {
+  dividendes:'💰 Dividendes', convocations_ag:'📋 AG', notations:'⭐ Notations',
+  communiques:'📣 Communiqués', dirigeants:'👔 Dirigeants',
+  franchissements:'📊 Franchissements', avis:'ℹ️ Avis', rapports:'📄 Rapports'
+};
+const _ANNC_SHORT = {
+  dividendes:'DIV', convocations_ag:'AG', notations:'NOT', communiques:'COM',
+  dirigeants:'DIR', franchissements:'FRS', avis:'AVI', rapports:'RAP'
+};
+
+function _sentimentBadge(text) {
+  const t = (text||'').toLowerCase();
+  const pos = ['hausse','bénéfice','dividende','croissance','profit','accord','partenariat','acquisition','résultat positif','augmentation'];
+  const neg = ['baisse','perte','litige','plainte','déficit','faillite','insolvable','chute','recul'];
+  if (pos.some(k=>t.includes(k))) return '<span style="color:#4ADE80;font-size:10px">🟢 Positif</span>';
+  if (neg.some(k=>t.includes(k))) return '<span style="color:#F87171;font-size:10px">🔴 Négatif</span>';
+  return '<span style="color:#FBBF24;font-size:10px">🟡 Neutre</span>';
+}
+
+function _isNew(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr), now = new Date();
+  return (now - d) < 7 * 86400 * 1000;
+}
+
+function _anncCard(item, type) {
+  const isNew = _isNew(item.date);
+  const badge = `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;margin-right:6px">${_ANNC_SHORT[type]||'ANN'}</span>`;
+  const newBadge = isNew ? '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:#F59E0B;color:#000;margin-right:6px">NOUVEAU</span>' : '';
+  const ticker = item.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent);margin-right:6px">${item.ticker}</span>` : '';
+  return `<div class="annc-card" onclick="openAnncModal(${JSON.stringify(JSON.stringify(item)).slice(1,-1)})">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-bottom:4px">
+      ${badge}${newBadge}${ticker}
+      <span style="font-size:10px;color:var(--t3);margin-left:auto">${item.date||'—'}</span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4">${(item.titre||'').slice(0,100)}</div>
+    ${item.contenu ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${(item.contenu||'').slice(0,120)}…</div>` : ''}
+  </div>`;
+}
+
+function openAnncModal(itemJson) {
+  let item;
+  try { item = JSON.parse(itemJson); } catch { return; }
+  const modal = document.getElementById('annc-modal');
+  const body  = document.getElementById('annc-modal-body');
+  if (!modal || !body) return;
+  body.innerHTML = `
+    <div style="margin-bottom:12px">
+      ${item.ticker ? `<span style="font-size:13px;font-weight:700;color:var(--accent);margin-right:8px">${item.ticker}</span>` : ''}
+      <span style="font-size:11px;color:var(--t3)">${item.date||''}</span>
+    </div>
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4">${item.titre||''}</h3>
+    ${item.montant_xof ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Montant :</strong> ${Number(item.montant_xof).toLocaleString('fr-FR')} XOF</div>` : ''}
+    ${item.date_paiement ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Date de paiement :</strong> ${item.date_paiement}</div>` : ''}
+    ${item.notation ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Notation :</strong> ${item.notation}</div>` : ''}
+    ${item.seuil_pct ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Seuil :</strong> ${item.seuil_pct}%</div>` : ''}
+    ${item.contenu ? `<div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:12px;white-space:pre-wrap">${item.contenu}</div>` : ''}
+    ${item.source_url ? `<a href="${item.source_url}" target="_blank" style="font-size:11px;color:var(--accent)">🔗 Voir la source</a>` : ''}
+    ${item.pdf_path ? `<div style="margin-top:8px;font-size:11px;color:var(--t3)">📄 PDF : ${item.pdf_path}</div>` : ''}`;
+  modal.style.display = 'flex';
+}
+
+async function switchAnncTab(type, btn) {
+  _anncCurrentTab = type;
+  document.querySelectorAll('.annc-tab').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  await _loadAnncList();
+}
+
+async function _loadAnncList() {
+  const el = document.getElementById('annc-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Chargement...</div>';
+  const ticker = (document.getElementById('news-ticker-filter')||{}).value || '';
+  const url = `/api/announcements?type=${_anncCurrentTab}&limit=30${ticker ? '&ticker='+ticker : ''}`;
+  try {
+    const d = await fetch(url).then(r=>r.json());
+    if (d.status === 'scraping_in_progress') {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);font-size:12px">⏳ Collecte des annonces en cours...<br><span style="font-size:10px;margin-top:6px;display:block">Lancez <code>python3 scripts/brvm_news_scraper.py</code></span></div>';
+      return;
+    }
+    const items = d.data || [];
+    if (!items.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Aucune annonce disponible pour cette catégorie.</div>';
+      return;
+    }
+    el.innerHTML = items.map(item => _anncCard(item, _anncCurrentTab)).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
+  }
+}
+
+async function _loadGNews() {
+  const el = document.getElementById('gnews-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Chargement...</div>';
+  const ticker = (document.getElementById('news-ticker-filter')||{}).value || '';
+  const url = ticker ? `/api/news?ticker=${ticker}&limit=20` : '/api/news/all?limit=40';
+  try {
+    const d = await fetch(url).then(r=>r.json());
+    if (d.status === 'scraping_in_progress') {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);font-size:12px">⏳ Collecte des actualités en cours...<br><span style="font-size:10px;margin-top:6px;display:block">Lancez <code>python3 scripts/google_news_scraper.py</code></span></div>';
+      return;
+    }
+    const items = d.data || [];
+    if (!items.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Aucun article disponible.</div>';
+      return;
+    }
+    el.innerHTML = items.map(a => `
+      <div class="gnews-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          ${a.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent)">${a.ticker}</span>` : ''}
+          ${_sentimentBadge(a.titre + ' ' + (a.resume||''))}
+          <span style="font-size:10px;color:var(--t3);margin-left:auto">${a.date||''}</span>
+          ${a.source ? `<span style="font-size:10px;color:var(--t3)">${a.source}</span>` : ''}
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4">
+          ${a.lien ? `<a href="${a.lien}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${(a.titre||'').slice(0,110)}</a>` : (a.titre||'').slice(0,110)}
+        </div>
+        ${a.resume ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${a.resume.slice(0,140)}</div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
+  }
+}
+
+async function renderNewsPage() {
+  // Peupler le filtre ticker si vide
+  const sel = document.getElementById('news-ticker-filter');
+  if (sel && sel.options.length <= 1) {
+    const tickers = [...new Set((window.scores||scores||[]).map(x=>x.ticker).filter(Boolean))].sort();
+    tickers.forEach(t => sel.add(new Option(t, t)));
+  }
+  await Promise.all([_loadAnncList(), _loadGNews()]);
+}
+
+async function _loadAnncWidget() {
+  const el = document.getElementById('annc-widget-content');
+  if (!el) return;
+  try {
+    const d = await fetch('/api/announcements?limit=3').then(r=>r.json());
+    if (d.status === 'scraping_in_progress' || !d.data || !d.data.length) {
+      el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucune annonce disponible — lancez le scraper</span>';
+      return;
+    }
+    el.innerHTML = d.data.map(item => {
+      const short = _ANNC_SHORT[item._type||'dividendes'] || 'ANN';
+      return `<div onclick="nav('news');renderNewsPage()" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0">${short}</span>
+        ${item.ticker ? `<span style="font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">${item.ticker}</span>` : ''}
+        <span style="font-size:11px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(item.titre||'').slice(0,60)}</span>
+        <span style="font-size:10px;color:var(--t3);flex-shrink:0">${(item.date||'').slice(0,10)}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Indisponible</span>';
+  }
+}
+
+async function loadStockNews(ticker) {
+  const el = document.getElementById('stock-news-section');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--t2);font-size:11px;padding:8px 0">Chargement...</div>';
+  try {
+    const [annc, gnews] = await Promise.all([
+      fetch(`/api/announcements?ticker=${ticker}&limit=5`).then(r=>r.json()).catch(()=>({data:[]})),
+      fetch(`/api/news?ticker=${ticker}&limit=5`).then(r=>r.json()).catch(()=>({data:[]})),
+    ]);
+    const anncItems = (annc.data||[]);
+    const newsItems = (gnews.data||[]);
+    if (!anncItems.length && !newsItems.length) {
+      el.innerHTML = '<div style="color:var(--t3);font-size:11px;padding:6px 0">Aucune actualité disponible.</div>';
+      return;
+    }
+    let html = '';
+    if (anncItems.length) {
+      html += anncItems.map(a => `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0;margin-top:1px">${_ANNC_SHORT['dividendes']||'ANN'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.4">${(a.titre||'').slice(0,80)}</div>
+          <div style="font-size:10px;color:var(--t3)">${a.date||''}</div>
+        </div>
+      </div>`).join('');
+    }
+    if (newsItems.length) {
+      html += newsItems.map(a => `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--t2);flex-shrink:0;margin-top:1px">NEWS</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;line-height:1.4">${a.lien ? `<a href="${a.lien}" target="_blank" style="color:var(--text);text-decoration:none">${(a.titre||'').slice(0,80)}</a>` : (a.titre||'').slice(0,80)}</div>
+          <div style="font-size:10px;color:var(--t3)">${a.date||''} ${a.source ? '· '+a.source : ''}</div>
+        </div>
+      </div>`).join('');
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:11px">Erreur de chargement.</div>';
+  }
 }
 
 // ── Signal du jour — chargement standalone, indépendant de init() ──────────
@@ -5406,6 +5676,7 @@ const _bcLabels = {
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
   signals:'Signaux', valuation:'Valorisation', income:'Revenus',
   port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire',
+  news:'Actualités BRVM',
 };
 
 document.addEventListener('keydown', function(e) {

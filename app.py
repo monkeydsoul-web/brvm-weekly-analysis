@@ -324,17 +324,6 @@ def api_top_performers():
     except Exception as e:
         return jsonify([])
 
-@app.route("/api/news")
-def api_news():
-    ticker = request.args.get("ticker", "")
-    all_news = load_news_cache()
-    if ticker:
-        news = [n for n in all_news if ticker.upper() in n.get("tickers", [])]
-    else:
-        news = all_news
-    return jsonify(news[:50])
-
-
 @app.route("/api/commodities")
 def api_commodities():
     prices = fetch_commodity_prices()
@@ -1195,14 +1184,6 @@ def api_sector_indices():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/api/announcements")
-def api_announcements():
-    try:
-        from brvm_data_scraper import get_announcements
-        return jsonify(get_announcements())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 @app.route("/api/dividends")
 def api_dividends():
     """Calendrier ex-div et rendements pour la page Dividendes."""
@@ -1731,6 +1712,109 @@ def api_rapport_mensuel():
     except Exception as e:
         logger.error(f"rapport-mensuel: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+# ── Annonces BRVM + Google News ──────────────────────────────────────────────
+_ANNC_PATH = os.path.join(DATA_DIR, "brvm_announcements.json")
+_NEWS_PATH  = os.path.join(DATA_DIR, "brvm_news.json")
+
+def _load_announcements():
+    if not os.path.exists(_ANNC_PATH):
+        return None
+    try:
+        with open(_ANNC_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def _load_news():
+    if not os.path.exists(_NEWS_PATH):
+        return None
+    try:
+        with open(_NEWS_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+@app.route("/api/announcements")
+def api_announcements():
+    data = _load_announcements()
+    if data is None:
+        return jsonify({"status": "scraping_in_progress", "data": []})
+    ann_type = request.args.get("type")
+    ticker   = request.args.get("ticker", "").upper() or None
+    limit    = min(int(request.args.get("limit", 20)), 200)
+    if ann_type and ann_type in data:
+        items = data[ann_type]
+    elif ann_type:
+        return jsonify({"status": "ok", "data": [], "type": ann_type})
+    else:
+        items = [item for sublist in data.values() for item in sublist]
+    if ticker:
+        items = [i for i in items if (i.get("ticker") or "").upper() == ticker]
+    items = sorted(items, key=lambda x: x.get("date") or "0000", reverse=True)
+    return jsonify({"status": "ok", "data": items[:limit], "total": len(items)})
+
+@app.route("/api/news")
+def api_news():
+    data = _load_news()
+    if data is None:
+        return jsonify({"status": "scraping_in_progress", "data": []})
+    ticker = request.args.get("ticker", "").upper()
+    limit  = min(int(request.args.get("limit", 10)), 100)
+    if ticker:
+        items = data.get(ticker, [])
+    else:
+        items = [a for lst in data.values() for a in lst]
+        items = sorted(items, key=lambda x: x.get("date") or "0000", reverse=True)
+    return jsonify({"status": "ok", "data": items[:limit]})
+
+@app.route("/api/news/all")
+def api_news_all():
+    data = _load_news()
+    if data is None:
+        return jsonify({"status": "scraping_in_progress", "data": []})
+    limit = min(int(request.args.get("limit", 50)), 500)
+    seen, items = set(), []
+    for ticker, articles in data.items():
+        for a in articles:
+            key = a.get("lien") or a.get("titre", "")
+            if key and key not in seen:
+                seen.add(key)
+                items.append({**a, "ticker": ticker})
+    items.sort(key=lambda x: x.get("date") or "0000", reverse=True)
+    return jsonify({"status": "ok", "data": items[:limit]})
+
+@app.route("/api/announcements/summary")
+def api_announcements_summary():
+    data = _load_announcements()
+    if data is None:
+        return jsonify({"status": "scraping_in_progress", "counts": {}, "total": 0})
+    import datetime as _dt
+    today = _dt.date.today().isoformat()
+    week_ago = (_dt.date.today() - _dt.timedelta(days=7)).isoformat()
+    counts, new_today, active_tickers = {}, 0, {}
+    for key, items in data.items():
+        counts[key] = len(items)
+        for item in items:
+            d = item.get("date") or ""
+            if d >= week_ago:
+                new_today += 1
+            t = item.get("ticker")
+            if t:
+                active_tickers[t] = active_tickers.get(t, 0) + 1
+    top_tickers = sorted(active_tickers, key=active_tickers.get, reverse=True)[:5]
+    mtime = os.path.getmtime(_ANNC_PATH) if os.path.exists(_ANNC_PATH) else 0
+    import datetime as _dt2
+    updated = _dt2.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M") if mtime else None
+    return jsonify({
+        "status": "ok",
+        "counts": counts,
+        "total": sum(counts.values()),
+        "new_last_7d": new_today,
+        "top_tickers": top_tickers,
+        "last_updated": updated,
+    })
 
 
 if __name__ == "__main__":
