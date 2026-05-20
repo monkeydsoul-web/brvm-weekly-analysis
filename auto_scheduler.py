@@ -79,6 +79,34 @@ def job_ai_analysis():
     except Exception as e:
         logger.error(f"job_ai_analysis: {e}")
 
+def job_brvm_announcements():
+    """Scrape les annonces officielles BRVM tous les jours à 8h."""
+    try:
+        import subprocess, sys
+        script = os.path.join(BASE_DIR, "scripts", "brvm_news_scraper.py")
+        result = subprocess.run(
+            [sys.executable, script, "--incremental"],
+            capture_output=True, text=True, timeout=600
+        )
+        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+        logger.info(f"BRVM announcements: {lines[-1] if lines else 'OK'}")
+    except Exception as e:
+        logger.error(f"job_brvm_announcements: {e}")
+
+def job_google_news():
+    """Scrape Google News pour les 47 tickers BRVM toutes les 4h."""
+    try:
+        import subprocess, sys
+        script = os.path.join(BASE_DIR, "scripts", "google_news_scraper.py")
+        result = subprocess.run(
+            [sys.executable, script, "--append", "--max-age", "30"],
+            capture_output=True, text=True, timeout=600
+        )
+        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+        logger.info(f"Google News: {lines[-1] if lines else 'OK'}")
+    except Exception as e:
+        logger.error(f"job_google_news: {e}")
+
 def job_market_data():
     """Met à jour les données de marché (indices BRVM)."""
     try:
@@ -139,6 +167,16 @@ def start_scheduler():
     sched.add_job(job_market_data, IntervalTrigger(minutes=15),
                   id='market_data', replace_existing=True,
                   name='Market data 15min')
+
+    # Annonces BRVM officielles tous les jours à 8h
+    sched.add_job(job_brvm_announcements, CronTrigger(hour=8, minute=0),
+                  id='brvm_announcements', replace_existing=True,
+                  name='Annonces BRVM 8h')
+
+    # Google News toutes les 4h
+    sched.add_job(job_google_news, IntervalTrigger(hours=4),
+                  id='google_news', replace_existing=True,
+                  name='Google News 4h')
 
     # Scrape rapports PDF à 22h
     sched.add_job(job_scrape_reports, CronTrigger(hour=22, minute=0),
