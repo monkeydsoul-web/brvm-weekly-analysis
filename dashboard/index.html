@@ -4871,26 +4871,52 @@ const _ANNC_TYPE_LABEL = {
 
 function _anncTitle(item, type) {
   const t = (item.titre || '').trim();
-  if (t && t !== 'Télécharger' && t.length > 3) return t;
-  // Extract from filename
+  // Strip é encoding variants: compare normalized to catch encoding edge cases
+  const isTelecharger = t === 'Télécharger' || t === 'Télécharger' || t.toLowerCase() === 'télécharger';
+  if (t && !isTelecharger && t.length > 3) return t;
+  // Extract from filename (pdf_path or source_url)
   const path = item.pdf_path || item.source_url || '';
   const filename = path.split('/').pop().replace(/\.pdf$/i, '');
   if (filename && filename.length > 5) {
     const stripped = filename
-      .replace(/^\d{8}_-_/, '')
+      .replace(/^\d{8}-?_-?_?/, '')   // handles both 20260513_-_ and 20260513-_
       .replace(/_-_/g, ' — ')
-      .replace(/_/g, ' ');
-    const cap = stripped.replace(/(^| — )(\S)/g, (m, sep, c) => sep + c.toUpperCase());
-    if (cap.length > 5) return cap.slice(0, 110);
+      .replace(/-_/g, ' — ')
+      .replace(/_/g, ' ')
+      .replace(/-/g, ' ');
+    const cap = stripped.replace(/(^| — )(\S)/g, (m, sep, c) => sep + c.toUpperCase()).trim();
+    if (cap.length > 5 && !/^\d/.test(cap)) return cap.slice(0, 110);
   }
   // First meaningful line of contenu
   if (item.contenu) {
-    const line = item.contenu.split('\n').map(l => l.trim()).find(l => l.length > 15 && !/^\d+$/.test(l));
+    const line = item.contenu.split('\n').map(l => l.trim()).find(l => l.length > 15 && !/^\d+$/.test(l) && !/^[A-Z]{1,4}$/.test(l));
     if (line) return line.slice(0, 100);
   }
-  // Fallback
-  const parts = [_ANNC_TYPE_LABEL[type] || type];
-  if (item.ticker) parts.push(item.ticker);
+  // source_url keyword fallback
+  const url = (item.source_url || item.pdf_path || '').toLowerCase();
+  const _urlMap = [
+    ['paiement_de_dividende','paiement-de-dividende','dividende','dividendes'],
+    ['convocation','convocations_ag','convocations'],
+    ['notation','notations'],
+    ['communique','communiques'],
+    ['direction','dirigeant','dirigeants'],
+    ['franchissement','franchissements'],
+    ['calendrier','premier_avis','avis'],
+    ['rapport','rapports'],
+  ];
+  const _urlLabels = ['Paiement de dividendes','Convocation Assemblée Générale','Notation financière','Communiqué','Changement de dirigeant','Franchissement de seuil','Avis de marché','Rapport annuel'];
+  for (let i = 0; i < _urlMap.length; i++) {
+    if (_urlMap[i].some(kw => url.includes(kw))) {
+      const ticker = item.ticker && item.ticker !== 'None' ? ' — ' + item.ticker : '';
+      return _urlLabels[i] + ticker;
+    }
+  }
+  // _type-based final fallback
+  const resolvedType = type || item._type || '';
+  const label = _ANNC_TYPE_LABEL[resolvedType];
+  const ticker = item.ticker && item.ticker !== 'None' ? item.ticker : '';
+  const parts = [label || 'Annonce BRVM'];
+  if (ticker) parts.push(ticker);
   if (item.date) parts.push(item.date);
   return parts.join(' · ');
 }
