@@ -4863,18 +4863,53 @@ function _isNew(dateStr) {
   return (now - d) < 7 * 86400 * 1000;
 }
 
+const _ANNC_TYPE_LABEL = {
+  dividendes:'Dividende', convocations_ag:'Assemblée Générale', notations:'Notation',
+  communiques:'Communiqué', dirigeants:'Changement de dirigeants',
+  franchissements:'Franchissement de seuil', avis:'Avis BRVM', rapports:'Rapport'
+};
+
+function _anncTitle(item, type) {
+  const t = (item.titre || '').trim();
+  if (t && t !== 'Télécharger' && t.length > 3) return t;
+  // Extract from filename
+  const path = item.pdf_path || item.source_url || '';
+  const filename = path.split('/').pop().replace(/\.pdf$/i, '');
+  if (filename && filename.length > 5) {
+    const stripped = filename
+      .replace(/^\d{8}_-_/, '')
+      .replace(/_-_/g, ' — ')
+      .replace(/_/g, ' ');
+    const cap = stripped.replace(/(^| — )(\S)/g, (m, sep, c) => sep + c.toUpperCase());
+    if (cap.length > 5) return cap.slice(0, 110);
+  }
+  // First meaningful line of contenu
+  if (item.contenu) {
+    const line = item.contenu.split('\n').map(l => l.trim()).find(l => l.length > 15 && !/^\d+$/.test(l));
+    if (line) return line.slice(0, 100);
+  }
+  // Fallback
+  const parts = [_ANNC_TYPE_LABEL[type] || type];
+  if (item.ticker) parts.push(item.ticker);
+  if (item.date) parts.push(item.date);
+  return parts.join(' · ');
+}
+
 function _anncCard(item, type) {
   const isNew = _isNew(item.date);
   const badge = `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;margin-right:6px">${_ANNC_SHORT[type]||'ANN'}</span>`;
   const newBadge = isNew ? '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:#F59E0B;color:#000;margin-right:6px">NOUVEAU</span>' : '';
   const ticker = item.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent);margin-right:6px">${item.ticker}</span>` : '';
-  return `<div class="annc-card" onclick="openAnncModal(${JSON.stringify(JSON.stringify(item)).slice(1,-1)})">
+  const itemWithType = {...item, _type: type};
+  const title = _anncTitle(item, type);
+  const preview = item.contenu ? item.contenu.split('\n').map(l=>l.trim()).find(l=>l.length>20&&l!==title) : '';
+  return `<div class="annc-card" onclick="openAnncModal(${JSON.stringify(JSON.stringify(itemWithType)).slice(1,-1)})">
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-bottom:4px">
       ${badge}${newBadge}${ticker}
       <span style="font-size:10px;color:var(--t3);margin-left:auto">${item.date||'—'}</span>
     </div>
-    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4">${(item.titre||'').slice(0,100)}</div>
-    ${item.contenu ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${(item.contenu||'').slice(0,120)}…</div>` : ''}
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4">${title}</div>
+    ${preview ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${preview.slice(0,120)}…</div>` : ''}
   </div>`;
 }
 
@@ -4889,7 +4924,7 @@ function openAnncModal(itemJson) {
       ${item.ticker ? `<span style="font-size:13px;font-weight:700;color:var(--accent);margin-right:8px">${item.ticker}</span>` : ''}
       <span style="font-size:11px;color:var(--t3)">${item.date||''}</span>
     </div>
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4">${item.titre||''}</h3>
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4">${_anncTitle(item, item._type||'')}</h3>
     ${item.montant_xof ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Montant :</strong> ${Number(item.montant_xof).toLocaleString('fr-FR')} XOF</div>` : ''}
     ${item.date_paiement ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Date de paiement :</strong> ${item.date_paiement}</div>` : ''}
     ${item.notation ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Notation :</strong> ${item.notation}</div>` : ''}
@@ -4989,7 +5024,7 @@ async function _loadAnncWidget() {
       return `<div onclick="nav('news');renderNewsPage()" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
         <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0">${short}</span>
         ${item.ticker ? `<span style="font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">${item.ticker}</span>` : ''}
-        <span style="font-size:11px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(item.titre||'').slice(0,60)}</span>
+        <span style="font-size:11px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_anncTitle(item, item._type||'').slice(0,60)}</span>
         <span style="font-size:10px;color:var(--t3);flex-shrink:0">${(item.date||'').slice(0,10)}</span>
       </div>`;
     }).join('');
@@ -5016,9 +5051,9 @@ async function loadStockNews(ticker) {
     let html = '';
     if (anncItems.length) {
       html += anncItems.map(a => `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0;margin-top:1px">${_ANNC_SHORT['dividendes']||'ANN'}</span>
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0;margin-top:1px">${_ANNC_SHORT[a._type||'']||'ANN'}</span>
         <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.4">${(a.titre||'').slice(0,80)}</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.4">${_anncTitle(a, a._type||'').slice(0,80)}</div>
           <div style="font-size:10px;color:var(--t3)">${a.date||''}</div>
         </div>
       </div>`).join('');

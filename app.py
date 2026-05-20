@@ -1745,11 +1745,11 @@ def api_announcements():
     ticker   = request.args.get("ticker", "").upper() or None
     limit    = min(int(request.args.get("limit", 20)), 200)
     if ann_type and ann_type in data:
-        items = data[ann_type]
+        items = [{**i, "_type": ann_type} for i in data[ann_type]]
     elif ann_type:
         return jsonify({"status": "ok", "data": [], "type": ann_type})
     else:
-        items = [item for sublist in data.values() for item in sublist]
+        items = [{**i, "_type": cat} for cat, sublist in data.items() for i in sublist]
     if ticker:
         items = [i for i in items if (i.get("ticker") or "").upper() == ticker]
     items = sorted(items, key=lambda x: x.get("date") or "0000", reverse=True)
