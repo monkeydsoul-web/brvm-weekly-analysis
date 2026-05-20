@@ -1,0 +1,40 @@
+[
+  {
+    "date": "2026-05-20",
+    "brvm_c": 418.44,
+    "brvm_30": 196.89,
+    "brvm_pres": null,
+    "volume_total_fcfa": 796159991.0,
+    "capitalisation_actions_fcfa": 16101667934513.0,
+    "capitalisation_obligations_fcfa": 12038884808765.0,
+    "indices_sectoriels": {
+      "SCRC": 2370.0,
+      "STAC": 2995.0,
+      "NSBC": 17700.0,
+      "SICC": 4615.0,
+      "UNLC": 58000.0,
+      "SMBC": 12110.0,
+      "SAFC": 3850.0,
+      "ETIT": 29.0,
+      "STBC": 20900.0,
+      "LNBB": 3940.0,
+      "Valeur des transactions": 796159991.0,
+      "Capitalisation Actions": 16101667934513.0,
+      "Capitalisation des obligations": 12038884808765.0,
+      "BRVM-C": 418.44,
+      "BRVM-30": 196.4,
+      "BRVM-PRES": 162.76,
+      "BRVM - COMPOSITE": 416.07,
+      "BRVM - PRESTIGE": 162.14,
+      "BRVM - PRINCIPAL": 291.63,
+      "BRVM - CONSOMMATION DE BASE": 258.55,
+      "BRVM - CONSOMMATION DISCRETIONNAIRE": 181.25,
+      "BRVM - ENERGIE": 141.92,
+      "BRVM - INDUSTRIELS": 182.73,
+      "BRVM - SERVICES FINANCIERS": 188.05,
+      "BRVM - SERVICES PUBLICS": 164.79,
+      "BRVM - TELECOMMUNICATIONS": 104.71,
+      "BRVM – COMPOSITE TOTAL RETURN": 160.64
+    }
+  }
+]

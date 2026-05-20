@@ -1,0 +1,462 @@
+[
+  {
+    "ticker": "STAC",
+    "agence": "Bloomfield Investment",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": "2026-05-05",
+    "source_url": "https://www.brvm.org/sites/default/files/fiche_de_notation-_erium_ci_-_2025.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, ERIUM COTE D’IVOIRE\nFiche de Notation Financière Validité : novembre 2025 à octobre 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA BBB BBB 31/10/2026 Stable\nCourt Terme Monnaie locale CFA A3 A3 31/10/2026 Stable\nBloomfield Investment Corporation\nTel: + (225) 27 22 54 84 40/41\nStéphanie ANGUI, VP & S-Directeur\ns.angui@bloomfield-investment.com\nAyélé EKUE-HETTAH, "
+  },
+  {
+    "ticker": "STBC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2026-05-05",
+    "source_url": "https://www.brvm.org/sites/default/files/fiche_de_notation_-_sitab_2025.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, SOCIETE IVOIRIENNE DES TABACS\nAnalyse portant sur les activités de fabrication et commercialisation de tabac.\nFiche de Notation Financière Date de validité : Décembre 2025 à novembre 2026\nCatégorie Echelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA AA+ N/A 30/11/2026 Stable\nCourt Terme Monnaie locale CFA A1+ N/A 30/11/2026 Stable\nBloomfield Investment Corporation Justification de "
+  },
+  {
+    "ticker": "ORGT",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": "2026-05-05",
+    "source_url": "https://www.brvm.org/sites/default/files/fiche_de_notation_-_oragroup_sa_-_2025.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nTOGO, ORAGROUP SA\nFiche de notation financière Validité : août 2025 à juillet 2026\nCatégorie Échelle de Monnaie Note préc. Note actu. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A A 31/07/2026 Stable\nCourt Terme Monnaie locale CFA A2 A2 31/07/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTéléphone: + (225) 27 22 54 84 40 Sur le long terme :\nHenoc GOLY, Directeur de Mission Qualité de c"
+  },
+  {
+    "ticker": "SIBC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2026-04-22",
+    "source_url": "https://www.brvm.org/sites/default/files/20260421_-_notation_financiere_-_sib_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nSOCIETE IVOIRIENNE DE BANQUE\nFiche de notation financière Validité : octobre 2025 à septembre 2026\nCatégorie Échelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale FCFA AA- AA- 30/09/2026 Positive\nCourt Terme Monnaie locale FCFA A1 A1 30/09/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTél: + (225) 27 22 54 84 40 /41 Sur le long terme :\nSoraya DIALLO, SVP Dire"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": "2026-03-03",
+    "source_url": "https://www.brvm.org/sites/default/files/20260303_-_notation_financiere_-_nei_ceda_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nNEI-CEDA\nFiche de notation Validité : décembre 2025 à novembre 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie locale CFA A- A- 30/11/2026 Stable\nCourt Terme Monnaie locale CFA A1- A1- 30/11/2026 Stable\nBloomfield Investment Corporation\nTéléphone: (225) 27 22 54 84 40/41\nHenoc GOLY, Directeur de mission\nh.goly@bloomfield-investment.com\nPaul Armel GNANZOU, Analyste Financier Senior\np.gnanz"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": "2026-03-03",
+    "source_url": "https://www.brvm.org/sites/default/files/20260303_-_notation_financiere_-_safca_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nALIOS FINANCE CÔTE D’IVOIRE\nFiche de notation financière Validité : septembre 2025 à août 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA BBB+ BBB+ 31/08/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/08/2026 Stable\nBloomfield Investment Corporation\nJustification de la notation et perspectives\nTéléphone : + (225) 27 22 54 84 40\nSur le long terme :\nSoraya DIALLO, SVP Direct"
+  },
+  {
+    "ticker": "ORAC",
+    "agence": "Bloomfield Investment",
+    "note": "AAA",
+    "score_notation": 10,
+    "perspective": "Stable",
+    "date": "2026-02-02",
+    "source_url": "https://www.brvm.org/sites/default/files/20260202_-_notation_financiere_-_orange_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, ORANGE COTE D’IVOIRE\nFiche de Notation Financière Validité : Septembre 2025 – Août 2026\nCatégorie Échelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA AAA AAA 31/08/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/08/2026 Stable\nBloomfield Investment Corporation\nTéléphone: + (225) 27 22 54 84 40/41\nHenoc GOLY, Directeur de Mission\nh.goly@bloomfield-investment.com\nCharles BANGA, A"
+  },
+  {
+    "ticker": "SDCC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2026-01-27",
+    "source_url": "https://www.brvm.org/sites/default/files/20260127_-_notation_financiere_-_sode_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nSOCIETE DE DISTRIBUTION D’EAU\nDE LA CÔTE D’IVOIRE (SODECI SA)\nFiche de notation Validité : août 2025 à juillet 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie locale FCFA AA AA 31/07/2026 Stable\nCourt Terme Monnaie locale FCFA A1- A1- 31/07/2026 Stable\nBloomfield Investment Corporation\nTéléphone : (225) 27 22 54 84 40/41\nSoraya DIALLO, S.VP Directrice Bloomfield Ratings\ns.diallo@bloomfiel"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2026-01-08",
+    "source_url": "https://www.brvm.org/sites/default/files/20260108_-_notation_financiere_-_cie_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, COMPAGNIE IVOIRIENNE D’ELECTRICITE (CIE)\nFiche de Notation Financière Validité : août 2025 à juillet 2026\nCatégorie Échelle de Monnaie Note actu. Note prec. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie locale CFA AA+ AA+ 31/07/2026 Stable\nCourt Terme Monnaie locale CFA A1+ A1+ 31/07/2026 Stable\nBloomfield Investment Corporation\nJustification de la notation et perspectives\nTéléphone: + (225) 27 22 54 84 40\nSur le long terme :\n"
+  },
+  {
+    "ticker": "SIBC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2026-01-08",
+    "source_url": "https://www.brvm.org/sites/default/files/20260108_-_notation_financiere_-_sib_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nSOCIETE IVOIRIENNE DE BANQUE\nFiche de notation financière Validité : octobre 2025 à septembre 2026\nCatégorie Échelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale FCFA AA- AA- 30/09/2026 Positive\nCourt Terme Monnaie locale FCFA A1 A1 30/09/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTél: + (225) 27 22 54 84 40 /41 Sur le long terme :\nSoraya DIALLO, SVP Dire"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "GCR Ratings",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": "2025-12-30",
+    "source_url": "https://www.brvm.org/sites/default/files/20251230_-_notation_financiere_-_onatel_bf.pdf",
+    "resume": "Communiqué de presse\nGCR rehausse la note d’émetteur de long terme de A à A+ de ONATEL-SA (Moov\n(WU) (WU)\nAfrica Burkina Faso) sur son échelle régionale de notation. La perspective est Stable.\nAction de notation\nDakar, le19 décembre 2025 – GCR Ratings (GCR) a rehaussé la note d’émetteur de long terme de\nONATEL-SA (Moov Africa Burkina Faso) de A à A+ sur son échelle régionale de notation. La\n(WU) (WU)\nperspective est stable. En outre, la note d’émetteur de court terme de A1 est affirmée\n(WU) .\nEm"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "GCR Ratings",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2025-12-30",
+    "source_url": "https://www.brvm.org/sites/default/files/20251230_-_notation_financiere_-_servair_abidjan_ci.pdf",
+    "resume": "COMMUNIQUE DE PRESSE\nGCR rehausse la note d’émetteur de long terme de Servair Abidjan à AA+ de A sur\n(WU) (WU)\nson échelle régionale. La perspective est stable.\nAction de notation\nDakar, le 29 août 2025 – GCR ratings (GCR) a rehaussé la note d’émetteur de long terme de Servair Abidjan\nà AA+(WU) de A (WU) sur son échelle régionale. La perspective est stable. En outre, la note d’émetteur de court\nterme a été rehaussée à A1+ de A1 .\n(WU) (WU)\nEmetteur Type de notation Echelle Notation Perspective\nE"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "GCR Ratings",
+    "note": "BB",
+    "score_notation": 4.5,
+    "perspective": "Stable",
+    "date": "2025-12-30",
+    "source_url": "https://www.brvm.org/sites/default/files/20251230_-_notation_financiere_-_sucrivoire_ci.pdf",
+    "resume": "Communiqué de presse\nGCR rehausse la note d’émetteur de long terme de SUCRIVOIRE de BB à BB+ sur\n(wu) (wu)\nson échelle régionale. La perspective est stable.\nAction de notation\nDakar, le 31 octobre 2025 – GCR ratings (GCR) a rehaussé la note d’émetteur de long terme de\nSUCRIVOIRE de BB à BB+ sur son échelle régionale de notation. La perspective demeure stable. En\n(WU) (WU)\noutre, GCR a affirmé la note d’émetteur de court terme de B .\n(WU)\nEmetteur Type de notation Echelle Notation Perspective\nEme"
+  },
+  {
+    "ticker": "ETIT",
+    "agence": "GCR Ratings",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": "2025-12-30",
+    "source_url": "https://www.brvm.org/sites/default/files/20251230_-_notation_financiere_-_totalenergies_marketing_ci.pdf",
+    "resume": "COMMUNIQUE DE PRESSE\nGCR affirme la note d’émetteur de long terme de A+ de TotalEnergies Marketing Côte\n(wu)\nd’Ivoire. La perspective est Stable.\nAction de notation\nDakar, le 30 septembre 2025 – GCR ratings (GCR) a affirmé la note d’émetteur de long terme de A+ de\n(WU)\nTotalEnergies Marketing Côte d’Ivoire sur son échelle régionale de notation. La perspective est stable. En\noutre, GCR a affirmé la note d’émetteur de court terme de A1 .\n(WU)\nEmetteur Type de notation Echelle Notation Perspective\n"
+  },
+  {
+    "ticker": "ETIT",
+    "agence": "GCR Ratings",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": "2025-12-30",
+    "source_url": "https://www.brvm.org/sites/default/files/20251230_-_notation_financiere_-_totalenergies_marketing_sn.pdf",
+    "resume": "COMMUNIQUE DE PRESSE\nGCR rehausse la note d’émetteur de long terme de TotalEnergies Marketing Sénégal de A à AA-\n(WU)\nsur son échelle régionale. La perspective est stable.\n(WU)\nAction de notation\nDakar, le 30 septembre 2025 – GCR Ratings (GCR) a rehaussé la note d’émetteur de long terme de\nTotalEnergies Marketing Sénégal de A(WU) à AA-(WU) sur son échelle régionale de notation. En outre, la note\nd’émetteur de court terme a été rehaussée de A1(WU) à A1+(WU). La perspective est stable.\nEmetteur Ty"
+  },
+  {
+    "ticker": null,
+    "agence": null,
+    "note": null,
+    "score_notation": null,
+    "perspective": null,
+    "date": null,
+    "source_url": "https://www.brvm.org/fr/emetteurs/type-annonces/notations-financieres?page=0",
+    "resume": ""
+  },
+  {
+    "ticker": "ETIT",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251209_-_notation_financiere_-_smb_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nSOCIETE MULTINATIONALE DE BITUMES (SMB)\nFiche de Notation Financière Date de validité : août 2025 à juillet 2026\nCatégorie Echelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A+ A+ 31/07/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/07/2026 Stable\nBloomfield Investment Corporation\nTéléphone : + (225) 27 22 54 84/40\nSoraya DIALLO, SVP Directrice Bloomfield Ratings\ns.diallo@bloomfield-investm"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "GCR Ratings",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251126_-_notation_financiere_-_sicable_ci.pdf",
+    "resume": "Communiqué de presse\nGCR affirme la note d’émetteur de long terme de la Société Ivoirienne de Câbles de AA- sur son\n(WU)\néchelle régionale. La perspective est stable.\nAction de notation\nDakar, le 20 novembre 2025 – GCR Ratings (GCR) a affirmé la note d’émetteur de long terme de la Société\nIvoirienne de Câbles (SICABLE) de AA- sur son échelle régionale de notation. La perspective est stable. En\n(WU)\noutre, la note d’émetteur de court terme est affirmée à A1+ .\n(WU)\nEmetteur Type de notation Echel"
+  },
+  {
+    "ticker": "BOAN",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251117_-_notation_financiere_-_boa_ng.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBANK OF AFRICA NIGER\nFiche de notation financière Validité : Août 2025 à juillet 2026\nCatégorie Échelle de Monnaie Note préc. Note actu. Date d’Exp. Perspective\nDe valeurs notation\nLong Terme Monnaie Locale CFA A- A- 31/07/2026 Stable\nCourt Terme Monnaie Locale CFA A2 A2 31/07/2026 Stable\nBloomfield Investment Corporation\nTéléphone: (225) 27 22 54 84 40/44\nAyélé EKUE-HETTAH, Directrice de Mission\na.ekue-hettah@bloomfield-investment.com\nCharles BANGA, Analyst"
+  },
+  {
+    "ticker": "ECOC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251028_-_notation_financiere_-_ecobank_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCÔTE D’IVOIRE, ECOBANK COTE D’IVOIRE\nFiche de Notation Financière Date de validité : Juillet 2025 à juin 2026\nEchelle de Catégorie Monnaie Note actu. Note Prec. Date d’exp. Perspective\nnotation De valeurs\nLong Terme Monnaie locale CFA AA AA 30/06/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 30/06/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTel: + (225) 27 22 54 84 40 Sur le long terme :\nBlanchard TRA BI, Dire"
+  },
+  {
+    "ticker": "NSBC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251028_-_notation_financiere_-_nsia_banque_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCôte d’Ivoire, NSIA Banque CI\nFiche de Notation Financière Validité : De septembre 2025 à août 2026\nCatégorie Échelle de Monnaie Note préc. Note actu. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie Locale CFA AA- AA- 31/08/2026 Stable\nCourt Terme Monnaie Locale CFA A1 A1 31/08/2026 Stable\nBloomfield Investment Corporation\nTéléphone : + (225) 27 22 54 84 40\nStéphanie ANGUI, VP Sous-Directrice\ns.angui@bloomfield-investment.com\nCharles BANGA, An"
+  },
+  {
+    "ticker": "BOAS",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251022_-_notation_financiere_-_boa_sn.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBANK OF AFRICA SENEGAL\nFiche de notation financière Validité : juillet 2025 à juin 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie Locale CFA A A 30/06/2026 Stable\nCourt Terme Monnaie Locale CFA A1- A1- 30/06/2026 Stable\nBloomfield Investment Corporation\nTéléphone: +225 27 22 54 84 40\nStéphanie ANGUI, VP, Sous-Directrice Bloomfield\nRating\ns.angui@bloomfield-investment.com\nFatoumata CHERIF"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251022_-_notation_financiere_-_petro_ivoire_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nPETRO IVOIRE (SA)\nFiche de notation financière Validité : août 2025 à juillet 2026\nCatégorie Échelle de Monnaie Note préc. Note actu. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA AA- AA- 31/07/2026 Stable\nCourt Terme Monnaie locale CFA A3 A3 31/07/2026 Stable\nBloomfield Investment Corporation\nTéléphone: + (225) 27 22 54 84 40\nStéphanie ANGUI, VP S-Directrice Bloomfield\nRatings\ns.angui@bloomfield-investment.com\nAyélé EKUE-HETTAH, "
+  },
+  {
+    "ticker": "SPHC",
+    "agence": "GCR Ratings",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20251016_-_notation_financiere_-_saph_ci.pdf",
+    "resume": "Communiqué de presse\nGCR affirme la note d’émetteur de long terme de la Société Africaine de Plantations\nd’Hévéas de BBB+ sur son échelle régionale. La perspective est stable.\n(WU)\nAction de notation\nDakar, le 16 octobre 2025 – GCR Ratings (GCR) a affirmé la note d’émetteur de long terme de la Société\nAfricaine de Plantations d’Hévéas (SAPH) de BBB+ sur son échelle régionale de notation. En outre, la note\n(WU)\nd’émetteur de court terme est de A2 . La perspective est stable.\n(WU)\nEmetteur Type de"
+  },
+  {
+    "ticker": "SGBC",
+    "agence": "Bloomfield Investment",
+    "note": "AAA",
+    "score_notation": 10,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250915_-_notation_financiere_-_societe_generale_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nSOCIETE GENERALE COTE D’IVOIRE\nFiche de Notation Financière Validité : Juillet 2025 – Juin 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie Locale CFA AAA AAA 30/06/2026 Stable\nCourt Terme Monnaie Locale CFA A1 A1 30/06/2026 Stable\nJustification de la notation et perspective\nBloomfield Investment Corporation\nTéléphone: +(225) 27 22 54 84 40 Sur le long terme : Qualité de crédit la plus éle"
+  },
+  {
+    "ticker": "CBIBF",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250915_-_notation_financiere_-_coris_bank_international_bf.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCORIS BANK INTERNATIONAL, BURKINA FASO\nFiche de notation financière Validité : Juin 2025 – Mai 2026\nÉchelle de Catégorie Monnaie Note actu. Note préc. Date d’exp. Perspectives\nnotation de valeurs\nLong Terme En monnaie locale CFA AA AA 31/05/2026 Stable\nCourt Terme En monnaie locale CFA A1 A1 31/05/2026 Stable\nBloomfield Investment Corporation\nTéléphone: (225) 27 22 54 84 40/44\nBlanchard TRA BI, Directeur de mission\nb.trabi@bloomfield-investment.com\nMerlin Ko"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "GCR Ratings",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250901_-_notation_financiere_-_port_autonome_de_dakar.pdf",
+    "resume": "Communiqué de presse\nGCR abaisse la note d’émetteur de long terme de A- à BBB- du Port Autonome de\n(WU) (WU)\nDakar sur son échelle régionale de notation. En outre, GCR abaisse la note de l’emprunt\nobligataire senior non sécurisé de A- à BBB- . La perspective attachée à ces notations\n(WU) (WU)\nest stable.\nAction de notation\nDakar, le 29 août 2025 – GCR ratings (GCR) a abaissé les notes d’émetteur de long terme et de court terme\ndu Port Autonome de Dakar (PAD) respectivement de A- à BBB- et de A2 "
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250828_-_notation_financiere_-_lnb_bn.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nLOTERIE NATIONALE DU BENIN\nFiche de notation Date de validité : aout 2025 à juillet 2026\nEchelle de Catégorie De Monnaie Note actu Note préc. Date d’exp. Perspective\nnotation valeurs\nLong Terme Monnaie locale CFA A+ NA 31/07/2026 Stable\nCourt Terme Monnaie locale CFA A1- NA 31/07/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTél: + (225) 27 22 54 84 40/41 Sur le long terme :\nSoraya Diallo, S.VP Directrice Bloomfiel"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250822_-_notation_financiere_-_bernabe_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, BERNABE CÔTE D’IVOIRE\nFiche de Notation Financière Date de validité : Juillet 2025 - Juin 2026\nCatégorie Echelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A+ A+ 30/06/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 30/06/2026 Stable\nBloomfield Investment Corporation\nTéléphone: + (225) 27 22 54 84/40\nHenoc GOLY, Chef de Mission\nh.goly@bloomfield-investment.com\nCharles BANGA, Anal"
+  },
+  {
+    "ticker": "PALC",
+    "agence": "Bloomfield Investment",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250822_-_notation_financiere_-_palm_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, PALMCI\nFiche de Notation Financière Date de validité : juillet 2025 – juin 2026\nCatégorie Échelle de Monnaie Note actu. Note Prec. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA AA- AA- 30/06/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 30/06/2026 Stable\nBloomfield Investment Corporation Justification de la notation et des perspectives\nTéléphone : + (225) 27 22 54 84 40\nSur le long terme : Qualité de crédit très "
+  },
+  {
+    "ticker": "BOAM",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250723_-_notation_financiere_-_boa_mali.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBOA MALI, Mali\nFiche de Notation Financière Validité : Juin 2025 – Mai 2026\nÉchelle de Catégorie Monnaie Note actu. Note Prec. Date d’exp. Perspective\nnotation De valeurs\nLong Terme Monnaie locale CFA A- A- 31/05/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/05/2026 Stable\nBloomfield Investment Corporation\nTel: + (225) 27 22 54 84 40\nBlanchard TRA BI, Chef de mission\nb.trabi@bloomfield-investment.com\nCharles BANGA, Analyste Financier Senior\nc.banga@blo"
+  },
+  {
+    "ticker": "BOAB",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250723_-_notation_financiere_-_boa_benin.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBOA BENIN\nFiche de Notation Financière Date de validité : juin 2025 - mai 2026\nCatégorie Échelle de Monnaie Note actu. Note Prec. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A+ A+ 30/05/2026 Stable\nCourt Terme Monnaie locale CFA A1 A1 30/05/2026 Stable\nBloomfield Investment Corporation Justification de la notation et perspective\nTel: + (225) 27 22 54 84 40/41 Sur le long terme :\nAyélé EKUE-HETTAH, Directeur de mission Qualité de"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "AAA",
+    "score_notation": 10,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250708_-_notation_financiere_-_crrh-uemoa.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nTOGO, CRRH-UEMOA\nFiche de Notation Financière Validité : Juin 2025-Mai 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA AAA AA+ 31/05/2026 Stable\nCourt Terme Monnaie locale CFA A1+ A1+ 31/05/2026 Stable\nBloomfield Investment Corporation\nTel: (225) 27 22 54 84 40/41\nStéphanie ANGUI, VP-SD Bloomfield Ratings\ns.angui@bloomfield-investment.com\nAyélé EKUE-HETTAH, Directrice de missio"
+  },
+  {
+    "ticker": "SNTS",
+    "agence": "GCR Ratings",
+    "note": "AAA",
+    "score_notation": 10,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250701_-_notation_financiere_-_sonatel_sn.pdf",
+    "resume": "COMMUNIQUE DE PRESSE\nGCR abaisse de AAA à AA+ les notes d’émetteur de long terme et d’emprunt\n(WU) (WU)\nobligataire senior non sécurisé de la Société Nationale des Télécommunications du\nSénégal SA. Les perspectives restent stables.\nAction de notation\nDakar, le 30 juin 2025 – GCR ratings (GCR) a abaissé la note d’émetteur de long terme de la Société Nationale\ndes Télécommunications du Sénégal SA (SONATEL) de AAA à AA+ sur son échelle régionale. En outre,\n(WU) (WU)\nla note d’émetteur de court term"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250630_-_notation_financiere_-_boa_bf.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBANK OF AFRICA- BURKINA FASO\nFiche de notation financière Validité : Juin 2025 à Mai 2026\nCatégorie Échelle de Monnaie Note préc. Note actu. Date d’exp. Perspectives\nde valeurs notation\nLong Terme monnaie locale F CFA A+ A+ 31/05/2026 Stable\nCourt Terme monnaie locale F CFA A1 A1 31/05/2026 Stable\nBloomfield Investment Corporation\nTéléphone: (225) 27 22 54 84 40/44\nSoraya DIALLO, S.VP & S-D Bloomfield Ratings\ns.diallo@bloomfield-investment.com\nStephanie ANGU"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250630_-_notation_financiere_-_boa_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nBOA Côte d’Ivoire\nFiche de Notation Financière Validité : Mai 2025-Avril 2026\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong terme Monnaie locale FCFA A+ A+ 30/04/2026 Stable\nCourt terme Monnaie locale FCFA A1- A1- 30/04/2026 Positive\nBloomfield Investment Corporation\nTel: + (225) 27 22 54 84 40\nSoraya DIALLO, S.VP & Directrice Ratings\ns.diallo@bloomfield-investment.com\nCharles KONIN, Analyste Financier Se"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250630_-_notation_financiere_-_fidelis_finance_bf.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nFIDELIS FINANCE BURKINA FASO\nFiche de notation financière Validité : juin 2025 à mai 2026\nCatégorie Échelle de Monnaie Note actu. Note prec. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie Locale CFA A A 31/05/2026 Stable\nCourt Terme Monnaie Locale CFA A1 A1 31/05/2026 Stable\nBloomfield Investment Corporation\nTéléphone : +225 27 22 54 84 40\nHenoc GOLY, Chef de Mission\nh.goly@bloomfield-investment.com\nMerlin KONAN, Analyste Financier Senior\nf.k"
+  },
+  {
+    "ticker": null,
+    "agence": "Fitch Ratings",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250513_-_notation_financiere_-_boad.pdf",
+    "resume": "RATING ACTION COMMENTARY\nFitch Revises BOAD's Outlook to Stable; Affirms at 'BBB'\nThu 17 Apr, 2025 - 10:40 ET\nFitch Ratings - London - 17 Apr 2025: Fitch Ratings has revised the Outlook\non Banque Ouest Africaine de Developpement (BOAD)'s Long-Term Issuer\nDefault Rating (LT IDR) to Stable from Negative and affirmed the IDR at\n'BBB'.\nA full list of rating actions is at the end of this rating action commentary.\nKEY RATING DRIVERS\nSCP Drives Rating: BOAD's 'BBB' rating is driven by its Standalone Cr"
+  },
+  {
+    "ticker": "ETIT",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250415_-_notation_financiere_-_unilever_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nUNILEVER COTE D’IVOIRE\nFiche de Notation Financière Validité : Octobre 2024 à Septembre 2025\nCatégorie Échelle de Monnaie Note actu. Note Préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A- A 30/09/2025 Stable\nCourt Terme Monnaie locale CFA A2 A1- 30/09/2025 Stable\nBloomfield Investment Corporation\nTéléphone: + (225) 27 22 54 84 40/41\nAyélé EKUE-HETTAH, Directeur de mission\nm.toukourou@bloomfield-investment.com\nKevin KONIN, Ana"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250415_-_notation_financiere_-_eviosys_packaging_siem_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, EVIOSYS PACKAGING SIEM\nAnalyse portant sur la fabrication d’emballages métalliques\nFiche de Notation Financière Validité : Juillet 2024 à Juin 2025\nCatégorie Échelle de Monnaie Note actu. Note Prec. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA A- A- 30/06/2025 Stable\nCourt Terme Monnaie locale CFA A2 A2 30/06/2025 Stable\nBloomfield Investment Corporation\nJustification de la notation et des perspectives\nTéléphone: +"
+  },
+  {
+    "ticker": "STBC",
+    "agence": "GCR Ratings",
+    "note": "AA",
+    "score_notation": 9,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250324_-_notation_financiere_-_sitab_ci.pdf",
+    "resume": "COMMUNIQUE DE PRESSE\nGCR rehausse la note d’émetteur de long terme de la Société Ivoirienne de Tabacs de AA- à\n(WU)\nAA+ sur son échelle régionale. La perspective est stable.\n(WU)\nAction de notation\nDakar, le 13 mars 2025 – GCR Ratings (GCR) a rehaussé la note d’émetteur de long terme de la Société\nIvoirienne de Tabacs (SITAB) de AA- à AA+ sur son échelle régionale de notation. La perspective est\n(WU) (WU)\nstable. En outre, la note d’émetteur de court terme est de A1+ .\n(WU)\nEmetteur Type de nota"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "A",
+    "score_notation": 7.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250319_-_notation_financiere_-_africa_global_logistics_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCôte d’Ivoire, AGL Côte D’ivoire\nFiche de notation financière validité : décembre 2024 à novembre 2025\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie locale CFA A N/A 30/11/2025 Stable\nCourt Terme Monnaie locale CFA A1- N/A 30/11/2025 Stable\nBloomfield Investment Corporation\nTéléphone: + (225) 27 22 54 84 40\nStéphanie ANGUI, V.P Sous-Directeur Bloomfield\nRatings\ns.angui@bloomfield-investment."
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250319_-_notation_financiere_-_air_liquide_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nAIR LIQUIDE COTE D’IVOIRE\nFiche de Notation Financière Validité : novembre 2024 à octobre 2025\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA BBB BBB 31/10/2025 Stable\nCourt Terme Monnaie locale CFA A3 A3 31/10/2025 Stable\nBloomfield Investment Corporation Toutefois, ce changement n’a pas impacté le\ncapital social, qui est resté fixe à 873 400 000\nTel: + (225) 27 22 54 84 40/41\nfra"
+  },
+  {
+    "ticker": "NTLC",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250319_-_notation_financiere_-_nestle_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nCOTE D’IVOIRE, NESTLE COTE D’IVOIRE\nFiche de Notation Financière Validité : Novembre 2024 – octobre 2025\nÉchelle de Catégorie Monnaie Note actu. Note Préc. Date d’exp. Perspective\nnotation De valeurs\nLong Terme Monnaie locale CFA A+ A+ 31/10/2025 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/10/2025 Stable\nBloomfield Investment Corporation\nTéléphone : (225) 27 22 54 84 40 /41\nBlanchard TRA BI, Chef de mission\nb.trabi@bloomfield-investment.com\nFatoumata CHER"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "B-",
+    "score_notation": 2.5,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250121_-_notation_financiere_-_nei_ceda.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nNEI-CEDA\nFiche de notation Validité : décembre 2024 à novembre 2025\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nde valeurs notation\nLong Terme Monnaie locale CFA A- A- 30/11/2025 Stable\nCourt Terme Monnaie locale CFA A1- A1- 30/11/2025 Stable\nBloomfield Investment Corporation Justification de la notation et des perspectives\nTéléphone: (225) 27 22 54 84 40/41 Sur le long terme :\nHenoc GOLY, Chef de Mission Qualité de crédit élev"
+  },
+  {
+    "ticker": "CIEC",
+    "agence": "Bloomfield Investment",
+    "note": "BBB",
+    "score_notation": 6,
+    "perspective": "Stable",
+    "date": null,
+    "source_url": "https://www.brvm.org/sites/default/files/20250121_-_notation_financiere_-_safca_ci.pdf",
+    "resume": "CREDIT RISK MANAGEMENT BEYOND NUMBERS\nALIOS FINANCE CÔTE D’IVOIRE\nFiche de notation financière Validité : septembre 2024 à août 2025\nCatégorie Échelle de Monnaie Note actu. Note préc. Date d’exp. Perspective\nDe valeurs notation\nLong Terme Monnaie locale CFA BBB+ BBB+ 31/08/2024 Stable\nCourt Terme Monnaie locale CFA A1 A1 31/08/2024 Stable\nBloomfield Investment Corporation Justification de la notation et perspectives\nTel: + (225) 27 22 54 84 40\nSur le long terme :\nMaryline KOUASSI, Chef de missio"
+  }
+]

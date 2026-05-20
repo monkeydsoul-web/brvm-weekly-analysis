@@ -1,0 +1,190 @@
+{
+  "ABJC": {
+    "ticker": "ABJC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/air-burkina"
+  },
+  "BICB": {
+    "ticker": "BICB",
+    "source_url": "https://www.brvm.org/fr/emetteurs/bic-benin"
+  },
+  "BICC": {
+    "ticker": "BICC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/bici-ci"
+  },
+  "BNBC": {
+    "ticker": "BNBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/baci"
+  },
+  "BOAB": {
+    "ticker": "BOAB",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-benin"
+  },
+  "BOABF": {
+    "ticker": "BOABF",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-burkina-faso"
+  },
+  "BOAC": {
+    "ticker": "BOAC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-cote-divoire"
+  },
+  "BOAM": {
+    "ticker": "BOAM",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-mali"
+  },
+  "BOAN": {
+    "ticker": "BOAN",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-niger"
+  },
+  "BOAS": {
+    "ticker": "BOAS",
+    "source_url": "https://www.brvm.org/fr/emetteurs/boa-senegal"
+  },
+  "CABC": {
+    "ticker": "CABC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sicable-ci"
+  },
+  "CBIBF": {
+    "ticker": "CBIBF",
+    "source_url": "https://www.brvm.org/fr/emetteurs/coris-bank-international"
+  },
+  "CFAC": {
+    "ticker": "CFAC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/cfao-motors-ci"
+  },
+  "CIEC": {
+    "ticker": "CIEC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/cie"
+  },
+  "ECOC": {
+    "ticker": "ECOC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/ecobank-ci"
+  },
+  "ETIT": {
+    "ticker": "ETIT",
+    "source_url": "https://www.brvm.org/fr/emetteurs/ecobank-transnational"
+  },
+  "FTSC": {
+    "ticker": "FTSC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/filtisac"
+  },
+  "LNBB": {
+    "ticker": "LNBB",
+    "source_url": "https://www.brvm.org/fr/emetteurs/lonab"
+  },
+  "NEIC": {
+    "ticker": "NEIC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/nei-ceda"
+  },
+  "NSBC": {
+    "ticker": "NSBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/nsia-banque"
+  },
+  "NTLC": {
+    "ticker": "NTLC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/nestle-ci"
+  },
+  "ONTBF": {
+    "ticker": "ONTBF",
+    "source_url": "https://www.brvm.org/fr/emetteurs/onatel"
+  },
+  "ORAC": {
+    "ticker": "ORAC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/orange-ci"
+  },
+  "ORGT": {
+    "ticker": "ORGT",
+    "source_url": "https://www.brvm.org/fr/emetteurs/oragroup"
+  },
+  "PALC": {
+    "ticker": "PALC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/palmci"
+  },
+  "PRSC": {
+    "ticker": "PRSC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/prestige-ci"
+  },
+  "SAFC": {
+    "ticker": "SAFC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/safca"
+  },
+  "SCRC": {
+    "ticker": "SCRC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sucrivoire"
+  },
+  "SDCC": {
+    "ticker": "SDCC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sodeci"
+  },
+  "SDSC": {
+    "ticker": "SDSC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sds-ci"
+  },
+  "SEMC": {
+    "ticker": "SEMC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/setao-ci"
+  },
+  "SGBC": {
+    "ticker": "SGBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sgbc"
+  },
+  "SHEC": {
+    "ticker": "SHEC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/vivo-energy-ci"
+  },
+  "SIBC": {
+    "ticker": "SIBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sibc"
+  },
+  "SICC": {
+    "ticker": "SICC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sicogi"
+  },
+  "SIVC": {
+    "ticker": "SIVC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sivop"
+  },
+  "SLBC": {
+    "ticker": "SLBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/solibra"
+  },
+  "SMBC": {
+    "ticker": "SMBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/soacii"
+  },
+  "SNTS": {
+    "ticker": "SNTS",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sonatel"
+  },
+  "SOGC": {
+    "ticker": "SOGC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sogb"
+  },
+  "SPHC": {
+    "ticker": "SPHC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/saph"
+  },
+  "STAC": {
+    "ticker": "STAC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/setaci"
+  },
+  "STBC": {
+    "ticker": "STBC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/sitab"
+  },
+  "TTLC": {
+    "ticker": "TTLC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/total-ci"
+  },
+  "TTLS": {
+    "ticker": "TTLS",
+    "source_url": "https://www.brvm.org/fr/emetteurs/total-senegal"
+  },
+  "UNLC": {
+    "ticker": "UNLC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/unilever-ci"
+  },
+  "UNXC": {
+    "ticker": "UNXC",
+    "source_url": "https://www.brvm.org/fr/emetteurs/uniwax"
+  }
+}

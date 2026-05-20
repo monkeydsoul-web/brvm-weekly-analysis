@@ -960,16 +960,23 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="tab-btn" onclick="switchTab('valuation','perf',this);if(typeof renderPerfPage!=='undefined')renderPerfPage()">📈 Performances</button>
   </div>
   <div class="tab-content on" id="valuation-tab-cibles">
-    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
-        · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée (opportunité d'achat potentielle)<br>
-        · "🟢 Bonne affaire" = potentiel ≥ 30% · "👀 À surveiller" = potentiel modéré · "⚖️ Prix correct" = juste prix
-      </div>
-    </details>
+    <div id="ratings-summary-block" style="margin-bottom:10px;display:none"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+      <details style="flex:1;min-width:260px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+        <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+        <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+          · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
+          · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée (opportunité d'achat potentielle)<br>
+          · "🟢 Bonne affaire" = potentiel ≥ 30% · "👀 À surveiller" = potentiel modéré · "⚖️ Prix correct" = juste prix
+        </div>
+      </details>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="filter-rated-only" onchange="renderTargets()" style="cursor:pointer">
+        Avec notation uniquement
+      </label>
+    </div>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -1124,6 +1131,54 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
           </div>
         </div>
       </div>
+    </div>
+    <!-- Notations souveraines + sociétés notées -->
+    <div class="card" style="margin-bottom:12px" id="sovereign-ratings-card">
+      <div class="ct" style="margin-bottom:10px">⭐ Notations souveraines UEMOA <span style="font-size:10px;font-weight:400;color:var(--t3)">(sources : Bloomfield · GCR · Moody's)</span></div>
+      <div id="sovereign-ratings-content" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-bottom:12px">
+        <!-- Données statiques connues — enrichies dynamiquement par renderMacroRatings() -->
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--amber)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇨🇮 Côte d'Ivoire</div>
+          <div style="font-size:16px;font-weight:700;color:var(--amber)">Ba3 / B+</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's / Fitch · Stable</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--green)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇸🇳 Sénégal</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green)">Ba3 / B+</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's / Fitch · Stable</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--red)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇧🇫 Burkina Faso</div>
+          <div style="font-size:16px;font-weight:700;color:var(--red)">Caa1</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's · Sous surveillance</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--amber)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇹🇬 Togo</div>
+          <div style="font-size:16px;font-weight:700;color:var(--amber)">B3</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's · Stable</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--amber)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇧🇯 Bénin</div>
+          <div style="font-size:16px;font-weight:700;color:var(--amber)">B1</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's · Stable</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--red)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇲🇱 Mali</div>
+          <div style="font-size:16px;font-weight:700;color:var(--red)">Caa2</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Moody's · Négatif</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--red)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇳🇪 Niger</div>
+          <div style="font-size:16px;font-weight:700;color:var(--red)">Non noté</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">Sanctions levées · 2025</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--t3)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇬🇳 Guinée-Bissau</div>
+          <div style="font-size:16px;font-weight:700;color:var(--t3)">Non noté</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">UEMOA · micro-économie</div>
+        </div>
+      </div>
+      <div id="rated-companies-block"></div>
     </div>
     <!-- Risque pays -->
     <div class="card">
@@ -3770,19 +3825,46 @@ function _buildPerfTable(tops,series){
 
 // ── Prix cibles ────────────────────────────────────────────────────────────
 async function renderTargets(){
-  const targets=await fetch('/api/targets').then(r=>r.json());
-  document.getElementById('targetsTable').innerHTML=targets.map(t=>{
+  const [targets, ratings] = await Promise.all([
+    fetch('/api/targets').then(r=>r.json()),
+    _ensureRatingsForTargets(),
+  ]);
+  const filterRated = document.getElementById('filter-rated-only')?.checked;
+
+  // Bloc résumé notations
+  const ratedTickers = Object.keys(ratings).filter(t => (ratings[t]||[]).some(r=>r.note));
+  const agences = [...new Set(
+    Object.values(ratings).flat().filter(r=>r.note&&r.agence).map(r=>r.agence)
+  )];
+  const sumEl = document.getElementById('ratings-summary-block');
+  if (sumEl && ratedTickers.length) {
+    sumEl.style.display = '';
+    sumEl.innerHTML = `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <span>⭐ <strong>${ratedTickers.length}</strong> sociétés notées</span>
+      <span style="color:var(--t2)">Agences : ${agences.join(' · ') || '—'}</span>
+      <span style="color:var(--t2)">${ratedTickers.map(t=>`<span onclick="_openStock('${t}')" style="cursor:pointer;color:var(--accent)">${t}</span>`).join(' ')}</span>
+    </div>`;
+  }
+
+  let rows = targets;
+  if (filterRated) rows = rows.filter(t => ratedTickers.includes(t.ticker));
+
+  document.getElementById('targetsTable').innerHTML=rows.map(t=>{
     const up=t.upside_pct||0;
     const cls=up>=30?'target-up':up<0?'target-dn':'';
     const vc=up>=30?'var(--green)':up<0?'var(--red)':'var(--amber)';
     const fmtAvis=(v)=>v==='Fort potentiel'?'✅ Bonne affaire':v==='Potentiel modéré'?'👀 À surveiller':v==='Proche valeur juste'?'⚖️ Prix correct':v?'⚠️ Trop cher':'—';
     const fmtOpp=up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`;
+    const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
+    const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
+    const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
       <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      ${ratingCell}
       <td style="font-size:11px">${fmtAvis(t.verdict)}</td>
     </tr>`;}).join('');
 }
@@ -4495,6 +4577,7 @@ async function showStock(ticker){
         <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">${ai}</div>
         ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong> <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fi.upside_pct>=0?'+':''}${fi.upside_pct}%)</span></div>`:''}</div>`:''}
       ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
+      <div id="stock-ratings-fundamentals-section"></div>
       <div class="g2" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0;border-left:3px solid var(--blue)">
           <div class="ct">🔗 Sociétés similaires</div>
@@ -4546,6 +4629,7 @@ async function showStock(ticker){
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
     loadPriceChart(ticker, 'stockChartDiv');
+    loadStockRatingsFundamentals(ticker);
     fetchLiveScore(ticker);
     window._openTicker = ticker;
     renderLiveRankBadge(ticker);
@@ -4708,7 +4792,7 @@ const pageLoaders={
   signals:   ()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
   optim:     ()=>renderCorrelMatrix(),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
-  macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();},
+  macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
   news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
 };
 
@@ -5114,6 +5198,130 @@ async function loadStockNews(ticker) {
   } catch(e) {
     el.innerHTML = '<div style="color:var(--t3);font-size:11px">Erreur de chargement.</div>';
   }
+}
+
+// ── Ratings + Fundamentals ─────────────────────────────────────────────────
+
+// Badge coloré selon la note de crédit
+function _ratingBadge(note) {
+  if (!note) return '';
+  const grade = note.toUpperCase();
+  const color = /^AA/.test(grade) ? 'var(--green)'
+              : /^A/.test(grade)  ? 'var(--blue)'
+              : /^BBB/.test(grade)? 'var(--amber)'
+              : /^BB/.test(grade) ? '#F97316'
+              : 'var(--red)';
+  return `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:${color}22;color:${color};border:1px solid ${color}">${grade}</span>`;
+}
+
+// Cache des ratings + fundamentals pour la session
+let _ratingsCache = null;
+let _fundamentalsCache = null;
+
+async function _loadRatingsCache() {
+  if (_ratingsCache) return _ratingsCache;
+  try {
+    const d = await fetch('/api/ratings').then(r=>r.json());
+    _ratingsCache = {};
+    (d.data || []).forEach(item => {
+      const t = (item.ticker || '').toUpperCase();
+      if (t) {
+        if (!_ratingsCache[t]) _ratingsCache[t] = [];
+        _ratingsCache[t].push(item);
+      }
+    });
+  } catch(e) { _ratingsCache = {}; }
+  return _ratingsCache;
+}
+
+async function _loadFundamentalsCache() {
+  if (_fundamentalsCache) return _fundamentalsCache;
+  try {
+    const d = await fetch('/api/fundamentals').then(r=>r.json());
+    _fundamentalsCache = d.data || {};
+  } catch(e) { _fundamentalsCache = {}; }
+  return _fundamentalsCache;
+}
+
+async function loadStockRatingsFundamentals(ticker) {
+  const el = document.getElementById('stock-ratings-fundamentals-section');
+  if (!el) return;
+  try {
+    const [ratings, funds] = await Promise.all([
+      _loadRatingsCache(),
+      _loadFundamentalsCache(),
+    ]);
+    const rList = (ratings[ticker.toUpperCase()] || []).filter(r => r.note);
+    const fund  = (funds[ticker.toUpperCase()]) || {};
+    let html = '';
+
+    if (rList.length) {
+      html += `<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
+        <div class="ct" style="margin-bottom:8px">⭐ Notations financières</div>
+        ${rList.map(r => `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+          ${_ratingBadge(r.note)}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:600">${r.agence || 'Agence inconnue'}</div>
+            <div style="font-size:10px;color:var(--t3)">${r.perspective ? r.perspective : ''} ${r.date ? '· ' + r.date : ''}</div>
+          </div>
+          ${r.source_url ? `<a href="${r.source_url}" target="_blank" style="font-size:10px;color:var(--accent);flex-shrink:0">PDF ↗</a>` : ''}
+        </div>`).join('')}
+      </div>`;
+    }
+
+    const hasFund = fund.capital_social_fcfa || fund.nb_actions || fund.date_introduction || fund.flottant_pct;
+    if (hasFund) {
+      const fmtCap = v => v ? (v/1e9).toFixed(1) + ' Md FCFA' : '—';
+      const fmtNb  = v => v ? Number(v).toLocaleString('fr-FR') : '—';
+      html += `<div class="card" style="margin-bottom:12px">
+        <div class="ct" style="margin-bottom:8px">📋 Données fondamentales</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          ${fund.capital_social_fcfa ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Capital social</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fmtCap(fund.capital_social_fcfa)}</div></div>` : ''}
+          ${fund.nb_actions ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Nombre d'actions</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fmtNb(fund.nb_actions)}</div></div>` : ''}
+          ${fund.flottant_pct ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Flottant</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fund.flottant_pct}%</div></div>` : ''}
+          ${fund.date_introduction ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Intro BRVM</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fund.date_introduction}</div></div>` : ''}
+        </div>
+      </div>`;
+    }
+
+    if (html) el.innerHTML = html;
+  } catch(e) {
+    console.warn('[BRVM] loadStockRatingsFundamentals:', e);
+  }
+}
+
+// Enrichit renderTargets() avec colonne Notation
+let _ratingsForTargets = null;
+async function _ensureRatingsForTargets() {
+  if (_ratingsForTargets) return _ratingsForTargets;
+  _ratingsForTargets = await _loadRatingsCache();
+  return _ratingsForTargets;
+}
+
+// Affiche sociétés notées dans la page Macro
+async function renderMacroRatings() {
+  const el = document.getElementById('rated-companies-block');
+  if (!el) return;
+  const ratings = await _loadRatingsCache();
+  const tickers = Object.keys(ratings).filter(t => ratings[t].some(r=>r.note));
+  if (!tickers.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `
+    <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:8px">
+        📊 Sociétés BRVM notées (${tickers.length})
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${tickers.map(t => {
+          const best = ratings[t].filter(r=>r.note).sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
+          return `<div onclick="_openStock('${t}')" style="cursor:pointer;background:var(--bg3);border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:6px" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+            <strong style="font-size:11px">${t}</strong>
+            ${_ratingBadge(best.note)}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
 }
 
 // ── Signal du jour — chargement standalone, indépendant de init() ──────────

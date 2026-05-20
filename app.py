@@ -1817,6 +1817,63 @@ def api_announcements_summary():
     })
 
 
+# ── Ratings + Fundamentals ────────────────────────────────────────────────────
+_RATINGS_PATH    = os.path.join(DATA_DIR, "brvm_ratings.json")
+_FUNDAMENT_PATH  = os.path.join(DATA_DIR, "brvm_fundamentals.json")
+_MARKET_STAT_PATH= os.path.join(DATA_DIR, "brvm_market_stats.json")
+
+def _load_json_file(path):
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+@app.route("/api/ratings")
+def api_ratings_all():
+    data = _load_json_file(_RATINGS_PATH)
+    if data is None:
+        return jsonify({"status": "not_available", "data": []})
+    items = [i for i in data if i.get("note")]
+    return jsonify({"status": "ok", "data": items, "total": len(items)})
+
+@app.route("/api/ratings/<ticker>")
+def api_ratings_ticker(ticker):
+    data = _load_json_file(_RATINGS_PATH)
+    if data is None:
+        return jsonify({"status": "not_available", "data": []})
+    items = [i for i in data if (i.get("ticker") or "").upper() == ticker.upper()]
+    return jsonify({"status": "ok", "data": items})
+
+@app.route("/api/fundamentals")
+def api_fundamentals_all():
+    data = _load_json_file(_FUNDAMENT_PATH)
+    if data is None:
+        return jsonify({"status": "not_available", "data": {}})
+    return jsonify({"status": "ok", "data": data})
+
+@app.route("/api/fundamentals/<ticker>")
+def api_fundamentals_ticker(ticker):
+    data = _load_json_file(_FUNDAMENT_PATH)
+    if data is None:
+        return jsonify({"status": "not_available", "data": {}})
+    item = data.get(ticker.upper(), {})
+    return jsonify({"status": "ok", "data": item})
+
+@app.route("/api/market-stats")
+def api_market_stats():
+    data = _load_json_file(_MARKET_STAT_PATH)
+    if data is None:
+        return jsonify({"status": "not_available", "data": []})
+    # Retourner le dernier entry ou la liste complète
+    limit = int(request.args.get("limit", 1))
+    if isinstance(data, list):
+        return jsonify({"status": "ok", "data": data[-limit:] if limit > 1 else data[-1]})
+    return jsonify({"status": "ok", "data": data})
+
+
 if __name__ == "__main__":
     try:
         from dotenv import load_dotenv as _ldenv
