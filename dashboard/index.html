@@ -782,7 +782,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <!-- Bilan mensuel -->
   <div class="card" style="margin-bottom:12px">
-    <div class="ct" style="margin-bottom:8px">📅 Bilan mensuel</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="ct" style="margin:0">📅 Bilan mensuel</div>
+      <button class="btn btn-o" onclick="portRecalcBilan()" style="font-size:10px;padding:4px 10px">🔄 Recalculer</button>
+    </div>
     <div id="port-monthly-table" style="overflow-x:auto"></div>
   </div>
 <div class="card" style="margin-bottom:12px" id="simPortCard">
@@ -3215,6 +3218,26 @@ function _normPos(pos){
   const avg_price = +(pos.avg_price ?? pos.buyPrice ?? pos.buy_price ?? pos.price ?? 0);
   return {...pos, shares, avg_price};
 }
+
+function _migratePortSchema(){
+  // Migration one-shot : normalise les anciens schémas vers {ticker,shares,avg_price,date,note}
+  try {
+    const raw = JSON.parse(localStorage.getItem(_LS_PORT) || '[]');
+    const needsMigration = raw.some(p =>
+      p.qty != null || p.buyPrice != null || p.buy_price != null || !p.date
+    );
+    if (!needsMigration) return;
+    const migrated = raw.map(p => ({
+      ticker:    p.ticker,
+      shares:    +(p.shares ?? p.qty ?? p.quantity ?? 0),
+      avg_price: +(p.avg_price ?? p.buyPrice ?? p.buy_price ?? p.price ?? 0),
+      date:      p.date || '2024-01-01',
+      note:      p.note || null,
+    }));
+    localStorage.setItem(_LS_PORT, JSON.stringify(migrated));
+    console.log('[migration] portfolio v2 normalisé :', migrated.length, 'positions');
+  } catch(e) {}
+}
 function _normTx(tx){
   return {
     ...tx,
@@ -3224,6 +3247,7 @@ function _normTx(tx){
 }
 
 function loadPortfolio(){
+  _migratePortSchema();
   const positions = _portData().map(_normPos);
   const txs       = _txData().map(_normTx);
   const sc        = window.scores || [];
@@ -3499,41 +3523,97 @@ function _portDrawChart(series, positions){
 }
 
 function _portMonthlyTable(positions){
-  const el=document.getElementById('port-monthly-table');
+  const el = document.getElementById('port-monthly-table');
   if(!el) return;
-  const ph=window._priceHistory||{};
+  const ph = window._priceHistory || {};
 
-  // Collecter les mois disponibles
-  const monthVals={};
-  positions.forEach(p=>{
-    (ph[p.ticker]||[]).filter(d=>d.price&&(!p.date||d.date>=p.date)).forEach(d=>{
-      const m=d.date.slice(0,7);
-      if(!monthVals[m]) monthVals[m]={};
-      monthVals[m][p.ticker]={price:d.price,shares:p.shares,avg_price:p.avg_price};
-    });
-  });
+  // Prix d'un ticker à une date donnée (ou avant)
+  function priceAt(ticker, dateStr){
+    const hist = (ph[ticker]||[]).filter(d => d.price && d.date <= dateStr);
+    return hist.length ? hist[hist.length-1].price : null;
+  }
 
-  const months=Object.keys(monthVals).sort().slice(-12);
-  if(months.length<2){el.innerHTML='<p style="color:var(--t2);font-size:11px">Données insuffisantes (< 2 mois).</p>';return;}
+  // Dernier jour du mois (YYYY-MM → YYYY-MM-DD)
+  function endOfMonth(ym){
+    const [y,m] = ym.split('-').map(Number);
+    return `${ym}-${String(new Date(y,m,0).getDate()).padStart(2,'0')}`;
+  }
 
-  const rows=months.map((m,i)=>{
-    const val=Object.values(monthVals[m]).reduce((s,x)=>s+x.shares*x.price,0);
-    const cost=Object.values(monthVals[m]).reduce((s,x)=>s+x.shares*x.avg_price,0);
-    const prevM=months[i-1];
-    const prevVal=prevM?Object.values(monthVals[prevM]).reduce((s,x)=>s+x.shares*x.price,0):val;
-    const monthGain=val-prevVal;
-    const totalGain=val-cost;
-    const mgC=monthGain>=0?'var(--green)':'var(--red)';
-    const tgC=totalGain>=0?'var(--green)':'var(--red)';
-    const moLabel=new Date(m+'-15').toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});
-    return`<tr style="border-bottom:1px solid var(--border)">
+  // Plage de mois à parcourir
+  const allDates = positions.map(p=>p.date||'').filter(Boolean).sort();
+  if(!allDates.length){
+    el.innerHTML='<p style="color:var(--t2);font-size:11px">Aucune position enregistrée.</p>';
+    return;
+  }
+  const firstMonth = allDates[0].slice(0,7);
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  // Enumérer chaque mois de firstMonth à currentMonth
+  const months = [];
+  let cursor = firstMonth;
+  while(cursor <= currentMonth){
+    months.push(cursor);
+    const [y,m] = cursor.split('-').map(Number);
+    cursor = m===12 ? `${y+1}-01` : `${y}-${String(m+1).padStart(2,'0')}`;
+  }
+
+  // Construire les lignes
+  let prevVal = null;
+  const rows = [];
+
+  for(const ym of months){
+    const eom = endOfMonth(ym);
+    const firstOfMonth = `${ym}-01`;
+
+    // Positions détenues à la fin de ce mois
+    const active = positions.filter(p => (p.date||'') <= eom && p.shares > 0);
+    if(!active.length) continue;
+
+    // Valeur totale fin de mois
+    const val = active.reduce((sum,p)=>{
+      const price = priceAt(p.ticker, eom) ?? p.avg_price;
+      return sum + p.shares * price;
+    }, 0);
+
+    // Coût total des positions actives
+    const cost = active.reduce((s,p) => s + p.shares * p.avg_price, 0);
+
+    // Apports nouveaux ce mois (neutralise l'effet "apparition de positions")
+    const newInM = active.filter(p => p.date >= firstOfMonth && p.date <= eom);
+    const apports = newInM.reduce((s,p) => s + p.shares * p.avg_price, 0);
+
+    // G/P mois = variation de valeur hors nouveaux apports
+    const monthGain = prevVal !== null ? val - prevVal - apports : null;
+    const totalGain = val - cost;
+    const rdt = cost > 0 ? ((val/cost-1)*100) : 0;
+
+    const mgC = (monthGain??0) >= 0 ? 'var(--green)' : 'var(--red)';
+    const tgC = totalGain >= 0 ? 'var(--green)' : 'var(--red)';
+    const moLabel = new Date(ym+'-15').toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});
+
+    rows.push(`<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 8px;font-size:11px;color:var(--t2)">${moLabel}</td>
       <td style="padding:5px 8px;font-size:11px;font-weight:600">${Math.round(val/1000)}k XOF</td>
-      <td style="padding:5px 8px;font-size:11px;color:${mgC};font-weight:600">${monthGain>=0?'+':''}${Math.round(monthGain/1000)}k</td>
+      <td style="padding:5px 8px;font-size:11px;color:${mgC};font-weight:600">${monthGain===null?'—':(monthGain>=0?'+':'')+Math.round(monthGain/1000)+'k'}</td>
       <td style="padding:5px 8px;font-size:11px;color:${tgC}">${totalGain>=0?'+':''}${Math.round(totalGain/1000)}k</td>
-      <td style="padding:5px 8px;font-size:11px;color:${tgC}">${cost>0?((val/cost-1)*100).toFixed(1)+'%':'—'}</td>
-    </tr>`;
-  }).join('');
+      <td style="padding:5px 8px;font-size:11px;color:${tgC}">${cost>0?rdt.toFixed(1)+'%':'—'}</td>
+    </tr>`);
+
+    prevVal = val;
+  }
+
+  // Vide ou 1 seul mois (pas encore de recul)
+  if(rows.length === 0){
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse"><tbody>
+      <tr><td colspan="5" style="padding:12px 8px;font-size:11px;color:var(--t2);text-align:center">
+        Le bilan mensuel apparaîtra à partir d'un mois complet de détention.
+      </td></tr></tbody></table>`;
+    return;
+  }
+
+  // Afficher les 12 derniers mois
+  const displayRows = rows.slice(-12).join('');
   el.innerHTML=`<table style="width:100%;border-collapse:collapse">
     <thead><tr style="border-bottom:2px solid var(--border)">
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Mois</th>
@@ -3541,7 +3621,31 @@ function _portMonthlyTable(positions){
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">G/P mois</th>
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">G/P total</th>
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Rdt</th>
-    </tr></thead><tbody>${rows}</tbody></table>`;
+    </tr></thead><tbody>${displayRows}</tbody></table>`;
+}
+
+function portRecalcBilan(){
+  const positions = _portData().map(_normPos).filter(p=>p.shares>0);
+  if(!positions.length) return;
+  const el = document.getElementById('port-monthly-table');
+  if(el) el.innerHTML='<p style="font-size:11px;color:var(--t2)">Recalcul en cours…</p>';
+
+  const run = () => {
+    _portMonthlyTable(positions);
+    // toast inline sous le bouton
+    const btn = document.querySelector('[onclick="portRecalcBilan()"]');
+    if(btn){ const old=btn.textContent; btn.textContent='✓ Recalculé'; setTimeout(()=>{btn.textContent=old;},2000); }
+  };
+  if(window._priceHistory){
+    run();
+  } else {
+    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
+      window._priceHistory=ph;
+      run();
+    }).catch(()=>{
+      if(el) el.innerHTML='<p style="font-size:11px;color:var(--red)">Erreur chargement historique des prix.</p>';
+    });
+  }
 }
 
 function portOptimize(){
