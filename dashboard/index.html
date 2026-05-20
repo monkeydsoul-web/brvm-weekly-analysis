@@ -4879,13 +4879,30 @@ function _anncTitle(item, type) {
   const filename = path.split('/').pop().replace(/\.pdf$/i, '');
   if (filename && filename.length > 5) {
     const stripped = filename
-      .replace(/^\d{8}-?_-?_?/, '')   // handles both 20260513_-_ and 20260513-_
+      .replace(/^\d{8}-?_-?_?/, '')   // strip leading date prefix
       .replace(/_-_/g, ' — ')
       .replace(/-_/g, ' — ')
       .replace(/_/g, ' ')
-      .replace(/-/g, ' ');
-    const cap = stripped.replace(/(^| — )(\S)/g, (m, sep, c) => sep + c.toUpperCase()).trim();
-    if (cap.length > 5 && !/^\d/.test(cap)) return cap.slice(0, 110);
+      .replace(/-/g, ' ')
+      .replace(/\bndeg\s*\d+\b/gi, '')   // "ndeg137" → ""
+      .replace(/\bbrvmdg\b/gi, '')        // "brvmdg" → ""
+      .replace(/\bbrvm\b/gi, '')          // "brvm" seul → ""
+      .replace(/ — \s*— /g, ' — ')       // doubles séparateurs
+      .replace(/\s{2,}/g, ' ')            // doubles espaces
+      .replace(/^ — | — $/g, '')          // séparateurs en début/fin
+      .trim();
+    // Title case : majuscule sur chaque mot sauf petits mots de liaison
+    const SMALL = new Set(['de','du','des','le','la','les','et','en','à','au','aux','par','sur','sous','dans','un','une','pour','d','l']);
+    // Abréviations à garder en majuscules (codes pays UEMOA, sigles courants)
+    const UPPER = new Set(['bf','ci','sn','ng','bj','ml','tg','gn','sa','ag','oa','pme','fcfa','dg','pdg','nv']);
+    const cap = stripped.split(' — ').map(part =>
+      part.split(' ').map((w, i) => {
+        const low = w.toLowerCase();
+        if (UPPER.has(low)) return w.toUpperCase();
+        return (i === 0 || !SMALL.has(low)) ? low.charAt(0).toUpperCase() + low.slice(1) : low;
+      }).join(' ')
+    ).join(' — ').trim();
+    if (cap.length > 5 && !/^\d/.test(cap) && !cap.includes('?')) return cap.slice(0, 110);
   }
   // First meaningful line of contenu
   if (item.contenu) {
