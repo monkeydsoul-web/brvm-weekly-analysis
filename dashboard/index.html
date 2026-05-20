@@ -3502,7 +3502,8 @@ async function renderDiv(){
 }
 
 // ── Performances (graphique Base 100 — données BOC réelles) ────────────────
-let _perfPeriod = '1an';
+// _perfPeriod est déclaré dans performance.js — réassignation seulement
+_perfPeriod = '1an';
 let _perfLoaded = false;
 
 function renderPerf(){} // legacy no-op
