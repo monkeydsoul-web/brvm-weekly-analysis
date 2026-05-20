@@ -1,0 +1,190 @@
+{
+  "ABJC": {
+    "name": "Air Burkina",
+    "aliases": ["Air Burkina", "ABJC"]
+  },
+  "BICB": {
+    "name": "BIC Bénin",
+    "aliases": ["BIC Bénin", "BICB", "Banque Internationale du Commerce Bénin", "BIC Benin"]
+  },
+  "BICC": {
+    "name": "BICI Côte d'Ivoire",
+    "aliases": ["BICI CI", "BICC", "Banque Internationale pour le Commerce et l'Industrie", "BICI Côte d'Ivoire", "BICI"]
+  },
+  "BNBC": {
+    "name": "BACI",
+    "aliases": ["BACI", "BNBC", "Banque Atlantique Côte d'Ivoire", "Banque Atlantique"]
+  },
+  "BOAB": {
+    "name": "BOA Bénin",
+    "aliases": ["BOA Bénin", "BOAB", "Bank of Africa Bénin", "BOA Benin", "BOA-Bénin"]
+  },
+  "BOABF": {
+    "name": "BOA Burkina",
+    "aliases": ["BOA Burkina", "BOABF", "Bank of Africa Burkina", "BOA Burkina Faso", "Bank of Africa Burkina Faso"]
+  },
+  "BOAC": {
+    "name": "BOA Côte d'Ivoire",
+    "aliases": ["BOA Côte d'Ivoire", "BOAC", "Bank of Africa CI", "BOA CI", "Bank of Africa Côte d'Ivoire"]
+  },
+  "BOAM": {
+    "name": "BOA Mali",
+    "aliases": ["BOA Mali", "BOAM", "Bank of Africa Mali"]
+  },
+  "BOAN": {
+    "name": "BOA Niger",
+    "aliases": ["BOA Niger", "BOAN", "Bank of Africa Niger"]
+  },
+  "BOAS": {
+    "name": "BOA Sénégal",
+    "aliases": ["BOA Sénégal", "BOAS", "Bank of Africa Sénégal", "BOA Senegal"]
+  },
+  "CABC": {
+    "name": "Sicable CI",
+    "aliases": ["Sicable", "CABC", "Câbles de Côte d'Ivoire", "SICABLE CI", "Sicable CI"]
+  },
+  "CBIBF": {
+    "name": "Coris Bank International",
+    "aliases": ["Coris Bank", "CBIBF", "Coris Bank International", "Coris Bank International Burkina"]
+  },
+  "CFAC": {
+    "name": "CFAO Motors CI",
+    "aliases": ["CFAO Motors", "CFAC", "CFAO CI", "CFAO Côte d'Ivoire"]
+  },
+  "CIEC": {
+    "name": "CIE Côte d'Ivoire",
+    "aliases": ["CIE", "CIEC", "Compagnie Ivoirienne d'Électricité", "Compagnie Ivoirienne d'Electricite"]
+  },
+  "ECOC": {
+    "name": "Ecobank Côte d'Ivoire",
+    "aliases": ["Ecobank CI", "ECOC", "Ecobank Côte d'Ivoire", "Ecobank Cote d'Ivoire"]
+  },
+  "ETIT": {
+    "name": "Ecobank Transnational",
+    "aliases": ["Ecobank Transnational", "ETIT", "ETI", "Ecobank Transnational Incorporated"]
+  },
+  "FTSC": {
+    "name": "Filtisac CI",
+    "aliases": ["Filtisac", "FTSC", "Filtisac CI"]
+  },
+  "LNBB": {
+    "name": "LONAB",
+    "aliases": ["LONAB", "LNBB", "Loterie Nationale Burkina", "Loterie Nationale du Burkina"]
+  },
+  "NEIC": {
+    "name": "NEI-CEDA",
+    "aliases": ["NEI CEDA", "NEIC", "NEI-CEDA", "NEI Ceda"]
+  },
+  "NSBC": {
+    "name": "NSIA Banque CI",
+    "aliases": ["NSIA Banque", "NSBC", "NSIA Banque CI", "NSIA Banque Côte d'Ivoire"]
+  },
+  "NTLC": {
+    "name": "Nestlé Côte d'Ivoire",
+    "aliases": ["Nestlé CI", "NTLC", "Nestlé Côte d'Ivoire", "Nestle CI", "Nestle Côte d'Ivoire"]
+  },
+  "ONTBF": {
+    "name": "ONATEL Burkina",
+    "aliases": ["ONATEL", "ONTBF", "Office National des Télécommunications Burkina", "ONATEL Burkina"]
+  },
+  "ORAC": {
+    "name": "Orange Côte d'Ivoire",
+    "aliases": ["Orange CI", "ORAC", "Orange Côte d'Ivoire", "Orange Cote d'Ivoire"]
+  },
+  "ORGT": {
+    "name": "ORAGROUP",
+    "aliases": ["ORAGROUP", "ORGT", "Oragroup"]
+  },
+  "PALC": {
+    "name": "PALMCI",
+    "aliases": ["PALMCI", "PALC", "Palm Côte d'Ivoire", "Palm CI"]
+  },
+  "PRSC": {
+    "name": "Tractafric Motors CI",
+    "aliases": ["PRESTIGE", "PRSC", "Tractafric Motors", "Tractafric Motors CI"]
+  },
+  "SAFC": {
+    "name": "ALIOS Finance CI",
+    "aliases": ["SAFCA", "SAFC", "Alios Finance", "ALIOS Finance CI", "ex-SAFCA"]
+  },
+  "SCRC": {
+    "name": "Sucrivoire",
+    "aliases": ["SUCRIVOIRE", "SCRC", "Sucrivoire", "Sucre Ivoire"]
+  },
+  "SDCC": {
+    "name": "SODECI",
+    "aliases": ["SODECI", "SDCC", "Société de Distribution d'Eau de Côte d'Ivoire"]
+  },
+  "SDSC": {
+    "name": "SDS CI",
+    "aliases": ["SDS CI", "SDSC", "Société de Dépôt et de Stocks CI"]
+  },
+  "SEMC": {
+    "name": "SETAO CI",
+    "aliases": ["SETAO", "SEMC", "SETAO CI", "Société Ivoirienne des Eaux et Travaux"]
+  },
+  "SGBC": {
+    "name": "Société Générale CI",
+    "aliases": ["Société Générale CI", "SGBC", "Société Générale Côte d'Ivoire", "Societe Generale CI", "SG CI"]
+  },
+  "SHEC": {
+    "name": "VIVO Energy CI",
+    "aliases": ["VIVO Energy", "SHEC", "Shell CI", "Vivo Energy CI", "Vivo Energy Côte d'Ivoire"]
+  },
+  "SIBC": {
+    "name": "Société Ivoirienne de Banque",
+    "aliases": ["Société Ivoirienne de Banque", "SIBC", "SIB", "SIB-CI"]
+  },
+  "SICC": {
+    "name": "SICOGI",
+    "aliases": ["SICOGI", "SICC", "Société Ivoirienne de Construction"]
+  },
+  "SIVC": {
+    "name": "SIVOP CI",
+    "aliases": ["SIVOP", "SIVC", "SIVOP CI"]
+  },
+  "SLBC": {
+    "name": "SOLIBRA",
+    "aliases": ["SOLIBRA", "SLBC", "Société de Limonaderies et Brasseries d'Afrique", "Brasseries Ivoire"]
+  },
+  "SMBC": {
+    "name": "SOACII",
+    "aliases": ["SOACII", "SMBC", "Société Multinationale de Bitumes"]
+  },
+  "SNTS": {
+    "name": "Sonatel",
+    "aliases": ["Sonatel", "SNTS", "Sonatel Sénégal", "Sénégalaise des Télécommunications", "SONATEL"]
+  },
+  "SOGC": {
+    "name": "SOGB CI",
+    "aliases": ["SOGB", "SOGC", "Société de Caoutchouc de Grand Béréby", "SOGB CI"]
+  },
+  "SPHC": {
+    "name": "SAPH CI",
+    "aliases": ["SAPH", "SPHC", "Société Africaine de Plantations d'Hévéas", "SAPH CI", "SAPH Côte d'Ivoire"]
+  },
+  "STAC": {
+    "name": "SETACI",
+    "aliases": ["SETACI", "STAC"]
+  },
+  "STBC": {
+    "name": "Philip Morris CI",
+    "aliases": ["STAB", "STBC", "Société de Tabac de Côte d'Ivoire", "Philip Morris CI", "Manufacture de Tabac"]
+  },
+  "TTLC": {
+    "name": "TotalEnergies CI",
+    "aliases": ["TOTAL CI", "TTLC", "TotalEnergies CI", "Total Côte d'Ivoire", "TotalEnergies Côte d'Ivoire"]
+  },
+  "TTLS": {
+    "name": "TotalEnergies Sénégal",
+    "aliases": ["TOTAL SN", "TTLS", "TotalEnergies Sénégal", "Total Sénégal", "Total Senegal"]
+  },
+  "UNLC": {
+    "name": "UNILEVER CI",
+    "aliases": ["UNILEVER CI", "UNLC", "Unilever Côte d'Ivoire", "Unilever CI"]
+  },
+  "UNXC": {
+    "name": "UNIWAX CI",
+    "aliases": ["UNIWAX", "UNXC", "UNIWAX CI", "Uniwax Côte d'Ivoire"]
+  }
+}

@@ -29,6 +29,16 @@ DATA_DIR    = BASE_DIR / "data"
 OUTPUT_PATH = DATA_DIR / "brvm_news.json"
 LOG_DIR     = BASE_DIR / "logs"
 
+# ── Scoring de pertinence ─────────────────────────────────────────────────────
+sys.path.insert(0, str(BASE_DIR))
+try:
+    from scripts.news_relevance import score_article, load_aliases
+    _ALIASES = load_aliases()
+except Exception:
+    _ALIASES = {}
+    def score_article(article, ticker, aliases_map=None):
+        return {"score": 50, "category": "generique", "matched_alias": None, "is_relevant": True}
+
 # ── Mapping ticker → noms de recherche ────────────────────────────────────────
 TICKER_NAMES: Dict[str, List[str]] = {
     "ABJC": ["Air Burkina", "ABJC"],
@@ -205,16 +215,21 @@ def scrape_ticker(ticker: str, names: List[str], max_age_days: int = 90) -> List
                 continue
 
             seen_links.add(link_text)
-            articles.append({
+            raw = {
                 "titre":  title_text,
                 "date":   date_str,
                 "source": source_name,
                 "lien":   link_text,
                 "resume": summary,
-            })
+            }
+            raw["relevance"] = score_article(raw, ticker, _ALIASES)
+            articles.append(raw)
 
-    # Tri par date décroissante
-    articles.sort(key=lambda x: x.get("date") or "0000", reverse=True)
+    # Tri par pertinence DESC, date DESC
+    articles.sort(key=lambda x: (
+        x.get("relevance", {}).get("score", 0),
+        x.get("date") or "0000",
+    ), reverse=True)
     return articles[:30]  # max 30 articles par ticker
 
 def main():

@@ -1750,8 +1750,22 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
   <!-- Section B : Google News -->
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="ct" style="margin:0">📡 Presse financière — Google News</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);cursor:pointer;white-space:nowrap">
+          <input type="checkbox" id="gnews-filter-high" checked onchange="_loadGNews()" style="accent-color:var(--accent)">
+          🎯 Pertinence élevée (≥80)
+        </label>
+        <select id="gnews-filter-cat" onchange="_loadGNews()" style="padding:4px 8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
+          <option value="">Toutes catégories</option>
+          <option value="dividende">💰 Dividendes</option>
+          <option value="resultats">📊 Résultats</option>
+          <option value="ag">🏛 AG</option>
+          <option value="nomination">👤 Nominations</option>
+          <option value="cours">📈 Cours</option>
+        </select>
+      </div>
     </div>
     <div id="gnews-list" style="min-height:80px"></div>
   </div>
@@ -5427,27 +5441,70 @@ async function _loadAnncList() {
   }
 }
 
+// Badges de pertinence
+function _relevanceBadge(rel) {
+  if (!rel) return '';
+  const score = rel.score ?? 0;
+  if (score >= 80) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.3)">🎯 Très pertinent</span>`;
+  if (score >= 50) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.3)">✓ Pertinent</span>`;
+  if (score >= 30) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(107,114,128,.1);color:var(--t2);border:1px solid var(--border)">À vérifier</span>`;
+  return '';
+}
+
+function _categoryBadge(cat) {
+  const map = {
+    dividende:  '💰 Dividende',
+    resultats:  '📊 Résultats',
+    ag:         '🏛 AG',
+    nomination: '👤 Nomination',
+    cours:      '📈 Cours',
+  };
+  if (!cat || cat === 'generique' || !map[cat]) return '';
+  return `<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--t2);border:1px solid var(--border)">${map[cat]}</span>`;
+}
+
 async function _loadGNews() {
   const el = document.getElementById('gnews-list');
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Chargement...</div>';
-  const ticker = (document.getElementById('news-ticker-filter')||{}).value || '';
-  const url = ticker ? `/api/news?ticker=${ticker}&limit=20` : '/api/news/all?limit=40';
+
+  const ticker   = (document.getElementById('news-ticker-filter')||{}).value || '';
+  const highOnly = (document.getElementById('gnews-filter-high')||{}).checked ?? true;
+  const cat      = (document.getElementById('gnews-filter-cat')||{}).value || '';
+
+  const params = new URLSearchParams({ limit: 60 });
+  if (ticker)   params.set('ticker', ticker);
+  if (highOnly) params.set('min_score', '80');
+  if (cat)      params.set('category', cat);
+
   try {
-    const d = await fetch(url).then(r=>r.json());
+    const d = await fetch(`/api/news?${params}`).then(r=>r.json());
     if (d.status === 'scraping_in_progress') {
       el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);font-size:12px">⏳ Collecte des actualités en cours...<br><span style="font-size:10px;margin-top:6px;display:block">Lancez <code>python3 scripts/google_news_scraper.py</code></span></div>';
       return;
     }
-    const items = d.data || [];
+    let items = d.data || [];
+    // Articles sans relevance : inclure si filtre high non coché
+    if (!highOnly) {
+      items = (d.data || []);
+    }
     if (!items.length) {
-      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Aucun article disponible.</div>';
+      el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">
+        Aucun article${highOnly?' très pertinent':''} disponible.
+        ${highOnly?'<br><span style="font-size:10px;cursor:pointer;color:var(--accent)" onclick="document.getElementById(\'gnews-filter-high\').checked=false;_loadGNews()">Afficher tous les articles →</span>':''}
+      </div>`;
       return;
     }
-    el.innerHTML = items.map(a => `
+    el.innerHTML = items.map(a => {
+      const rel = a.relevance || {};
+      const relBadge = _relevanceBadge(rel);
+      const catBadge = _categoryBadge(rel.category);
+      return `
       <div class="gnews-card">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
           ${a.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent)">${a.ticker}</span>` : ''}
+          ${relBadge}
+          ${catBadge}
           ${_sentimentBadge(a.titre + ' ' + (a.resume||''))}
           <span style="font-size:10px;color:var(--t3);margin-left:auto">${a.date||''}</span>
           ${a.source ? `<span style="font-size:10px;color:var(--t3)">${a.source}</span>` : ''}
@@ -5456,7 +5513,9 @@ async function _loadGNews() {
           ${a.lien ? `<a href="${a.lien}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${(a.titre||'').slice(0,110)}</a>` : (a.titre||'').slice(0,110)}
         </div>
         ${a.resume ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${a.resume.slice(0,140)}</div>` : ''}
-      </div>`).join('');
+        ${rel.matched_alias?`<div style="font-size:10px;color:var(--t3);margin-top:3px">Alias confirmé : <em>${rel.matched_alias}</em></div>`:''}
+      </div>`;
+    }).join('');
   } catch(e) {
     el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
   }

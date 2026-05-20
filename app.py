@@ -1760,14 +1760,34 @@ def api_news():
     data = _load_news()
     if data is None:
         return jsonify({"status": "scraping_in_progress", "data": []})
-    ticker = request.args.get("ticker", "").upper()
-    limit  = min(int(request.args.get("limit", 10)), 100)
+    ticker    = request.args.get("ticker", "").upper()
+    min_score = int(request.args.get("min_score", 0))
+    category  = request.args.get("category", "").lower()
+    limit     = min(int(request.args.get("limit", 10)), 200)
+
     if ticker:
-        items = data.get(ticker, [])
+        items = [{**a, "ticker": ticker} for a in data.get(ticker, [])]
     else:
-        items = [a for lst in data.values() for a in lst]
-        items = sorted(items, key=lambda x: x.get("date") or "0000", reverse=True)
-    return jsonify({"status": "ok", "data": items[:limit]})
+        seen, items = set(), []
+        for tk, arts in data.items():
+            for a in arts:
+                key = a.get("lien") or a.get("titre", "")
+                if key and key not in seen:
+                    seen.add(key)
+                    items.append({**a, "ticker": tk})
+
+    # Filtres optionnels
+    if min_score > 0:
+        items = [a for a in items if (a.get("relevance") or {}).get("score", 0) >= min_score]
+    if category:
+        items = [a for a in items if (a.get("relevance") or {}).get("category", "") == category]
+
+    # Tri : pertinence DESC, date DESC
+    items.sort(key=lambda x: (
+        (x.get("relevance") or {}).get("score", 0),
+        x.get("date") or "0000",
+    ), reverse=True)
+    return jsonify({"status": "ok", "data": items[:limit], "total": len(items)})
 
 @app.route("/api/news/all")
 def api_news_all():
