@@ -5775,9 +5775,9 @@ async function loadStockReports(ticker) {
     };
 
     const rows = reports.map((r, idx) => {
-      const pdfUrl  = r.pdf_url || r.url || '';
-      const annee   = r.annee   || r.year  || '?';
-      const titre   = (r.titre  || r.title || r.type || 'Document').slice(0, 90);
+      const pdfUrl  = r.pdf_url || '';
+      const annee   = r.annee   || '?';
+      const titre   = (r.titre  || r.type  || 'Document').slice(0, 90);
       const col     = typeColor[r.type] || 'var(--t3)';
       const hasAI   = !!(r.analyse && r.analyse.verdict_investisseur);
       const safeT   = ticker.replace(/[^A-Za-z0-9]/g,'');
