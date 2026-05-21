@@ -397,6 +397,17 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .annc-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .annc-card{background:var(--bg3);border:1px solid var(--border);border-left:4px solid var(--border);border-radius:8px;padding:10px 13px 10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s}
 .annc-card:hover{border-color:var(--accent)}
+.verdict-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.verdict-badge.positif{background:rgba(16,185,129,0.15);color:#10b981}
+.verdict-badge.neutre{background:rgba(251,191,36,0.15);color:#d97706}
+.verdict-badge.negatif{background:rgba(239,68,68,0.15);color:#ef4444}
+.kpis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0}
+.kpis-grid>div{background:var(--bg3);padding:8px 12px;border-radius:6px}
+.kpis-grid span{font-size:11px;color:var(--text-2);display:block;margin-bottom:2px}
+.kpis-grid strong{font-family:var(--font-mono);font-size:12px}
+.analyse-detail{display:none;padding:14px 16px;margin:8px 0;background:var(--bg3);border-radius:8px;border:1px solid var(--border-1)}
+.analyse-detail.open{display:block}
+.analyse-detail h5{font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
 .gnews-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:8px;transition:border-color .15s}
 .gnews-card:hover{border-color:var(--accent)}
 .tab-content{display:none}
@@ -5731,6 +5742,9 @@ async function loadStockNews(ticker) {
 }
 
 // ── Onglet Rapports fiche société ──────────────────────────────────────────
+// Stockage des rapports chargés pour le toggle analyse — keyed by ticker
+window._stockReportsCache = window._stockReportsCache || {};
+
 async function loadStockReports(ticker) {
   const el = document.getElementById('stock-reports-section');
   if (!el) return;
@@ -5738,6 +5752,10 @@ async function loadStockReports(ticker) {
   try {
     const d = await fetch(`/api/reports/${ticker}`).then(r => r.json());
     const reports = d.reports || [];
+
+    // Stocker par ticker+index pour toggleStockAnalyse()
+    window._stockReportsCache[ticker] = reports;
+
     if (!reports.length) {
       el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--t2)">
         <div style="font-size:28px;margin-bottom:10px">📑</div>
@@ -5746,15 +5764,6 @@ async function loadStockReports(ticker) {
       </div>`;
       return;
     }
-
-    // Grouper par année
-    const byYear = {};
-    for (const r of reports) {
-      const y = r.annee || r.year || '?';
-      if (!byYear[y]) byYear[y] = [];
-      byYear[y].push(r);
-    }
-    const years = Object.keys(byYear).sort((a,b) => b - a);
 
     const typeColor = {
       'Rapport annuel':     '#22c55e',
@@ -5765,91 +5774,88 @@ async function loadStockReports(ticker) {
       'Document':           'var(--t3)',
     };
 
-    const verdictEmoji = {'POSITIF':'✅','NEUTRE':'⏳','NEGATIF':'⚠️'};
-    const _KPI_LABELS = [
-      {key:'chiffre_affaires',     label:'💼 Chiffre d\'affaires'},
-      {key:'ebitda',               label:'📊 EBITDA'},
-      {key:'dette_nette',          label:'🏦 Dette nette'},
-      {key:'dividende_par_action', label:'💰 Div / action'},
-      {key:'capitaux_propres',     label:'🏛 Capitaux propres'},
-    ];
+    const rows = reports.map((r, idx) => {
+      const pdfUrl  = r.pdf_url || r.url || '';
+      const annee   = r.annee   || r.year  || '?';
+      const titre   = (r.titre  || r.title || r.type || 'Document').slice(0, 90);
+      const col     = typeColor[r.type] || 'var(--t3)';
+      const hasAI   = !!(r.analyse && r.analyse.verdict_investisseur);
+      const safeT   = ticker.replace(/[^A-Za-z0-9]/g,'');
 
-    const html = years.map(y => {
-      const reps = byYear[y];
-      const rows = reps.map(r => {
-        const url  = r.pdf_url || r.url || '';
-        const col  = typeColor[r.type] || 'var(--t3)';
-        const titre = (r.titre || r.title || r.type || 'Document').slice(0, 90);
-        const an = r.analyse;
-
-        let aiBlock = '';
-        if (an && an.verdict_investisseur) {
-          const vrd = an.verdict_investisseur;
-          const vc = vrd === 'POSITIF' ? 'var(--green)' : vrd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
-          const kpis = an.kpis || {};
-          const kpiHtml = _KPI_LABELS
-            .map(({key, label}) => {
-              const v = kpis[key];
-              if (!v || v.valeur == null) return `<div style="background:var(--bg3);border-radius:6px;padding:6px 8px;opacity:.5">
-                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${label}</div>
-                <div style="font-size:11px;font-weight:700">—</div></div>`;
-              const varStyle = v.variation && v.variation.startsWith('+') ? 'color:var(--green)'
-                             : v.variation && v.variation.startsWith('-') ? 'color:var(--red)' : '';
-              return `<div style="background:var(--bg3);border-radius:6px;padding:6px 8px">
-                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${label}</div>
-                <div style="font-size:11px;font-weight:700">${v.valeur} <span style="font-size:9px;color:var(--t3)">${v.unite||''}</span></div>
-                ${v.variation ? `<div style="font-size:9px;${varStyle}">${v.variation}</div>` : ''}
-              </div>`;
-            }).join('');
-
-          const pts = (an.points_cles || []).slice(0, 3)
-            .map(p => `<li style="margin-bottom:3px">${p}</li>`).join('');
-          const risks = (an.risques || []).slice(0, 2)
-            .map(p => `<li style="color:#f97316;margin-bottom:3px">${p}</li>`).join('');
-
-          aiBlock = `
-            <details style="margin-top:8px;border:1px solid var(--border);border-radius:8px;padding:0">
-              <summary style="padding:7px 12px;cursor:pointer;font-size:11px;font-weight:600;list-style:none;display:flex;align-items:center;gap:6px;user-select:none">
-                🤖 Analyse IA
-                <span style="padding:2px 8px;border-radius:10px;background:${vc}22;color:${vc};font-size:10px;font-weight:700">${verdictEmoji[an.verdict_investisseur]||''} ${an.verdict_investisseur}</span>
-              </summary>
-              <div style="padding:10px 12px 12px;border-top:1px solid var(--border)">
-                ${an.resume ? `<div style="font-size:11px;color:var(--t2);margin-bottom:10px;line-height:1.6;font-style:italic">"${an.resume}"</div>` : ''}
-                ${kpiHtml ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">${kpiHtml}</div>` : ''}
-                ${pts ? `<div style="font-size:11px;margin-bottom:6px"><strong style="color:var(--text)">Points clés</strong><ul style="margin:4px 0 0;padding-left:14px;color:var(--t2);line-height:1.6">${pts}</ul></div>` : ''}
-                ${risks ? `<div style="font-size:11px"><strong style="color:var(--text)">Risques</strong><ul style="margin:4px 0 0;padding-left:14px;line-height:1.6">${risks}</ul></div>` : ''}
-              </div>
-            </details>`;
-        }
-
-        return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
-          <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
-            <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${col}22;color:${col};border:1px solid ${col}22;white-space:nowrap">${r.type||'Document'}</span>
-            <span style="font-size:11px;flex:1;font-weight:600;line-height:1.4">${titre}</span>
-            ${url ? `<a href="${url}" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0">📥 PDF</a>` : ''}
-          </div>
-          ${r.date ? `<div style="font-size:10px;color:var(--t3);margin-top:4px">${r.date}</div>` : ''}
-          ${aiBlock}
-        </div>`;
-      }).join('');
-
-      return `<div style="margin-bottom:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--text);padding:6px 0;border-bottom:2px solid var(--border);margin-bottom:8px">${y}</div>
-        ${rows}
+      return `<div style="border:1px solid var(--border-1);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${col}22;color:${col};border:1px solid ${col}22;white-space:nowrap;flex-shrink:0">${r.type||'Document'}</span>
+          <span style="font-size:10px;font-weight:700;color:var(--text-2);flex-shrink:0">${annee}</span>
+          <span style="font-size:11px;flex:1;font-weight:600;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis">${titre}</span>
+          ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0;text-decoration:none">📥 PDF</a>` : ''}
+          ${hasAI ? `<button onclick="toggleStockAnalyse('${safeT}',${idx})" style="font-size:10px;padding:2px 10px;border-radius:20px;border:1px solid var(--border-1);background:transparent;color:var(--accent);cursor:pointer;white-space:nowrap;flex-shrink:0">🤖 Analyser</button>` : ''}
+        </div>
+        ${r.date ? `<div style="font-size:10px;color:var(--text-3);margin-top:4px">${r.date}</div>` : ''}
+        <div class="analyse-detail" id="stock-analyse-${safeT}-${idx}"></div>
       </div>`;
     }).join('');
 
-    const total = reports.length;
-    const withAI = reports.filter(r => r.analyse?.verdict_investisseur).length;
+    const total  = reports.length;
+    const withAI = reports.filter(r => r.analyse && r.analyse.verdict_investisseur).length;
     el.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px">
-        <div style="font-size:11px;color:var(--t2)">${total} rapport${total>1?'s':''} · ${withAI} analysé${withAI>1?'s':''} par IA</div>
-        ${withAI < total ? `<div style="font-size:10px;color:var(--t3)">Analyses générées automatiquement chaque lundi 2h</div>` : ''}
+        <div style="font-size:11px;color:var(--text-2)">${total} rapport${total>1?'s':''} · ${withAI} analysé${withAI>1?'s':''} par IA</div>
+        ${withAI < total ? `<div style="font-size:10px;color:var(--text-3)">Analyses générées automatiquement chaque lundi 2h</div>` : ''}
       </div>
-      ${html}`;
+      ${rows}`;
   } catch(e) {
     if (el) el.innerHTML = '<div style="color:var(--red);font-size:11px">Erreur de chargement des rapports.</div>';
   }
+}
+
+function toggleStockAnalyse(ticker, idx) {
+  const reports = window._stockReportsCache[ticker] || [];
+  const r = reports[idx];
+  const el = document.getElementById(`stock-analyse-${ticker}-${idx}`);
+  if (!el) return;
+
+  // Toggle close if already open
+  if (el.classList.contains('open')) { el.classList.remove('open'); return; }
+
+  const an = r && r.analyse;
+  if (!an || !an.verdict_investisseur) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-2);padding:4px 0">⏳ Analyse en cours — revenez après le prochain batch (lundi 2h).</div>';
+    el.classList.add('open');
+    return;
+  }
+
+  const vrd   = an.verdict_investisseur.toLowerCase();
+  const vIcon = vrd === 'positif' ? '✅' : vrd === 'neutre' ? '⏳' : '⚠️';
+  const kpis  = an.kpis || {};
+  const _KPI  = [
+    {key:'chiffre_affaires',     label:"💼 Chiffre d'affaires"},
+    {key:'ebitda',               label:'📊 EBITDA'},
+    {key:'dette_nette',          label:'🏦 Dette nette'},
+    {key:'dividende_par_action', label:'💰 Div / action'},
+    {key:'capitaux_propres',     label:'🏛 Capitaux propres'},
+  ];
+
+  const kpiHtml = _KPI.map(({key, label}) => {
+    const v = kpis[key];
+    const val = v && v.valeur != null
+      ? `${v.valeur} <span style="font-size:9px;color:var(--text-3)">${v.unite||''}</span>${v.variation ? ` <span style="font-size:9px;color:${v.variation.startsWith('+')?'var(--green)':'var(--red)'}">${v.variation}</span>` : ''}`
+      : '—';
+    return `<div><span>${label}</span><strong>${val}</strong></div>`;
+  }).join('');
+
+  const pts  = (an.points_cles || []).map(p => `<li>${p}</li>`).join('');
+  const risks= (an.risques     || []).map(p => `<li>${p}</li>`).join('');
+  const persp= (an.perspectives|| []).map(p => `<li>${p}</li>`).join('');
+
+  el.innerHTML = `
+    <span class="verdict-badge ${vrd}">${vIcon} ${an.verdict_investisseur}</span>
+    ${an.resume ? `<p style="font-size:12px;color:var(--text-2);line-height:1.6;margin:6px 0 10px">${an.resume}</p>` : ''}
+    <h5>📊 Indicateurs financiers</h5>
+    <div class="kpis-grid">${kpiHtml}</div>
+    ${pts  ? `<h5>🎯 Points clés</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:var(--text-2);line-height:1.8">${pts}</ul>` : ''}
+    ${risks ? `<h5>⚠️ Risques</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:#f97316;line-height:1.8">${risks}</ul>` : ''}
+    ${persp ? `<h5>🔮 Perspectives</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:var(--text-2);line-height:1.8">${persp}</ul>` : ''}`;
+  el.classList.add('open');
 }
 
 // ── Ratings + Fundamentals ─────────────────────────────────────────────────
