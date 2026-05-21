@@ -14,11 +14,12 @@ import subprocess
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
 try:
-    from auto_scheduler import start_scheduler, get_scheduler_status
+    from auto_scheduler import start_scheduler, get_scheduler_status, get_scheduler
 except Exception as _e:
     print(f"auto_scheduler import error: {_e}")
     def start_scheduler(): pass
     def get_scheduler_status(): return {}
+    def get_scheduler(): return None
 from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
@@ -1487,18 +1488,56 @@ def api_scheduler_status():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route("/api/scheduler/jobs")
+def api_scheduler_jobs():
+    try:
+        sched = get_scheduler()
+        jobs = []
+        if sched and sched.running:
+            for job in sched.get_jobs():
+                jobs.append({
+                    "id": job.id,
+                    "name": job.name or job.id,
+                    "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+                    "trigger": str(job.trigger),
+                })
+        hist_path = os.path.join(DATA_DIR, "scheduler_history.json")
+        history = {}
+        if os.path.exists(hist_path):
+            with open(hist_path) as f:
+                history = json.load(f)
+        for j in jobs:
+            last = history.get(j["id"])
+            if last:
+                j["last_run"] = last.get("started_at")
+                j["last_status"] = last.get("status")
+                j["last_duration_s"] = last.get("duration_s")
+                j["last_error"] = last.get("error")
+        return jsonify({"jobs": jobs, "now": datetime.now().isoformat()})
+    except Exception as e:
+        return jsonify({"error": str(e), "jobs": []}), 500
+
 @app.route("/api/scheduler/run/<job_id>", methods=["POST"])
 def api_scheduler_run(job_id):
-    jobs = {
-        "news":    lambda: __import__("company_scraper").run_company_scraper(),
-        "ranking": lambda: __import__("live_ranker").compute_live_ranking(trigger="manual"),
-        "history": lambda: __import__("price_history_builder").append_live_prices(),
-    }
-    if job_id not in jobs:
-        return jsonify({"error": "Job inconnu"}), 404
     try:
-        result = jobs[job_id]()
-        return jsonify({"status": "ok", "job": job_id, "result": str(result)})
+        sched = get_scheduler()
+        if sched and sched.running:
+            job = sched.get_job(job_id)
+            if job:
+                t = threading.Thread(target=job.func, daemon=True)
+                t.start()
+                return jsonify({"ok": True, "message": f"Job {job_id} lancé"})
+        # Fallback legacy jobs
+        legacy = {
+            "news":    lambda: __import__("company_scraper").run_company_scraper(),
+            "ranking": lambda: __import__("live_ranker").compute_live_ranking(trigger="manual"),
+            "history": lambda: __import__("price_history_builder").append_live_prices(),
+        }
+        if job_id in legacy:
+            t = threading.Thread(target=legacy[job_id], daemon=True)
+            t.start()
+            return jsonify({"ok": True, "message": f"Job {job_id} lancé"})
+        return jsonify({"error": "Job inconnu"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -1826,6 +1865,26 @@ def api_announcements():
     if ticker:
         items = [i for i in items if (i.get("ticker") or "").upper() == ticker]
     items = sorted(items, key=lambda x: x.get("date") or "0000", reverse=True)
+    # Enrichir avec résumés IA si disponibles
+    import hashlib as _hl
+    summaries_path = os.path.join(DATA_DIR, "announcements_summaries.json")
+    summaries = {}
+    if os.path.exists(summaries_path):
+        try:
+            with open(summaries_path, encoding="utf-8") as f:
+                summaries = json.load(f)
+        except Exception:
+            pass
+    if summaries:
+        for ann in items:
+            pdf_url = ann.get("source_url") or ann.get("pdf_url") or ann.get("lien")
+            if pdf_url:
+                ann_id = _hl.md5(pdf_url.encode()).hexdigest()[:12]
+                sm = summaries.get(ann_id)
+                if sm:
+                    ann["summary"] = sm.get("summary")
+                    ann["sentiment"] = sm.get("sentiment")
+                    ann["sentiment_reason"] = sm.get("sentiment_reason")
     return jsonify({"status": "ok", "data": items[:limit], "total": len(items)})
 
 @app.route("/api/news")

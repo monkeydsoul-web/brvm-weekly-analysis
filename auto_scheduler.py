@@ -12,9 +12,11 @@ Jobs:
   - Dimanches 23h      : analyse IA PDF batch (legacy)
   - Dimanches 23h30    : scrape exhaustif rapports BRVM (nouveau pipeline)
   - Lundis 2h          : analyse IA rapports (nouveau pipeline)
+  - Lundis 4h          : résumés IA annonces BRVM
 """
-import logging, os, time
+import logging, os, time, json
 from datetime import datetime
+from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
@@ -22,7 +24,37 @@ import warnings
 warnings.filterwarnings('ignore')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_HIST_PATH = Path(BASE_DIR) / "data" / "scheduler_history.json"
 logger = logging.getLogger(__name__)
+
+
+def wrap_job(job_id: str, fn):
+    """Wraps a job function to log start/end/error in scheduler_history.json."""
+    def wrapped():
+        start = time.time()
+        status = "success"
+        err = None
+        try:
+            fn()
+        except Exception as e:
+            status = "error"
+            err = str(e)[:500]
+            logger.error(f"Job {job_id} failed: {e}")
+        finally:
+            try:
+                hist = json.loads(_HIST_PATH.read_text()) if _HIST_PATH.exists() else {}
+                hist[job_id] = {
+                    "started_at": datetime.fromtimestamp(start).isoformat(),
+                    "duration_s": round(time.time() - start, 1),
+                    "status": status,
+                    "error": err,
+                }
+                _HIST_PATH.write_text(json.dumps(hist, indent=2))
+            except Exception:
+                pass
+    wrapped.__name__ = fn.__name__
+    return wrapped
+
 
 # ── Jobs ──────────────────────────────────────────────────────────────────
 
@@ -140,6 +172,21 @@ def job_reports_analyze():
     except Exception as e:
         logger.error(f"job_reports_analyze: {e}")
 
+def job_summarize_announcements():
+    """Résumés IA des nouvelles annonces BRVM (lundi 4h)."""
+    try:
+        import subprocess, sys
+        script = os.path.join(BASE_DIR, "scripts", "announcements_summarizer.py")
+        result = subprocess.run(
+            [sys.executable, script, "--max-cost", "2.0"],
+            capture_output=True, text=True, timeout=3600,
+            input="\n",  # auto-confirm le prompt interactif
+        )
+        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+        logger.info(f"Announcements summarize: {lines[-1] if lines else 'OK'}")
+    except Exception as e:
+        logger.error(f"job_summarize_announcements: {e}")
+
 def job_market_data():
     """Met à jour les données de marché (indices BRVM)."""
     try:
@@ -176,60 +223,70 @@ def start_scheduler():
     if sched.running:
         return sched
     
-    # Ranking live toutes les 5min (heures de marché 9h-16h en semaine)
-    sched.add_job(job_live_ranking, IntervalTrigger(minutes=5),
+    # Ranking live toutes les 5min
+    sched.add_job(wrap_job('live_ranking', job_live_ranking), IntervalTrigger(minutes=5),
                   id='live_ranking', replace_existing=True,
                   name='Ranking live 5min')
-    
+
     # News RSS toutes les heures
-    sched.add_job(job_news_rss, IntervalTrigger(hours=1),
+    sched.add_job(wrap_job('news_rss', job_news_rss), IntervalTrigger(hours=1),
                   id='news_rss', replace_existing=True,
                   name='News RSS 1h')
-    
+
     # Price history quotidien à 18h
-    sched.add_job(job_price_history, CronTrigger(hour=18, minute=0),
+    sched.add_job(wrap_job('price_history', job_price_history), CronTrigger(hour=18, minute=0),
                   id='price_history', replace_existing=True,
                   name='Price history 18h')
 
     # BOC quotidien à 18h30
-    sched.add_job(job_boc, CronTrigger(hour=18, minute=30),
+    sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=18, minute=30),
                   id='boc_scrape', replace_existing=True,
                   name='BOC scrape 18h30')
-    
+
     # Market data toutes les 15min
-    sched.add_job(job_market_data, IntervalTrigger(minutes=15),
+    sched.add_job(wrap_job('market_data', job_market_data), IntervalTrigger(minutes=15),
                   id='market_data', replace_existing=True,
                   name='Market data 15min')
 
     # Annonces BRVM officielles tous les jours à 8h
-    sched.add_job(job_brvm_announcements, CronTrigger(hour=8, minute=0),
+    sched.add_job(wrap_job('brvm_announcements', job_brvm_announcements),
+                  CronTrigger(hour=8, minute=0),
                   id='brvm_announcements', replace_existing=True,
                   name='Annonces BRVM 8h')
 
     # Google News toutes les 4h
-    sched.add_job(job_google_news, IntervalTrigger(hours=4),
+    sched.add_job(wrap_job('google_news', job_google_news), IntervalTrigger(hours=4),
                   id='google_news', replace_existing=True,
                   name='Google News 4h')
 
-    # Scrape rapports PDF à 22h
-    sched.add_job(job_scrape_reports, CronTrigger(hour=22, minute=0),
+    # Scrape rapports PDF à 22h (legacy)
+    sched.add_job(wrap_job('scrape_reports', job_scrape_reports), CronTrigger(hour=22, minute=0),
                   id='scrape_reports', replace_existing=True,
                   name='Scrape rapports 22h')
-    
-    # Analyse IA PDF dimanche à 23h
-    sched.add_job(job_ai_analysis, CronTrigger(day_of_week='sun', hour=23, minute=0),
+
+    # Analyse IA PDF dimanche à 23h (legacy)
+    sched.add_job(wrap_job('ai_analysis', job_ai_analysis),
+                  CronTrigger(day_of_week='sun', hour=23, minute=0),
                   id='ai_analysis', replace_existing=True,
                   name='Analyse IA PDF dim 23h')
 
     # Scrape exhaustif rapports BRVM dimanche à 23h30
-    sched.add_job(job_reports_full_scrape, CronTrigger(day_of_week='sun', hour=23, minute=30),
+    sched.add_job(wrap_job('reports_full_scrape', job_reports_full_scrape),
+                  CronTrigger(day_of_week='sun', hour=23, minute=30),
                   id='reports_full_scrape', replace_existing=True,
                   name='Reports scrape dim 23h30')
 
     # Analyse IA rapports (nouveau pipeline) lundi à 2h
-    sched.add_job(job_reports_analyze, CronTrigger(day_of_week='mon', hour=2, minute=0),
+    sched.add_job(wrap_job('reports_analyze', job_reports_analyze),
+                  CronTrigger(day_of_week='mon', hour=2, minute=0),
                   id='reports_analyze', replace_existing=True,
                   name='Reports analyze lun 2h')
+
+    # Résumés IA annonces BRVM lundi à 4h
+    sched.add_job(wrap_job('summarize_announcements', job_summarize_announcements),
+                  CronTrigger(day_of_week='mon', hour=4, minute=0),
+                  id='summarize_announcements', replace_existing=True,
+                  name='Résumés annonces lun 4h')
 
     sched.start()
     logger.info("Scheduler démarré — jobs actifs:")
