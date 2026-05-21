@@ -30,16 +30,15 @@ PDF_DIR.mkdir(parents=True, exist_ok=True)
 BASE = "https://www.brvm.org"
 
 SECTIONS = [
+    # Section principale (seule source active sur brvm.org)
     ("rapports-societes-cotees",
      "/fr/rapports-societes-cotees?field_secteur_emeteur_tid=All&page="),
-    ("rapports-annuels",
-     "/fr/type-document/rapports-annuels?page="),
-    ("rapports-semestriels",
-     "/fr/type-document/rapports-semestriels?page="),
-    ("rapports-trimestriels",
-     "/fr/type-document/rapports-trimestriels?page="),
-    ("rapport-brvm",
-     "/fr/type-document/rapport-brvm?page="),
+    # Les 4 sections /type-document/* ne renvoient aucun contenu (Drupal views vides)
+    # confirmé par diagnose_brvm_sections.py le 2026-05-21 → conservées en commentaire
+    # ("rapports-annuels",     "/fr/type-document/rapports-annuels?page="),
+    # ("rapports-semestriels", "/fr/type-document/rapports-semestriels?page="),
+    # ("rapports-trimestriels","/fr/type-document/rapports-trimestriels?page="),
+    # ("rapport-brvm",         "/fr/type-document/rapport-brvm?page="),
 ]
 
 HEADERS = {
@@ -353,7 +352,7 @@ def download_pdf(pdf_url: str, ticker: Optional[str], annee: Optional[int],
 
 # ── Scraping principal ─────────────────────────────────────────────────────────
 
-def scrape_all(max_pages: int = 20, skip_download: bool = False) -> list[dict]:
+def scrape_all(max_pages: int = 50, skip_download: bool = False) -> list[dict]:
     """Scrape toutes les sections, parse les détails, télécharge les PDFs."""
     all_entries: list[dict] = []
 
@@ -443,8 +442,8 @@ def scrape_all(max_pages: int = 20, skip_download: bool = False) -> list[dict]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scraper exhaustif rapports BRVM")
-    parser.add_argument("--max-pages", type=int, default=20,
-                        help="Nombre max de pages par section (défaut: 20)")
+    parser.add_argument("--max-pages", type=int, default=50,
+                        help="Nombre max de pages par section (défaut: 50)")
     parser.add_argument("--skip-download", action="store_true",
                         help="Ne pas télécharger les PDFs (index seulement)")
     args = parser.parse_args()
