@@ -85,11 +85,16 @@ def _get(url: str):
 # ─── Parsing PDF ───────────────────────────────────────────────────────────────
 
 def _parse_num(s):
-    """Convertit '6 875' ou '6,875' → float. Renvoie None si impossible."""
+    """Convertit '6 875', '6,875' (milliers) ou '6.875' → float. Renvoie None si impossible."""
     if not s or s in ("NC","SP","Val-T","Ex-d","Ex-c","Ex-coupon","","Moy."):
         return None
     try:
-        return float(str(s).replace(" ","").replace(",","."))
+        s2 = str(s).strip().replace(" ", "")
+        # "28,850" or "1,234,567" → comma is thousands separator (3 digits after each comma)
+        if re.match(r'^\d{1,3}(,\d{3})+$', s2):
+            return float(s2.replace(",", ""))
+        # Otherwise comma is decimal separator (French locale)
+        return float(s2.replace(",", "."))
     except ValueError:
         return None
 
