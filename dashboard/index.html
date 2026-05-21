@@ -4905,6 +4905,7 @@ async function showStock(ticker){
         <div class="stock-tab" data-tab="history" onclick="_stockTab('history');_loadStockHistory('${ticker}')">📅 Historique 30j</div>
         <div class="stock-tab" data-tab="aianalysis" onclick="_stockTab('aianalysis');_loadStockAI('${ticker}')">🤖 Analyse IA complète</div>
         <div class="stock-tab" data-tab="news" onclick="_stockTab('news');loadStockNews('${ticker}')">📰 Actualités</div>
+        <div class="stock-tab" data-tab="reports" onclick="_stockTab('reports');loadStockReports('${ticker}')">📑 Rapports</div>
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
@@ -5008,6 +5009,12 @@ async function showStock(ticker){
         <div class="card">
           <div class="ct" style="margin-bottom:10px">📰 Annonces &amp; Presse financière</div>
           <div id="stock-news-section"><p style="font-size:12px;color:var(--t2)">Chargement...</p></div>
+        </div>
+      </div>
+      <!-- ── Onglet Rapports ─────────────────────────────────────────────── -->
+      <div id="stab-reports" class="stock-tab-panel">
+        <div id="stock-reports-section">
+          <p style="font-size:12px;color:var(--t2);padding:12px 0">Chargement des rapports...</p>
         </div>
       </div>`;
     // Charts dans la fiche
@@ -5626,6 +5633,119 @@ async function loadStockNews(ticker) {
     el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div style="color:var(--t3);font-size:11px">Erreur de chargement.</div>';
+  }
+}
+
+// ── Onglet Rapports fiche société ──────────────────────────────────────────
+async function loadStockReports(ticker) {
+  const el = document.getElementById('stock-reports-section');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--t2);font-size:11px;padding:12px 0">Chargement des rapports...</div>';
+  try {
+    const d = await fetch(`/api/reports/${ticker}`).then(r => r.json());
+    const reports = d.reports || [];
+    if (!reports.length) {
+      el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--t2)">
+        <div style="font-size:28px;margin-bottom:10px">📑</div>
+        <div style="font-weight:600;margin-bottom:6px">Aucun rapport disponible</div>
+        <div style="font-size:11px;color:var(--t3)">Les rapports apparaîtront ici après le prochain scrape (dimanche 23h).</div>
+      </div>`;
+      return;
+    }
+
+    // Grouper par année
+    const byYear = {};
+    for (const r of reports) {
+      const y = r.annee || r.year || '?';
+      if (!byYear[y]) byYear[y] = [];
+      byYear[y].push(r);
+    }
+    const years = Object.keys(byYear).sort((a,b) => b - a);
+
+    const typeColor = {
+      'Rapport annuel':     '#22c55e',
+      'Etats financiers':   'var(--amber)',
+      'Rapport semestriel': 'var(--blue)',
+      'Rapport trimestriel':'#a78bfa',
+      'Rapport BRVM':       '#94a3b8',
+      'Document':           'var(--t3)',
+    };
+
+    const verdictEmoji = {'POSITIF':'✅','NEUTRE':'⚠️','NEGATIF':'❌'};
+
+    const html = years.map(y => {
+      const reps = byYear[y];
+      const rows = reps.map(r => {
+        const url  = r.pdf_url || r.url || '';
+        const col  = typeColor[r.type] || 'var(--t3)';
+        const titre = (r.titre || r.title || r.type || 'Document').slice(0, 90);
+        const an = r.analyse;
+
+        let aiBlock = '';
+        if (an && an.verdict_investisseur) {
+          const vc = an.verdict_investisseur === 'POSITIF' ? 'var(--green)'
+                   : an.verdict_investisseur === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
+          const kpis = an.kpis || {};
+          const kpiHtml = Object.entries(kpis)
+            .filter(([, v]) => v && v.valeur != null)
+            .slice(0, 6)
+            .map(([k, v]) => {
+              const varStyle = v.variation && v.variation.startsWith('+') ? 'color:var(--green)'
+                             : v.variation && v.variation.startsWith('-') ? 'color:var(--red)' : '';
+              return `<div style="background:var(--bg3);border-radius:6px;padding:6px 8px">
+                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${k.replace(/_/g,' ')}</div>
+                <div style="font-size:11px;font-weight:700">${v.valeur} <span style="font-size:9px;color:var(--t3)">${v.unite||''}</span></div>
+                ${v.variation ? `<div style="font-size:9px;${varStyle}">${v.variation}</div>` : ''}
+              </div>`;
+            }).join('');
+
+          const pts = (an.points_cles || []).slice(0, 3)
+            .map(p => `<li style="margin-bottom:3px">${p}</li>`).join('');
+          const risks = (an.risques || []).slice(0, 2)
+            .map(p => `<li style="color:#f97316;margin-bottom:3px">${p}</li>`).join('');
+
+          aiBlock = `
+            <details style="margin-top:8px;border:1px solid var(--border);border-radius:8px;padding:0">
+              <summary style="padding:7px 12px;cursor:pointer;font-size:11px;font-weight:600;list-style:none;display:flex;align-items:center;gap:6px;user-select:none">
+                🤖 Analyse IA
+                <span style="padding:2px 8px;border-radius:10px;background:${vc}22;color:${vc};font-size:10px;font-weight:700">${verdictEmoji[an.verdict_investisseur]||''} ${an.verdict_investisseur}</span>
+              </summary>
+              <div style="padding:10px 12px 12px;border-top:1px solid var(--border)">
+                ${an.resume ? `<div style="font-size:11px;color:var(--t2);margin-bottom:10px;line-height:1.6;font-style:italic">"${an.resume}"</div>` : ''}
+                ${kpiHtml ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">${kpiHtml}</div>` : ''}
+                ${pts ? `<div style="font-size:11px;margin-bottom:6px"><strong style="color:var(--text)">Points clés</strong><ul style="margin:4px 0 0;padding-left:14px;color:var(--t2);line-height:1.6">${pts}</ul></div>` : ''}
+                ${risks ? `<div style="font-size:11px"><strong style="color:var(--text)">Risques</strong><ul style="margin:4px 0 0;padding-left:14px;line-height:1.6">${risks}</ul></div>` : ''}
+              </div>
+            </details>`;
+        }
+
+        return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+          <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
+            <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${col}22;color:${col};border:1px solid ${col}22;white-space:nowrap">${r.type||'Document'}</span>
+            <span style="font-size:11px;flex:1;font-weight:600;line-height:1.4">${titre}</span>
+            ${url ? `<a href="${url}" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0">📥 PDF</a>` : ''}
+          </div>
+          ${r.date ? `<div style="font-size:10px;color:var(--t3);margin-top:4px">${r.date}</div>` : ''}
+          ${aiBlock}
+        </div>`;
+      }).join('');
+
+      return `<div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text);padding:6px 0;border-bottom:2px solid var(--border);margin-bottom:8px">${y}</div>
+        ${rows}
+      </div>`;
+    }).join('');
+
+    const total = reports.length;
+    const withAI = reports.filter(r => r.analyse?.verdict_investisseur).length;
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:11px;color:var(--t2)">${total} rapport${total>1?'s':''} · ${withAI} analysé${withAI>1?'s':''} par IA</div>
+        ${withAI < total ? `<div style="font-size:10px;color:var(--t3)">Analyses générées automatiquement chaque lundi 2h</div>` : ''}
+      </div>
+      ${html}`;
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="color:var(--red);font-size:11px">Erreur de chargement des rapports.</div>';
   }
 }
 

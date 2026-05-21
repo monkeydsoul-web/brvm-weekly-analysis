@@ -712,16 +712,89 @@ def serve_previsions_js():
     return send_from_directory("dashboard", "previsions.js", mimetype="application/javascript")
 
 
+_REPORTS_FULL_PATH   = os.path.join(DATA_DIR, "reports_full.json")
+_ANALYSES_INDEX_PATH = os.path.join(DATA_DIR, "analyses_reports.json")
+_PDF_ANALYSES_DIR    = os.path.join(DATA_DIR, "pdf_analyses")
+
+def _load_analyses_index():
+    """Charge l'index des analyses IA (URL-hash → analyse)."""
+    if os.path.exists(_ANALYSES_INDEX_PATH):
+        try:
+            with open(_ANALYSES_INDEX_PATH, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    # Reconstruire depuis les fichiers individuels
+    index = {}
+    if os.path.isdir(_PDF_ANALYSES_DIR):
+        for fname in os.listdir(_PDF_ANALYSES_DIR):
+            if not fname.endswith(".json"):
+                continue
+            try:
+                with open(os.path.join(_PDF_ANALYSES_DIR, fname), encoding="utf-8") as f:
+                    d = json.load(f)
+                if d.get("status") == "ok" and d.get("url"):
+                    import hashlib
+                    key = hashlib.md5(d["url"].encode()).hexdigest()[:12]
+                    index[key] = d
+            except Exception:
+                pass
+    return index
+
 @app.route("/api/reports/<ticker>")
 def api_reports(ticker):
     ticker = ticker.upper()
-    force = request.args.get("refresh", "0") == "1"
-    try:
-        from reports_scraper import get_reports
-        reports = get_reports(ticker, force_refresh=force)
-        return jsonify({"ticker": ticker, "reports": reports, "total": len(reports)})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    reports = []
+
+    # Source 1 : reports_full.json (scraper exhaustif sections)
+    if os.path.exists(_REPORTS_FULL_PATH):
+        try:
+            with open(_REPORTS_FULL_PATH, encoding="utf-8") as f:
+                all_reports = json.load(f)
+            reports = [r for r in all_reports if (r.get("ticker") or "").upper() == ticker]
+        except Exception:
+            pass
+
+    # Source 2 : reports_cache.json (scraper per-ticker legacy) — complément
+    legacy_cache = os.path.join(DATA_DIR, "reports_cache.json")
+    if os.path.exists(legacy_cache):
+        try:
+            with open(legacy_cache, encoding="utf-8") as f:
+                cache = json.load(f)
+            legacy = cache.get("reports", {}).get(ticker, [])
+            existing_urls = {r.get("pdf_url") or r.get("url") for r in reports}
+            for r in legacy:
+                url = r.get("url") or r.get("pdf_url") or ""
+                if url not in existing_urls:
+                    reports.append({
+                        "titre": r.get("title", ""),
+                        "ticker": ticker,
+                        "annee": r.get("year"),
+                        "date": r.get("date"),
+                        "type": r.get("type", "Document"),
+                        "pdf_url": url,
+                        "section": "legacy",
+                        "pdf_path": None,
+                    })
+                    existing_urls.add(url)
+        except Exception:
+            pass
+
+    # Enrichir avec analyses IA
+    if reports:
+        import hashlib
+        analyses = _load_analyses_index()
+        for r in reports:
+            url = r.get("pdf_url") or r.get("url") or ""
+            if url:
+                key = hashlib.md5(url.encode()).hexdigest()[:12]
+                r["analyse"] = analyses.get(key)
+
+    reports.sort(
+        key=lambda r: (r.get("annee") or 0, r.get("date") or ""),
+        reverse=True,
+    )
+    return jsonify({"ticker": ticker, "reports": reports, "total": len(reports)})
 
 
 @app.route("/api/analyze-report", methods=["POST"])

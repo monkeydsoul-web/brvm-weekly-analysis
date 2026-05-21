@@ -1,12 +1,17 @@
 """
 auto_scheduler.py — Scheduler automatique BRVM Dashboard
 Jobs:
-  - Toutes les 5min  : prix live + ranking
-  - Toutes les heures: actualités RSS
-  - Tous les jours 7h: price_history + actualités entreprises
-  - Tous les jours 22h: rapports PDF scrape
-  - Tous les dimanches 23h: analyse IA PDF batch
-  - Tous les lundis 6h: bulk_analyzer sociétés manquantes
+  - Toutes les 5min    : prix live + ranking
+  - Toutes les heures  : actualités RSS
+  - Toutes les 4h      : Google News (47 tickers)
+  - Toutes les 15min   : market data indices
+  - Tous les jours 8h  : annonces BRVM officielles
+  - Tous les jours 18h : price_history
+  - Tous les jours 18h30: BOC scrape
+  - Tous les jours 22h : rapports PDF scrape (legacy)
+  - Dimanches 23h      : analyse IA PDF batch (legacy)
+  - Dimanches 23h30    : scrape exhaustif rapports BRVM (nouveau pipeline)
+  - Lundis 2h          : analyse IA rapports (nouveau pipeline)
 """
 import logging, os, time
 from datetime import datetime
@@ -107,6 +112,34 @@ def job_google_news():
     except Exception as e:
         logger.error(f"job_google_news: {e}")
 
+def job_reports_full_scrape():
+    """Scrape exhaustif rapports BRVM (dimanche 23h30)."""
+    try:
+        import subprocess, sys
+        script = os.path.join(BASE_DIR, "scripts", "brvm_reports_full_scraper.py")
+        result = subprocess.run(
+            [sys.executable, script, "--max-pages", "20"],
+            capture_output=True, text=True, timeout=3600
+        )
+        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+        logger.info(f"Reports scrape: {lines[-1] if lines else 'OK'}")
+    except Exception as e:
+        logger.error(f"job_reports_full_scrape: {e}")
+
+def job_reports_analyze():
+    """Analyse IA des rapports (lundi 2h)."""
+    try:
+        import subprocess, sys
+        script = os.path.join(BASE_DIR, "scripts", "analyze_all_reports.py")
+        result = subprocess.run(
+            [sys.executable, script, "--max", "10"],
+            capture_output=True, text=True, timeout=3600
+        )
+        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+        logger.info(f"Reports analyze: {lines[-1] if lines else 'OK'}")
+    except Exception as e:
+        logger.error(f"job_reports_analyze: {e}")
+
 def job_market_data():
     """Met à jour les données de marché (indices BRVM)."""
     try:
@@ -187,6 +220,16 @@ def start_scheduler():
     sched.add_job(job_ai_analysis, CronTrigger(day_of_week='sun', hour=23, minute=0),
                   id='ai_analysis', replace_existing=True,
                   name='Analyse IA PDF dim 23h')
+
+    # Scrape exhaustif rapports BRVM dimanche à 23h30
+    sched.add_job(job_reports_full_scrape, CronTrigger(day_of_week='sun', hour=23, minute=30),
+                  id='reports_full_scrape', replace_existing=True,
+                  name='Reports scrape dim 23h30')
+
+    # Analyse IA rapports (nouveau pipeline) lundi à 2h
+    sched.add_job(job_reports_analyze, CronTrigger(day_of_week='mon', hour=2, minute=0),
+                  id='reports_analyze', replace_existing=True,
+                  name='Reports analyze lun 2h')
 
     sched.start()
     logger.info("Scheduler démarré — jobs actifs:")
