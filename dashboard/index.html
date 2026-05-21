@@ -1738,7 +1738,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="gloss-list" style="max-width:800px"></div>
 </div>
 <!-- ── Paramètres ─────────────────────────────────────────────────────────── -->
-<div class="page" id="page-settings" style="display:none">
+<div class="page" id="page-settings">
   <div class="ph"><h2>⚙️ Paramètres</h2><p class="page-sub">Tâches automatiques et statistiques</p></div>
 
   <div class="card" style="margin-bottom:14px">
@@ -2471,7 +2471,7 @@ function populateSelects(){
   const sorted=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   ['portTicker','alertTicker'].forEach(id=>{
     const sel=document.getElementById(id);
-    if(sel&&sel.options.length<=1) sorted.forEach(s=>sel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
+    if(sel&&sel.options&&sel.options.length<=1) sorted.forEach(s=>sel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
   });
   const nsel=document.getElementById('nFil');
   if(nsel&&nsel.options.length<=1) sorted.forEach(s=>nsel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
@@ -3206,10 +3206,10 @@ function _sparklineDots(hist30, w, h){
   if(vals.length<2) return '';
   const PAD_Y=3, PAD_LABEL=34; // espace réservé à droite pour l'étiquette
   const W=w-PAD_LABEL;
+  const H_inner=h-2*PAD_Y; // déclaré AVANT toY pour éviter TDZ ReferenceError
   const mn=Math.min(...vals), mx=Math.max(...vals), range=mx-mn||1;
   const toX=i=>+(i/(vals.length-1)*W).toFixed(1);
   const toY=v=>+(H_inner-(v-mn)/range*H_inner).toFixed(1);
-  const H_inner=h-2*PAD_Y;
   const pts=vals.map((v,i)=>`${toX(i)},${PAD_Y+toY(v)}`);
   const col=vals[vals.length-1]>=vals[0]?'#10b981':'#ef4444';
   const line=`<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>`;
@@ -5242,6 +5242,7 @@ const pageLoaders={
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
   news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
+  settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
 };
 
 function switchTab(pageId, tabId, btn) {
@@ -5764,7 +5765,14 @@ async function loadStockReports(ticker) {
       'Document':           'var(--t3)',
     };
 
-    const verdictEmoji = {'POSITIF':'✅','NEUTRE':'⚠️','NEGATIF':'❌'};
+    const verdictEmoji = {'POSITIF':'✅','NEUTRE':'⏳','NEGATIF':'⚠️'};
+    const _KPI_LABELS = [
+      {key:'chiffre_affaires',     label:'💼 Chiffre d\'affaires'},
+      {key:'ebitda',               label:'📊 EBITDA'},
+      {key:'dette_nette',          label:'🏦 Dette nette'},
+      {key:'dividende_par_action', label:'💰 Div / action'},
+      {key:'capitaux_propres',     label:'🏛 Capitaux propres'},
+    ];
 
     const html = years.map(y => {
       const reps = byYear[y];
@@ -5776,17 +5784,19 @@ async function loadStockReports(ticker) {
 
         let aiBlock = '';
         if (an && an.verdict_investisseur) {
-          const vc = an.verdict_investisseur === 'POSITIF' ? 'var(--green)'
-                   : an.verdict_investisseur === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
+          const vrd = an.verdict_investisseur;
+          const vc = vrd === 'POSITIF' ? 'var(--green)' : vrd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
           const kpis = an.kpis || {};
-          const kpiHtml = Object.entries(kpis)
-            .filter(([, v]) => v && v.valeur != null)
-            .slice(0, 6)
-            .map(([k, v]) => {
+          const kpiHtml = _KPI_LABELS
+            .map(({key, label}) => {
+              const v = kpis[key];
+              if (!v || v.valeur == null) return `<div style="background:var(--bg3);border-radius:6px;padding:6px 8px;opacity:.5">
+                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${label}</div>
+                <div style="font-size:11px;font-weight:700">—</div></div>`;
               const varStyle = v.variation && v.variation.startsWith('+') ? 'color:var(--green)'
                              : v.variation && v.variation.startsWith('-') ? 'color:var(--red)' : '';
               return `<div style="background:var(--bg3);border-radius:6px;padding:6px 8px">
-                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${k.replace(/_/g,' ')}</div>
+                <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${label}</div>
                 <div style="font-size:11px;font-weight:700">${v.valeur} <span style="font-size:9px;color:var(--t3)">${v.unite||''}</span></div>
                 ${v.variation ? `<div style="font-size:9px;${varStyle}">${v.variation}</div>` : ''}
               </div>`;
