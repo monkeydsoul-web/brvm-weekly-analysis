@@ -734,14 +734,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <p style="color:var(--t2);font-size:12px">Chargement...</p>
     </div>
   </div>
-  <div class="g2" style="margin-bottom:12px">
-    <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
-      <div id="cDistDiv" style="width:100%;height:170px"></div>
-      <p class="help-text">Répartition des 47 sociétés par score · vert = achat possible · rouge = éviter</p></div>
-    <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
-      <div id="cSectDiv" style="width:100%;height:170px"></div></div>
-  </div>
-  <!-- IDs marché conservés pour compatibilité JS -->
+  <!-- Compatibilité JS — IDs conservés mais cachés dans dash -->
+  <div id="cDistDiv" style="display:none"></div>
+  <div id="cSectDiv" style="display:none"></div>
+  <div id="heatmap-grid" style="display:none"></div>
+  <div id="flux-content" style="display:none"></div>
+  <div id="insights" style="display:none"></div>
   <div id="market-indices" style="display:none"></div>
   <div id="market-top5" style="display:none"></div>
   <div id="market-flop5" style="display:none"></div>
@@ -751,41 +749,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="idx-composite" style="display:none"></div>
   <div id="idx-brvm30" style="display:none"></div>
   <div id="idx-cap" style="display:none"></div>
-  <div class="card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-      <div class="ct" title="Vue d'ensemble des 47 sociétés · taille = score, couleur = variation du jour">🌡️ Heatmap BRVM — Performance du jour</div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap" id="heatmap-filters">
-        <button class="hf-btn hf-on" onclick="setHeatmapFilter('')">Tous</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Banque')">Banques</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Industrie')">Industriel</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Telecom')">Télécoms</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Distribution')">Distribution</button>
-      </div>
-    </div>
-    <div id="heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:60px"></div>
-    <div style="margin-top:8px">
-      <div style="font-size:9px;color:var(--t3);margin-bottom:4px;font-style:italic">
-        🔴 en baisse · 🟢 en hausse · taille = Score /10 · 💡 <strong>Comment lire la heatmap :</strong> chaque bloc représente une action — sa <strong>taille</strong> reflète son score /10 (plus gros = mieux noté), sa <strong>couleur</strong> reflète la variation du cours aujourd'hui. Cliquez sur un bloc pour ouvrir la fiche.
-      </div>
-      <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);flex-wrap:wrap">
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block"></span>&gt;+2% Forte hausse</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block"></span>0%→+2% Hausse</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block"></span>Stable 0%</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#f87171;display:inline-block"></span>0%→-2% Baisse</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>&lt;-2% Forte baisse</span>
-        <span style="margin-left:auto;color:var(--t3);font-size:9px">Taille = Score /10 · Couleur = Var%</span>
-      </div>
-    </div>
+  <!-- Bouton vers analyse marché complète -->
+  <div style="text-align:center;padding:20px 0 8px">
+    <button onclick="nav('market')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
   </div>
-  <!-- Flux de capitaux -->
-  <div class="card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="ct" style="margin:0">💸 Flux de capitaux — Pression achat / vente</div>
-      <span style="font-size:10px;color:var(--t3)">volume × cours</span>
-    </div>
-    <div id="flux-content"><p style="color:var(--t2);font-size:11px">Chargement flux...</p></div>
-  </div>
-  <div class="card"><div class="ct">💡 Insights</div><div id="insights" style="font-size:12px;color:var(--t2);line-height:1.7">—</div></div>
 </div>
 
 <!-- CLASSEMENT -->
@@ -1320,11 +1287,43 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="kpi"><div class="kl">Sociétés en hausse</div><div class="kv" id="mkt-up" style="color:var(--green)">—</div></div>
     <div class="kpi"><div class="kl">Sociétés en baisse</div><div class="kv" id="mkt-down" style="color:var(--red)">—</div></div>
   </div>
-  <!-- Contenu déplacé depuis le dashboard -->
-  <div id="market-page-content">
-    <div style="text-align:center;padding:40px;color:var(--t2);font-size:13px">
-      <div style="font-size:28px;margin-bottom:10px">📊</div>
-      Chargement des données marché...
+  <!-- Distribution + sectoriel -->
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
+      <div id="mkt-dist" style="width:100%;height:170px"></div>
+      <p style="font-size:10px;color:var(--t3);margin-top:6px">Répartition des 47 sociétés par score · vert = achat possible · rouge = éviter</p></div>
+    <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
+      <div id="mkt-sect" style="width:100%;height:170px"></div></div>
+  </div>
+  <!-- Heatmap -->
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+      <div class="ct" style="margin:0">🌡️ Heatmap BRVM — Performance du jour</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap" id="mkt-heatmap-filters">
+        <button class="hf-btn hf-on" onclick="setHeatmapFilter('');_syncMktHeatmap()">Tous</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Banque');_syncMktHeatmap()">Banques</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Industrie');_syncMktHeatmap()">Industriel</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Telecom');_syncMktHeatmap()">Télécoms</button>
+        <button class="hf-btn" onclick="setHeatmapFilter('Distribution');_syncMktHeatmap()">Distribution</button>
+      </div>
+    </div>
+    <div id="mkt-heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:80px"></div>
+    <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);flex-wrap:wrap;margin-top:8px">
+      <span><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block;vertical-align:middle"></span> &gt;+2% Forte hausse</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block;vertical-align:middle"></span> 0→+2% Hausse</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block;vertical-align:middle"></span> Stable</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block;vertical-align:middle"></span> Baisse</span>
+    </div>
+  </div>
+  <!-- Flux + Insights -->
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:0">
+      <div class="ct">💸 Flux de capitaux</div>
+      <div id="mkt-flux"><p style="color:var(--t2);font-size:11px">Chargement...</p></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ct">💡 Insights du jour</div>
+      <div id="mkt-insights-full"><p style="color:var(--t2);font-size:11px">Chargement...</p></div>
     </div>
   </div>
 </div>
@@ -5560,46 +5559,47 @@ function _renderMarketPage() {
   // Peupler les KPI indices depuis la barre de marché
   var brvcEl = document.getElementById('msb-composite');
   var brv30El = document.getElementById('msb-brvm30');
-  var mktC = document.getElementById('mkt-brvm-c');
-  var mktCChg = document.getElementById('mkt-brvm-c-chg');
-  var mkt30 = document.getElementById('mkt-brvm-30');
-  var mkt30Chg = document.getElementById('mkt-brvm-30-chg');
-  if (mktC && brvcEl) mktC.textContent = brvcEl.textContent.replace('BRVM-C','').trim();
-  if (mkt30 && brv30El) mkt30.textContent = brv30El.textContent.replace('BRVM-30','').trim();
-  // Compteurs hausse/baisse
+  if (document.getElementById('mkt-brvm-c') && brvcEl) document.getElementById('mkt-brvm-c').textContent = brvcEl.textContent.replace('BRVM-C','').trim();
+  if (document.getElementById('mkt-brvm-30') && brv30El) document.getElementById('mkt-brvm-30').textContent = brv30El.textContent.replace('BRVM-30','').trim();
   var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
   var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
-  var mktUp = document.getElementById('mkt-up');
-  var mktDown = document.getElementById('mkt-down');
-  if (mktUp) mktUp.textContent = up;
-  if (mktDown) mktDown.textContent = down;
-  // Content: injecter liens vers les sections du tableau de bord
-  var content = document.getElementById('market-page-content');
-  if (content && content.children.length <= 1) {
-    content.innerHTML = `
-      <div class="g2" style="margin-bottom:16px">
-        <div class="card"><div class="ct">📊 Répartition par secteur</div>
-          <div id="mkt-sector-chart" style="min-height:180px"><div style="color:var(--t2);font-size:11px;padding:12px">→ Voir <a href="#" onclick="nav('dash');return false" style="color:var(--accent)">Tableau de bord</a> section Répartition sectorielle</div></div>
-        </div>
-        <div class="card"><div class="ct">🌡 Distribution des scores</div>
-          <div id="mkt-score-dist" style="min-height:180px"><div style="color:var(--t2);font-size:11px;padding:12px">→ Voir <a href="#" onclick="nav('dash');return false" style="color:var(--accent)">Tableau de bord</a> section Distribution des scores</div></div>
-        </div>
-      </div>
-      <div class="card" style="margin-bottom:16px"><div class="ct">🌍 Heatmap BRVM</div>
-        <div style="color:var(--t2);font-size:12px;padding:12px">La heatmap est disponible dans le <a href="#" onclick="nav('dash');return false" style="color:var(--accent)">Tableau de bord</a>.</div>
-      </div>
-      <div class="card"><div class="ct">💡 Insights du jour</div>
-        <div id="mkt-insights" style="min-height:60px"></div>
-      </div>`;
-    // Peuplier insights
-    var ins = document.getElementById('mkt-insights');
-    if (ins && window.scores && window.scores.length) {
+  if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
+  if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
+
+  // Heatmap dans market page
+  _syncMktHeatmap();
+
+  // Distribution + sectoriel — clone from rendered charts
+  var distSrc = document.getElementById('cDistDiv');
+  var sectSrc = document.getElementById('cSectDiv');
+  var distDst = document.getElementById('mkt-dist');
+  var sectDst = document.getElementById('mkt-sect');
+  if (distSrc && distDst && distSrc.innerHTML) distDst.innerHTML = distSrc.innerHTML;
+  if (sectSrc && sectDst && sectSrc.innerHTML) sectDst.innerHTML = sectSrc.innerHTML;
+
+  // Flux
+  var fluxSrc = document.getElementById('flux-content');
+  var fluxDst = document.getElementById('mkt-flux');
+  if (fluxSrc && fluxDst && fluxSrc.innerHTML && !fluxSrc.innerHTML.includes('Chargement')) fluxDst.innerHTML = fluxSrc.innerHTML;
+
+  // Insights
+  var insSrc = document.getElementById('insights');
+  var insDst = document.getElementById('mkt-insights-full');
+  if (insSrc && insDst) {
+    if (insSrc.textContent.trim() && insSrc.textContent !== '—') {
+      insDst.innerHTML = insSrc.innerHTML;
+    } else if (window.scores && window.scores.length) {
       var sorted = [...window.scores].sort(function(a,b){return (b.composite_adj||0)-(a.composite_adj||0);});
-      var top3 = sorted.slice(0,3).map(function(s){ return `<span style="font-weight:700;color:var(--accent)">${s.ticker}</span> ${((s.composite_adj||0)/80*10).toFixed(1)}/10`; }).join(' · ');
-      ins.innerHTML = `<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : ${top3}</div>
-        <div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 ${up} en hausse · 🔴 ${down} en baisse · ${(window.scores.length-up-down)} stables</div>`;
+      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+((s.composite_adj||0)/80*10).toFixed(1)+'/10'; }).join(' · ');
+      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
     }
   }
+}
+
+function _syncMktHeatmap() {
+  var srcGrid = document.getElementById('heatmap-grid');
+  var dstGrid = document.getElementById('mkt-heatmap-grid');
+  if (srcGrid && dstGrid && srcGrid.innerHTML) dstGrid.innerHTML = srcGrid.innerHTML;
 }
 
 function switchTab(pageId, tabId, btn) {
