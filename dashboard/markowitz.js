@@ -145,6 +145,13 @@ async function launchMarkowitz() {
 }
 
 function _renderMrkResult(d) {
+  if (d.skipped_tickers && d.skipped_tickers.length) {
+    const notice = document.getElementById('mrk-portfolios');
+    const banner = document.createElement('div');
+    banner.style.cssText = 'grid-column:1/-1;padding:8px 12px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:6px;font-size:11px;color:var(--amber);margin-bottom:4px';
+    banner.textContent = '⚠️ Historique insuffisant, actions ignorées : ' + d.skipped_tickers.join(', ');
+    if (notice) notice.prepend(banner);
+  }
   const portfolios = [
     {label:'🏆 Max Sharpe',subtitle:'Meilleur ratio risque/rendement',data:d.max_sharpe,color:'var(--green)'},
     {label:'🛡️ Min Volatilité',subtitle:'Portefeuille le moins risqué',data:d.min_volatility,color:'var(--blue)'},

@@ -1021,21 +1021,24 @@ def api_markowitz():
             return jsonify({"error": "Minimum 2 actifs"}), 400
         
         import json as _json, numpy as np
-        ph_path = os.path.join(DATA_DIR, "price_history.json")
+        ph_path = os.path.join(DATA_DIR, "price_history_extended.json")
         with open(ph_path) as f:
             history = _json.load(f)
-        
-        # Extraire séries de prix (BOC seulement - quotidien)
+
+        # Extraire séries de prix depuis price_history_extended (300+ points/ticker)
+        MIN_POINTS = 20
         price_series = {}
         for ticker in tickers:
-            pts = sorted([p for p in history.get(ticker, []) 
-                         if p.get("source") == "boc"], key=lambda x: x["date"])
-            if len(pts) >= 20:
-                price_series[ticker] = {p["date"]: p["price"] for p in pts}
-        
+            pts = sorted([p for p in history.get(ticker, []) if p.get("close")],
+                         key=lambda x: x["date"])
+            if len(pts) >= MIN_POINTS:
+                price_series[ticker] = {p["date"]: p["close"] for p in pts}
+
         valid_tickers = list(price_series.keys())
+        skipped_tickers = [t for t in tickers if t not in valid_tickers]
         if len(valid_tickers) < 2:
-            return jsonify({"error": "Données insuffisantes (min 20 points BOC)"}), 400
+            missing_info = ", ".join(skipped_tickers) if skipped_tickers else "tous"
+            return jsonify({"error": f"Optimisation impossible : pas assez d'actions avec historique suffisant (min {MIN_POINTS} points). Actions ignorées : {missing_info}"}), 400
         
         # Aligner les dates communes
         all_dates = sorted(set.intersection(*[set(ps.keys()) for ps in price_series.values()]))
@@ -1120,6 +1123,8 @@ def api_markowitz():
         
         return jsonify({
             "tickers": valid_tickers,
+            "used_tickers": valid_tickers,
+            "skipped_tickers": skipped_tickers,
             "max_sharpe": max_sharpe,
             "min_volatility": min_vol,
             "max_return": max_ret,
