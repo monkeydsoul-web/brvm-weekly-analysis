@@ -670,7 +670,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 20px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer">🤖 Voir les signaux IA</button>
     </div>
   </div>
-  <div id="dash-market-summary" class="beginner-only" style="padding:10px 14px;background:var(--accent-dim,rgba(34,211,238,.08));border-radius:8px;font-size:13px;color:var(--text-2);margin-bottom:12px;display:none">🟢 Chargement du marché…</div>
+  <div id="dash-market-summary" class="beginner-only" style="padding:10px 14px;background:var(--accent-dim,rgba(34,211,238,.08));border-radius:8px;font-size:13px;color:var(--text-2);margin-bottom:12px">🟢 Chargement du marché…</div>
   <div class="g4" id="kpis"></div>
   <!-- IDs conservés pour compatibilité JS -->
   <div id="dash-port-widget" style="display:none"></div>
@@ -2827,9 +2827,10 @@ function renderDash(m){
     var stable=s.length-up-down;
     var secs={};s.forEach(function(x){if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
     var topSec=Object.entries(secs).sort(function(a,b){return b[1]-a[1];})[0];
-    var icon=up>down?'🟢':down>up?'🔴':'🟡';
-    var trend=up>down?'qui monte':'qui baisse';
+    var icon=up>down*1.2?'🟢':down>up*1.2?'🔴':'🟡';
+    var trend=up>down*1.2?'qui monte':down>up*1.2?'qui baisse':'stable';
     sumEl.innerHTML=icon+' Marché '+trend+' aujourd\'hui · '+up+' actions en hausse ↗ · '+down+' en baisse ↘ · '+stable+' stables'+(topSec?' · Secteur le plus actif : <strong>'+topSec[0]+'</strong>':'');
+    sumEl.style.display='';
   })();
 
   // Signal du jour + widgets S4
