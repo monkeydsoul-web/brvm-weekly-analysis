@@ -432,6 +432,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 /* ── Mode débutant / expert ────────────────────────────────────────────── */
 [data-mode="beginner"] .expert-only{display:none!important}
 [data-mode="expert"] .beginner-only{display:none!important}
+/* Colonnes P/E cachées en mode débutant */
+[data-mode="beginner"] .col-pe{display:none!important}
+[data-mode="beginner"] .adv-col{display:none!important}
 .mode-toggle{display:flex;gap:4px;padding:4px;background:var(--bg-card2);border-radius:8px;margin:4px 0}
 .mode-btn{flex:1;padding:6px 10px;font-size:11px;background:transparent;border:none;border-radius:6px;cursor:pointer;color:var(--text-2);transition:all .15s}
 .mode-btn.active{background:var(--bg-card);color:var(--text-1);box-shadow:0 1px 2px rgba(0,0,0,.06);font-weight:500}
@@ -667,6 +670,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 20px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer">🤖 Voir les signaux IA</button>
     </div>
   </div>
+  <div id="dash-market-summary" class="beginner-only" style="padding:10px 14px;background:var(--accent-dim,rgba(34,211,238,.08));border-radius:8px;font-size:13px;color:var(--text-2);margin-bottom:12px;display:none">🟢 Chargement du marché…</div>
   <div class="g4" id="kpis"></div>
   <!-- IDs conservés pour compatibilité JS -->
   <div id="dash-port-widget" style="display:none"></div>
@@ -801,18 +805,18 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Prix</th>
       <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">1 mois</th>
       <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">+/- aujourd'hui</th>
-      <th class="tt" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
+      <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
       <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Conseil</th>
       <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
-      <th class="adv-col" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
-      <th class="adv-col" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
-      <th class="adv-col" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
-      <th class="adv-col" data-tip="EPV /10 — valeur basée sur les bénéfices normalisés · Greenwald"><abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th>
-      <th class="adv-col" data-tip="Buffett /10 — qualité + avantage concurrentiel + ROE ≥ 15%">Buf</th>
-      <th class="adv-col" data-tip="RevDCF /10 — taux de croissance implicite dans le cours actuel">Rev</th>
-      <th class="adv-col" data-tip="Relatif /10 — comparaison avec les médianes sectorielles BRVM">Rel</th>
-      <th class="adv-col" data-tip="Technique /10 — dynamique haussière récente, volume, tendance 30 jours">Tech</th>
+      <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
+      <th class="adv-col expert-only" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
+      <th class="adv-col expert-only" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
+      <th class="adv-col expert-only" data-tip="EPV /10 — valeur basée sur les bénéfices normalisés · Greenwald"><abbr data-tip="Valeur basée sur la capacité bénéficiaire normalisée de la société" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">EPV</abbr></th>
+      <th class="adv-col expert-only" data-tip="Buffett /10 — qualité + avantage concurrentiel + ROE ≥ 15%">Buf</th>
+      <th class="adv-col expert-only" data-tip="RevDCF /10 — taux de croissance implicite dans le cours actuel">Rev</th>
+      <th class="adv-col expert-only" data-tip="Relatif /10 — comparaison avec les médianes sectorielles BRVM">Rel</th>
+      <th class="adv-col expert-only" data-tip="Technique /10 — dynamique haussière récente, volume, tendance 30 jours">Tech</th>
       <th></th>
     </tr></thead>
     <tbody id="rankBody"></tbody></table>
@@ -2061,6 +2065,21 @@ window.TERMS = {
   'AGE': {short:'Assemblée Générale Extraordinaire',long:'AG exceptionnelle pour décisions importantes (fusion, etc.).'},
   'OPV': {short:'Offre Publique de Vente',long:'Mise en vente publique d\'actions, généralement pour une introduction en bourse.'},
   'OPF': {short:'Offre Publique de Retrait',long:'Rachat des actions par la société pour les retirer de la cote.'},
+  'PDG': {short:'Président-Directeur Général',long:'Plus haut dirigeant de la société. Il préside le conseil d\'administration ET dirige la société.'},
+  'AG':  {short:'Assemblée Générale',long:'Réunion annuelle des actionnaires où sont votés les dividendes, les comptes et les grandes décisions.'},
+  'Haussier': {short:'Marché qui monte',long:'La majorité des actions progressent aujourd\'hui. Bon climat général pour investir.'},
+  'Baissier': {short:'Marché qui baisse',long:'La majorité des actions reculent aujourd\'hui. Climat de prudence recommandé.'},
+  'Neutre': {short:'Marché stable',long:'Pas de tendance claire à la hausse ou à la baisse. Le marché est indécis.'},
+  'Trim.': {short:'Trimestriel',long:'Période de 3 mois (T1 = jan-mars, T2 = avr-juin, T3 = juil-sept, T4 = oct-déc).'},
+  'Sem.': {short:'Semestriel',long:'Période de 6 mois. S1 = 1er semestre (jan-juin), S2 = 2e semestre (juil-déc).'},
+  'T1': {short:'1er trimestre (jan–mars)',long:'Résultats de janvier à mars. Publiés généralement en avril-mai.'},
+  'T2': {short:'2e trimestre (avr–juin)',long:'Résultats d\'avril à juin. Publiés généralement en juillet-août.'},
+  'T3': {short:'3e trimestre (juil–sept)',long:'Résultats de juillet à septembre. Publiés généralement en octobre-novembre.'},
+  'T4': {short:'4e trimestre (oct–déc)',long:'Résultats d\'octobre à décembre. Inclus dans les résultats annuels.'},
+  'S1': {short:'1er semestre (jan–juin)',long:'Résultats des 6 premiers mois de l\'année.'},
+  'S2': {short:'2e semestre (juil–déc)',long:'Résultats des 6 derniers mois de l\'année.'},
+  'Sous-évaluée': {short:'Prix en bourse < valeur estimée',long:'Le cours actuel est inférieur à ce que la société "devrait" valoir selon les modèles financiers. Opportunité potentielle d\'achat.'},
+  'Verdict': {short:'Recommandation globale de l\'IA',long:'Synthèse des 8 modèles : ✅ Acheter (score ≥ 7,5), ⏳ Attendre (5–7,5), ⚠️ Éviter (< 5).'},
 };
 
 window.MODE_LABELS = {
@@ -2074,6 +2093,28 @@ window.MODE_LABELS = {
   'Marché Baissier':{beginner:'🔴 Le marché baisse', expert:'Marché Baissier'},
   'Marché Neutre':  {beginner:'🟡 Marché stable',  expert:'Marché Neutre'},
 };
+
+function _toast(msg, duration) {
+  duration = duration || 3000;
+  var el = document.getElementById('_toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_toast';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text-1,#1a1f2e);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:99999;opacity:0;transition:all .3s;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:90vw;text-align:center;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = String(msg);
+  requestAnimationFrame(function() {
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(100px)';
+  }, duration);
+}
+window._toast = _toast;
 
 function _label(key) {
   const mode = document.documentElement.getAttribute('data-mode') || 'expert';
@@ -2777,6 +2818,20 @@ function renderDash(m){
   ];
   document.getElementById('kpis').innerHTML=_kpiCards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="border-top:2px solid ${k.top}"><div class="kl">${k.l}</div><div class="kv" style="color:${k.vc}">${k.v}</div><div style="font-size:11px;color:var(--text-3);margin-top:6px">${k.ctx}</div></div>`).join('');
 
+  // Beginner market summary
+  (function(){
+    var sumEl=document.getElementById('dash-market-summary');
+    if(!sumEl)return;
+    var up=s.filter(function(x){return(x.change_pct||0)>0;}).length;
+    var down=s.filter(function(x){return(x.change_pct||0)<0;}).length;
+    var stable=s.length-up-down;
+    var secs={};s.forEach(function(x){if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
+    var topSec=Object.entries(secs).sort(function(a,b){return b[1]-a[1];})[0];
+    var icon=up>down?'🟢':down>up?'🔴':'🟡';
+    var trend=up>down?'qui monte':'qui baisse';
+    sumEl.innerHTML=icon+' Marché '+trend+' aujourd\'hui · '+up+' actions en hausse ↗ · '+down+' en baisse ↘ · '+stable+' stables'+(topSec?' · Secteur le plus actif : <strong>'+topSec[0]+'</strong>':'');
+  })();
+
   // Signal du jour + widgets S4
   _renderDaySignal(s);
   _renderSignalSparkline(s);
@@ -3088,8 +3143,8 @@ function _renderSignalSparkline(sorted){
 }
 
 // ── Flux de capitaux ─────────────────────────────────────────────────────────
-async function renderFluxCapitaux() {
-  const el = document.getElementById('flux-content');
+async function renderFluxCapitaux(targetEl) {
+  const el = targetEl || document.getElementById('flux-content');
   if (!el) return;
   let prices;
   try {
@@ -3183,8 +3238,8 @@ function setHeatmapFilter(sector){
   renderHeatmap();
 }
 
-function renderHeatmap(){
-  const grid=document.getElementById('heatmap-grid');
+function renderHeatmap(containerId){
+  const grid=document.getElementById(containerId||'heatmap-grid');
   if(!grid)return;
   let all=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   if(_heatmapFilter) all=all.filter(x=>(x.sector||'').toLowerCase().includes(_heatmapFilter.toLowerCase()));
@@ -3539,7 +3594,7 @@ function renderRank(){
       <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
       <td style="padding:2px 4px">${spk}${var30}</td>
       <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
-      <td>${x.pe_ref||'—'}×</td>
+      <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtVerdict(x.pdf_verdict)}</td>
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
@@ -5000,6 +5055,26 @@ function _stockTab(id){
   document.querySelectorAll('.stock-tab-panel').forEach(p=>p.classList.toggle('active',p.id==='stab-'+id));
 }
 
+function buildKpiCards(s){
+  const pe=s.pe_ref||s.pe_hist;
+  const pb=s.pb_ref||s.pb_hist;
+  const bna=s.eps||s.bna;
+  const roe=s.roe;
+  const cards=[
+    pe?{l:'P/E',v:pe.toFixed(1)+'×',vc:pe<15?'var(--green)':pe<25?'var(--amber)':'var(--red)',tip:'Cours ÷ Bénéfice par action. Seuil Graham : ≤15×'}:null,
+    pb?{l:'P/B',v:pb.toFixed(2)+'×',vc:pb<1?'var(--green)':pb<2?'var(--amber)':'var(--red)',tip:'Cours ÷ Valeur comptable. < 1 = décote sur actif net'}:null,
+    bna?{l:'BNA',v:Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.'}:null,
+    roe?{l:'ROE',v:roe.toFixed(1)+'%',vc:roe>=15?'var(--green)':roe>=8?'var(--amber)':'var(--red)',tip:'Return on Equity = Bénéfice net / Capitaux propres. ≥15% = excellence Buffett.'}:null,
+  ].filter(Boolean);
+  if(!cards.length) return '';
+  return `<div class="expert-only" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:12px">${
+    cards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="text-align:center;padding:10px 8px">
+      <div style="font-size:10px;color:var(--t2);margin-bottom:4px">${k.l}</div>
+      <div style="font-size:15px;font-weight:700;color:${k.vc};font-family:var(--mono,'monospace')">${k.v}</div>
+    </div>`).join('')
+  }</div>`;
+}
+
 function _genVerdict(s){
   const v=s.composite_adj||0;
   const col=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
@@ -5567,21 +5642,26 @@ function _renderMarketPage() {
   if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
   if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
 
-  // Heatmap dans market page
-  _syncMktHeatmap();
+  // Heatmap — re-render directement dans mkt-heatmap-grid
+  renderHeatmap('mkt-heatmap-grid');
 
-  // Distribution + sectoriel — clone from rendered charts
-  var distSrc = document.getElementById('cDistDiv');
-  var sectSrc = document.getElementById('cSectDiv');
+  // Distribution + sectoriel — re-render via svgBar/svgDonut
   var distDst = document.getElementById('mkt-dist');
   var sectDst = document.getElementById('mkt-sect');
-  if (distSrc && distDst && distSrc.innerHTML) distDst.innerHTML = distSrc.innerHTML;
-  if (sectSrc && sectDst && sectSrc.innerHTML) sectDst.innerHTML = sectSrc.innerHTML;
+  var _sc = window.scores || [];
+  if (distDst && _sc.length) {
+    var bkts={'0–20':0,'20–35':0,'35–50':0,'50–65':0,'65–80':0};
+    _sc.forEach(function(x){var v=x.composite_adj||0;bkts[v<20?'0–20':v<35?'20–35':v<50?'35–50':v<65?'50–65':'65–80']++;});
+    svgBar(distDst,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#4ADE80','#22D3EE'],170);
+  }
+  if (sectDst && _sc.length) {
+    var secs={};_sc.forEach(function(x){if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
+    svgDonut(sectDst,Object.keys(secs),Object.values(secs),170);
+  }
 
-  // Flux
-  var fluxSrc = document.getElementById('flux-content');
+  // Flux — re-render directement dans mkt-flux
   var fluxDst = document.getElementById('mkt-flux');
-  if (fluxSrc && fluxDst && fluxSrc.innerHTML && !fluxSrc.innerHTML.includes('Chargement')) fluxDst.innerHTML = fluxSrc.innerHTML;
+  if (fluxDst) renderFluxCapitaux(fluxDst);
 
   // Insights
   var insSrc = document.getElementById('insights');
@@ -5598,9 +5678,7 @@ function _renderMarketPage() {
 }
 
 function _syncMktHeatmap() {
-  var srcGrid = document.getElementById('heatmap-grid');
-  var dstGrid = document.getElementById('mkt-heatmap-grid');
-  if (srcGrid && dstGrid && srcGrid.innerHTML) dstGrid.innerHTML = srcGrid.innerHTML;
+  renderHeatmap('mkt-heatmap-grid');
 }
 
 function switchTab(pageId, tabId, btn) {

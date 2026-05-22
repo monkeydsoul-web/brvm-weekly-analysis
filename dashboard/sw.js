@@ -1,5 +1,5 @@
-// BRVM Dashboard — Service Worker v1
-const CACHE = 'brvm-sw-v1';
+// BRVM Dashboard — Service Worker v2
+const CACHE = 'brvm-sw-v2';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
