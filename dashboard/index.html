@@ -645,6 +645,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- DASHBOARD -->
 <div class="page on" id="page-dash">
+  <div class="beginner-banner" id="beginner-banner-dash">💡 <strong>Comment lire cette page :</strong> Ce tableau de bord montre l'état général du marché BRVM aujourd'hui. Les cartes colorées en haut = les meilleures actions selon notre IA. Cliquez sur n'importe quelle action pour voir sa fiche détaillée. <button onclick="document.getElementById('beginner-banner-dash').style.display='none';localStorage.setItem('bb_dash_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Tableau de bord BRVM</h2><p class="page-sub">Vue d'ensemble · signaux · opportunités en temps réel</p></div>
     <div style="display:flex;gap:8px;align-items:center">
@@ -789,6 +790,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- CLASSEMENT -->
 <div class="page" id="page-rank">
+  <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Toutes les 47 sociétés BRVM sont notées de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Classement complet</h2><p class="page-sub">47 sociétés classées par score composite sur 8 modèles de valorisation</p></div>
     <div style="display:flex;gap:8px">
@@ -1197,6 +1199,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- VALORISATION (Prix cibles + Performances) -->
 <div class="page" id="page-valuation">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente les modèles de valorisation détaillés. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour y accéder pleinement.</div>
   <div class="ph"><div><h2>📊 Valorisation</h2><p class="page-sub">Prix cibles · performances historiques · upside potentiel</p></div></div>
   <div class="tab-bar">
     <button class="tab-btn on" onclick="switchTab('valuation','cibles',this)">🎯 Prix cibles</button>
@@ -1546,6 +1549,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- SCREENER -->
 <div class="page" id="page-screener">
+  <div class="beginner-banner" id="beginner-banner-screener">🔍 <strong>Comment utiliser le screener :</strong> Filtrez les 47 sociétés selon vos critères. Ex : dividende ≥ 4%, note ≥ 7,5. Cliquez sur "Filtrer" pour voir les résultats. <button onclick="document.getElementById('beginner-banner-screener').style.display='none'" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK</button></div>
   <div class="ph">
     <div><h2>🔍 Screener avancé</h2><p class="page-sub">Filtrez les actions BRVM par score, P/E, dividende, ROE et secteur</p></div>
     <div style="display:flex;gap:6px">
@@ -1652,6 +1656,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
 <div class="page" id="page-signals">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
   <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
@@ -1730,6 +1735,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- OPTIMISATION & ANALYSE -->
 <div class="page" id="page-optim">
   <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente la corrélation entre actions et l'optimisation de portefeuille Markowitz. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a>.</div>
   <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
@@ -1910,6 +1916,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 <!-- ── Actualités ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-news">
+  <div class="beginner-banner" id="beginner-banner-news">📢 <strong>Comment lire cette page :</strong> Les annonces officielles BRVM sont classées par catégorie (dividendes, AG, résultats...). Les 🟢 bonnes nouvelles indiquent une actualité positive pour l'action. <button onclick="document.getElementById('beginner-banner-news').style.display='none'" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK</button></div>
   <div class="ph">
     <div><h2>📰 Actualités BRVM</h2><p class="page-sub">Annonces officielles et presse financière</p></div>
     <select id="news-ticker-filter" onchange="renderNewsPage()" style="padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);min-width:140px">
@@ -7189,6 +7196,13 @@ window._toggleModePopover = _toggleModePopover;
   if (badge) badge.textContent = m === 'beginner' ? '🌱 Mode débutant' : '🎯 Mode expert';
   document.querySelectorAll('[data-mode-btn]').forEach(function(b) {
     b.classList.toggle('active', b.dataset.modeBtn === m);
+  });
+  // Masquer les bannières déjà ignorées
+  ['dash','rank','screener','news'].forEach(function(p) {
+    if (localStorage.getItem('bb_'+p+'_ok')) {
+      var el = document.getElementById('beginner-banner-'+p);
+      if (el) el.style.display = 'none';
+    }
   });
 })();
 
