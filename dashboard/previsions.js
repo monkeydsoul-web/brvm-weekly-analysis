@@ -121,8 +121,17 @@ function _prevAdopter(pf) {
   (pf.stocks || []).forEach(s => {
     const alloc = total * (s.weight / 100);
     const shares = s.price > 0 ? Math.floor(alloc / s.price) : 0;
-    if (shares > 0) {
-      existing.push({ ticker: s.ticker, shares, buy_price: s.price, date: new Date().toISOString().slice(0, 10), note: `Portefeuille ${pf.name}` });
+    if (shares <= 0) return;
+    const idx = existing.findIndex(p => p.ticker === s.ticker);
+    if (idx >= 0) {
+      const old = existing[idx];
+      const oldShares = +(old.shares || old.qty || 0);
+      const oldPrice  = +(old.avg_price || old.buy_price || old.buyPrice || s.price);
+      const newShares = oldShares + shares;
+      const newAvg    = (oldShares * oldPrice + shares * s.price) / newShares;
+      existing[idx]   = { ...old, shares: newShares, avg_price: +newAvg.toFixed(2) };
+    } else {
+      existing.push({ ticker: s.ticker, shares, avg_price: s.price, date: new Date().toISOString().slice(0, 10), note: `Portefeuille ${pf.name}` });
     }
   });
   localStorage.setItem('brvm_portfolio_v2', JSON.stringify(existing));

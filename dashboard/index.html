@@ -112,6 +112,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 /* ══ Cards + KPIs ═══════════════════════════════════════════════════════════ */
 .kpi{background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px 20px;transition:box-shadow .15s}
 .kpi:hover{box-shadow:var(--shadow-md)}
+html[data-mode="beginner"] .kpi-expert{display:none!important}
+html[data-mode="beginner"] #simPortCard{display:none!important}
 .kl{font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .kv{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--font-mono)}
 .card{background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:12px;transition:box-shadow .15s}
@@ -861,6 +863,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px" title="Suggère comment rééquilibrer votre portefeuille selon les scores actuels">⚡ Optimiser</button>
       <button class="btn btn-o" onclick="sharePortfolioURL()" style="font-size:11px" title="Partagez votre portefeuille via un lien">🔗 Partager</button>
       <button class="btn btn-o" onclick="exportPortfolioCSV()" style="font-size:11px" title="Exporter le portefeuille en CSV">📥 Exporter CSV</button>
+      <button class="btn btn-r" onclick="resetPortfolio()" style="font-size:11px" title="Effacer toutes vos positions et repartir de zéro">🗑️ Réinitialiser</button>
       <button class="btn btn-g" onclick="showAddPosition()" style="font-weight:700">➕ Ajouter position</button>
     </div>
   </div>
@@ -985,12 +988,14 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="g2">
       <div class="card" style="margin-bottom:0"><div class="ct">Positions actuelles</div>
         <div style="overflow-x:auto"><table><thead><tr>
-          <th>Ticker</th><th>Nom</th><th>Qté</th><th title="Prix moyen d'achat">Px achat</th>
-          <th title="Cours actuel en temps réel">Cours</th><th title="Quantité × cours actuel">Valeur</th>
-          <th title="Valeur actuelle − investissement initial">G/P XOF</th>
-          <th title="Gain ou perte en pourcentage">G/P %</th>
-          <th title="Part de cette action dans votre portefeuille total">Poids</th>
-          <th title="Dividendes estimés sur 12 mois">Div/an</th>
+          <th>Ticker</th><th>Nom</th><th>Qté</th>
+          <th title="Prix moyen d'achat">Prix d'achat</th>
+          <th title="Cours actuel en temps réel">Cours actuel</th>
+          <th title="Quantité × cours actuel">Valeur</th>
+          <th title="Différence entre ce que valent vos actions aujourd'hui et leur prix d'achat">Gain/Perte (FCFA)</th>
+          <th title="Variation en pourcentage depuis l'achat">Gain/Perte %</th>
+          <th title="Part de cette action dans la valeur totale du portefeuille">% du portefeuille</th>
+          <th title="Revenu passif estimé sur 1 an pour cette ligne">Dividende annuel</th>
           <th>Date</th><th></th>
         </tr></thead>
         <tbody id="portTable"></tbody></table></div></div>
@@ -3709,14 +3714,15 @@ function loadPortfolio(){
   if (emptyEl)   emptyEl.style.display   = enriched.length ? 'none' : '';
   if (contentEl) contentEl.style.display = enriched.length ? '' : 'none';
 
-  document.getElementById('portSummary').innerHTML = [
-    ['Valeur totale',     fmtXOF(totalValue),    'var(--blue)',   'Ce que valent vos actions aujourd\'hui'],
-    ['Gain / Perte',      `${fmtXOF(totalGain)} (${totalGainPct > 0 ? '+' : ''}${totalGainPct}%)`, gainC, 'Différence entre votre investissement initial et aujourd\'hui'],
-    ['Meilleure position',best ? `${best.ticker} +${best.gain_pct}%` : '—', 'var(--green)', 'L\'action qui a le plus progressé depuis votre achat'],
-    ['Pire position',     worst && worst!==best ? `${worst.ticker} ${worst.gain_pct}%` : '—', 'var(--red)', 'L\'action qui a le plus baissé depuis votre achat'],
-    ['Div. annuels',      fmtXOF(annDivTotal),   'var(--amber)',  'Revenus passifs estimés que vous percevrez cette année'],
-    ['Rend. sur coût',    totalCost ? ((annDivTotal/totalCost)*100).toFixed(2)+'%' : '—', 'var(--amber)', 'Rendement dividendes ÷ investissement initial'],
-  ].map(([l,v,c,desc])=>`<div class="kpi">
+  const _kpiAll = [
+    [false, 'Valeur totale',      fmtXOF(totalValue),    'var(--blue)',   'Ce que valent vos actions aujourd\'hui'],
+    [false, 'Gain / Perte',       `${fmtXOF(totalGain)} (${totalGainPct > 0 ? '+' : ''}${totalGainPct}%)`, gainC, 'Différence entre votre investissement initial et aujourd\'hui'],
+    [false, 'Dividendes annuels', fmtXOF(annDivTotal),   'var(--amber)',  'Revenus passifs estimés que vous percevrez cette année'],
+    [true,  'Meilleure position', best ? `${best.ticker} +${best.gain_pct}%` : '—', 'var(--green)', 'L\'action qui a le plus progressé depuis votre achat'],
+    [true,  'Pire position',      worst && worst!==best ? `${worst.ticker} ${worst.gain_pct}%` : '—', 'var(--red)', 'L\'action qui a le plus baissé depuis votre achat'],
+    [true,  'Rend. sur coût',     totalCost ? ((annDivTotal/totalCost)*100).toFixed(2)+'%' : '—', 'var(--amber)', 'Rendement dividendes ÷ investissement initial'],
+  ];
+  document.getElementById('portSummary').innerHTML = _kpiAll.map(([expert,l,v,c,desc])=>`<div class="kpi${expert?' kpi-expert':''}">
     <div class="kl">${l}</div>
     <div class="kv" style="color:${c};font-size:15px">${v}</div>
     <div style="font-size:10px;color:var(--t3);margin-top:3px;line-height:1.3">${desc}</div>
@@ -4055,16 +4061,20 @@ function _portMonthlyTable(positions){
 
   // Vide ou 1 seul mois (pas encore de recul)
   if(rows.length === 0){
-    el.innerHTML=`<table style="width:100%;border-collapse:collapse"><tbody>
-      <tr><td colspan="5" style="padding:12px 8px;font-size:11px;color:var(--t2);text-align:center">
-        Le bilan mensuel apparaîtra à partir d'un mois complet de détention.
-      </td></tr></tbody></table>`;
+    el.innerHTML=`<p style="font-size:11px;color:var(--t2);padding:8px 0">Le bilan mensuel apparaîtra à partir d'un mois complet de détention.</p>`;
     return;
   }
 
-  // Afficher les 12 derniers mois
-  const displayRows = rows.slice(-12).join('');
-  el.innerHTML=`<table style="width:100%;border-collapse:collapse">
+  // Garder les 4 derniers mois + les mois plus anciens avec variation réelle (≠ 0k)
+  const displayRows = rows.filter((row, i) => i >= rows.length - 4 || _portRowHasVariation(row)).slice(-12).join('');
+
+  const intro = `<p style="font-size:11px;color:var(--t2);margin-bottom:8px;line-height:1.5">
+    Évolution mois par mois de la valeur de votre portefeuille.
+    <strong>G/P mois</strong> = variation hors nouveaux apports.
+    Les mois sans mouvement sont masqués.
+  </p>`;
+
+  el.innerHTML = intro + `<table style="width:100%;border-collapse:collapse">
     <thead><tr style="border-bottom:2px solid var(--border)">
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Mois</th>
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Valeur</th>
@@ -4072,6 +4082,12 @@ function _portMonthlyTable(positions){
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">G/P total</th>
       <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--t2)">Rdt</th>
     </tr></thead><tbody>${displayRows}</tbody></table>`;
+}
+
+function _portRowHasVariation(rowHtml){
+  // La 3e <td> contient le G/P mois — renvoie false si c'est "+0k" ou "0k" (aucune variation)
+  const thirdTd = rowHtml.split('</td>')[2] || '';
+  return !/>[+]?0k</.test(thirdTd);
 }
 
 function portRecalcBilan(){
@@ -4257,6 +4273,14 @@ function removePositionLS(ticker){
 function removePosition(ticker){ removePositionLS(ticker); }
 // Garder addPosition (ancienne API) pour backward compat
 function addPosition(){ addPositionLS(); }
+
+function resetPortfolio(){
+  if(!confirm('Effacer toutes vos positions et repartir de zéro ?\nCette action est irréversible.')) return;
+  localStorage.removeItem(_LS_PORT);
+  localStorage.removeItem(_LS_TX);
+  loadPortfolio();
+  _toast('Portefeuille réinitialisé');
+}
 
 function navToRank(ticker){
   nav('rank');
@@ -5788,11 +5812,6 @@ function renderCorrelMatrix() {
   html += `<div style="margin-top:6px;font-size:10px;color:var(--t3)">${tickers.length} actions analysées · ${Object.values(returns)[0]?.length||'?'} rendements journaliers BOC</div>`;
   el.innerHTML = html;
 }
-document.querySelectorAll('.ni').forEach(ni=>{
-  const orig=ni.getAttribute('onclick');
-  ni.setAttribute('onclick',orig+`;if(pageLoaders[arguments[0]]||pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']) (pageLoaders['${orig?.match(/'([^']+)'/)?.[1]}']||function(){})();`);
-});
-
 // ── Macro UEMOA ──────────────────────────────────────────────────────────────
 function renderMacroPage() {
   const el = document.getElementById('macro-brvm-ytd');
