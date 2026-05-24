@@ -125,6 +125,10 @@ function startAutoRefresh() {
       const data = await res.json();
       const arr  = Array.isArray(data) ? data : (data.scores || data.ranking || []);
       if (arr.length > 0) {
+        // Mettre à jour le cache de prix live depuis les scores frais
+        const freshPrices = {};
+        arr.forEach(s => { if (s.ticker && s.price) freshPrices[s.ticker] = { price: s.price, change_pct: s.change_pct }; });
+        if (Object.keys(freshPrices).length > 0) window._livePrices = freshPrices;
         if (typeof onScoresRefreshed === 'function') {
           onScoresRefreshed(arr);
         } else {

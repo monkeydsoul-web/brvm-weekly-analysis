@@ -3687,7 +3687,8 @@ function loadPortfolio(){
   // Enrichir avec prix live
   const enriched = positions.map(pos => {
     const live = sc.find(x=>x.ticker===pos.ticker) || {};
-    const curPrice = live.price || pos.avg_price || 0;
+    const _lp = (window._livePrices || {})[pos.ticker];
+    const curPrice = (_lp && _lp.price) || live.price || pos.avg_price || 0;
     const value    = isFinite(curPrice * pos.shares) ? curPrice * pos.shares : 0;
     const cost     = isFinite(pos.avg_price * pos.shares) ? pos.avg_price * pos.shares : 0;
     const gain     = value - cost;
@@ -5614,6 +5615,7 @@ async function loadStatus(){
     const fd=document.getElementById('footer-date');
     if(fd&&!fd.textContent) fd.textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
     const lv=await fetch('/api/live').then(r=>r.json());
+    window._livePrices = lv.prices || {};
     const n=Object.keys(lv.prices||{}).length;
     const fb=document.getElementById('footer-boc');
     if(fb) fb.textContent=`BOC : ${n} tickers live`;

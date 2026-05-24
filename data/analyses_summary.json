@@ -1312,7 +1312,7 @@
         "variation": null
       },
       "dividende_par_action": {
-        "valeur": 1726.56,
+        "valeur": 0,
         "unite": "FCFA",
         "variation": null
       },
@@ -2693,7 +2693,7 @@
         "variation": "+1.8%"
       },
       "dividende_par_action": {
-        "valeur": 1200,
+        "valeur": null,
         "unite": "FCFA",
         "variation": null
       },
@@ -2767,7 +2767,7 @@
         "variation": "+2.9%"
       },
       "dividende_par_action": {
-        "valeur": 980,
+        "valeur": 247,
         "unite": "FCFA",
         "variation": null
       },
@@ -2840,7 +2840,7 @@
         "variation": "+0.9%"
       },
       "dividende_par_action": {
-        "valeur": 1500,
+        "valeur": 324,
         "unite": "FCFA",
         "variation": null
       },
@@ -2986,7 +2986,7 @@
         "variation": "+7.1%"
       },
       "dividende_par_action": {
-        "valeur": 850,
+        "valeur": 80,
         "unite": "FCFA",
         "variation": null
       },
@@ -3491,7 +3491,7 @@
         "variation": "+4.8%"
       },
       "dividende_par_action": {
-        "valeur": 280,
+        "valeur": null,
         "unite": "FCFA",
         "variation": null
       },

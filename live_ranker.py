@@ -145,6 +145,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
             row['earnings_stable'] = roe >= 18
 
     # ── KPIs PDF — enrichissement prioritaire des modeles ────────────────
+    div_pdf = None  # initialisé avant le bloc pour la référence BOC plus bas
     if pdf_analysis and pdf_analysis.get("status") == "ok":
         kpis = pdf_analysis.get("kpis") or {}
 
@@ -162,11 +163,17 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
             row["earnings_stable"] = roe_pdf >= 12
 
         # Dividende par action depuis PDF → div_yield recalculé
+        # div_pdf=0 signifie "pas de dividende récurrent" (ex: HAO exceptionnel) → efface la valeur
         div_pdf = kv("dividende_par_action")
-        if div_pdf and div_pdf > 0:
-            row["div_per_share"] = div_pdf
-            if price > 0:
-                row["div_yield"] = round(div_pdf / price * 100, 2)
+        if div_pdf is not None:
+            if div_pdf > 0:
+                row["div_per_share"] = div_pdf
+                if price > 0:
+                    row["div_yield"] = round(div_pdf / price * 100, 2)
+            else:
+                # Valeur explicitement nulle = dividende non récurrent ou non vérifié
+                row["div_per_share"] = 0
+                row["div_yield"]     = 0.0
 
         # EPS depuis résultat net / nb actions (si disponible)
         rn_pdf  = kv("resultat_net")    # en MFCFA
@@ -244,7 +251,9 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
                 row['pe_ref'] = float(boc_per)
 
     # Dividende BOC : appliqué si date récente ET cohérent avec existant (≥ 50%)
-    if boc_div > 0 and _is_div_date_recent(boc_div_date, max_years=3):
+    # Exception : si PDF a explicitement fixé 0 (dividende non récurrent), le BOC ne peut pas l'écraser
+    _pdf_zeroed = (div_pdf is not None and div_pdf == 0)
+    if boc_div > 0 and _is_div_date_recent(boc_div_date, max_years=3) and not _pdf_zeroed:
         existing_div = row.get('div_per_share') or 0
         if not existing_div or boc_div >= existing_div * 0.5:
             row['div_per_share'] = boc_div
@@ -423,6 +432,25 @@ def compute_live_ranking(trigger="manual", force=False):
                 r["rank"]      = i + 1
                 old_rank       = old_ranks.get(r["ticker"], i + 1)
                 r["rank_delta"] = old_rank - (i + 1)  # positif = monté
+
+            # ── Garde-fou dividendes aberrants ────────────────────────────
+            _YIELD_HARD_CAP = 15.0   # % — au-dessus = forcé à 0
+            _YIELD_WARN     = 8.0    # % — entre 8 et 15 = log warning
+            for r in results:
+                dy = r.get("div_yield") or 0
+                t  = r.get("ticker", "?")
+                if dy > _YIELD_HARD_CAP:
+                    logger.warning(
+                        f"[garde-fou div] {t}: div_yield={dy:.2f}% > {_YIELD_HARD_CAP}% "
+                        f"— forcé à 0 (div_per_share={r.get('div_per_share')})"
+                    )
+                    r["div_yield"]     = 0.0
+                    r["div_per_share"] = 0
+                elif dy > _YIELD_WARN:
+                    logger.warning(
+                        f"[à vérifier div] {t}: div_yield={dy:.2f}% "
+                        f"(div_per_share={r.get('div_per_share')}, price={r.get('price')})"
+                    )
 
             # Payload final
             payload = {
