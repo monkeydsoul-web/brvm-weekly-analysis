@@ -335,6 +335,7 @@ def compute_live_ranking(trigger="manual", force=False):
         try:
             from scraper import STOCK_FUNDAMENTALS
             from live_data import get_live_data
+            from data_validator import validate_dividend
 
             # Charger les analyses PDF
             summary_path = os.path.join(BASE_DIR, "data", "analyses_summary.json")
@@ -342,6 +343,16 @@ def compute_live_ranking(trigger="manual", force=False):
             if os.path.exists(summary_path):
                 with open(summary_path, encoding="utf-8") as f:
                     pdf_summary = json.load(f)
+
+            # Charger les données BOC (pour la validation multi-source)
+            boc_path = os.path.join(BASE_DIR, "data", "boc_data.json")
+            boc_data = {}
+            if os.path.exists(boc_path):
+                try:
+                    with open(boc_path, encoding="utf-8") as f:
+                        boc_data = json.load(f)
+                except Exception:
+                    pass
 
             # Charger les prix live (depuis cache, pas de re-fetch)
             live_cache  = get_live_data(force_refresh=False)
@@ -365,6 +376,26 @@ def compute_live_ranking(trigger="manual", force=False):
                     # Construire le row enrichi
                     row = _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis)
 
+                    # ── Validation multi-source du dividende ──────────────
+                    _boc_e    = boc_data.get(ticker, {})
+                    _boc_div  = _boc_e.get("div_net") if _boc_e else None
+                    _pdf_kpis = ((pdf_analysis or {}).get("kpis") or {}) if pdf_analysis else {}
+                    _pdf_raw  = (_pdf_kpis.get("dividende_par_action") or {}).get("valeur")
+                    _pdf_div  = float(_pdf_raw) if (_pdf_raw is not None and _pdf_raw > 0) else None
+                    _hist_div = base_row.get("div_hist")
+                    _price    = row.get("price") or 0
+
+                    _dv = validate_dividend(ticker, _hist_div, _pdf_div, _boc_div, _price)
+                    row["div_per_share"]         = _dv["value"]
+                    row["div_yield"]             = _dv["yield_for_calc"]
+                    row["div_confidence"]        = _dv["confidence"]
+                    row["div_flag"]              = _dv["flag"]
+                    row["div_is_exceptional"]    = _dv["is_exceptional"]
+                    row["div_exceptional_value"] = _dv["raw_value"]
+                    row["div_source_used"]       = _dv["source_used"]
+                    row["div_source_detail"]     = _dv["source_detail"]
+                    row["div_ecart_boc_pdf"]     = _dv["ecart_boc_pdf"]
+
                     # Calculer les 8 scores
                     scores = _compute_scores(row)
 
@@ -380,8 +411,15 @@ def compute_live_ranking(trigger="manual", force=False):
                         "pe_ref":        row.get("pe_ref") or row.get("pe_hist"),
                         "pb_ref":        row.get("pb_ref") or row.get("pb_hist"),
                         "roe":           row.get("roe"),
-                        "div_yield":     row.get("div_yield"),
-                        "div_per_share": row.get("div_per_share"),
+                        "div_yield":              row.get("div_yield"),
+                        "div_per_share":           row.get("div_per_share"),
+                        "div_confidence":          row.get("div_confidence", "inconnue"),
+                        "div_flag":                row.get("div_flag", ""),
+                        "div_is_exceptional":      row.get("div_is_exceptional", False),
+                        "div_exceptional_value":   row.get("div_exceptional_value", 0),
+                        "div_source_used":         row.get("div_source_used", "none"),
+                        "div_source_detail":       row.get("div_source_detail", ""),
+                        "div_ecart_boc_pdf":       row.get("div_ecart_boc_pdf"),
                         "pdf_verdict":   row.get("pdf_verdict"),
                         "pdf_ca":        row.get("pdf_ca"),
                         "pdf_rn":        row.get("pdf_rn"),

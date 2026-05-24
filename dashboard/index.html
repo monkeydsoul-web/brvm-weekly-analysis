@@ -1999,6 +1999,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/ranking.js"></script>
 <script src="/stock_chart.js"></script>
 <script src="/badges.js"></script>
+<script src="/data_confidence.js"></script>
 <script src="/compare.js"></script>
 <script src="/alerts.js"></script>
 <script src="/screener.js"></script>
@@ -2800,7 +2801,7 @@ function _kpiArrow(curr, prev) {
 function renderDash(m){
   if(!scores.length)return;
   const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
-  const wd=scores.filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
+  const wd=(typeof getRecurringDivStocks==='function'?getRecurringDivStocks(scores):scores.filter(x=>(x.div_yield||0)>0)).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
 
   // KPI trend arrows
   // Données valides = plus de 20 sociétés avec un score composite > 0
@@ -3007,7 +3008,7 @@ function _renderDaySignal(sorted) {
   }
 
   const bestScore = sorted[0];
-  const bestDiv = (window.scores||scores||[]).filter(x=>(x.div_yield||0)>0).sort((a,b)=>b.div_yield-a.div_yield)[0];
+  const bestDiv = (typeof getRecurringDivStocks==='function'?getRecurringDivStocks(window.scores||scores||[]):(window.scores||scores||[]).filter(x=>(x.div_yield||0)>0)).sort((a,b)=>b.div_yield-a.div_yield)[0];
 
   // Top 3 du jour par variation positive
   const top3 = [...gainers].sort((a,b)=>(b.change_pct||0)-(a.change_pct||0)).slice(0,3);
@@ -3747,7 +3748,7 @@ function loadPortfolio(){
           <td style="color:${gc}">${pos.gain>=0?'+':''}${fmt(Math.round(pos.gain))}</td>
           <td style="color:${gc};font-weight:700">${pos.gain>=0?'+':''}${pos.gain_pct}%</td>
           <td style="color:var(--t2)">${w}%</td>
-          <td style="color:var(--amber)">${fmt(Math.round(pos.annual_div))}</td>
+          <td style="color:var(--amber)">${sc?.div_is_exceptional?'<span style="color:var(--t3)">—</span>':fmt(Math.round(pos.annual_div))}${typeof getDivConfidenceBadge==='function'&&sc?getDivConfidenceBadge(sc,{short:true,hideHaute:true}):''}</td>
           <td style="color:var(--t3);font-size:10px">${pos.date||'—'}</td>
           <td>
             <button class="btn btn-o" style="font-size:9px;padding:2px 5px;margin-bottom:2px" onclick="event.stopPropagation();_portWhyTicker('${pos.ticker}','${sig}','${sc10}','${div}')">ℹ️</button>
@@ -4333,13 +4334,19 @@ async function renderDiv(){
     wdate = [...all].filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
       .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
   }
-  _divData = wd;
 
-  // Peupler select simulateur
+  // Séparer récurrents vs exceptionnels AVANT tout calcul
+  const wdRecurring = (typeof getRecurringDivStocks==='function')
+    ? getRecurringDivStocks(wd)
+    : wd.filter(x=>!x.div_is_exceptional);
+  const wdExceptional = wd.filter(x=>x.div_is_exceptional);
+  _divData = wdRecurring;
+
+  // Peupler select simulateur (récurrents uniquement)
   const sel = document.getElementById('divSimTicker');
   if(sel && sel.options.length <= 1){
-    wd.forEach(x=>sel.add(new Option(`${x.ticker} — ${(x.div_yield||0).toFixed(1)}%`, x.ticker)));
-    if(wd.length) { sel.value = wd[0].ticker; divSimCalc(); }
+    wdRecurring.forEach(x=>sel.add(new Option(`${x.ticker} — ${(x.div_yield||0).toFixed(1)}%`, x.ticker)));
+    if(wdRecurring.length) { sel.value = wdRecurring[0].ticker; divSimCalc(); }
   }
 
   // Calendrier 12 mois visuel
@@ -4379,43 +4386,57 @@ async function renderDiv(){
 
   // Calendrier ex-div liste
   document.getElementById('divCal').innerHTML = wdate.length ? wdate.map(x=>{
-    const dy = x.div_yield||0;
-    const dyC = dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
-    const dyBg = dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const isExc = x.div_is_exceptional || x.div_flag==='exceptionnel_non_recurrent';
+    const dy    = isExc ? 0 : (x.div_yield||0);
+    const dyC   = isExc ? 'var(--amber)' : dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
+    const dyBg  = isExc ? 'rgba(251,191,36,.06)' : dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const dyLabel = isExc
+      ? `<span style="font-size:11px;color:var(--amber)">🔶 Exceptionnel</span>`
+      : `<span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>`;
+    const divAmt = isExc ? (x.div_exceptional_value||0) : (x.div_per_share||0);
+    const badge  = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(x,{short:true,hideHaute:true}) : '';
     return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="_openStock('${x.ticker}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <strong style="font-size:12px">${x.ticker}</strong>
           <span style="font-size:10px;color:var(--t2);margin-left:6px">${x.name||''}</span>
+          ${badge}
         </div>
-        <span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>
+        ${dyLabel}
       </div>
-      <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px">
+      <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap">
         <span>📅 Ex-div: <strong style="color:var(--t1)">${x.ex_div_date}</strong></span>
-        <span>💰 ${fmtXOF(x.div_per_share)}/action</span>
+        <span>💰 ${fmtXOF(divAmt)}/action</span>
         ${x.eps?`<span>BNA: ${Math.round(x.eps).toLocaleString('fr-FR')} XOF</span>`:''}
       </div>
     </div>`;
   }).join('') : '<p style="font-size:12px;color:var(--t2)">Dates à paraître.</p>';
 
-  // Table Top 15 rendements (couleurs renforcées)
-  document.getElementById('divTable').innerHTML = wd.slice(0,15).map(x=>{
+  // Table Top 15 rendements récurrents (exceptionnels exclus)
+  const _confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge : ()=>'';
+  document.getElementById('divTable').innerHTML = wdRecurring.slice(0,15).map(x=>{
     const dy = x.div_yield||0;
     const dyC = dy>=10?'#22c55e':dy>=5?'var(--amber)':'var(--t2)';
     const dyBg = dy>=10?'rgba(34,197,94,.15)':dy>=5?'rgba(251,191,36,.1)':'transparent';
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
+    const badge = _confBadge(x, {short:true, hideHaute:true});
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
-      <td style="font-weight:600">${fmtXOF(x.div_per_share)}</td>
+      <td style="font-weight:600">${fmtXOF(x.div_per_share)}${badge}</td>
       <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span></td>
       <td style="font-size:10px;color:var(--t2)">${x.ex_div_date||'N/D'}</td>
       <td style="font-size:10px;color:var(--t2)">${pe}</td>
       <td><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)'}">${x.pdf_verdict||'—'}</span></td>
     </tr>`;
-  }).join('');
+  }).join('')
+  + (wdExceptional.length ? `<tr><td colspan="6" style="padding:6px 4px;font-size:10px;color:var(--t3);border-top:2px dashed var(--border)">
+    🔶 Dividendes exceptionnels (hors calculs récurrents) :
+    ${wdExceptional.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;margin:0 4px;color:var(--amber)">${x.ticker} ${fmtXOF(x.div_exceptional_value||x.div_per_share)}/action</span>`).join('·')}
+    <span style="color:var(--t3)"> — cessions d'actifs ou HAO, non récurrents</span>
+  </td></tr>` : '');
 
-  // Graphique barres rendements
-  const top = wd.slice(0,15);
+  // Graphique barres rendements (récurrents uniquement)
+  const top = wdRecurring.slice(0,15);
   svgBar(document.getElementById('cDivDiv'),
     top.map(x=>x.ticker),
     top.map(x=>(x.div_yield||0)),
@@ -5364,15 +5385,25 @@ async function showStock(ticker){
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
-      ${(s.div_per_share&&s.div_per_share>0)||(entry&&entry.div_per_share>0)?`<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
+      ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
+            const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
+            const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
+            const _dy = _isExc ? (s.price>0?(s.div_exceptional_value||0)/s.price*100:0) : (s.div_yield||entry?.div_yield||0);
+            const _badge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(s,{hideHaute:true}) : '';
+            const _yieldCell = _isExc
+              ? `<span style="text-decoration:line-through;font-size:12px;color:var(--t3)">${_dy.toFixed(1)}%</span><br><span style="font-size:10px;color:var(--amber)">🔶 Non récurrent</span>`
+              : `${_dy.toFixed(2)}%${_badge}`;
+            const _amtCell = fmtXOF(_rawAmt)+(_isExc?'<br><span style="font-size:9px;color:var(--amber)">non récurrent</span>':'');
+            return `<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[
-            ['Par action',fmtXOF(s.div_per_share||entry?.div_per_share||0),'var(--amber)'],
-            ['Rendement',((s.div_yield||entry?.div_yield||0)).toFixed(2)+'%','var(--amber)'],
+            ['Par action',_amtCell,'var(--amber)'],
+            ['Rendement',_yieldCell,'var(--amber)'],
             ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
           ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
-        </div></div>`:''}
+        </div></div>`;
+          })():''}
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
         <div class="ct">📊 Résumé rapide</div>
         <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">Note ${(v/80*10).toFixed(1)}/10</strong>. ${v>=65?'C\'est une excellente opportunité selon nos analyses.':v>=50?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'} <a href="#" onclick="_setMode(\'expert\');return false" style="color:var(--accent);font-size:11px">Voir les 8 modèles →</a></div>
