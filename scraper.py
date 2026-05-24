@@ -27,7 +27,7 @@ HEADERS = {
 # Mises à jour lors de chaque publication de résultats annuels
 STOCK_FUNDAMENTALS = {
     "SGBC":  {"name": "Société Générale CI",          "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 31_111_110,  "pe_hist": 8.5,  "pb_hist": 1.96, "roe": 24, "div_hist": 1863, "debt": "Faible",   "stable": True},
-    "SIBC":  {"name": "Société Ivoirienne de Banque", "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 10_000_000,  "pe_hist": 10.7, "pb_hist": 2.2,  "roe": 31, "div_hist": 338,  "debt": "Faible",   "stable": True},
+    "SIBC":  {"name": "Société Ivoirienne de Banque", "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 65_000_000,  "pe_hist": 10.7, "pb_hist": 2.2,  "roe": 31, "div_hist": 338,  "debt": "Faible",   "stable": True},
     "SNTS":  {"name": "Sonatel Senegal",               "sector": "Télécoms",     "country": "Sénégal",       "shares": 100_000_000, "pe_hist": 8.33, "pb_hist": 3.5,  "roe": 34, "div_hist": 1933, "debt": "Faible",   "stable": True},
     "NSBC":  {"name": "NSIA Banque CI",                "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 20_000_000,  "pe_hist": 7.05, "pb_hist": 1.0,  "roe": 15, "div_hist": 759,  "debt": "Faible",   "stable": True},
     "CBIBF": {"name": "Coris Bank International",     "sector": "Banque",        "country": "Burkina Faso",  "shares": 19_232_000,  "pe_hist": 5.0,  "pb_hist": 1.2,  "roe": 18, "div_hist": 900,  "debt": "Faible",   "stable": True},
