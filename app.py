@@ -1268,11 +1268,14 @@ def api_dividends():
     """Calendrier ex-div et rendements pour la page Dividendes."""
     scores = load_latest_scores()
     fields = ["ticker","name","div_yield","div_per_share","ex_div_date",
-              "eps","pe_ref","sector","pdf_verdict","composite_adj"]
+              "eps","pe_ref","sector","pdf_verdict","composite_adj",
+              "div_confidence","div_flag","div_is_exceptional",
+              "div_exceptional_value","div_source_detail","div_ecart_boc_pdf","price"]
     result = []
     for s in scores:
         dy = s.get("div_yield") or 0
-        if dy > 0:
+        exc_v = s.get("div_exceptional_value") or 0
+        if dy > 0 or exc_v > 0:
             result.append({f: s.get(f) for f in fields})
     result.sort(key=lambda x: x.get("div_yield") or 0, reverse=True)
     return jsonify(result)
