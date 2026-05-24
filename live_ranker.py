@@ -354,6 +354,13 @@ def compute_live_ranking(trigger="manual", force=False):
                 except Exception:
                     pass
 
+            # Charger le cache african-markets (3e source, lecture seule — refresh dans job BOC)
+            try:
+                from external_source import get_cached_dividends as _get_am
+                am_cache = _get_am()
+            except Exception:
+                am_cache = {}
+
             # Charger les prix live (depuis cache, pas de re-fetch)
             live_cache  = get_live_data(force_refresh=False)
             live_prices = live_cache.get("prices", {})
@@ -385,7 +392,15 @@ def compute_live_ranking(trigger="manual", force=False):
                     _hist_div = base_row.get("div_hist")
                     _price    = row.get("price") or 0
 
-                    _dv = validate_dividend(ticker, _hist_div, _pdf_div, _boc_div, _price)
+                    _boc_date = _boc_e.get("div_date") if _boc_e else None
+                    _am_entry = am_cache.get(ticker, {})
+                    _am_div   = _am_entry.get("amount")
+                    _am_date  = _am_entry.get("paid_date")
+
+                    _dv = validate_dividend(
+                        ticker, _hist_div, _pdf_div, _boc_div, _price,
+                        am_div=_am_div, am_date=_am_date, boc_date=_boc_date,
+                    )
                     row["div_per_share"]         = _dv["value"]
                     row["div_yield"]             = _dv["yield_for_calc"]
                     row["div_confidence"]        = _dv["confidence"]
@@ -395,6 +410,10 @@ def compute_live_ranking(trigger="manual", force=False):
                     row["div_source_used"]       = _dv["source_used"]
                     row["div_source_detail"]     = _dv["source_detail"]
                     row["div_ecart_boc_pdf"]     = _dv["ecart_boc_pdf"]
+                    row["div_am_value"]          = _dv["am_div_raw"]
+                    row["div_am_date"]           = _dv["am_paid_date"]
+                    row["div_am_split"]          = _dv["am_split_flag"]
+                    row["div_am_net_brut"]       = _dv["am_net_brut_flag"]
 
                     # Calculer les 8 scores
                     scores = _compute_scores(row)
@@ -420,6 +439,10 @@ def compute_live_ranking(trigger="manual", force=False):
                         "div_source_used":         row.get("div_source_used", "none"),
                         "div_source_detail":       row.get("div_source_detail", ""),
                         "div_ecart_boc_pdf":       row.get("div_ecart_boc_pdf"),
+                        "div_am_value":            row.get("div_am_value"),
+                        "div_am_date":             row.get("div_am_date"),
+                        "div_am_split":            row.get("div_am_split", False),
+                        "div_am_net_brut":         row.get("div_am_net_brut", False),
                         "pdf_verdict":   row.get("pdf_verdict"),
                         "pdf_ca":        row.get("pdf_ca"),
                         "pdf_rn":        row.get("pdf_rn"),

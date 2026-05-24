@@ -1,0 +1,237 @@
+{
+  "SGBC": {
+    "amount": 1553.847,
+    "paid_date": "25 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SIBC": {
+    "amount": 495.0,
+    "paid_date": "31 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SNTS": {
+    "amount": 1575.0,
+    "paid_date": "17 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "NSBC": {
+    "amount": 454.829,
+    "paid_date": "8 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "CBIBF": {
+    "amount": 790.0,
+    "paid_date": "5 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOAB": {
+    "amount": 706.0,
+    "paid_date": "27 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOABF": {
+    "amount": 704.0,
+    "paid_date": "6 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOAC": {
+    "amount": 684.0,
+    "paid_date": "29 avril 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOAM": {
+    "amount": 144.0,
+    "paid_date": "21 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOAN": {
+    "amount": 609.15,
+    "paid_date": "31 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BOAS": {
+    "amount": 300.0,
+    "paid_date": "27 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ECOC": {
+    "amount": 594.0,
+    "paid_date": "30 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BICC": {
+    "amount": 540.9,
+    "paid_date": "27 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ETIT": {
+    "amount": null,
+    "paid_date": null,
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ORGT": {
+    "amount": 59.52,
+    "paid_date": "17 juil. 2020",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SAFC": {
+    "amount": null,
+    "paid_date": null,
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ORAC": {
+    "amount": 780.0,
+    "paid_date": "3 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ONTBF": {
+    "amount": 266.44625,
+    "paid_date": "31 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "NTLC": {
+    "amount": 675.0,
+    "paid_date": "20 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "STBC": {
+    "amount": 675.0,
+    "paid_date": "29 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "UNLC": {
+    "amount": 1233.0,
+    "paid_date": "9 juil. 2012",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SLBC": {
+    "amount": 4050.0,
+    "paid_date": "12 août 2022",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SMBC": {
+    "amount": 720.0,
+    "paid_date": "31 août 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "UNXC": {
+    "amount": 60.75,
+    "paid_date": "29 juil. 2022",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "LNBB": {
+    "amount": null,
+    "paid_date": null,
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "NEIC": {
+    "amount": 81.78,
+    "paid_date": "25 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "PALC": {
+    "amount": 563.306,
+    "paid_date": "26 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SPHC": {
+    "amount": 294.3,
+    "paid_date": "29 sept. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SOGC": {
+    "amount": 558.0,
+    "paid_date": "17 juil. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SCRC": {
+    "amount": 40.5,
+    "paid_date": "20 août 2021",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "TTLC": {
+    "amount": 175.5258,
+    "paid_date": "21 sept. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "TTLS": {
+    "amount": 207.58,
+    "paid_date": "28 juin 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SHEC": {
+    "amount": 53.0,
+    "paid_date": "28 déc. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SEMC": {
+    "amount": 14.4,
+    "paid_date": "28 déc. 2021",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "CIEC": {
+    "amount": 171.0,
+    "paid_date": "30 juil. 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SDCC": {
+    "amount": 450.0,
+    "paid_date": "15 sept. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "FTSC": {
+    "amount": 235.0,
+    "paid_date": "30 juil. 2021",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SDSC": {
+    "amount": 92.0,
+    "paid_date": "20 nov. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "CABC": {
+    "amount": 79.58,
+    "paid_date": "31 mai 2024",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "CFAC": {
+    "amount": 27.45,
+    "paid_date": "15 sept. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BNBC": {
+    "amount": 150.0,
+    "paid_date": "24 juil. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SICC": {
+    "amount": null,
+    "paid_date": null,
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "PRSC": {
+    "amount": 224.1,
+    "paid_date": "13 sept. 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "ABJC": {
+    "amount": 92.0,
+    "paid_date": "31 août 2023",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "STAC": {
+    "amount": 66.15,
+    "paid_date": "18 juil. 2022",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "SIVC": {
+    "amount": 630.0,
+    "paid_date": "29 sept. 2017",
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  },
+  "BICB": {
+    "amount": null,
+    "paid_date": null,
+    "scraped_at": "2026-05-24T17:13:14.254966"
+  }
+}

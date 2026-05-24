@@ -87,13 +87,22 @@ def job_price_history():
         logger.error(f"job_price_history: {e}")
 
 def job_boc():
-    """Scrape le Bulletin Officiel de la Cote chaque jour à 18h30."""
+    """Scrape BOC (18h30) puis rafraîchit la 3e source externe (african-markets)."""
     try:
         from boc_scraper import update_from_boc
         data = update_from_boc()
         logger.info(f"BOC: {len(data)} tickers mis à jour")
     except Exception as e:
-        logger.error(f"job_boc: {e}")
+        logger.error(f"job_boc BOC: {e}")
+    # Refresh african-markets — 1×/jour groupé avec BOC, dégradation gracieuse
+    try:
+        from scraper import STOCK_FUNDAMENTALS
+        from external_source import fetch_all as _fetch_am
+        tickers = list(STOCK_FUNDAMENTALS.keys())
+        _fetch_am(tickers)
+        logger.info(f"external_source: {len(tickers)} tickers rafraîchis (african-markets)")
+    except Exception as e:
+        logger.warning(f"job_boc external_source: {e} — BOC+PDF continuent sans 3e source")
 
 def job_scrape_reports():
     """Scrape les rapports PDF depuis brvm.org à 22h."""

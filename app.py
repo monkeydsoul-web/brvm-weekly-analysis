@@ -1270,7 +1270,8 @@ def api_dividends():
     fields = ["ticker","name","div_yield","div_per_share","ex_div_date",
               "eps","pe_ref","sector","pdf_verdict","composite_adj",
               "div_confidence","div_flag","div_is_exceptional",
-              "div_exceptional_value","div_source_detail","div_ecart_boc_pdf","price"]
+              "div_exceptional_value","div_source_detail","div_ecart_boc_pdf","price",
+              "div_am_value","div_am_date","div_am_split","div_am_net_brut"]
     result = []
     for s in scores:
         dy = s.get("div_yield") or 0
