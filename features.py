@@ -260,13 +260,30 @@ def get_price_targets() -> list:
             avg_target = None
             upside = None
             verdict = "exceptional_div"
+            n_models = 0
+            target_unreliable = False
         else:
             available = [v for v in [epv_target, graham_target, pb_target] if v]
-            avg_target = round(sum(available)/len(available)) if available else None
-            upside = round((avg_target/price-1)*100, 1) if avg_target and price else None
-            verdict = ("Fort potentiel" if (upside or 0) > 30
-                       else "Potentiel modéré" if (upside or 0) > 10
-                       else "Proche valeur juste")
+            n_models = len(available)
+            avg_target = round(sum(available) / n_models) if available else None
+            upside = round((avg_target / price - 1) * 100, 1) if avg_target and price else None
+            # Sanity check: cible aberrante si écart >80%, ou >50% sur modèle unique
+            target_unreliable = bool(
+                upside is not None and (
+                    abs(upside) > 80 or
+                    (n_models == 1 and abs(upside) > 50)
+                )
+            )
+            if target_unreliable:
+                verdict = "incertain"
+                logger.warning(
+                    "[price_targets] %s: upside=%.1f%% (%d modèle(s)) — cible marquée incertaine",
+                    s.get("ticker", "?"), upside, n_models,
+                )
+            else:
+                verdict = ("Fort potentiel" if (upside or 0) > 30
+                           else "Potentiel modéré" if (upside or 0) > 10
+                           else "Proche valeur juste")
         targets.append({
             "ticker": s["ticker"], "name": s.get("name", ""),
             "current_price": price, "score": s.get("composite_adj", 0),
@@ -274,6 +291,8 @@ def get_price_targets() -> list:
             "pb_target": pb_target, "avg_target": avg_target,
             "upside_pct": upside,
             "verdict": verdict,
+            "n_models": n_models,
+            "target_unreliable": target_unreliable,
             "div_is_exceptional": div_is_exceptional,
             "div_confidence": s.get("div_confidence", "inconnue"),
             "div_flag": s.get("div_flag", ""),
