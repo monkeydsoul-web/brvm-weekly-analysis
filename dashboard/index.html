@@ -4684,11 +4684,12 @@ async function renderTargets(){
     const up=t.upside_pct||0;
     const cls=up>=30?'target-up':up<0?'target-dn':'';
     const vc=up>=30?'var(--green)':up<0?'var(--red)':'var(--amber)';
-    const fmtAvis=(v)=>v==='Fort potentiel'?'✅ Bonne affaire':v==='Potentiel modéré'?'👀 À surveiller':v==='Proche valeur juste'?'⚖️ Prix correct':v?'⚠️ Trop cher':'—';
+    const fmtAvis=(v)=>v==='Fort potentiel'?'✅ Bonne affaire':v==='Potentiel modéré'?'👀 À surveiller':v==='Proche valeur juste'?'⚖️ Prix correct':v==='exceptional_div'?'🔶 Div. exceptionnel':v?'⚠️ Trop cher':'—';
     const fmtOpp=up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`;
     const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
     const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
     const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
+    const confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(t,{short:true,hideHaute:true}) : '';
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
@@ -4696,7 +4697,7 @@ async function renderTargets(){
       <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
       <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
-      <td style="font-size:11px">${fmtAvis(t.verdict)}</td>
+      <td style="font-size:11px">${fmtAvis(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
 }
 

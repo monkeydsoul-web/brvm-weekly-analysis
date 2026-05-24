@@ -49,7 +49,17 @@ def _save(path, data):
     json.dump(data, open(path,"w"), ensure_ascii=False, indent=2)
 
 def _load_scores():
-    files = sorted(glob.glob(os.path.join(DATA_DIR,"scores_*.json")))
+    live = os.path.join(DATA_DIR, "live_ranking.json")
+    if os.path.exists(live):
+        try:
+            data = json.load(open(live))
+            if isinstance(data, list):
+                return data
+            if isinstance(data, dict) and "ranking" in data:
+                return data["ranking"]
+        except Exception:
+            pass
+    files = sorted(glob.glob(os.path.join(DATA_DIR, "scores_*.json")))
     return json.load(open(files[-1])) if files else []
 
 # ── Custom scoring ─────────────────────────────────────────────────────────
@@ -233,29 +243,40 @@ def get_price_targets() -> list:
     targets = []
     for s in scores:
         price = s.get("price")
-        eps = s.get("eps_est")
-        bv = s.get("book_value_per_share")
+        # Compat: live_ranking.json → "eps"/"bna", scores_*.json → "eps_est"
+        eps = s.get("eps_est") or s.get("eps") or s.get("bna")
+        # Compat: live_ranking.json → "bvpa", scores_*.json → "book_value_per_share"
+        bv = s.get("book_value_per_share") or s.get("bvpa")
         roe = s.get("roe", 0)
-        pe = s.get("pe_ref", 15)
+        div_is_exceptional = bool(
+            s.get("div_is_exceptional") or s.get("div_flag") == "exceptionnel_non_recurrent"
+        )
         if not price: continue
-        # EPV target: normalised EPS / cost of capital
         epv_target = round(eps / 0.10) if eps else None
-        # Graham target: sqrt(22.5 * EPS * BV)
         graham_target = round((22.5 * eps * bv) ** 0.5) if eps and bv else None
-        # Warranted P/B: ROE / cost of equity
         warranted_pb = roe / 10.0 if roe else None
         pb_target = round(bv * warranted_pb) if bv and warranted_pb else None
-        # Average of available targets
-        available = [t for t in [epv_target, graham_target, pb_target] if t]
-        avg_target = round(sum(available)/len(available)) if available else None
-        upside = round((avg_target/price-1)*100, 1) if avg_target and price else None
+        if div_is_exceptional:
+            avg_target = None
+            upside = None
+            verdict = "exceptional_div"
+        else:
+            available = [v for v in [epv_target, graham_target, pb_target] if v]
+            avg_target = round(sum(available)/len(available)) if available else None
+            upside = round((avg_target/price-1)*100, 1) if avg_target and price else None
+            verdict = ("Fort potentiel" if (upside or 0) > 30
+                       else "Potentiel modéré" if (upside or 0) > 10
+                       else "Proche valeur juste")
         targets.append({
-            "ticker": s["ticker"], "name": s.get("name",""),
-            "current_price": price, "score": s.get("composite_adj",0),
+            "ticker": s["ticker"], "name": s.get("name", ""),
+            "current_price": price, "score": s.get("composite_adj", 0),
             "epv_target": epv_target, "graham_target": graham_target,
             "pb_target": pb_target, "avg_target": avg_target,
             "upside_pct": upside,
-            "verdict": "Fort potentiel" if (upside or 0)>30 else ("Potentiel modéré" if (upside or 0)>10 else "Proche valeur juste"),
+            "verdict": verdict,
+            "div_is_exceptional": div_is_exceptional,
+            "div_confidence": s.get("div_confidence", "inconnue"),
+            "div_flag": s.get("div_flag", ""),
         })
     targets.sort(key=lambda x: x.get("upside_pct") or -999, reverse=True)
     return targets
