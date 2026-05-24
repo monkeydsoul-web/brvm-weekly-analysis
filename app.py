@@ -2050,6 +2050,16 @@ if __name__ == "__main__":
         logger.info(f"Auto-scheduler démarré — {len(_sched.get_jobs())} jobs")
     except Exception as e:
         logger.warning(f"Scheduler non démarré: {e}")
+    # Validation au démarrage : exécute le validateur AVANT de servir des requêtes
+    # Garantit que live_ranking.json contient div_confidence/div_flag/etc. dès le 1er appel
+    # (sinon les données brutes sont servies jusqu'au 1er cycle scheduler, ~5 min)
+    try:
+        from live_ranker import compute_live_ranking as _warm_ranking
+        logger.info("Démarrage : validation des données (validate_dividend sur 47 tickers)...")
+        _warm_ranking(trigger="startup")
+        logger.info("Démarrage : live_ranking.json validé et à jour.")
+    except Exception as _e:
+        logger.warning(f"Démarrage : validation échouée — données potentiellement brutes: {_e}")
     # Préchauffage du cache commodités en arrière-plan (évite 2.5s au premier appel)
     threading.Thread(target=fetch_commodity_prices, daemon=True).start()
     app.run(host='0.0.0.0', port=PORT, debug=False)
