@@ -27,7 +27,7 @@ HEADERS = {
 # Mises à jour lors de chaque publication de résultats annuels
 STOCK_FUNDAMENTALS = {
     "SGBC":  {"name": "Société Générale CI",          "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 31_111_110,  "pe_hist": 8.5,  "pb_hist": 1.96, "roe": 24, "div_hist": 1863, "debt": "Faible",   "stable": True},
-    "SIBC":  {"name": "Société Ivoirienne de Banque", "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 65_000_000,  "pe_hist": 10.7, "pb_hist": 2.2,  "roe": 31, "div_hist": 338,  "debt": "Faible",   "stable": True},
+    "SIBC":  {"name": "Société Ivoirienne de Banque", "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 100_000_000, "pe_hist": 10.7, "pb_hist": 2.2,  "roe": 31, "div_hist": 338,  "debt": "Faible",   "stable": True},
     "SNTS":  {"name": "Sonatel Senegal",               "sector": "Télécoms",     "country": "Sénégal",       "shares": 100_000_000, "pe_hist": 8.33, "pb_hist": 3.5,  "roe": 34, "div_hist": 1933, "debt": "Faible",   "stable": True},
     "NSBC":  {"name": "NSIA Banque CI",                "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 20_000_000,  "pe_hist": 7.05, "pb_hist": 1.0,  "roe": 15, "div_hist": 759,  "debt": "Faible",   "stable": True},
     "CBIBF": {"name": "Coris Bank International",     "sector": "Banque",        "country": "Burkina Faso",  "shares": 19_232_000,  "pe_hist": 5.0,  "pb_hist": 1.2,  "roe": 18, "div_hist": 900,  "debt": "Faible",   "stable": True},
@@ -64,7 +64,7 @@ STOCK_FUNDAMENTALS = {
     "SDCC":  {"name": "SODECI CI",                     "sector": "Utilités",     "country": "Côte d'Ivoire", "shares": 12_000_000,  "pe_hist": 14.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 250,  "debt": "Élevée",   "stable": True},
     "FTSC":  {"name": "Filtisac CI",                   "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 45_294_490,  "pe_hist": 5.5,  "pb_hist": 1.2,  "roe": 12, "div_hist": 150,  "debt": "Faible",   "stable": False},
     "SDSC":  {"name": "Africa Global Logistics CI",    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 33_000_000,  "pe_hist": 16.0, "pb_hist": 2.2,  "roe": 8,  "div_hist": 50,   "debt": "Élevée",   "stable": False},
-    "CABC":  {"name": "Sicable CI",                    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 14_000_000,  "pe_hist": 12.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 120,  "debt": "Modérée",  "stable": False},
+    "CABC":  {"name": "Sicable CI",                    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 5_920_000,   "pe_hist": 12.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 120,  "debt": "Modérée",  "stable": False},
     "CFAC":  {"name": "CFAO Motors CI",                "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 35_200_000,  "pe_hist": 14.0, "pb_hist": 1.8,  "roe": 8,  "div_hist": 50,   "debt": "Modérée",  "stable": False},
     "BNBC":  {"name": "Bernabé CI",                    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 30_000_000,  "pe_hist": 15.0, "pb_hist": 2.0,  "roe": 8,  "div_hist": 50,   "debt": "Modérée",  "stable": False},
     "SICC":  {"name": "Sicor CI",                      "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 18_000_000,  "pe_hist": 16.0, "pb_hist": 2.2,  "roe": 8,  "div_hist": 80,   "debt": "Modérée",  "stable": False},
@@ -72,7 +72,7 @@ STOCK_FUNDAMENTALS = {
     "ABJC":  {"name": "Servair Abidjan CI",            "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 7_000_000,   "pe_hist": 25.0, "pb_hist": 3.5,  "roe": 7,  "div_hist": 50,   "debt": "Modérée",  "stable": False},
     "STAC":  {"name": "Setao CI",                      "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 17_000_000,  "pe_hist": 22.0, "pb_hist": 3.0,  "roe": 8,  "div_hist": 30,   "debt": "Élevée",   "stable": False},
     "SIVC":  {"name": "Erium CI (Air Liquide)",        "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 60_000_000,  "pe_hist": 20.0, "pb_hist": 3.0,  "roe": 10, "div_hist": 60,   "debt": "Faible",   "stable": True},
-    "BICB":  {"name": "BICB Bénin",                    "sector": "Banque",        "country": "Bénin",         "shares": 10_000_000,  "pe_hist": 12.0, "pb_hist": 1.5,  "roe": 12, "div_hist": 200,  "debt": "Faible",   "stable": True},
+    "BICB":  {"name": "BIIC Bénin",                    "sector": "Banque",        "country": "Bénin",         "shares": 57_760_000,  "pe_hist": 12.0, "pb_hist": 1.5,  "roe": 19, "div_hist": 200,  "debt": "Faible",   "stable": True},
 }
 
 

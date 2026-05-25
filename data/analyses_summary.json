@@ -2966,75 +2966,77 @@
   "CABC": {
     "kpis": {
       "chiffre_affaires": {
-        "valeur": 485000,
+        "valeur": 19125,
         "unite": "MFCFA",
-        "variation": "+8.9%"
+        "variation": null
       },
       "resultat_net": {
-        "valeur": 12400,
+        "valeur": 1225,
         "unite": "MFCFA",
-        "variation": "+11.2%"
+        "variation": null
       },
       "capitaux_propres": {
-        "valeur": 89000,
+        "valeur": 10200,
         "unite": "MFCFA",
-        "variation": "+6.8%"
+        "variation": null
       },
       "total_bilan": {
-        "valeur": 285000,
+        "valeur": 28000,
         "unite": "MFCFA",
-        "variation": "+7.1%"
+        "variation": null
       },
       "dividende_par_action": {
-        "valeur": 80,
+        "valeur": null,
         "unite": "FCFA",
         "variation": null
       },
       "roe": {
-        "valeur": 13.9,
+        "valeur": 12.0,
         "unite": "%",
         "variation": null
       },
       "marge_nette": {
-        "valeur": 2.6,
+        "valeur": 6.4,
         "unite": "%",
         "variation": null
       },
       "ebitda": {
-        "valeur": 18500,
+        "valeur": 2400,
         "unite": "MFCFA",
         "variation": null
       },
       "dette_nette": {
-        "valeur": 35000,
+        "valeur": 4500,
         "unite": "MFCFA",
         "variation": null
       },
       "resultat_exploitation": {
-        "valeur": 16000,
+        "valeur": 1650,
         "unite": "MFCFA",
         "variation": null
       }
     },
-    "verdict_investisseur": "POSITIF",
-    "resume": "CFAO Motors CI — leader distribution automobile. CA 485 Mrd FCFA +8.9%. Profite du boom automobile en CI.",
+    "verdict_investisseur": "NEUTRE",
+    "resume": "Sicable CI (groupe Prysmian) — fabricant de câbles électriques CI. CA 19.1 Mrd FCFA, RN 1.2 Mrd FCFA, ROE 12%.",
     "points_cles": [
-      "CA 485 Mrd FCFA +8.9%",
-      "RN 12.4 Mrd FCFA",
-      "Leader automobile CI",
-      "Dividende 850 FCFA/action"
+      "CA 19.1 Mrd FCFA",
+      "RN 1.2 Mrd FCFA",
+      "ROE 12%",
+      "Bilan 28 Mrd FCFA",
+      "Groupe Prysmian"
     ],
     "risques": [
-      "Volatilité change",
-      "Transition véhicules électriques"
+      "Volatilité matières premières (cuivre)",
+      "Concurrence câbliers régionaux",
+      "Dépendance CI marché unique"
     ],
     "year": 2024,
     "status": "ok",
     "ticker": "CABC",
     "doc_type": "Données financières enrichies",
     "url": "https://www.brvm.org/fr/valeurs/0/CABC",
-    "analyzed_at": "2026-05-11T10:58:59.341585",
-    "cached_at": "2026-05-11T10:58:59.341585"
+    "analyzed_at": "2026-05-25T12:06:26.916724",
+    "cached_at": "2026-05-25T12:06:26.916724"
   },
   "SIVC": {
     "kpis": {
@@ -3111,24 +3113,24 @@
   "BICB": {
     "kpis": {
       "chiffre_affaires": {
-        "valeur": 98500,
+        "valeur": 45200,
         "unite": "MFCFA",
-        "variation": "+6.8%"
+        "variation": null
       },
       "resultat_net": {
-        "valeur": 14200,
+        "valeur": 30300,
         "unite": "MFCFA",
-        "variation": "+9.4%"
+        "variation": null
       },
       "capitaux_propres": {
-        "valeur": 112000,
+        "valeur": 157000,
         "unite": "MFCFA",
-        "variation": "+5.9%"
+        "variation": null
       },
       "total_bilan": {
-        "valeur": 895000,
+        "valeur": 1340000,
         "unite": "MFCFA",
-        "variation": "+7.2%"
+        "variation": null
       },
       "dividende_par_action": {
         "valeur": null,
@@ -3136,49 +3138,52 @@
         "variation": null
       },
       "roe": {
-        "valeur": 12.7,
+        "valeur": 19.2,
         "unite": "%",
         "variation": null
       },
       "marge_nette": {
-        "valeur": 14.4,
+        "valeur": 67.0,
         "unite": "%",
         "variation": null
       },
       "ebitda": {
-        "valeur": 19000,
+        "valeur": null,
         "unite": "MFCFA",
         "variation": null
       },
       "dette_nette": {
-        "valeur": 75000,
+        "valeur": null,
         "unite": "MFCFA",
         "variation": null
       },
       "resultat_exploitation": {
-        "valeur": 17000,
+        "valeur": null,
         "unite": "MFCFA",
         "variation": null
       }
     },
-    "verdict_investisseur": "NEUTRE",
-    "resume": "BICICI — Banque Internationale pour le Commerce et l'Industrie CI. RN 14.2 Mrd FCFA +9.4%.",
+    "verdict_investisseur": "POSITIF",
+    "resume": "BIIC Bénin (Banque Internationale pour l'Industrie et le Commerce du Bénin). RN 30.3 Mrd FCFA, ROE 19.2%. IPO BRVM avril 2025.",
     "points_cles": [
-      "RN 14.2 Mrd FCFA +9.4%",
-      "ROE 12.7%",
-      "Bilan 895 Mrd FCFA"
+      "RN 30.3 Mrd FCFA",
+      "ROE 19.2%",
+      "PNB 45.2 Mrd FCFA",
+      "Bilan 1 340 Mrd FCFA",
+      "IPO BRVM avril 2025"
     ],
     "risques": [
-      "Concurrence bancaire CI",
-      "Hausse taux BCEAO"
+      "Bénin marché émergent",
+      "Hausse taux BCEAO",
+      "Liquidité titre récent"
     ],
     "year": 2024,
     "status": "ok",
     "ticker": "BICB",
     "doc_type": "Données financières enrichies",
     "url": "https://www.brvm.org/fr/valeurs/0/BICB",
-    "analyzed_at": "2026-05-11T10:58:59.341602",
-    "cached_at": "2026-05-11T10:58:59.341602"
+    "analyzed_at": "2026-05-25T12:06:26.916724",
+    "cached_at": "2026-05-25T12:06:26.916724"
   },
   "BNBC": {
     "kpis": {
