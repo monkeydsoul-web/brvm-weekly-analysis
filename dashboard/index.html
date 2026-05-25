@@ -590,17 +590,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge compact-hide" style="display:none"></span></div>
-    <div class="sb-grp sb-acc" onclick="sbToggle('grp-marche')"><span>📊</span> <span class="ni-label">Vue Marché</span><span class="sb-acc-arrow ni-label">▾</span></div>
-    <div class="sb-sub" id="grp-marche">
-      <div class="ni ni-sub" onclick="nav('market')" data-tip="Vue marché complète : indices BRVM, heatmap, flux de capitaux, répartition sectorielle"><span>◈</span> <span class="ni-label">📈 Indices BRVM</span></div>
-      <div class="ni ni-sub" onclick="nav('comm')" data-tip="Impact des prix des matières premières (pétrole, cacao, or) sur les sociétés BRVM"><span>◈</span> <span class="ni-label">Commodités</span></div>
-      <div class="ni ni-sub" onclick="nav('macro')" data-tip="Indicateurs économiques de la zone UEMOA : taux d'intérêt, croissance, risque pays"><span>◈</span> <span class="ni-label">Macro UEMOA</span></div>
-    </div>
+    <div class="ni" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
       <div class="ni ni-sub" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>◈</span> <span class="ni-label">Signaux</span></div>
       <div class="ni ni-sub" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>◈</span> <span class="ni-label">Valorisation</span></div>
-      <div class="ni ni-sub" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
+      <div class="ni ni-sub expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-port">
@@ -758,7 +753,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="idx-cap" style="display:none"></div>
   <!-- Bouton vers analyse marché complète -->
   <div style="text-align:center;padding:20px 0 8px">
-    <button onclick="nav('market')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
+    <button onclick="nav('marche')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
   </div>
 </div>
 
@@ -1283,21 +1278,26 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- ACTUALITÉS -->
 
-<!-- MARCHÉ VUE COMPLÈTE -->
-<div class="page" id="page-market">
+<!-- MARCHÉ — PAGE UNIFIÉE (Indices · Commodités · Macro UEMOA) -->
+<div class="page" id="page-marche">
   <div class="ph">
-    <div><h2>📊 Vue Marché BRVM</h2><p class="page-sub">Indices · heatmap · flux de capitaux · répartition sectorielle</p></div>
-    <button class="btn btn-o" style="font-size:11px" onclick="nav('dash')">← Tableau de bord</button>
+    <div><h2>📊 Marché</h2><p class="page-sub">Indices BRVM · Commodités · Contexte macro UEMOA</p></div>
   </div>
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="switchTab('marche','indices',this);if(typeof _renderMarketPage!=='undefined')_renderMarketPage()">📈 Indices BRVM</button>
+    <button class="tab-btn" onclick="switchTab('marche','comm',this)">🌍 Commodités</button>
+    <button class="tab-btn" onclick="switchTab('marche','macro',this);if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(function(){if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300)">🏦 Macro UEMOA</button>
+  </div>
+
+  <!-- ── Onglet Indices BRVM ── -->
+  <div class="tab-content on" id="marche-tab-indices">
   <div class="beginner-banner">📊 Cette page présente une vue complète du marché BRVM avec tous les indicateurs techniques. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
-  <!-- Bandeau indices -->
   <div class="g4" id="market-indices-kpis" style="margin-bottom:20px">
     <div class="kpi"><div class="kl">BRVM-C</div><div class="kv" id="mkt-brvm-c">—</div><div id="mkt-brvm-c-chg" style="font-size:11px;color:var(--t2)">—</div></div>
     <div class="kpi"><div class="kl">BRVM-30</div><div class="kv" id="mkt-brvm-30">—</div><div id="mkt-brvm-30-chg" style="font-size:11px;color:var(--t2)">—</div></div>
     <div class="kpi"><div class="kl">Sociétés en hausse</div><div class="kv" id="mkt-up" style="color:var(--green)">—</div></div>
     <div class="kpi"><div class="kl">Sociétés en baisse</div><div class="kv" id="mkt-down" style="color:var(--red)">—</div></div>
   </div>
-  <!-- Distribution + sectoriel -->
   <div class="g2" style="margin-bottom:16px">
     <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
       <div id="mkt-dist" style="width:100%;height:170px"></div>
@@ -1305,7 +1305,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="mkt-sect" style="width:100%;height:170px"></div></div>
   </div>
-  <!-- Heatmap -->
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
       <div class="ct" style="margin:0">🌡️ Heatmap BRVM — Performance du jour</div>
@@ -1325,7 +1324,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block;vertical-align:middle"></span> Baisse</span>
     </div>
   </div>
-  <!-- Flux + Insights -->
   <div class="g2" style="margin-bottom:16px">
     <div class="card" style="margin-bottom:0">
       <div class="ct">💸 Flux de capitaux</div>
@@ -1336,11 +1334,33 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div id="mkt-insights-full"><p style="color:var(--t2);font-size:11px">Chargement...</p></div>
     </div>
   </div>
-</div>
+  </div>
 
-<!-- MACRO UEMOA -->
-<div class="page" id="page-macro">
-  <div class="ph"><div><h2>🏦 Macro UEMOA</h2><p class="page-sub">Contexte économique régional · indicateurs BCEAO · taux directeurs</p></div></div>
+  <!-- ── Onglet Commodités ── -->
+  <div class="tab-content" id="marche-tab-comm">
+  <div class="ph" style="margin-top:4px"><div><h3 style="margin:0">Commodités internationales</h3><p class="page-sub">Or · pétrole · cacao · coton · matières premières liées à l'UEMOA</p></div>
+    <span style="font-size:11px;color:var(--t2)">Produit principal uniquement</span></div>
+  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Indique quelles sociétés BRVM sont exposées aux matières premières<br>
+      · Ex : une hausse du cacao bénéficie aux sociétés agro-industrielles<br>
+      · Utile pour comprendre les risques sectoriels indirects
+    </div>
+  </details>
+  <div id="commPrices" class="g4" style="margin-bottom:14px"></div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0"><div class="ct">Score des sociétés exposées</div>
+      <div id="cCommDiv" style="width:100%;height:260px"></div></div>
+    <div class="card" style="margin-bottom:0"><div class="ct">Exposition produit principal</div>
+      <table><thead><tr><th>Ticker</th><th>Activité</th><th>Commodité</th><th title="Impact des matières premières sur les revenus et marges de la société · Fort = dépendance élevée">Expo.</th><th title="Score global · 💡 Au-dessus de 60 = signal fort">Score</th></tr></thead>
+      <tbody id="commTable"></tbody></table></div>
+  </div>
+  </div>
+
+  <!-- ── Onglet Macro UEMOA ── -->
+  <div class="tab-content" id="marche-tab-macro">
+  <div class="ph" style="margin-top:4px"><div><h3 style="margin:0">🏦 Macro UEMOA</h3><p class="page-sub">Contexte économique régional · indicateurs BCEAO · taux directeurs</p></div></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
@@ -1410,11 +1430,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         </div>
       </div>
     </div>
-    <!-- Notations souveraines + sociétés notées -->
     <div class="card" style="margin-bottom:12px" id="sovereign-ratings-card">
       <div class="ct" style="margin-bottom:10px">⭐ Notations souveraines UEMOA <span style="font-size:10px;font-weight:400;color:var(--t3)">(sources : Bloomfield · GCR · Moody's)</span></div>
       <div id="sovereign-ratings-content" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-bottom:12px">
-        <!-- Données statiques connues — enrichies dynamiquement par renderMacroRatings() -->
         <div style="background:var(--bg3);border-radius:8px;padding:10px;border-top:3px solid var(--amber)">
           <div style="font-size:12px;font-weight:700;margin-bottom:3px">🇨🇮 Côte d'Ivoire</div>
           <div style="font-size:16px;font-weight:700;color:var(--amber)">Ba3 / B+</div>
@@ -1458,7 +1476,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
       <div id="rated-companies-block"></div>
     </div>
-    <!-- Risque pays -->
     <div class="card">
       <div class="ct" style="margin-bottom:10px" title="Niveau de risque politique et économique évalué · 💡 Faible risque = environnement favorable aux investisseurs">🔐 Risque pays — Sociétés cotées BRVM</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
@@ -1485,29 +1502,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
     </div>
   </div>
+  </div>
+
 </div>
 
-<!-- COMMODITÉS -->
-<div class="page" id="page-comm">
-  <div class="ph"><div><h2>Commodités internationales</h2><p class="page-sub">Or · pétrole · cacao · coton · matières premières liées à l'UEMOA</p></div>
-    <span style="font-size:11px;color:var(--t2)">Produit principal uniquement</span></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Indique quelles sociétés BRVM sont exposées aux matières premières<br>
-      · Ex : une hausse du cacao bénéficie aux sociétés agro-industrielles<br>
-      · Utile pour comprendre les risques sectoriels indirects
-    </div>
-  </details>
-  <div id="commPrices" class="g4" style="margin-bottom:14px"></div>
-  <div class="g2">
-    <div class="card" style="margin-bottom:0"><div class="ct">Score des sociétés exposées</div>
-      <div id="cCommDiv" style="width:100%;height:260px"></div></div>
-    <div class="card" style="margin-bottom:0"><div class="ct">Exposition produit principal</div>
-      <table><thead><tr><th>Ticker</th><th>Activité</th><th>Commodité</th><th title="Impact des matières premières sur les revenus et marges de la société · Fort = dépendance élevée">Expo.</th><th title="Score global · 💡 Au-dessus de 60 = signal fort">Score</th></tr></thead>
-      <tbody id="commTable"></tbody></table></div>
-  </div>
-</div>
+<!-- backward-compat stubs — contenu déplacé dans page-marche -->
+<div class="page" id="page-market"></div>
+
+<div class="page" id="page-macro"></div>
+<div class="page" id="page-comm"></div>
 
 <!-- CHAT IA -->
 <div class="page" id="page-chat">
@@ -5687,6 +5690,7 @@ const pageLoaders={
   optim:     ()=>renderCorrelMatrix(),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
+  marche:    ()=>{if(typeof _renderMarketPage!=='undefined')_renderMarketPage();},
   news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
   settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
   market:    ()=>_renderMarketPage(),
@@ -7218,7 +7222,7 @@ const _bcLabels = {
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
   signals:'Signaux', valuation:'Valorisation', income:'Revenus',
   port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire', settings:'Paramètres',
-  news:'Actualités BRVM', market:'Vue Marché',
+  news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
 };
 
 document.addEventListener('keydown', function(e) {
@@ -7247,6 +7251,32 @@ function _showKbdHint(label) {
 const navHistory = [];
 const _origNav = nav;
 nav = function(id, pushHistory) {
+  // Redirect market/comm/macro vers la page unifiée Marché
+  var _MARCHE_TAB = { market: 'indices', comm: 'comm', macro: 'macro' };
+  if (_MARCHE_TAB[id]) {
+    var tab = _MARCHE_TAB[id];
+    if (pushHistory !== false) navHistory.push('marche');
+    _origNav('marche');
+    var pg = document.getElementById('page-marche');
+    if (pg) {
+      pg.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('on'); });
+      pg.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('on'); });
+      var tabEl = document.getElementById('marche-tab-' + tab);
+      if (tabEl) tabEl.classList.add('on');
+      var btns = pg.querySelectorAll('.tab-btn');
+      var idx = ['indices','comm','macro'].indexOf(tab);
+      if (idx >= 0 && btns[idx]) btns[idx].classList.add('on');
+    }
+    var bcEl = document.getElementById('bc-page');
+    var _tabLabels = { market: 'Indices BRVM', comm: 'Commodités', macro: 'Macro UEMOA' };
+    if (bcEl) bcEl.textContent = _tabLabels[id] || 'Marché';
+    if (id === 'market' && typeof _renderMarketPage !== 'undefined') _renderMarketPage();
+    if (id === 'macro') {
+      if (typeof renderMacroPage !== 'undefined') renderMacroPage();
+      setTimeout(function(){ if(typeof renderMacroRatings!=='undefined') renderMacroRatings(); }, 300);
+    }
+    return;
+  }
   if (pushHistory !== false) navHistory.push(id);
   _origNav(id);
   const bcEl = document.getElementById('bc-page');
@@ -7379,7 +7409,7 @@ function _renderCmdK(q) {
     {id:'screener',label:'Screener',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
     {id:'port',label:'Mon portefeuille',icon:'💼'},{id:'signals',label:'Signaux',icon:'📡'},
     {id:'valuation',label:'Valorisation',icon:'💰'},{id:'optim',label:'Corrélation & Markowitz',icon:'📊'},
-    {id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
+    {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
     {id:'income',label:'Revenus',icon:'💵'},{id:'alerts',label:'Alertes',icon:'🔔'},
     {id:'glossaire',label:'Glossaire',icon:'📚'},{id:'settings',label:'Paramètres',icon:'⚙️'}
   ].filter(p => !lq || p.label.toLowerCase().includes(lq) || p.id.toLowerCase().includes(lq)).slice(0,5);

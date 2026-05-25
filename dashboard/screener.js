@@ -3,6 +3,26 @@
 let _scrSort = { col: 'composite_adj', asc: false };
 let _scrResults = [];
 
+function _screenerHasFilters() {
+  const hasVal = ['sc-score','sc-pe','sc-div','sc-roe','sc-pb'].some(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim() !== '';
+  });
+  const sect = document.getElementById('sc-sect');
+  return hasVal || !!(sect && sect.value !== '');
+}
+
+function _screenerShowEmpty() {
+  const tbody = document.getElementById('screener-table');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--t2);padding:40px 20px">
+    <div style="font-size:28px;margin-bottom:10px">🔍</div>
+    <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:8px">Choisissez une stratégie ou filtrez</div>
+    <div style="font-size:12px;color:var(--t3);line-height:1.7">Sélectionnez une stratégie pré-configurée ci-dessus,<br>ou définissez vos critères dans les filtres.</div>
+  </td></tr>`;
+  const count = document.getElementById('sc-count');
+  if (count) count.innerHTML = `<span style="font-size:15px;font-weight:700;color:var(--t3)">—</span> <span style="font-size:12px;color:var(--text-2)">choisissez une stratégie ou filtrez</span>`;
+}
+
 function initScreener() {
   const sectSel = document.getElementById('sc-sect');
   if (!sectSel || sectSel.options.length > 1) return;
@@ -14,6 +34,7 @@ function initScreener() {
 }
 
 function runScreener() {
+  if (!_screenerHasFilters()) { _screenerShowEmpty(); return; }
   _screenerSaveFilters();
   const all = window.scores || scores || [];
   const scoreMin = (parseFloat(document.getElementById('sc-score')?.value) || 0) * 8;
