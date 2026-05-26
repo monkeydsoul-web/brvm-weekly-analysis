@@ -47,8 +47,9 @@ REPORTS_DIR = "reports"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+_LIVE_UNAVAIL_MSG = "Données live indisponibles — relancer la régénération du ranking"
+
 def load_latest_scores():
-    # Priorité 1 : live_ranking.json (reclassement automatique temps réel)
     live_path = os.path.join(DATA_DIR, "live_ranking.json")
     if os.path.exists(live_path):
         try:
@@ -56,21 +57,14 @@ def load_latest_scores():
                 data = json.load(f)
             ranking = data.get("ranking", [])
             if ranking:
-                # Convertir au format attendu par le dashboard
                 for r in ranking:
                     r.setdefault("composite_adj", r.get("composite_adj", 0))
                 return ranking
         except Exception as e:
-            logger.warning(f"live_ranking.json erreur: {e}")
-    # Fallback : fichier scores_*.json statique
-    files = sorted(glob.glob(os.path.join(DATA_DIR, "scores_*.json")))
-    if not files:
-        return []
-    try:
-        with open(files[-1]) as f:
-            return json.load(f)
-    except Exception:
-        return []
+            logger.error(f"live_ranking.json illisible: {e} — {_LIVE_UNAVAIL_MSG}")
+            return []
+    logger.error(f"live_ranking.json absent — {_LIVE_UNAVAIL_MSG}")
+    return []
 
 
 def load_price_history():
@@ -256,7 +250,14 @@ def index():
 
 @app.route("/api/scores")
 def api_scores():
+    live_path = os.path.join(DATA_DIR, "live_ranking.json")
+    if not os.path.exists(live_path):
+        logger.error(f"/api/scores — {_LIVE_UNAVAIL_MSG}")
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
     scores = load_latest_scores()
+    if not scores:
+        logger.error(f"/api/scores — live_ranking.json vide ou illisible — {_LIVE_UNAVAIL_MSG}")
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
     return jsonify(scores)
 
 
