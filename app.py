@@ -700,9 +700,6 @@ def serve_compare_analysis_js():
 def serve_performance_js():
     return send_from_directory("dashboard", "performance.js", mimetype="application/javascript")
 
-@app.route("/sectors.js")
-def serve_sectors_js():
-    return send_from_directory("dashboard", "sectors.js", mimetype="application/javascript")
 
 @app.route("/screener.js")
 def serve_screener_js():

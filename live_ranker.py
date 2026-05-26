@@ -605,38 +605,6 @@ def get_ranking_changes():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Scheduler intégration
-# ─────────────────────────────────────────────────────────────────────────────
-
-def schedule_ranking_jobs(scheduler):
-    """
-    Ajoute les jobs de reclassement à l'APScheduler existant.
-    Appeler depuis app.py après start_scheduler().
-    """
-    # Recalcul après chaque mise à jour des prix live (toutes les 5 min)
-    def job_ranking_on_price():
-        compute_live_ranking(trigger="price_update")
-
-    scheduler.add_job(
-        job_ranking_on_price,
-        "interval", minutes=5,
-        id="live_ranking_price",
-        replace_existing=True,
-    )
-
-    # Recalcul après analyse PDF (quotidien 23h30)
-    def job_ranking_on_pdf():
-        compute_live_ranking(trigger="pdf_analysis")
-
-    scheduler.add_job(
-        job_ranking_on_pdf,
-        "cron", hour=23, minute=30,
-        id="live_ranking_pdf",
-        replace_existing=True,
-    )
-
-    logger.info("Jobs ranking schedulés")
-
 
 if __name__ == "__main__":
     import sys
