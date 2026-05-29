@@ -5190,7 +5190,9 @@ function _genVerdict(s){
   </div>`;
 }
 
-function _shareStockText(s){
+function _shareStockText(ticker){
+  const s=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
+  if(!s.ticker){console.warn('_shareStockText: ticker introuvable',ticker);return;}
   const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
     `Score BRVM : ${((s.composite_adj||0)/80*10).toFixed(1)}/10\n`+
     `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
@@ -5343,7 +5345,7 @@ async function showStock(ticker){
           <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a>
             <button onclick="_quickCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
-            <button onclick="_shareStockText(${JSON.stringify(s)})" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
+            <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>
