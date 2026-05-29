@@ -167,6 +167,8 @@ tr:nth-child(even) td{background:rgba(255,255,255,.012)}
 .sb-grp{padding:12px 12px 4px;font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 .sb-grp:first-child{margin-top:0}
 .sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:16px;padding:0 6px;border-radius:10px;font-size:10px;font-weight:600;background:var(--bg-overlay);color:var(--text-2);margin-left:auto}
+/* ══ Classement cartes mobile (caché par défaut — visible via media query) ══ */
+#rank-cards{display:none}
 /* ══ Footer ══════════════════════════════════════════════════════════════════ */
 #app-footer{position:fixed;bottom:0;left:220px;right:0;z-index:50;background:var(--bg-surface);border-top:1px solid var(--border-1);padding:0 24px;height:32px;font-size:11px;color:var(--text-3);display:flex;justify-content:space-between;align-items:center;gap:6px}
 /* ══ Misc ════════════════════════════════════════════════════════════════════ */
@@ -259,6 +261,8 @@ input[type=range]{padding:0;height:20px}
   #help-drawer{width:88vw}
   #tour-box{padding:20px;margin:12px}
   .sso-nav-btn,.why-close,#mob-menu-btn,button[title="Thème"]{min-width:44px;min-height:44px}
+  #rank-table-wrap{display:none}
+  #rank-cards{display:flex;flex-direction:column;gap:10px;padding:4px 0}
 }
 @media(max-width:600px){
   .g4{grid-template-columns:1fr;gap:6px}
@@ -821,6 +825,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     </tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
+  <div id="rank-cards"></div>
 </div>
 
 <!-- SECTEURS -->
