@@ -7267,7 +7267,7 @@ nav = function(id, pushHistory) {
       var idx = ['indices','comm','macro'].indexOf(tab);
       if (idx >= 0 && btns[idx]) btns[idx].classList.add('on');
     }
-    var bcEl = document.getElementById('bc-page');
+    let bcEl = document.getElementById('bc-page');
     var _tabLabels = { market: 'Indices BRVM', comm: 'Commodités', macro: 'Macro UEMOA' };
     if (bcEl) bcEl.textContent = _tabLabels[id] || 'Marché';
     if (id === 'market' && typeof _renderMarketPage !== 'undefined') _renderMarketPage();
