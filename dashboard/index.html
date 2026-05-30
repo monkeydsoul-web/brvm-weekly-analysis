@@ -3634,7 +3634,7 @@ function openAddToPort(ticker, price){
   },100);
 }
 
-function renderRankLive(){ renderRank(); }
+function renderRankLive(){ renderRank(); if(typeof renderRankCards==='function') renderRankCards(); }
 function initRanking(){
   const all=window.scores||scores||[];
   const sec=document.getElementById('fSec');
