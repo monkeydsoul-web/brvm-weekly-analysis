@@ -494,6 +494,17 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 /* Sidebar badges */
 .sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:10px;background:var(--bg-overlay);color:var(--text-2);font-size:10px;font-weight:600;padding:0 6px;margin-left:auto}
 .sb-live-tag{font-size:7px;background:rgba(34,197,94,.15);color:var(--bull);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:1px 4px;margin-left:auto;font-weight:700;letter-spacing:.03em}
+/* Sprint 8 — Welcome 3 portes */
+.welcome-hero{text-align:center;padding:40px 20px 24px}
+.welcome-hero h1{font-size:clamp(22px,5vw,32px);font-weight:800;margin-bottom:8px}
+.welcome-hero p{color:var(--text-2);font-size:14px;max-width:400px;margin:0 auto}
+.welcome-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding:0 16px 40px}
+.welcome-card{flex:1;min-width:220px;max-width:300px;background:var(--bg-card);border:1px solid var(--border-1);border-radius:12px;padding:24px 20px;cursor:pointer;transition:box-shadow .2s,transform .2s;text-align:center}
+.welcome-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.15);transform:translateY(-2px)}
+.welcome-card .wc-icon{font-size:36px;margin-bottom:12px}
+.welcome-card .wc-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.welcome-card .wc-desc{font-size:12px;color:var(--text-2);line-height:1.6}
+.welcome-card .wc-btn{display:inline-block;margin-top:16px;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;background:var(--accent);color:#fff}
 </style></head>
 <body>
 <div id="g-spin"></div>
@@ -766,6 +777,44 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div style="text-align:center;padding:20px 0 8px">
     <button onclick="nav('marche')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
   </div>
+</div>
+
+<!-- WELCOME 3 PORTES -->
+<div class="page" id="page-welcome">
+  <div class="welcome-hero">
+    <div style="font-size:48px;margin-bottom:12px">📈</div>
+    <h1>Bienvenue sur BRVM Analyse</h1>
+    <p>Suivez, analysez et investissez sur la Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest.</p>
+  </div>
+  <div class="welcome-cards">
+    <div class="welcome-card" onclick="_welcomeDoor('decouvrir')">
+      <div class="wc-icon">🌱</div>
+      <div class="wc-title">Je découvre</div>
+      <div class="wc-desc">Nouveau sur la BRVM ? Commencez par les bases : comprendre les actions, les dividendes, les scores.</div>
+      <span class="wc-btn">Commencer →</span>
+    </div>
+    <div class="welcome-card" onclick="_welcomeDoor('investir')">
+      <div class="wc-icon">💼</div>
+      <div class="wc-title">J'investis</div>
+      <div class="wc-desc">Trouvez les meilleures opportunités, filtrez par secteur, dividende ou valorisation.</div>
+      <span class="wc-btn">Voir le classement →</span>
+    </div>
+    <div class="welcome-card" onclick="_welcomeDoor('analyser')">
+      <div class="wc-icon">🎯</div>
+      <div class="wc-title">J'analyse</div>
+      <div class="wc-desc">Mode expert : tableaux de bord complets, signaux IA, corrélations et optimisation de portefeuille.</div>
+      <span class="wc-btn">Dashboard →</span>
+    </div>
+  </div>
+</div>
+
+<!-- APPRENDRE -->
+<div class="page" id="page-apprendre">
+  <div class="ph" style="padding:24px 20px 8px">
+    <h2 style="font-size:20px;margin:0">Apprendre</h2>
+    <p style="font-size:13px;color:var(--text-2);margin:4px 0 0">Les bases pour investir sur la BRVM</p>
+  </div>
+  <div id="apprendre-content" style="padding:16px 20px"></div>
 </div>
 
 <!-- CLASSEMENT -->
@@ -5696,8 +5745,35 @@ async function loadStatus(){
   }catch(e){}
 }
 
+// ── Sprint 8 — Welcome 3 portes ────────────────────────────────────────────
+function _welcomeDoor(door) {
+  localStorage.setItem('brvm_visited', '1');
+  if (door === 'decouvrir') { _setMode('beginner'); nav('apprendre'); }
+  else if (door === 'investir') { _setMode('beginner'); nav('rank'); }
+  else { _setMode('expert'); nav('dash'); }
+}
+function initWelcome() { /* page statique — rien à charger */ }
+function initApprendre() {
+  const el = document.getElementById('apprendre-content');
+  if (!el || el.innerHTML.trim()) return;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct">Qu'est-ce qu'une action ?</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Une action est une part de propriété d'une entreprise cotée. En achetant une action, vous devenez actionnaire et recevez une part des bénéfices sous forme de <strong>dividende</strong>.</p>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct">Comment lire la Note /10 ?</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">La Note /10 combine 5 modèles d'évaluation (Graham, DCF, DDM, EPV, Buffett). <span style="color:var(--green);font-weight:600">≥ 7.5 → ✅ Acheter</span> · <span style="color:var(--amber);font-weight:600">5–7.4 → ⏳ Attendre</span> · <span style="color:var(--red);font-weight:600">&lt; 5 → ⚠️ Éviter</span></p>
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <button onclick="nav('rank')" class="btn-prim" style="padding:10px 28px;font-size:14px">Voir le classement →</button>
+    </div>`;
+}
+
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
+  welcome:   ()=>{ if(typeof initWelcome!=='undefined') initWelcome(); },
+  apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   port:      loadPortfolio,
   alerts:    ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
   income:    ()=>{renderDiv();},
