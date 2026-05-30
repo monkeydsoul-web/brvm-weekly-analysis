@@ -5710,6 +5710,7 @@ const pageLoaders={
   news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
   settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
   market:    ()=>_renderMarketPage(),
+  glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
 };
 
 function _renderMarketPage() {
