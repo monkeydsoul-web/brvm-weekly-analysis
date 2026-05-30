@@ -607,6 +607,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div id="curr-rate" style="padding:0 14px 10px;font-size:10px;color:var(--text-3)" class="compact-hide"></div>
   </div>
   <nav class="nav">
+    <div class="ni" onclick="nav('welcome')" data-tip="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span>👋</span> <span class="ni-label">Accueil</span></div>
     <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
@@ -2823,7 +2824,12 @@ async function init(){
       console.error('[BRVM] price-history error:',e);
     }).finally(()=>{
       try{
-        renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
+        const _hash = (location.hash || '').replace('#','');
+        if (!localStorage.getItem('brvm_visited') && !_hash) {
+          nav('welcome');
+        } else {
+          renderDash(m);initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
+        }
       }catch(e2){console.error('[BRVM] renderDash error:',e2);}
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
