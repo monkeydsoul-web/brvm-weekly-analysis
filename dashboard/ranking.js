@@ -52,7 +52,7 @@ function renderRankCards() {
       const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
       const verdClr   = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
       const priceStr  = x.price
-        ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR')) + ' XOF'
+        ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR') + ' XOF')
         : 'N/D';
       const divStr = (x.div_yield || 0) > 0 ? 'Div ' + x.div_yield.toFixed(1) + '%' : '—';
       const meta   = [x.name, x.sector, x.country].filter(Boolean).join(' · ');
