@@ -114,6 +114,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .kpi:hover{box-shadow:var(--shadow-md)}
 html[data-mode="beginner"] .kpi-expert{display:none!important}
 html[data-mode="beginner"] #simPortCard{display:none!important}
+#page-port.port-empty-beginner #portSummary,
+#page-port.port-empty-beginner #port-chart-card,
+#page-port.port-empty-beginner #port-monthly-card,
+#page-port.port-empty-beginner #port-action-btns{display:none!important}
 .kl{font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .kv{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--font-mono)}
 .card{background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:12px;transition:box-shadow .15s}
@@ -862,7 +866,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </details>
 
   <div class="ph"><div><h2>Mon portefeuille</h2><p class="page-sub">Suivez vos positions, votre P&amp;L et les recommandations par titre</p></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div id="port-action-btns" style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px" title="Suggère comment rééquilibrer votre portefeuille selon les scores actuels">⚡ Optimiser</button>
       <button class="btn btn-o" onclick="sharePortfolioURL()" style="font-size:11px" title="Partagez votre portefeuille via un lien">🔗 Partager</button>
       <button class="btn btn-o" onclick="exportPortfolioCSV()" style="font-size:11px" title="Exporter le portefeuille en CSV">📥 Exporter CSV</button>
@@ -872,7 +876,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div id="portSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
   <!-- Graphique évolution valeur -->
-  <div class="card" style="margin-bottom:12px">
+  <div class="card" id="port-chart-card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div class="ct">📈 Évolution de la valeur du portefeuille</div>
       <span id="port-perf-badge" style="font-size:11px;font-weight:700"></span>
@@ -880,7 +884,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div id="port-value-chart" style="width:100%;height:160px"></div>
   </div>
   <!-- Bilan mensuel -->
-  <div class="card" style="margin-bottom:12px">
+  <div class="card" id="port-monthly-card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="ct" style="margin:0">📅 Bilan mensuel</div>
       <button class="btn btn-o" onclick="portRecalcBilan()" style="font-size:10px;padding:4px 10px">🔄 Recalculer</button>
@@ -3726,6 +3730,8 @@ function loadPortfolio(){
   const contentEl = document.getElementById('portContent');
   if (emptyEl)   emptyEl.style.display   = enriched.length ? 'none' : '';
   if (contentEl) contentEl.style.display = enriched.length ? '' : 'none';
+  const _portMode = document.documentElement.getAttribute('data-mode') || 'expert';
+  document.getElementById('page-port').classList.toggle('port-empty-beginner', !enriched.length && _portMode === 'beginner');
 
   const _kpiAll = [
     [false, 'Valeur totale',      fmtXOF(totalValue),    'var(--blue)',   'Ce que valent vos actions aujourd\'hui'],
