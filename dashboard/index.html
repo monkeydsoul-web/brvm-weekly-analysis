@@ -5461,6 +5461,7 @@ async function showStock(ticker){
             <button onclick="_quickCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
             <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
+          <div id="stockStory"></div>
     ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
       <div class="ct">🏢 Activité</div>
       <p style="font-size:11px;color:var(--t2);margin:4px 0 8px;line-height:1.6">${co.description||''}</p>
@@ -5496,7 +5497,6 @@ async function showStock(ticker){
       <button class="btn btn-o" style="margin-top:4px;display:block;font-size:10px" onclick="navToRank('${ticker}')">📊 Voir classement</button>
         </div>
       </div>
-      <div id="stockStory"></div>
       ${_genVerdict(s)}
       <!-- Onglets fiche société -->
       <div class="stock-tabs">
