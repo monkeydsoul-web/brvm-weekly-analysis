@@ -494,6 +494,16 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 /* Sidebar badges */
 .sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:10px;background:var(--bg-overlay);color:var(--text-2);font-size:10px;font-weight:600;padding:0 6px;margin-left:auto}
 .sb-live-tag{font-size:7px;background:rgba(34,197,94,.15);color:var(--bull);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:1px 4px;margin-left:auto;font-weight:700;letter-spacing:.03em}
+/* Sprint 9B — Storytelling fiche société */
+#stockStory{background:var(--bg-elevated);border-radius:10px;padding:16px 20px;margin-bottom:16px;border:1px solid var(--border-1)}
+#stockStory h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-3);margin:0 0 6px}
+#stockStory section{margin-bottom:14px}
+#stockStory section:last-child{margin-bottom:0}
+#stockStory p{font-size:13px;color:var(--text-1);line-height:1.6;margin:0}
+#stockStory ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+#stockStory li{font-size:12px;color:var(--text-2);line-height:1.4}
+.story-inline{font-size:12px;color:var(--text-2);line-height:1.6}
+@media(max-width:600px){#stockStory{padding:12px 14px}#stockStory p,#stockStory li{font-size:12px}}
 /* Sprint 8 — Welcome 3 portes */
 .welcome-hero{text-align:center;padding:40px 20px 24px}
 .welcome-hero h1{font-size:clamp(22px,5vw,32px);font-weight:800;margin-bottom:8px}
@@ -2816,6 +2826,8 @@ async function init(){
     loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
     window._priceHistory={};
     window._extSparklines={};
+    // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
+    fetch('/data/companies_stories.json').then(r=>r.json()).then(d=>{_companyStories=d.stories||{};}).catch(()=>{});
     // Charger historique prix PUIS rendu — .finally() garantit le rendu même si l'API échoue
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -5330,6 +5342,39 @@ function _openStock(ticker){
   else showStock(ticker);
 }
 
+// ── Sprint 9B — Stories storytelling ──────────────────────────────────────
+let _companyStories = {};
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStockStory(ticker) {
+  const container = document.getElementById('stockStory');
+  if (!container) return;
+  const story = _companyStories[ticker];
+  if (!story) { container.innerHTML = ''; container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  const sec = (emoji, title, content) =>
+    `<section><h3>${emoji} ${escapeHtml(title)}</h3>${content}</section>`;
+  const list = items =>
+    `<ul>${items.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`;
+  const inline = items =>
+    `<div class="story-inline">${items.map(p => escapeHtml(p)).join(' · ')}</div>`;
+  container.innerHTML = [
+    story.en_bref
+      ? sec('📖', 'En bref', `<p>${escapeHtml(story.en_bref)}</p>`) : '',
+    story.points_forts?.length
+      ? sec('💪', 'Points forts', list(story.points_forts)) : '',
+    story.points_attention?.length
+      ? sec('⚠️', "Points d'attention", list(story.points_attention)) : '',
+    story.activites?.length
+      ? sec('🏢', 'Activités', inline(story.activites)) : '',
+    story.presence?.length
+      ? sec('🌍', 'Présence', inline(story.presence)) : '',
+  ].join('');
+}
+
 async function showStock(ticker){
   _trackRecentTicker(ticker);
   const useSlide = _stockRenderTarget === 'sso-body' && document.getElementById('stock-slideover')?.classList.contains('open');
@@ -5451,6 +5496,7 @@ async function showStock(ticker){
       <button class="btn btn-o" style="margin-top:4px;display:block;font-size:10px" onclick="navToRank('${ticker}')">📊 Voir classement</button>
         </div>
       </div>
+      <div id="stockStory"></div>
       ${_genVerdict(s)}
       <!-- Onglets fiche société -->
       <div class="stock-tabs">
@@ -5584,6 +5630,7 @@ async function showStock(ticker){
           <p style="font-size:12px;color:var(--t2);padding:12px 0">Chargement des rapports...</p>
         </div>
       </div>`;
+    renderStockStory(ticker);
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
     loadPriceChart(ticker, 'stockChartDiv');

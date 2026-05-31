@@ -669,6 +669,10 @@ def serve_live_score_js():
 def serve_ranking_js():
     return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
 
+@app.route("/data/companies_stories.json")
+def serve_companies_stories():
+    return send_from_directory(DATA_DIR, "companies_stories.json", mimetype="application/json")
+
 @app.route("/stock_chart.js")
 def serve_stock_chart_js():
     return send_from_directory("dashboard", "stock_chart.js", mimetype="application/javascript")
