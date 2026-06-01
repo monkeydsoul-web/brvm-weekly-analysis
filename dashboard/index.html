@@ -494,6 +494,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 /* Sidebar badges */
 .sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:10px;background:var(--bg-overlay);color:var(--text-2);font-size:10px;font-weight:600;padding:0 6px;margin-left:auto}
 .sb-live-tag{font-size:7px;background:rgba(34,197,94,.15);color:var(--bull);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:1px 4px;margin-left:auto;font-weight:700;letter-spacing:.03em}
+/* Sprint 9C — Fiche société responsive mobile */
+.stock-main-col{min-width:0;flex:1 1 auto}
+@media(max-width:768px){.stock-main-col{width:100%;max-width:100%}}
 /* Sprint 9B — Storytelling fiche société */
 #stockStory{background:var(--bg-elevated);border-radius:10px;padding:16px 20px;margin-bottom:16px;border:1px solid var(--border-1)}
 #stockStory h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-3);margin:0 0 6px}
@@ -5433,7 +5436,7 @@ async function showStock(ticker){
     const isFav=favorites.includes(ticker);
     document.getElementById(_stockRenderTarget).innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
-        <div>
+        <div class="stock-main-col">
           <h2 style="font-size:20px;font-weight:700">${s.ticker}
             <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
             <span style="font-size:11px;color:var(--t2);font-weight:400">· ${s.sector||''} · ${s.country||''}</span></h2>
