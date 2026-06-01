@@ -51,6 +51,16 @@
   --blue:#60A5FA;--purple:#C084FC;
   --r:var(--radius-md);
   --shadow:var(--shadow-md);
+  /* Sprint 10 — tokens espacement */
+  --space-1:8px;
+  --space-2:16px;
+  --space-3:24px;
+  --space-4:32px;
+  /* Sprint 10 — tokens typographie (tailles) */
+  --text-h1:24px;
+  --text-h2:18px;
+  --text-h3:16px;
+  --text-body:14px;
 }
 :root.light{
   --bg-base:#f6f8fa;--bg-surface:#ffffff;--bg-elevated:#f0f2f5;--bg-overlay:#e8ecf0;
@@ -494,6 +504,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 /* Sidebar badges */
 .sb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:10px;background:var(--bg-overlay);color:var(--text-2);font-size:10px;font-weight:600;padding:0 6px;margin-left:auto}
 .sb-live-tag{font-size:7px;background:rgba(34,197,94,.15);color:var(--bull);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:1px 4px;margin-left:auto;font-weight:700;letter-spacing:.03em}
+/* Sprint 10 — bouton retour standardisé */
+.brvm-back-btn{display:inline-flex;align-items:center;gap:4px;padding:var(--space-1) var(--space-2);min-height:44px;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm);font-size:var(--text-body);color:var(--text-1);cursor:pointer;transition:background .15s;margin-bottom:8px}
+.brvm-back-btn:hover{background:var(--bg-elevated)}
 /* Sprint 9C — Fiche société responsive mobile */
 .stock-main-col{min-width:0;flex:1 1 auto}
 @media(max-width:768px){.stock-main-col{width:100%;max-width:100%}}
