@@ -1,0 +1,1049 @@
+{
+  "_meta": {
+    "generated_at": "2026-05-30T17:54:09+00:00",
+    "model": "claude-sonnet-4-6",
+    "version": 1
+  },
+  "stories": {
+    "ABJC": {
+      "en_bref": "Erium Côte d'Ivoire, cotée à la BRVM sous le ticker ABJC, est une société industrielle basée en Côte d'Ivoire. Elle génère ses revenus principalement à travers la fabrication de produits et la vente de services. En 2024, malgré une progression de ses ventes, sa rentabilité a fortement reculé, ce qui soulève des interrogations sur sa santé financière.",
+      "points_forts": [
+        "Le chiffre d'affaires est en croissance de plus de 9%, ce qui montre que la société vend davantage et gagne des parts de marché.",
+        "La société dispose d'actifs industriels importants, qui représentent près d'un tiers de son bilan et constituent une base productive solide.",
+        "Aucune dépréciation des équipements industriels n'a été signalée par les vérificateurs officiels des comptes."
+      ],
+      "points_attention": [
+        "Le bénéfice net a chuté de près de 58% en un an, ce qui signifie que la société gagne beaucoup moins d'argent malgré une hausse de ses ventes.",
+        "La société dépense plus d'argent qu'elle n'en dispose en caisse, avec une trésorerie nette négative qui se creuse davantage d'une année à l'autre.",
+        "La société ne respecte pas encore les normes comptables internationales (IFRS) pourtant obligatoires pour les sociétés cotées, ce qui représente un risque réglementaire sérieux.",
+        "Le niveau de dettes à court terme est élevé, notamment envers les fournisseurs, ce qui peut peser sur la capacité de la société à faire face à ses obligations financières."
+      ],
+      "activites": [
+        "Fabrication et vente de produits industriels",
+        "Vente de travaux et de services"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:46:15+00:00"
+    },
+    "BICB": {
+      "en_bref": "BIIC Bénin (Banque Internationale pour l'Industrie et le Commerce du Bénin) est une banque basée au Bénin, spécialisée dans le financement de l'industrie et du commerce. Elle a rejoint la BRVM en avril 2025 à l'occasion de son introduction en bourse. Avec un bilan de 1 340 milliards de FCFA et un résultat net de 30,3 milliards de FCFA, elle affiche une activité solide.",
+      "points_forts": [
+        "Une rentabilité élevée : le ROE de 19,2 % signifie que la banque génère de bons bénéfices par rapport aux capitaux investis par ses actionnaires.",
+        "Un produit net bancaire robuste de 45,2 milliards de FCFA, qui reflète la capacité de la banque à dégager des revenus de son activité.",
+        "Un bilan important de 1 340 milliards de FCFA, signe d'une institution bancaire de taille significative dans la région."
+      ],
+      "points_attention": [
+        "Le Bénin est un marché émergent, ce qui peut exposer la banque à des risques économiques ou institutionnels plus importants que dans des marchés plus matures.",
+        "La hausse des taux de la BCEAO peut peser sur le coût de refinancement de la banque et réduire ses marges à terme.",
+        "Le titre est récent en bourse, ce qui signifie qu'il peut être difficile d'acheter ou de vendre facilement des actions sans impacter le prix (faible liquidité)."
+      ],
+      "activites": [
+        "Financement des entreprises industrielles et commerciales au Bénin.",
+        "Services bancaires classiques : collecte de dépôts et octroi de crédits."
+      ],
+      "presence": [
+        "🇧🇯 Bénin"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:46:27+00:00"
+    },
+    "BICC": {
+      "en_bref": "La BICICI (ticker : BICC) est une banque ivoirienne cotée à la BRVM, active dans le financement des particuliers et des entreprises en Côte d'Ivoire. Elle génère ses revenus principalement à travers les intérêts sur crédits et les commissions sur services bancaires. Avec un bilan qui dépasse 1 000 milliards de FCFA, elle figure parmi les établissements bancaires significatifs de la zone UEMOA.",
+      "points_forts": [
+        "Le bénéfice net a progressé de près de 40% sur la dernière période, ce qui témoigne d'une rentabilité en forte amélioration.",
+        "La banque maîtrise bien ses coûts de fonctionnement, qui sont restés quasi stables malgré une activité en croissance.",
+        "Les fonds propres ont augmenté de plus de 20%, ce qui renforce la solidité financière de l'établissement et sa capacité à faire face aux imprévus."
+      ],
+      "points_attention": [
+        "Le coût du risque est en hausse, ce qui signale que certains crédits accordés pourraient être plus difficiles à récupérer.",
+        "Les crédits accordés aux clients sont en recul, ce qui peut indiquer une prudence de la banque ou un ralentissement de la demande de financement.",
+        "Des investissements importants ont été réalisés, notamment dans des actifs immatériels, mais leur rentabilité future reste encore à confirmer."
+      ],
+      "activites": [
+        "Collecte de dépôts et octroi de crédits aux particuliers et aux entreprises",
+        "Services bancaires generateurs de commissions (virements, gestion de comptes, etc.)",
+        "Investissement dans des titres publics (obligations d'État)"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:46:38+00:00"
+    },
+    "BNBC": {
+      "en_bref": "Bernabé CI est une société ivoirienne cotée à la BRVM, spécialisée dans la distribution de matériaux de construction. Elle réalise un chiffre d'affaires de 32,4 milliards de FCFA, ce qui en fait un acteur significatif du secteur industriel en Côte d'Ivoire. Son activité est étroitement liée au dynamisme du secteur du bâtiment et des travaux publics dans le pays.",
+      "points_forts": [
+        "La société verse un dividende de 120 FCFA par action, ce qui représente un revenu régulier pour ses actionnaires.",
+        "Le chiffre d'affaires est en progression de 5,1 %, signe d'une croissance commerciale continue.",
+        "Avec un résultat net de 2,18 milliards de FCFA, la société affiche une rentabilité réelle et positive."
+      ],
+      "points_attention": [
+        "L'activité dépend fortement du secteur du bâtiment et des travaux publics en Côte d'Ivoire, ce qui la rend vulnérable en cas de ralentissement de ce secteur.",
+        "La rentabilité des capitaux propres (ROE) reste modeste à 7,6 %, ce qui signifie que la société génère peu de profit par rapport aux fonds investis par ses actionnaires."
+      ],
+      "activites": [
+        "Distribution de matériaux de construction",
+        "Approvisionnement du secteur du bâtiment et des travaux publics"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:46:48+00:00"
+    },
+    "BOAB": {
+      "en_bref": "BOA Bénin est une banque commerciale cotée à la BRVM, opérant au Bénin sous la marque Bank of Africa. Elle propose des services financiers classiques aux particuliers et aux entreprises. Son bilan dépasse les 500 milliards de FCFA, ce qui en fait un acteur de taille significative dans le paysage bancaire béninois.",
+      "points_forts": [
+        "Le bénéfice net progresse de plus de 12% et atteint 8,2 milliards de FCFA, signe d'une croissance régulière.",
+        "La banque verse un dividende de 180 FCFA par action, ce qui peut représenter un revenu intéressant pour l'investisseur.",
+        "Le rendement des capitaux propres (ROE) de 12% indique que la banque utilise efficacement l'argent de ses actionnaires pour générer des profits."
+      ],
+      "points_attention": [
+        "La banque exerce l'essentiel de son activité au Bénin, ce qui l'expose fortement aux risques économiques et politiques de ce seul pays.",
+        "Le secteur bancaire en Afrique de l'Ouest est de plus en plus concurrentiel, avec des acteurs régionaux qui peuvent peser sur les parts de marché."
+      ],
+      "activites": [
+        "Collecte de dépôts et octroi de crédits aux particuliers et aux entreprises",
+        "Fourniture de services bancaires et financiers au Bénin"
+      ],
+      "presence": [
+        "🇧🇯 Bénin"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:46:58+00:00"
+    },
+    "BOABF": {
+      "en_bref": "BOA Burkina Faso est une banque cotée à la BRVM, active au Burkina Faso. Elle propose des services bancaires à sa clientèle locale et affiche une croissance régulière de ses résultats. Malgré un environnement difficile, elle continue de dégager des bénéfices et de verser des dividendes à ses actionnaires.",
+      "points_forts": [
+        "La banque affiche une rentabilité des capitaux propres (ROE) de 12,7%, ce qui traduit une bonne efficacité dans l'utilisation de l'argent investi.",
+        "Le bénéfice net a progressé de plus de 9% sur la période, signe d'une croissance solide.",
+        "Un dividende de 160 FCFA par action est versé aux actionnaires, ce qui représente un revenu régulier pour les investisseurs."
+      ],
+      "points_attention": [
+        "Le contexte sécuritaire au Burkina Faso représente un risque réel pour l'activité de la banque et peut peser sur ses performances futures.",
+        "L'instabilité politique dans le pays peut créer de l'incertitude et affecter la confiance des investisseurs."
+      ],
+      "activites": [
+        "Collecte de dépôts et octroi de crédits à la clientèle",
+        "Services bancaires aux particuliers et aux entreprises au Burkina Faso"
+      ],
+      "presence": [
+        "🇧🇫 Burkina Faso"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:07+00:00"
+    },
+    "BOAC": {
+      "en_bref": "BOA Côte d'Ivoire (BOAC) est une banque ivoirienne cotée à la BRVM, la bourse commune des pays d'Afrique de l'Ouest. Elle collecte l'épargne des particuliers et des entreprises, et leur accorde des financements. En 2024, elle affiche de solides résultats avec un bilan qui dépasse les 1 000 milliards de FCFA, ce qui en fait un acteur significatif du secteur bancaire régional.",
+      "points_forts": [
+        "La banque a fortement amélioré sa rentabilité, avec un bénéfice net en hausse de près de 23% sur l'année.",
+        "Le produit net bancaire, qui mesure la richesse créée par l'activité bancaire, a progressé de près de 20%, témoignant d'une bonne dynamique commerciale.",
+        "Le doublement du capital de la banque renforce sa solidité financière et sa capacité à soutenir sa croissance future."
+      ],
+      "points_attention": [
+        "Le coût du risque a fortement augmenté, ce qui signifie que la banque doit mettre de côté davantage de provisions pour faire face à des crédits potentiellement non remboursés.",
+        "La charge fiscale a nettement progressé, ce qui réduit une partie des gains réalisés sur l'activité.",
+        "Certaines charges liées aux commissions et à l'exploitation bancaire ont quasiment doublé, ce qui pourrait peser sur les marges à l'avenir.",
+        "Les crédits accordés directement aux clients ont légèrement reculé, ce qui peut indiquer un ralentissement de cette activité clé."
+      ],
+      "activites": [
+        "Collecte de dépôts auprès des particuliers et des entreprises",
+        "Octroi de crédits et financement de projets",
+        "Opérations interbancaires et gestion de portefeuille de titres"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:21+00:00"
+    },
+    "BOAM": {
+      "en_bref": "BOA Mali (Bank of Africa Mali) est une banque cotée à la BRVM, opérant au Mali. Elle propose des services bancaires à sa clientèle locale et affiche une croissance modérée de ses résultats malgré un environnement difficile. Son résultat net est en hausse, ce qui témoigne d'une certaine résistance dans un contexte exigeant.",
+      "points_forts": [
+        "La banque verse un dividende à ses actionnaires, ce qui peut représenter un revenu régulier pour l'investisseur.",
+        "La rentabilité des capitaux propres (ROE) dépasse 12%, signe que la banque crée de la valeur avec l'argent qui lui est confié.",
+        "Le résultat net est en progression, ce qui montre que l'activité continue de croître malgré les difficultés du pays."
+      ],
+      "points_attention": [
+        "Le Mali traverse une période d'instabilité politique liée à une transition militaire, ce qui crée une incertitude forte sur l'environnement des affaires.",
+        "Le risque lié au pays est élevé : des événements politiques ou sécuritaires peuvent impacter directement les performances de la banque."
+      ],
+      "activites": [
+        "Services bancaires aux particuliers et aux entreprises au Mali.",
+        "Collecte de dépôts et octroi de crédits sur le marché malien."
+      ],
+      "presence": [
+        "🇲🇱 Mali"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:30+00:00"
+    },
+    "BOAN": {
+      "en_bref": "BOA Niger est la filiale nigérienne du groupe Bank of Africa, une banque commerciale présente sur le marché financier régional de l'Afrique de l'Ouest. Elle propose des services bancaires aux particuliers et aux entreprises au Niger. Son activité affiche une croissance stable, ce qui lui permet d'être cotée à la BRVM.",
+      "points_forts": [
+        "Le résultat net progresse de plus de 6%, signe d'une croissance régulière de l'activité.",
+        "La banque verse un dividende à ses actionnaires, ce qui peut représenter un revenu complémentaire pour l'investisseur.",
+        "La rentabilité des capitaux propres (ROE) dépasse 11%, ce qui indique que la banque utilise correctement les fonds qui lui sont confiés."
+      ],
+      "points_attention": [
+        "Le Niger traverse une période d'incertitude politique qui peut affecter la stabilité des activités économiques dans le pays.",
+        "La banque opère uniquement au Niger, ce qui concentre tous ses risques sur un seul marché sans diversification géographique."
+      ],
+      "activites": [
+        "Collecte de dépôts et distribution de crédits aux particuliers et aux entreprises",
+        "Fourniture de services bancaires courants sur le marché nigérien"
+      ],
+      "presence": [
+        "🇳🇪 Niger"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:38+00:00"
+    },
+    "BOAS": {
+      "en_bref": "BOA Sénégal (Bank of Africa Sénégal) est une banque commerciale cotée à la BRVM et active au Sénégal. Elle propose des services financiers aux particuliers et aux entreprises dans un pays en pleine expansion économique. Elle fait partie du groupe Bank of Africa, un acteur reconnu sur le continent africain.",
+      "points_forts": [
+        "La banque affiche une croissance solide de son résultat net, en hausse de plus de 15%, ce qui traduit une activité en bonne santé.",
+        "La rentabilité des capitaux propres (ROE) dépasse 13%, un niveau qui montre que la banque utilise efficacement l'argent de ses actionnaires.",
+        "Le développement du secteur pétrolier au Sénégal constitue un moteur de croissance supplémentaire pour l'activité de la banque."
+      ],
+      "points_attention": [
+        "Le marché bancaire sénégalais devient de plus en plus concurrentiel, ce qui pourrait peser sur les parts de marché et les marges de la banque à l'avenir."
+      ],
+      "activites": [
+        "Services bancaires aux particuliers et aux entreprises",
+        "Financement de l'économie sénégalaise en croissance"
+      ],
+      "presence": [
+        "🇸🇳 Sénégal"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:47+00:00"
+    },
+    "CABC": {
+      "en_bref": "Sicable CI est une société ivoirienne spécialisée dans la fabrication de câbles électriques. Elle fait partie du groupe Prysmian, un acteur mondial reconnu dans ce secteur, ce qui lui confère un soutien industriel et technique important. Elle est cotée à la BRVM et représente une exposition au secteur industriel en Côte d'Ivoire.",
+      "points_forts": [
+        "L'appartenance au groupe Prysmian apporte à Sicable CI une crédibilité et un savoir-faire reconnus à l'échelle internationale.",
+        "La société affiche une rentabilité positive avec un bénéfice net et un retour sur capitaux propres (ROE) de 12%, ce qui traduit une gestion efficace de ses ressources.",
+        "Sicable CI opère dans un secteur essentiel, la fourniture de câbles électriques, dont la demande est portée par les besoins croissants en infrastructures en Afrique de l'Ouest."
+      ],
+      "points_attention": [
+        "Le cuivre, matière première clé dans la fabrication de câbles, est soumis à de fortes variations de prix sur les marchés mondiaux, ce qui peut peser sur les marges de la société.",
+        "Sicable CI fait face à la concurrence d'autres fabricants de câbles présents dans la région, ce qui peut limiter sa capacité à augmenter ses prix ou ses parts de marché.",
+        "La société réalise l'essentiel de son activité en Côte d'Ivoire uniquement, ce qui la rend vulnérable à tout ralentissement économique ou instabilité dans ce seul pays."
+      ],
+      "activites": [
+        "Fabrication de câbles électriques",
+        "Commercialisation de câbles électriques sur le marché ivoirien"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:47:57+00:00"
+    },
+    "CBIBF": {
+      "en_bref": "Coris Bank International est une banque burkinabè cotée à la BRVM sous le ticker CBIBF. Elle collecte l'épargne des particuliers et des entreprises et leur accorde des crédits pour financer leurs projets. Elle opère dans un pays dont la croissance économique est attendue à 6% en 2025, ce qui représente un environnement porteur pour son activité.",
+      "points_forts": [
+        "Les revenus de la banque progressent bien, avec une hausse de près de 10% de son produit net bancaire au troisième trimestre 2025.",
+        "Les dépôts des clients augmentent fortement, ce qui montre que la banque attire de plus en plus d'épargnants.",
+        "Le bénéfice net continue de croître, signe que la banque reste rentable malgré un environnement difficile."
+      ],
+      "points_attention": [
+        "Le contexte sécuritaire au Burkina Faso représente un risque réel pour l'activité de la banque et pour la stabilité de ses résultats.",
+        "Les crédits accordés aux clients sont en légère baisse, ce qui pourrait limiter la croissance future des revenus de la banque."
+      ],
+      "activites": [
+        "Collecte de l'épargne auprès des particuliers et des entreprises sous forme de dépôts",
+        "Octroi de crédits à la clientèle pour financer des projets personnels ou professionnels"
+      ],
+      "presence": [
+        "🇧🇫 Burkina Faso"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:48:06+00:00"
+    },
+    "CFAC": {
+      "en_bref": "CFAO Motors CI (ticker : CFAC) est une société ivoirienne cotée à la BRVM, active dans le secteur industriel. Elle se spécialise dans la distribution et la vente de véhicules en Côte d'Ivoire. En 2023, elle affiche une bonne dynamique commerciale avec un chiffre d'affaires en hausse, mais sa rentabilité s'est nettement dégradée sous l'effet de la montée des coûts.",
+      "points_forts": [
+        "Le chiffre d'affaires progresse de plus de 11% en 2023, ce qui témoigne d'une demande soutenue pour ses produits.",
+        "La société parvient à écouler ses stocks, ce qui montre une capacité à vendre ses véhicules sur le marché ivoirien.",
+        "CFAC reste bénéficiaire malgré la pression sur ses coûts, ce qui indique une activité commerciale encore solide à la base."
+      ],
+      "points_attention": [
+        "Le bénéfice net a chuté de plus de 40% en 2023, car les coûts d'achats, de personnel et d'amortissements ont fortement augmenté.",
+        "Les flux de trésorerie générés par l'activité sont quasi nuls en 2023, ce qui fragilise la capacité de la société à investir ou à verser des dividendes.",
+        "Les créances clients ont bondi de plus de 55%, ce qui signifie que la société a vendu mais n'a pas encore encaissé une grande partie de cet argent, avec un risque de non-paiement.",
+        "La société porte des dettes liées à ses contrats de location, ce qui génère des charges financières régulières pesant sur ses résultats."
+      ],
+      "activites": [
+        "Distribution et vente de véhicules automobiles",
+        "Gestion d'un parc commercial de véhicules sur le marché ivoirien"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:48:17+00:00"
+    },
+    "CIEC": {
+      "en_bref": "CIE CI (Compagnie Ivoirienne d'Électricité) est une société ivoirienne qui opère dans le secteur de l'énergie électrique en Côte d'Ivoire. Elle distribue l'électricité à des millions de clients et gère des volumes d'énergie importants pour le compte de l'État. C'est un acteur central de l'électrification du pays, avec une base de clientèle en forte expansion.",
+      "points_forts": [
+        "La base de clients progresse fortement, avec plus de 4,5 millions de clients, ce qui reflète le dynamisme du programme national d'électrification.",
+        "Le chiffre d'affaires est en hausse et la trésorerie s'améliore, ce qui montre une bonne santé opérationnelle globale.",
+        "La société verse des dividendes attractifs, ce qui en fait un titre intéressant pour les investisseurs qui cherchent des revenus réguliers."
+      ],
+      "points_attention": [
+        "Le bénéfice net est en recul à cause de la hausse des charges et des amortissements, ce qui pèse sur la rentabilité.",
+        "Le niveau d'endettement à court terme est élevé, ce qui pourrait limiter la capacité de la société à investir ou à faire face à des imprévus.",
+        "Les ventes d'électricité vers l'étranger ont diminué, réduisant une source de revenus supplémentaires.",
+        "La société est exposée au risque de change, notamment à cause de ses importations d'énergie et de certaines dettes en devises étrangères."
+      ],
+      "activites": [
+        "Distribution d'électricité auprès de particuliers et d'entreprises en Côte d'Ivoire.",
+        "Gestion des ventes d'énergie pour le compte de l'autorité publique concédante."
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:48:27+00:00"
+    },
+    "ECOC": {
+      "en_bref": "Ecobank Côte d'Ivoire est une banque commerciale cotée à la BRVM, opérant sur le marché ivoirien. Elle propose des services bancaires aux particuliers et aux entreprises, et figure parmi les acteurs importants du secteur financier en Côte d'Ivoire. En 2025, elle affiche des résultats en nette progression, avec une rentabilité élevée et une politique de dividendes généreuse.",
+      "points_forts": [
+        "La banque est très rentable, avec un retour sur fonds propres de 29%, ce qui signifie qu'elle génère beaucoup de bénéfices par rapport à ce que les actionnaires ont investi.",
+        "Le dividende versé aux actionnaires a augmenté de 10%, reflétant une politique de partage des bénéfices attractive et une solidité financière confirmée.",
+        "Les dépôts des clients ont fortement progressé et les crédits ont franchi un cap important, ce qui témoigne de la confiance de la clientèle et du dynamisme commercial de la banque."
+      ],
+      "points_attention": [
+        "La baisse des taux directeurs de la BCEAO pourrait réduire les revenus tirés des prêts et comprimer les marges de la banque à moyen terme.",
+        "La concurrence entre banques en Côte d'Ivoire s'intensifie, ce qui peut peser sur les parts de marché et les tarifs pratiqués.",
+        "Un environnement économique mondial incertain et une réglementation bancaire plus stricte pourraient alourdir les contraintes de fonctionnement de la banque."
+      ],
+      "activites": [
+        "Collecte de dépôts et distribution de crédits aux particuliers et aux entreprises",
+        "Services bancaires et financiers avec un axe de développement sur l'innovation numérique et l'interopérabilité"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:48:39+00:00"
+    },
+    "ETIT": {
+      "en_bref": "Ecobank Transnational (ETI) est une grande banque panafricaine dont le siège est au Togo, cotée à la BRVM. Elle propose des services bancaires à des millions de clients à travers une quarantaine de pays en Afrique. Son modèle unique de banque continentale lui confère une position très différenciée sur le marché financier africain.",
+      "points_forts": [
+        "Le groupe affiche une rentabilité solide avec un retour sur fonds propres élevé, signe que l'argent des actionnaires est bien utilisé.",
+        "Les dépôts des clients ont fortement progressé et la grande majorité provient de comptes courants et d'épargne, ce qui réduit le coût de financement de la banque.",
+        "L'efficacité opérationnelle s'est nettement améliorée : la banque dépense moins pour chaque franc de revenu généré, ce qui est un signal positif pour sa rentabilité future."
+      ],
+      "points_attention": [
+        "Les provisions pour créances douteuses ont fortement augmenté, ce qui signifie que davantage de clients ont du mal à rembourser leurs prêts.",
+        "Le groupe opère dans de nombreux pays africains avec des monnaies locales qui peuvent fluctuer, exposant ses résultats à des pertes liées aux variations de change.",
+        "La réduction du nombre de salariés dans le cadre de la transformation du groupe peut créer des tensions sociales et des risques sur la qualité du service."
+      ],
+      "activites": [
+        "Banque aux entreprises et grandes institutions (financement, trésorerie, opérations internationales)",
+        "Banque de détail pour les particuliers et petites entreprises (comptes, épargne, crédits)"
+      ],
+      "presence": [
+        "🇹🇬 Togo"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:48:50+00:00"
+    },
+    "FTSC": {
+      "en_bref": "Filtisac CI (FTSC) est une société industrielle ivoirienne cotée à la BRVM. Elle opère dans le secteur de la production et de la distribution, avec un chiffre d'affaires de 30,7 milliards FCFA en 2024. L'année 2024 a été marquée par des résultats financiers en apparence très solides, mais qui cachent en réalité des difficultés importantes sur son activité principale.",
+      "points_forts": [
+        "La société dispose d'une trésorerie nette fortement positive grâce à des cessions d'actifs réalisées en 2024.",
+        "Une distribution exceptionnelle très généreuse est proposée aux actionnaires, soit environ 2 001 FCFA par action.",
+        "Le résultat net affiché est spectaculaire à 18,6 milliards FCFA, offrant une image comptable flatteuse sur l'exercice."
+      ],
+      "points_attention": [
+        "L'activité opérationnelle est déficitaire : la société perd de l'argent sur son cœur de métier, ce qui est un signal d'alarme sérieux.",
+        "Le chiffre d'affaires a chuté de 20 % en un an, ce qui suggère une perte de clients ou de volumes d'activité.",
+        "Le résultat net exceptionnel repose presque entièrement sur des opérations ponctuelles non répétables, et non sur la performance réelle de l'entreprise.",
+        "La distribution aux actionnaires dépasse le résultat net généré, ce qui signifie que la société puise dans ses réserves pour payer ce dividende."
+      ],
+      "activites": [
+        "Production industrielle dans le secteur de l'emballage ou des matériaux (secteur industriel)",
+        "Cession d'actifs financiers ayant généré des produits exceptionnels importants en 2024"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:02+00:00"
+    },
+    "LNBB": {
+      "en_bref": "La Loterie Nationale Bénin (LNB SA) est une société béninoise spécialisée dans l'organisation et l'exploitation de jeux de loterie et de paris. Elle opère à la fois via des canaux physiques traditionnels et des plateformes numériques, avec les jeux en ligne qui représentent désormais plus des deux tiers de son chiffre d'affaires. C'est un acteur incontournable du secteur des jeux au Bénin, bien qu'il évolue dans un environnement de plus en plus concurrentiel.",
+      "points_forts": [
+        "Malgré une baisse du chiffre d'affaires, la société maîtrise bien ses coûts : sa rentabilité opérationnelle s'est nettement améliorée avec une hausse significative de l'excédent brut d'exploitation.",
+        "Le bilan financier est solide, avec des fonds propres importants et une trésorerie nette positive, ce qui témoigne d'une gestion financière saine et d'une bonne capacité de résistance.",
+        "Les jeux en ligne affichent une forte croissance et constituent un relais de croissance structurel prometteur, porté par la digitalisation croissante de l'économie."
+      ],
+      "points_attention": [
+        "La concurrence illégale est le principal danger : des opérateurs non agréés proposent des conditions plus attractives aux joueurs, ce qui entraîne une perte de clientèle et pèse directement sur les revenus.",
+        "La société dépend très fortement d'un seul produit phare qui génère entre les deux tiers et les quatre cinquièmes de son chiffre d'affaires, ce qui la rend vulnérable si ce jeu venait à perdre en popularité.",
+        "La baisse du résultat net est marquée, en partie parce que la société avait bénéficié en 2024 de revenus exceptionnels qui ne se sont pas répétés en 2025, ce qui rend la comparaison moins favorable."
+      ],
+      "activites": [
+        "Organisation et exploitation de jeux de loterie physiques, dont un jeu phare qui représente la majorité du chiffre d'affaires",
+        "Développement et exploitation de jeux en ligne, incluant des paris sportifs, des jeux de casino et des jeux virtuels accessibles via des plateformes numériques"
+      ],
+      "presence": [
+        "🇧🇯 Bénin"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:16+00:00"
+    },
+    "NEIC": {
+      "en_bref": "NEI-CEDA CI est une société ivoirienne spécialisée dans l'édition et la distribution de manuels et supports scolaires. Elle opère sur un marché de niche directement lié au secteur de l'éducation, ce qui lui confère une certaine stabilité. Cotée à la BRVM, elle réalise un chiffre d'affaires de 18,5 milliards de FCFA et verse un dividende de 85 FCFA par action.",
+      "points_forts": [
+        "L'entreprise évolue dans le secteur de l'éducation, un domaine dont la demande reste stable année après année.",
+        "Elle distribue un dividende à ses actionnaires, ce qui peut représenter un revenu régulier pour l'investisseur.",
+        "Son positionnement sur une niche bien définie lui permet de limiter la concurrence directe sur son cœur de métier."
+      ],
+      "points_attention": [
+        "Le marché de l'édition scolaire est de taille limitée, ce qui peut freiner la croissance future de la société.",
+        "La montée en puissance du numérique dans l'éducation pourrait réduire la demande pour les supports imprimés traditionnels."
+      ],
+      "activites": [
+        "Édition de manuels et contenus scolaires",
+        "Distribution de supports pédagogiques"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:24+00:00"
+    },
+    "NSBC": {
+      "en_bref": "NSIA Banque CI est une banque ivoirienne cotée à la BRVM, appartenant au Groupe NSIA. Elle offre des services bancaires aux particuliers et aux entreprises en Côte d'Ivoire. Avec un bilan en forte croissance et une notation de qualité maintenue par une agence spécialisée, elle figure parmi les acteurs bancaires solides de la région.",
+      "points_forts": [
+        "Le bénéfice net progresse régulièrement d'une année à l'autre, témoignant d'une rentabilité stable et durable.",
+        "Les commissions bancaires connaissent une croissance très dynamique, ce qui diversifie les sources de revenus de la banque.",
+        "La qualité du portefeuille de crédits s'améliore nettement, avec un coût du risque qui passe en territoire positif, signe d'une meilleure maîtrise des impayés."
+      ],
+      "points_attention": [
+        "Les charges de la banque augmentent plus vite que ses revenus, ce qui pèse légèrement sur son efficacité opérationnelle.",
+        "Le contexte socio-politique de la région ouest-africaine reste incertain et pourrait affecter l'activité bancaire.",
+        "La marge tirée des intérêts sur les prêts recule légèrement malgré la croissance du bilan, ce qui limite la progression des revenus."
+      ],
+      "activites": [
+        "Collecte de dépôts et octroi de crédits aux particuliers et aux entreprises",
+        "Fourniture de services bancaires et financiers générateurs de commissions"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:33+00:00"
+    },
+    "NTLC": {
+      "en_bref": "Nestlé CI est une société ivoirienne du secteur de la consommation, cotée à la BRVM sous le ticker NTLC. Elle fabrique et commercialise des produits de grande consommation, réalisant un chiffre d'affaires de plus de 233 milliards FCFA. C'est un acteur établi sur son marché, avec une performance commerciale en croissance régulière.",
+      "points_forts": [
+        "Le chiffre d'affaires progresse d'environ 6%, témoignant d'une demande soutenue pour les produits de la société.",
+        "L'EBITDA (excédent brut d'exploitation) est en hausse, ce qui montre que l'activité courante génère de plus en plus de richesse avant les charges financières.",
+        "La trésorerie disponible s'est nettement améliorée par rapport à l'année précédente, ce qui renforce la capacité de la société à faire face à ses obligations à court terme."
+      ],
+      "points_attention": [
+        "La dette financière et la trésorerie passif restent à des niveaux très élevés, ce qui expose la société à un risque de liquidité si ses revenus venaient à baisser.",
+        "Les frais financiers liés à la dette ont fortement augmenté, ce qui pèse sur le bénéfice net et réduit la marge disponible pour les actionnaires.",
+        "Le dividende versé aux actionnaires a été réduit de près de moitié par rapport à l'année précédente, ce qui peut décevoir les investisseurs qui recherchent un revenu régulier.",
+        "La hausse des coûts d'exploitation, notamment les matières premières, pourrait comprimer les marges si cette tendance se poursuit."
+      ],
+      "activites": [
+        "Fabrication et vente de produits de grande consommation",
+        "Commercialisation de marchandises auprès du marché local"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:44+00:00"
+    },
+    "ONTBF": {
+      "en_bref": "Onatel Burkina Faso est l'opérateur télécom historique du Burkina Faso, coté à la BRVM. Elle propose des services de télécommunications à ses clients et occupe une place établie sur son marché national. Malgré cette position, la société fait face à des défis qui pèsent sur ses résultats récents.",
+      "points_forts": [
+        "Onatel est l'opérateur historique du Burkina Faso, ce qui lui confère une présence et une notoriété solides sur son marché.",
+        "La société génère un chiffre d'affaires significatif de 142 milliards de FCFA, ce qui témoigne d'une activité à grande échelle.",
+        "L'EBITDA de 48 milliards de FCFA montre que la société dégage une capacité à générer des ressources depuis son exploitation courante."
+      ],
+      "points_attention": [
+        "Le résultat net est en baisse de 12,3%, ce qui signifie que la société gagne moins qu'avant : un signal à surveiller pour un investisseur.",
+        "Le contexte sécuritaire au Burkina Faso représente un risque réel sur la continuité et le développement des activités.",
+        "La concurrence dans le secteur mobile est forte et peut continuer à rogner les parts de marché d'Onatel."
+      ],
+      "activites": [
+        "Fourniture de services de télécommunications au Burkina Faso",
+        "Exploitation d'un réseau mobile sur le marché national"
+      ],
+      "presence": [
+        "🇧🇫 Burkina Faso"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:49:54+00:00"
+    },
+    "ORAC": {
+      "en_bref": "Orange Côte d'Ivoire est une société de télécommunications cotée à la BRVM, active en Côte d'Ivoire et dans deux autres pays africains. Elle propose des services mobiles, internet et de paiement mobile à des millions de clients. C'est l'un des acteurs majeurs du secteur télécom en Afrique de l'Ouest francophone.",
+      "points_forts": [
+        "Le chiffre d'affaires est en forte hausse de plus de 10%, ce qui montre que l'entreprise continue de gagner du terrain sur ses marchés.",
+        "Un dividende est versé aux actionnaires, ce qui témoigne de la bonne santé financière du groupe et de sa volonté de récompenser ses investisseurs.",
+        "Les investissements dans les réseaux et les services numériques sont en nette progression, ce qui prépare la croissance future de l'entreprise."
+      ],
+      "points_attention": [
+        "Les impôts et taxes payés par l'entreprise augmentent fortement, ce qui pèse sur ses bénéfices et pourrait continuer à limiter sa rentabilité.",
+        "L'entreprise s'endette davantage pour financer sa croissance, et le coût de cette dette augmente, ce qui représente un risque à surveiller.",
+        "Les activités hors de la zone CFA exposent le groupe à des pertes liées aux variations de monnaies étrangères.",
+        "Des amendes exceptionnelles ont réduit la croissance des bénéfices cette année, et des événements similaires ne peuvent pas être exclus à l'avenir."
+      ],
+      "activites": [
+        "Services de téléphonie mobile et internet pour les particuliers et les entreprises",
+        "Paiement mobile via Orange Money",
+        "Déploiement de réseaux fibre optique et développement de services énergétiques via Orange Energies"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire",
+        "🇧🇫 Burkina Faso",
+        "🇱🇷 Libéria"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:05+00:00"
+    },
+    "ORGT": {
+      "en_bref": "Oragroup est un groupe bancaire coté à la BRVM, dont la société holding est basée au Togo. Il exerce ses activités dans le secteur bancaire en Afrique de l'Ouest. Après une année 2024 difficile marquée par de lourdes pertes, le groupe a renoué avec les bénéfices en 2025, bien que sa situation reste fragile.",
+      "points_forts": [
+        "Retour à la rentabilité en 2025 avec un résultat net consolidé positif, après une perte record l'année précédente.",
+        "Forte réduction du coût du risque, principal moteur du redressement financier du groupe.",
+        "Progression significative des capitaux propres consolidés, qui ont augmenté de 17%, renforçant la solidité du bilan."
+      ],
+      "points_attention": [
+        "Aucun dividende ne sera versé aux actionnaires, ce qui réduit l'attrait immédiat du titre pour les investisseurs.",
+        "Le résultat de la holding Oragroup SA reste négatif, ce qui signifie que la maison mère n'est pas encore rentable par elle-même.",
+        "Les revenus tirés des commissions ont nettement reculé, signalant une pression sur une source importante de revenus.",
+        "Le niveau d'endettement est très élevé, les dettes représentant plus de 90% du bilan total, ce qui est un point de vigilance."
+      ],
+      "activites": [
+        "Activités bancaires consolidées générant des revenus d'intérêts et des commissions auprès de la clientèle.",
+        "Gestion d'un portefeuille de filiales bancaires en Afrique de l'Ouest via une structure de holding."
+      ],
+      "presence": [
+        "🇹🇬 Togo"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:16+00:00"
+    },
+    "PALC": {
+      "en_bref": "Palm CI (PALC) est une société ivoirienne spécialisée dans le secteur agricole, principalement dans la production et la transformation de l'huile de palme. Elle est cotée à la BRVM et opère exclusivement en Côte d'Ivoire. En 2025, elle affiche une croissance notable de ses ventes, même si sa rentabilité reste sous pression.",
+      "points_forts": [
+        "Le chiffre d'affaires progresse de près de 15%, ce qui montre une forte capacité à vendre davantage de produits.",
+        "La situation de trésorerie s'améliore nettement grâce à une bonne génération de cash par l'activité opérationnelle.",
+        "La solidité financière de la société est assurée par des capitaux propres importants, offrant une base stable pour l'avenir."
+      ],
+      "points_attention": [
+        "La hausse très forte des coûts des matières premières réduit les marges et pèse sur les bénéfices malgré la croissance des ventes.",
+        "Le niveau élevé des créances clients représente un risque : si certains clients tardent à payer, cela peut fragiliser la trésorerie.",
+        "Les résultats de la société sont très sensibles aux variations des prix de l'huile de palme sur les marchés internationaux, un facteur difficile à contrôler.",
+        "Le dividende versé aux actionnaires est en baisse par rapport à l'année précédente, ce qui reflète la pression sur la rentabilité."
+      ],
+      "activites": [
+        "Production et transformation de l'huile de palme",
+        "Vente de produits fabriqués à base de matières premières agricoles"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:26+00:00"
+    },
+    "PRSC": {
+      "en_bref": "Tractafric Motors CI est une société ivoirienne spécialisée dans la distribution d'engins lourds et de véhicules. Elle s'adresse principalement aux entreprises et acteurs du secteur industriel qui ont besoin d'équipements robustes. Avec un chiffre d'affaires de 285 milliards de FCFA en progression, elle occupe une place notable sur le marché ivoirien.",
+      "points_forts": [
+        "Le chiffre d'affaires est en hausse de plus de 7%, ce qui montre que la société continue de gagner du terrain.",
+        "La rentabilité des capitaux propres (ROE) de 15,3% indique que la société crée de la valeur pour ses actionnaires.",
+        "Le résultat net de près de 9 milliards de FCFA témoigne d'une capacité réelle à générer des bénéfices."
+      ],
+      "points_attention": [
+        "L'activité de la société dépend fortement des investissements dans le BTP et les grands travaux, qui peuvent ralentir selon la conjoncture.",
+        "Une partie des achats se fait en dollars américains, ce qui expose la société aux variations du taux de change et peut peser sur les marges."
+      ],
+      "activites": [
+        "Distribution d'engins lourds destinés aux chantiers et industries",
+        "Distribution de véhicules professionnels et utilitaires"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:35+00:00"
+    },
+    "SAFC": {
+      "en_bref": "SAFCA CI est une société ivoirienne active dans les domaines des assurances et de la finance, cotée à la BRVM. Elle génère un chiffre d'affaires de 45,8 milliards de FCFA, ce qui lui confère une présence notable sur le marché des assurances en Côte d'Ivoire. Le secteur dans lequel elle évolue connaît une croissance modérée, offrant des perspectives stables sans être particulièrement dynamiques.",
+      "points_forts": [
+        "La société affiche une rentabilité des capitaux propres de 10%, signe qu'elle génère correctement de la valeur pour ses actionnaires.",
+        "Un chiffre d'affaires de 45,8 milliards de FCFA témoigne d'une activité de taille significative sur le marché ivoirien.",
+        "Le résultat net positif indique que l'entreprise est bénéficiaire et maîtrise globalement ses charges."
+      ],
+      "points_attention": [
+        "Le marché des assurances en Côte d'Ivoire est concurrentiel, ce qui peut peser sur les parts de marché et les marges de SAFCA CI.",
+        "Les risques liés aux sinistres climatiques peuvent entraîner des coûts imprévus et affecter la rentabilité de la société."
+      ],
+      "activites": [
+        "Activités d'assurance sur le marché ivoirien",
+        "Services financiers complémentaires"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:44+00:00"
+    },
+    "SCRC": {
+      "en_bref": "Sucrivoire est une entreprise ivoirienne du secteur agricole, spécialisée dans la production de sucre. Elle est cotée à la BRVM sous le ticker SCRC et opère exclusivement en Côte d'Ivoire. Actuellement, elle traverse une période difficile marquée par des pertes importantes et un endettement en forte hausse.",
+      "points_forts": [
+        "Sucrivoire réalise des investissements massifs qui pourraient, à terme, renforcer ses capacités de production.",
+        "L'entreprise est présente sur un marché alimentaire essentiel, le sucre, qui répond à une demande constante en Afrique de l'Ouest.",
+        "À enrichir."
+      ],
+      "points_attention": [
+        "Sucrivoire a enregistré une lourde perte nette en 2025, contre un bénéfice l'année précédente, ce qui représente un retournement brutal de sa situation financière.",
+        "Les dettes à long terme ont plus que doublé en un an, ce qui fait exploser les charges financières et pèse fortement sur la rentabilité.",
+        "Les capitaux propres de l'entreprise ont fortement reculé et pourraient devenir négatifs si les pertes continuent, menaçant la solidité financière de la société.",
+        "L'activité est exposée à la volatilité des prix du sucre et aux aléas climatiques, deux facteurs hors du contrôle de l'entreprise.",
+        "Aucun dividende n'est attendu à court terme, ce qui rend la valeur peu attractive pour un investisseur cherchant un revenu régulier."
+      ],
+      "activites": [
+        "Production de sucre à partir de cultures agricoles",
+        "Gestion d'actifs biologiques liés à la culture de la canne à sucre"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:50:55+00:00"
+    },
+    "SDCC": {
+      "en_bref": "SODECI CI est une société ivoirienne cotée à la BRVM, active dans le secteur des utilités. Elle assure la distribution d'eau potable en Côte d'Ivoire dans le cadre d'une délégation de service public. Avec plus de deux millions de clients, elle occupe une position centrale dans l'accès à l'eau pour les populations.",
+      "points_forts": [
+        "Le chiffre d'affaires est en hausse de 10% et le résultat net progresse de 31%, ce qui traduit une amélioration réelle de la rentabilité.",
+        "Un dividende est proposé aux actionnaires, ce qui témoigne de la confiance de la direction dans la solidité financière de la société.",
+        "Le nombre de clients continue de croître et le taux de recouvrement des factures s'améliore, signe d'une meilleure gestion commerciale."
+      ],
+      "points_attention": [
+        "La trésorerie reste sous tension malgré de bons résultats opérationnels, ce qui constitue un point de vigilance important pour l'investisseur.",
+        "Le niveau d'endettement est élevé et pèse sur la capacité de la société à financer elle-même ses activités.",
+        "La société dépend fortement du cadre réglementaire et du renouvellement de son contrat de délégation de service public, dont le déploiement est prévu prochainement.",
+        "Les charges d'exploitation, notamment les coûts de personnel et de production, sont soumises à des pressions dans un contexte inflationniste."
+      ],
+      "activites": [
+        "Distribution d'eau potable auprès des ménages et entreprises dans le cadre d'une délégation de service public",
+        "Gestion commerciale et facturation auprès d'une clientèle de plus de deux millions d'abonnés"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:05+00:00"
+    },
+    "SDSC": {
+      "en_bref": "Africa Global Logistics CI, anciennement connue sous le nom Bolloré, est une entreprise spécialisée dans la logistique portuaire en Côte d'Ivoire. Elle occupe une position de leader dans ce secteur en Afrique. Son chiffre d'affaires s'élève à 185 milliards de FCFA, en progression de 6,1%, ce qui témoigne d'une activité solide et en croissance.",
+      "points_forts": [
+        "L'entreprise est reconnue comme le leader de la logistique en Afrique, ce qui lui confère un avantage concurrentiel important.",
+        "Son chiffre d'affaires est en hausse de 6,1%, signe d'une croissance régulière de son activité.",
+        "Elle verse un dividende de 280 FCFA par action, ce qui peut représenter un revenu intéressant pour les actionnaires."
+      ],
+      "points_attention": [
+        "L'entreprise traverse une période de changement liée à sa transition après son ancienne appartenance au groupe Bolloré, ce qui peut créer une certaine incertitude sur sa gestion future.",
+        "Le secteur portuaire est de plus en plus concurrentiel, ce qui pourrait peser sur les parts de marché de la société."
+      ],
+      "activites": [
+        "Logistique portuaire",
+        "Gestion et exploitation de terminaux portuaires"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:14+00:00"
+    },
+    "SEMC": {
+      "en_bref": "Crown Siem CI, cotée à la BRVM sous le ticker SEMC, est une société ivoirienne active dans le secteur de l'énergie. Elle est également connue sous le nom Eviosys Packaging SIEM, ce qui suggère une activité liée à l'emballage industriel. Les informations disponibles restent très limitées, ce qui rend difficile une présentation complète de sa place sur le marché.",
+      "points_forts": [
+        "Les états financiers de la société ont été vérifiés et certifiés par des Commissaires aux Comptes, ce qui témoigne d'un processus de contrôle formel.",
+        "La société est cotée à la BRVM, ce qui lui impose un cadre réglementaire et une obligation de transparence envers les investisseurs.",
+        "À enrichir."
+      ],
+      "points_attention": [
+        "Le délai très long entre la clôture des comptes et la tenue de l'Assemblée Générale peut être le signe de difficultés dans la gestion ou la gouvernance de la société.",
+        "Aucune donnée financière chiffrée n'est disponible, ce qui empêche d'évaluer la santé financière réelle de l'entreprise.",
+        "Le verdict neutre attribué à ce titre reflète cette incertitude globale et invite à la prudence avant tout investissement."
+      ],
+      "activites": [
+        "Activité dans le secteur de l'énergie selon sa classification à la BRVM.",
+        "Activité d'emballage industriel sous la marque Eviosys Packaging SIEM."
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:23+00:00"
+    },
+    "SGBC": {
+      "en_bref": "Société Générale CI est une banque de référence en Côte d'Ivoire, cotée à la BRVM. Elle propose des services bancaires aux particuliers et aux entreprises sur le marché ivoirien. Elle est reconnue pour sa solidité financière et verse régulièrement des dividendes à ses actionnaires.",
+      "points_forts": [
+        "Un rendement sur dividende d'environ 6,5% au cours actuel, ce qui représente un revenu intéressant pour un investisseur.",
+        "Un ROE estimé à 24%, l'un des meilleurs du secteur bancaire coté à la BRVM, signe d'une bonne rentabilité des capitaux.",
+        "Une banque bien établie avec un historique de versement régulier de dividendes, gage d'une certaine stabilité."
+      ],
+      "points_attention": [
+        "Les rapports financiers détaillés ne sont pas facilement accessibles en ligne, ce qui limite l'analyse approfondie de la société.",
+        "La performance de la banque est étroitement liée à la situation économique et politique de la Côte d'Ivoire, ce qui constitue un risque de concentration."
+      ],
+      "activites": [
+        "Services bancaires aux particuliers et aux entreprises en Côte d'Ivoire",
+        "Collecte de dépôts et octroi de crédits sur le marché ivoirien"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:31+00:00"
+    },
+    "SHEC": {
+      "en_bref": "Vivo Energy Côte d'Ivoire est une société spécialisée dans la distribution et la commercialisation de produits énergétiques, cotée à la BRVM sous le ticker SHEC. Elle opère sur plusieurs segments comme la vente de carburants aux entreprises, l'aviation et le gaz butane. En 2024, elle affiche une croissance solide de son chiffre d'affaires et de son résultat net, ce qui témoigne d'une bonne dynamique commerciale sur le marché ivoirien.",
+      "points_forts": [
+        "Le chiffre d'affaires a progressé de 9% en 2024, porté par la hausse des volumes sur les segments Entreprises, Aviation et Butane.",
+        "Le résultat net a bondi de 33% en 2024, reflétant une nette amélioration de la performance opérationnelle.",
+        "La dynamique commerciale se confirme au début 2025, avec une poursuite de la croissance des volumes et du résultat net."
+      ],
+      "points_attention": [
+        "La société dépend fortement des découverts bancaires pour financer ses activités, ce qui pèse lourdement sur son résultat financier et représente un risque important si les taux d'intérêt restent élevés.",
+        "La marge nette est très faible, autour de 0,9%, ce qui rend les bénéfices très sensibles à la moindre variation des prix des carburants ou des charges.",
+        "La forte hausse des dettes envers les fournisseurs et de la trésorerie passive peut indiquer des tensions sur la capacité de la société à faire face à ses obligations à court terme.",
+        "Les comptes 2024 n'avaient pas encore reçu la certification définitive du commissaire aux comptes au moment de leur publication, ce qui invite à la prudence dans leur interprétation."
+      ],
+      "activites": [
+        "Distribution et commercialisation de carburants auprès des entreprises et dans l'aviation",
+        "Commercialisation de gaz butane"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:42+00:00"
+    },
+    "SIBC": {
+      "en_bref": "La Société Ivoirienne de Banque (SIB) est une banque basée en Côte d'Ivoire, cotée à la BRVM. Elle finance les particuliers et les entreprises en collectant des dépôts et en accordant des crédits. Ses excellents résultats récents et sa notation financière de premier rang en font l'une des institutions bancaires solides de la région.",
+      "points_forts": [
+        "Une rentabilité élevée avec un bénéfice net en hausse de 11% et un retour sur fonds propres de plus de 27%, signe d'une gestion très efficace.",
+        "Un dividende attractif proposé aux actionnaires, accompagné d'une forte progression du cours de l'action en bourse, récompensant les investisseurs.",
+        "Une qualité du portefeuille de crédits en nette amélioration, avec un coût du risque en recul de 30%, ce qui traduit une gestion prudente des prêts accordés."
+      ],
+      "points_attention": [
+        "Un ralentissement possible de la distribution de crédits pourrait réduire les revenus futurs de la banque si les conditions de marché évoluent défavorablement.",
+        "Les tensions géopolitiques internationales représentent un risque indirect sur l'environnement économique en Afrique de l'Ouest, pouvant affecter l'activité de la banque.",
+        "Une hausse des charges de fonctionnement, si elle s'accélère, pourrait peser sur la rentabilité globale de l'institution."
+      ],
+      "activites": [
+        "Collecte de dépôts auprès des particuliers et des entreprises",
+        "Octroi de crédits à la clientèle pour financer l'économie ivoirienne"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:51:52+00:00"
+    },
+    "SICC": {
+      "en_bref": "SICABLE est une société industrielle ivoirienne cotée à la BRVM, spécialisée dans la fabrication et la distribution de câbles. Elle opère dans un secteur clé pour le développement des infrastructures en Afrique de l'Ouest. En 2025, elle affiche une croissance soutenue de son activité et une rentabilité en amélioration.",
+      "points_forts": [
+        "Le chiffre d'affaires progresse de plus de 11% en 2025, confirmant une trajectoire de croissance solide sur plusieurs années.",
+        "La société dispose d'une trésorerie nette positive et de capitaux propres solides, ce qui témoigne d'un bilan financier sain.",
+        "Les dividendes versés aux actionnaires ont été significativement relevés, signe que la direction est confiante dans la capacité de l'entreprise à générer des liquidités."
+      ],
+      "points_attention": [
+        "Les stocks et les créances clients ont fortement augmenté, ce qui crée une pression sur la trésorerie disponible à court terme.",
+        "Les provisions enregistrées au bilan sont importantes et en hausse, ce qui peut signaler des risques opérationnels ou des contentieux en cours.",
+        "L'activité dépend des cours mondiaux de matières premières comme le cuivre et l'aluminium, dont les fluctuations peuvent affecter les marges."
+      ],
+      "activites": [
+        "Fabrication de câbles à usage industriel et pour les infrastructures",
+        "Distribution de câbles sur le marché ivoirien"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:01+00:00"
+    },
+    "SIVC": {
+      "en_bref": "Erium CI est une société ivoirienne spécialisée dans la production et la distribution de gaz industriels, cotée à la BRVM sous le ticker SIVC. Elle opère dans un secteur de niche qui soutient les industries locales en leur fournissant des gaz essentiels à leurs activités. Son activité est portée par le dynamisme de l'industrialisation en Côte d'Ivoire.",
+      "points_forts": [
+        "La société affiche une croissance régulière de son chiffre d'affaires, signe d'une demande stable pour ses produits.",
+        "Avec un retour sur capitaux propres de 15%, elle démontre une bonne capacité à générer des bénéfices pour ses actionnaires.",
+        "L'industrialisation croissante de la Côte d'Ivoire constitue un moteur naturel pour le développement de son activité."
+      ],
+      "points_attention": [
+        "La société évolue dans un marché de niche, ce qui limite le nombre de clients potentiels et peut freiner une forte croissance.",
+        "Son activité est étroitement liée à la santé de l'industrie ivoirienne, ce qui la rend vulnérable en cas de ralentissement économique local."
+      ],
+      "activites": [
+        "Production et distribution de gaz industriels",
+        "Fourniture de solutions gazières aux entreprises industrielles en Côte d'Ivoire"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:10+00:00"
+    },
+    "SLBC": {
+      "en_bref": "SOLIBRA (ticker : SLBC) est une société ivoirienne cotée à la BRVM, active dans le secteur de la consommation. Elle produit et commercialise des boissons sur le marché de Côte d'Ivoire. En 2024, elle a affiché des résultats financiers en nette amélioration, confirmant son retour à une situation plus solide.",
+      "points_forts": [
+        "La rentabilité a fortement progressé en 2024, avec un bénéfice net en hausse de plus de 42%, malgré un chiffre d'affaires quasi stable.",
+        "La société a repris le versement d'un dividende après une année sans distribution, signe que la direction juge les finances suffisamment solides.",
+        "Les dépenses ont été mieux maîtrisées, ce qui a permis d'améliorer les marges et de réduire l'endettement net de façon significative."
+      ],
+      "points_attention": [
+        "La société reste endettée, même si ses dettes financières sont en baisse, ce qui peut limiter sa flexibilité en cas de coup dur.",
+        "Le passif à court terme a augmenté, notamment les dettes fiscales et sociales, ce qui pourrait créer des tensions sur la trésorerie dans les prochains mois.",
+        "Le chiffre d'affaires est en légère baisse, ce qui peut indiquer une pression sur les volumes vendus ou une concurrence plus forte sur le marché.",
+        "Certains éléments exceptionnels ont pesé négativement sur les résultats en 2024, après avoir joué en faveur de la société l'année précédente."
+      ],
+      "activites": [
+        "Production et vente de boissons sur le marché ivoirien",
+        "Investissements dans l'outil de production pour maintenir la capacité industrielle"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:21+00:00"
+    },
+    "SMBC": {
+      "en_bref": "La Société Multinationale de Bitumes (SMBC CI) est une entreprise ivoirienne du secteur industriel, cotée à la BRVM. Elle opère dans la production et la commercialisation de bitume, un matériau essentiel à la construction et à l'entretien des routes. Elle réalise un chiffre d'affaires de plusieurs centaines de milliards de francs CFA, ce qui en fait un acteur de poids dans son domaine en Afrique de l'Ouest.",
+      "points_forts": [
+        "Le bilan de la société est solide, avec des capitaux propres élevés et un endettement financier quasi nul, ce qui réduit le risque pour les investisseurs.",
+        "La trésorerie nette est redevenue positive grâce à une bonne gestion du besoin en fonds de roulement, signe d'un assainissement financier en cours.",
+        "Malgré une année difficile, la direction maintient le versement d'un dividende, témoignant d'une volonté de récompenser les actionnaires."
+      ],
+      "points_attention": [
+        "La rentabilité s'est fortement dégradée en 2024, avec un résultat net en baisse de près de moitié et une marge opérationnelle divisée par deux, ce qui interroge sur la capacité à retrouver rapidement des niveaux de profitabilité satisfaisants.",
+        "La société est très exposée aux fluctuations des prix du bitume, une matière première dont elle dépend et dont les variations peuvent peser lourdement sur ses coûts.",
+        "Un volume très élevé de créances clients non encore encaissées représente un risque important si certains clients venaient à ne pas honorer leurs paiements."
+      ],
+      "activites": [
+        "Production et commercialisation de bitume destiné aux travaux de construction et d'entretien routier.",
+        "Gestion de stocks de matières premières dans un secteur lié aux infrastructures de transport en Afrique de l'Ouest."
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:34+00:00"
+    },
+    "SNTS": {
+      "en_bref": "Sonatel est une société de télécommunications cotée à la BRVM, basée au Sénégal et opérant sous la marque Orange. Elle propose des services mobiles, internet fixe et mobile money à ses clients en Afrique de l'Ouest. C'est l'un des acteurs majeurs du secteur des télécoms dans la région, avec des résultats financiers en croissance continue.",
+      "points_forts": [
+        "Le chiffre d'affaires est en forte progression, tiré par la data mobile, l'internet fixe et les services de paiement mobile qui affichent tous une croissance à deux chiffres.",
+        "La rentabilité opérationnelle est excellente : près de la moitié du chiffre d'affaires se transforme en bénéfice avant intérêts et amortissements, ce qui est un signe de bonne gestion.",
+        "Les actionnaires bénéficient d'un dividende attractif versé chaque année, ce qui fait de ce titre une source potentielle de revenus réguliers en plus de la valorisation du capital."
+      ],
+      "points_attention": [
+        "La base de clients mobiles est en légère baisse dans certains pays, notamment en raison de règles d'identification plus strictes imposées par les autorités.",
+        "Les impôts et taxes pesant sur l'activité ont fortement augmenté, ce qui réduit une partie des gains réalisés par la croissance du chiffre d'affaires.",
+        "La volatilité des devises locales dans certains pays où le groupe opère entraîne des pertes de change qui impactent les résultats consolidés.",
+        "La concurrence s'intensifie avec l'arrivée de nouveaux acteurs dans certains marchés, ce qui pourrait mettre sous pression les parts de marché du groupe."
+      ],
+      "activites": [
+        "Téléphonie mobile et internet mobile, avec un accent sur la data et la couverture 4G",
+        "Internet fixe à haut débit, notamment via la fibre optique",
+        "Services de paiement mobile et solutions financières numériques (mobile money)",
+        "Développement de solutions numériques pour les entreprises, incluant le cloud et la cybersécurité"
+      ],
+      "presence": [
+        "🇸🇳 Sénégal"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:48+00:00"
+    },
+    "SOGC": {
+      "en_bref": "SOGB CI est une société ivoirienne cotée à la BRVM, active dans le secteur agricole. Elle produit et vend principalement du caoutchouc et de l'huile de palme. Ses résultats 2025 restent solides malgré une légère pression sur sa rentabilité liée à la hausse de ses coûts d'approvisionnement.",
+      "points_forts": [
+        "La trésorerie de la société s'est nettement renforcée en 2025, offrant une bonne capacité à faire face aux imprévus.",
+        "Le chiffre d'affaires progresse de 12%, porté par la hausse des prix de l'huile de palme et du caoutchouc.",
+        "Des dividendes généreux sont proposés aux actionnaires, ce qui témoigne d'une volonté de partager les bénéfices malgré un contexte plus difficile."
+      ],
+      "points_attention": [
+        "Le coût d'achat du caoutchouc brut auprès des producteurs locaux a fortement augmenté, ce qui réduit les marges de la société.",
+        "Les volumes vendus d'huile de palme et d'huile de palmiste sont en baisse, ce qui fragilise une partie des revenus.",
+        "L'environnement concurrentiel et la volatilité des prix des matières premières agricoles pourraient continuer de peser sur les résultats futurs."
+      ],
+      "activites": [
+        "Production et vente de caoutchouc naturel",
+        "Production et vente d'huile de palme et d'huile de palmiste"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:52:57+00:00"
+    },
+    "SPHC": {
+      "en_bref": "SAPH CI est une société ivoirienne spécialisée dans la production de caoutchouc naturel. Elle est reconnue comme le premier producteur africain dans ce secteur. Avec un chiffre d'affaires de 185 milliards de FCFA, elle occupe une place de premier plan sur le continent.",
+      "points_forts": [
+        "SAPH CI est le premier producteur de caoutchouc naturel en Afrique, ce qui lui confère une position de leader solide sur son marché.",
+        "La société génère un résultat net de 22,8 milliards de FCFA, signe d'une activité rentable.",
+        "Les actionnaires bénéficient d'un dividende de 1 500 FCFA par action, ce qui représente un revenu régulier pour les investisseurs."
+      ],
+      "points_attention": [
+        "Le cours mondial du caoutchouc est très variable, ce qui peut faire fluctuer fortement les revenus de la société d'une année à l'autre.",
+        "SAPH CI dépend largement du marché asiatique pour écouler sa production, ce qui l'expose aux aléas économiques de cette région."
+      ],
+      "activites": [
+        "Production de caoutchouc naturel",
+        "Commercialisation du caoutchouc sur les marchés internationaux"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:53:05+00:00"
+    },
+    "STAC": {
+      "en_bref": "Setao CI est une société ivoirienne spécialisée dans l'ingénierie et la construction, cotée à la BRVM sous le ticker STAC. Elle réalise un chiffre d'affaires de 52 milliards de FCFA, ce qui en fait un acteur significatif du secteur BTP en Côte d'Ivoire. Elle profite directement de la forte dynamique de construction que connaît le pays.",
+      "points_forts": [
+        "La société bénéficie du boom du secteur BTP en Côte d'Ivoire, qui soutient une demande élevée en travaux de construction et d'ingénierie.",
+        "Son chiffre d'affaires de 52 milliards de FCFA témoigne d'une activité à grande échelle sur son marché.",
+        "La société dégage un résultat net positif de 1,82 milliard de FCFA, signe qu'elle est rentable malgré un environnement concurrentiel."
+      ],
+      "points_attention": [
+        "Le secteur BTP est cyclique : les commandes peuvent fortement baisser en période de ralentissement économique ou de réduction des investissements publics.",
+        "Le ROE (retour sur fonds propres) de 8 % est modeste, ce qui signifie que la société génère une rentabilité limitée pour ses actionnaires par rapport aux capitaux investis."
+      ],
+      "activites": [
+        "Ingénierie : conception et études techniques pour des projets de construction",
+        "Construction : réalisation de travaux dans le secteur du bâtiment et des travaux publics"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:53:17+00:00"
+    },
+    "STBC": {
+      "en_bref": "La SITAB (ticker : STBC) est une société ivoirienne cotée à la BRVM, active dans le secteur de la consommation, principalement autour du tabac. Elle affiche une forte croissance de ses ventes en 2025, ce qui témoigne d'une activité commerciale dynamique sur son marché. Cependant, la hausse de ses coûts pèse sur ses bénéfices, ce qui invite à la prudence malgré l'attractivité apparente du titre.",
+      "points_forts": [
+        "Le chiffre d'affaires progresse fortement de plus de 25%, porté par une hausse significative des ventes de marchandises, signe d'une activité commerciale en pleine expansion.",
+        "La société propose un dividende très généreux, offrant un rendement attractif à court terme pour les actionnaires.",
+        "La trésorerie reste positive et solide, ce qui montre que la société dispose encore d'une certaine réserve financière pour faire face à ses obligations."
+      ],
+      "points_attention": [
+        "La rentabilité se dégrade nettement : la part de bénéfice réalisée sur chaque franc de vente a chuté en un an, ce qui signifie que la société gagne proportionnellement moins malgré sa croissance.",
+        "Le dividende versé dépasse le bénéfice de l'année, ce qui signifie que la société puise dans ses réserves pour payer ses actionnaires, laissant peu de ressources pour investir dans son avenir.",
+        "Les coûts d'approvisionnement et de fonctionnement augmentent très fortement, notamment les impôts et taxes, ce qui pourrait peser durablement sur les marges.",
+        "Le secteur du tabac est exposé à des risques réglementaires importants, les autorités pouvant à tout moment alourdir la fiscalité pour des raisons de santé publique."
+      ],
+      "activites": [
+        "Vente et distribution de produits du tabac sur le marché ivoirien.",
+        "Commerce de marchandises, segment en forte croissance représentant la majorité du chiffre d'affaires."
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:53:30+00:00"
+    },
+    "TTLC": {
+      "en_bref": "TotalEnergies CI est une société ivoirienne spécialisée dans la distribution de carburants. Elle occupe une position de leader sur ce marché en Côte d'Ivoire. Son chiffre d'affaires atteint 892 milliards de FCFA, ce qui en fait un acteur de grande envergure dans le secteur de l'énergie en Afrique de l'Ouest.",
+      "points_forts": [
+        "La société est leader sur le marché de la distribution de carburants en Côte d'Ivoire, ce qui lui confère une position solide et reconnue.",
+        "La rentabilité des capitaux propres (ROE) de 18,9% traduit une bonne capacité à générer des bénéfices pour ses actionnaires.",
+        "La société verse un dividende de 1 200 FCFA par action, ce qui peut représenter un revenu régulier attractif pour l'investisseur."
+      ],
+      "points_attention": [
+        "Les marges de la société sont sous pression en raison de la hausse des cours du pétrole, ce qui peut réduire la rentabilité.",
+        "La politique de subvention des carburants en Côte d'Ivoire représente une incertitude, car toute modification de cette politique peut impacter directement l'activité.",
+        "La transition énergétique mondiale vers des énergies moins polluantes pourrait, à terme, réduire la demande de carburants traditionnels."
+      ],
+      "activites": [
+        "Distribution de carburants sur le marché ivoirien",
+        "Commercialisation de produits énergétiques auprès des particuliers et des professionnels"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:53:40+00:00"
+    },
+    "TTLS": {
+      "en_bref": "TotalEnergies Sénégal est une société du secteur de l'énergie, cotée à la BRVM et active au Sénégal. Elle bénéficie directement du boom pétrolier que connaît le pays, ce qui soutient sa croissance. Avec un chiffre d'affaires de 524 milliards de FCFA en hausse de 5,8 %, elle occupe une place solide sur son marché.",
+      "points_forts": [
+        "Le boom pétrolier sénégalais crée un environnement favorable qui profite directement à l'activité de la société.",
+        "Un dividende généreux de 980 FCFA par action récompense les actionnaires et témoigne de la bonne santé financière de l'entreprise.",
+        "La croissance du chiffre d'affaires de 5,8 % montre une dynamique commerciale positive et régulière."
+      ],
+      "points_attention": [
+        "Les résultats de la société dépendent fortement des cours du pétrole, qui peuvent varier brusquement et peser sur les bénéfices.",
+        "L'arrivée de nouveaux concurrents sur le marché sénégalais de l'énergie pourrait réduire les parts de marché de la société à l'avenir."
+      ],
+      "activites": [
+        "Distribution et commercialisation de produits pétroliers au Sénégal.",
+        "Participation au développement du secteur énergétique sénégalais en pleine expansion."
+      ],
+      "presence": [
+        "🇸🇳 Sénégal"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:53:49+00:00"
+    },
+    "UNLC": {
+      "en_bref": "Unilever Côte d'Ivoire est une entreprise ivoirienne cotée à la BRVM, active dans le secteur de la consommation courante. Elle commercialise des produits du quotidien destinés aux ménages. Après deux années difficiles marquées par des pertes importantes, la société a retrouvé un résultat positif en 2023, mais sa santé financière reste fragile.",
+      "points_forts": [
+        "Retour à la rentabilité avec un résultat net positif en 2023, mettant fin à deux années consécutives de pertes.",
+        "Un chiffre d'affaires significatif qui témoigne d'une activité commerciale réelle et d'une présence établie sur le marché ivoirien.",
+        "Un excédent brut d'exploitation positif, signe que l'activité génère encore une marge opérationnelle malgré les pressions sur les coûts."
+      ],
+      "points_attention": [
+        "Les capitaux propres sont négatifs, ce qui signifie que la société a accumulé plus de pertes que de ressources propres, une situation financière structurellement préoccupante.",
+        "L'entreprise dépend fortement de crédits bancaires à court terme pour financer son fonctionnement quotidien, ce qui l'expose à un risque de liquidité élevé.",
+        "Les pertes cumulées des années passées sont très lourdes, ce qui rend toute distribution de dividendes improbable dans un avenir proche.",
+        "La marge bénéficiaire reste très faible, ce qui laisse peu de marge de manœuvre en cas de nouvelle difficulté économique."
+      ],
+      "activites": [
+        "Commercialisation de produits de grande consommation destinés aux ménages",
+        "Distribution de biens du quotidien sur le marché ivoirien"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:54:00+00:00"
+    },
+    "UNXC": {
+      "en_bref": "Uniwax CI est une société ivoirienne spécialisée dans l'impression de tissus wax, ces étoffes colorées très prisées en Afrique de l'Ouest. Elle se positionne comme le leader du wax sur le continent africain. Son chiffre d'affaires atteint 38,2 milliards de FCFA, ce qui témoigne d'une activité solide dans une niche textile en croissance modérée.",
+      "points_forts": [
+        "Uniwax CI est reconnue comme le leader du marché du wax en Afrique, ce qui lui confère une position commerciale forte.",
+        "La société verse un dividende de 180 FCFA par action, ce qui peut représenter un revenu régulier pour l'investisseur.",
+        "Elle opère sur un segment de marché ancré dans les habitudes culturelles africaines, ce qui lui assure une demande durable."
+      ],
+      "points_attention": [
+        "La concurrence des producteurs asiatiques, souvent moins chers, pèse sur les parts de marché de la société.",
+        "La contrefaçon des tissus wax représente une menace sérieuse qui peut réduire les ventes et nuire à l'image de la marque."
+      ],
+      "activites": [
+        "Impression et fabrication de tissus wax destinés au marché africain",
+        "Commercialisation de textiles dans le secteur de la consommation vestimentaire"
+      ],
+      "presence": [
+        "🇨🇮 Côte d'Ivoire"
+      ],
+      "reviewed": false,
+      "generated_at": "2026-05-30T17:54:09+00:00"
+    }
+  }
+}
