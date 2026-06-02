@@ -244,6 +244,10 @@ input[type=range]{padding:0;height:20px}
 .ctab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .ctab-panel{display:none}
 .ctab-panel.active{display:block}
+/* Sprint 11-fix — Barre d'actions + bloc scoring */
+.ctab-action-strip{display:flex;gap:6px;flex-wrap:wrap;padding:var(--space-1) 0;border-bottom:1px solid var(--border-1);margin-bottom:var(--space-2)}
+.ctab-act-btn{font-size:11px;padding:5px 12px;min-height:44px;white-space:nowrap}
+.ctab-score-block{background:var(--bg-elevated);border-radius:10px;padding:var(--space-2);margin-bottom:var(--space-2);border:1px solid var(--border-1)}
 /* ── Verdict analyste ──────────────────────────────────────────────────── */
 .analyst-verdict{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:12px}
 /* ── Raccourcis clavier ────────────────────────────────────────────────── */
@@ -5456,7 +5460,7 @@ async function showStock(ticker){
     const hasCompany=co&&co.description&&co.description.length>10;
     const isFav=favorites.includes(ticker);
     document.getElementById(_stockRenderTarget).innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+      <div style="margin-bottom:12px">
         <div class="stock-main-col">
           <h2 style="font-size:20px;font-weight:700">${s.ticker}
             <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
@@ -5486,19 +5490,14 @@ async function showStock(ticker){
             <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-          <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
-          <span class="b ${bcls(v)}" style="margin-top:4px;display:inline-block" data-tip="Score composite sur 8 modèles · /10">${(v/80*10).toFixed(1)}/10</span>
-          <div id="live-score-container" style="margin-top:8px"></div>
-          <div id="stock-spark-mini" style="margin:6px 0;display:flex;justify-content:flex-end"></div>
-          <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
-      <button class="btn btn-g" style="margin-top:8px;display:block;font-size:10px" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
-      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px;background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(34,211,238,0.2));border-color:var(--green)" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
-      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
-      <button class="btn btn-g" style="margin-top:4px;display:block;font-size:10px" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
-      <button class="btn btn-o" style="margin-top:4px;display:block;font-size:10px" onclick="navToRank('${ticker}')">📊 Voir classement</button>
-        </div>
+      </div>
+      <div class="ctab-action-strip">
+        <button class="btn btn-g ctab-act-btn" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
+        <button class="btn btn-g ctab-act-btn" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
+        <button class="btn btn-g ctab-act-btn" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
+        <button class="btn btn-g ctab-act-btn" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
+        <button class="btn btn-g ctab-act-btn" onclick="toggleCompare('${ticker}')">⚖️ Comparer</button>
+        <button class="btn btn-o ctab-act-btn" onclick="navToRank('${ticker}')">📊 Voir classement</button>
       </div>
       <!-- Sprint 11 — 3 onglets fiche société -->
       <div class="ctab-bar">
@@ -5519,8 +5518,6 @@ async function showStock(ticker){
         ${co.employees_approx?`<span>👥 ~${co.employees_approx.toLocaleString('fr-FR')} employés</span>`:''}
         ${co.markets&&co.markets.length?`<span>🌍 ${co.markets.join(' · ')}</span>`:''}
       </div>
-      <div id="reports-container" style="margin-top:6px"></div>
-          <div id="pdf-analysis-container"></div>
           ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
       ${co.reports_url?` &nbsp;<a href="${co.reports_url}" target="_blank" style="font-size:10px;color:var(--amber);margin-top:6px;display:inline-block">📄 Rapports annuels</a>`:''}
     </div>`:''}
@@ -5530,6 +5527,17 @@ async function showStock(ticker){
     </div>`:'' }
       </div><!-- /ctab-comprendre -->
       <div class="ctab-panel" data-ctab="chiffres">
+        <div class="ctab-score-block">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <div>
+              <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
+              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+            </div>
+            <span class="b ${bcls(v)}" data-tip="Score composite sur 8 modèles · /10">${(v/80*10).toFixed(1)}/10</span>
+          </div>
+          <div id="live-score-container"></div>
+          <div id="stock-spark-mini" style="margin:6px 0"></div>
+        </div>
         ${_genVerdict(s)}
       <!-- Onglets fiche société -->
       <div class="stock-tabs">
@@ -5671,7 +5679,6 @@ async function showStock(ticker){
     fetchLiveScore(ticker);
     window._openTicker = ticker;
     renderLiveRankBadge(ticker);
-    loadReports(ticker);
     // Mini sparkline 30j dans l'en-tête (préférer données BOC étendues)
     const _miniSpkEl = document.getElementById('stock-spark-mini');
     if(_miniSpkEl){
