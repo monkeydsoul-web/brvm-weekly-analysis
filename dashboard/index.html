@@ -5752,7 +5752,8 @@ function _loadStockAI(ticker){
     const kpiHtml=Object.entries(kpis).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--t2)">${k}</span><strong>${v}</strong></div>`).join('');
     const pts=(data.points_cles||[]).map(p=>`<li style="color:var(--green);font-size:11px;margin-bottom:4px">✓ ${p}</li>`).join('');
     const risques=(data.risques||[]).map(r=>`<li style="color:var(--red);font-size:11px;margin-bottom:4px">✗ ${r}</li>`).join('');
-    const persp=(data.perspectives||[]).map(p=>`<li style="color:var(--blue);font-size:11px;margin-bottom:4px">→ ${p}</li>`).join('');
+    const _pArr=Array.isArray(data.perspectives)?data.perspectives:(data.perspectives?[data.perspectives]:[]);
+    const persp=_pArr.map(p=>`<li style="color:var(--blue);font-size:11px;margin-bottom:4px">→ ${p}</li>`).join('');
     el.innerHTML=`
       <div class="card" style="margin-bottom:10px;border-left:3px solid ${vC}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -6560,7 +6561,8 @@ function toggleStockAnalyse(ticker, idx) {
 
   const pts  = (an.points_cles || []).map(p => `<li>${p}</li>`).join('');
   const risks= (an.risques     || []).map(p => `<li>${p}</li>`).join('');
-  const persp= (an.perspectives|| []).map(p => `<li>${p}</li>`).join('');
+  const _perspArr = Array.isArray(an.perspectives) ? an.perspectives : (an.perspectives ? [an.perspectives] : []);
+  const persp= _perspArr.map(p => `<li>${p}</li>`).join('');
 
   el.innerHTML = `
     <span class="verdict-badge ${vrd}">${vIcon} ${an.verdict_investisseur}</span>
