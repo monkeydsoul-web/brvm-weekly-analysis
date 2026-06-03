@@ -650,11 +650,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
     <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge compact-hide" style="display:none"></span></div>
-    <div class="ni" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
+    <div class="ni expert-only" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
     <div class="sb-sub" id="grp-analyse">
       <div class="ni ni-sub" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>◈</span> <span class="ni-label">Signaux</span></div>
-      <div class="ni ni-sub" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>◈</span> <span class="ni-label">Valorisation</span></div>
+      <div class="ni ni-sub expert-only" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>◈</span> <span class="ni-label">Valorisation</span></div>
       <div class="ni ni-sub expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     </div>
     <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
@@ -662,7 +662,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
       <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Revenus</span></div>
     </div>
-    <div class="ni" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
+    <div class="ni expert-only" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
   </nav>
   <div class="tl">
@@ -812,7 +812,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="idx-brvm30" style="display:none"></div>
   <div id="idx-cap" style="display:none"></div>
   <!-- Bouton vers analyse marché complète -->
-  <div style="text-align:center;padding:20px 0 8px">
+  <div class="expert-only" style="text-align:center;padding:20px 0 8px">
     <button onclick="nav('marche')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
   </div>
 </div>
