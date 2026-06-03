@@ -694,7 +694,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- Topbar marché + breadcrumb -->
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
-    <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;cursor:pointer;white-space:nowrap" onclick="nav('dash')">BRVM <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Tableau de bord</span></span>
+    <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Tableau de bord</span></span>
     <span id="msb-composite" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
@@ -848,6 +848,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- APPRENDRE -->
 <div class="page" id="page-apprendre">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph" style="padding:24px 20px 8px">
     <h2 style="font-size:20px;margin:0">Apprendre</h2>
     <p style="font-size:13px;color:var(--text-2);margin:4px 0 0">Les bases pour investir sur la BRVM</p>
@@ -857,6 +858,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- CLASSEMENT -->
 <div class="page" id="page-rank">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Toutes les 47 sociétés BRVM sont notées de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Classement complet</h2><p class="page-sub">47 sociétés classées par score composite sur 8 modèles de valorisation</p></div>
@@ -922,7 +924,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- SECTEURS -->
 <!-- PORTEFEUILLE -->
 <div class="page" id="page-port">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <!-- Guide débutant -->
   <details style="margin:0 0 14px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:10px;padding:0">
     <summary style="padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);user-select:none;list-style:none;display:flex;align-items:center;gap:8px">
@@ -1147,7 +1149,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- REVENUS (Dividendes + Simulateur) -->
 <div class="page" id="page-income">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><div><h2>💰 Revenus</h2><p class="page-sub">Dividendes · calendrier · simulateur de revenus passifs</p></div></div>
   <div class="tab-bar">
     <button class="tab-btn on" onclick="switchTab('income','dividendes',this)">💰 Dividendes</button>
@@ -1269,7 +1271,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- VALORISATION (Prix cibles + Performances) -->
 <div class="page" id="page-valuation">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente les modèles de valorisation détaillés. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour y accéder pleinement.</div>
   <div class="ph"><div><h2>📊 Valorisation</h2><p class="page-sub">Prix cibles · performances historiques · upside potentiel</p></div></div>
   <div class="tab-bar">
@@ -1311,7 +1313,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- ALERTES -->
 <div class="page" id="page-alerts">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><div><h2>🔔 Alertes</h2><p class="page-sub">Soyez notifié quand un cours atteint votre seuil cible</p></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-o" onclick="addPortfolioAlerts()" style="font-size:11px">📦 Alertes portefeuille</button>
@@ -1379,6 +1381,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- MARCHÉ — PAGE UNIFIÉE (Indices · Commodités · Macro UEMOA) -->
 <div class="page" id="page-marche">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph">
     <div><h2>📊 Marché</h2><p class="page-sub">Indices BRVM · Commodités · Contexte macro UEMOA</p></div>
   </div>
@@ -1613,6 +1616,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- CHAT IA -->
 <div class="page" id="page-chat">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><div><h2>Chat IA — Analyste BRVM</h2><p class="page-sub">Posez vos questions sur les actions, secteurs et opportunités BRVM</p></div>
     <button class="btn btn-o" onclick="clearChat()">Effacer</button></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -1660,6 +1664,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- SCREENER -->
 <div class="page" id="page-screener">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner" id="beginner-banner-screener">🔍 <strong>Comment utiliser le screener :</strong> Filtrez les 47 sociétés selon vos critères. Ex : dividende ≥ 4%, note ≥ 7,5. Cliquez sur "Filtrer" pour voir les résultats. <button onclick="document.getElementById('beginner-banner-screener').style.display='none'" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK</button></div>
   <div class="ph">
     <div><h2>🔍 Screener avancé</h2><p class="page-sub">Filtrez les actions BRVM par score, P/E, dividende, ROE et secteur</p></div>
@@ -1766,7 +1771,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
 <div class="page" id="page-signals">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
   <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
@@ -1845,7 +1850,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- OPTIMISATION & ANALYSE -->
 <div class="page" id="page-optim">
-  <button onclick="navBack()" style="background:transparent;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 8px;display:inline-flex;align-items:center;gap:4px">← Retour</button>
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente la corrélation entre actions et l'optimisation de portefeuille Markowitz. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a>.</div>
   <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -1975,6 +1980,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 <!-- ── Glossaire ──────────────────────────────────────────────────────────── -->
 <div class="page" id="page-glossaire">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph">
     <h2>📚 Glossaire financier BRVM</h2>
     <input id="gloss-search" placeholder="🔍 Rechercher un terme..." oninput="filterGlossaire(this.value)"
@@ -1984,6 +1990,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 <!-- ── Paramètres ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-settings">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><h2>⚙️ Paramètres</h2><p class="page-sub">Tâches automatiques et statistiques</p></div>
 
   <div class="card" style="margin-bottom:14px">
@@ -2027,6 +2034,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 <!-- ── Actualités ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-news">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner" id="beginner-banner-news">📢 <strong>Comment lire cette page :</strong> Les annonces officielles BRVM sont classées par catégorie (dividendes, AG, résultats...). Les 🟢 bonnes nouvelles indiquent une actualité positive pour l'action. <button onclick="document.getElementById('beginner-banner-news').style.display='none'" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK</button></div>
   <div class="ph">
     <div><h2>📰 Actualités BRVM</h2><p class="page-sub">Annonces officielles et presse financière</p></div>
