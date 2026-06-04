@@ -3663,11 +3663,11 @@ function _sparklineDots(hist30, w, h){
   // Étiquette : toujours à droite du dernier point, clampée verticalement
   const labelX=lx+4;
   const labelY=Math.max(8,Math.min(h-2,ly+3));
-  const labelTxt=Math.round(vals[vals.length-1]).toLocaleString('fr-FR');
+  const labelTxt=typeof fmtXOF==='function'?fmtXOF(Math.round(vals[vals.length-1])):Math.round(vals[vals.length-1]).toLocaleString('fr-FR');
   const label=`<text x="${labelX}" y="${labelY}" font-size="8" font-weight="500" fill="${col}" font-family="ui-monospace,monospace">${labelTxt}</text>`;
   const perf=vals[0]>0?((vals[vals.length-1]-vals[0])/vals[0]*100):0;
   const sign=perf>=0?'+':'';
-  const tip=`Min: ${Math.round(mn).toLocaleString('fr-FR')} · Max: ${Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  const tip=`Min: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mn)):Math.round(mn).toLocaleString('fr-FR')} · Max: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mx)):Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
   return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}${label}</svg></span>`;
 }
 
@@ -3717,7 +3717,7 @@ function renderRank(){
       <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
       <td><strong>${x.ticker}</strong>${momBadge}</td>
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
-      <td>${x.price?x.price.toLocaleString('fr-FR'):'N/D'}</td>
+      <td>${x.price?(typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')):'N/D'}</td>
       <td style="padding:2px 4px">${spk}${var30}</td>
       <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
       <td class="col-pe">${x.pe_ref||'—'}×</td>
