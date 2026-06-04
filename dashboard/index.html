@@ -542,6 +542,20 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .welcome-card .wc-title{font-size:16px;font-weight:700;margin-bottom:6px}
 .welcome-card .wc-desc{font-size:12px;color:var(--text-2);line-height:1.6}
 .welcome-card .wc-btn{display:inline-block;margin-top:16px;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;background:var(--accent);color:#fff}
+/* ── Tiroir épuré — labels de section + gros boutons (Sprint 18) ─────────── */
+.sb-grp-label{padding:10px 14px 3px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;flex-shrink:0}
+.sb-grp-label:first-child{margin-top:0}
+.sb .ni{height:auto;min-height:44px;padding:0 14px}
+/* ── Drawer-mode : tiroir sur tous les écrans (Sprint 17) ───────────────── */
+.sb{position:fixed;top:0;left:0;height:100vh;width:240px;transform:translateX(-100%);z-index:500;box-shadow:4px 0 24px rgba(0,0,0,.3)}
+.sb.mob-open{transform:translateX(0)}
+#mob-menu-btn{display:flex}
+#mob-overlay.show{display:block}
+.main{margin-left:0;padding-top:54px}
+#app-footer{left:0}
+.sb.compact~.main #app-footer{left:0}
+#breadcrumb{padding-left:56px}
+#sb-compact-btn{display:none!important}
 </style></head>
 <body>
 <div id="g-spin"></div>
@@ -644,26 +658,24 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div id="curr-rate" style="padding:0 14px 10px;font-size:10px;color:var(--text-3)" class="compact-hide"></div>
   </div>
   <nav class="nav">
+    <div class="sb-grp-label">Naviguer</div>
     <div class="ni" onclick="nav('welcome')" data-tip="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span>👋</span> <span class="ni-label">Accueil</span></div>
-    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag compact-hide">LIVE</span></div>
-    <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge compact-hide" title="Nombre de sociétés analysées">47</span></div>
-    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span><span class="ni-kbd compact-hide">S</span></div>
+    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag">LIVE</span></div>
+    <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
+    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
     <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
-    <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge compact-hide" style="display:none"></span></div>
+    <div class="sb-grp-label">Découvrir</div>
+    <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
     <div class="ni expert-only" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
-    <div class="sb-grp sb-acc" onclick="sbToggle('grp-analyse')"><span>📐</span> <span class="ni-label">Analyse</span><span class="sb-acc-arrow ni-label">▾</span></div>
-    <div class="sb-sub" id="grp-analyse">
-      <div class="ni ni-sub" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>◈</span> <span class="ni-label">Signaux</span></div>
-      <div class="ni ni-sub expert-only" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>◈</span> <span class="ni-label">Valorisation</span></div>
-      <div class="ni ni-sub expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>◈</span> <span class="ni-label">Corrélation & Markowitz</span></div>
-    </div>
-    <div class="sb-grp sb-acc" onclick="sbToggle('grp-port')"><span>💼</span> <span class="ni-label">Revenus</span><span class="sb-acc-arrow ni-label">▾</span></div>
-    <div class="sb-sub" id="grp-port">
-      <div class="ni ni-sub" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>◈</span> <span class="ni-label">Mon portefeuille</span></div>
-      <div class="ni ni-sub" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>◈</span> <span class="ni-label">Revenus</span></div>
-    </div>
-    <div class="ni expert-only" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span><span class="ni-kbd compact-hide">A</span></div>
+    <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
+    <div class="sb-grp-label expert-only">Analyse</div>
+    <div class="ni expert-only" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>📊</span> <span class="ni-label">Valorisation</span></div>
+    <div class="ni expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
+    <div class="sb-grp-label">Mon argent</div>
+    <div class="ni" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
+    <div class="ni" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>💰</span> <span class="ni-label">Revenus</span></div>
+    <div class="ni expert-only" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span></div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -674,20 +686,16 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="cmp-bar">
     <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
   </div>
-  <div id="sb-bottom" style="padding:6px 8px 8px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:4px">
-    <div class="ni" onclick="nav('settings');loadSettingsPage()" data-tip="Tâches automatiques · préférences · statistiques" style="margin:0 0 2px"><span>⚙️</span> <span class="ni-label compact-hide">Paramètres</span></div>
+  <div id="sb-bottom" style="padding:8px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:4px">
+    <div class="mode-toggle">
+      <button data-mode-btn="beginner" class="mode-btn" onclick="_setMode('beginner')">🌱 Débutant</button>
+      <button data-mode-btn="expert" class="mode-btn active" onclick="_setMode('expert')">🎯 Expert</button>
+    </div>
+    <div class="ni" onclick="nav('settings');loadSettingsPage()" data-tip="Tâches automatiques · préférences · statistiques" style="margin:0"><span>⚙️</span> <span class="ni-label">Paramètres</span></div>
     <div id="push-notif-bar" style="display:none">
       <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
       <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
     </div>
-    <div class="mode-toggle compact-hide">
-      <button data-mode-btn="beginner" class="mode-btn" onclick="_setMode('beginner')">🌱 Débutant</button>
-      <button data-mode-btn="expert" class="mode-btn active" onclick="_setMode('expert')">🎯 Expert</button>
-    </div>
-    <button onclick="startOnboarding()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🎓 Revoir le tour guidé</button>
-    <button id="eco-mode-btn" onclick="toggleEcoMode()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide">🔋 Mode économie : OFF</button>
-    <button onclick="toggleSidebarCompact()" id="sb-compact-btn" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left">⟨ Réduire la sidebar</button>
-    <button onclick="showChangelog()" style="display:block;background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:3px 0;width:100%;text-align:left" class="compact-hide" data-tip="Historique des mises à jour et nouvelles fonctionnalités">📋 Changelog v9.0</button>
   </div>
 </aside>
 <main class="main">
@@ -2385,13 +2393,11 @@ function toggleMobMenu() {
   document.querySelector('.sb').classList.toggle('mob-open');
   document.getElementById('mob-overlay').classList.toggle('show');
 }
-// Close sidebar when a nav item is tapped on mobile (<= 900px)
+// Close sidebar when a nav item is tapped (drawer mode — all screen sizes)
 document.querySelectorAll('.ni').forEach(el => {
   el.addEventListener('click', () => {
-    if (window.innerWidth <= 900) {
-      document.querySelector('.sb').classList.remove('mob-open');
-      document.getElementById('mob-overlay').classList.remove('show');
-    }
+    document.querySelector('.sb').classList.remove('mob-open');
+    document.getElementById('mob-overlay').classList.remove('show');
   });
 });
 
