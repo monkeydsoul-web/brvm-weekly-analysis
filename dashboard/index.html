@@ -542,6 +542,16 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .welcome-card .wc-title{font-size:16px;font-weight:700;margin-bottom:6px}
 .welcome-card .wc-desc{font-size:12px;color:var(--text-2);line-height:1.6}
 .welcome-card .wc-btn{display:inline-block;margin-top:16px;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;background:var(--accent);color:#fff}
+/* ── Drawer-mode : tiroir sur tous les écrans (Sprint 17) ───────────────── */
+.sb{position:fixed;top:0;left:0;height:100vh;width:240px;transform:translateX(-100%);z-index:500;box-shadow:4px 0 24px rgba(0,0,0,.3)}
+.sb.mob-open{transform:translateX(0)}
+#mob-menu-btn{display:flex}
+#mob-overlay.show{display:block}
+.main{margin-left:0;padding-top:54px}
+#app-footer{left:0}
+.sb.compact~.main #app-footer{left:0}
+#breadcrumb{padding-left:56px}
+#sb-compact-btn{display:none!important}
 </style></head>
 <body>
 <div id="g-spin"></div>
@@ -2385,13 +2395,11 @@ function toggleMobMenu() {
   document.querySelector('.sb').classList.toggle('mob-open');
   document.getElementById('mob-overlay').classList.toggle('show');
 }
-// Close sidebar when a nav item is tapped on mobile (<= 900px)
+// Close sidebar when a nav item is tapped (drawer mode — all screen sizes)
 document.querySelectorAll('.ni').forEach(el => {
   el.addEventListener('click', () => {
-    if (window.innerWidth <= 900) {
-      document.querySelector('.sb').classList.remove('mob-open');
-      document.getElementById('mob-overlay').classList.remove('show');
-    }
+    document.querySelector('.sb').classList.remove('mob-open');
+    document.getElementById('mob-overlay').classList.remove('show');
   });
 });
 
