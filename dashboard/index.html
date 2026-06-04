@@ -5234,7 +5234,7 @@ function buildKpiCards(s){
   const cards=[
     pe?{l:'P/E',v:pe.toFixed(1)+'×',vc:pe<15?'var(--green)':pe<25?'var(--amber)':'var(--red)',tip:'Cours ÷ Bénéfice par action. Seuil Graham : ≤15×'}:null,
     pb?{l:'P/B',v:pb.toFixed(2)+'×',vc:pb<1?'var(--green)':pb<2?'var(--amber)':'var(--red)',tip:'Cours ÷ Valeur comptable. < 1 = décote sur actif net'}:null,
-    bna?{l:'BNA',v:Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.'}:null,
+    bna?{l:'BNA',v:typeof fmtXOF==='function'?fmtXOF(Math.round(bna)):Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.'}:null,
     roe?{l:'ROE',v:roe.toFixed(1)+'%',vc:roe>=15?'var(--green)':roe>=8?'var(--amber)':'var(--red)',tip:'Return on Equity = Bénéfice net / Capitaux propres. ≥15% = excellence Buffett.'}:null,
   ].filter(Boolean);
   if(!cards.length) return '';

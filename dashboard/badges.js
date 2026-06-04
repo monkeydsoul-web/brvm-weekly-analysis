@@ -63,8 +63,8 @@ function renderLiveRankBadge(ticker) {
         Note <strong style="color:${scoreC}">${((entry.composite_adj||0)/80*10).toFixed(1)}/10</strong>
       </span>
       ${verdict ? `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${verdC}22;color:${verdC};font-weight:700">${verdict}</span>` : ''}
-      ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${entry.eps.toLocaleString('fr-FR')} XOF</strong></span>` : ''}
-      ${entry.bvpa ? `<span class="tt" data-tt="Book Value Per Action · valeur comptable par action — actif net / nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BVPA <strong>${Math.round(entry.bvpa).toLocaleString('fr-FR')} XOF</strong></span>` : ''}
+      ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.eps)):Math.round(entry.eps).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
+      ${entry.bvpa ? `<span class="tt" data-tt="Book Value Per Action · valeur comptable par action — actif net / nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BVPA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.bvpa)):Math.round(entry.bvpa).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
     </div>`;
 }
 
