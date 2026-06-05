@@ -1,145 +1,145 @@
-# 📈 BRVM Weekly Analyzer
+# 📈 BRVM Analyzer
 
-Système d'analyse automatique hebdomadaire de toutes les actions cotées à la **Bourse Régionale des Valeurs Mobilières (BRVM)**.
+Tableau de bord d'analyse des 47 actions cotées à la **Bourse Régionale des Valeurs Mobilières (BRVM)** — marché financier commun à 8 pays d'Afrique de l'Ouest (UEMOA).
 
-Chaque vendredi soir, le système :
-1. **Scrape** les cours officiels depuis brvm.org
-2. **Calcule** 7 scores de valorisation (Graham, DCF, DDM, EPV, Buffett, Reverse DCF, Relatif)
-3. **Génère** un rapport PDF complet avec graphiques et classement
-4. **Commit** le rapport sur GitHub automatiquement
+Application web locale (Flask, port 5000) à usage personnel. Interface en français, conçue pour être accessible aux débutants comme aux investisseurs expérimentés grâce à un mode d'affichage adaptatif.
 
 ---
 
-## 🚀 Installation rapide
+## Présentation
 
-### 1. Prérequis
-- Python 3.10+ ([télécharger](https://python.org))
-- Git ([télécharger](https://git-scm.com))
-- Un compte GitHub
+BRVM Analyzer scrape les cours en temps réel depuis brvm.org, calcule 8 modèles de valorisation (Graham, DCF, DDM, EPV, Buffett, Reverse DCF, Relatif, Technique), génère un classement live des sociétés et propose une interface progressive disclosure adaptée au niveau de l'utilisateur.
 
-### 2. Cloner et installer
+**Fonctionnalités principales :**
+- Classement live des 47 sociétés avec scores /10
+- Fiche société : storytelling, ratios fondamentaux, analyse IA des rapports PDF (Claude Sonnet)
+- Dashboard : KPIs, heatmap, opportunités, signaux du marché
+- Portefeuille : suivi des positions, gains/pertes, dividendes
+- Screener : filtres multi-critères (P/E, score, dividende, ROE…)
+- Mode débutant / expert : affichage adaptatif
+- Multi-devises : XOF, EUR, USD
+- Alertes prix via notifications push (Service Worker)
+
+---
+
+## Stack & Architecture
+
+| Couche | Technologie |
+|--------|-------------|
+| Backend | Python 3.9 · Flask · APScheduler (~12 jobs) |
+| Scraping | `live_data.py`, `boc_scraper.py`, `reports_scraper.py` |
+| IA | API Anthropic — Claude Sonnet (analyse PDF + contenu pédagogique) |
+| Frontend | HTML/CSS/JS vanilla — `dashboard/index.html` (~8 000 lignes) + ~15 fichiers `.js` |
+| Données | Fichiers JSON dans `data/` (cache cours, ranking, annonces, rapports…) |
+| Notifications | Service Worker `dashboard/sw.js` — alertes prix en arrière-plan |
+
+L'application tourne exclusivement en local (`localhost:5000`). Aucun déploiement en production.
+
+---
+
+## Prérequis
+
+- Python 3.9+
+- pip
+- Clé API Anthropic (pour les analyses IA)
+
+---
+
+## Installation
 
 ```bash
-# Cloner ce repo
-git clone https://github.com/TON_USERNAME/brvm-weekly-analysis.git
+git clone https://github.com/monkeydsoul-web/brvm-weekly-analysis.git
 cd brvm-weekly-analysis
-
-# Installer les dépendances
 pip install -r requirements.txt
 ```
 
-### 3. Configurer ton username GitHub
+---
 
-Dans `main.py`, ligne 20 :
-```python
-"github_username": "TON_USERNAME_GITHUB",
-```
+## Variables d'environnement
 
-### 4. Initialiser le repo GitHub
+La clé API Anthropic doit être disponible dans le shell. Ajouter dans `~/.zprofile` :
 
 ```bash
-# Initialiser git (si pas déjà fait)
-git init
-git add .
-git commit -m "🎉 Initialisation du projet BRVM Analyzer"
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
 
-# Créer le repo sur GitHub (via GitHub CLI ou manuellement sur github.com)
-# Puis:
-git remote add origin https://github.com/TON_USERNAME/brvm-weekly-analysis.git
-git branch -M main
-git push -u origin main
+Puis recharger :
+
+```bash
+source ~/.zprofile
 ```
 
 ---
 
-## 📋 Utilisation
+## Lancement
 
-### Lancer une analyse immédiatement
 ```bash
-python main.py
+python3 app.py
 ```
 
-### Lancer en mode hors-ligne (utilise le cache)
-```bash
-python main.py --offline
-```
+L'application démarre sur **http://localhost:5000**.
 
-### Lancer sans push GitHub
-```bash
-python main.py --no-github
-```
-
-### Activer l'automatisation hebdomadaire
-```bash
-# Option A: Planificateur Python (laisser tourner)
-python scheduler.py
-
-# Option B: Cron (Linux/Mac) — toujours plus fiable
-# Ouvrir le crontab:
-crontab -e
-# Ajouter cette ligne (vendredi à 20h00):
-0 20 * * 5 cd /CHEMIN/VERS/brvm-weekly-analysis && python main.py >> logs/cron.log 2>&1
-
-# Option C: Planificateur Windows
-# Utiliser le Planificateur de tâches Windows:
-# - Action: python main.py
-# - Déclencheur: chaque vendredi à 20:00
-# - Répertoire de démarrage: C:\CHEMIN\VERS\brvm-weekly-analysis
-```
+Le port 5000 est fixe et ne doit pas être modifié (références hardcodées dans le frontend).
 
 ---
 
-## 📁 Structure du projet
+## Structure des dossiers
 
 ```
 brvm-weekly-analysis/
-├── main.py              # Orchestrateur principal
-├── scraper.py           # Récupération des cours BRVM
-├── valuation.py         # Moteur de scoring (7 modèles)
-├── report_generator.py  # Générateur de rapport PDF
-├── scheduler.py         # Planificateur hebdomadaire
-├── requirements.txt     # Dépendances Python
-├── data/
-│   ├── prices_cache.json     # Cache des cours
-│   └── scores_YYYYMMDD.json  # Historique des scores
-├── reports/
-│   └── BRVM_Analyse_YYYY_MM_DD.pdf  # Rapports hebdomadaires
-└── logs/
-    └── brvm_YYYYMMDD.log    # Logs d'exécution
+├── app.py                   # Serveur Flask — routes API et serving du frontend
+├── live_data.py             # Scraping live brvm.org (cours, indices)
+├── boc_scraper.py           # Scraping BOC (données fondamentales officielles)
+├── reports_scraper.py       # Téléchargement et indexation des rapports PDF
+├── pdf_analyzer.py          # Analyse IA des rapports PDF (Claude)
+├── live_ranker.py           # Calcul du score composite et classement
+├── valuation.py             # Modèles de valorisation (Graham, DCF, DDM…)
+├── auto_scheduler.py        # Planificateur APScheduler (~12 jobs)
+├── requirements.txt
+├── data/                    # Cache JSON (cours, scores, annonces, news…)
+├── dashboard/
+│   ├── index.html           # Frontend monolithique (~8 000 lignes)
+│   ├── badges.js            # Badges rang et KPI cards fiche société
+│   ├── ranking.js           # Classement live + auto-refresh
+│   ├── screener.js          # Filtres screener
+│   ├── dash-hierarchy.js    # Hiérarchie 3 niveaux dashboard
+│   ├── alerts.js            # Alertes prix
+│   ├── compare.js           # Comparaison multi-actions
+│   └── sw.js                # Service Worker (notifications push)
+├── reports/                 # Rapports PDF archivés
+└── logs/                    # Logs d'exécution
 ```
 
 ---
 
-## 📊 Les 7 modèles de valorisation
+## Conventions de code
 
-| Modèle | Description | Score |
-|--------|-------------|-------|
-| **Graham** | P/E≤15, P/B≤1.5, P/E×P/B≤22.5, dividende≥4% | /10 |
-| **DCF/FCF** | Rendement des bénéfices + ROE | /10 |
-| **DDM** | Dividend Discount Model (Gordon Growth) | /10 |
-| **EPV** | Earnings Power Value (Greenwald) | /10 |
-| **Buffett** | ROE, moat, stabilité, prix raisonnable | /10 |
-| **Rev. DCF** | Croissance implicite vs réaliste | /10 |
-| **Relatif** | Décote vs médiane sectorielle | /10 |
-| **TOTAL** | Score composite (avec pénalité géopolitique) | /70 |
+### Port fixe
+Le port Flask est **5000**. Ne pas le modifier.
+
+### Mode débutant / expert
+Le mode est contrôlé par l'attribut `data-mode` sur la balise `<html>` (`beginner` ou `expert`).  
+La règle CSS suivante masque automatiquement les éléments réservés aux experts :
+
+```css
+[data-mode="beginner"] .expert-only { display: none !important; }
+```
+
+Tout élément réservé aux experts reçoit la classe `.expert-only`.
+
+### Formatage monétaire
+Utiliser systématiquement `fmtXOF(valeur)` — cette fonction formate selon la devise active (XOF / EUR / USD) malgré son nom. Ne jamais utiliser `.toLocaleString('fr-FR') + ' XOF'` en dur.
+
+### Apostrophes françaises en JS
+Tout nouveau code JS contenant des apostrophes françaises ou des caractères spéciaux doit aller dans un **fichier `.js` séparé** sous `dashboard/`. Jamais inline dans `index.html`.
+
+### Bloc JS inline de index.html
+Le bloc `<script>` inline de `dashboard/index.html` ne doit **jamais être restructuré, réindenté ou déplacé**. Seuls des edits minimaux et ciblés sont autorisés. Toute nouvelle logique va dans un fichier `.js` séparé.
 
 ---
 
-## 🔄 Mise à jour des données fondamentales
+## Avertissement
 
-Les ratios P/E, P/B, ROE et dividendes de référence sont dans `scraper.py` (dictionnaire `STOCK_FUNDAMENTALS`).
-**Mettre à jour une fois par an** après la publication des résultats annuels (généralement mars-avril).
-
----
-
-## ⚠️ Avertissement
-
-Ce système est produit à des fins **éducatives et informatives uniquement**.
-Il ne constitue pas un conseil en investissement.
+Ce projet est à usage **personnel et éducatif uniquement**.  
+Il ne constitue pas un conseil en investissement.  
 Consultez un conseiller financier avant toute décision d'investissement.
-
----
-
-## 📝 Licence
-
-MIT — Libre d'utilisation et de modification.
