@@ -1,6 +1,5 @@
 // ── Classement Live — ranking.js ──────────────────────────────────────────
 
-let _lastRankOrder = {};   // ticker -> rank précédent pour badges ↑↓
 let _autoRefreshTimer = null;
 
 function initRanking() {
@@ -21,10 +20,6 @@ function initRanking() {
   const fv = document.getElementById('fVerdict');
   if (fv) fv.onchange = renderRankLive;
 
-  // Mémoriser rangs actuels
-  if (window.scores || typeof scores !== "undefined") {
-    (window.scores || scores || []).forEach((x, i) => { _lastRankOrder[x.ticker] = i + 1; });
-  }
 }
 
 function renderRankCards() {
