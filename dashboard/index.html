@@ -196,10 +196,7 @@ input[type=range]{padding:0;height:20px}
 .ctag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:var(--bg3);font-size:11px;margin:2px}
 .cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .div-cal{border-left:3px solid var(--amber);padding:8px 12px;margin-bottom:6px;background:rgba(251,191,36,.05);border-radius:0 6px 6px 0}
-.chat-msg{padding:10px 14px;border-radius:10px;margin-bottom:8px;font-size:13px;line-height:1.6;max-width:85%}
-.chat-user{background:rgba(96,165,250,.18);color:var(--blue);margin-left:auto}
-.chat-ai{background:var(--bg3);color:var(--text)}
-.chat-input-row{display:flex;gap:8px;padding:12px 0 0}
+
 .profile-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--t2);font-size:11px;cursor:pointer}
 .profile-btn.on{background:rgba(74,222,128,.15);color:var(--green);border-color:rgba(74,222,128,.4)}
 .weight-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -221,8 +218,6 @@ input[type=range]{padding:0;height:20px}
 /* ══ Chat chips ══════════════════════════════════════════════════════════════ */
 .chat-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--t2);font-size:11px;cursor:pointer;transition:all .12s;white-space:nowrap}
 .chat-chip:hover{background:var(--border);color:var(--text)}
-.chat-copy-btn{font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--t3);cursor:pointer;margin-top:4px;display:block;width:fit-content}
-.chat-copy-btn:hover{background:var(--bg3);color:var(--text)}
 @keyframes dotBlink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 .dot-blink{animation:dotBlink 1.2s infinite;display:inline-block}
 /* ══ Météo marché ════════════════════════════════════════════════════════════ */
@@ -663,8 +658,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
-    <div class="ni" onclick="nav('chat')" data-tip="Posez n'importe quelle question sur la BRVM · ex: Analyse SIBC · Quel secteur performe le mieux ?"><span>💬</span> <span class="ni-label">Assistant IA</span></div>
-    <div class="sb-grp-label">Découvrir</div>
+<div class="sb-grp-label">Découvrir</div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
     <div class="ni expert-only" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
@@ -1618,44 +1612,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="page" id="page-macro"></div>
 <div class="page" id="page-comm"></div>
 
-<!-- CHAT IA -->
-<div class="page" id="page-chat">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="ph"><div><h2>Chat IA — Analyste BRVM</h2><p class="page-sub">Posez vos questions sur les actions, secteurs et opportunités BRVM</p></div>
-    <button class="btn btn-o" onclick="clearChat()">Effacer</button></div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-    <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Posez n'importe quelle question sur une société : "Analyse SIBC"<br>
-      · Vous pouvez aussi demander : "Quelles sont les meilleures banques BRVM ?"<br>
-      · L'IA utilise les données réelles du BOC pour répondre
-    </div>
-  </details>
-  <div class="card" style="height:calc(100vh - 280px);display:flex;flex-direction:column">
-    <div id="chatMessages" style="flex:1;overflow-y:auto;padding:4px 0">
-      <div id="chat-welcome" style="text-align:center;padding:32px 16px;color:var(--t2);font-size:13px">
-        <div style="font-size:32px;margin-bottom:12px">🤖</div>
-        <div style="font-weight:600;color:var(--t1);margin-bottom:6px">Votre analyste BRVM personnel</div>
-        <div style="font-size:12px;color:var(--t3);line-height:1.7">Posez n'importe quelle question sur les 47 sociétés,<br>les secteurs, les dividendes ou le marché BRVM.<br>Je réponds en utilisant les données réelles du BOC.</div>
-      </div>
-    </div>
-    <div class="chat-input-row">
-      <input id="chatInput" placeholder="Ex : Analyse SIBC, meilleures opportunités, top dividendes..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
-      <button class="btn btn-g" onclick="sendChat()" id="chatBtn">Envoyer</button>
-    </div>
-    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-      <button class="chat-chip" onclick="quickChat('Quelles sont les meilleures opportunités en ce moment ?')">Opportunités</button>
-      <button class="chat-chip" onclick="quickChat('Analyse SIBC — score, dividende, recommandation.')">Analyse SIBC</button>
-      <button class="chat-chip" onclick="quickChat('Prévision marché BRVM prochains mois ?')">Prévision marché</button>
-      <button class="chat-chip" onclick="quickChat('Comment investir 1 million XOF sur la BRVM ?')">Investir 1M XOF</button>
-      <button class="chat-chip" onclick="quickChat('Top dividendes BRVM 2025 ?')">Top dividendes</button>
-      <button class="chat-chip" onclick="quickChat('Quelle est la meilleure action BRVM aujourd\'hui ?')">🏆 Quelle est la meilleure action BRVM aujourd'hui ?</button>
-      <button class="chat-chip" onclick="quickChat('Quelles sociétés versent le plus de dividendes ?')">💰 Quelles sociétés versent le plus de dividendes ?</button>
-      <button class="chat-chip" onclick="quickChat('Comment diversifier un portefeuille BRVM ?')">📊 Comment diversifier un portefeuille BRVM ?</button>
-      <button class="chat-chip" onclick="quickChat('Quels sont les risques à connaître sur la BRVM ?')">⚠️ Quels sont les risques à connaître sur la BRVM ?</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- PERFORMANCES HISTORIQUES -->
 
@@ -2162,7 +2119,7 @@ window.addEventListener('load',()=>{
   const main=document.querySelector('.main');
   if(main) _tableObs.observe(main,{childList:true,subtree:true});
 });
-let scores=[],comms={},charts={},favorites=[],portfolio={},chatHistory=[],topPerf=[];
+let scores=[],comms={},charts={},favorites=[],portfolio={},topPerf=[];
 
 // ── Dictionnaire termes financiers ─────────────────────────────────────────
 window.TERMS = {
@@ -2419,7 +2376,6 @@ const _PAGES = [
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
   {id:'optim',    icon:'📐', label:'Analyse & Optim',      desc:'Corrélation, Markowitz, frontière efficiente'},
   {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
-  {id:'chat',     icon:'💬', label:'Chat IA',              desc:'Analyste IA BRVM'},
   {id:'glossaire',icon:'📚', label:'Glossaire',            desc:'Termes financiers expliqués'},
   {id:'comm',     icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
   {id:'settings', icon:'⚙️', label:'Paramètres',           desc:'Tâches automatiques · statistiques · version'},
@@ -5155,81 +5111,7 @@ function renderComm(){
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Score /10">${v10fmt(v)}/10</span></td></tr>`;}).join('');
 }
 
-// ── Chat IA ────────────────────────────────────────────────────────────────
-function clearChat(){
-  chatHistory=[];
-  localStorage.removeItem(_LS_CHAT_MEM);
-  document.getElementById('chatMessages').innerHTML=`<div class="chat-msg chat-ai">Bonjour ! Je suis votre analyste BRVM. Comment puis-je vous aider ?</div>`;
-}
-const _LS_CHAT_MEM = 'brvm_chat_memory_v1';
-function _chatMemLoad(){ try{return JSON.parse(localStorage.getItem(_LS_CHAT_MEM)||'[]');}catch{return[];} }
-function _chatMemSave(hist){ localStorage.setItem(_LS_CHAT_MEM, JSON.stringify(hist.slice(-10))); }
 
-function quickChat(msg){
-  const inp = document.getElementById('chatInput');
-  if(inp){ inp.value = msg; sendChat(); }
-}
-
-function _chatCopyReply(btn, text){
-  navigator.clipboard.writeText(text).then(()=>{
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copié';
-    setTimeout(()=>{ btn.textContent = orig; }, 1500);
-  }).catch(()=>{ btn.textContent = '✗ Erreur'; setTimeout(()=>{ btn.textContent = '📋 Copier'; }, 1500); });
-}
-
-async function sendChat(){
-  const inp=document.getElementById('chatInput');
-  const msg=inp.value.trim();
-  if(!msg)return;
-  inp.value='';
-  const container=document.getElementById('chatMessages');
-  // Hide welcome block on first message
-  const welcome=document.getElementById('chat-welcome');
-  if(welcome) welcome.style.display='none';
-
-  // Ajouter message utilisateur
-  const userDiv=document.createElement('div');
-  userDiv.className='chat-msg chat-user';
-  userDiv.textContent=msg;
-  container.appendChild(userDiv);
-
-  // Animation "Claude réfléchit..."
-  const thinkDiv=document.createElement('div');
-  thinkDiv.className='chat-msg chat-ai';
-  thinkDiv.id='chatTyping';
-  thinkDiv.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;color:var(--t2);font-style:italic">Claude réfléchit<span style="display:inline-flex;gap:3px"><span class="dot-blink" style="animation-delay:0s">.</span><span class="dot-blink" style="animation-delay:.2s">.</span><span class="dot-blink" style="animation-delay:.4s">.</span></span></span>';
-  container.appendChild(thinkDiv);
-  container.scrollTop=container.scrollHeight;
-
-  document.getElementById('chatBtn').disabled=true;
-  chatHistory.push({role:'user',content:msg});
-  // Charger mémoire persistée
-  const mem = _chatMemLoad();
-  const histWithMem = [...mem.slice(-8), ...chatHistory].slice(-20);
-
-  try{
-    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:msg,history:histWithMem})}).then(r=>r.json());
-    thinkDiv.remove();
-    const reply = r.reply || r.error || 'Erreur';
-    chatHistory.push({role:'assistant',content:reply});
-    // Sauvegarder en mémoire (5 derniers échanges = 10 messages)
-    const newMem = [...mem, {role:'user',content:msg}, {role:'assistant',content:reply}];
-    _chatMemSave(newMem);
-    // Créer bulle IA avec bouton copier
-    const aiDiv=document.createElement('div');
-    aiDiv.className='chat-msg chat-ai';
-    const replyId='cr-'+Date.now();
-    aiDiv.innerHTML=`<div id="${replyId}" style="white-space:pre-wrap">${reply.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-      <button class="chat-copy-btn" onclick="_chatCopyReply(this,document.getElementById('${replyId}').innerText)">📋 Copier</button>`;
-    container.appendChild(aiDiv);
-  }catch(e){
-    thinkDiv.textContent='Erreur de connexion.';
-  }
-  document.getElementById('chatBtn').disabled=false;
-  container.scrollTop=container.scrollHeight;
-}
 
 // ── Fiche action ────────────────────────────────────────────────────────────
 function _stockTab(id){
@@ -7192,15 +7074,6 @@ const _helpContent = {
       { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
     ]
   },
-  chat: {
-    title: 'Chat IA',
-    sections: [
-      { h: '🤖 Votre analyste BRVM personnel', p: 'Posez n\'importe quelle question en français sur la BRVM, les actions, ou la finance en général. L\'IA connaît les données de toutes les 47 sociétés et les concepts financiers.' },
-      { h: '💬 Questions exemples', p: '• "Qu\'est-ce qu\'un P/E ratio et comment l\'utiliser ?"\n• "Quelle est la meilleure action BRVM pour les dividendes ?"\n• "Explique-moi comment fonctionne la BRVM"\n• "SIBC est-elle une bonne opportunité ?" \n• "Compare SGBC et BICB pour moi"' },
-      { h: '⚠️ Limites', p: 'L\'IA donne des analyses basées sur les données disponibles. Ce n\'est pas un conseil financier officiel. Consultez un professionnel pour des décisions importantes.' },
-      { tip: '💡 Astuce : Mentionnez un ticker précis ("SIBC", "CABC") pour des réponses sur une société spécifique. Ou demandez une comparaison entre plusieurs actions.' },
-    ]
-  },
   glossaire: {
     title: 'Glossaire',
     sections: [
@@ -7259,9 +7132,7 @@ function openHelpDrawer(page) {
     if (s.tip) return `<div class="help-tip">${s.tip}</div>`;
     if (s.ex) return `<div class="help-example">${s.ex}</div>`;
     return '';
-  }).join('') + `<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3)">
-    Question ? Page <strong style="color:var(--accent)">💬 Chat IA</strong> — posez vos questions en français.
-  </div>`;
+  }).join('');
   document.getElementById('help-drawer').classList.add('open');
   document.getElementById('help-overlay').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -7408,7 +7279,7 @@ document.getElementById('cmp-modal').addEventListener('click', function(e){
         <li>Screener avancé avec 4 presets + export CSV</li>
         <li>Score personnalisé avec profils d'investissement</li>
         <li>Heatmap BRVM + matrice de corrélation</li>
-        <li>Chat IA + alertes prix + tour guidé</li>
+        <li>Alertes prix + tour guidé</li>
       </ul>
     </div>
   </div>
@@ -7422,7 +7293,6 @@ const _kbdMap = {
   'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
   'd': {fn: ()=>{nav('income');renderDiv();}, label: 'D → Dividendes'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
-  'c': {fn: ()=>{nav('chat');}, label: 'C → Chat IA'},
   '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
 };
 
@@ -7430,7 +7300,7 @@ const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
   signals:'Signaux', valuation:'Valorisation', income:'Revenus',
-  port:'Portefeuille', alerts:'Alertes', chat:'Chat IA', glossaire:'Glossaire', settings:'Paramètres',
+  port:'Portefeuille', alerts:'Alertes', glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
   apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
 };
@@ -7801,7 +7671,7 @@ gSpinShow = function() {
     <div id="ob-step-3" style="display:none">
       <div style="font-size:32px;margin-bottom:12px">🚀</div>
       <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Vous êtes prêt !</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">💬 Cliquez sur <strong>Assistant IA</strong> dans le menu pour poser vos questions.<br><br>🔍 Utilisez le <strong>Screener</strong> pour filtrer selon vos critères.<br><br>❓ Le bouton <strong>?</strong> en bas à droite contient le lexique complet.</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">🔍 Utilisez le <strong>Screener</strong> pour filtrer selon vos critères.<br><br>❓ Le bouton <strong>?</strong> en bas à droite contient le lexique complet.</div>
       <button onclick="document.getElementById('onboarding-modal').style.display='none';localStorage.setItem('onboarding_done','1')" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Accéder au dashboard →</button>
     </div>
     <div style="text-align:center;margin-top:12px">
