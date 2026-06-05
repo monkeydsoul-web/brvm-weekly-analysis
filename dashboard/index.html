@@ -692,10 +692,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button data-mode-btn="expert" class="mode-btn active" onclick="_setMode('expert')">🎯 Expert</button>
     </div>
     <div class="ni" onclick="nav('settings');loadSettingsPage()" data-tip="Tâches automatiques · préférences · statistiques" style="margin:0"><span>⚙️</span> <span class="ni-label">Paramètres</span></div>
-    <div id="push-notif-bar" style="display:none">
-      <button id="push-btn" class="btn btn-o" style="width:100%;font-size:9px;padding:4px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
-      <div id="push-status" style="font-size:8px;color:var(--t3);margin-top:2px;text-align:center"></div>
-    </div>
   </div>
 </aside>
 <main class="main">
@@ -2037,6 +2033,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Modèle IA</span><span>claude-sonnet-4-6</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Tickers couverts</span><span>47</span></div>
       </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="ct" style="margin-bottom:12px">🔔 Notifications push</div>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:10px">Recevez une alerte dans votre navigateur quand un cours atteint votre prix cible, même quand le site est en arrière-plan.</p>
+    <div id="push-notif-bar">
+      <button id="push-btn" class="btn btn-o" style="font-size:12px;padding:8px 16px" onclick="requestPushPermission()">🔔 Activer notifications push</button>
+      <div id="push-status" style="font-size:11px;color:var(--t3);margin-top:6px"></div>
     </div>
   </div>
 </div>
