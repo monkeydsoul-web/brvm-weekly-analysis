@@ -2090,6 +2090,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/previsions.js"></script>
 <script src="/company-tabs.js"></script>
 <script src="/dash-hierarchy.js"></script>
+<script src="/news_v2.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -5780,7 +5781,7 @@ const pageLoaders={
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
   marche:    ()=>{if(typeof _renderMarketPage!=='undefined')_renderMarketPage();},
-  news:      ()=>{if(typeof renderNewsPage!=='undefined')renderNewsPage();},
+  news:      ()=>{if(typeof renderNewsV2!=='undefined')renderNewsV2();},
   settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
   market:    ()=>_renderMarketPage(),
   glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
