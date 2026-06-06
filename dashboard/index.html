@@ -655,7 +655,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <nav class="nav">
     <div class="sb-grp-label">Naviguer</div>
     <div class="ni" onclick="nav('welcome')" data-tip="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span>👋</span> <span class="ni-label">Accueil</span></div>
-    <div class="ni on" onclick="nav('dash')" data-tip="Vue d'ensemble du marché BRVM : signaux, opportunités et état de votre portefeuille en temps réel"><span>🏠</span> <span class="ni-label" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tableau de bord</span><span class="sb-live-tag">LIVE</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
 <div class="sb-grp-label">Découvrir</div>
@@ -700,7 +699,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <!-- DASHBOARD -->
-<div class="page on" id="page-dash">
+<div class="page" id="page-dash">
   <div class="beginner-banner" id="beginner-banner-dash">💡 <strong>Comment lire cette page :</strong> Ce tableau de bord montre l'état général du marché BRVM aujourd'hui. Les cartes colorées en haut = les meilleures actions selon notre IA. Cliquez sur n'importe quelle action pour voir sa fiche détaillée. <button onclick="document.getElementById('beginner-banner-dash').style.display='none';localStorage.setItem('bb_dash_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div id="dash-ph" class="ph">
     <div><h2>Tableau de bord BRVM</h2><p class="page-sub">Vue d'ensemble · signaux · opportunités en temps réel</p></div>
@@ -813,7 +812,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <!-- WELCOME 3 PORTES -->
-<div class="page" id="page-welcome">
+<div class="page on" id="page-welcome">
   <div class="welcome-hero">
     <div style="font-size:48px;margin-bottom:12px">📈</div>
     <h1>Bienvenue sur BRVM Analyse</h1>
@@ -2090,6 +2089,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/news_v2.js"></script>
 <script src="/port_revenus_v2.js"></script>
 <script src="/signaux_v2.js"></script>
+<script src="/rank_v2.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -2565,7 +2565,7 @@ function nav(id){
   if(h) window.addEventListener('load',function(){setTimeout(function(){if(typeof nav==='function'&&document.getElementById('page-'+h))nav(h);},800);});
 })();
 window.addEventListener('hashchange', function() {
-  var page = (location.hash || '#dash').slice(1);
+  var page = (location.hash || '#welcome').slice(1);
   if (typeof nav === 'function' && document.getElementById('page-' + page)) nav(page);
 });
 
@@ -5769,6 +5769,8 @@ function initApprendre() {
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
+  dash:      ()=>{nav('rank');},
+  rank:      loadRankDash,
   welcome:   ()=>{ if(typeof initWelcome!=='undefined') initWelcome(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   port:      loadPortRevenus,
@@ -7108,7 +7110,7 @@ const _helpContent = {
 };
 
 let _helpOpen = false;
-let _currentPage = 'dash';
+let _currentPage = 'welcome';
 
 function openHelpDrawer(page) {
   page = page || _currentPage;
@@ -7297,7 +7299,7 @@ const _kbdMap = {
 };
 
 const _bcLabels = {
-  dash:'Tableau de bord', rank:'Classement', comm:'Commodités',
+  rank:'Classement', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
   signals:'Signaux',
   port:'Portefeuille', glossaire:'Glossaire', settings:'Paramètres',
@@ -7419,7 +7421,7 @@ function _setMode(m) {
   if (badge) badge.textContent = m === 'beginner' ? '🌱 Mode débutant' : '🎯 Mode expert';
   _toast(m === 'beginner' ? '🌱 Mode débutant activé · explications simplifiées' : '🎯 Mode expert activé · données complètes');
   // Re-render page courante
-  var page = (location.hash || '#dash').slice(1);
+  var page = (location.hash || '#welcome').slice(1);
   if (typeof nav === 'function') nav(page);
 }
 window._setMode = _setMode;
