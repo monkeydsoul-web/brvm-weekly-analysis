@@ -1,4 +1,23 @@
-// dashboard/signaux_v2.js — Fusion Signaux + Valorisation + Alertes (sprint 4a)
+// dashboard/signaux_v2.js — Fusion Signaux + Valorisation + Alertes (sprints 4a + 4b)
+
+function injectEpurationSignaux() {
+  if (document.getElementById('epuration-signaux')) return;
+  var style = document.createElement('style');
+  style.id = 'epuration-signaux';
+  style.textContent = [
+    // Valorisation — (i) retour, (ii) titre .ph, beginner-banner, (iii) bandeaux aide
+    '#page-signals #page-valuation .brvm-back-btn { display:none !important; }',
+    '#page-signals #page-valuation .ph { display:none !important; }',
+    '#page-signals #page-valuation .beginner-banner { display:none !important; }',
+    '#page-signals #valuation-tab-cibles details { display:none !important; }',
+    '#page-signals #valuation-tab-perf > details { display:none !important; }',
+    // Alertes — (iv) retour, (v) titre .ph, (vi) bandeau aide
+    '#page-signals #page-alerts .brvm-back-btn { display:none !important; }',
+    '#page-signals #page-alerts .ph { display:none !important; }',
+    '#page-signals #page-alerts > details { display:none !important; }',
+  ].join('\n');
+  document.head.appendChild(style);
+}
 
 function loadSignauxValoAlertes() {
   // 1. Remplir #page-signals via le loader existant (écrit dans #page-previsions-content)
@@ -6,7 +25,7 @@ function loadSignauxValoAlertes() {
     renderPrevisionsPage();
   }
 
-  var pageSignals  = document.getElementById('page-signals');
+  var pageSignals   = document.getElementById('page-signals');
   var pageValuation = document.getElementById('page-valuation');
   var pageAlerts    = document.getElementById('page-alerts');
   if (!pageSignals) return;
@@ -47,7 +66,10 @@ function loadSignauxValoAlertes() {
     pageSignals.appendChild(pageAlerts);
   }
 
-  // 4. Loaders valorisation et alertes
+  // 4. Épuration chrome dupliqué (one-shot)
+  injectEpurationSignaux();
+
+  // 5. Loaders valorisation et alertes
   if (typeof renderTargets === 'function') renderTargets();
   if (typeof loadAlertsLocal !== 'undefined') {
     loadAlertsLocal();
