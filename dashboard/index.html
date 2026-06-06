@@ -668,7 +668,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     <div class="sb-grp-label">Mon argent</div>
     <div class="ni" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
-    <div class="ni" onclick="nav('income');renderDiv()" data-tip="Calendrier annuel des dividendes · simulateur de revenus passifs sur 1 à 20 ans"><span>💰</span> <span class="ni-label">Revenus</span></div>
     <div class="ni expert-only" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span></div>
   </nav>
   <div class="tl">
@@ -2091,6 +2090,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/company-tabs.js"></script>
 <script src="/dash-hierarchy.js"></script>
 <script src="/news_v2.js"></script>
+<script src="/port_revenus_v2.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -5772,9 +5772,9 @@ function initApprendre() {
 const pageLoaders={
   welcome:   ()=>{ if(typeof initWelcome!=='undefined') initWelcome(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
-  port:      loadPortfolio,
+  port:      loadPortRevenus,
   alerts:    ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
-  income:    ()=>{renderDiv();},
+  income:    ()=>{nav('port');},
   valuation: ()=>{renderTargets();},
   signals:   ()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
   optim:     ()=>renderCorrelMatrix(),
@@ -7292,7 +7292,7 @@ const _kbdMap = {
   'g': {fn: ()=>{nav('dash');}, label: 'G → Dashboard'},
   'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
   'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
-  'd': {fn: ()=>{nav('income');renderDiv();}, label: 'D → Dividendes'},
+  'd': {fn: ()=>{nav('port');}, label: 'D → Portefeuille & Revenus'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
   '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
 };
@@ -7300,7 +7300,7 @@ const _kbdMap = {
 const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
-  signals:'Signaux', valuation:'Valorisation', income:'Revenus',
+  signals:'Signaux', valuation:'Valorisation',
   port:'Portefeuille', alerts:'Alertes', glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
   apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
