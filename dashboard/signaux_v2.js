@@ -11,9 +11,9 @@ function injectEpurationSignaux() {
     '#page-signals #page-valuation .beginner-banner { display:none !important; }',
     '#page-signals #valuation-tab-cibles details { display:none !important; }',
     '#page-signals #valuation-tab-perf > details { display:none !important; }',
-    // Alertes — (iv) retour, (v) titre .ph, (vi) bandeau aide
+    // Alertes — (iv) retour, (v) titre .ph premier enfant seulement (h2+p), (vi) bandeau aide
     '#page-signals #page-alerts .brvm-back-btn { display:none !important; }',
-    '#page-signals #page-alerts .ph { display:none !important; }',
+    '#page-signals #page-alerts .ph > div:first-child { display:none !important; }',
     '#page-signals #page-alerts > details { display:none !important; }',
   ].join('\n');
   document.head.appendChild(style);
