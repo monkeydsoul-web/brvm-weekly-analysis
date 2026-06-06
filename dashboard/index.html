@@ -664,11 +664,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
     <div class="sb-grp-label expert-only">Analyse</div>
-    <div class="ni expert-only" onclick="nav('valuation');renderTargets()" data-tip="Prix cibles Graham · EPV · P/B · performances historiques des cours"><span>📊</span> <span class="ni-label">Valorisation</span></div>
     <div class="ni expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     <div class="sb-grp-label">Mon argent</div>
     <div class="ni" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
-    <div class="ni expert-only" onclick="nav('alerts');loadAlertsLocal();renderAlertsPanel();renderSmartAlertsPanel()" data-tip="Recevez une notification quand un cours atteint votre prix cible"><span>🔔</span> <span class="ni-label">Alertes</span><span id="alert-badge" class="sb-badge" style="display:none" title="Nombre d'alertes actives en ce moment"></span></div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -2091,6 +2089,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/dash-hierarchy.js"></script>
 <script src="/news_v2.js"></script>
 <script src="/port_revenus_v2.js"></script>
+<script src="/signaux_v2.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -5773,10 +5772,10 @@ const pageLoaders={
   welcome:   ()=>{ if(typeof initWelcome!=='undefined') initWelcome(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   port:      loadPortRevenus,
-  alerts:    ()=>{if(typeof loadAlertsLocal!=='undefined'){loadAlertsLocal();renderAlertsPanel();}},
+  alerts:    ()=>{nav('signals');},
   income:    ()=>{nav('port');},
-  valuation: ()=>{renderTargets();},
-  signals:   ()=>{if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage();},
+  valuation: ()=>{nav('signals');},
+  signals:   loadSignauxValoAlertes,
   optim:     ()=>renderCorrelMatrix(),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
@@ -7300,8 +7299,8 @@ const _kbdMap = {
 const _bcLabels = {
   dash:'Tableau de bord', rank:'Classement', comm:'Commodités',
   macro:'Macro UEMOA', screener:'Screener', optim:'Analyse & Optim',
-  signals:'Signaux', valuation:'Valorisation',
-  port:'Portefeuille', alerts:'Alertes', glossaire:'Glossaire', settings:'Paramètres',
+  signals:'Signaux',
+  port:'Portefeuille', glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
   apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
 };
