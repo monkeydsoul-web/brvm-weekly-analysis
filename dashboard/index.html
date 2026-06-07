@@ -658,6 +658,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
 <div class="sb-grp-label">Découvrir</div>
+    <div class="ni" onclick="nav('apprendre');initApprendre()" data-tip="Les bases pour investir sur la BRVM · explications simples et pédagogiques"><span>📖</span> <span class="ni-label">Apprendre</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
     <div class="ni expert-only" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
@@ -688,7 +689,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- Topbar marché + breadcrumb -->
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
-    <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Tableau de bord</span></span>
+    <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Accueil</span></span>
     <span id="msb-composite" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
@@ -1917,7 +1918,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <div id="help-drawer">
   <div id="help-drawer-head">
-    <span style="font-weight:700;font-size:13px">📖 Aide — <span id="help-page-title">Tableau de bord</span></span>
+    <span style="font-weight:700;font-size:13px">📖 Aide — <span id="help-page-title">Accueil</span></span>
     <button onclick="toggleHelpDrawer()" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer">✕</button>
   </div>
   <div id="help-drawer-body"></div>
@@ -2367,7 +2368,6 @@ document.querySelectorAll('.ni').forEach(el => {
 let _gsIdx = -1;
 
 const _PAGES = [
-  {id:'dash',     icon:'🏠', label:'Tableau de bord',    desc:'KPIs, heatmap, opportunités'},
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
   {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
   {id:'port',     icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
@@ -7487,7 +7487,7 @@ function _renderCmdK(q) {
   const tickers = (window.scores || []).filter(s => !lq || s.ticker.toLowerCase().includes(lq) || (s.name||'').toLowerCase().includes(lq)).slice(0,6);
   // Pages
   const pages = [
-    {id:'dash',label:'Tableau de bord',icon:'🏠'},{id:'rank',label:'Classement',icon:'🏆'},
+    {id:'rank',label:'Classement',icon:'🏆'},
     {id:'screener',label:'Screener',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
     {id:'port',label:'Mon portefeuille',icon:'💼'},{id:'signals',label:'Signaux',icon:'📡'},
     {id:'valuation',label:'Valorisation',icon:'💰'},{id:'optim',label:'Corrélation & Markowitz',icon:'📊'},

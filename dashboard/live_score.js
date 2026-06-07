@@ -75,8 +75,8 @@ async function _fetchLiveScoreFallback(ticker){
       '<div style="width:'+(sc/80*100).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+
       '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">'+bars+'</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--t2);border-top:1px solid var(--border);padding-top:6px;align-items:center">'+
-      '<span>P/E: '+(d.pe_ref_live||0).toFixed(1)+'x</span><span>P/B: '+(d.pb_ref_live||0).toFixed(1)+'x</span>'+
-      '<span>Rdt: '+(d.div_yield_live||0).toFixed(1)+'%</span>'+
+      '<span>P/E: '+(d.pe_ref_live||d.pe_ref||0).toFixed(1)+'x</span><span>P/B: '+(d.pb_ref_live||d.pb_ref||0).toFixed(1)+'x</span>'+
+      '<span>Rdt: '+(d.div_yield_live||d.div_yield||0).toFixed(1)+'%</span>'+
       '<button onclick="fetchLiveScore(\''+ticker+'\')" style="margin-left:auto;font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;color:var(--t2)">Actualiser</button></div></div>';
   }catch(e){var msg=e.name==='AbortError'?'Timeout — brvm.org trop lent':e.message;el.innerHTML='<div style="color:var(--red);font-size:11px">'+msg+' <button onclick="fetchLiveScore(\"'+ticker+'\")" style="margin-left:6px;font-size:10px;padding:1px 6px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;color:var(--t2)">Réessayer</button></div>';}
 }
