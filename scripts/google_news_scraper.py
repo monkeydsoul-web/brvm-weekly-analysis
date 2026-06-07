@@ -178,6 +178,7 @@ def scrape_ticker(ticker: str, names: List[str], max_age_days: int = 90) -> List
         queries.append(f"{ticker} BRVM bourse")
 
     seen_links: set = set()
+    seen_titles: set = set()
 
     for query in queries:
         encoded = requests.utils.quote(query)
@@ -209,12 +210,16 @@ def scrape_ticker(ticker: str, names: List[str], max_age_days: int = 90) -> List
                 continue
             if link_text in seen_links:
                 continue
+            title_norm = re.sub(r'\s+', ' ', title_text.lower().strip())
+            if title_norm in seen_titles:
+                continue
             if date_str and date_str < cutoff:
                 continue
             if not _is_relevant(title_text, summary, ticker, names):
                 continue
 
             seen_links.add(link_text)
+            seen_titles.add(title_norm)
             raw = {
                 "titre":  title_text,
                 "date":   date_str,
@@ -281,9 +286,10 @@ def main():
         articles = scrape_ticker(ticker, names, args.max_age)
 
         if args.append and ticker in existing:
-            # Fusionner sans doublons (par lien)
+            # Fusionner sans doublons (par lien et par titre)
             seen = {a["lien"] for a in existing[ticker]}
-            added = [a for a in articles if a["lien"] not in seen]
+            seen_t = {re.sub(r'\s+', ' ', a.get("titre", "").lower().strip()) for a in existing[ticker]}
+            added = [a for a in articles if a["lien"] not in seen and re.sub(r'\s+', ' ', a.get("titre", "").lower().strip()) not in seen_t]
             existing[ticker] = sorted(
                 existing[ticker] + added,
                 key=lambda x: x.get("date") or "0000",

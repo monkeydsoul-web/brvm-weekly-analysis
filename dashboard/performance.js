@@ -2,7 +2,7 @@
 
 let _perfData = {};
 let _perfSelected = [];
-let _perfPeriod = 'Tout';
+let _perfPeriod = '1an';
 let _perfZoom = null; // {startDate, endDate}
 const PERF_COLORS = ['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB923C','#A78BFA'];
 const _perfChartStates = {};
