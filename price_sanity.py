@@ -4,25 +4,38 @@ quarantaine si aucun prix. BRVM plafonne à ±7,5%/j, donc >20% = donnée fausse
 MAX_DEV = 0.20
 
 def resolve_price(live_price, ref_price, boc_last=None):
-    ref = None
-    for c in (boc_last, ref_price):
+    """Vote 2-sur-3 entre live / boc / hist (ref_price = dernier prix historique).
+    Un prix n'est 'verified' que si le live est confirmé par une autre source à ±20%.
+    BRVM plafonne à ±7,5%/j donc >20% d'écart = donnée fausse quelque part."""
+    def _f(x):
         try:
-            if c and float(c) > 0:
-                ref = float(c); break
+            x = float(x)
+            return x if x > 0 else None
         except (TypeError, ValueError):
-            pass
-    lp = None
-    try:
-        if live_price and float(live_price) > 0:
-            lp = float(live_price)
-    except (TypeError, ValueError):
-        lp = None
-    if lp is not None and ref is not None and abs(lp / ref - 1) > MAX_DEV:
-        return {"price": ref, "source": "repli_aberration", "verified": False}
-    if lp is not None:
-        return {"price": lp, "source": "live", "verified": True}
-    if ref is not None:
-        return {"price": ref, "source": "repli", "verified": False}
+            return None
+
+    def _ok(a, b):
+        return a is not None and b is not None and abs(a / b - 1) <= MAX_DEV
+
+    live, hist, boc = _f(live_price), _f(ref_price), _f(boc_last)
+
+    # 1. Live confirmé par au moins une référence → prix officiel
+    if live is not None and (_ok(live, boc) or _ok(live, hist)):
+        return {"price": live, "source": "live", "verified": True}
+    # 2. Live contredit mais les 2 réfs concordent → le live est l'intrus
+    if live is not None and _ok(boc, hist):
+        return {"price": hist, "source": "repli_aberration", "verified": False}
+    # 3. Live absent, les 2 réfs concordent → repli sur le plus frais (hist)
+    if live is None and _ok(boc, hist):
+        return {"price": hist, "source": "repli", "verified": False}
+    # 4. Une seule source au monde, rien pour la contredire → affichée non vérifiée
+    cands = [c for c in (live, hist, boc) if c is not None]
+    if len(cands) == 1:
+        src = "live" if live is not None else "repli"
+        return {"price": cands[0], "source": src, "verified": False}
+    # 5. Plusieurs sources, toutes discordantes (ou aucune) → quarantaine
+    if not cands:
+        return {"price": None, "source": "quarantaine", "verified": False}
     return {"price": None, "source": "quarantaine", "verified": False}
 
 
