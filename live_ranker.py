@@ -11,6 +11,7 @@ import time
 import threading
 from datetime import datetime, timezone
 from copy import deepcopy
+from price_sanity import resolve_price
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,11 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
     live_price = live_price_data.get("price")
     if live_price and live_price > 0:
         old_price = row.get("price") or live_price
-        row["price"]      = live_price
+        ref_price = row.get("price")
+        _pr = resolve_price(live_price, ref_price)
+        row["price"] = _pr["price"]
+        row["price_source"] = _pr["source"]
+        row["price_verified"] = _pr["verified"]
         row["change_pct"] = live_price_data.get("change_pct", 0)
         row["prev_close"] = live_price_data.get("prev_close")
         row["volume"]     = live_price_data.get("volume", 0)
@@ -424,6 +429,8 @@ def compute_live_ranking(trigger="manual", force=False):
                         "sector":        base_row.get("sector", ""),
                         "country":       base_row.get("country", ""),
                         "price":         row.get("price"),
+                        "price_source":  row.get("price_source", "live"),
+                        "price_verified": row.get("price_verified", True),
                         "change_pct":    row.get("change_pct", 0),
                         "volume":        row.get("volume", 0),
                         "trend":         row.get("trend"),
