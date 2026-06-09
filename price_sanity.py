@@ -24,3 +24,37 @@ def resolve_price(live_price, ref_price, boc_last=None):
     if ref is not None:
         return {"price": ref, "source": "repli", "verified": False}
     return {"price": None, "source": "quarantaine", "verified": False}
+
+
+import json as _json
+import time as _time
+
+_REF_CACHE = {"t": 0.0, "refs": {}}
+
+def load_reference_prices():
+    try:
+        boc = _json.load(open('data/boc_data.json'))
+    except Exception:
+        boc = {}
+    try:
+        from price_history_builder import load_history
+        ph = load_history()
+    except Exception:
+        ph = {}
+    refs = {}
+    for t in set(boc) | set(ph):
+        b = boc.get(t) or {}
+        pts = ph.get(t) or []
+        last = pts[-1] if pts else {}
+        refs[t] = {
+            "boc":  b.get("cours_clot") if isinstance(b, dict) else None,
+            "hist": last.get("price") if isinstance(last, dict) else None,
+        }
+    return refs
+
+def get_reference_prices(ttl=300):
+    now = _time.time()
+    if now - _REF_CACHE["t"] > ttl or not _REF_CACHE["refs"]:
+        _REF_CACHE["refs"] = load_reference_prices()
+        _REF_CACHE["t"] = now
+    return _REF_CACHE["refs"]

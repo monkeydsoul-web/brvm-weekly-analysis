@@ -5,7 +5,7 @@ Injecte le prix live dans le row avant appel des 7 modèles + score technique.
 """
 
 import logging
-from price_sanity import resolve_price
+from price_sanity import resolve_price, get_reference_prices
 from valuation import (
     score_graham, score_dcf, score_ddm, score_epv,
     score_buffett, score_reverse_dcf, score_relative,
@@ -175,8 +175,9 @@ def _inject_live_price(base_row: dict, live_price: float, live_data: dict) -> di
     row = dict(base_row)
     old_price = row.get("price") or live_price
 
-    ref_price = row.get("price")
-    _pr = resolve_price(live_price, ref_price)
+    _t = row.get("ticker") or base_row.get("ticker")
+    _refs = get_reference_prices().get(_t, {})
+    _pr = resolve_price(live_price, _refs.get("hist"), boc_last=_refs.get("boc"))
     row["price"] = _pr["price"]
     row["price_source"] = _pr["source"]
     row["price_verified"] = _pr["verified"]
