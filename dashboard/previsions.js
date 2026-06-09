@@ -15,7 +15,7 @@ async function renderPrevisionsPage() {
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
         ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique', false],
-        ['signaux','🔔 Par société','Recommandation Acheter / Conserver / Vendre pour chaque société', false],
+        ['signaux','🤖 Recommandations IA','Recommandation Acheter / Conserver / Vendre pour chaque société', false],
         ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC', true],
         ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable', true],
       ].map(([id,lbl,tip,hidden])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}"${hidden?' style="display:none"':''}>${lbl}</div>`).join('')}
