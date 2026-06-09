@@ -3533,6 +3533,7 @@ function loadMarketWidget(){
     var flop5=document.getElementById('market-flop5');
     if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
     if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
+    _paintIndexCards();
   }).catch(()=>{});
 }
 
@@ -5578,18 +5579,19 @@ const pageLoaders={
   glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
 };
 
+function _paintIndexCards() {
+  if (!window._marketData || !window._marketData.composite) return;
+  var _comp = window._marketData.composite, _b30 = window._marketData.brvm30 || {};
+  var _cEl = document.getElementById('mkt-brvm-c'),  _cChg = document.getElementById('mkt-brvm-c-chg');
+  var _bEl = document.getElementById('mkt-brvm-30'), _bChg = document.getElementById('mkt-brvm-30-chg');
+  if (_cEl) _cEl.textContent = Number(_comp.current).toFixed(2);
+  if (_cChg) { var _cs=_comp.change>=0?'+':''; _cChg.textContent=_cs+Number(_comp.change).toFixed(2)+'%'; _cChg.style.color=_comp.change>=0?'var(--bull)':'var(--bear)'; }
+  if (_bEl && _b30.current != null) _bEl.textContent = Number(_b30.current).toFixed(2);
+  if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
+}
+
 function _renderMarketPage() {
-  // Peupler les KPI indices depuis window._marketData (source directe, inclut .change)
-  var _md = window._marketData;
-  if (_md && _md.composite && _md.composite.current != null) {
-    var _comp = _md.composite, _b30 = _md.brvm30 || {};
-    var _cEl = document.getElementById('mkt-brvm-c'),    _cChg = document.getElementById('mkt-brvm-c-chg');
-    var _bEl = document.getElementById('mkt-brvm-30'),   _bChg = document.getElementById('mkt-brvm-30-chg');
-    if (_cEl) _cEl.textContent = Number(_comp.current).toFixed(2);
-    if (_cChg) { var _cs=_comp.change>=0?'+':''; _cChg.textContent=_cs+Number(_comp.change).toFixed(2)+'%'; _cChg.style.color=_comp.change>=0?'var(--bull)':'var(--bear)'; }
-    if (_bEl && _b30.current != null) _bEl.textContent = Number(_b30.current).toFixed(2);
-    if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
-  }
+  _paintIndexCards();
   var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
   var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
   if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
