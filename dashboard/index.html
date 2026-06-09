@@ -660,7 +660,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="sb-grp-label">Découvrir</div>
     <div class="ni" onclick="nav('apprendre');initApprendre()" data-tip="Les bases pour investir sur la BRVM · explications simples et pédagogiques"><span>📖</span> <span class="ni-label">Apprendre</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
-    <div class="ni expert-only" onclick="nav('marche')" data-tip="Vue marché : indices BRVM · commodités · contexte macro UEMOA"><span>📊</span> <span class="ni-label">Marché</span></div>
+
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
     <div class="sb-grp-label expert-only">Analyse</div>
@@ -794,7 +794,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <!-- Compatibilité JS — IDs conservés mais cachés dans dash -->
   <div id="cDistDiv" style="display:none"></div>
   <div id="cSectDiv" style="display:none"></div>
-  <div id="heatmap-grid" style="display:none"></div>
+
   <div id="flux-content" style="display:none"></div>
   <div id="insights" style="display:none"></div>
   <div id="market-indices" style="display:none"></div>
@@ -806,10 +806,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="idx-composite" style="display:none"></div>
   <div id="idx-brvm30" style="display:none"></div>
   <div id="idx-cap" style="display:none"></div>
-  <!-- Bouton vers analyse marché complète -->
-  <div class="expert-only" style="text-align:center;padding:20px 0 8px">
-    <button onclick="nav('marche')" style="background:var(--bg-elevated);color:var(--text-1);font-size:13px;padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border-1);cursor:pointer;font-weight:500">📊 Voir l'analyse marché complète →</button>
-  </div>
+
 </div>
 
 <!-- WELCOME 3 PORTES -->
@@ -2091,6 +2088,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/port_revenus_v2.js"></script>
 <script src="/signaux_v2.js"></script>
 <script src="/rank_v2.js"></script>
+<script src="/welcome_v2.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -5562,7 +5560,7 @@ function initApprendre() {
 const pageLoaders={
   dash:      ()=>{nav('rank');},
   rank:      loadRankDash,
-  welcome:   ()=>{ if(typeof initWelcome!=='undefined') initWelcome(); },
+  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   port:      loadPortRevenus,
   alerts:    ()=>{nav('signals');},
@@ -5572,10 +5570,10 @@ const pageLoaders={
   optim:     ()=>renderCorrelMatrix(),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
-  marche:    ()=>{if(typeof _renderMarketPage!=='undefined')_renderMarketPage();},
+  marche:    ()=>{ nav('welcome'); },
   news:      ()=>{if(typeof renderNewsV2!=='undefined')renderNewsV2();},
   settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
-  market:    ()=>_renderMarketPage(),
+  market:    ()=>{ nav('welcome'); },
   glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
 };
 
