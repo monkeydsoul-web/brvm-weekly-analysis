@@ -5579,11 +5579,17 @@ const pageLoaders={
 };
 
 function _renderMarketPage() {
-  // Peupler les KPI indices depuis la barre de marché
-  var brvcEl = document.getElementById('msb-composite');
-  var brv30El = document.getElementById('msb-brvm30');
-  if (document.getElementById('mkt-brvm-c') && brvcEl) document.getElementById('mkt-brvm-c').textContent = brvcEl.textContent.replace('BRVM-C','').trim();
-  if (document.getElementById('mkt-brvm-30') && brv30El) document.getElementById('mkt-brvm-30').textContent = brv30El.textContent.replace('BRVM-30','').trim();
+  // Peupler les KPI indices depuis window._marketData (source directe, inclut .change)
+  var _md = window._marketData;
+  if (_md && _md.composite && _md.composite.current != null) {
+    var _comp = _md.composite, _b30 = _md.brvm30 || {};
+    var _cEl = document.getElementById('mkt-brvm-c'),    _cChg = document.getElementById('mkt-brvm-c-chg');
+    var _bEl = document.getElementById('mkt-brvm-30'),   _bChg = document.getElementById('mkt-brvm-30-chg');
+    if (_cEl) _cEl.textContent = Number(_comp.current).toFixed(2);
+    if (_cChg) { var _cs=_comp.change>=0?'+':''; _cChg.textContent=_cs+Number(_comp.change).toFixed(2)+'%'; _cChg.style.color=_comp.change>=0?'var(--bull)':'var(--bear)'; }
+    if (_bEl && _b30.current != null) _bEl.textContent = Number(_b30.current).toFixed(2);
+    if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
+  }
   var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
   var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
   if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
