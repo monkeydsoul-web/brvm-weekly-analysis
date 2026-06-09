@@ -23,6 +23,10 @@ function loadWelcomeHero() {
   pm.style.padding = '0';
   pw.appendChild(pm);
 
+  // Masquer le bouton Retour hérité de #page-marche (sans sens sur l'Accueil)
+  var backBtn = pm.querySelector('.brvm-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+
   // Rendre
   if (typeof _renderMarketPage !== 'undefined') _renderMarketPage();
 }
