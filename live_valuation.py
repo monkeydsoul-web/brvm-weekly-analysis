@@ -299,6 +299,8 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
         "geo_penalty":      geo_penalty,
         "composite_raw":    round(composite_raw, 1),
         "composite_adj":    composite_adj_80,
+        "note":             round(composite_adj_80 / 8.0, 1) if live_price else None,
+        "conseil":          None if not live_price else ('acheter' if composite_adj_80 >= 60 else 'attendre' if composite_adj_80 >= 40 else 'eviter'),
         "pe_ref_live":      row.get("pe_ref") or row.get("pe_hist") or row.get("pe_hist"),
         "pb_ref_live":      row.get("pb_ref") or row.get("pb_hist") or row.get("pb_hist"),
         "div_yield_live":   row.get("div_yield"),
@@ -324,7 +326,7 @@ def compute_all_live_scores(base_fundamentals_dict: dict, live_cache: dict) -> l
             results.append(result)
         except Exception as e:
             logger.warning(f"Erreur score live {ticker}: {e}")
-            results.append({"ticker": ticker, "composite_adj": 0, "error": str(e)})
+            results.append({"ticker": ticker, "composite_adj": 0, "error": str(e), "note": None, "conseil": None})
 
     results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
     for i, r in enumerate(results):
