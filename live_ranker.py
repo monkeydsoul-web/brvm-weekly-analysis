@@ -322,6 +322,8 @@ def _compute_scores(row):
         "geo_penalty":     geo_penalty,
         "composite_raw":   round(composite_raw, 1),
         "composite_adj":   composite_adj_80,
+        "note":            round(composite_adj_80 / 8.0, 1) if row.get('price') else None,
+        "conseil":         None if not row.get('price') else ('acheter' if composite_adj_80 >= 60 else 'attendre' if composite_adj_80 >= 40 else 'eviter'),
     }
 
 
