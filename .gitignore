@@ -7,3 +7,10 @@ logs/
 __pycache__/
 *.pyc
 .DS_Store
+backtesting_cache.json
+portfolio_optimizer_cache.json
+data/prices_cache.json
+data/macro_cache.json
+data/alerts.json
+logs/
+reports/
