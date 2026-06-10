@@ -1715,7 +1715,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="change_pct" onclick="screenerSortBy('change_pct')" title="Variation de cours depuis la clôture d'hier">Var. j.<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:center" title="Recommandation IA issue des rapports PDF · Acheter / Attendre / Éviter">Conseil</th>
+        <th style="padding:8px 12px;text-align:center" title="Conseil derive de la Note /10 : Acheter si 7,5 ou plus - Attendre entre 5 et 7,5 - Eviter sous 5">Conseil</th>
       </tr></thead>
       <tbody id="screener-table"></tbody>
     </table>
@@ -2746,6 +2746,7 @@ function showTooltip(evt,text){
 function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
 
 function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
+function fmtConseil(c){return c==='acheter'?'<span style="color:var(--green)">✅ Acheter</span>':c==='attendre'?'<span style="color:var(--amber)">⏳ Attendre</span>':c==='eviter'?'<span style="color:var(--red)">⚠️ Éviter</span>':'<span style="color:var(--t2)" title="Donnee en quarantaine - prix non confirme">—</span>';}
 
 function showChangelog(){
   var m=document.createElement('div');
@@ -3584,7 +3585,7 @@ function renderSignauxParSociete(){
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Note sur 8 critères · ≥7.5 excellent">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
-      <td style="font-size:11px">${fmtVerdict(x.pdf_verdict)}</td>
+      <td style="font-size:11px">${fmtConseil(x.conseil)}</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
     </tr>`;
   }).join('');
@@ -3688,7 +3689,7 @@ function renderRank(){
       <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
       <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
-      <td style="font-size:10px">${fmtVerdict(x.pdf_verdict)}</td>
+      <td style="font-size:10px">${fmtConseil(x.conseil)}</td>
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
       <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+ Portef.</button></td>
