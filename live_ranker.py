@@ -376,6 +376,14 @@ def compute_live_ranking(trigger="manual", force=False):
                 except Exception:
                     pass
 
+            # Historique prix pour le sas variation
+            _ph = {}
+            try:
+                from price_history_builder import load_history as _load_ph
+                _ph = _load_ph()
+            except Exception:
+                pass
+
             # Conseil précédent pour l'hystérésis
             _prev_conseil = {}
             try:
@@ -446,6 +454,27 @@ def compute_live_ranking(trigger="manual", force=False):
                     row["div_am_date"]           = _dv["am_paid_date"]
                     row["div_am_split"]          = _dv["am_split_flag"]
                     row["div_am_net_brut"]       = _dv["am_net_brut_flag"]
+
+                    # Sas variation : plafond BRVM ±7,5%
+                    _raw_chg = row.get("change_pct")
+                    if _raw_chg is not None and abs(_raw_chg) > 7.5:
+                        import datetime as _dt
+                        _today = _dt.date.today().isoformat()
+                        _hist = _ph.get(ticker, [])
+                        _ref = None
+                        if _hist:
+                            if len(_hist) >= 2 and _hist[-1].get("date") == _today:
+                                _ref = _hist[-2].get("price")
+                            else:
+                                _ref = _hist[-1].get("price")
+                        if _ref is None:
+                            _ref = _boc_e.get("cours_prev")
+                        _cur = row.get("price")
+                        if _ref and _ref > 0 and _cur:
+                            _chg2 = (_cur / _ref - 1) * 100
+                            row["change_pct"] = _chg2 if abs(_chg2) <= 7.5 else None
+                        else:
+                            row["change_pct"] = None
 
                     # Calculer les 8 scores
                     scores = _compute_scores(row)

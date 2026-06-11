@@ -90,9 +90,9 @@ function _renderScreenerTable() {
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
     const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
     const dyC = (x.div_yield || 0) >= 6 ? 'var(--green)' : (x.div_yield || 0) >= 3 ? 'var(--amber)' : 'var(--t2)';
-    const chg = x.change_pct || 0;
-    const chgC = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
-    const chgS = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
+    const chg = x.change_pct != null ? x.change_pct : null;
+    const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
+    const chgS = chg != null ? (chg > 0 ? '+' : '') + chg.toFixed(2) + '%' : '—';
     const verd = x.pdf_verdict || '';
     const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
     const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
