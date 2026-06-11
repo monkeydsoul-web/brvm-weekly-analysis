@@ -4931,10 +4931,10 @@ function buildKpiCards(s){
 
 function _genVerdict(s){
   const v=s.composite_adj||0;
-  const col=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
-  const bg=v>=60?'rgba(74,222,128,.08)':v>=45?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)';
+  const col=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+  const bg=v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)';
   const label=v>=65?'ACHETER':v>=55?'ACCUMULER':v>=45?'CONSERVER':v>=35?'SURVEILLER':'ALLÉGER';
-  const labelBeg=v>=55?'✅ Acheter':v>=40?'⏳ Attendre':'⚠️ Éviter';
+  const labelBeg=s.conseil==='acheter'?'✅ Acheter':s.conseil==='attendre'?'⏳ Attendre':s.conseil==='eviter'?'⚠️ Éviter':v>=60?'✅ Acheter':v>=40?'⏳ Attendre':'⚠️ Éviter';
   const labelShow=document.documentElement.dataset.mode==='beginner'?labelBeg:label;
 
   // Points forts
