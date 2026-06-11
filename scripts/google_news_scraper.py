@@ -286,15 +286,16 @@ def main():
         articles = scrape_ticker(ticker, names, args.max_age)
 
         if args.append and ticker in existing:
-            # Fusionner sans doublons (par lien et par titre)
-            seen = {a["lien"] for a in existing[ticker]}
-            seen_t = {re.sub(r'\s+', ' ', a.get("titre", "").lower().strip()) for a in existing[ticker]}
-            added = [a for a in articles if a["lien"] not in seen and re.sub(r'\s+', ' ', a.get("titre", "").lower().strip()) not in seen_t]
-            existing[ticker] = sorted(
-                existing[ticker] + added,
-                key=lambda x: x.get("date") or "0000",
-                reverse=True
-            )[:50]
+            # Fusionner sans doublons (par lien et par titre normalise sur tout le stock)
+            def _norm_t(t): return re.sub(r'[^a-z0-9]', '', (t or '').lower())[:80]
+            all_arts = existing[ticker] + articles
+            seen_links = set(); seen_titles = set(); merged = []
+            for a in all_arts:
+                lien = a.get("lien", ""); nt = _norm_t(a.get("titre"))
+                if lien in seen_links or nt in seen_titles:
+                    continue
+                seen_links.add(lien); seen_titles.add(nt); merged.append(a)
+            existing[ticker] = sorted(merged, key=lambda x: x.get("date") or "0000", reverse=True)[:50]
         else:
             existing[ticker] = articles
 
