@@ -896,7 +896,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">+/- aujourd'hui</th>
       <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
-      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE">Conseil</th>
+      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
       <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
       <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col expert-only" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
@@ -1715,7 +1715,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="change_pct" onclick="screenerSortBy('change_pct')" title="Variation de cours depuis la clôture d'hier">Var. j.<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:center" title="Conseil derive de la Note /10 : Acheter si 7,5 ou plus - Attendre entre 5 et 7,5 - Eviter sous 5">Conseil</th>
+        <th style="padding:8px 12px;text-align:center" title="Conseil derive de la Note /10 : Acheter si 7,5 ou plus - Attendre entre 5 et 7,5 - Eviter sous 5 - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
       </tr></thead>
       <tbody id="screener-table"></tbody>
     </table>

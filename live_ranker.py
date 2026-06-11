@@ -327,6 +327,21 @@ def _compute_scores(row):
     }
 
 
+def _hysteresis_conseil(adj, prev, price):
+    if not price:
+        return None
+    std = 'acheter' if adj >= 60 else 'attendre' if adj >= 40 else 'eviter'
+    if prev == 'acheter':
+        return 'acheter' if adj >= 57.6 else std
+    if prev == 'attendre':
+        if adj >= 60: return 'acheter'
+        if adj < 37.6: return 'eviter'
+        return 'attendre'
+    if prev == 'eviter':
+        return 'eviter' if adj < 42.4 else std
+    return std
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Reclassement complet
 # ─────────────────────────────────────────────────────────────────────────────
@@ -360,6 +375,16 @@ def compute_live_ranking(trigger="manual", force=False):
                         boc_data = json.load(f)
                 except Exception:
                     pass
+
+            # Conseil précédent pour l'hystérésis
+            _prev_conseil = {}
+            try:
+                with open(RANKING_PATH, encoding="utf-8") as _f:
+                    for _r in json.load(_f).get("ranking", []):
+                        if _r.get("ticker") and _r.get("conseil"):
+                            _prev_conseil[_r["ticker"]] = _r["conseil"]
+            except Exception:
+                pass
 
             # Charger le cache african-markets (3e source, lecture seule — refresh dans job BOC)
             try:
@@ -424,6 +449,11 @@ def compute_live_ranking(trigger="manual", force=False):
 
                     # Calculer les 8 scores
                     scores = _compute_scores(row)
+                    scores["conseil"] = _hysteresis_conseil(
+                        scores.get("composite_adj", 0),
+                        _prev_conseil.get(ticker),
+                        row.get("price")
+                    )
 
                     result = {
                         "ticker":        ticker,
