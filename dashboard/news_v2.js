@@ -1,4 +1,4 @@
-// dashboard/news_v2.js — Refonte Actualites : Google News en vedette + tableau dividendes 2026
+// dashboard/news_v2.js — Refonte Actualites : Google News en vedette
 
 async function renderNewsV2() {
   const page = document.getElementById('page-news');
@@ -32,13 +32,9 @@ async function renderNewsV2() {
     '<div class="card" style="margin-bottom:14px">' +
     '<div class="ct" style="margin-bottom:10px">&#128225; Google News &mdash; Presse financi&egrave;re BRVM</div>' +
     '<div id="nv2-gnews-list" style="min-height:60px">Chargement...</div>' +
-    '</div>' +
-    '<div class="card">' +
-    '<div class="ct" style="margin-bottom:10px">&#128176; Dividendes 2026</div>' +
-    '<div id="nv2-div-list" style="min-height:40px">Chargement...</div>' +
     '</div>';
 
-  await Promise.all([_nv2LoadGNews(), _nv2LoadDividends()]);
+  await Promise.all([_nv2LoadGNews()]);
 }
 
 async function _nv2LoadGNews() {
@@ -87,61 +83,5 @@ async function _nv2LoadGNews() {
     }).join('');
   } catch (e) {
     el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
-  }
-}
-
-function _nv2ExtractTicker(item) {
-  if (item.ticker && item.ticker !== 'None' && item.ticker !== null) return item.ticker;
-  const contenu = item.contenu || '';
-  const m = contenu.match(/symbole\s*:\s*([A-Z]{3,6})/i);
-  if (m) return m[1];
-  return '&mdash;';
-}
-
-async function _nv2LoadDividends() {
-  const el = document.getElementById('nv2-div-list');
-  if (!el) return;
-  try {
-    const d = await fetch('/api/announcements?type=dividendes&limit=200').then(r => r.json());
-    const items = (d.data || []).filter(function(item) {
-      const ref = item.date_paiement || item.date || '';
-      return String(ref).startsWith('2026');
-    });
-    items.sort(function(a, b) {
-      const da = String(a.date_paiement || a.date || '');
-      const db = String(b.date_paiement || b.date || '');
-      return da.localeCompare(db);
-    });
-    if (!items.length) {
-      el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t2);font-size:12px">Aucun dividende 2026 disponible.</div>';
-      return;
-    }
-    const withMontant = items.filter(function(x) { return x.montant_xof != null; }).length;
-    const note = '<div style="font-size:10px;color:var(--t3);margin-bottom:8px">' +
-      'Date de paiement 2026 &mdash; montant disponible pour ' + withMontant + '/' + items.length + ' entr&eacute;es' +
-      '</div>';
-    const rows = items.map(function(item) {
-      const ticker = _nv2ExtractTicker(item);
-      const date = item.date_paiement || item.date || '&mdash;';
-      const montant = item.montant_xof != null
-        ? (typeof fmtXOF === 'function' ? fmtXOF(item.montant_xof) : item.montant_xof.toLocaleString('fr-FR') + ' XOF')
-        : '&mdash;';
-      return '<tr>' +
-        '<td style="padding:6px 4px;font-weight:600;color:var(--accent)">' + ticker + '</td>' +
-        '<td style="padding:6px 4px">' + date + '</td>' +
-        '<td style="padding:6px 4px;text-align:right">' + montant + '</td>' +
-        '</tr>';
-    }).join('');
-    el.innerHTML = note +
-      '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<thead><tr style="color:var(--t2);font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid var(--border)">' +
-      '<th style="text-align:left;padding:6px 4px">Soci&eacute;t&eacute;</th>' +
-      '<th style="text-align:left;padding:6px 4px">Date de paiement</th>' +
-      '<th style="text-align:right;padding:6px 4px">Montant</th>' +
-      '</tr></thead>' +
-      '<tbody>' + rows + '</tbody>' +
-      '</table>';
-  } catch (e) {
-    el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
   }
 }
