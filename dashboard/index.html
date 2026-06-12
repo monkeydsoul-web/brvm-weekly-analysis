@@ -2011,8 +2011,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card" style="margin-bottom:14px">
     <div class="ct" style="margin-bottom:12px">🏛 Annonces officielles BRVM</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="annc-tabs">
-      <button class="annc-tab on" onclick="switchAnncTab('dividendes',this)">💰 Dividendes</button>
-      <button class="annc-tab" onclick="switchAnncTab('convocations_ag',this)">📋 AG</button>
+      <button class="annc-tab on" onclick="switchAnncTab('convocations_ag',this)">📋 AG</button>
       <button class="annc-tab" onclick="switchAnncTab('notations',this)">⭐ Notations</button>
       <button class="annc-tab" onclick="switchAnncTab('communiques',this)">📣 Communiqués</button>
       <button class="annc-tab" onclick="switchAnncTab('dirigeants',this)">👔 Dirigeants</button>
@@ -5754,7 +5753,7 @@ function renderMacroPage() {
 }
 
 // ── Actualités BRVM + Google News ────────────────────────────────────────────
-let _anncCurrentTab = 'dividendes';
+let _anncCurrentTab = 'convocations_ag';
 
 const _ANNC_LABELS = {
   dividendes:'💰 Dividendes', convocations_ag:'📋 AG', notations:'⭐ Notations',
