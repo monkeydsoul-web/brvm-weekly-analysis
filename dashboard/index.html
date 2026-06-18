@@ -664,7 +664,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
     <div class="sb-grp-label expert-only">Analyse</div>
-    <div class="ni expert-only" onclick="nav('optim');renderCorrelMatrix()" data-tip="Optimisez votre portefeuille : corrélations · Markowitz · frontière efficiente"><span>📐</span> <span class="ni-label">Corrélation & Markowitz</span></div>
     <div class="sb-grp-label">Mon argent</div>
     <div class="ni" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
   </nav>
@@ -1628,6 +1627,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button class="btn btn-g" onclick="runScreener()">Filtrer</button>
     </div>
   </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--border)">
+    <span style="background:var(--accent);color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 1</span>
+    <span style="font-weight:600;font-size:14px">🔍 Filtrer les actions</span>
+  </div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
@@ -1722,92 +1725,16 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </div>
   <div id="sc-ai-result" class="card" style="display:none"></div>
 
-</div>
-
-<!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
-<div class="page" id="page-signals">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
-  <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
-    <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
+  <!-- ── Étape 2 : Composer son portefeuille ───────────────────────────────── -->
+  <div style="display:flex;align-items:center;gap:10px;margin:28px 0 16px;padding-top:20px;border-top:2px solid var(--border)">
+    <span style="background:#8B5CF6;color:#fff;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 2</span>
+    <span style="font-weight:600;font-size:14px">⚖️ Composer son portefeuille</span>
   </div>
-  <div class="tab-bar">
-    <button class="tab-btn on" onclick="switchTab('signals','previsions',this)">🎯 Mes stratégies</button>
-    <button class="tab-btn" onclick="switchTab('signals','parsociete',this);renderSignauxParSociete()">🔔 Par société</button>
+  <div style="background:var(--accent-dim);border-left:3px solid #8B5CF6;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--t2)">
+    Vous avez identifié des actions intéressantes ? Construisez maintenant un portefeuille diversifié.
+    La matrice de corrélation révèle les actions qui évoluent ensemble — à éviter en excès.
+    Markowitz calcule la répartition optimale selon votre tolérance au risque.
   </div>
-  <div class="tab-content on" id="signals-tab-previsions">
-    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · ✅ Acheter = les modèles détectent un signal haussier<br>
-        · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
-        · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
-        · Ces prévisions sont indicatives — pas de conseil en investissement
-      </div>
-    </details>
-    <div id="page-previsions-content">
-      <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Signaux pour charger...</div>
-    </div>
-  </div>
-  <div class="tab-content" id="signals-tab-parsociete">
-    <div style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--t2)">
-      💡 Cliquez sur n'importe quelle société pour voir sa fiche complète avec prix, dividende et analyse IA.
-    </div>
-    <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr>
-        <th>Ticker</th><th>Société</th>
-        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
-        <th>Conseil</th>
-        <th>Dividende/an</th>
-      </tr></thead>
-      <tbody id="signaux-parsociete-body"></tbody></table>
-    </div>
-  </div>
-  <div class="tab-content" id="signals-tab-score" style="display:none">
-    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · Faites glisser les curseurs pour ajuster l'importance de chaque modèle<br>
-        · Graham et EPV = valeur intrinsèque · DCF = flux futurs · Technique = momentum<br>
-        · Cliquez "Appliquer" pour recalculer le classement avec vos poids
-      </div>
-    </details>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="card" style="margin-bottom:0">
-        <div class="ct">Profil d'investissement</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
-          <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
-        </div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
-        <div id="weightSliders"></div>
-        <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
-        <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
-          <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
-          <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
-            <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
-            <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
-            <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
-            <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
-            <em>Le score technique est la moyenne pondérée de ces 4 indicateurs, sur 10 points.</em>
-          </div>
-        </details>
-      </div>
-      <div class="card" style="margin-bottom:0">
-        <div class="ct">Classement personnalisé</div>
-        <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
-          <table><thead><tr><th>#</th><th>Ticker</th><th>Société</th><th>Score std</th><th>Score perso</th><th>Variation</th></tr></thead>
-          <tbody id="customRankBody"></tbody></table></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- OPTIMISATION & ANALYSE -->
-<div class="page" id="page-optim">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente la corrélation entre actions et l'optimisation de portefeuille Markowitz. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a>.</div>
-  <div class="ph"><div><h2>📐 Analyse &amp; Optimisation</h2><p class="page-sub">Corrélations entre actions · optimisation Markowitz · frontière efficiente</p></div></div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
@@ -1907,6 +1834,86 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <p><strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations pour cartographier l'espace risque/rendement.</p>
         <p><strong style="color:var(--t1)">📈 Données</strong> — Cours BOC quotidiens BRVM (80 jours).</p>
       </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
+<div class="page" id="page-signals">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
+  <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
+    <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="switchTab('signals','previsions',this)">🎯 Mes stratégies</button>
+    <button class="tab-btn" onclick="switchTab('signals','parsociete',this);renderSignauxParSociete()">🔔 Par société</button>
+  </div>
+  <div class="tab-content on" id="signals-tab-previsions">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · ✅ Acheter = les modèles détectent un signal haussier<br>
+        · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
+        · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
+        · Ces prévisions sont indicatives — pas de conseil en investissement
+      </div>
+    </details>
+    <div id="page-previsions-content">
+      <div style="text-align:center;padding:40px;color:var(--t2)">Cliquez sur Signaux pour charger...</div>
+    </div>
+  </div>
+  <div class="tab-content" id="signals-tab-parsociete">
+    <div style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--t2)">
+      💡 Cliquez sur n'importe quelle société pour voir sa fiche complète avec prix, dividende et analyse IA.
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table><thead><tr>
+        <th>Ticker</th><th>Société</th>
+        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
+        <th>Conseil</th>
+        <th>Dividende/an</th>
+      </tr></thead>
+      <tbody id="signaux-parsociete-body"></tbody></table>
+    </div>
+  </div>
+  <div class="tab-content" id="signals-tab-score" style="display:none">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Faites glisser les curseurs pour ajuster l'importance de chaque modèle<br>
+        · Graham et EPV = valeur intrinsèque · DCF = flux futurs · Technique = momentum<br>
+        · Cliquez "Appliquer" pour recalculer le classement avec vos poids
+      </div>
+    </details>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:0">
+        <div class="ct">Profil d'investissement</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
+          <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
+        <div id="weightSliders"></div>
+        <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
+        <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
+          <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
+          <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
+            <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
+            <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
+            <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
+            <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
+            <em>Le score technique est la moyenne pondérée de ces 4 indicateurs, sur 10 points.</em>
+          </div>
+        </details>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ct">Classement personnalisé</div>
+        <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
+          <table><thead><tr><th>#</th><th>Ticker</th><th>Société</th><th>Score std</th><th>Score perso</th><th>Variation</th></tr></thead>
+          <tbody id="customRankBody"></tbody></table></div></div>
     </div>
   </div>
 </div>
@@ -2371,7 +2378,6 @@ const _PAGES = [
   {id:'income',   icon:'💰', label:'Revenus',                  desc:'Dividendes, calendrier, simulateur revenus passifs'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
-  {id:'optim',    icon:'📐', label:'Analyse & Optim',      desc:'Corrélation, Markowitz, frontière efficiente'},
   {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
   {id:'glossaire',icon:'📚', label:'Glossaire',            desc:'Termes financiers expliqués'},
   {id:'comm',     icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
@@ -2546,6 +2552,7 @@ _applyTheme();
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 function nav(id){
+  if(id==='optim')id='screener';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   const pg = document.getElementById('page-'+id);
@@ -5567,7 +5574,7 @@ const pageLoaders={
   income:    ()=>{nav('port');},
   valuation: ()=>{nav('signals');},
   signals:   loadSignauxValoAlertes,
-  optim:     ()=>renderCorrelMatrix(),
+  optim:     ()=>nav('screener'),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
   marche:    ()=>{ nav('welcome'); },
@@ -7286,7 +7293,7 @@ function _renderCmdK(q) {
     {id:'rank',label:'Classement',icon:'🏆'},
     {id:'screener',label:'Screener',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
     {id:'port',label:'Mon portefeuille',icon:'💼'},{id:'signals',label:'Signaux',icon:'📡'},
-    {id:'valuation',label:'Valorisation',icon:'💰'},{id:'optim',label:'Corrélation & Markowitz',icon:'📊'},
+    {id:'valuation',label:'Valorisation',icon:'💰'},
     {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
     {id:'income',label:'Revenus',icon:'💵'},{id:'alerts',label:'Alertes',icon:'🔔'},
     {id:'glossaire',label:'Glossaire',icon:'📚'},{id:'settings',label:'Paramètres',icon:'⚙️'}
