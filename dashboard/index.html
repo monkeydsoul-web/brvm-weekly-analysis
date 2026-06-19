@@ -656,7 +656,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="sb-grp-label">Naviguer</div>
     <div class="ni" onclick="nav('welcome')" data-tip="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span>👋</span> <span class="ni-label">Accueil</span></div>
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
-    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
+    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener & Portefeuille</span></div>
 <div class="sb-grp-label">Découvrir</div>
     <div class="ni" onclick="nav('apprendre');initApprendre()" data-tip="Les bases pour investir sur la BRVM · explications simples et pédagogiques"><span>📖</span> <span class="ni-label">Apprendre</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
@@ -2374,7 +2374,7 @@ let _gsIdx = -1;
 
 const _PAGES = [
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
-  {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
+  {id:'screener', icon:'🔍', label:'Screener & Portefeuille',            desc:'Filtres avancés P/E, score, dividende'},
   {id:'port',     icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
   {id:'income',   icon:'💰', label:'Revenus',                  desc:'Dividendes, calendrier, simulateur revenus passifs'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
@@ -7292,7 +7292,7 @@ function _renderCmdK(q) {
   // Pages
   const pages = [
     {id:'rank',label:'Classement',icon:'🏆'},
-    {id:'screener',label:'Screener',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
+    {id:'screener',label:'Screener & Portefeuille',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
     {id:'port',label:'Mon portefeuille',icon:'💼'},{id:'signals',label:'Signaux',icon:'📡'},
     {id:'valuation',label:'Valorisation',icon:'💰'},
     {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
