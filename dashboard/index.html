@@ -1726,7 +1726,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="sc-ai-result" class="card" style="display:none"></div>
 
   <!-- ── Étape 2 : Composer son portefeuille ───────────────────────────────── -->
-  <div style="display:flex;align-items:center;gap:10px;margin:28px 0 16px;padding-top:20px;border-top:2px solid var(--border)">
+  <div id="etape2-anchor" style="display:flex;align-items:center;gap:10px;margin:28px 0 16px;padding-top:20px;border-top:2px solid var(--border)">
     <span style="background:#8B5CF6;color:#fff;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 2</span>
     <span style="font-weight:600;font-size:14px">⚖️ Composer son portefeuille</span>
   </div>
@@ -2095,6 +2095,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/signaux_v2.js"></script>
 <script src="/rank_v2.js"></script>
 <script src="/welcome_v2.js"></script>
+<script src="/screener_lazy.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
