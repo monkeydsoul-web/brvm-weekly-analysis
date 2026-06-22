@@ -2576,7 +2576,7 @@ window.addEventListener('hashchange', function() {
 
 // ── Mode débutant / expert — init ─────────────────────────────────────────
 (function(){
-  var m = localStorage.getItem('brvm_mode') || 'beginner';
+  var m = 'beginner';
   document.documentElement.setAttribute('data-mode', m);
   // Mettre à jour les boutons mode toggle une fois le DOM prêt
   document.addEventListener('DOMContentLoaded', function() {
@@ -7215,7 +7215,7 @@ document.getElementById('changelog-modal').addEventListener('click', function(e)
 })();
 
 // ── Mode débutant / expert ─────────────────────────────────────────────────
-function _setMode(m) {
+function _setMode(m) { m = 'beginner';
   localStorage.setItem('brvm_mode', m);
   document.documentElement.setAttribute('data-mode', m);
   document.querySelectorAll('[data-mode-btn]').forEach(function(b) {
@@ -7242,7 +7242,7 @@ window._toggleModePopover = _toggleModePopover;
 
 // Init mode badge au chargement
 (function(){
-  var m = localStorage.getItem('brvm_mode') || 'beginner';
+  var m = 'beginner';
   var badge = document.getElementById('mode-badge');
   if (badge) badge.textContent = m === 'beginner' ? '🌱 Mode débutant' : '🎯 Mode expert';
   document.querySelectorAll('[data-mode-btn]').forEach(function(b) {
