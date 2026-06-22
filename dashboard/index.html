@@ -677,10 +677,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
   </div>
   <div id="sb-bottom" style="padding:8px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:4px">
-    <div class="mode-toggle">
-      <button data-mode-btn="beginner" class="mode-btn" onclick="_setMode('beginner')">🌱 Débutant</button>
-      <button data-mode-btn="expert" class="mode-btn active" onclick="_setMode('expert')">🎯 Expert</button>
-    </div>
+    
     <div class="ni" onclick="nav('settings');loadSettingsPage()" data-tip="Tâches automatiques · préférences · statistiques" style="margin:0"><span>⚙️</span> <span class="ni-label">Paramètres</span></div>
   </div>
 </aside>
@@ -1263,7 +1260,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- VALORISATION (Prix cibles + Performances) -->
 <div class="page" id="page-valuation">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente les modèles de valorisation détaillés. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour y accéder pleinement.</div>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle présente les modèles de valorisation détaillés.  pour y accéder pleinement.</div>
   <div class="ph"><div><h2>📊 Valorisation</h2><p class="page-sub">Prix cibles · performances historiques · upside potentiel</p></div></div>
   <div class="tab-bar">
     <button class="tab-btn on" onclick="switchTab('valuation','cibles',this)">🎯 Prix cibles</button>
@@ -1842,7 +1839,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
 <div class="page" id="page-signals">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA. <a href="#" onclick="_setMode('expert');return false" style="color:var(--accent)">Passer en mode expert</a> pour accéder à l'analyse complète.</div>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA.  pour accéder à l'analyse complète.</div>
   <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
