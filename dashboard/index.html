@@ -5541,7 +5541,7 @@ function _welcomeDoor(door) {
   localStorage.setItem('brvm_visited', '1');
   if (door === 'decouvrir') { _setMode('beginner'); nav('apprendre'); }
   else if (door === 'investir') { _setMode('beginner'); nav('rank'); }
-  else { _setMode('expert'); nav('dash'); }
+  else { _setMode('beginner'); nav('dash'); }
 }
 function initWelcome() { /* page statique — rien à charger */ }
 function initApprendre() {
