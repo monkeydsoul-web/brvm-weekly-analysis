@@ -2560,7 +2560,11 @@ function nav(id){
 // Support navigation par hash URL + hashchange
 (function(){
   var h=(location.hash||'').replace('#','');
-  if(h) window.addEventListener('load',function(){setTimeout(function(){if(typeof nav==='function'&&document.getElementById('page-'+h))nav(h);},800);});
+  window.addEventListener('load',function(){
+    if(h && document.getElementById('page-'+h)){
+      setTimeout(function(){if(typeof nav==='function')nav(h);},800);
+    } else if(typeof nav==='function'){ nav('welcome'); }
+  });
 })();
 window.addEventListener('hashchange', function() {
   var page = (location.hash || '#welcome').slice(1);
