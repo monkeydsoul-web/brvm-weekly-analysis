@@ -130,6 +130,13 @@ html[data-mode="beginner"] #simPortCard{display:none!important}
 #page-port.port-empty-beginner #port-action-btns{display:none!important}
 .kl{font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .kv{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--font-mono)}
+/* D.14a — lifting cartes indices Accueil (cible #market-indices-kpis uniquement) */
+#market-indices-kpis .kpi{border-left:3px solid var(--accent);padding-left:17px}
+#market-indices-kpis .kl{color:var(--accent);opacity:.85}
+#market-indices-kpis .kv{font-size:32px}
+@media(max-width:768px){#market-indices-kpis .kv{font-size:22px}}
+@media(max-width:480px){#market-indices-kpis .kv{font-size:18px}}
+.tab-btn.on{background:var(--accent-dim);border-radius:var(--radius-sm) var(--radius-sm) 0 0}
 .card{background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:12px;transition:box-shadow .15s}
 .ct{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border-2);display:flex;justify-content:space-between;align-items:center}
 /* ══ Tables ═════════════════════════════════════════════════════════════════ */
