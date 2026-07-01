@@ -166,8 +166,13 @@ def parse_boc_tables(url):
                             entry['div_rdt']  = float(div_m.group(3).replace(',','.'))
                         van_m = re.search(r'(\d+[,.]\d+)\s*%\s+(?:\d+[,.]?\d*)\s+\d{1,2}-\w', line)
                         if van_m: entry['var_annee'] = float(van_m.group(1).replace(',','.'))
-                        if entry['cours_clot'] > 100 and ticker not in results:
+                        ouv = entry.get('cours_ouv') or 0
+                        clot = entry.get('cours_clot') or 0
+                        ratio_oc = (max(ouv, clot) / min(ouv, clot)) if ouv > 0 and clot > 0 else 0
+                        if entry['cours_clot'] > 100 and ratio_oc <= 5 and ticker not in results:
                             results[ticker] = entry
+                        elif entry['cours_clot'] > 100 and ratio_oc > 5:
+                            logger.warning(f"BOC fallback: {ticker} rejete (ratio OUV/CLOT={ratio_oc:.1f}, ouv={ouv}, clot={clot})")
                     except: continue
 
         return results, boc_date
