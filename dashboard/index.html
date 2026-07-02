@@ -2243,7 +2243,7 @@ function _autoTooltips() {
   const re = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'g');
   const walk = (node) => {
     if (node.nodeType === 3 && node.parentElement &&
-        !node.parentElement.closest('.t,script,style,[data-help],input,textarea')) {
+        !node.parentElement.closest('.t,script,style,[data-help],input,textarea,svg')) {
       const txt = node.nodeValue;
       if (re.test(txt)) {
         re.lastIndex = 0;
@@ -2255,7 +2255,8 @@ function _autoTooltips() {
         node.parentNode.replaceChild(span, node);
       }
     } else if (node.nodeType === 1 &&
-               !['SCRIPT','STYLE','INPUT','TEXTAREA','CODE'].includes(node.tagName)) {
+               !['SCRIPT','STYLE','INPUT','TEXTAREA','CODE'].includes(node.tagName) &&
+               node.tagName !== 'svg') {
       [...node.childNodes].forEach(walk);
     }
   };
@@ -3625,11 +3626,12 @@ function _sparklineDots(hist30, w, h){
   if(hist30.length<2) return '';
   const vals=hist30.map(p=>p.price||0).filter(Boolean);
   if(vals.length<2) return '';
-  const PAD_Y=3, PAD_LABEL=34; // espace réservé à droite pour l'étiquette
-  const W=w-PAD_LABEL;
+  // D.14b : plus de label de prix incrusté (redondant avec la colonne PRIX) -- la courbe utilise toute la largeur
+  const PAD_Y=3, PAD_X=3;
+  const W=w-2*PAD_X;
   const H_inner=h-2*PAD_Y; // déclaré AVANT toY pour éviter TDZ ReferenceError
   const mn=Math.min(...vals), mx=Math.max(...vals), range=mx-mn||1;
-  const toX=i=>+(i/(vals.length-1)*W).toFixed(1);
+  const toX=i=>+(PAD_X+i/(vals.length-1)*W).toFixed(1);
   const toY=v=>+(H_inner-(v-mn)/range*H_inner).toFixed(1);
   const pts=vals.map((v,i)=>`${toX(i)},${PAD_Y+toY(v)}`);
   const col=vals[vals.length-1]>=vals[0]?'#10b981':'#ef4444';
@@ -3638,15 +3640,10 @@ function _sparklineDots(hist30, w, h){
   const lx=toX(vals.length-1);
   const ly=PAD_Y+toY(vals[vals.length-1]);
   const dot=`<circle cx="${lx}" cy="${ly}" r="1.8" fill="${col}"/>`;
-  // Étiquette : toujours à droite du dernier point, clampée verticalement
-  const labelX=lx+4;
-  const labelY=Math.max(8,Math.min(h-2,ly+3));
-  const labelTxt=typeof fmtXOF==='function'?fmtXOF(Math.round(vals[vals.length-1])):Math.round(vals[vals.length-1]).toLocaleString('fr-FR');
-  const label=`<text x="${labelX}" y="${labelY}" font-size="8" font-weight="500" fill="${col}" font-family="ui-monospace,monospace">${labelTxt}</text>`;
   const perf=vals[0]>0?((vals[vals.length-1]-vals[0])/vals[0]*100):0;
   const sign=perf>=0?'+':'';
   const tip=`Min: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mn)):Math.round(mn).toLocaleString('fr-FR')} · Max: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mx)):Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
-  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}${label}</svg></span>`;
+  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}</svg></span>`;
 }
 
 function renderRank(){
