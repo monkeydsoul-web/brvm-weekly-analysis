@@ -7182,7 +7182,7 @@ nav = function(id, pushHistory) {
 };
 function navBack() {
   navHistory.pop();
-  const prev = navHistory.pop() || 'dash';
+  const prev = navHistory[navHistory.length - 1] || 'welcome';
   nav(prev, false);
 }
 
