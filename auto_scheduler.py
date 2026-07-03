@@ -7,6 +7,7 @@ Jobs:
   - Toutes les 15min   : market data indices
   - Tous les jours 8h  : annonces BRVM officielles
   - Tous les jours 18h : price_history
+  - Tous les jours 18h05: rank_history (snapshot top3)
   - Tous les jours 18h30: BOC scrape
   - Tous les jours 22h : rapports PDF scrape (legacy)
   - Dimanches 23h      : analyse IA PDF batch (legacy)
@@ -85,6 +86,15 @@ def job_price_history():
         logger.info(f"Price history: {n} tickers mis à jour")
     except Exception as e:
         logger.error(f"job_price_history: {e}")
+
+def job_rank_history():
+    """Snapshot quotidien du top3 du classement (18h05)."""
+    try:
+        from rank_history_builder import append_daily_top3
+        append_daily_top3()
+        logger.info("Rank history: snapshot top3 enregistré")
+    except Exception as e:
+        logger.error(f"job_rank_history: {e}")
 
 def job_boc():
     """Scrape BOC (18h30) puis rafraîchit la 3e source externe (african-markets)."""
@@ -246,6 +256,11 @@ def start_scheduler():
     sched.add_job(wrap_job('price_history', job_price_history), CronTrigger(hour=18, minute=0),
                   id='price_history', replace_existing=True,
                   name='Price history 18h')
+
+    # Snapshot top3 quotidien à 18h05
+    sched.add_job(wrap_job('rank_history', job_rank_history), CronTrigger(hour=18, minute=5),
+                  id='rank_history', replace_existing=True,
+                  name='Rank history top3 18h05')
 
     # BOC quotidien à 18h30
     sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=18, minute=30),

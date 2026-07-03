@@ -262,6 +262,16 @@ def api_scores():
     return jsonify(scores)
 
 
+@app.route("/api/top3-constance")
+def api_top3_constance():
+    from rank_history_builder import compute_top3_constance
+    result = compute_top3_constance()
+    names = {s.get("ticker"): s.get("name") for s in load_latest_scores()}
+    for p in result.get("podium", []):
+        p["name"] = names.get(p["ticker"])
+    return jsonify(result)
+
+
 @app.route("/api/stock/<ticker>")
 def api_stock(ticker):
     scores = load_latest_scores()
