@@ -1624,7 +1624,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- SCREENER -->
 <div class="page" id="page-screener">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner" id="beginner-banner-screener">🔍 <strong>Comment utiliser le screener :</strong> Filtrez les 47 sociétés selon vos critères. Ex : dividende ≥ 4%, note ≥ 7,5. Cliquez sur "Filtrer" pour voir les résultats. <button onclick="document.getElementById('beginner-banner-screener').style.display='none'" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK</button></div>
   <div class="ph">
     <div><h2>🔍 Screener avancé</h2><p class="page-sub">Filtrez les actions BRVM par score, P/E, dividende, ROE et secteur</p></div>
     <div style="display:flex;gap:6px">
@@ -1639,14 +1638,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+      · Filtrez les 47 sociétés BRVM selon vos critères (ex : dividende ≥ 4%, note ≥ 7,5), ou cliquez sur une stratégie pré-configurée ci-dessous<br>
       · Laissez un filtre vide pour ne pas l'appliquer<br>
-      · Cliquez sur une stratégie prédéfinie pour appliquer des filtres optimisés<br>
+      · Une Note ≥ 6/10 avec un Conseil "✅ Acheter" est un bon point de départ<br>
       · Le graphique Scatter montre les sociétés filtrées : zone idéale = P/E&lt;15 et Div&gt;5%
     </div>
   </details>
-  <div style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--t2)">
-    💡 <strong>Comment trouver une bonne action ?</strong> Cliquez sur une stratégie ci-dessous, ou réglez les filtres à la main. Une Note ≥ 6/10 avec un Conseil "✅ Acheter" est un bon point de départ.
-  </div>
   <!-- Presets stratégies -->
   <div style="margin-bottom:12px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
@@ -1735,30 +1732,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <span style="background:#8B5CF6;color:#fff;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 2</span>
     <span style="font-weight:600;font-size:14px">⚖️ Composer son portefeuille</span>
   </div>
-  <div style="background:var(--accent-dim);border-left:3px solid #8B5CF6;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--t2)">
-    Vous avez identifié des actions intéressantes ? Construisez maintenant un portefeuille diversifié.
-    La matrice de corrélation révèle les actions qui évoluent ensemble — à éviter en excès.
-    Markowitz calcule la répartition optimale selon votre tolérance au risque.
-  </div>
-  <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+  <details style="margin:0 0 20px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
     <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-      · Le graphique montre 3 000 portefeuilles simulés aléatoirement<br>
-      · Plus un point est en haut à gauche = meilleur rendement pour moins de risque<br>
-      · Cliquez sur "Optimiser" pour voir le portefeuille recommandé
+      · Vous avez identifié des actions intéressantes ? Construisez un portefeuille diversifié : la matrice de corrélation ci-dessous vous aide à ne pas mettre tous vos œufs dans le même panier<br>
+      · 🟢 <strong style="color:var(--bull)">Vert</strong> = ces deux actions montent et baissent ensemble → risqué de les avoir toutes les deux. 🔴 <strong style="color:var(--bear)">Rouge</strong> = elles évoluent en sens inverse → bonne diversification. ⬜ <strong>Gris</strong> = pas de lien entre elles → neutre. <span style="color:var(--t3)">Conseil : peu de cases vertes.</span><br>
+      · Pour réduire le risque, choisissez des sociétés de <strong>secteurs différents</strong> (ex: banque + agro-industrie + télécoms)<br>
+      · Puis Markowitz calcule la répartition optimale selon votre tolérance au risque : le graphique montre 3 000 portefeuilles simulés, cliquez "Optimiser" pour voir le portefeuille recommandé
     </div>
   </details>
-  <!-- Explication corrélation -->
-  <div style="background:var(--bg-elevated);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:20px">
-    <div style="font-weight:600;color:var(--text-1);margin-bottom:6px;font-size:13px">🔗 À quoi sert cette page ?</div>
-    <div style="font-size:12px;color:var(--text-2);line-height:1.8">
-      Elle vous aide à <strong>ne pas mettre tous vos œufs dans le même panier</strong>.<br>
-      🟢 <strong style="color:var(--bull)">Vert</strong> = ces deux actions montent et baissent ensemble → risqué de les avoir toutes les deux.<br>
-      🔴 <strong style="color:var(--bear)">Rouge</strong> = elles évoluent en sens inverse → bonne diversification.<br>
-      ⬜ <strong>Gris</strong> = pas de lien entre elles → neutre.<br>
-      <span style="color:var(--t3);font-size:11px">Conseil : construisez un portefeuille avec peu de cases vertes.</span>
-    </div>
-  </div>
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="ct" title="Coefficient de Pearson · +1 = évoluent ensemble, -1 = évoluent en sens contraire · 💡 Choisissez des actions peu corrélées pour diversifier">🔗 Matrice de corrélation — Top 15 actions (30j BOC)</div>
@@ -1781,41 +1763,33 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#ef4444;display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
     </div>
   </div>
-  <!-- Résumé actionnable corrélation -->
-  <div style="margin-bottom:16px;background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:14px 18px">
-    <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:8px">💡 Ce que ça signifie pour votre portefeuille</div>
-    <div style="font-size:12px;color:var(--text-2);line-height:1.8">
-      Pour réduire le risque, choisissez des sociétés de <strong>secteurs différents</strong> (ex: une banque + une société agro-industrielle + une télécoms). Utilisez l'outil Optimisation ci-dessous pour trouver la meilleure combinaison.
-    </div>
-  </div>
-  <!-- Markowitz guide étape par étape -->
-  <div class="card" style="margin-bottom:16px;border-left:3px solid #8B5CF6;background:rgba(139,92,246,0.06)">
-    <div class="ct" style="color:#a78bfa">📐 Comment utiliser l'optimisation Markowitz — Guide étape par étape</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px">
-      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-        <div style="font-size:10px;font-weight:700;color:#8B5CF6;margin-bottom:4px">Étape 1 — Lancer</div>
-        <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"📐 Optimisation Markowitz (Top 8)"</strong>. L'outil charge automatiquement les 8 meilleures actions du classement.</div>
+  <details style="margin:0 0 16px;background:rgba(139,92,246,0.06);border:1px solid var(--border-2);border-left:3px solid #8B5CF6;border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:#a78bfa;font-weight:600;user-select:none;list-style:none">📐 Comprendre l'optimisation Markowitz</summary>
+    <div style="padding:10px 14px 14px;border-top:1px solid var(--border-2)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:#8B5CF6;margin-bottom:4px">Étape 1 — Lancer</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"📐 Optimisation Markowitz (Top 8)"</strong>. L'outil charge automatiquement les 8 meilleures actions du classement.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:#60A5FA;margin-bottom:4px">Étape 2 — Choisir</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Ajustez votre sélection (cochez/décochez) et cliquez <strong>"Calculer"</strong> — l'algorithme simule 3 000 portefeuilles.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:#4ADE80;margin-bottom:4px">Étape 3 — Analyser</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Repérez <strong style="color:#fbbf24">⭐ Max Sharpe</strong> (meilleur rendement/risque) et <strong style="color:#60A5FA">⬟ Min Risque</strong> (le plus stable).</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:#f59e0b;margin-bottom:4px">Étape 4 — Backtester</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"Tester →"</strong> sur le portefeuille Max Sharpe pour simuler ses performances passées.</div>
+        </div>
       </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-        <div style="font-size:10px;font-weight:700;color:#60A5FA;margin-bottom:4px">Étape 2 — Choisir</div>
-        <div style="font-size:11px;color:var(--t2);line-height:1.6">Ajustez votre sélection d'actions (cochez/décochez) et cliquez <strong>"Calculer"</strong>. L'algorithme simule 3 000 portefeuilles.</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-        <div style="font-size:10px;font-weight:700;color:#4ADE80;margin-bottom:4px">Étape 3 — Analyser</div>
-        <div style="font-size:11px;color:var(--t2);line-height:1.6">Sur le graphe, repérez <strong style="color:#fbbf24">⭐ Max Sharpe</strong> (meilleur ratio rendement/risque) et <strong style="color:#60A5FA">⬟ Min Risque</strong> (portefeuille le plus stable).</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-        <div style="font-size:10px;font-weight:700;color:#f59e0b;margin-bottom:4px">Étape 4 — Backtester</div>
-        <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"Tester →"</strong> sur le portefeuille Max Sharpe pour simuler ses performances passées sur l'historique BOC réel.</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--t2);line-height:1.7">
+        <strong style="color:var(--green)">📐 Frontière efficiente</strong> — portefeuilles optimaux pour chaque niveau de risque · <strong style="color:var(--amber)">🏆 Ratio de Sharpe</strong> = (rendement − taux sans risque) ÷ volatilité, plus il est élevé mieux vous êtes rémunéré pour le risque pris · <strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations pour cartographier l'espace risque/rendement · <strong style="color:var(--t1)">📈 Données</strong> — cours BOC quotidiens BRVM (80 jours).
       </div>
     </div>
-    <div style="margin-top:8px;font-size:10px;color:var(--t3);font-style:italic">
-      💡 <strong>Ratio de Sharpe</strong> = (rendement attendu − taux sans risque) ÷ volatilité. Plus il est élevé, mieux vous êtes rémunéré pour chaque unité de risque prise.
-      &nbsp;·&nbsp; <strong>Volatilité</strong> = dispersion des rendements journaliers (annualisée). Faible = stable, élevée = fluctuant.
-    </div>
-  </div>
-  <div class="g2" style="margin-bottom:16px">
-    <div class="card" style="margin-bottom:0">
+  </details>
+    <div class="card" style="margin-bottom:16px">
       <div class="ct">🚀 Outils d'optimisation</div>
       <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Optimisez votre portefeuille BRVM avec Markowitz et le backtesting.</p>
       <button onclick="openMarkowitz((window.scores||[]).slice(0,8).map(x=>x.ticker))"
@@ -1831,16 +1805,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         style="width:100%;padding:10px;background:linear-gradient(135deg,#4ADE80,#22D3EE);border:none;border-radius:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer">
         🤖 Analyse comparative IA</button>
     </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ct">📊 Théorie de Markowitz</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.7">
-        <p><strong style="color:var(--green)">📐 Frontière efficiente</strong> — Portefeuilles optimaux pour chaque niveau de risque.</p>
-        <p><strong style="color:var(--amber)">🏆 Ratio de Sharpe</strong> — Rendement excédentaire par unité de risque.</p>
-        <p><strong style="color:var(--blue)">🎲 Monte Carlo</strong> — 3000 simulations pour cartographier l'espace risque/rendement.</p>
-        <p><strong style="color:var(--t1)">📈 Données</strong> — Cours BOC quotidiens BRVM (80 jours).</p>
-      </div>
-    </div>
-  </div>
 
 </div>
 
