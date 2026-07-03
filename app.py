@@ -23,6 +23,7 @@ except Exception as _e:
 from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
+from history_merge import get_full_history
 try:
     from scraper import STOCK_FUNDAMENTALS
     print(f"STOCK_FUNDAMENTALS charge: {len(STOCK_FUNDAMENTALS)} tickers")
@@ -1022,17 +1023,13 @@ def api_markowitz():
         if len(tickers) < 2:
             return jsonify({"error": "Minimum 2 actifs"}), 400
         
-        import json as _json, numpy as np
-        ph_path = os.path.join(DATA_DIR, "price_history_extended.json")
-        with open(ph_path) as f:
-            history = _json.load(f)
+        import numpy as np
 
-        # Extraire séries de prix depuis price_history_extended (300+ points/ticker)
+        # Extraire séries de prix depuis l'historique fusionné (extended + vivant)
         MIN_POINTS = 20
         price_series = {}
         for ticker in tickers:
-            pts = sorted([p for p in history.get(ticker, []) if p.get("close")],
-                         key=lambda x: x["date"])
+            pts = [p for p in get_full_history(ticker) if p.get("close")]
             if len(pts) >= MIN_POINTS:
                 price_series[ticker] = {p["date"]: p["close"] for p in pts}
 
@@ -1369,8 +1366,7 @@ def _filter_by_period(points, period):
 def api_price_history_extended(ticker):
     ticker = ticker.upper()
     period = request.args.get("period", "1an")
-    history = _load_extended_history()
-    raw = sorted(history.get(ticker, []), key=lambda x: x["date"])
+    raw = get_full_history(ticker)
     points = _filter_by_period(raw, period)
     return jsonify({"ticker": ticker, "period": period, "points": points, "count": len(points)})
 
@@ -1382,8 +1378,8 @@ def api_price_history_extended_top():
         period = request.args.get("period", "1an")
         history = _load_extended_history()
         results = []
-        for ticker, raw in history.items():
-            points = _filter_by_period(sorted(raw, key=lambda x: x["date"]), period)
+        for ticker in history.keys():
+            points = _filter_by_period(get_full_history(ticker), period)
             if len(points) < 5:
                 continue
             first_close = points[0]["close"]
