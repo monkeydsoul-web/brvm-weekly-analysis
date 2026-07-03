@@ -814,6 +814,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- WELCOME 3 PORTES -->
 <div class="page on" id="page-welcome">
+  <div id="top3-podium" hidden></div>
   <div class="welcome-hero">
     <div style="font-size:48px;margin-bottom:12px">📈</div>
     <h1>Bienvenue sur BRVM Analyse</h1>
@@ -2099,6 +2100,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/signaux_v2.js"></script>
 <script src="/rank_v2.js"></script>
 <script src="/welcome_v2.js"></script>
+<script src="/top3_podium.js"></script>
 <script src="/screener_lazy.js"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
@@ -5573,7 +5575,7 @@ function initApprendre() {
 const pageLoaders={
   dash:      ()=>{nav('rank');},
   rank:      loadRankDash,
-  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); },
+  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   port:      loadPortRevenus,
   alerts:    ()=>{nav('signals');},
