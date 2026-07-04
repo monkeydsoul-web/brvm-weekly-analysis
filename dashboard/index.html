@@ -910,7 +910,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="adv-col expert-only" data-tip="RevDCF /10 — taux de croissance implicite dans le cours actuel">Rev</th>
       <th class="adv-col expert-only" data-tip="Relatif /10 — comparaison avec les médianes sectorielles BRVM">Rel</th>
       <th class="adv-col expert-only" data-tip="Technique /10 — dynamique haussière récente, volume, tendance 30 jours">Tech</th>
-      <th></th>
     </tr></thead>
     <tbody id="rankBody"></tbody></table>
   </div>
@@ -3659,7 +3658,6 @@ function renderRank(){
       <td style="font-size:10px">${fmtConseil(x.conseil)}</td>
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
-      <td onclick="event.stopPropagation()"><button class="btn btn-o" style="font-size:9px;padding:2px 7px;white-space:nowrap" onclick="openAddToPort('${x.ticker}',${x.price||0})">+ Portef.</button></td>
     </tr>`;}).join('');
   // Masquer par défaut les colonnes avancées
   if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
@@ -5154,10 +5152,9 @@ async function showStock(ticker){
         </div>
       </div>
       <div class="ctab-action-strip">
-        <button class="btn btn-g ctab-act-btn" onclick="nav('port');setTimeout(function(){if(typeof simInit!=='undefined')simInit();},200);document.getElementById('portTicker').value='${ticker}';showAddPosition()">+ Portefeuille</button>
+        <button class="btn btn-g ctab-act-btn" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         <button class="btn btn-o ctab-act-btn" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
         <button class="btn btn-o ctab-act-btn" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
-        <button class="btn btn-o ctab-act-btn" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
         <button class="btn btn-o ctab-act-btn" onclick="navToRank('${ticker}')">📊 Voir classement</button>
       </div>
       <!-- Sprint 11 — 3 onglets fiche société -->
