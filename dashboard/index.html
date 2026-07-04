@@ -1143,128 +1143,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 </div>
 
-<!-- REVENUS (Dividendes + Simulateur) -->
-<div class="page" id="page-income">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="ph"><div><h2>💰 Revenus</h2><p class="page-sub">Dividendes · calendrier · simulateur de revenus passifs</p></div></div>
-  <div class="tab-bar">
-    <button class="tab-btn on" onclick="switchTab('income','dividendes',this)">💰 Dividendes</button>
-    <button class="tab-btn" onclick="switchTab('income','simulateur',this);simBuildSliders();simCalc()">📊 Simulateur</button>
-  </div>
-  <div class="tab-content on" id="income-tab-dividendes">
-    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · Les dates en vert = prochains versements prévus<br>
-        · Utilisez le simulateur pour estimer vos revenus selon votre mise<br>
-        · Un dividende élevé n'est pas toujours bon — vérifiez aussi le score /10
-      </div>
-    </details>
-    <div class="card" style="margin-bottom:10px">
-      <div class="ct" style="margin-bottom:10px" title="Dates de détachement et paiement des dividendes sur 12 mois · 💡 Il faut posséder l'action AVANT la date ex-div pour toucher le dividende">📅 Calendrier annuel des détachements</div>
-      <div id="divCalMonths" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
-    </div>
-    <div class="card" style="margin-bottom:10px">
-      <div class="ct" style="margin-bottom:10px" title="Estimez vos revenus selon votre mise de départ · 💡 Modifiez l'action et le montant pour simuler différents scénarios">🧮 Simulateur de revenus dividendes</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-        <div>
-          <label style="font-size:10px;color:var(--t2)">Action</label>
-          <select id="divSimTicker" onchange="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px">
-            <option value="">— Choisir —</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--t2)">Montant investi (XOF)</label>
-          <input id="divSimAmount" type="number" value="1000000" oninput="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;width:140px">
-        </div>
-        <div id="divSimResult" style="padding:8px 14px;border-radius:8px;background:var(--bg3);min-width:160px">
-          <div style="font-size:10px;color:var(--t2)">Revenus annuels estimés</div>
-          <div id="divSimOut" style="font-size:18px;font-weight:700;color:var(--amber)">—</div>
-          <div id="divSimDetail" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
-        </div>
-      </div>
-    </div>
-    <div class="g2">
-      <div>
-        <div class="card"><div class="ct">📋 Prochains détachements</div><div id="divCal"></div></div>
-        <div class="card"><div class="ct">Rendements Top 15</div>
-          <div id="cDivDiv" style="width:100%;height:250px"></div></div>
-      </div>
-      <div class="card"><div class="ct">Top 15 rendements</div>
-        <table><thead><tr><th>Ticker</th><th>Dividende XOF</th><th>Rdt%</th><th>Ex-div</th><th>P/E</th><th>Verdict</th></tr></thead>
-        <tbody id="divTable"></tbody></table></div>
-    </div>
-  </div>
-  <div class="tab-content" id="income-tab-simulateur">
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">
-      <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
-      <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
-    </div>
-    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
-      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
-      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · Entrez votre mise de départ et la durée souhaitée<br>
-        · La croissance estimée vient des Prévisions IA composite 4 facteurs<br>
-        · Les dividendes sont réinvestis automatiquement dans la simulation
-      </div>
-    </details>
-    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
-      <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
-      <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
-      <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
-      <div>3️⃣ <strong>Dividendes</strong> → estimés sur la base des taux historiques <abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BRVM</abbr></div>
-      <div>4️⃣ <strong>Croissance</strong> → basée sur les Prévisions IA composite 4 facteurs</div>
-      <div style="margin-top:8px;color:var(--t2);">⚠️ Simulation indicative · Les performances passées ne garantissent pas les résultats futurs</div>
-    </div>
-    <div class="g3" style="margin-bottom:12px">
-      <div class="kpi">
-        <div class="kl">Montant à investir</div>
-        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-          <input type="number" id="simInv2" value="1000000" min="10000" step="10000" oninput="simCalc()" style="flex:1">
-          <div style="display:flex;gap:2px">
-            <button id="simCurXOF" class="curr-btn on" onclick="simSetCur('XOF')">XOF</button>
-            <button id="simCurEUR" class="curr-btn" onclick="simSetCur('EUR')">EUR</button>
-            <button id="simCurUSD" class="curr-btn" onclick="simSetCur('USD')">USD</button>
-          </div>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kl">Horizon (années) : <span id="simYearsVal">5</span></div>
-        <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;simCalc()" style="margin-top:8px" title="Durée de votre investissement · 💡 Plus long = plus de dividendes cumulés grâce aux intérêts composés">
-      </div>
-      <div class="kpi" style="display:flex;align-items:center;gap:10px">
-        <div>
-          <div class="kl">Réinvest. dividendes</div>
-          <input type="checkbox" id="simReinvest2" checked onchange="simCalc()" style="width:auto;margin-top:6px;transform:scale(1.4)" title="Les dividendes reçus sont réinvestis chaque année · 💡 Effet boule de neige — accélère la croissance du capital">
-        </div>
-        <div style="border-left:1px solid var(--border);padding-left:10px;flex:1">
-          <div class="kl">Taux croissance div/an</div>
-          <input type="number" id="simGrowth" value="3" min="0" max="20" step="0.5" oninput="simCalc()" style="margin-top:4px" title="Progression estimée du dividende par action chaque année · 💡 Historique BRVM : 2-5% en moyenne">
-        </div>
-      </div>
-    </div>
-    <div class="g4" id="simKPIs" style="margin-bottom:12px"></div>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="card" style="margin-bottom:0">
-        <div class="ct">Répartition par action (sliders)</div>
-        <div id="simSliders2" style="max-height:320px;overflow-y:auto"></div>
-        <div style="margin-top:8px;font-size:11px;color:var(--t2)">Poids total : <span id="simTotalW" style="font-weight:700;color:var(--text)">0%</span></div>
-      </div>
-      <div class="card" style="margin-bottom:0">
-        <div class="ct" title="Estimation de vos dividendes cumulés sur 5 ans · 💡 Inclut réinvestissement si coché">Dividendes projetés sur 5 ans (XOF)</div>
-        <div id="cSimDiv" style="width:100%;height:260px"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct">Détail par action — projection an 1</div>
-      <div style="overflow-x:auto">
-        <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rendement div.</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /10</th></tr></thead>
-        <tbody id="simTable2"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- VALORISATION (Prix cibles + Performances) -->
 <div class="page" id="page-valuation">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
@@ -1385,6 +1263,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="tab-btn on" onclick="switchTab('marche','indices',this);if(typeof _renderMarketPage!=='undefined')_renderMarketPage()">📈 Indices BRVM</button>
     <button class="tab-btn" onclick="switchTab('marche','comm',this)">🌍 Commodités</button>
     <button class="tab-btn" onclick="switchTab('marche','macro',this);if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(function(){if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300)">🏦 Macro UEMOA</button>
+    <button class="tab-btn" onclick="switchTab('marche','div',this);if(typeof renderDiv!=='undefined'&&!window._marcheDivRendered){window._marcheDivRendered=true;renderDiv();}">💰 Dividendes</button>
   </div>
 
   <!-- ── Onglet Indices BRVM ── -->
@@ -1600,6 +1479,121 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
     </div>
   </div>
+  </div>
+  <div class="tab-content" id="marche-tab-div">
+    <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+      <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+      <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+        · Les dates en vert = prochains versements prévus<br>
+        · Utilisez le simulateur pour estimer vos revenus selon votre mise<br>
+        · Un dividende élevé n'est pas toujours bon — vérifiez aussi le score /10
+      </div>
+    </details>
+    <div class="card" style="margin-bottom:10px">
+      <div class="ct" style="margin-bottom:10px" title="Dates de détachement et paiement des dividendes sur 12 mois · 💡 Il faut posséder l'action AVANT la date ex-div pour toucher le dividende">📅 Calendrier annuel des détachements</div>
+      <div id="divCalMonths" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="ct" style="margin-bottom:10px" title="Estimez vos revenus selon votre mise de départ · 💡 Modifiez l'action et le montant pour simuler différents scénarios">🧮 Simulateur de revenus dividendes</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div>
+          <label style="font-size:10px;color:var(--t2)">Action</label>
+          <select id="divSimTicker" onchange="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px">
+            <option value="">— Choisir —</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--t2)">Montant investi (XOF)</label>
+          <input id="divSimAmount" type="number" value="1000000" oninput="divSimCalc()" style="display:block;margin-top:3px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;width:140px">
+        </div>
+        <div id="divSimResult" style="padding:8px 14px;border-radius:8px;background:var(--bg3);min-width:160px">
+          <div style="font-size:10px;color:var(--t2)">Revenus annuels estimés</div>
+          <div id="divSimOut" style="font-size:18px;font-weight:700;color:var(--amber)">—</div>
+          <div id="divSimDetail" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="card"><div class="ct">📋 Derniers détachements connus</div><div id="divCal"></div></div>
+        <div class="card"><div class="ct">Rendements Top 15</div>
+          <div id="cDivDiv" style="width:100%;height:250px"></div></div>
+      </div>
+      <div class="card"><div class="ct">Top 15 rendements</div>
+        <table><thead><tr><th>Ticker</th><th>Dividende XOF</th><th>Rdt%</th><th>Ex-div</th><th>P/E</th><th>Verdict</th></tr></thead>
+        <tbody id="divTable"></tbody></table></div>
+    </div>
+    <details ontoggle="if(this.open&&!window._simRevenusRendered){window._simRevenusRendered=true;simBuildSliders();simCalc();}" style="margin-top:16px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:10px;padding:0">
+      <summary style="padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none;display:flex;align-items:center;gap:8px">📊 Simulateur de revenus</summary>
+      <div style="padding:0 16px 16px;border-top:1px solid var(--border-2)">
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">
+          <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
+          <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
+        </div>
+        <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
+          <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
+          <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
+            · Entrez votre mise de départ et la durée souhaitée<br>
+            · La croissance estimée vient des Prévisions IA composite 4 facteurs<br>
+            · Les dividendes sont réinvestis automatiquement dans la simulation
+          </div>
+        </details>
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
+          <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
+          <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
+          <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
+          <div>3️⃣ <strong>Dividendes</strong> → estimés sur la base des taux historiques <abbr data-tip="Bourse Régionale des Valeurs Mobilières · bourse commune des 8 pays UEMOA" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BRVM</abbr></div>
+          <div>4️⃣ <strong>Croissance</strong> → basée sur les Prévisions IA composite 4 facteurs</div>
+          <div style="margin-top:8px;color:var(--t2);">⚠️ Simulation indicative · Les performances passées ne garantissent pas les résultats futurs</div>
+        </div>
+        <div class="g3" style="margin-bottom:12px">
+          <div class="kpi">
+            <div class="kl">Montant à investir</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+              <input type="number" id="simInv2" value="1000000" min="10000" step="10000" oninput="simCalc()" style="flex:1">
+              <div style="display:flex;gap:2px">
+                <button id="simCurXOF" class="curr-btn on" onclick="simSetCur('XOF')">XOF</button>
+                <button id="simCurEUR" class="curr-btn" onclick="simSetCur('EUR')">EUR</button>
+                <button id="simCurUSD" class="curr-btn" onclick="simSetCur('USD')">USD</button>
+              </div>
+            </div>
+          </div>
+          <div class="kpi">
+            <div class="kl">Horizon (années) : <span id="simYearsVal">5</span></div>
+            <input type="range" id="simYears" min="1" max="20" value="5" oninput="document.getElementById('simYearsVal').textContent=this.value;simCalc()" style="margin-top:8px" title="Durée de votre investissement · 💡 Plus long = plus de dividendes cumulés grâce aux intérêts composés">
+          </div>
+          <div class="kpi" style="display:flex;align-items:center;gap:10px">
+            <div>
+              <div class="kl">Réinvest. dividendes</div>
+              <input type="checkbox" id="simReinvest2" checked onchange="simCalc()" style="width:auto;margin-top:6px;transform:scale(1.4)" title="Les dividendes reçus sont réinvestis chaque année · 💡 Effet boule de neige — accélère la croissance du capital">
+            </div>
+            <div style="border-left:1px solid var(--border);padding-left:10px;flex:1">
+              <div class="kl">Taux croissance div/an</div>
+              <input type="number" id="simGrowth" value="3" min="0" max="20" step="0.5" oninput="simCalc()" style="margin-top:4px" title="Progression estimée du dividende par action chaque année · 💡 Historique BRVM : 2-5% en moyenne">
+            </div>
+          </div>
+        </div>
+        <div class="g4" id="simKPIs" style="margin-bottom:12px"></div>
+        <div class="g2" style="margin-bottom:12px">
+          <div class="card" style="margin-bottom:0">
+            <div class="ct">Répartition par action (sliders)</div>
+            <div id="simSliders2" style="max-height:320px;overflow-y:auto"></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--t2)">Poids total : <span id="simTotalW" style="font-weight:700;color:var(--text)">0%</span></div>
+          </div>
+          <div class="card" style="margin-bottom:0">
+            <div class="ct" title="Estimation de vos dividendes cumulés sur 5 ans · 💡 Inclut réinvestissement si coché">Dividendes projetés sur 5 ans (XOF)</div>
+            <div id="cSimDiv" style="width:100%;height:260px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">Détail par action — projection an 1</div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Secteur</th><th>Montant investi</th><th>Rendement div.</th><th>Dividende an 1</th><th>Ex-div</th><th>Score /10</th></tr></thead>
+            <tbody id="simTable2"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </details>
   </div>
 
 </div>
@@ -4450,8 +4444,9 @@ async function renderDiv(){
     }).join('');
   }
 
-  // Calendrier ex-div liste
-  document.getElementById('divCal').innerHTML = wdate.length ? wdate.map(x=>{
+  // Calendrier ex-div liste — derniers détachements connus, tri date desc (plus récent en premier)
+  const wdateDesc = [...wdate].sort((a,b)=>b.ex_div_date.localeCompare(a.ex_div_date));
+  document.getElementById('divCal').innerHTML = wdateDesc.length ? wdateDesc.map(x=>{
     const isExc = x.div_is_exceptional || x.div_flag==='exceptionnel_non_recurrent';
     const dy    = isExc ? 0 : (x.div_yield||0);
     const dyC   = isExc ? 'var(--amber)' : dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
