@@ -124,10 +124,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .kpi:hover{box-shadow:var(--shadow-md)}
 html[data-mode="beginner"] .kpi-expert{display:none!important}
 html[data-mode="beginner"] #simPortCard{display:none!important}
-#page-port.port-empty-beginner #portSummary,
-#page-port.port-empty-beginner #port-chart-card,
-#page-port.port-empty-beginner #port-monthly-card,
-#page-port.port-empty-beginner #port-action-btns{display:none!important}
 .kl{font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .kv{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--font-mono)}
 /* D.14a — lifting cartes indices Accueil (cible #market-indices-kpis uniquement) */
@@ -672,7 +668,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
     <div class="sb-grp-label expert-only">Analyse</div>
     <div class="sb-grp-label">Mon argent</div>
-    <div class="ni" onclick="nav('port')" data-tip="Suivez vos positions, vos gains/pertes et vos dividendes reçus"><span>💼</span> <span class="ni-label">Mon portefeuille</span></div>
   </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
@@ -770,10 +765,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">3. Consulter les signaux IA</div>
         <div style="font-size:12px;color:var(--text-2)">Notre IA analyse chaque société et suggère Acheter, Attendre ou Éviter.</div>
       </div>
-      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('port')">
-        <div style="font-size:20px;margin-bottom:8px">💼</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">4. Suivre son portefeuille</div>
-        <div style="font-size:12px;color:var(--text-2)">Enregistrez vos positions pour suivre vos gains et dividendes reçus.</div>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:16px;cursor:pointer" onclick="nav('rank')">
+        <div style="font-size:20px;margin-bottom:8px">🔔</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">4. Créer une alerte prix</div>
+        <div style="font-size:12px;color:var(--text-2)">Ouvrez la fiche d'une société et touchez 🔔 Alerte prix pour être prévenu quand un seuil est atteint.</div>
       </div>
     </div>
   </div>
@@ -917,231 +912,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <!-- SECTEURS -->
-<!-- PORTEFEUILLE -->
-<div class="page" id="page-port">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <!-- Guide débutant -->
-  <details style="margin:0 0 14px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:10px;padding:0">
-    <summary style="padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);user-select:none;list-style:none;display:flex;align-items:center;gap:8px">
-      📖 Comment utiliser cette page ?
-    </summary>
-    <div style="padding:4px 16px 16px;border-top:1px solid var(--border-2)">
-      <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px">
-        Le portefeuille vous permet de suivre vos actions BRVM réelles.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:12px;flex:1;line-height:1.5"><span style="font-weight:600">① Cliquez <strong>+ Ajouter position</strong></span> — pour enregistrer une action que vous possédez</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:12px;flex:1;line-height:1.5"><span style="font-weight:600">② Indiquez le ticker (ex : SIBC)</span> — la quantité et votre prix d'achat</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:12px;flex:1;line-height:1.5"><span style="font-weight:600">③ Le dashboard calcule automatiquement</span> — vos gains/pertes en temps réel</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:12px;flex:1;line-height:1.5"><span style="font-weight:600">④ La section <strong>Revenus</strong></span> — montre les dividendes estimés que vous percevrez</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:12px;flex:1;line-height:1.5"><span style="font-weight:600">⑤ <strong>Optimiser</strong></span> — suggère comment rééquilibrer selon les scores actuels</span>
-        </div>
-      </div>
-    </div>
-  </details>
-
-  <div class="ph"><div><h2>Mon portefeuille</h2><p class="page-sub">Suivez vos positions, votre P&amp;L et les recommandations par titre</p></div>
-    <div id="port-action-btns" style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-o" onclick="portOptimize()" style="font-size:11px" title="Suggère comment rééquilibrer votre portefeuille selon les scores actuels">⚡ Optimiser</button>
-      <button class="btn btn-o" onclick="sharePortfolioURL()" style="font-size:11px" title="Partagez votre portefeuille via un lien">🔗 Partager</button>
-      <button class="btn btn-o" onclick="exportPortfolioCSV()" style="font-size:11px" title="Exporter le portefeuille en CSV">📥 Exporter CSV</button>
-      <button class="btn btn-r" onclick="resetPortfolio()" style="font-size:11px" title="Effacer toutes vos positions et repartir de zéro">🗑️ Réinitialiser</button>
-      <button class="btn btn-g" onclick="showAddPosition()" style="font-weight:700">➕ Ajouter position</button>
-    </div>
-  </div>
-  <div id="portSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
-  <!-- Graphique évolution valeur -->
-  <div class="card" id="port-chart-card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="ct">📈 Évolution de la valeur du portefeuille</div>
-      <span id="port-perf-badge" style="font-size:11px;font-weight:700"></span>
-    </div>
-    <div id="port-value-chart" style="width:100%;height:160px"></div>
-  </div>
-  <!-- Bilan mensuel -->
-  <div class="card" id="port-monthly-card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="ct" style="margin:0">📅 Bilan mensuel</div>
-      <button class="btn btn-o" onclick="portRecalcBilan()" style="font-size:10px;padding:4px 10px">🔄 Recalculer</button>
-    </div>
-    <div id="port-monthly-table" style="overflow-x:auto"></div>
-  </div>
-<div class="card" style="margin-bottom:12px" id="simPortCard">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div class="ct">Simulateur portefeuille live</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-g" style="font-size:10px" onclick="simAddTicker()">+ Action</button>
-      <button class="btn btn-o" style="font-size:10px" onclick="simReset()">Reset</button>
-    </div>
-  </div>
-  <div id="simSliders" style="margin-bottom:12px"></div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Base simulation</div>
-      <div id="sim-value" style="font-size:13px;font-weight:700;color:var(--blue)">---</div>
-    </div>
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Rendement div.</div>
-      <div id="sim-yield" style="font-size:13px;font-weight:700">---</div>
-    </div>
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Sharpe simule</div>
-      <div id="sim-sharpe" style="font-size:13px;font-weight:700">---</div>
-    </div>
-    <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center">
-      <div style="font-size:10px;color:var(--t3)">Div. annuel</div>
-      <div id="sim-div" style="font-size:13px;font-weight:700;color:var(--amber)">---</div>
-    </div>
-  </div>
-  <div id="sim-chart" style="width:100%;height:120px"></div>
-  <div id="sim-warning" style="font-size:10px;color:var(--red);margin-top:6px;display:none">Poids total doit etre 100%</div>
-</div>
-  <div id="addPositionForm" style="display:none" class="card" style="margin-bottom:12px;border:2px solid var(--accent)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="ct" style="margin:0">➕ Ajouter une position</div>
-      <button onclick="hideAddPosition()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--t2);line-height:1">✕</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-      <!-- Ticker avec autocomplete -->
-      <div style="position:relative">
-        <label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px">Action (ticker)</label>
-        <input id="portTickerInput" type="text" placeholder="Ex: SIBC, SGBC…" autocomplete="off"
-          oninput="_portTickerSearch(this.value)"
-          onfocus="_portTickerSearch(this.value)"
-          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;box-sizing:border-box;font-weight:600;letter-spacing:.5px">
-        <div id="portTickerDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.2)"></div>
-        <div id="portTickerInfo" style="margin-top:6px;font-size:11px;color:var(--t2);min-height:16px;line-height:1.4"></div>
-        <input type="hidden" id="portTicker">
-      </div>
-      <!-- Quantité -->
-      <div>
-        <label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px">Nombre d'actions</label>
-        <input type="number" id="portShares" placeholder="Ex : 100" min="1"
-          oninput="_portCalcTotal()"
-          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;box-sizing:border-box">
-        <div id="portTotalHelper" style="margin-top:6px;font-size:11px;color:var(--accent);min-height:16px"></div>
-      </div>
-      <!-- Prix d'achat -->
-      <div>
-        <label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px">Prix d'achat (XOF)</label>
-        <input type="number" id="portPrice" placeholder="Ex : 7 500" min="1"
-          oninput="_portCalcTotal()"
-          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;box-sizing:border-box">
-        <div style="margin-top:6px;font-size:10px;color:var(--t3)">Prérempli avec le cours actuel</div>
-      </div>
-      <!-- Date -->
-      <div>
-        <label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px">Date d'achat</label>
-        <input type="date" id="portDate"
-          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;box-sizing:border-box">
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-g" onclick="addPositionLS()"
-        style="padding:10px 24px;font-size:13px;font-weight:700;background:var(--accent);border-color:var(--accent)">
-        ✅ Valider l'achat
-      </button>
-      <button class="btn btn-o" onclick="hideAddPosition()" style="padding:10px 16px">Annuler</button>
-      <span id="portAddConfirm" style="font-size:12px;color:var(--green);font-weight:600;display:none">✓ Position ajoutée !</span>
-    </div>
-  </div>
-  <!-- État vide (affiché par JS si 0 positions) -->
-  <div id="portEmptyState" style="display:none;text-align:center;padding:48px 24px">
-    <div style="font-size:56px;margin-bottom:16px">📈</div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:10px">Commencez à suivre vos investissements BRVM</div>
-    <p style="font-size:14px;color:var(--t2);max-width:480px;margin:0 auto 24px;line-height:1.7">
-      Ajoutez vos premières positions pour voir vos gains en temps réel,
-      suivre vos dividendes et optimiser votre allocation.
-    </p>
-    <button class="btn btn-g" onclick="showAddPosition()"
-      style="padding:12px 28px;font-size:14px;font-weight:700;background:var(--accent);border-color:var(--accent);margin-bottom:20px">
-      ➕ Ajouter ma première action
-    </button>
-    <div style="font-size:12px;color:var(--t3)">
-      Pas encore investi ?
-      <span onclick="nav('rank')" style="color:var(--accent);cursor:pointer;font-weight:600">
-        Consultez le Classement pour trouver les meilleures opportunités du moment →
-      </span>
-    </div>
-  </div>
-
-  <!-- Contenu portefeuille (caché si vide) -->
-  <div id="portContent">
-    <div class="g2">
-      <div class="card" style="margin-bottom:0"><div class="ct">Positions actuelles</div>
-        <div style="overflow-x:auto"><table><thead><tr>
-          <th>Ticker</th><th>Nom</th><th>Qté</th>
-          <th title="Prix moyen d'achat">Prix d'achat</th>
-          <th title="Cours actuel en temps réel">Cours actuel</th>
-          <th title="Quantité × cours actuel">Valeur</th>
-          <th title="Différence entre ce que valent vos actions aujourd'hui et leur prix d'achat">Gain/Perte (FCFA)</th>
-          <th title="Variation en pourcentage depuis l'achat">Gain/Perte %</th>
-          <th title="Part de cette action dans la valeur totale du portefeuille">% du portefeuille</th>
-          <th title="Revenu passif estimé sur 1 an pour cette ligne">Dividende annuel</th>
-          <th>Date</th><th></th>
-        </tr></thead>
-        <tbody id="portTable"></tbody></table></div></div>
-      <div class="card" style="margin-bottom:0">
-        <div class="ct">Répartition par secteur</div>
-        <div id="portSectDiv" style="width:100%;height:220px"></div>
-        <div class="ct" style="margin-top:12px">Historique transactions</div>
-        <div id="portTransactions" style="max-height:200px;overflow-y:auto"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Accordéon pédagogique -->
-  <details style="margin-top:16px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:10px;padding:0">
-    <summary style="padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none;display:flex;align-items:center;gap:8px">
-      🎓 Comprendre mes résultats
-    </summary>
-    <div style="padding:0 16px 16px;border-top:1px solid var(--border-2)">
-      <details style="margin-top:10px;border:1px solid var(--border);border-radius:8px;padding:0">
-        <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none">Qu'est-ce que le Gain / Perte ?</summary>
-        <div style="padding:10px 14px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--t2);line-height:1.8">
-          C'est la différence entre ce que valent vos actions <strong>aujourd'hui</strong> et ce que vous avez <strong>payé</strong> pour les acheter.<br><br>
-          <code style="background:var(--bg3);padding:3px 8px;border-radius:4px;font-size:12px">Gain = (Cours actuel − Prix d'achat) × Nombre d'actions</code><br><br>
-          Un gain vert signifie que vos actions ont pris de la valeur. Un rouge signifie qu'elles ont baissé depuis votre achat — ce qui ne veut pas dire qu'il faut vendre.
-        </div>
-      </details>
-      <details style="margin-top:10px;border:1px solid var(--border);border-radius:8px;padding:0">
-        <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none">Comment sont calculés les dividendes estimés ?</summary>
-        <div style="padding:10px 14px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--t2);line-height:1.8">
-          Les dividendes estimés sont basés sur le <strong>taux de rendement historique</strong> de chaque société, multiplié par la valeur actuelle de vos actions.<br><br>
-          <code style="background:var(--bg3);padding:3px 8px;border-radius:4px;font-size:12px">Dividende estimé = Rendement (%) × Valeur de la position</code><br><br>
-          C'est une <em>estimation</em> — le dividende réel dépend de la décision du Conseil d'Administration chaque année.
-        </div>
-      </details>
-      <details style="margin-top:10px;border:1px solid var(--border);border-radius:8px;padding:0">
-        <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none">Que signifie Rendement sur coût ?</summary>
-        <div style="padding:10px 14px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--t2);line-height:1.8">
-          C'est votre <strong>taux de rendement total</strong> depuis l'achat, dividendes inclus.<br><br>
-          <code style="background:var(--bg3);padding:3px 8px;border-radius:4px;font-size:12px">Rendement sur coût = Dividendes annuels ÷ Investissement initial × 100</code><br><br>
-          Exemple : vous avez investi 1 000 000 XOF et recevez 60 000 XOF de dividendes → rendement sur coût = 6%.
-        </div>
-      </details>
-      <details style="margin-top:10px;border:1px solid var(--border);border-radius:8px;padding:0">
-        <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;user-select:none;list-style:none">Comment optimiser mon portefeuille ?</summary>
-        <div style="padding:10px 14px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--t2);line-height:1.8">
-          Le bouton <strong>⚡ Optimiser</strong> analyse vos positions actuelles et compare leurs scores (8 modèles financiers) pour suggérer un rééquilibrage.<br><br>
-          Il peut recommander d'augmenter votre exposition aux actions les mieux notées et de réduire celles qui sont moins attractives — sans jamais forcer une décision.<br><br>
-          <em>L'optimisation reste une suggestion. La décision finale vous appartient toujours.</em>
-        </div>
-      </details>
-    </div>
-  </details>
-
-</div>
-
 <!-- VALORISATION (Prix cibles + Performances) -->
 <div class="page" id="page-valuation">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
@@ -2048,7 +1818,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <script src="/company-tabs.js"></script>
 <script src="/dash-hierarchy.js"></script>
 <script src="/news_v2.js"></script>
-<script src="/port_revenus_v2.js"></script>
 <script src="/signaux_v2.js"></script>
 <script src="/rank_v2.js"></script>
 <script src="/welcome_v2.js"></script>
@@ -2334,7 +2103,6 @@ let _gsIdx = -1;
 const _PAGES = [
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
   {id:'screener', icon:'🔍', label:'Screener & Portefeuille',            desc:'Filtres avancés P/E, score, dividende'},
-  {id:'port',     icon:'💼', label:'Portefeuille',         desc:'Vos positions, G/P, donut sectoriel'},
   {id:'income',   icon:'💰', label:'Revenus',                  desc:'Dividendes, calendrier, simulateur revenus passifs'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
@@ -2796,7 +2564,7 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
-    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();_importPortfolioFromURL();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -3663,17 +3431,6 @@ function renderRank(){
   if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
 }
 
-function openAddToPort(ticker, price){
-  nav('port');
-  setTimeout(()=>{
-    showAddPosition(ticker);
-    const priceEl=document.getElementById('portPrice');
-    if(priceEl&&price) priceEl.value=Math.round(price);
-    const dtEl=document.getElementById('portDate');
-    if(dtEl&&!dtEl.value) dtEl.value=new Date().toISOString().slice(0,10);
-  },100);
-}
-
 function renderRankLive(){ renderRank(); if(typeof renderRankCards==='function') renderRankCards(); }
 function initRanking(){
   const all=window.scores||scores||[];
@@ -3766,9 +3523,6 @@ function loadPortfolio(){
   const contentEl = document.getElementById('portContent');
   if (emptyEl)   emptyEl.style.display   = enriched.length ? 'none' : '';
   if (contentEl) contentEl.style.display = enriched.length ? '' : 'none';
-  const _portMode = document.documentElement.getAttribute('data-mode') || 'expert';
-  document.getElementById('page-port').classList.toggle('port-empty-beginner', !enriched.length && _portMode === 'beginner');
-
   const _kpiAll = [
     [false, 'Valeur totale',      fmtXOF(totalValue),    'var(--blue)',   'Ce que valent vos actions aujourd\'hui'],
     [false, 'Gain / Perte',       `${fmtXOF(totalGain)} (${totalGainPct > 0 ? '+' : ''}${totalGainPct}%)`, gainC, 'Différence entre votre investissement initial et aujourd\'hui'],
@@ -3897,37 +3651,6 @@ function exportPortfolioCSV() {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   _toast('📥 Export CSV téléchargé');
-}
-
-function sharePortfolioURL(){
-  const positions = _portData().map(_normPos).filter(p=>p.ticker&&p.shares>0);
-  if(!positions.length){ return; }
-  // Encoder les positions en base64 (données minimales)
-  const payload = positions.map(p=>({t:p.ticker, s:p.shares, p:Math.round(p.avg_price), d:p.date||''}));
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  const url = `${location.origin}${location.pathname}?port=${b64}`;
-  navigator.clipboard.writeText(url).catch(()=>{
-    prompt('Copiez ce lien de partage :', url);
-  });
-}
-
-function _importPortfolioFromURL(){
-  const params = new URLSearchParams(location.search);
-  const b64 = params.get('port');
-  if(!b64) return;
-  try{
-    const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
-    if(!Array.isArray(payload)||!payload.length) return;
-    const positions = payload.map(p=>({ ticker:p.t, shares:+p.s, avg_price:+p.p, date:p.d||new Date().toISOString().slice(0,10) }));
-    const existing = _portData();
-    positions.forEach(pos=>{
-      if(!existing.find(e=>e.ticker===pos.ticker)) existing.push(pos);
-    });
-    _portSave(existing);
-    // Nettoyer l'URL
-    const clean = location.pathname;
-    history.replaceState({}, '', clean);
-  }catch(e){ console.warn('Erreur import portfolio URL', e); }
 }
 
 // ── Portfolio évolution de valeur ──────────────────────────────────────────
@@ -5528,9 +5251,7 @@ const pageLoaders={
   rank:      loadRankDash,
   welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
-  port:      loadPortRevenus,
   alerts:    ()=>{nav('signals');},
-  income:    ()=>{nav('port');},
   valuation: ()=>{nav('signals');},
   signals:   loadSignauxValoAlertes,
   optim:     ()=>nav('screener'),
@@ -7060,8 +6781,6 @@ document.getElementById('cmp-modal').addEventListener('click', function(e){
 const _kbdMap = {
   'g': {fn: ()=>{nav('dash');}, label: 'G → Dashboard'},
   'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
-  'p': {fn: ()=>{nav('port');loadPortfolio();}, label: 'P → Portefeuille'},
-  'd': {fn: ()=>{nav('port');}, label: 'D → Portefeuille & Revenus'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
   '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
 };
@@ -7257,7 +6976,7 @@ function _renderCmdK(q) {
   const pages = [
     {id:'rank',label:'Classement',icon:'🏆'},
     {id:'screener',label:'Screener & Portefeuille',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
-    {id:'port',label:'Mon portefeuille',icon:'💼'},{id:'signals',label:'Signaux',icon:'📡'},
+    {id:'signals',label:'Signaux',icon:'📡'},
     {id:'valuation',label:'Valorisation',icon:'💰'},
     {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
     {id:'income',label:'Revenus',icon:'💵'},{id:'alerts',label:'Alertes',icon:'🔔'},
