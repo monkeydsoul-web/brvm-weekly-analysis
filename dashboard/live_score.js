@@ -113,6 +113,7 @@ async function loadReports(ticker) {
       var pdfUrl = r.pdf_url || r.url || '';
       var annee  = r.annee  || r.year  || '?';
       var titre  = r.titre  || r.title || r.type || 'Document';
+      var titreDisplay = titre.replace(/^\d{8}\s*-\s*/, '').replace(/Dactivites/g, "D'activités");
       var hasAI  = !!(r.analyse && r.analyse.verdict_investisseur);
       var analyseBtn = (r.type==='Etats financiers'||r.type==='Rapport annuel')
         ? ' <button onclick="event.preventDefault();'+
@@ -120,13 +121,13 @@ async function loadReports(ticker) {
             ? 'toggleStockAnalyseInline(\''+safeT+'\','+idx+',this)'
             : 'analyzePDF(\''+encodeURIComponent(pdfUrl)+'\',\''+ticker+'\',\''+r.type+'\','+annee+',this)')+
           '" style="font-size:9px;padding:1px 5px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;color:'+(hasAI?'var(--accent)':'var(--t2)')+';margin-left:4px">'+
-          (hasAI ? '🤖 Analyser' : 'Analyser')+'</button>'+
+          (hasAI ? "Voir l'analyse IA" : 'Analyser')+'</button>'+
           '<div id="rc-analyse-'+safeT+'-'+idx+'" style="display:none;margin-top:6px"></div>'
         : '';
       return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">'+
         '<span style="font-size:10px;font-weight:600;color:'+col+';min-width:115px;white-space:nowrap">'+r.type+'</span>'+
         '<span style="font-size:11px;color:var(--t2);min-width:34px;flex-shrink:0">'+annee+'</span>'+
-        '<span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+titre+'</span>'+
+        '<span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+titreDisplay+'</span>'+
         (pdfUrl ? '<a href="'+pdfUrl+'" target="_blank" style="font-size:10px;color:#3b82f6;font-weight:600;white-space:nowrap;flex-shrink:0;text-decoration:none">📥 PDF</a>' : '')+
         analyseBtn+
         '</div>';
