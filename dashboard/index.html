@@ -5234,7 +5234,7 @@ async function loadStockReports(ticker) {
     const rows = reports.map((r, idx) => {
       const pdfUrl  = r.pdf_url || '';
       const annee   = r.annee   || '?';
-      const titre   = (r.titre  || r.type  || 'Document').slice(0, 90);
+      const titre   = (r.titre  || r.type  || 'Document').replace(/^\d{8}\s*-\s*/, '').replace(/Dactivites/g, "D'activités").slice(0, 90);
       const col     = typeColor[r.type] || 'var(--t3)';
       const hasAI   = !!(r.analyse && r.analyse.verdict_investisseur);
       const safeT   = ticker.replace(/[^A-Za-z0-9]/g,'');
@@ -5245,7 +5245,7 @@ async function loadStockReports(ticker) {
           <span style="font-size:10px;font-weight:700;color:var(--text-2);flex-shrink:0">${annee}</span>
           <span style="font-size:11px;flex:1;font-weight:600;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis">${titre}</span>
           ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0;text-decoration:none">📥 PDF</a>` : ''}
-          ${hasAI ? `<button onclick="toggleStockAnalyse('${safeT}',${idx})" style="font-size:10px;padding:2px 10px;border-radius:20px;border:1px solid var(--border-1);background:transparent;color:var(--accent);cursor:pointer;white-space:nowrap;flex-shrink:0">🤖 Analyser</button>` : ''}
+          ${hasAI ? `<button onclick="toggleStockAnalyse('${safeT}',${idx})" style="font-size:10px;padding:2px 10px;border-radius:20px;border:1px solid var(--border-1);background:transparent;color:var(--accent);cursor:pointer;white-space:nowrap;flex-shrink:0">Voir l'analyse IA</button>` : ''}
         </div>
         ${r.date ? `<div style="font-size:10px;color:var(--text-3);margin-top:4px">${r.date}</div>` : ''}
         <div class="analyse-detail" id="stock-analyse-${safeT}-${idx}"></div>
