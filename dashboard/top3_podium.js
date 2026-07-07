@@ -13,6 +13,15 @@ function initTop3Podium() {
 }
 
 const _T3P_MEDALS = ['🥇', '🥈', '🥉'];
+const _T3P_MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+function _fmtDateFR(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  if (!m) return iso;
+  const day = parseInt(m[3], 10);
+  const month = _T3P_MONTHS_FR[parseInt(m[2], 10) - 1];
+  return `${day} ${month} ${m[1]}`;
+}
 
 function _renderTop3Podium(el, data) {
   if (!document.getElementById('t3p-style')) {
@@ -42,7 +51,7 @@ function _renderTop3Podium(el, data) {
     <div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px">
       <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px">
         <span style="font-weight:700;color:var(--gold)">🏆 Top 3 constance</span>
-        <span style="font-size:12px;color:var(--text-2)">dans le Top 3 depuis le ${data.since} · ${data.days} ${dayLabel}</span>
+        <span style="font-size:12px;color:var(--text-2)">dans le Top 3 depuis le ${_fmtDateFR(data.since)} · ${data.days} ${dayLabel}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">${rows}</div>
     </div>`;
