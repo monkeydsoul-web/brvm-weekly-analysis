@@ -958,7 +958,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><div><h2>🔔 Alertes</h2><p class="page-sub">Soyez notifié quand un cours atteint votre seuil cible</p></div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-o" onclick="addPortfolioAlerts()" style="font-size:11px">📦 Alertes portefeuille</button>
       <button class="btn btn-g" onclick="showAddAlert()">+ Nouvelle alerte</button>
     </div>
   </div>
@@ -3443,19 +3442,6 @@ function initRanking(){
   renderRank();
 }
 
-// ── Portfolio localStorage ─────────────────────────────────────────────────
-const _LS_PORT = 'brvm_portfolio_v2';
-const _LS_TX   = 'brvm_transactions_v2';
-
-function _portData(){ try{return JSON.parse(localStorage.getItem(_LS_PORT)||'[]');}catch{return[];} }
-
-function _normPos(pos){
-  // Accepte {shares,avg_price} OU {qty,buyPrice} OU {quantity,price}
-  const shares    = +(pos.shares ?? pos.qty ?? pos.quantity ?? 0);
-  const avg_price = +(pos.avg_price ?? pos.buyPrice ?? pos.buy_price ?? pos.price ?? 0);
-  return {...pos, shares, avg_price};
-}
-
 function navToRank(ticker){
   nav('rank');
   setTimeout(()=>{
@@ -3938,26 +3924,6 @@ async function createAlert(){
   document.getElementById('addAlertForm').style.display='none';
   if(typeof loadAlerts==='function') loadAlerts();
   if(typeof loadAlertsLocal==='function') loadAlertsLocal();
-}
-
-function addPortfolioAlerts(){
-  const positions = _portData().map(_normPos);
-  if(!positions.length){ return; }
-  let created = 0;
-  positions.forEach(p=>{
-    if(!p.ticker||!p.avg_price) return;
-    // Alerte si le cours dépasse le prix d'achat +15% (prise de profit)
-    const target = Math.round(p.avg_price * 1.15);
-    const existing = (window._priceAlerts||[]).find(a=>a.ticker===p.ticker&&a.type==='price'&&a.target===target);
-    if(!existing){
-      if(typeof addAlertLocal==='function'){
-        addAlertLocal({ticker:p.ticker, type:'price', target, direction:'above', note:`+15% vs achat ${Math.round(p.avg_price)} XOF`});
-        created++;
-      }
-    }
-  });
-  if(typeof loadAlertsLocal==='function') loadAlertsLocal();
-  if(typeof renderAlertsPanel==='function') renderAlertsPanel();
 }
 
 // loadAlerts/checkAlerts/deleteAlert gérées par alerts.js
