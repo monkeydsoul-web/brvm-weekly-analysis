@@ -2049,7 +2049,6 @@ function setCurrency(c) {
   // Re-rendu de la page active
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
   if (active === 'rank') renderRankLive();
-  else if (active === 'dash') renderDash({});
   else if (active === 'income') renderDiv();
   else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
@@ -4585,7 +4584,7 @@ function _welcomeDoor(door) {
   localStorage.setItem('brvm_visited', '1');
   if (door === 'decouvrir') { _setMode('beginner'); nav('apprendre'); }
   else if (door === 'investir') { _setMode('beginner'); nav('rank'); }
-  else { _setMode('beginner'); nav('dash'); }
+  else { _setMode('beginner'); nav('rank'); }
 }
 function initWelcome() { /* page statique — rien à charger */ }
 function initApprendre() {
@@ -4607,7 +4606,6 @@ function initApprendre() {
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
-  dash:      ()=>{nav('rank');},
   rank:      loadRankDash,
   welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
   apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
@@ -5641,7 +5639,7 @@ const _tourSteps = [
   {
     title: '🏆 Les scores /10 — comprendre d\'un coup d\'œil',
     body: 'Chaque société reçoit un <strong>score sur 10 points</strong> calculé par 8 modèles financiers reconnus (Graham, DCF, Buffett…).<br><br>🟢 ≥ 7.5/10 = Excellente opportunité<br>🟡 5–7.5/10 = Société correcte<br>🔴 &lt; 5/10 = Prudence recommandée<br><br>Le classement complet est dans l\'onglet <strong>🏆 Classement</strong>.',
-    highlight: '#page-dash .g3',
+    highlight: null,
     btn: 'Suivant →'
   },
   {
@@ -5844,7 +5842,7 @@ function renderGlossaire() {
 
 // ── Aide contextuelle — contenu par page ───────────────────────────────────
 const _helpContent = {
-  dash: {
+  _default: {
     title: 'Tableau de bord',
     sections: [
       { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
@@ -5963,7 +5961,7 @@ let _currentPage = 'welcome';
 
 function openHelpDrawer(page) {
   page = page || _currentPage;
-  const content = _helpContent[page] || _helpContent['dash'];
+  const content = _helpContent[page] || _helpContent['_default'];
   document.getElementById('help-page-title').textContent = content.title;
   const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
     <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🚀 Pour commencer</div>
@@ -6139,7 +6137,7 @@ document.getElementById('cmp-modal').addEventListener('click', function(e){
 <script>
 // ── Raccourcis clavier ────────────────────────────────────────────────────
 const _kbdMap = {
-  'g': {fn: ()=>{nav('dash');}, label: 'G → Dashboard'},
+  'g': {fn: ()=>{nav('rank');}, label: 'G → Classement'},
   'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
   's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
   '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
@@ -6292,7 +6290,7 @@ window._toggleModePopover = _toggleModePopover;
     b.classList.toggle('active', b.dataset.modeBtn === m);
   });
   // Masquer les bannières déjà ignorées
-  ['dash','rank','screener','news'].forEach(function(p) {
+  ['rank','screener','news'].forEach(function(p) {
     if (localStorage.getItem('bb_'+p+'_ok')) {
       var el = document.getElementById('beginner-banner-'+p);
       if (el) el.style.display = 'none';
