@@ -248,6 +248,8 @@ input[type=range]{padding:0;height:20px}
 .ctab-score-block{background:var(--bg-elevated);border-radius:10px;padding:var(--space-2);margin-bottom:var(--space-2);border:1px solid var(--border-1)}
 /* ── Verdict analyste ──────────────────────────────────────────────────── */
 .analyst-verdict{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:12px}
+/* ── Disclaimer légal fiche société ───────────────────────────────────── */
+.sso-disclaimer{margin-top:var(--space-2);border-top:1px solid var(--border-1);color:var(--text-2);font-size:12px;line-height:1.6;padding:var(--space-2);border-radius:var(--radius-sm)}
 /* ── Raccourcis clavier ────────────────────────────────────────────────── */
 #kbd-hint{position:fixed;bottom:8px;right:8px;font-size:9px;color:var(--t3);pointer-events:none;z-index:50}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
@@ -3469,10 +3471,11 @@ function _genVerdict(s){
 
   const secBg='rgba(255,255,255,0.04)';
   return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col};border-radius:8px;padding:12px 16px;margin-bottom:14px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
       <strong style="color:${col};font-size:13px">📋 Verdict analyste — ${s.ticker}</strong>
       <span style="background:${col};color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">${labelShow}</span>
     </div>
+    <div style="text-align:right;font-size:11px;color:var(--text-3);margin-bottom:8px">Pas un conseil en investissement</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div style="background:${secBg};border-radius:6px;padding:8px 10px">
         <div style="font-size:9px;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:5px">✅ Points forts</div>
@@ -3862,7 +3865,8 @@ async function showStock(ticker){
         <div id="stock-reports-section">
           <p style="font-size:12px;color:var(--t2);padding:12px 0">Chargement des rapports...</p>
         </div>
-      </div><!-- /ctab-documents -->`;
+      </div><!-- /ctab-documents -->
+      <div class="sso-disclaimer">⚠️ Les notes et conseils sont générés automatiquement par des modèles de valorisation à partir de données publiques. Ils sont fournis à titre pédagogique et informatif et ne constituent pas un conseil en investissement. Investir en bourse comporte un risque de perte en capital. Faites vos propres recherches ou consultez un conseiller agréé.</div>`;
     renderStockStory(ticker);
     if (typeof initCompanyTabs === 'function') initCompanyTabs(ticker);
     // Charts dans la fiche
