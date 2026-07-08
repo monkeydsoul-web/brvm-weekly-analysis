@@ -5542,7 +5542,16 @@ const _bcLabels = {
   glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
   apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
+  valuation:'Valorisation', alerts:'Alertes',
 };
+
+function _updateBackLabels() {
+  const t = navHistory[navHistory.length - 2] || 'welcome';
+  const label = _bcLabels[t] || 'Retour';
+  document.querySelectorAll('.brvm-back-btn').forEach(function(btn) {
+    btn.textContent = '← ' + label;
+  });
+}
 
 document.addEventListener('keydown', function(e) {
   // Ignorer si focus sur input/textarea/select
@@ -5594,6 +5603,7 @@ nav = function(id, pushHistory) {
       if (typeof renderMacroPage !== 'undefined') renderMacroPage();
       setTimeout(function(){ if(typeof renderMacroRatings!=='undefined') renderMacroRatings(); }, 300);
     }
+    _updateBackLabels();
     return;
   }
   if (pushHistory !== false) navHistory.push(id);
@@ -5601,6 +5611,7 @@ nav = function(id, pushHistory) {
   const bcEl = document.getElementById('bc-page');
   if (bcEl) bcEl.textContent = _bcLabels[id] || id;
   if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
+  _updateBackLabels();
 };
 function navBack() {
   navHistory.pop();
