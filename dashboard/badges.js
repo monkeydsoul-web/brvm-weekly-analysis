@@ -138,7 +138,6 @@ function onScoresRefreshed(newScores) {
   // Rafraîchir composants
   if (typeof renderRankLive === 'function') renderRankLive();
   if (typeof renderSidebarScores === 'function') renderSidebarScores(newScores);
-  if (typeof renderDash === 'function' && window._lastMarket) renderDash(window._lastMarket);
   // Badge rang fiche ouverte
   const openTicker = window._openTicker;
   if (openTicker) renderLiveRankBadge(openTicker);
