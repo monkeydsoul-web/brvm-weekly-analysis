@@ -3980,11 +3980,6 @@ function gSpinShow(){ const el=document.getElementById('g-spin'); if(el)el.style
 function gSpinHide(){ const el=document.getElementById('g-spin'); if(el)el.style.display='none'; }
 
 async function loadStatus(){
-  try{
-    const s=await fetch('/api/refresh/status').then(r=>r.json());
-    document.getElementById('status').textContent='Màj: '+s.last_update;
-    document.getElementById('lastUp').textContent=s.last_update;
-  }catch(e){}
   // Footer info
   try{
     const fd=document.getElementById('footer-date');
