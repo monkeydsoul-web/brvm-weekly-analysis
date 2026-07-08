@@ -7,10 +7,8 @@ Ouvre: http://localhost:5000
 
 import os
 import json
-import glob
 import logging
 import threading
-import subprocess
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
 try:
@@ -368,53 +366,6 @@ def api_top(n):
     scores = load_latest_scores()
     sorted_scores = sorted(scores, key=lambda x: x.get("composite_adj", 0), reverse=True)
     return jsonify(sorted_scores[:n])
-
-
-@app.route("/api/refresh", methods=["POST"])
-def api_refresh():
-    """Lance une mise à jour des données en arrière-plan"""
-    def run_update():
-        try:
-            subprocess.run(
-                ["python3", "main.py", "--no-github", "--no-email"],
-                timeout=300,
-                cwd=os.path.dirname(os.path.abspath(__file__))
-            )
-            # Sauvegarder les news dans le cache
-            _cache_news()
-        except Exception as e:
-            logger.error(f"Refresh: {e}")
-
-    thread = threading.Thread(target=run_update, daemon=True)
-    thread.start()
-    return jsonify({"status": "started", "message": "Mise à jour lancée en arrière-plan (~2 min)"})
-
-
-@app.route("/api/refresh/status")
-def api_refresh_status():
-    files = sorted(glob.glob(os.path.join(DATA_DIR, "scores_*.json")))
-    if files:
-        mtime = os.path.getmtime(files[-1])
-        last_update = datetime.fromtimestamp(mtime).strftime("%d/%m/%Y à %H:%M")
-        age_minutes = (datetime.now().timestamp() - mtime) / 60
-        return jsonify({
-            "last_update": last_update,
-            "age_minutes": round(age_minutes),
-            "fresh": age_minutes < 60 * 24 * 7,
-        })
-    return jsonify({"last_update": "Jamais", "age_minutes": 9999, "fresh": False})
-
-
-def _cache_news():
-    """Cache les news dans un fichier JSON pour l'app"""
-    try:
-        from news_scraper import fetch_all_news
-        news = fetch_all_news()
-        os.makedirs(DATA_DIR, exist_ok=True)
-        with open(os.path.join(DATA_DIR, "news_cache.json"), "w") as f:
-            json.dump(news, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        logger.warning(f"Cache news: {e}")
 
 
 def _cache_macro():
