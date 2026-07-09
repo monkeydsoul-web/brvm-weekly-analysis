@@ -658,7 +658,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
     <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
 <div class="sb-grp-label">Découvrir</div>
-    <div class="ni" onclick="nav('apprendre');initApprendre()" data-tip="Les bases pour investir sur la BRVM · explications simples et pédagogiques"><span>📖</span> <span class="ni-label">Apprendre</span></div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
 
     <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
@@ -720,16 +719,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <span class="wc-btn">Dashboard →</span>
     </div>
   </div>
-</div>
-
-<!-- APPRENDRE -->
-<div class="page" id="page-apprendre">
-  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="ph" style="padding:24px 20px 8px">
-    <h2 style="font-size:20px;margin:0">Apprendre</h2>
-    <p style="font-size:13px;color:var(--text-2);margin:4px 0 0">Les bases pour investir sur la BRVM</p>
-  </div>
-  <div id="apprendre-content" style="padding:16px 20px"></div>
 </div>
 
 <!-- METHODOLOGIE -->
@@ -4045,33 +4034,16 @@ async function loadStatus(){
 // ── Sprint 8 — Welcome 3 portes ────────────────────────────────────────────
 function _welcomeDoor(door) {
   localStorage.setItem('brvm_visited', '1');
-  if (door === 'decouvrir') { _setMode('beginner'); nav('apprendre'); }
+  if (door === 'decouvrir') { _setMode('beginner'); nav('glossaire'); }
   else if (door === 'investir') { _setMode('beginner'); nav('rank'); }
   else { _setMode('beginner'); nav('rank'); }
 }
 function initWelcome() { /* page statique — rien à charger */ }
-function initApprendre() {
-  const el = document.getElementById('apprendre-content');
-  if (!el || el.innerHTML.trim()) return;
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:12px">
-      <div class="ct">Qu'est-ce qu'une action ?</div>
-      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Une action est une part de propriété d'une entreprise cotée. En achetant une action, vous devenez actionnaire et recevez une part des bénéfices sous forme de <strong>dividende</strong>.</p>
-    </div>
-    <div class="card" style="margin-bottom:12px">
-      <div class="ct">Comment lire la Note /10 ?</div>
-      <p style="font-size:13px;color:var(--text-2);line-height:1.7">La Note /10 combine 5 modèles d'évaluation (Graham, DCF, DDM, EPV, Buffett). <span style="color:var(--green);font-weight:600">≥ 7.5 → ✅ Acheter</span> · <span style="color:var(--amber);font-weight:600">5–7.4 → ⏳ Attendre</span> · <span style="color:var(--red);font-weight:600">&lt; 5 → ⚠️ Éviter</span></p>
-    </div>
-    <div style="margin-top:16px;text-align:center">
-      <button onclick="nav('rank')" class="btn-prim" style="padding:10px 28px;font-size:14px">Voir le classement →</button>
-    </div>`;
-}
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
   rank:      loadRankDash,
   welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
-  apprendre: ()=>{ if(typeof initApprendre!=='undefined') initApprendre(); },
   alerts:    ()=>{nav('signals');},
   valuation: ()=>{nav('signals');},
   signals:   loadSignauxValoAlertes,
@@ -5579,7 +5551,7 @@ const _bcLabels = {
   signals:'Signaux',
   glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
-  apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
+  welcome:'Accueil', stock:'Fiche société',
   valuation:'Valorisation', alerts:'Alertes', methodo:'Méthodologie',
 };
 
