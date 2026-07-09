@@ -169,7 +169,6 @@ def fetch_commodity_prices():
         "Cacao":        {"symbol": "CC=F",  "unit": "USD/tonne"},
         "Café":         {"symbol": "KC=F",  "unit": "USD/livre"},
         "Huile palme":  {"symbol": "CPO=F", "unit": "USD/tonne"},
-        "Caoutchouc":   {"symbol": "RUBBF", "unit": "USD/kg"},
         "Pétrole Brent":{"symbol": "BZ=F",  "unit": "USD/baril"},
         "Or":           {"symbol": "GC=F",  "unit": "USD/once"},
         "Coton":        {"symbol": "CT=F",  "unit": "USD/livre"},
