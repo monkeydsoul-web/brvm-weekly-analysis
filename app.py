@@ -1972,6 +1972,13 @@ def api_market_stats():
     return jsonify({"status": "ok", "data": data})
 
 
+@app.errorhandler(404)
+def not_found(e):
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "not found"}), 404
+    return send_from_directory("dashboard", "404.html"), 404
+
+
 if __name__ == "__main__":
     try:
         from dotenv import load_dotenv as _ldenv
