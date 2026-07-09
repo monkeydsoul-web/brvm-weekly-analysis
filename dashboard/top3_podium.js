@@ -34,7 +34,11 @@ function _renderTop3Podium(el, data) {
   }
 
   const dayLabel = data.days > 1 ? 'jours' : 'jour';
-  const rows = data.podium.map((p, i) => `
+  const rows = data.podium.map((p, i) => {
+    const badge = (p.jours != null && data.days < 30)
+      ? `${p.jours} j sur ${data.days}`
+      : `${p.pct} % du temps`;
+    return `
     <div class="t3p-row" role="button" tabindex="0" aria-label="${p.ticker}${p.name ? ' — ' + p.name : ''}"
       onclick="_openStock('${p.ticker}')"
       onkeydown="if(event.key==='Enter')_openStock('${p.ticker}')"
@@ -44,8 +48,9 @@ function _renderTop3Podium(el, data) {
         <strong style="color:var(--text-1)">${p.ticker}</strong>
         <span style="color:var(--text-2);font-size:12px">${p.name || ''}</span>
       </div>
-      <span style="margin-left:auto;font-size:11px;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;white-space:nowrap">${p.pct} % du temps</span>
-    </div>`).join('');
+      <span style="margin-left:auto;font-size:11px;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;white-space:nowrap">${badge}</span>
+    </div>`;
+  }).join('');
 
   el.innerHTML = `
     <div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px">
