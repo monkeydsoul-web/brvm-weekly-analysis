@@ -732,6 +732,40 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div id="apprendre-content" style="padding:16px 20px"></div>
 </div>
 
+<!-- METHODOLOGIE -->
+<div class="page" id="page-methodo">
+  <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
+  <div class="ph" style="padding:24px 20px 8px">
+    <h2 style="font-size:20px;margin:0">📖 Notre méthodologie</h2>
+  </div>
+  <div style="padding:16px 20px">
+    <div class="card">
+      <div class="ct">Notre mission</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Rendre l'analyse des 47 sociétés cotées à la BRVM accessible aux investisseurs débutants d'Afrique de l'Ouest. Chaque société reçoit une note sur 10 et un repère (✅ ⏳ ⚠️) — voici exactement comment ils sont fabriqués.</p>
+    </div>
+    <div class="card">
+      <div class="ct">D'où viennent les prix</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les cours proviennent du site officiel de la BRVM, actualisés toutes les 5 minutes pendant les séances. Chaque prix passe un contrôle de cohérence : il est comparé à plusieurs sources et rejeté s'il s'écarte anormalement (validation croisée « 2 sources sur 3 », tolérance ±20 %). Les variations quotidiennes supérieures au plafond réglementaire de la BRVM (7,5 %) sont bloquées en quarantaine le temps d'être confirmées.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Les 8 modèles de valorisation</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Chaque société est évaluée par 8 méthodes complémentaires : <strong>Graham</strong> (la valeur selon les critères classiques de Benjamin Graham), <strong>DCF</strong> (la valeur des profits futurs actualisés), <strong>DDM</strong> (la valeur des dividendes attendus), <strong>EPV</strong> (la valeur de la capacité bénéficiaire actuelle, sans pari sur la croissance), <strong>Buffett</strong> (les critères de qualité chers à Warren Buffett), <strong>Reverse DCF</strong> (quelles attentes de croissance le prix actuel suppose-t-il ?), <strong>Relatif</strong> (la cherté comparée aux sociétés similaires) et <strong>Technique</strong> (la dynamique récente du cours).</p>
+    </div>
+    <div class="card">
+      <div class="ct">Comment naît la note et le conseil</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les 8 modèles produisent un score global sur 80, traduit en note sur 10. Le repère en découle : au-dessus de 60/80 → ✅ Acheter ; en dessous de 40/80 → ⚠️ Éviter ; entre les deux → ⏳ Attendre. Pour éviter qu'une société change de repère à chaque petite variation, un amortisseur (« hystérésis ») exige un mouvement franc avant de basculer. Si le prix d'une société est en quarantaine, aucun conseil n'est affiché.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Fréquences de mise à jour</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Prix et classement : toutes les 5 minutes en séance. Actualités : toutes les heures. Historique du Top 3 : chaque jour de bourse à 18h05. Rapports annuels et indicateurs : analysés automatiquement chaque semaine.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Nos limites, assumées</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les notes sont calculées automatiquement à partir de données publiques ; aucun analyste ne les revoit une par une. Les modèles reposent sur des hypothèses qui peuvent se tromper, et les données publiées par les sociétés peuvent être incomplètes ou tardives. C'est pourquoi rien ici ne constitue un conseil en investissement : ces notes sont un point de départ pour vos propres recherches, pas une recommandation.</p>
+    </div>
+  </div>
+</div>
+
 <!-- CLASSEMENT -->
 <div class="page" id="page-rank">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
@@ -3866,7 +3900,7 @@ async function showStock(ticker){
           <p style="font-size:12px;color:var(--t2);padding:12px 0">Chargement des rapports...</p>
         </div>
       </div><!-- /ctab-documents -->
-      <div class="sso-disclaimer">⚠️ Les notes et conseils sont générés automatiquement par des modèles de valorisation à partir de données publiques. Ils sont fournis à titre pédagogique et informatif et ne constituent pas un conseil en investissement. Investir en bourse comporte un risque de perte en capital. Faites vos propres recherches ou consultez un conseiller agréé.</div>`;
+      <div class="sso-disclaimer">⚠️ Les notes et conseils sont générés automatiquement par des modèles de valorisation à partir de données publiques. Ils sont fournis à titre pédagogique et informatif et ne constituent pas un conseil en investissement. Investir en bourse comporte un risque de perte en capital. Faites vos propres recherches ou consultez un conseiller agréé. <a href="#" onclick="closeStockSlideover();nav('methodo');return false" style="color:var(--accent);text-decoration:none;white-space:nowrap">Voir notre méthodologie →</a></div>`;
     renderStockStory(ticker);
     if (typeof initCompanyTabs === 'function') initCompanyTabs(ticker);
     // Charts dans la fiche
@@ -3991,7 +4025,7 @@ async function loadStatus(){
       const rCount=nReports.total||471;
       const nAnnc=(await fetch('/api/announcements?limit=1').then(r=>r.json()).catch(()=>({total:95})));
       const aCount=nAnnc.total||95;
-      fsEl.textContent=`${rCount} rapports archivés · ${aCount} annonces analysées`;
+      fsEl.innerHTML=`${rCount} rapports archivés · ${aCount} annonces analysées · <a href="#" onclick="nav('methodo');return false" style="color:inherit;text-decoration:none;cursor:pointer">📖 Méthodologie</a>`;
     }
     const msbBoc=document.getElementById('msb-boc');
     if(msbBoc) msbBoc.textContent=`${n} cours live`;
@@ -5546,7 +5580,7 @@ const _bcLabels = {
   glossaire:'Glossaire', settings:'Paramètres',
   news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
   apprendre:'Apprendre', welcome:'Accueil', stock:'Fiche société',
-  valuation:'Valorisation', alerts:'Alertes',
+  valuation:'Valorisation', alerts:'Alertes', methodo:'Méthodologie',
 };
 
 function _updateBackLabels() {
