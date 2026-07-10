@@ -12,10 +12,10 @@ import threading
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, send_from_directory
 try:
-    from auto_scheduler import start_scheduler, get_scheduler_status, get_scheduler
+    from auto_scheduler import start_scheduler as start_auto_scheduler, get_scheduler_status, get_scheduler
 except Exception as _e:
     print(f"auto_scheduler import error: {_e}")
-    def start_scheduler(): pass
+    def start_auto_scheduler(): pass
     def get_scheduler_status(): return {}
     def get_scheduler(): return None
 from flask_cors import CORS
@@ -29,7 +29,7 @@ except ImportError:
     STOCK_FUNDAMENTALS = {}
     print("WARN: scraper.py introuvable")
 try:
-    from live_data import get_live_data, start_scheduler, is_market_open
+    from live_data import get_live_data, start_scheduler as start_live_scheduler, is_market_open
     LIVE_DATA_OK = True
 except ImportError:
     LIVE_DATA_OK = False
@@ -37,8 +37,6 @@ except ImportError:
 app = Flask(__name__, static_folder="dashboard", static_url_path="")
 CORS(app)
 logging.basicConfig(level=logging.INFO)
-if LIVE_DATA_OK:
-    start_scheduler()
 logger = logging.getLogger("app")
 
 DATA_DIR = "data"
@@ -1978,33 +1976,57 @@ def not_found(e):
     return send_from_directory("dashboard", "404.html"), 404
 
 
-if __name__ == "__main__":
+_INIT_DONE = False
+
+def _init_app():
+    """Initialisation unique du process : appelée à l'import du module, pas seulement
+    sous __main__ — sous gunicorn, __main__ ne s'exécute jamais (app importé comme app:app)."""
+    global _INIT_DONE
+    if _INIT_DONE:
+        return
+    _INIT_DONE = True
+
     try:
         from dotenv import load_dotenv as _ldenv
         _ldenv()
     except ImportError:
         pass
-    PORT = 5000
-    print("\n" + "="*50)
-    print(f"  BRVM Dashboard — http://localhost:{PORT}")
-    print("="*50 + "\n")
+
+    if LIVE_DATA_OK:
+        start_live_scheduler()
+
     try:
-        from auto_scheduler import start_scheduler as _start_auto
-        _sched = _start_auto()
+        _sched = start_auto_scheduler()
         logger.info(f"Auto-scheduler démarré — {len(_sched.get_jobs())} jobs")
     except Exception as e:
         logger.warning(f"Scheduler non démarré: {e}")
-    # Validation au démarrage : exécute le validateur AVANT de servir des requêtes
-    # Garantit que live_ranking.json contient div_confidence/div_flag/etc. dès le 1er appel
-    # (sinon les données brutes sont servies jusqu'au 1er cycle scheduler, ~5 min)
-    try:
-        from live_ranker import compute_live_ranking as _warm_ranking
-        logger.info("Démarrage : validation des données (validate_dividend sur 47 tickers)...")
-        _warm_ranking(trigger="startup")
-        logger.info("Démarrage : live_ranking.json validé et à jour.")
-    except Exception as _e:
-        logger.warning(f"Démarrage : validation échouée — données potentiellement brutes: {_e}")
+
+    # Validation au démarrage : lancée en thread daemon (non bloquant — décision
+    # Souleymane : ne doit plus retarder le démarrage du serveur, y compris sous gunicorn).
+    # Garantit que live_ranking.json contient div_confidence/div_flag/etc. dès que le
+    # thread termine (quelques secondes) ; jusque-là les données peuvent rester brutes,
+    # comme avant le 1er cycle scheduler (~5 min) si le thread n'a pas encore fini.
+    def _warm():
+        try:
+            from live_ranker import compute_live_ranking as _warm_ranking
+            logger.info("Démarrage : validation des données (validate_dividend sur 47 tickers)...")
+            _warm_ranking(trigger="startup")
+            logger.info("Démarrage : live_ranking.json validé et à jour.")
+        except Exception as _e:
+            logger.warning(f"Démarrage : validation échouée — données potentiellement brutes: {_e}")
+    threading.Thread(target=_warm, daemon=True).start()
+
     # Préchauffage du cache commodités en arrière-plan (évite 2.5s au premier appel)
     threading.Thread(target=fetch_commodity_prices, daemon=True).start()
+
+
+_init_app()
+
+
+if __name__ == "__main__":
+    PORT = int(os.environ.get("PORT", "5000"))
+    print("\n" + "="*50)
+    print(f"  BRVM Dashboard — http://localhost:{PORT}")
+    print("="*50 + "\n")
     app.run(host='0.0.0.0', port=PORT, debug=False)
 
