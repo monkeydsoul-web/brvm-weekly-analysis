@@ -98,7 +98,7 @@ async function renderPerfPage() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:8px">
         <div>
           <div class="ct">📈 Évolution des cours</div>
-          <p class="help-text">Base 100 depuis la première date disponible · survolez pour les valeurs · glissez pour zoomer · double-clic pour réinitialiser</p>
+          <p class="help-text">Base 100 depuis la première date disponible · survolez ou touchez pour les valeurs · glissez pour zoomer · double-clic pour réinitialiser</p>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="perf-period-btns">
           ${['6m','1an','3ans','5ans','Tout'].map(p=>`
@@ -434,12 +434,12 @@ function _attachPerfInteractivity(containerId) {
   const idxFromX = (x) => Math.max(0, Math.min(allDates.length - 1,
     Math.round((x - PAD.left) / CW * (allDates.length - 1))));
 
-  svg.addEventListener('mousemove', e => {
-    const x = svgX(e.clientX);
+  const updateAt = (clientX) => {
+    const x = svgX(clientX);
     if (x < PAD.left || x > PAD.left + CW) {
       if (ch) ch.setAttribute('opacity', '0');
       if (tt) tt.style.display = 'none';
-      return;
+      return null;
     }
     const idx = idxFromX(x);
     const date = allDates[idx];
@@ -466,6 +466,13 @@ function _attachPerfInteractivity(containerId) {
       }
     }
 
+    return x;
+  };
+
+  svg.addEventListener('mousemove', e => {
+    const x = updateAt(e.clientX);
+    if (x === null) return;
+
     if (isDragging && dragStartX !== null && zr) {
       const dx = x - dragStartX;
       if (dx > 0) { zr.setAttribute('x', dragStartX); zr.setAttribute('width', dx); }
@@ -479,6 +486,24 @@ function _attachPerfInteractivity(containerId) {
     if (tt) tt.style.display = 'none';
     if (!isDragging && zr) zr.setAttribute('opacity', '0');
   });
+
+  svg.addEventListener('touchstart', e => {
+    if (e.touches && e.touches[0]) updateAt(e.touches[0].clientX);
+  }, {passive: true});
+
+  svg.addEventListener('touchmove', e => {
+    if (e.touches && e.touches[0]) updateAt(e.touches[0].clientX);
+  }, {passive: true});
+
+  svg.addEventListener('touchend', () => {
+    if (ch) ch.setAttribute('opacity', '0');
+    if (tt) tt.style.display = 'none';
+  }, {passive: true});
+
+  svg.addEventListener('touchcancel', () => {
+    if (ch) ch.setAttribute('opacity', '0');
+    if (tt) tt.style.display = 'none';
+  }, {passive: true});
 
   svg.addEventListener('mousedown', e => {
     const x = svgX(e.clientX);
