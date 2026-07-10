@@ -39,6 +39,12 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
 
+@app.after_request
+def _noindex_guard(response):
+    if os.environ.get("BRVM_NOINDEX") == "1":
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
 from paths import DATA_DIR
 REPORTS_DIR = "reports"
 
