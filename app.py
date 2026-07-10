@@ -39,7 +39,7 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
 
-DATA_DIR = "data"
+from paths import DATA_DIR
 REPORTS_DIR = "reports"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -1356,7 +1356,7 @@ def api_analyses_ticker(ticker):
     """Analyse IA complète depuis analyses_summary.json pour un ticker."""
     ticker = ticker.upper()
     try:
-        path = os.path.join(os.path.dirname(__file__), "data", "analyses_summary.json")
+        path = os.path.join(DATA_DIR, "analyses_summary.json")
         if not os.path.exists(path):
             return jsonify({"error": "analyses_summary.json introuvable"}), 404
         with open(path) as f:
@@ -1402,7 +1402,7 @@ def api_calendar():
     except Exception:
         pass
     try:
-        ann_path = os.path.join(os.path.dirname(__file__), "data", "announcements.json")
+        ann_path = os.path.join(DATA_DIR, "announcements.json")
         if os.path.exists(ann_path):
             with open(ann_path) as f:
                 anns = json.load(f)
@@ -1506,7 +1506,7 @@ def api_rapport_pdf(ticker):
         import io
 
         # Récupérer les données du ticker
-        ranking_path = os.path.join(os.path.dirname(__file__), "data", "live_ranking.json")
+        ranking_path = os.path.join(DATA_DIR, "live_ranking.json")
         row = {}
         if os.path.exists(ranking_path):
             with open(ranking_path) as f:
@@ -1522,7 +1522,7 @@ def api_rapport_pdf(ticker):
         # Résumé IA si dispo
         ai_summary = ""
         ai_paths = [
-            os.path.join(os.path.dirname(__file__), "data", "analyses_summary.json"),
+            os.path.join(DATA_DIR, "analyses_summary.json"),
             os.path.join(os.path.dirname(__file__), "analyses_summary.json"),
         ]
         for p in ai_paths:
@@ -1694,7 +1694,7 @@ def _get_live_scores_list():
 
 
 def _get_price_history_dict():
-    ph_path = os.path.join(os.path.dirname(__file__), "data", "price_history.json")
+    ph_path = os.path.join(DATA_DIR, "price_history.json")
     with open(ph_path) as f:
         return json.load(f)
 
@@ -1743,7 +1743,7 @@ def api_prevision_backtest():
 
 @app.route("/api/prevision-accuracy")
 def api_prevision_accuracy():
-    acc_path = os.path.join(os.path.dirname(__file__), "data", "prevision_accuracy.json")
+    acc_path = os.path.join(DATA_DIR, "prevision_accuracy.json")
     if os.path.exists(acc_path):
         with open(acc_path) as f:
             return jsonify(json.load(f))

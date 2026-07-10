@@ -25,12 +25,13 @@ from bs4 import BeautifulSoup
 
 # ── Chemins ───────────────────────────────────────────────────────────────────
 BASE_DIR    = Path(__file__).parent.parent
-DATA_DIR    = BASE_DIR / "data"
+sys.path.insert(0, str(BASE_DIR))
+from paths import DATA_DIR
+DATA_DIR = Path(DATA_DIR)  # paths.py expose une str ; ce script compose des chemins en Path (/, .mkdir())
 OUTPUT_PATH = DATA_DIR / "brvm_news.json"
 LOG_DIR     = BASE_DIR / "logs"
 
 # ── Scoring de pertinence ─────────────────────────────────────────────────────
-sys.path.insert(0, str(BASE_DIR))
 try:
     from scripts.news_relevance import score_article, load_aliases
     _ALIASES = load_aliases()

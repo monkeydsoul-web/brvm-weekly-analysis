@@ -15,8 +15,8 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-CACHE_PATH = os.path.join(BASE_DIR, "data", "reports_cache.json")
+from paths import DATA_DIR
+CACHE_PATH = os.path.join(DATA_DIR, "reports_cache.json")
 
 HEADERS = {
     "User-Agent": (

@@ -15,9 +15,9 @@ from price_sanity import resolve_price, get_reference_prices
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-RANKING_PATH  = os.path.join(BASE_DIR, "data", "live_ranking.json")
-HISTORY_PATH  = os.path.join(BASE_DIR, "data", "ranking_history.json")
+from paths import DATA_DIR
+RANKING_PATH  = os.path.join(DATA_DIR, "live_ranking.json")
+HISTORY_PATH  = os.path.join(DATA_DIR, "ranking_history.json")
 
 # Verrou pour éviter les recalculs simultanés
 _lock = threading.Lock()
@@ -360,14 +360,14 @@ def compute_live_ranking(trigger="manual", force=False):
             from data_validator import validate_dividend
 
             # Charger les analyses PDF
-            summary_path = os.path.join(BASE_DIR, "data", "analyses_summary.json")
+            summary_path = os.path.join(DATA_DIR, "analyses_summary.json")
             pdf_summary  = {}
             if os.path.exists(summary_path):
                 with open(summary_path, encoding="utf-8") as f:
                     pdf_summary = json.load(f)
 
             # Charger les données BOC (pour la validation multi-source)
-            boc_path = os.path.join(BASE_DIR, "data", "boc_data.json")
+            boc_path = os.path.join(DATA_DIR, "boc_data.json")
             boc_data = {}
             if os.path.exists(boc_path):
                 try:

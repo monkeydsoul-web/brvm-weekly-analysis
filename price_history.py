@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
-HISTORY_FILE = "data/price_history.json"
+from paths import DATA_DIR
+HISTORY_FILE = os.path.join(DATA_DIR, "price_history.json")
 MIN_WEEKS_FOR_SIGNALS = 4   # Minimum de semaines pour calculer les signaux
 
 

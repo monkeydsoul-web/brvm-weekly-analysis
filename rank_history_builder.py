@@ -5,9 +5,9 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LIVE_RANKING_PATH = os.path.join(BASE_DIR, "data", "live_ranking.json")
-RANK_HISTORY_PATH = os.path.join(BASE_DIR, "data", "rank_history.json")
+from paths import DATA_DIR
+LIVE_RANKING_PATH = os.path.join(DATA_DIR, "live_ranking.json")
+RANK_HISTORY_PATH = os.path.join(DATA_DIR, "rank_history.json")
 
 
 def _load_rank_history():

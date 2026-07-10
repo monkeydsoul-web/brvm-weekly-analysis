@@ -24,7 +24,7 @@ import anthropic
 # ── Chemins ───────────────────────────────────────────────────────────────────
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data"
+DATA_DIR = pathlib.Path(os.environ.get("BRVM_DATA_DIR", str(ROOT / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
 LIVE_RANKING_PATH = DATA_DIR / "live_ranking.json"
 ANALYSES_SUMMARY_PATH = DATA_DIR / "analyses_summary.json"
 OUTPUT_PATH = DATA_DIR / "companies_stories.json"

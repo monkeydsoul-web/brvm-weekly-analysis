@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 import warnings
 warnings.filterwarnings('ignore')
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BOC_CACHE_PATH = os.path.join(BASE_DIR, 'data', 'boc_data.json')
+from paths import DATA_DIR
+BOC_CACHE_PATH = os.path.join(DATA_DIR, 'boc_data.json')
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'}
 logger = logging.getLogger(__name__)
 

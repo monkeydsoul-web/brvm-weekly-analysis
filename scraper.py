@@ -11,6 +11,7 @@ import os
 import time
 import logging
 from datetime import datetime
+from paths import DATA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +156,7 @@ def fetch_kwayisi_price(ticker: str) :
         return None
 
 
-def build_stock_dataset(use_cache: bool = False, cache_path: str = "data/prices_cache.json") -> pd.DataFrame:
+def build_stock_dataset(use_cache: bool = False, cache_path: str = os.path.join(DATA_DIR, "prices_cache.json")) -> pd.DataFrame:
     """
     Construit le dataset complet en combinant:
     - Cours live de brvm.org

@@ -25,7 +25,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-_HIST_PATH = Path(BASE_DIR) / "data" / "scheduler_history.json"
+from paths import DATA_DIR
+_HIST_PATH = Path(DATA_DIR) / "scheduler_history.json"
 logger = logging.getLogger(__name__)
 
 

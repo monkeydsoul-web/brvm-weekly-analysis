@@ -41,12 +41,14 @@ def resolve_price(live_price, ref_price, boc_last=None):
 
 import json as _json
 import time as _time
+import os as _os
+from paths import DATA_DIR
 
 _REF_CACHE = {"t": 0.0, "refs": {}}
 
 def load_reference_prices():
     try:
-        boc = _json.load(open('data/boc_data.json'))
+        boc = _json.load(open(_os.path.join(DATA_DIR, 'boc_data.json')))
     except Exception:
         boc = {}
     try:

@@ -9,13 +9,14 @@ Usage :
     python3 scripts/validate_price_history.py --ticker SNTS
 """
 
-import json, sys, argparse
+import json, sys, argparse, os
 from pathlib import Path
 from typing import Optional
 
 BASE_DIR  = Path(__file__).parent.parent
-HIST_PATH = BASE_DIR / "data" / "price_history_extended.json"
-LIVE_PATH = BASE_DIR / "data" / "live_cache.json"
+DATA_DIR  = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
+HIST_PATH = DATA_DIR / "price_history_extended.json"
+LIVE_PATH = DATA_DIR / "live_cache.json"
 
 
 def _live_prices() -> dict:

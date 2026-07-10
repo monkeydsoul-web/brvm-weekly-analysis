@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Optional
 
 BASE_DIR    = Path(__file__).parent.parent
-ALIASES_PATH = BASE_DIR / "data" / "ticker_aliases.json"
+DATA_DIR    = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — module importé par des scripts en subprocess isolé
+ALIASES_PATH = DATA_DIR / "ticker_aliases.json"
 
 TRUSTED_SOURCES = {
     "Sika Finance", "Dabafinance", "Financial Afrik",
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     sys.path.insert(0, str(BASE_DIR))
     aliases = load_aliases()
 
-    news_path = BASE_DIR / "data" / "brvm_news.json"
+    news_path = DATA_DIR / "brvm_news.json"
     if not news_path.exists():
         print("brvm_news.json introuvable")
         sys.exit(1)

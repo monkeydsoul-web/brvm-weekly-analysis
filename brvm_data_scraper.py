@@ -10,12 +10,12 @@ from bs4 import BeautifulSoup
 import warnings
 warnings.filterwarnings('ignore')
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from paths import DATA_DIR
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'}
 logger = logging.getLogger(__name__)
 
-SECTOR_INDICES_PATH = os.path.join(BASE_DIR, 'data', 'sector_indices.json')
-ANNOUNCEMENTS_PATH  = os.path.join(BASE_DIR, 'data', 'announcements.json')
+SECTOR_INDICES_PATH = os.path.join(DATA_DIR, 'sector_indices.json')
+ANNOUNCEMENTS_PATH  = os.path.join(DATA_DIR, 'announcements.json')
 
 # Map indices sectoriels -> secteur dashboard
 SECTOR_MAP = {

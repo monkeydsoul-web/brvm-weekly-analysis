@@ -11,8 +11,8 @@ from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-CACHE_PATH = os.path.join(BASE_DIR, "data", "external_dividends.json")
+from paths import DATA_DIR
+CACHE_PATH = os.path.join(DATA_DIR, "external_dividends.json")
 _BASE_URL  = "https://www.african-markets.com/fr/bourse/brvm/listed-companies/company?code="
 _UA        = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "

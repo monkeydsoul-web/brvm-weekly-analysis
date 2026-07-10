@@ -37,7 +37,7 @@ except ImportError:
 
 # ── Chemins ───────────────────────────────────────────────────────────────────
 BASE_DIR        = Path(__file__).parent.parent
-DATA_DIR        = BASE_DIR / "data"
+DATA_DIR        = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
 DOCS_DIR        = DATA_DIR / "brvm_docs"
 OUTPUT_PATH     = DATA_DIR / "brvm_announcements.json"
 CHECKPOINT_PATH = DATA_DIR / "brvm_news_checkpoint.json"

@@ -20,9 +20,10 @@ from typing import Optional
 urllib3.disable_warnings()
 
 BASE_DIR       = Path(__file__).parent.parent
-ANNONCES_PATH  = BASE_DIR / "data" / "brvm_announcements.json"
-SUMMARIES_PATH = BASE_DIR / "data" / "announcements_summaries.json"
-PDF_CACHE_DIR  = BASE_DIR / "data" / "announcement_pdfs"
+DATA_DIR       = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
+ANNONCES_PATH  = DATA_DIR / "brvm_announcements.json"
+SUMMARIES_PATH = DATA_DIR / "announcements_summaries.json"
+PDF_CACHE_DIR  = DATA_DIR / "announcement_pdfs"
 PDF_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}

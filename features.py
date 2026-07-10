@@ -16,7 +16,7 @@ from flask import jsonify, request, Response
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = "data"
+from paths import DATA_DIR
 PORTFOLIO_FILE = os.path.join(DATA_DIR, "portfolio.json")
 ALERTS_FILE    = os.path.join(DATA_DIR, "alerts.json")
 PREFS_FILE     = os.path.join(DATA_DIR, "preferences.json")

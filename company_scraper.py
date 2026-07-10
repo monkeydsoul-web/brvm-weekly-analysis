@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 import warnings
 warnings.filterwarnings('ignore')
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-NEWS_PATH = os.path.join(BASE_DIR, 'data', 'news_cache.json')
+from paths import DATA_DIR
+NEWS_PATH = os.path.join(DATA_DIR, 'news_cache.json')
 
 logger = logging.getLogger(__name__)
 

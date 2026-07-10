@@ -15,8 +15,8 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-CACHE_DIR   = os.path.join(BASE_DIR, "data", "pdf_analyses")
+from paths import DATA_DIR
+CACHE_DIR   = os.path.join(DATA_DIR, "pdf_analyses")
 CACHE_TTL   = 60 * 60 * 24 * 30  # 30 jours
 
 HEADERS = {

@@ -20,8 +20,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ── Chemins ────────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent.parent
-PDF_DIR  = BASE_DIR / "data" / "reports_pdf"
-OUT_FILE = BASE_DIR / "data" / "reports_full.json"
+DATA_DIR = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
+PDF_DIR  = DATA_DIR / "reports_pdf"
+OUT_FILE = DATA_DIR / "reports_full.json"
 LOG_DIR  = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 PDF_DIR.mkdir(parents=True, exist_ok=True)

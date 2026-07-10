@@ -14,8 +14,8 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-SUMMARY_PATH  = os.path.join(BASE_DIR, "data", "analyses_summary.json")
+from paths import DATA_DIR
+SUMMARY_PATH  = os.path.join(DATA_DIR, "analyses_summary.json")
 DELAY_BETWEEN = 2.0   # secondes entre chaque analyse (respect brvm.org)
 MAX_PER_TICKER = 2    # max rapports analysés par société
 

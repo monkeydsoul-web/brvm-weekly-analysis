@@ -25,7 +25,7 @@ import pdfplumber
 
 # ─── Chemins ───────────────────────────────────────────────────────────────────
 BASE_DIR       = Path(__file__).parent.parent
-DATA_DIR       = BASE_DIR / "data"
+DATA_DIR       = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
 LOG_DIR        = BASE_DIR / "logs"
 OUTPUT_PATH    = DATA_DIR / "price_history_extended.json"
 SUMMARY_PATH   = DATA_DIR / "price_history_extended_summary.txt"

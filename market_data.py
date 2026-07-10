@@ -9,8 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-CACHE_PATH = os.path.join(BASE_DIR, "data", "market_cache.json")
+from paths import DATA_DIR
+CACHE_PATH = os.path.join(DATA_DIR, "market_cache.json")
 HEADERS    = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 def clean(s):

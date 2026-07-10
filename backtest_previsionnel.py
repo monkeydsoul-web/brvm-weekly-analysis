@@ -8,7 +8,7 @@ import math
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+from paths import DATA_DIR
 
 
 # ── Loaders ───────────────────────────────────────────────────────────────────

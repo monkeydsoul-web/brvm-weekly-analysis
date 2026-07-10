@@ -3,8 +3,8 @@ import os
 
 from price_history_builder import load_history
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXTENDED_PATH = os.path.join(BASE_DIR, "data", "price_history_extended.json")
+from paths import DATA_DIR
+EXTENDED_PATH = os.path.join(DATA_DIR, "price_history_extended.json")
 
 
 def _load_extended():

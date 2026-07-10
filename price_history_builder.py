@@ -6,8 +6,8 @@ Construit et maintient data/price_history.json
 import json, os, logging
 from datetime import datetime, timedelta
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-HISTORY_PATH = os.path.join(BASE_DIR, "data", "price_history.json")
+from paths import DATA_DIR
+HISTORY_PATH = os.path.join(DATA_DIR, "price_history.json")
 
 logger = logging.getLogger(__name__)
 

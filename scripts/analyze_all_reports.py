@@ -20,12 +20,14 @@ import json, sys, argparse, hashlib, time, os
 from pathlib import Path
 
 BASE_DIR       = Path(__file__).parent.parent
-REPORTS_PATH   = BASE_DIR / "data" / "reports_full.json"
-LEGACY_PATH    = BASE_DIR / "data" / "reports_cache.json"
-CACHE_DIR      = BASE_DIR / "data" / "pdf_analyses"
-OUT_INDEX_PATH = BASE_DIR / "data" / "analyses_reports.json"
-
 sys.path.insert(0, str(BASE_DIR))
+from paths import DATA_DIR
+DATA_DIR       = Path(DATA_DIR)  # paths.py expose une str ; ce script compose des chemins en Path
+REPORTS_PATH   = DATA_DIR / "reports_full.json"
+LEGACY_PATH    = DATA_DIR / "reports_cache.json"
+CACHE_DIR      = DATA_DIR / "pdf_analyses"
+OUT_INDEX_PATH = DATA_DIR / "analyses_reports.json"
+
 from pdf_analyzer import analyze_report, _cache_path
 
 
