@@ -4117,8 +4117,12 @@ function _syncMktHeatmap() {
 function switchTab(pageId, tabId, btn) {
   const page = document.getElementById('page-' + pageId);
   if (!page) return;
-  page.querySelectorAll('.tab-content').forEach(t => t.classList.remove('on'));
-  page.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  page.querySelectorAll('.tab-content').forEach(t => {
+    if (t.closest('[id^="page-"]') === page) t.classList.remove('on');
+  });
+  page.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.closest('[id^="page-"]') === page) b.classList.remove('on');
+  });
   const tabEl = document.getElementById(pageId + '-tab-' + tabId);
   if (tabEl) tabEl.classList.add('on');
   if (btn) btn.classList.add('on');
