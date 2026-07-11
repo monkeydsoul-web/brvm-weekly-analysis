@@ -2458,14 +2458,14 @@ async function init(){
   _initEcoModeUI();
   document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
   try{
-    const[s,c,m,f,tp]=await Promise.all([
+    const[s,c,m,tp]=await Promise.all([
       _cachedFetch('/api/scores'),
       _cachedFetch('/api/commodities').catch(()=>({})),
       _cachedFetch('/api/macro').catch(()=>({})),
-      fetch('/api/favorites').then(r=>r.json()).catch(()=>[]),
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
-    scores=s;window.scores=s;comms=c;favorites=f.map(x=>x.ticker);topPerf=tp;
+    scores=s;window.scores=s;comms=c;topPerf=tp;
+    try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
     window._priceHistory={};
     window._extSparklines={};
@@ -2775,8 +2775,10 @@ function filterSidebar(q){
 }
 
 // ── Favorites ──────────────────────────────────────────────────────────────
-async function toggleFav(ticker){
-  favorites=await fetch('/api/favorites/'+ticker,{method:'POST'}).then(r=>r.json());
+function toggleFav(ticker){
+  if(favorites.includes(ticker)) favorites=favorites.filter(t=>t!==ticker);
+  else favorites=[...favorites,ticker];
+  try{localStorage.setItem('brvm_favorites',JSON.stringify(favorites));}catch{}
   loadSidebar();
   document.querySelectorAll('.star').forEach(b=>{
     if(b.textContent==='★') b.classList.toggle('fav',favorites.includes(b.closest('[onclick]')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||''));
