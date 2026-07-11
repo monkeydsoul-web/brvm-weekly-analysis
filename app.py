@@ -9,7 +9,7 @@ import os
 import json
 import logging
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Flask, jsonify, request, send_from_directory
 try:
     from auto_scheduler import start_scheduler as start_auto_scheduler, get_scheduler_status, get_scheduler
@@ -159,16 +159,34 @@ COMMODITY_COLORS = {
 }
 
 
-_COMM_CACHE = {"data": {}, "ts": 0.0}
-_COMM_TTL   = 300  # 5 minutes
+_COMM_CACHE = {"data": {}, "ts": 0.0, "fetched_at": None}
+_COMM_REFRESH_INTERVAL = 900   # 15 minutes entre 2 refresh réussis
+_COMM_BACKOFF_MAX      = 3600  # 60 minutes plafond en cas d'échecs répétés (429 etc.)
+_COMM_FAIL_COUNT       = 0
 
-def fetch_commodity_prices():
-    """Récupère les prix des commodités (cache 5 min, fetches parallèles, timeout 3s/ticker)."""
-    import time
-    now = time.time()
-    if _COMM_CACHE["data"] and now - _COMM_CACHE["ts"] < _COMM_TTL:
-        return _COMM_CACHE["data"]
+def _comm_cache_path():
+    return os.path.join(DATA_DIR, "commodities_cache.json")
 
+def _load_comm_cache_disk():
+    path = _comm_cache_path()
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return None
+
+def _save_comm_cache_disk(data, fetched_at):
+    try:
+        with open(_comm_cache_path(), "w", encoding="utf-8") as f:
+            json.dump({"data": data, "fetched_at": fetched_at}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.warning(f"[commodities] écriture cache disque échouée: {e}")
+
+def _fetch_commodities_live():
+    """Fetch réel des 9 commodités via yfinance — timeout court par ticker, jamais
+    appelé depuis un handler de requête (uniquement depuis le thread de fond)."""
     commodities = {
         "Cacao":        {"symbol": "CC=F",  "unit": "USD/tonne"},
         "Café":         {"symbol": "KC=F",  "unit": "USD/livre"},
@@ -228,13 +246,46 @@ def fetch_commodity_prices():
             "Gaz naturel":   {"price": 3.85, "change_pct": +2.3, "unit": "USD/MMBtu"},
         }
 
-    if prices:
-        _COMM_CACHE["data"] = prices
-        _COMM_CACHE["ts"]   = now
-    elif _COMM_CACHE["data"]:
-        return _COMM_CACHE["data"]
-
     return prices
+
+def _refresh_commodities_loop():
+    """Thread de fond démarré depuis _init_app() : charge le disque immédiatement
+    (préchauffage instantané), puis rafraîchit périodiquement (15 min, backoff jusqu'à
+    60 min en cas d'échec/429). Jamais appelé par un handler de requête."""
+    global _COMM_FAIL_COUNT
+    import time
+
+    disk = _load_comm_cache_disk()
+    if disk and disk.get("data"):
+        _COMM_CACHE["data"] = disk["data"]
+        _COMM_CACHE["ts"] = time.time()
+        _COMM_CACHE["fetched_at"] = disk.get("fetched_at")
+
+    while True:
+        prices = _fetch_commodities_live()
+        now_iso = datetime.now(timezone.utc).isoformat()
+        if prices:
+            _COMM_CACHE["data"] = prices
+            _COMM_CACHE["ts"] = time.time()
+            _COMM_CACHE["fetched_at"] = now_iso
+            _save_comm_cache_disk(prices, now_iso)
+            _COMM_FAIL_COUNT = 0
+            sleep_s = _COMM_REFRESH_INTERVAL
+        else:
+            _COMM_FAIL_COUNT += 1
+            sleep_s = min(_COMM_REFRESH_INTERVAL * (2 ** _COMM_FAIL_COUNT), _COMM_BACKOFF_MAX)
+            logger.warning(f"[commodities] fetch vide (tentative {_COMM_FAIL_COUNT}) — retry dans {sleep_s}s, données existantes conservées")
+        time.sleep(sleep_s)
+
+def get_commodity_prices():
+    """Accès non-bloquant, zéro I/O réseau — sert l'état en mémoire (peuplé par le
+    thread de fond), fetched_at injecté dans chaque entrée (forme racine inchangée
+    pour renderComm côté client)."""
+    data = _COMM_CACHE.get("data") or {}
+    fetched_at = _COMM_CACHE.get("fetched_at")
+    if not fetched_at:
+        return data
+    return {name: {**v, "fetched_at": fetched_at} for name, v in data.items()}
 
 
 # ── Routes API ────────────────────────────────────────────────────────────────
@@ -290,7 +341,7 @@ def api_stock(ticker):
 
     # Impact commodités
     commodity_info = COMMODITY_IMPACT.get(ticker.upper(), {"commodities": [], "impact": "Non évalué"})
-    commodity_prices = fetch_commodity_prices()
+    commodity_prices = get_commodity_prices()
 
     relevant_commodities = {}
     for c in commodity_info.get("commodities", []):
@@ -340,7 +391,7 @@ def api_top_performers():
 
 @app.route("/api/commodities")
 def api_commodities():
-    prices = fetch_commodity_prices()
+    prices = get_commodity_prices()
     return jsonify(prices)
 
 
@@ -2022,8 +2073,8 @@ def _init_app():
             logger.warning(f"Démarrage : validation échouée — données potentiellement brutes: {_e}")
     threading.Thread(target=_warm, daemon=True).start()
 
-    # Préchauffage du cache commodités en arrière-plan (évite 2.5s au premier appel)
-    threading.Thread(target=fetch_commodity_prices, daemon=True).start()
+    # Cache commodités : charge le disque puis rafraîchit en boucle (15 min, backoff sur échec/429)
+    threading.Thread(target=_refresh_commodities_loop, daemon=True).start()
 
 
 _init_app()
