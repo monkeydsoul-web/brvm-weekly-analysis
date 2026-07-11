@@ -908,7 +908,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="ct">Alertes actives</div>
-      <button class="btn btn-o" onclick="checkAlertsWithPrices()" style="font-size:10px;padding:3px 8px">🔄 Vérifier maintenant</button>
+      <button class="btn btn-o" onclick="verifierAlertesMaintenant()" style="font-size:10px;padding:3px 8px">🔄 Vérifier maintenant</button>
     </div>
     <div id="alertsList"><p style="color:var(--t2);font-size:12px">Aucune alerte configurée.</p></div>
   </div>
@@ -3397,6 +3397,14 @@ function createAlert(){
   setAlert(ticker,threshold,direction);
   renderAlertsPanel();
   document.getElementById('addAlertForm').style.display='none';
+}
+
+async function verifierAlertesMaintenant(){
+  try{
+    const data=await fetch('/api/live').then(r=>r.json());
+    checkAlertsWithPrices(data.prices);
+  }catch(e){}
+  renderAlertsPanel();
 }
 
 
