@@ -1271,7 +1271,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- backward-compat stubs — contenu déplacé dans page-marche -->
 <div class="page" id="page-market"></div>
 
-<div class="page" id="page-macro"></div>
 <div class="page" id="page-comm"></div>
 
 
@@ -2007,7 +2006,6 @@ let _gsIdx = -1;
 const _PAGES = [
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
   {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
-  {id:'income',   icon:'💰', label:'Revenus',                  desc:'Dividendes, calendrier, simulateur revenus passifs'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
   {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
@@ -3549,7 +3547,7 @@ function _shareStockText(ticker){
     `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% | ':''}`+
     `${s.roe?'ROE : '+s.roe+'%':''}\n`+
     `Verdict IA : ${s.pdf_verdict||'—'}\n`+
-    `📈 Analysé sur BRVM Dashboard`;
+    `📈 Analysé sur BRVM Analyzer`;
   navigator.clipboard.writeText(text).catch(()=>prompt('Copiez ce texte :',text));
 }
 
@@ -5532,7 +5530,7 @@ document.getElementById('cmp-modal').addEventListener('click', function(e){
 <div id="changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:480px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h3 style="font-size:16px;font-weight:700">📋 Changelog BRVM Dashboard</h3>
+      <h3 style="font-size:16px;font-weight:700">📋 Changelog BRVM Analyzer</h3>
       <button onclick="document.getElementById('changelog-modal').style.display='none'" class="btn btn-o" style="padding:4px 12px;font-size:12px">✕</button>
     </div>
     <div style="font-size:12px;color:var(--t1);line-height:1.8">
@@ -5704,10 +5702,6 @@ function _setMode(m) { m = 'beginner';
   if (typeof nav === 'function') nav(page);
 }
 window._setMode = _setMode;
-window.toggleBeginnerMode = function() {
-  var cur = document.documentElement.getAttribute('data-mode') || 'expert';
-  _setMode(cur === 'beginner' ? 'expert' : 'beginner');
-};
 
 // Init data-mode au chargement
 (function(){
@@ -5763,7 +5757,7 @@ function _renderCmdK(q) {
     {id:'signals',label:'Signaux',icon:'📡'},
     {id:'valuation',label:'Valorisation',icon:'💰'},
     {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
-    {id:'income',label:'Revenus',icon:'💵'},{id:'alerts',label:'Alertes',icon:'🔔'},
+    {id:'alerts',label:'Alertes',icon:'🔔'},
     {id:'glossaire',label:'Glossaire',icon:'📚'},{id:'settings',label:'Paramètres',icon:'⚙️'}
   ].filter(p => !lq || p.label.toLowerCase().includes(lq) || p.id.toLowerCase().includes(lq)).slice(0,5);
   // Termes
@@ -5958,20 +5952,6 @@ gSpinShow = function() {
     const m = document.getElementById('onboarding-modal');
     if (m) { m.style.display = 'flex'; }
   }
-  function toggleBeginnerMode() {
-    const on = localStorage.getItem('beginner_mode') === '1';
-    const lbl = document.getElementById('beginner-label');
-    if (on) {
-      localStorage.removeItem('beginner_mode');
-      if (lbl) lbl.textContent = 'Mode débutant : OFF';
-      document.querySelectorAll('details').forEach(el => el.removeAttribute('open'));
-    } else {
-      localStorage.setItem('beginner_mode', '1');
-      if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';
-      document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
-    }
-  }
-  window.toggleBeginnerMode = toggleBeginnerMode;
   if (localStorage.getItem('beginner_mode') === '1') {
     const lbl = document.getElementById('beginner-label');
     if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';

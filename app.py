@@ -1,5 +1,5 @@
 """
-BRVM Dashboard — Serveur Flask local
+BRVM Analyzer — Serveur Flask local
 API backend pour l'application interactive Mac
 Lance avec: python3 app.py
 Ouvre: http://localhost:5000
@@ -134,30 +134,6 @@ COMMODITY_IMPACT = {
     "ECOC":  {"commodities": ["Cacao", "Pétrole"], "impact": "Financement agro-industrie et énergie"},
     "ETIT":  {"commodities": ["Pétrole", "Or", "Cacao"], "impact": "Pan-africain — exposé à toutes les matières"},
 }
-
-COMMODITY_COLORS = {
-    "Cacao":             "#5D3A1A",
-    "Café":              "#8B4513",
-    "Huile de palme":    "#FF8C00",
-    "Caoutchouc":        "#2E8B57",
-    "Pétrole brut":      "#1C1C1C",
-    "Pétrole":           "#333333",
-    "Or":                "#DAA520",
-    "Coton":             "#87CEEB",
-    "Sucre":             "#FFB6C1",
-    "Blé":               "#F5DEB3",
-    "Gaz naturel":       "#87CEEB",
-    "Bitume":            "#696969",
-    "Polypropylène":     "#9370DB",
-    "Soja":              "#6B8E23",
-    "Tabac brut":        "#A0522D",
-    "Lait":              "#FFFACD",
-    "Orge":              "#DEB887",
-    "Houblon":           "#9ACD32",
-    "Alimentation":      "#FF6347",
-    "Chlore":            "#20B2AA",
-}
-
 
 _COMM_CACHE = {"data": {}, "ts": 0.0, "fetched_at": None}
 _COMM_REFRESH_INTERVAL = 900   # 15 minutes entre 2 refresh réussis
@@ -1628,7 +1604,7 @@ def api_rapport_pdf(ticker):
         # En-tête
         story.append(Paragraph(f"📈 Rapport BRVM — {ticker.upper()}", h1))
         story.append(Paragraph(row.get("name", ticker.upper()), ParagraphStyle("sub", parent=styles["Normal"], fontSize=12, textColor=colors.HexColor("#64748B"))))
-        story.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} — Source : BRVM Dashboard", small))
+        story.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} — Source : BRVM Analyzer", small))
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0"), spaceAfter=10))
 
         # Score + Cours
@@ -2095,7 +2071,7 @@ _init_app()
 if __name__ == "__main__":
     PORT = int(os.environ.get("PORT", "5000"))
     print("\n" + "="*50)
-    print(f"  BRVM Dashboard — http://localhost:{PORT}")
+    print(f"  BRVM Analyzer — http://localhost:{PORT}")
     print("="*50 + "\n")
     app.run(host='0.0.0.0', port=PORT, debug=False)
 
