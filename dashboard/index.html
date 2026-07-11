@@ -2466,6 +2466,7 @@ async function init(){
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
+    if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
     loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
     window._priceHistory={};
     window._extSparklines={};
