@@ -908,7 +908,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="ct">Alertes actives</div>
-      <button class="btn btn-o" onclick="checkAlerts()" style="font-size:10px;padding:3px 8px">🔄 Vérifier maintenant</button>
+      <button class="btn btn-o" onclick="checkAlertsWithPrices()" style="font-size:10px;padding:3px 8px">🔄 Vérifier maintenant</button>
     </div>
     <div id="alertsList"><p style="color:var(--t2);font-size:12px">Aucune alerte configurée.</p></div>
   </div>
@@ -3389,20 +3389,15 @@ function testAlertNow(){
   }
 }
 
-async function createAlert(){
+function createAlert(){
   const ticker=document.getElementById('alertTicker').value;
-  const type=document.getElementById('alertType').value;
   const threshold=parseFloat(document.getElementById('alertThreshold').value);
   const direction=document.getElementById('alertDir').value;
   if(!ticker||!threshold)return;
-  await fetch('/api/alerts',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ticker,type,threshold,direction})});
+  setAlert(ticker,threshold,direction);
+  renderAlertsPanel();
   document.getElementById('addAlertForm').style.display='none';
-  if(typeof loadAlerts==='function') loadAlerts();
-  if(typeof loadAlertsLocal==='function') loadAlertsLocal();
 }
-
-// loadAlerts/checkAlerts/deleteAlert gérées par alerts.js
 
 
 // ── Commodités ─────────────────────────────────────────────────────────────
