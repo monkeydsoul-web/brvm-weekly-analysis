@@ -2408,6 +2408,7 @@ let _ecoMode = localStorage.getItem(_LS_ECO) === '1';
 
 async function _cachedFetch(url, ttl = _CACHE_TTL) {
   const key = 'brvm_ss_' + url;
+  let staleData = null, staleTs = null;
   try {
     const raw = sessionStorage.getItem(key);
     if (raw) {
@@ -2416,12 +2417,25 @@ async function _cachedFetch(url, ttl = _CACHE_TTL) {
         _updateFreshness(ts);
         return data;
       }
+      staleData = data; staleTs = ts;
     }
   } catch {}
-  const data = await fetch(url).then(r => r.json());
-  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
-  _updateFreshness(Date.now());
-  return data;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const data = await fetch(url, { signal: controller.signal }).then(r => r.json());
+    try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+    _updateFreshness(Date.now());
+    return data;
+  } catch (e) {
+    if (staleData !== null) {
+      _updateFreshness(staleTs);
+      return staleData;
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function _updateFreshness(ts) {
