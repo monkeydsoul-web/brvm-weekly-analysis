@@ -172,15 +172,23 @@ def _load_comm_cache_disk():
     if os.path.exists(path):
         try:
             with open(path, encoding="utf-8") as f:
-                return json.load(f)
+                raw = json.load(f)
+            data = raw.get("data") or {}
+            root_fetched_at = raw.get("fetched_at")
+            for v in data.values():
+                if not v.get("fetched_at"):
+                    v["fetched_at"] = root_fetched_at
+            raw["data"] = data
+            return raw
         except Exception:
             pass
     return None
 
 def _save_comm_cache_disk(data, fetched_at):
     try:
+        data_out = {name: {**v, "fetched_at": v.get("fetched_at") or fetched_at} for name, v in data.items()}
         with open(_comm_cache_path(), "w", encoding="utf-8") as f:
-            json.dump({"data": data, "fetched_at": fetched_at}, f, ensure_ascii=False, indent=2)
+            json.dump({"data": data_out, "fetched_at": fetched_at}, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.warning(f"[commodities] écriture cache disque échouée: {e}")
 
@@ -265,10 +273,14 @@ def _refresh_commodities_loop():
         prices = _fetch_commodities_live()
         now_iso = datetime.now(timezone.utc).isoformat()
         if prices:
-            _COMM_CACHE["data"] = prices
+            for v in prices.values():
+                v["fetched_at"] = now_iso
+            merged = dict(_COMM_CACHE.get("data") or {})
+            merged.update(prices)  # nouvelles écrasent leur clé, absentes conservées avec leur fetched_at d'origine
+            _COMM_CACHE["data"] = merged
             _COMM_CACHE["ts"] = time.time()
             _COMM_CACHE["fetched_at"] = now_iso
-            _save_comm_cache_disk(prices, now_iso)
+            _save_comm_cache_disk(merged, now_iso)
             _COMM_FAIL_COUNT = 0
             sleep_s = _COMM_REFRESH_INTERVAL
         else:
@@ -279,13 +291,13 @@ def _refresh_commodities_loop():
 
 def get_commodity_prices():
     """Accès non-bloquant, zéro I/O réseau — sert l'état en mémoire (peuplé par le
-    thread de fond), fetched_at injecté dans chaque entrée (forme racine inchangée
-    pour renderComm côté client)."""
+    thread de fond), fetched_at propre à chaque entrée (fallback sur le fetched_at
+    racine si absent) — forme racine de la réponse inchangée pour renderComm côté client."""
     data = _COMM_CACHE.get("data") or {}
-    fetched_at = _COMM_CACHE.get("fetched_at")
-    if not fetched_at:
-        return data
-    return {name: {**v, "fetched_at": fetched_at} for name, v in data.items()}
+    root_fetched_at = _COMM_CACHE.get("fetched_at")
+    if not data:
+        return {}
+    return {name: {**v, "fetched_at": v.get("fetched_at") or root_fetched_at} for name, v in data.items()}
 
 
 # ── Routes API ────────────────────────────────────────────────────────────────
