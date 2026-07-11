@@ -17,11 +17,6 @@ from flask import jsonify, request, Response
 logger = logging.getLogger(__name__)
 
 from paths import DATA_DIR
-PORTFOLIO_FILE = os.path.join(DATA_DIR, "portfolio.json")
-ALERTS_FILE    = os.path.join(DATA_DIR, "alerts.json")
-PREFS_FILE     = os.path.join(DATA_DIR, "preferences.json")
-FAVORITES_FILE = os.path.join(DATA_DIR, "favorites.json")
-TRANSACTIONS_FILE = os.path.join(DATA_DIR, "transactions.json")
 
 # ── Default score weights ──────────────────────────────────────────────────
 DEFAULT_WEIGHTS = {
@@ -85,122 +80,6 @@ def apply_custom_weights(scores: list, weights: dict) -> list:
     result.sort(key=lambda x: x["composite_custom"], reverse=True)
     for i,r in enumerate(result): r["custom_rank"] = i+1
     return result
-
-# ── Portfolio ──────────────────────────────────────────────────────────────
-def get_portfolio():
-    return _load(PORTFOLIO_FILE, {})
-
-def update_portfolio(ticker: str, shares: float, avg_price: float):
-    p = get_portfolio()
-    if shares <= 0:
-        p.pop(ticker, None)
-    else:
-        p[ticker] = {"shares": shares, "avg_price": avg_price, "added": datetime.now().isoformat()}
-    _save(PORTFOLIO_FILE, p)
-    return p
-
-def get_portfolio_summary():
-    p = get_portfolio()
-    if not p: return {"positions":[], "total_value":0, "total_cost":0, "total_gain":0, "total_gain_pct":0, "annual_div":0}
-    scores = {s["ticker"]:s for s in _load_scores()}
-    positions, total_value, total_cost, annual_div = [], 0, 0, 0
-    for ticker, pos in p.items():
-        s = scores.get(ticker, {})
-        price = s.get("price") or pos["avg_price"]
-        shares = pos["shares"]
-        cost = shares * pos["avg_price"]
-        value = shares * price
-        gain = value - cost
-        gain_pct = (gain/cost*100) if cost else 0
-        div_income = shares * (s.get("div_per_share") or 0)
-        total_value += value; total_cost += cost; annual_div += div_income
-        positions.append({
-            "ticker": ticker, "name": s.get("name",""), "sector": s.get("sector",""),
-            "shares": shares, "avg_price": pos["avg_price"], "current_price": price,
-            "cost": round(cost), "value": round(value),
-            "gain": round(gain), "gain_pct": round(gain_pct,1),
-            "div_yield": s.get("div_yield",0), "annual_div": round(div_income),
-            "score": s.get("composite_adj",0), "weight_pct": 0,
-        })
-    positions.sort(key=lambda x: x["value"], reverse=True)
-    if total_value:
-        for pos in positions: pos["weight_pct"] = round(pos["value"]/total_value*100,1)
-    total_gain = total_value - total_cost
-    return {
-        "positions": positions,
-        "total_value": round(total_value), "total_cost": round(total_cost),
-        "total_gain": round(total_gain),
-        "total_gain_pct": round((total_gain/total_cost*100) if total_cost else 0, 1),
-        "annual_div": round(annual_div),
-        "div_yield_on_cost": round((annual_div/total_cost*100) if total_cost else 0, 2),
-    }
-
-# ── Transactions ───────────────────────────────────────────────────────────
-def add_transaction(ticker, action, shares, price, date=None):
-    t = _load(TRANSACTIONS_FILE, [])
-    t.append({"ticker":ticker,"action":action,"shares":shares,"price":price,
-               "date": date or datetime.now().strftime("%Y-%m-%d"),
-               "total": round(shares*price)})
-    _save(TRANSACTIONS_FILE, t)
-    # Update portfolio
-    p = get_portfolio()
-    existing = p.get(ticker, {"shares":0,"avg_price":price})
-    if action == "buy":
-        total_shares = existing["shares"] + shares
-        total_cost = existing["shares"]*existing["avg_price"] + shares*price
-        p[ticker] = {"shares":total_shares, "avg_price":round(total_cost/total_shares,0), "added":datetime.now().isoformat()}
-    elif action == "sell":
-        new_shares = existing["shares"] - shares
-        if new_shares <= 0: p.pop(ticker, None)
-        else: p[ticker] = {"shares":new_shares, "avg_price":existing["avg_price"], "added":existing.get("added","")}
-    _save(PORTFOLIO_FILE, p)
-    return t
-
-# ── Alerts ─────────────────────────────────────────────────────────────────
-def get_alerts():
-    return _load(ALERTS_FILE, [])
-
-def add_alert(ticker, alert_type, threshold, direction="above"):
-    alerts = get_alerts()
-    alert = {"id": len(alerts)+1, "ticker":ticker, "type":alert_type,
-              "threshold":threshold, "direction":direction,
-              "active":True, "created":datetime.now().isoformat(), "triggered":None}
-    alerts.append(alert)
-    _save(ALERTS_FILE, alerts)
-    return alert
-
-def check_alerts():
-    alerts = get_alerts()
-    scores = {s["ticker"]:s for s in _load_scores()}
-    triggered = []
-    for alert in alerts:
-        if not alert.get("active"): continue
-        s = scores.get(alert["ticker"], {})
-        val = s.get("price") if alert["type"]=="price" else s.get("composite_adj",0)
-        if val is None: continue
-        hit = (alert["direction"]=="above" and val >= alert["threshold"]) or \
-              (alert["direction"]=="below" and val <= alert["threshold"])
-        if hit:
-            alert["triggered"] = datetime.now().isoformat()
-            alert["active"] = False
-            triggered.append({**alert, "current_value": val})
-    _save(ALERTS_FILE, alerts)
-    return triggered
-
-def delete_alert(alert_id):
-    alerts = [a for a in get_alerts() if a["id"] != alert_id]
-    _save(ALERTS_FILE, alerts)
-
-# ── Favorites ──────────────────────────────────────────────────────────────
-def get_favorites():
-    return _load(FAVORITES_FILE, [])
-
-def toggle_favorite(ticker):
-    favs = get_favorites()
-    if ticker in favs: favs.remove(ticker)
-    else: favs.append(ticker)
-    _save(FAVORITES_FILE, favs)
-    return favs
 
 # ── Dividend simulator ─────────────────────────────────────────────────────
 def simulate_dividends(investment_xof: float, years: int = 5, reinvest: bool = True) -> dict:
@@ -351,59 +230,6 @@ def register_routes(app):
     @app.route("/api/profiles")
     def api_profiles():
         return jsonify(PROFILES)
-
-    @app.route("/api/portfolio", methods=["GET"])
-    def api_portfolio_get():
-        return jsonify(get_portfolio_summary())
-
-    @app.route("/api/portfolio", methods=["POST"])
-    def api_portfolio_post():
-        d = request.json or {}
-        update_portfolio(d["ticker"], float(d["shares"]), float(d["avg_price"]))
-        return jsonify(get_portfolio_summary())
-
-    @app.route("/api/portfolio/<ticker>", methods=["DELETE"])
-    def api_portfolio_delete(ticker):
-        update_portfolio(ticker, 0, 0)
-        return jsonify(get_portfolio_summary())
-
-    @app.route("/api/transactions", methods=["GET"])
-    def api_transactions_get():
-        return jsonify(_load(TRANSACTIONS_FILE, []))
-
-    @app.route("/api/transactions", methods=["POST"])
-    def api_transactions_post():
-        d = request.json or {}
-        t = add_transaction(d["ticker"], d["action"], float(d["shares"]), float(d["price"]), d.get("date"))
-        return jsonify({"transactions": t, "portfolio": get_portfolio_summary()})
-
-    @app.route("/api/favorites", methods=["GET"])
-    def api_favorites_get():
-        favs = get_favorites()
-        scores = {s["ticker"]:s for s in _load_scores()}
-        return jsonify([scores[f] for f in favs if f in scores])
-
-    @app.route("/api/favorites/<ticker>", methods=["POST"])
-    def api_favorites_toggle(ticker):
-        return jsonify(toggle_favorite(ticker))
-
-    @app.route("/api/alerts", methods=["GET"])
-    def api_alerts_get():
-        return jsonify(get_alerts())
-
-    @app.route("/api/alerts", methods=["POST"])
-    def api_alerts_post():
-        d = request.json or {}
-        return jsonify(add_alert(d["ticker"], d.get("type","price"), float(d["threshold"]), d.get("direction","above")))
-
-    @app.route("/api/alerts/<int:alert_id>", methods=["DELETE"])
-    def api_alerts_delete(alert_id):
-        delete_alert(alert_id)
-        return jsonify({"ok": True})
-
-    @app.route("/api/alerts/check")
-    def api_alerts_check():
-        return jsonify(check_alerts())
 
     @app.route("/api/simulate/dividends")
     def api_sim_div():
