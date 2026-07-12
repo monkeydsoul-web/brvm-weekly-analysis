@@ -2183,10 +2183,16 @@ _applyTheme();
 // ── Navigation ─────────────────────────────────────────────────────────────
 function nav(id){
   if(id==='optim')id='screener';
+  const pg = document.getElementById('page-'+id);
+  if (!pg) {
+    console.warn('nav: cible inconnue', id);
+    if (id === 'rank') return;
+    nav('rank');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  const pg = document.getElementById('page-'+id);
-  if (pg) pg.classList.add('on');
+  pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')});
   document.querySelector('.main').scrollTop=0;
   if(typeof _currentPage!=='undefined') _currentPage=id;
