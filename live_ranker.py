@@ -46,6 +46,22 @@ def _is_div_date_recent(date_str: str, max_years: int = 3) -> bool:
     return False
 
 
+USD_XOF = 575.0  # Taux USD→XOF approx. au 2026-07-13 (FCFA arrimé EUR ; à rafraîchir au rituel macro trimestriel)
+
+def _convert_pdf_div(ticker, value, unite):
+    """Convertit un dividende PDF selon son unité déclarée (analyses_summary.json).
+    None si unité inconnue — traité comme donnée absente en aval."""
+    if value is None:
+        return None
+    u = (unite or "").strip().upper()
+    if u in ("", "FCFA", "XOF"):
+        return value
+    if u == "USD":
+        return value * USD_XOF
+    logger.warning("dividende %s: unité inconnue '%s' — valeur ignorée", ticker, unite)
+    return None
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Construction du row fondamental enrichi
 # ─────────────────────────────────────────────────────────────────────────────
@@ -170,6 +186,8 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
         # Dividende par action depuis PDF → div_yield recalculé
         # div_pdf=0 signifie "pas de dividende récurrent" (ex: HAO exceptionnel) → efface la valeur
         div_pdf = kv("dividende_par_action")
+        div_unite = (kpis.get("dividende_par_action") or {}).get("unite")
+        div_pdf = _convert_pdf_div(ticker, div_pdf, div_unite)
         if div_pdf is not None:
             if div_pdf > 0:
                 row["div_per_share"] = div_pdf
@@ -427,7 +445,9 @@ def compute_live_ranking(trigger="manual", force=False):
                     _boc_e    = boc_data.get(ticker, {})
                     _boc_div  = _boc_e.get("div_net") if _boc_e else None
                     _pdf_kpis = ((pdf_analysis or {}).get("kpis") or {}) if pdf_analysis else {}
-                    _pdf_raw  = (_pdf_kpis.get("dividende_par_action") or {}).get("valeur")
+                    _pdf_raw   = (_pdf_kpis.get("dividende_par_action") or {}).get("valeur")
+                    _pdf_unite = (_pdf_kpis.get("dividende_par_action") or {}).get("unite")
+                    _pdf_raw   = _convert_pdf_div(ticker, _pdf_raw, _pdf_unite)
                     _pdf_div  = float(_pdf_raw) if (_pdf_raw is not None and _pdf_raw > 0) else None
                     _hist_div = base_row.get("div_hist")
                     _price    = row.get("price") or 0
