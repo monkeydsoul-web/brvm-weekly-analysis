@@ -165,12 +165,15 @@ def main():
         sys.exit(1)
 
     if pending:
-        try:
-            input(f"⚠️  Continuer avec {len(pending)} analyses (~${est_cost:.2f}) ? "
-                  f"[Enter pour confirmer / Ctrl-C pour annuler] ")
-        except KeyboardInterrupt:
-            print("\nAnnulé.")
-            sys.exit(0)
+        if sys.stdin.isatty():
+            try:
+                input(f"⚠️  Continuer avec {len(pending)} analyses (~${est_cost:.2f}) ? "
+                      f"[Enter pour confirmer / Ctrl-C pour annuler] ")
+            except KeyboardInterrupt:
+                print("\nAnnulé.")
+                sys.exit(0)
+        else:
+            print(f"  (mode non-interactif — confirmation automatique, {len(pending)} analyses)")
 
     # Compteurs
     done = skipped = errors = 0

@@ -180,17 +180,19 @@ def job_reports_full_scrape():
 
 def job_reports_analyze():
     """Analyse IA des rapports (lundi 2h)."""
-    try:
-        import subprocess, sys
-        script = os.path.join(BASE_DIR, "scripts", "analyze_all_reports.py")
-        result = subprocess.run(
-            [sys.executable, script, "--max", "10"],
-            capture_output=True, text=True, timeout=3600
+    import subprocess, sys
+    script = os.path.join(BASE_DIR, "scripts", "analyze_all_reports.py")
+    result = subprocess.run(
+        [sys.executable, script, "--max", "10"],
+        capture_output=True, text=True, timeout=3600
+    )
+    lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"analyze_all_reports.py a échoué (code {result.returncode}): "
+            f"{lines[-1] if lines else 'pas de sortie'}"
         )
-        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
-        logger.info(f"Reports analyze: {lines[-1] if lines else 'OK'}")
-    except Exception as e:
-        logger.error(f"job_reports_analyze: {e}")
+    logger.info(f"Reports analyze: {lines[-1] if lines else 'OK'}")
 
 def job_summarize_announcements():
     """Résumés IA des nouvelles annonces BRVM (lundi 4h)."""
