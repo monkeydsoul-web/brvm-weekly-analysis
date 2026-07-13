@@ -537,6 +537,92 @@ def api_status():
         return jsonify({"error": str(e)}), 500
 
 
+_AI_SUM_CACHE = {}
+_AI_SUM_LOCK  = threading.Lock()
+_AI_SUM_TTL   = 7 * 24 * 3600  # 7 jours
+
+def _ai_sum_cache_path():
+    return os.path.join(DATA_DIR, "ai_summaries.json")
+
+def _load_ai_sum_disk():
+    path = _ai_sum_cache_path()
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def _save_ai_sum_disk(cache):
+    try:
+        with open(_ai_sum_cache_path(), "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.warning(f"[ai_summary] écriture cache disque échouée: {e}")
+
+def _get_ai_summary(ticker, company):
+    """Résumé IA par ticker, cache mémoire+disque TTL 7j, verrouillé (gunicorn
+    multi-thread). Retourne (text, generated_at). generated_at=None si jamais
+    généré et échec de génération."""
+    import time
+    now = time.time()
+    with _AI_SUM_LOCK:
+        entry = _AI_SUM_CACHE.get(ticker)
+        if entry is None:
+            disk = _load_ai_sum_disk()
+            entry = disk.get(ticker)
+            if entry:
+                _AI_SUM_CACHE[ticker] = entry
+        if entry:
+            try:
+                age = now - datetime.fromisoformat(entry["generated_at"]).timestamp()
+            except Exception:
+                age = _AI_SUM_TTL  # date illisible -> traité comme périmé
+            if age < _AI_SUM_TTL:
+                return entry["text"], entry["generated_at"]
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        prompt = f"""Tu es un analyste financier spécialisé sur la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
+
+Société : {company.get('name')} ({ticker})
+Secteur : {company.get('sector')} | Pays : {company.get('country')}
+Fondée : {company.get('founded', 'N/D')}
+Description : {company.get('description', '')}
+Produits/Services : {', '.join(company.get('products', []))}
+Marchés : {', '.join(company.get('markets', []))}
+
+Donne en 3-4 phrases courtes :
+1. Le positionnement stratégique de cette société sur la BRVM
+2. Les principaux moteurs de croissance ou risques en 2025-2026
+3. Une perspective sur l'attractivité du titre pour un investisseur long terme
+
+Réponds en français, de façon factuelle et concise."""
+        resp = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=600,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = resp.content[0].text
+        if resp.stop_reason == "max_tokens":
+            text = text.rsplit('.', 1)[0] + '.'
+        generated_at = datetime.now(timezone.utc).isoformat()
+        with _AI_SUM_LOCK:
+            new_entry = {"text": text, "generated_at": generated_at}
+            _AI_SUM_CACHE[ticker] = new_entry
+            disk = _load_ai_sum_disk()
+            disk[ticker] = new_entry
+            _save_ai_sum_disk(disk)
+        return text, generated_at
+    except Exception as e:
+        logger.warning(f"[ai_summary] génération échouée pour {ticker}: {e}")
+        if entry:
+            return entry["text"], entry["generated_at"]
+        return "", None
+
+
 @app.route("/api/company/<ticker>")
 def api_company(ticker):
     """Fiche société enrichie : activité, produits, marchés, rapports"""
@@ -554,39 +640,15 @@ def api_company(ticker):
         except Exception:
             pass
 
-        # Enrichissement IA — résumé activité + perspectives
-        ai_summary = ""
-        try:
-            client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-            prompt = f"""Tu es un analyste financier spécialisé sur la BRVM (Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest).
-
-Société : {company.get('name')} ({t})
-Secteur : {company.get('sector')} | Pays : {company.get('country')}
-Fondée : {company.get('founded', 'N/D')}
-Description : {company.get('description', '')}
-Produits/Services : {', '.join(company.get('products', []))}
-Marchés : {', '.join(company.get('markets', []))}
-
-Donne en 3-4 phrases courtes :
-1. Le positionnement stratégique de cette société sur la BRVM
-2. Les principaux moteurs de croissance ou risques en 2025-2026
-3. Une perspective sur l'attractivité du titre pour un investisseur long terme
-
-Réponds en français, de façon factuelle et concise."""
-            resp = client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=300,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            ai_summary = resp.content[0].text
-        except Exception as e:
-            ai_summary = ""
+        # Enrichissement IA — résumé activité + perspectives (cache 7j)
+        ai_summary, ai_generated_at = _get_ai_summary(t, company)
 
         return jsonify({
             "ticker": t,
             "company": company,
             "live": live,
             "ai_summary": ai_summary,
+            "ai_generated_at": ai_generated_at,
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
