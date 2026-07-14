@@ -265,10 +265,10 @@ def start_scheduler():
                   id='rank_history', replace_existing=True,
                   name='Rank history top3 18h05')
 
-    # BOC quotidien à 18h30
+    # BOC quotidien à 19h00
     sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=19, minute=0),
                   id='boc_scrape', replace_existing=True,
-                  name='BOC scrape 18h30')
+                  name='BOC scrape 19h00')
 
     # Market data toutes les 15min
     sched.add_job(wrap_job('market_data', job_market_data), IntervalTrigger(minutes=15),
@@ -281,10 +281,10 @@ def start_scheduler():
                   id='brvm_announcements', replace_existing=True,
                   name='Annonces BRVM 8h')
 
-    # Google News toutes les 4h
+    # Google News crons fixes 6/10/14/20h
     sched.add_job(wrap_job('google_news', job_google_news), CronTrigger(hour='6,10,14,20', minute=0),
                   id='google_news', replace_existing=True,
-                  name='Google News 4h')
+                  name='Google News 6/10/14/20h')
 
     # Scrape rapports PDF à 22h (legacy)
     sched.add_job(wrap_job('scrape_reports', job_scrape_reports), CronTrigger(hour=22, minute=0),
