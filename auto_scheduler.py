@@ -266,7 +266,7 @@ def start_scheduler():
                   name='Rank history top3 18h05')
 
     # BOC quotidien à 18h30
-    sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=18, minute=30),
+    sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=19, minute=0),
                   id='boc_scrape', replace_existing=True,
                   name='BOC scrape 18h30')
 
@@ -282,7 +282,7 @@ def start_scheduler():
                   name='Annonces BRVM 8h')
 
     # Google News toutes les 4h
-    sched.add_job(wrap_job('google_news', job_google_news), IntervalTrigger(hours=4),
+    sched.add_job(wrap_job('google_news', job_google_news), CronTrigger(hour='6,10,14,20', minute=0),
                   id='google_news', replace_existing=True,
                   name='Google News 4h')
 
