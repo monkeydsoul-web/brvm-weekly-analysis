@@ -3698,7 +3698,6 @@ async function showStock(ticker){
     const s=d.stock,v=s.composite_adj||0;
     const fi=cd.financials||{},ai=cd.ai_analysis||'';
     const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
-    const models=[['Graham',s.score_graham||0,s.detail_graham||''],['DCF/FCF',s.score_dcf||0,s.detail_dcf||''],['DDM',s.score_ddm||0,s.detail_ddm||''],['EPV',s.score_epv||0,s.detail_epv||''],['Buffett',s.score_buffett||0,s.detail_buffett||''],['Rev.DCF',s.score_rev_dcf||0,s.detail_rev_dcf||''],['Relatif',s.score_relatif||0,s.detail_relatif||''],['Technique',s.score_technique||0,s.detail_technique||'']];
     const ci=COMM_PROD[ticker];
     const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
     const hasCompany=co&&co.description&&co.description.length>10;
@@ -3812,63 +3811,6 @@ async function showStock(ticker){
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
         <div class="ct">📊 Résumé rapide</div>
         <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">Note ${(v/80*10).toFixed(1)}/10</strong>. ${v>=65?'C\'est une excellente opportunité selon nos analyses.':v>=50?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'}</div>
-      </div>
-      <div class="card" style="margin-bottom:12px;background:#161b22;border:1px solid #30363d">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-          <div class="ct" style="margin-bottom:0">Scores détaillés — 8 modèles de valorisation</div>
-          <div style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:${v>=65?'rgba(74,222,128,.15)':v>=50?'rgba(251,191,36,.15)':'rgba(248,113,113,.15)'};color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">
-            Note ${(v/80*10).toFixed(1)}/10 — ${v>=65?'Excellente opportunité 🟢':v>=50?'Bonne société 🟡':v>=35?'Valorisation correcte 🟡':'Prudence recommandée 🔴'}
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          ${(()=>{
-            const modelLabels=[
-              'Valeur patrimoniale · Graham',
-              'Flux futurs · DCF',
-              'Dividendes · DDM',
-              'Rentabilité durable · EPV',
-              'Qualité · Buffett',
-              'Attentes du marché · Rev. DCF',
-              'Comparables · Relatif',
-              'Tendance · Technique'
-            ];
-            const modelTips=[
-              'Compare le prix de l\'action à ce que valent réellement ses actifs et ses bénéfices — la méthode prudente du pionnier de l\'investissement valeur.',
-              'Estime la valeur de la société à partir des liquidités qu\'elle devrait générer dans le futur.',
-              'Valorise l\'action à partir des dividendes attendus — pertinent seulement si la société en verse régulièrement.',
-              'Estime ce que vaut la société si elle arrête de croître — un scénario prudent, sans pari sur l\'avenir.',
-              'Note la qualité de l\'entreprise : rentabilité élevée, avantage durable et dette maîtrisée.',
-              'Déduit du cours actuel la croissance qu\'il suppose — plus cette attente est basse, moins l\'action est risquée.',
-              'Compare la cherté de l\'action à celle de ses concurrents du même secteur à la BRVM.',
-              'Regarde la dynamique récente du cours : tendance, volume et performance sur l\'année.'
-            ];
-            return models.map(([l,mv,det],i)=>{
-              // NA couplé au texte EXACT des early-return de valuation.py :
-              // DDM -> "... non applicable" ; EPV/Rev.DCF -> "Données insuffisantes".
-              // Ne JAMAIS déduire NA d'un score===0 seul (un modèle applicable peut scorer 0).
-              const isNA=(det||'').includes('non applicable')||(det||'').trim()==='Données insuffisantes';
-              const label=modelLabels[i]||l;
-              const tip=(modelTips[i]||label).replace(/"/g,"'");
-              const topRight=isNA
-                ? `<div style="font-size:10px;font-style:italic;color:#484f58;flex-shrink:0">non applicable</div>`
-                : `<div style="font-size:11px;font-weight:700;color:#8b949e;flex-shrink:0">${mv.toFixed(1)}/10</div>`;
-              const bar=isNA
-                ? `<div style="height:8px;border:1.5px dashed #21262d;border-radius:4px;box-sizing:border-box"></div>`
-                : `<div style="background:#21262d;border-radius:4px;height:8px;overflow:hidden"><div style="height:100%;width:${Math.max(0,Math.min(10,mv))*10}%;background:#2dd4bf;border-radius:4px"></div></div>`;
-              return `<div style="display:flex;flex-direction:column;gap:4px">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <div style="flex:1;font-size:11px;color:${isNA?'#484f58':'#e6edf3'}">${label}</div>
-                  ${topRight}
-                  <span class="tt tt-r" data-tt="${tip}" style="color:var(--t3);font-size:12px;cursor:help;flex-shrink:0">ℹ</span>
-                </div>
-                ${bar}
-              </div>`;
-            }).join('');
-          })()}
-        </div>
-        <div style="text-align:right;margin-top:10px">
-          <a href="#" onclick="closeStockSlideover();nav('methodo');return false" style="color:#2dd4bf;font-size:11px;text-decoration:none">En savoir plus → Méthodologie</a>
-        </div>
       </div>
       ${fi.strengths||fi.risks?`<div class="g2 expert-only" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
