@@ -669,14 +669,11 @@ def api_live_score_ticker(ticker):
                 return jsonify(entry)
     except Exception as e:
         print(f"[live-score] fallback live_valuation: {e}")
-    # Fallback calcul a la volee
-    force = request.args.get("refresh", "0") == "1"
-    try:
-        live_cache = get_live_data(force_refresh=force)
-        result = compute_live_score(ticker, STOCK_FUNDAMENTALS[ticker], live_cache)
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Fallback : notes du jour (pas de recalcul a la volee)
+    entry = next((r for r in load_latest_scores() if r.get("ticker") == ticker), None)
+    if entry:
+        return jsonify(entry)
+    return jsonify({"error": "ranking indisponible"}), 503
 
 
 @app.route("/api/live-scores")
@@ -882,7 +879,10 @@ def api_live_ranking():
     force = request.args.get("refresh", "0") == "1"
     try:
         from live_ranker import compute_live_ranking, load_ranking
-        result = compute_live_ranking(trigger="manual") if force else (load_ranking() or compute_live_ranking(trigger="manual"))
+        if force:
+            result = compute_live_ranking(trigger="manual")
+        else:
+            result = load_ranking() or {"ranking": load_latest_scores()}
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
