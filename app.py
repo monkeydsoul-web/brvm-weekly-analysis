@@ -885,7 +885,8 @@ def api_live_ranking():
             result = load_ranking() or {"ranking": load_latest_scores()}
         return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.warning(f"/api/live-ranking indisponible, fallback notes du jour: {e}")
+        return jsonify({"ranking": load_latest_scores()})
 
 @app.route("/api/live-ranking/changes")
 def api_live_ranking_changes():
