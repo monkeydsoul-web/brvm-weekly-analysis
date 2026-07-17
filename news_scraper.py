@@ -128,34 +128,6 @@ def fetch_sikafinance_dividends() -> list[dict]:
     return divs
 
 
-def fetch_sikafinance_indices() -> dict:
-    """Récupère les indices BRVM Composite et BRVM-30"""
-    url = "https://www.sikafinance.com/bourse/"
-    indices = {}
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-        soup = BeautifulSoup(r.text, "html.parser")
-        text = soup.get_text()
-
-        # Chercher BRVM Composite et BRVM 30
-        for pattern, key in [
-            (r"BRVM\s*Composite[^\d]*([\d\s,.]+)", "BRVM_COMPOSITE"),
-            (r"BRVM[-\s]*30[^\d]*([\d\s,.]+)", "BRVM_30"),
-        ]:
-            m = re.search(pattern, text)
-            if m:
-                val_str = m.group(1).replace(" ", "").replace(",", ".")
-                try:
-                    indices[key] = float(re.findall(r"[\d.]+", val_str)[0])
-                except Exception:
-                    pass
-
-        logger.info(f"Indices BRVM: {indices}")
-    except Exception as e:
-        logger.warning(f"Indices BRVM: {e}")
-    return indices
-
-
 # ── RICHBOURSE ────────────────────────────────────────────────────────────────
 def fetch_richbourse_dividends() -> list[dict]:
     """Scrape les dividendes officiels depuis RichBourse"""
@@ -421,9 +393,23 @@ def fetch_macro_context() -> dict:
         "week": datetime.now().strftime("Semaine %W/%Y"),
     }
 
-    # Indices BRVM
-    indices = fetch_sikafinance_indices()
-    macro.update(indices)
+    # Indices BRVM officiels (via market_data.py, scrapé depuis brvm.org/fr/resume)
+    try:
+        from market_data import get_market_data
+        for entry in get_market_data().get("indices", []):
+            name = entry.get("name", "")
+            value = entry.get("current")
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                continue
+            if not (50 <= value <= 5000):
+                continue
+            if re.search(r"(?<!\d)30(?!\d)", name):
+                macro["BRVM_30"] = value
+            elif "COMPOSITE" in name.upper():
+                macro["BRVM_COMPOSITE"] = value
+        logger.info(f"Indices BRVM retenus: BRVM_30={macro.get('BRVM_30')} BRVM_COMPOSITE={macro.get('BRVM_COMPOSITE')}")
+    except Exception as e:
+        logger.warning(f"Indices BRVM: {e}")
 
     # Taux de change FCFA (proxy via ECB — FCFA est arrimé à l'EUR)
     try:
