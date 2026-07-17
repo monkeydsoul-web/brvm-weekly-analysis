@@ -22,6 +22,7 @@ from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
 from history_merge import get_full_history
+import live_ranker  # CIRC-2: import complet et synchrone AVANT _init_app()/fork gunicorn — le worker herite toujours d un module fini (fix « partially initialized » sur instance fraiche)
 try:
     from scraper import STOCK_FUNDAMENTALS
     print(f"STOCK_FUNDAMENTALS charge: {len(STOCK_FUNDAMENTALS)} tickers")
