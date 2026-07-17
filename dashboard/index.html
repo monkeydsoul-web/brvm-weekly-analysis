@@ -814,6 +814,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <option value="neutr">Neutre</option>
         <option value="vend">Vendre</option>
       </select>
+      <button id="fFav" onclick="toggleFavFilter()" style="height:auto;padding:6px 13px;border-radius:var(--r,6px);border:1px solid var(--border-1,var(--border));background:var(--bg2,var(--bg-elevated));color:var(--t2);font-size:13px;cursor:pointer">★ Mes favoris</button>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openCompareAnalysis(_compareAnalysisTickers.length?_compareAnalysisTickers:(window.scores||scores||[]).slice(0,5).map(x=>x.ticker))" title="Synthèse générée automatiquement par intelligence artificielle · Cochez des actions pour une analyse ciblée">🤖 Analyse IA</button>
@@ -1798,6 +1799,7 @@ window.addEventListener('load',()=>{
   if(main) _tableObs.observe(main,{childList:true,subtree:true});
 });
 let scores=[],comms={},charts={},favorites=[],portfolio={},topPerf=[];
+window._favOnly = false;
 
 // ── Dictionnaire termes financiers ─────────────────────────────────────────
 window.TERMS = {
@@ -2859,6 +2861,16 @@ function toggleFav(ticker){
   document.querySelectorAll('.star').forEach(b=>{
     if(b.textContent==='★') b.classList.toggle('fav',favorites.includes(b.closest('[onclick]')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||''));
   });
+  if(window._favOnly) renderRankLive();
+}
+function toggleFavFilter(){
+  window._favOnly = !window._favOnly;
+  const btn = document.getElementById('fFav');
+  if (btn) {
+    btn.style.borderColor = window._favOnly ? 'var(--accent)' : '';
+    btn.style.color = window._favOnly ? 'var(--accent)' : '';
+  }
+  renderRankLive();
 }
 
 // ── Signaux par société ────────────────────────────────────────────────────
@@ -2931,6 +2943,7 @@ function renderRank(){
   let d=[...scores];
   if(sec)d=d.filter(x=>x.sector===sec);
   if(verd)d=d.filter(x=>(x.pdf_verdict||'').toLowerCase().includes(verd));
+  if(window._favOnly)d=d.filter(x=>favorites.includes(x.ticker));
   d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
 
   // Contre
@@ -2942,6 +2955,9 @@ function renderRank(){
   const _dow = new Date().getDay(); // 0=dim, 6=sam
   const _isWeekend = _dow === 0 || _dow === 6;
   const _staleLbl = `<span style="color:var(--t3);font-size:9px">(ven.)</span>`;
+  if(window._favOnly && d.length===0){
+    document.getElementById('rankBody').innerHTML = '<tr><td colspan="19" style="text-align:center;color:var(--t2);padding:20px;font-size:12px">Aucun favori pour le moment — désactivez le filtre et cliquez sur ★ pour en ajouter</td></tr>';
+  } else {
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
     const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
@@ -2979,6 +2995,7 @@ function renderRank(){
       <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
     </tr>`;}).join('');
+  }
   // Masquer par défaut les colonnes avancées
   if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
 }

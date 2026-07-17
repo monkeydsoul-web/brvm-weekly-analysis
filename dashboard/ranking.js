@@ -30,12 +30,17 @@ function renderRankCards() {
   let d = [...(window.scores || scores || [])];
   if (sec)     d = d.filter(x => x.sector === sec);
   if (verdict) d = d.filter(x => (x.pdf_verdict || '').toLowerCase().includes(verdict.toLowerCase()));
+  if (window._favOnly) d = d.filter(x => (window.favorites || favorites || []).includes(x.ticker));
   d.sort((a, b) => srt === 'pe_ref'
     ? (a[srt] || 999) - (b[srt] || 999)
     : (b[srt] || 0) - (a[srt] || 0));
 
   const cards = document.getElementById('rank-cards');
   if (!cards) return;
+  if (window._favOnly && d.length === 0) {
+    cards.innerHTML = '<div style="text-align:center;color:var(--t2);padding:20px;font-size:12px">Aucun favori pour le moment — désactivez le filtre et cliquez sur ★ pour en ajouter</div>';
+    return;
+  }
   cards.innerHTML = d.map((x, i) => {
       const v      = x.composite_adj || 0;
       const v10    = (v / 80 * 10).toFixed(1);
