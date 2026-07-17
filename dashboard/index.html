@@ -2243,14 +2243,20 @@ function nav(id){
 // Support navigation par hash URL + hashchange
 (function(){
   var h=(location.hash||'').replace('#','');
+  var stockMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(h);
+  if(stockMatch){ window._pendingStockTicker = stockMatch[1].toUpperCase(); }
   window.addEventListener('load',function(){
-    if(h && document.getElementById('page-'+h)){
+    if(stockMatch){
+      if(window._pendingStockTicker && typeof nav==='function') nav('rank');
+    } else if(h && document.getElementById('page-'+h)){
       setTimeout(function(){if(typeof nav==='function')nav(h);},800);
     } else if(typeof nav==='function'){ nav('welcome'); }
   });
 })();
 window.addEventListener('hashchange', function() {
   var page = (location.hash || '#welcome').slice(1);
+  var hcMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(page);
+  if (hcMatch) { _openStock(hcMatch[1].toUpperCase()); return; }
   if (typeof nav === 'function' && document.getElementById('page-' + page)) nav(page);
 });
 
@@ -2546,6 +2552,16 @@ async function init(){
           initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
         }
       }catch(e2){console.error('[BRVM] init render error:',e2);}
+      if (window._pendingStockTicker) {
+        var _pt = window._pendingStockTicker;
+        if ((window.scores||scores||[]).some(function(x){return x.ticker===_pt;})) {
+          if(typeof nav==='function') nav('rank');
+          _openStock(_pt);
+        } else {
+          console.warn('LOT4-a: ticker inconnu dans le hash:', _pt);
+        }
+        window._pendingStockTicker = null;
+      }
       document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
       gSpinHide();
     });
@@ -3660,6 +3676,7 @@ function closeStockSlideover(){
   document.getElementById('stock-slideover')?.classList.remove('open');
   document.getElementById('sso-overlay')?.classList.remove('open');
   document.removeEventListener('keydown', _ssoEscHandler);
+  if((location.hash||'').indexOf('#stock/')===0){ try{history.replaceState(null,'','#'+(_currentPage||'rank'))}catch(e){} }
 }
 function _ssoEscHandler(e){ if(e.key==='Escape') closeStockSlideover(); }
 
@@ -3715,6 +3732,7 @@ async function showStock(ticker){
     if (lbl) lbl.textContent = ticker;
     _addToSSOHistory(ticker);
   }
+  try{history.replaceState(null,'','#stock/'+ticker)}catch(e){}
   // Phase 1: render static header immediately from cached ranking data
   const _staticEntry = (window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
   const _v0 = _staticEntry.composite_adj||0;
