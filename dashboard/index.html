@@ -3471,6 +3471,19 @@ async function verifierAlertesMaintenant(){
 
 
 // ── Commodités ─────────────────────────────────────────────────────────────
+function timeAgo(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  const s=Math.floor((Date.now()-d.getTime())/1000);
+  if(s<60) return 'il y a quelques secondes';
+  const min=Math.floor(s/60);
+  if(min<60) return `il y a ${min} min`;
+  const h=Math.floor(min/60);
+  if(h<24) return `il y a ${h} h`;
+  const j=Math.floor(h/24);
+  return `il y a ${j} j`;
+}
 function renderComm(){
   document.getElementById('commPrices').innerHTML=Object.entries(comms).map(([n,d])=>`
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px;text-align:center">
@@ -3478,6 +3491,7 @@ function renderComm(){
       <div style="font-size:14px;font-weight:700">${typeof d.price==='number'?d.price.toLocaleString('fr-FR'):d.price}</div>
       <div style="font-size:10px;color:${(d.change_pct||0)===0?'var(--t3)':(d.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(d.change_pct||0)===0?'—':`${(d.change_pct||0)>=0?'+':''}${(d.change_pct||0).toFixed(1)}%`}</div>
       <div style="font-size:9px;color:var(--t3)">${d.unit||''}</div>
+      ${timeAgo(d.fetched_at)?`<div style="font-size:9px;color:var(--t3)">MàJ ${timeAgo(d.fetched_at)}</div>`:''}
     </div>`).join('');
   const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   svgBar(document.getElementById('cCommDiv'),exp.map(x=>x.ticker),exp.map(x=>x.composite_adj||0),exp.map(x=>COMM_PROD[x.ticker]?.col||'#94A3B8'),260,true);
