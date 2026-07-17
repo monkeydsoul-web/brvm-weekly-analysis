@@ -759,6 +759,25 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
           <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">Ce site attribue une <strong>note sur 10 transparente</strong> à chacune des 47 sociétés, pour aider les débutants à s'y retrouver — avec une <strong>méthodologie publiée</strong> et consultable. Les notes sont un <strong>outil d'aide à la décision, pas un conseil en investissement</strong> : à toi de te faire ton opinion.</p>
         </div>
       </div>
+
+  <div class="card" id="macroCard" style="display:none;margin-top:12px">
+    <div class="ct">Marché BRVM</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div id="macroComposite" style="display:none">
+        <div style="font-size:10px;color:var(--text-3)">BRVM Composite</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macroCompositeVal"></div>
+      </div>
+      <div id="macro30" style="display:none">
+        <div style="font-size:10px;color:var(--text-3)">BRVM-30</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macro30Val"></div>
+      </div>
+      <div id="macroFx" style="display:none">
+        <div style="font-size:10px;color:var(--text-3)">1 USD</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macroFxVal"></div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--t3);margin-top:8px" id="macroMeta"></div>
+  </div>
 </div>
 
 <!-- METHODOLOGIE -->
@@ -2532,6 +2551,7 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
+    renderMacro(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
     loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
@@ -3516,6 +3536,35 @@ function timeAgo(iso){
   if(h<24) return `il y a ${h} h`;
   const j=Math.floor(h/24);
   return `il y a ${j} j`;
+}
+function renderMacro(m){
+  if(!m || !m.date) return;
+  const d = new Date(m.date);
+  if(isNaN(d.getTime())) return;
+  const ageH = (Date.now() - d.getTime()) / 3600000;
+  if(ageH > 48) return;
+  let any = false;
+  if(typeof m.BRVM_COMPOSITE === 'number'){
+    document.getElementById('macroCompositeVal').textContent = m.BRVM_COMPOSITE.toFixed(2);
+    document.getElementById('macroComposite').style.display = '';
+    any = true;
+  }
+  if(typeof m.BRVM_30 === 'number'){
+    document.getElementById('macro30Val').textContent = m.BRVM_30.toFixed(2);
+    document.getElementById('macro30').style.display = '';
+    any = true;
+  }
+  if(typeof m.FCFA_per_USD === 'number'){
+    document.getElementById('macroFxVal').textContent = Math.round(m.FCFA_per_USD) + ' FCFA';
+    document.getElementById('macroFx').style.display = '';
+    any = true;
+  }
+  if(!any) return;
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  document.getElementById('macroMeta').textContent = 'Donnees du ' + dd + '/' + mm + '/' + yyyy;
+  document.getElementById('macroCard').style.display = '';
 }
 function renderComm(){
   document.getElementById('commPrices').innerHTML=Object.entries(comms).map(([n,d])=>`
