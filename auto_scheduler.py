@@ -219,11 +219,13 @@ def job_market_data():
         logger.error(f"job_market_data: {e}")
 
 def job_macro():
-    """Met à jour les données macro."""
+    """Met à jour le contexte macro (indices BRVM + taux de change)."""
     try:
-        from app import fetch_macro_data
-        fetch_macro_data()
-        logger.debug("Macro mis à jour")
+        from news_scraper import fetch_macro_context
+        macro = fetch_macro_context()
+        with open(os.path.join(DATA_DIR, "macro_cache.json"), "w") as f:
+            json.dump(macro, f, ensure_ascii=False, indent=2)
+        logger.info(f"Macro mis à jour: {macro}")
     except Exception as e:
         logger.error(f"job_macro: {e}")
 
@@ -274,6 +276,11 @@ def start_scheduler():
     sched.add_job(wrap_job('market_data', job_market_data), IntervalTrigger(minutes=15),
                   id='market_data', replace_existing=True,
                   name='Market data 15min')
+
+    # Contexte macro (indices BRVM + taux de change) 2x/jour
+    sched.add_job(wrap_job('macro', job_macro), CronTrigger(hour='8,16', minute=10),
+                  id='macro', replace_existing=True,
+                  name='Macro 8h10/16h10 UTC')
 
     # Annonces BRVM officielles tous les jours à 8h
     sched.add_job(wrap_job('brvm_announcements', job_brvm_announcements),

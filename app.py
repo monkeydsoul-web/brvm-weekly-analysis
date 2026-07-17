@@ -411,18 +411,6 @@ def api_top(n):
     return jsonify(sorted_scores[:n])
 
 
-def _cache_macro():
-    """Cache le contexte macro"""
-    try:
-        from news_scraper import fetch_macro_context
-        macro = fetch_macro_context()
-        with open(os.path.join(DATA_DIR, "macro_cache.json"), "w") as f:
-            json.dump(macro, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        logger.warning(f"Cache macro: {e}")
-
-
-
 try:
     from features import register_routes
     register_routes(app)
