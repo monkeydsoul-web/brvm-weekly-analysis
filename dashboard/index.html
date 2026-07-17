@@ -3755,6 +3755,7 @@ async function showStock(ticker){
     const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
     const ci=COMM_PROD[ticker];
     const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
+    const aiGeneratedAt=(cd&&cd.ai_generated_at)||null;
     const hasCompany=co&&co.description&&co.description.length>10;
     const isFav=favorites.includes(ticker);
     document.getElementById(_stockRenderTarget).innerHTML=`
@@ -3820,6 +3821,7 @@ async function showStock(ticker){
     ${aiSummary?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--green);background:var(--bg3)">
       <div class="ct">🤖 Analyse IA — Positionnement stratégique</div>
       <div class="ai-analysis" style="margin-top:4px">${_md(aiSummary.trim())}</div>
+      ${timeAgo(aiGeneratedAt)?`<div style="font-size:10px;color:var(--t3);margin-top:6px">Résumé généré ${timeAgo(aiGeneratedAt)}</div>`:''}
     </div>`:'' }
       </div><!-- /ctab-comprendre -->
       <div class="ctab-panel" data-ctab="chiffres">
