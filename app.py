@@ -896,6 +896,29 @@ def api_live_ranking_changes():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# DIAG-CIRC1 : route temporaire d enquete import live_ranker — A RETIRER apres diagnostic.
+@app.route("/api/diag-circ1")
+def api_diag_circ1():
+    import sys, traceback, threading
+    lr_mod = sys.modules.get('live_ranker')
+    thread_names = {t.ident: t.name for t in threading.enumerate()}
+    thread_daemon = {t.ident: t.daemon for t in threading.enumerate()}
+    threads = []
+    for tid, frame in sys._current_frames().items():
+        threads.append({
+            "name": thread_names.get(tid, 'unknown'),
+            "daemon": thread_daemon.get(tid),
+            "stack": traceback.format_stack(frame)[-25:],
+        })
+    return jsonify({
+        "live_ranker_in_sys_modules": 'live_ranker' in sys.modules,
+        "spec_initializing": getattr(getattr(lr_mod, '__spec__', None), '_initializing', None),
+        "has_compute": hasattr(lr_mod, 'compute_live_ranking') if lr_mod is not None else None,
+        "has_load_ranking": hasattr(lr_mod, 'load_ranking') if lr_mod is not None else None,
+        "module_file": getattr(lr_mod, '__file__', None),
+        "threads": threads,
+    })
+
 @app.route("/api/sector-analysis", methods=["POST"])
 def api_sector_analysis():
     """Analyse IA d'un secteur BRVM complet."""
