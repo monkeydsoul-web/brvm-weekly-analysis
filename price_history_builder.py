@@ -3,7 +3,7 @@ Construit et maintient data/price_history.json
 - Initialise depuis les prix statiques connus (HIST_PRICES annuels)
 - Accumule les prix live quotidiennement
 """
-import json, os, logging
+import json, os, logging, tempfile
 from datetime import datetime, timedelta
 
 from paths import DATA_DIR
@@ -36,8 +36,22 @@ def load_history():
     return {}
 
 def save_history(history):
-    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False)
+    if not history:
+        logger.error("save_history: historique vide, ecriture annulee pour eviter un ecrasement")
+        return
+    tmp_path = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(HISTORY_PATH), delete=False)
+        tmp_path = tmp.name
+        with tmp:
+            json.dump(history, tmp, ensure_ascii=False)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, HISTORY_PATH)
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 def init_history():
     """Initialise price_history.json depuis les données annuelles statiques."""
@@ -66,6 +80,9 @@ def append_live_prices():
         prices = live.get("prices", {})
         today = datetime.now().strftime("%Y-%m-%d")
         history = load_history()
+        if not history and os.path.exists(HISTORY_PATH) and os.path.getsize(HISTORY_PATH) > 100:
+            logger.error("append_live_prices: lecture vide alors qu'un fichier non trivial existe, historique probablement corrompu, ecriture annulee")
+            return 0
         updated = []
         for ticker, data in prices.items():
             price = data.get("price")
