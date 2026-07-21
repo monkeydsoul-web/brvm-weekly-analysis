@@ -693,6 +693,11 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
 <!-- WELCOME 3 PORTES -->
 <div class="page on" id="page-welcome">
+  <div class="card" id="bootError" style="display:none">
+    <div class="ct">Données temporairement indisponibles</div>
+    <p style="color:var(--t2)">Le serveur ne répond pas. Cela arrive pendant les mises à jour du site.</p>
+    <button class="btn btn-g" onclick="location.reload()">Réessayer</button>
+  </div>
   <div id="top3-podium" hidden></div>
   <div class="welcome-hero">
     <div style="font-size:48px;margin-bottom:12px">📈</div>
@@ -2596,6 +2601,8 @@ async function init(){
     console.error('[BRVM] init fatal:',e);
     gSpinHide();
     document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+    const be=document.getElementById('bootError');
+    if(be) be.style.display='';
   }
 }
 
