@@ -139,7 +139,12 @@ def parse_boc_tables(url):
             with pdfplumber.open(tmp_path) as pdf:
                 for page in pdf.pages:
                     text = page.extract_text() or ''
-                    if not text or len(text) < 50: continue
+                    if not text or len(text) < 50:
+                        try:
+                            page.close()
+                        except Exception:
+                            pass
+                        continue
 
                     # Extraire date BOC
                     if not boc_date:
@@ -190,6 +195,11 @@ def parse_boc_tables(url):
                             elif entry['cours_clot'] > 100 and ratio_oc > 5:
                                 logger.warning(f"BOC fallback: {ticker} rejete (ratio OUV/CLOT={ratio_oc:.1f}, ouv={ouv}, clot={clot})")
                         except: continue
+
+                    try:
+                        page.close()
+                    except Exception:
+                        pass
         finally:
             try:
                 os.unlink(tmp_path)
