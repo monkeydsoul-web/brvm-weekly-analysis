@@ -2,7 +2,7 @@
 live_data.py — Données live BRVM
 Sources : brvm.org Table 3 → kwayisi fallback
 """
-import json, logging, os, time, threading
+import json, logging, os, tempfile, time, threading
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
@@ -106,7 +106,25 @@ def save_cache(prices_dict):
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(), "market_open": is_market_open(),
                "prices": prices_dict, "stats": {"total": len(prices_dict),
                "with_price": len([v for v in prices_dict.values() if v.get("price")]), "sources": sources}}
-    with open(CACHE_PATH,"w") as f: json.dump(payload, f, indent=2, ensure_ascii=False)
+    n_ok = payload["stats"]["with_price"]
+    if n_ok == 0:
+        ancien = load_cache()
+        if ancien and ancien.get("stats", {}).get("with_price", 0) > 0:
+            logger.error("save_cache: 0 prix valide, ecriture annulee pour ne pas ecraser un cache existant")
+            return ancien
+    tmp_path = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(CACHE_PATH), delete=False)
+        tmp_path = tmp.name
+        with tmp:
+            json.dump(payload, tmp, indent=2, ensure_ascii=False)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, CACHE_PATH)
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
     return payload
 
 def load_cache():
