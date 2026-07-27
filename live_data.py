@@ -1,6 +1,6 @@
 """
 live_data.py — Données live BRVM
-Sources : brvm.org Table 3 → kwayisi fallback
+Source : brvm.org Table 3
 """
 import json, logging, os, tempfile, time, threading
 from datetime import datetime, timezone
@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 from paths import DATA_DIR
 CACHE_PATH = os.path.join(DATA_DIR, "live_cache.json")
+_FETCH_LOCK = threading.Lock()
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 def is_market_open():
@@ -58,23 +59,6 @@ def fetch_brvm_org():
         logger.warning(f"brvm.org erreur: {e}")
     return results
 
-def fetch_kwayisi_price(ticker):
-    try:
-        r = requests.get(f"https://afx.kwayisi.org/brvm/{ticker.lower()}/", headers=HEADERS, timeout=10)
-        if r.status_code != 200: return None
-        soup = BeautifulSoup(r.text, "html.parser")
-        for td in soup.find_all("td"):
-            txt = td.get_text(strip=True).replace(" ","").replace(",",".").replace("\u202f","")
-            try:
-                val = float(txt)
-                if 100 < val < 500000:
-                    return {"price": val, "change_pct": 0.0, "source": "kwayisi",
-                            "fetched_at": datetime.now(timezone.utc).isoformat()}
-            except: continue
-    except Exception as e:
-        logger.debug(f"kwayisi {ticker}: {e}")
-    return None
-
 def fetch_live_prices(all_tickers=None):
     if all_tickers is None:
         try:
@@ -83,14 +67,6 @@ def fetch_live_prices(all_tickers=None):
         except: all_tickers = []
     start = time.time()
     results = fetch_brvm_org()
-    missing = [t for t in all_tickers if t not in results]
-    if missing:
-        logger.info(f"kwayisi fallback: {len(missing)} tickers")
-        for ticker in missing:
-            d = fetch_kwayisi_price(ticker)
-            if d and d.get("price"):
-                results[ticker] = d
-            time.sleep(0.3)
     for t in all_tickers:
         if t not in results:
             results[t] = {"price": None, "change_pct": 0.0, "source": "unavailable", "fetched_at": None}
@@ -140,7 +116,15 @@ def get_live_data(force_refresh=False):
             age = (datetime.now(timezone.utc) - datetime.fromisoformat(cache["updated_at"])).total_seconds()
             if age < 360: return cache
         except: pass
-    return save_cache(fetch_live_prices())
+    if not _FETCH_LOCK.acquire(blocking=False):
+        if cache:
+            logger.info("get_live_data: recuperation deja en cours, cache existant servi")
+            return cache
+        _FETCH_LOCK.acquire()
+    try:
+        return save_cache(fetch_live_prices())
+    finally:
+        _FETCH_LOCK.release()
 
 def start_scheduler():
     try:
