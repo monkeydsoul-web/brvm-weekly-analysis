@@ -85,7 +85,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
     if live_price and live_price > 0:
         old_price = row.get("price") or live_price
         row["change_pct"] = live_price_data.get("change_pct", 0)
-        row["prev_close"] = live_price_data.get("prev_close")
+        row["open"] = live_price_data.get("open")
         row["volume"]     = live_price_data.get("volume", 0)
         row["trend"]      = live_price_data.get("trend")
 

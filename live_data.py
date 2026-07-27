@@ -38,12 +38,12 @@ def fetch_brvm_org():
                 def clean(s): return s.get_text(strip=True).replace(" ","").replace("\u202f","").replace(",",".")
                 close  = float(clean(cols[5])) if clean(cols[5]) else None
                 change = float(clean(cols[6]).replace("%","")) if clean(cols[6]) else 0.0
-                prev   = float(clean(cols[3])) if clean(cols[3]) else None
+                open_price = float(clean(cols[3])) if clean(cols[3]) else None
                 vol    = clean(cols[2])
                 try: volume = int(vol)
                 except: volume = 0
                 if ticker and close and close > 0:
-                    results[ticker] = {"price": close, "prev_close": prev, "change_pct": change,
+                    results[ticker] = {"price": close, "open": open_price, "change_pct": change,
                                        "volume": volume, "source": "brvm.org",
                                        "fetched_at": datetime.now(timezone.utc).isoformat()}
             except: continue

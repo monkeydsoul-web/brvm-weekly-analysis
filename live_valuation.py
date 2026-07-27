@@ -36,7 +36,7 @@ def score_technique_live(row: dict) -> dict:
     """
     Score technique /10 basé sur les données live :
     - Variation jour (change_pct)
-    - Momentum vs veille (prix vs prev_close)
+    - Momentum intraday (prix vs ouverture)
     - Volume relatif
     """
     score = 0.0
@@ -44,7 +44,7 @@ def score_technique_live(row: dict) -> dict:
 
     change_pct  = row.get("change_pct", 0) or 0
     price       = row.get("price") or 0
-    prev_close  = row.get("prev_close") or price
+    open_price  = row.get("open") or price
     volume      = row.get("volume", 0) or 0
 
     # Variation du jour
@@ -64,20 +64,20 @@ def score_technique_live(row: dict) -> dict:
         score -= 1.0
         details.append(f"Variation={change_pct:+.1f}% forte baisse ✗✗")
 
-    # Prix au-dessus de la veille = momentum positif
-    if prev_close and prev_close > 0:
-        above = (price / prev_close - 1) * 100
+    # Prix au-dessus de l'ouverture = momentum intraday positif
+    if open_price and open_price > 0:
+        above = (price / open_price - 1) * 100
         if above > 2:
             score += 3.0
-            details.append(f"Au-dessus veille +{above:.1f}% ✓✓")
+            details.append(f"Au-dessus ouverture +{above:.1f}% ✓✓")
         elif above > 0:
             score += 2.0
-            details.append(f"Au-dessus veille +{above:.1f}% ✓")
+            details.append(f"Au-dessus ouverture +{above:.1f}% ✓")
         elif above > -2:
             score += 1.0
-            details.append("En ligne avec veille")
+            details.append("En ligne avec ouverture")
         else:
-            details.append(f"En dessous veille {above:.1f}% ✗")
+            details.append(f"En dessous ouverture {above:.1f}% ✗")
 
     # Volume : signal de liquidité (bonus si > 0)
     if volume > 10000:
@@ -182,7 +182,7 @@ def _inject_live_price(base_row: dict, live_price: float, live_data: dict) -> di
     row["price_source"] = _pr["source"]
     row["price_verified"] = _pr["verified"]
     row["change_pct"] = live_data.get("change_pct", 0)
-    row["prev_close"] = live_data.get("prev_close")
+    row["open"] = live_data.get("open")
     row["volume"]     = live_data.get("volume", 0)
     row["trend"]      = live_data.get("trend")
 
