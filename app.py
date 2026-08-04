@@ -544,11 +544,20 @@ def _load_ai_sum_disk():
     return {}
 
 def _save_ai_sum_disk(cache):
+    import tempfile
+    tmp_path = None
     try:
-        with open(_ai_sum_cache_path(), "w", encoding="utf-8") as f:
-            json.dump(cache, f, ensure_ascii=False, indent=2)
+        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(_ai_sum_cache_path()), delete=False)
+        tmp_path = tmp.name
+        with tmp:
+            json.dump(cache, tmp, ensure_ascii=False, indent=2)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, _ai_sum_cache_path())
     except Exception as e:
         logger.warning(f"[ai_summary] écriture cache disque échouée: {e}")
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 def _get_ai_summary(ticker, company):
     """Résumé IA par ticker, cache mémoire+disque TTL 7j, verrouillé (gunicorn
