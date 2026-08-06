@@ -10,6 +10,7 @@ import json
 import time
 import logging
 import sys
+import tempfile
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,19 @@ def load_summary():
 
 def save_summary(summary):
     os.makedirs(os.path.dirname(SUMMARY_PATH), exist_ok=True)
-    with open(SUMMARY_PATH, "w", encoding="utf-8") as f:
-        json.dump(summary, f, ensure_ascii=False, indent=2)
+    tmp_path = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(SUMMARY_PATH), delete=False)
+        tmp_path = tmp.name
+        with tmp:
+            json.dump(summary, tmp, ensure_ascii=False, indent=2)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, SUMMARY_PATH)
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 
 def print_status():
