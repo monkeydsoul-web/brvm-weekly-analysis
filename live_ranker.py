@@ -9,6 +9,7 @@ import json
 import logging
 import time
 import threading
+import tempfile
 from datetime import datetime, timezone
 from copy import deepcopy
 from price_sanity import resolve_price, get_reference_prices
@@ -23,6 +24,24 @@ HISTORY_PATH  = os.path.join(DATA_DIR, "ranking_history.json")
 _lock = threading.Lock()
 _last_ranking = None          # Cache en mémoire
 _last_prices  = {}            # Derniers prix connus (pour détecter les changements)
+
+def _save_json_atomic(path, data):
+    """Ecriture atomique d un JSON : temporaire dans le meme repertoire, fsync, os.replace."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(path), delete=False)
+    tmp_path = tmp.name
+    try:
+        with tmp:
+            json.dump(data, tmp, ensure_ascii=False, indent=2)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _is_div_date_recent(date_str: str, max_years: int = 3) -> bool:
@@ -614,9 +633,7 @@ def compute_live_ranking(trigger="manual", force=False):
             }
 
             # Sauvegarder
-            os.makedirs(os.path.dirname(RANKING_PATH), exist_ok=True)
-            with open(RANKING_PATH, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
+            _save_json_atomic(RANKING_PATH, payload)
 
             # Sauvegarder dans l'historique (top 10 seulement, max 30 entrées)
             _save_history(payload)
@@ -653,10 +670,9 @@ def _save_history(payload):
         history.append(snapshot)
         history = history[-30:]  # Garder 30 derniers
 
-        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
+        _save_json_atomic(HISTORY_PATH, history)
     except Exception as e:
-        logger.debug(f"_save_history: {e}")
+        logger.warning(f"_save_history: {e}")
 
 
 def load_ranking():
