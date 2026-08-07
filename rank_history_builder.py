@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import tempfile
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -10,19 +11,34 @@ LIVE_RANKING_PATH = os.path.join(DATA_DIR, "live_ranking.json")
 RANK_HISTORY_PATH = os.path.join(DATA_DIR, "rank_history.json")
 
 
-def _load_rank_history():
-    if os.path.exists(RANK_HISTORY_PATH):
-        try:
-            with open(RANK_HISTORY_PATH, encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return []
-    return []
+def _load_rank_history(strict=False):
+    if not os.path.exists(RANK_HISTORY_PATH):
+        return []
+    try:
+        with open(RANK_HISTORY_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        if strict:
+            raise
+        logger.warning("_load_rank_history: rank_history.json illisible, historique ignore")
+        return []
 
 
 def _save_rank_history(entries):
-    with open(RANK_HISTORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(entries, f, ensure_ascii=False, indent=2)
+    tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(RANK_HISTORY_PATH), delete=False)
+    tmp_path = tmp.name
+    try:
+        with tmp:
+            json.dump(entries, tmp, ensure_ascii=False, indent=2)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, RANK_HISTORY_PATH)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def append_daily_top3():
@@ -52,7 +68,12 @@ def append_daily_top3():
     ]
 
     today = datetime.now().strftime("%Y-%m-%d")
-    entries = [e for e in _load_rank_history() if e.get("date") != today]
+    try:
+        history = _load_rank_history(strict=True)
+    except Exception as exc:
+        logger.error(f"append_daily_top3: rank_history.json illisible ({exc}) - ecriture annulee pour ne pas effacer l historique")
+        return
+    entries = [e for e in history if e.get("date") != today]
     entries.append({"date": today, "top3": top3_entry})
     entries.sort(key=lambda e: e["date"])
     _save_rank_history(entries)
