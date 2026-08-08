@@ -428,7 +428,7 @@ def scrape_source(source_key: str, source_cfg: dict, incremental: bool,
                 dest       = docs_dir / ticker_dir / pdf_name
                 dl         = _download_pdf(item["pdf_url"], dest.parent, pdf_name)
                 if dl:
-                    pdf_path = str(dl.relative_to(BASE_DIR))
+                    pdf_path = str(dl.relative_to(DATA_DIR))
                     pdf_text = _read_pdf(dl)
                     if not content:
                         content = pdf_text
