@@ -138,45 +138,51 @@ def job_ai_analysis():
 
 def job_brvm_announcements():
     """Scrape les annonces officielles BRVM tous les jours à 8h."""
-    try:
-        import subprocess, sys
-        script = os.path.join(BASE_DIR, "scripts", "brvm_news_scraper.py")
-        result = subprocess.run(
-            [sys.executable, script, "--incremental"],
-            capture_output=True, text=True, timeout=600
+    import subprocess, sys
+    script = os.path.join(BASE_DIR, "scripts", "brvm_news_scraper.py")
+    result = subprocess.run(
+        [sys.executable, script, "--incremental"],
+        capture_output=True, text=True, timeout=600
+    )
+    lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"brvm_news_scraper.py a echoue (code {result.returncode}): "
+            f"{lines[-1] if lines else 'pas de sortie'}"
         )
-        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
-        logger.info(f"BRVM announcements: {lines[-1] if lines else 'OK'}")
-    except Exception as e:
-        logger.error(f"job_brvm_announcements: {e}")
+    logger.info(f"BRVM announcements: {lines[-1] if lines else 'OK'}")
 
 def job_google_news():
     """Scrape Google News pour les 47 tickers BRVM toutes les 4h."""
-    try:
-        import subprocess, sys
-        script = os.path.join(BASE_DIR, "scripts", "google_news_scraper.py")
-        result = subprocess.run(
-            [sys.executable, script, "--append", "--max-age", "30"],
-            capture_output=True, text=True, timeout=600
+    import subprocess, sys
+    script = os.path.join(BASE_DIR, "scripts", "google_news_scraper.py")
+    result = subprocess.run(
+        [sys.executable, script, "--append", "--max-age", "30"],
+        capture_output=True, text=True, timeout=600
+    )
+    lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"google_news_scraper.py a echoue (code {result.returncode}): "
+            f"{lines[-1] if lines else 'pas de sortie'}"
         )
-        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
-        logger.info(f"Google News: {lines[-1] if lines else 'OK'}")
-    except Exception as e:
-        logger.error(f"job_google_news: {e}")
+    logger.info(f"Google News: {lines[-1] if lines else 'OK'}")
 
 def job_reports_full_scrape():
     """Scrape exhaustif rapports BRVM (dimanche 23h30)."""
-    try:
-        import subprocess, sys
-        script = os.path.join(BASE_DIR, "scripts", "brvm_reports_full_scraper.py")
-        result = subprocess.run(
-            [sys.executable, script, "--max-pages", "20"],
-            capture_output=True, text=True, timeout=3600
+    import subprocess, sys
+    script = os.path.join(BASE_DIR, "scripts", "brvm_reports_full_scraper.py")
+    result = subprocess.run(
+        [sys.executable, script, "--max-pages", "20"],
+        capture_output=True, text=True, timeout=3600
+    )
+    lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"brvm_reports_full_scraper.py a echoue (code {result.returncode}): "
+            f"{lines[-1] if lines else 'pas de sortie'}"
         )
-        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
-        logger.info(f"Reports scrape: {lines[-1] if lines else 'OK'}")
-    except Exception as e:
-        logger.error(f"job_reports_full_scrape: {e}")
+    logger.info(f"Reports scrape: {lines[-1] if lines else 'OK'}")
 
 def job_reports_analyze():
     """Analyse IA des rapports (lundi 2h)."""
@@ -196,18 +202,20 @@ def job_reports_analyze():
 
 def job_summarize_announcements():
     """Résumés IA des nouvelles annonces BRVM (lundi 4h)."""
-    try:
-        import subprocess, sys
-        script = os.path.join(BASE_DIR, "scripts", "announcements_summarizer.py")
-        result = subprocess.run(
-            [sys.executable, script, "--max-cost", "2.0"],
-            capture_output=True, text=True, timeout=3600,
-            input="\n",  # auto-confirm le prompt interactif
+    import subprocess, sys
+    script = os.path.join(BASE_DIR, "scripts", "announcements_summarizer.py")
+    result = subprocess.run(
+        [sys.executable, script, "--max-cost", "2.0"],
+        capture_output=True, text=True, timeout=3600,
+        input="\n",  # auto-confirm le prompt interactif
+    )
+    lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"announcements_summarizer.py a echoue (code {result.returncode}): "
+            f"{lines[-1] if lines else 'pas de sortie'}"
         )
-        lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
-        logger.info(f"Announcements summarize: {lines[-1] if lines else 'OK'}")
-    except Exception as e:
-        logger.error(f"job_summarize_announcements: {e}")
+    logger.info(f"Announcements summarize: {lines[-1] if lines else 'OK'}")
 
 def job_market_data():
     """Met à jour les données de marché (indices BRVM)."""
