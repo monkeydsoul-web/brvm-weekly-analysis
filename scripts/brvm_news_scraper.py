@@ -366,7 +366,8 @@ def _enrich(item: Dict, source_key: str, content: str) -> Dict:
 
 # ── Scraper principal ──────────────────────────────────────────────────────────
 def scrape_source(source_key: str, source_cfg: dict, incremental: bool,
-                  known_urls: set, checkpoint: dict) -> List[Dict]:
+                  known_urls: set, checkpoint: dict,
+                  max_pages: int = 3) -> List[Dict]:
     base_url = source_cfg["url"]
     label    = source_cfg["label"]
     docs_dir = DOCS_DIR / source_key
@@ -378,14 +379,9 @@ def scrape_source(source_key: str, source_cfg: dict, incremental: bool,
     logging.info(f"  Source : {label}")
     logging.info(f"{'─'*50}")
 
-    while True:
+    while page < max_pages:
         page_url = f"{base_url}?page={page}"
         ck_key   = f"{source_key}::p{page}"
-
-        if ck_key in checkpoint and incremental:
-            logging.debug(f"  [skip] {page_url} (checkpoint)")
-            page += 1
-            continue
 
         r = _get(page_url)
         if r is None:
@@ -452,10 +448,6 @@ def scrape_source(source_key: str, source_cfg: dict, incremental: bool,
         if page > 0 and page % 20 == 0:
             _save_checkpoint(checkpoint)
 
-        if not _has_next_page(r.text, page):
-            logging.info(f"  Dernière page ({page}) — fin source")
-            break
-
         page += 1
 
     logging.info(f"  → {len(results)} nouvelles annonces")
@@ -484,6 +476,8 @@ def main():
                         help="Réinitialiser checkpoint et données")
     parser.add_argument("--source", default=None,
                         help="Scraper une seule source (ex: dividendes)")
+    parser.add_argument("--max-pages", type=int, default=3,
+                        help="Nombre de pages de listing relues par source")
     args = parser.parse_args()
 
     LOG_DIR.mkdir(exist_ok=True)
@@ -541,7 +535,8 @@ def main():
         sources_to_run = {args.source: SOURCES[args.source]}
 
     for key, cfg in sources_to_run.items():
-        new_items = scrape_source(key, cfg, args.incremental, known_urls, checkpoint)
+        new_items = scrape_source(key, cfg, args.incremental, known_urls,
+                                  checkpoint, max_pages=args.max_pages)
         existing.setdefault(key, [])
         # Dédupliquer par source_url
         seen = {i.get("source_url") for i in existing[key]}
