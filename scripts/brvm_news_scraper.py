@@ -20,7 +20,7 @@ Usage  :
   python3 scripts/brvm_news_scraper.py --reset
 """
 
-import os, sys, json, re, io, time, logging, datetime, argparse, threading
+import os, sys, json, re, io, time, logging, datetime, argparse, threading, tempfile
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from urllib.parse import urljoin, urlparse
@@ -508,8 +508,11 @@ def main():
         try:
             with open(OUTPUT_PATH) as f:
                 existing = json.load(f)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"ERREUR: {OUTPUT_PATH.name} existe mais est illisible ({e}). "
+                  f"Arret pour ne pas ecraser les annonces deja collectees. "
+                  f"Diagnostiquer le fichier avant de relancer.")
+            sys.exit(1)
 
     # Index des URLs déjà connues
     known_urls: set = set()
@@ -550,8 +553,20 @@ def main():
         existing[key].sort(key=lambda x: x.get("date") or "0000", reverse=True)
 
     # Sauvegarde finale
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(existing, f, ensure_ascii=False, indent=2)
+    tmp_path = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8",
+                                          dir=str(OUTPUT_PATH.parent), delete=False)
+        tmp_path = tmp.name
+        with tmp:
+            json.dump(existing, tmp, ensure_ascii=False, indent=2)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.replace(tmp_path, OUTPUT_PATH)
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
     _save_checkpoint(checkpoint)
 
     total = sum(len(v) for v in existing.values())
