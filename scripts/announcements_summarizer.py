@@ -12,7 +12,7 @@ Usage :
     python3 scripts/announcements_summarizer.py --limit 10
 """
 
-import anthropic, json, hashlib, time, base64, argparse, sys, os
+import anthropic, json, hashlib, time, base64, argparse, sys, os, tempfile
 import requests, urllib3
 from pathlib import Path
 from typing import Optional
@@ -53,15 +53,33 @@ def _load_summaries() -> dict:
     if SUMMARIES_PATH.exists():
         try:
             return json.loads(SUMMARIES_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"ARRET: {SUMMARIES_PATH} existe mais est illisible ({e}).")
+            print("       Aucune ecriture effectuee. Restaurez ou supprimez le fichier avant de relancer.")
+            sys.exit(1)
     return {}
 
 
 def _save_summaries(summaries: dict):
-    SUMMARIES_PATH.write_text(
-        json.dumps(summaries, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    tmp_path = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", suffix=".tmp",
+            dir=str(SUMMARIES_PATH.parent), delete=False
+        )
+        tmp_path = tmp.name
+        with tmp as f:
+            f.write(json.dumps(summaries, ensure_ascii=False, indent=2))
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, str(SUMMARIES_PATH))
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+        raise
 
 
 def _ann_id(source_url: str) -> str:
