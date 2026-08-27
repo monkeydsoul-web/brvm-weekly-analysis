@@ -15,6 +15,7 @@ Usage :
 import anthropic, json, hashlib, time, base64, argparse, sys, os, tempfile
 import requests, urllib3
 from pathlib import Path
+from datetime import datetime, timedelta
 from typing import Optional
 
 urllib3.disable_warnings()
@@ -184,6 +185,8 @@ def main():
     parser.add_argument("--force", action="store_true", help="Ré-analyser même si en cache")
     parser.add_argument("--type", type=str, default=None,
                         help="Filtrer par type (ex: dividendes, convocations_ag)")
+    parser.add_argument("--max-age-days", type=int, default=None,
+                        help="Ignorer les annonces datees de plus de N jours")
     args = parser.parse_args()
 
     if not ANNONCES_PATH.exists():
@@ -195,6 +198,10 @@ def main():
 
     # Filtrer celles qui ont une URL PDF
     anns = [a for a in anns if a.get("source_url") or a.get("pdf_url")]
+
+    if args.max_age_days is not None:
+        cutoff = (datetime.utcnow() - timedelta(days=args.max_age_days)).strftime("%Y-%m-%d")
+        anns = [a for a in anns if str(a.get("date") or "")[:10] >= cutoff]
 
     # Filtrer déjà en cache (sauf --force)
     summaries = _load_summaries()

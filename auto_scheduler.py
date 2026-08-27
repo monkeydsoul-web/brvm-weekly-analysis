@@ -205,7 +205,7 @@ def job_summarize_announcements():
     import subprocess, sys
     script = os.path.join(BASE_DIR, "scripts", "announcements_summarizer.py")
     result = subprocess.run(
-        [sys.executable, script, "--max-cost", "2.0"],
+        [sys.executable, script, "--limit", "15", "--max-age-days", "45", "--max-cost", "2.0"],
         capture_output=True, text=True, timeout=3600,
         input="\n",  # auto-confirm le prompt interactif
     )
