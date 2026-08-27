@@ -207,6 +207,8 @@ def main():
         pending = anns
         cached = 0
 
+    pending.sort(key=lambda a: str(a.get("date") or "0000"), reverse=True)
+
     if args.limit:
         pending = pending[:args.limit]
 
