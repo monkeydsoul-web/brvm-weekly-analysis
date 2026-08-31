@@ -173,7 +173,7 @@ def job_reports_full_scrape():
     import subprocess, sys
     script = os.path.join(BASE_DIR, "scripts", "brvm_reports_full_scraper.py")
     result = subprocess.run(
-        [sys.executable, script, "--max-pages", "20"],
+        [sys.executable, script, "--max-pages", "20", "--skip-download"],
         capture_output=True, text=True, timeout=3600
     )
     lines = [l for l in (result.stdout + result.stderr).splitlines() if l.strip()]
