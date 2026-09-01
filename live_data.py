@@ -79,9 +79,17 @@ def save_cache(prices_dict):
     sources = {}
     for v in prices_dict.values():
         s = v.get("source","unavailable"); sources[s] = sources.get(s,0)+1
+    try:
+        from scraper import STOCK_FUNDAMENTALS
+        _inconnus = sorted(set(prices_dict.keys()) - set(STOCK_FUNDAMENTALS.keys()))
+    except Exception:
+        _inconnus = None
+    if _inconnus:
+        logger.warning("save_cache: %d ticker(s) cote(s) hors perimetre : %s", len(_inconnus), ", ".join(_inconnus))
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(), "market_open": is_market_open(),
                "prices": prices_dict, "stats": {"total": len(prices_dict),
-               "with_price": len([v for v in prices_dict.values() if v.get("price")]), "sources": sources}}
+               "with_price": len([v for v in prices_dict.values() if v.get("price")]), "sources": sources,
+               "unknown_tickers": _inconnus}}
     n_ok = payload["stats"]["with_price"]
     if n_ok == 0:
         ancien = load_cache()
