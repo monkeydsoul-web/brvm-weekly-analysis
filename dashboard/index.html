@@ -4104,7 +4104,30 @@ function _loadStockAI(ticker){
     if(data.error){el.innerHTML=`<div class="card"><p style="color:var(--t2);font-size:12px">Aucune analyse IA disponible pour ${ticker}.</p></div>`;return;}
     const vC=data.verdict_investisseur==='POSITIF'?'var(--green)':data.verdict_investisseur==='NEGATIF'?'var(--red)':'var(--amber)';
     const kpis=data.kpis||{};
-    const kpiHtml=Object.entries(kpis).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--t2)">${k}</span><strong>${v}</strong></div>`).join('');
+    const _KPI_FULL=[
+      {key:'chiffre_affaires',     label:"Chiffre d'affaires"},
+      {key:'resultat_exploitation',label:"Resultat d'exploitation"},
+      {key:'resultat_net',         label:'Resultat net'},
+      {key:'ebitda',               label:'EBITDA'},
+      {key:'marge_nette',          label:'Marge nette'},
+      {key:'roe',                  label:'ROE'},
+      {key:'total_bilan',          label:'Total bilan'},
+      {key:'capitaux_propres',     label:'Capitaux propres'},
+      {key:'dette_nette',          label:'Dette nette'},
+      {key:'dividende_par_action', label:'Dividende par action'}
+    ];
+    const kpiHtml=_KPI_FULL.map(({key,label})=>{
+      const v=kpis[key];
+      let val='—';
+      if(v&&v.valeur!=null){
+        const num=(typeof v.valeur==='number')?v.valeur.toLocaleString('fr-FR'):String(v.valeur);
+        const uni=v.unite?` <span style="font-size:9px;color:var(--t2)">${v.unite}</span>`:'';
+        const varc=String(v.variation||'').startsWith('+')?'var(--green)':'var(--red)';
+        const vari=v.variation?` <span style="font-size:9px;color:${varc}">${v.variation}</span>`:'';
+        val=`${num}${uni}${vari}`;
+      }
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--t2)">${label}</span><strong>${val}</strong></div>`;
+    }).join('');
     const pts=(data.points_cles||[]).map(p=>`<li style="color:var(--green);font-size:11px;margin-bottom:4px">✓ ${p}</li>`).join('');
     const risques=(data.risques||[]).map(r=>`<li style="color:var(--red);font-size:11px;margin-bottom:4px">✗ ${r}</li>`).join('');
     const _pArr=Array.isArray(data.perspectives)?data.perspectives:(data.perspectives?[data.perspectives]:[]);
