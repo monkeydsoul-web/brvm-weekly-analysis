@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BRVM Analyzer — Notation des sociétés de la BRVM</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="description" content="Notes sur 10 et analyses transparentes des 47 sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:title" content="BRVM Analyzer — Notation des sociétés de la BRVM"><meta property="og:description" content="Notes sur 10 et analyses transparentes des 47 sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="BRVM Analyzer">
+<!DOCTYPE html><html lang="fr" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BRVM Analyzer — Notation des sociétés de la BRVM</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="description" content="Notes sur 10 et analyses transparentes des sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:title" content="BRVM Analyzer — Notation des sociétés de la BRVM"><meta property="og:description" content="Notes sur 10 et analyses transparentes des sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="BRVM Analyzer">
 <style>
 /* ══ Variables ══════════════════════════════════════════════════════════════ */
 :root{
@@ -825,7 +825,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Toutes les 47 sociétés BRVM sont notées de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
-    <div><h2>Classement complet</h2><p class="page-sub">47 sociétés classées par score composite sur 8 modèles de valorisation</p></div>
+    <div><h2>Classement complet</h2><p class="page-sub" id="rank-subtitle">Sociétés classées par score composite sur 8 modèles de valorisation</p></div>
     <div style="display:flex;gap:8px">
       <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
       <select id="fSort" onchange="renderRankLive()" title="Trier par...">
@@ -1687,7 +1687,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">BRVM Analyzer</span><span>v14.2</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Modèle IA</span><span>claude-sonnet-4-6</span></div>
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Tickers couverts</span><span>47</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Tickers couverts</span><span id="settings-tickers">—</span></div>
       </div>
     </div>
   </div>
@@ -1765,7 +1765,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 
 <footer id="app-footer">
-  <span>📅 <span id="footer-date"></span> · 📊 47 sociétés · <span id="footer-stats">—</span> · ⚠️ Cours indicatifs — aucun conseil en investissement</span>
+  <span>📅 <span id="footer-date"></span> · 📊 <span id="footer-count">—</span> · <span id="footer-stats">—</span> · ⚠️ Cours indicatifs — aucun conseil en investissement</span>
   <span style="display:flex;align-items:center;gap:10px">
     <span id="footer-live" style="font-size:10px">MàJ : —</span>
     <button onclick="showChangelog()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:10px;padding:0" title="Historique des versions">Changelog v14.3</button>
@@ -4168,10 +4168,22 @@ async function loadStatus(){
     const fsEl=document.getElementById('footer-stats');
     if(fsEl){
       const nReports=(await fetch('/api/reports-count').then(r=>r.json()).catch(()=>({})));
-      const rCount=nReports.total||471;
-      const nAnnc=(await fetch('/api/announcements?limit=1').then(r=>r.json()).catch(()=>({total:95})));
-      const aCount=nAnnc.total||95;
-      fsEl.innerHTML=`${rCount} rapports archivés · ${aCount} annonces analysées · <a href="#" onclick="nav('methodo');return false" style="color:inherit;text-decoration:none;cursor:pointer">📖 Méthodologie</a>`;
+      const rCount=nReports.total;
+      const nAnnc=(await fetch('/api/announcements?limit=1').then(r=>r.json()).catch(()=>({})));
+      const aCount=nAnnc.total;
+      const _BBGCI1=[];
+      if(rCount) _BBGCI1.push(`${rCount} rapports archivés`);
+      if(aCount) _BBGCI1.push(`${aCount} annonces collectées`);
+      _BBGCI1.push(`<a href="#" onclick="nav('methodo');return false" style="color:inherit;text-decoration:none;cursor:pointer">📖 Méthodologie</a>`);
+      fsEl.innerHTML=_BBGCI1.join(' · ');
+      const _notees=(window.scores||[]).length;
+      const _cotees=n;
+      const _fc=document.getElementById('footer-count');
+      if(_fc) _fc.textContent=_cotees&&_cotees!==_notees?`${_notees} sociétés notées / ${_cotees} cotées`:`${_notees} sociétés`;
+      const _rb=document.getElementById('rank-badge');
+      if(_rb&&_notees) _rb.textContent=_notees;
+      const _st=document.getElementById('settings-tickers');
+      if(_st&&_notees) _st.textContent=_cotees&&_cotees!==_notees?`${_notees} notées / ${_cotees} cotées`:_notees;
     }
     const msbBoc=document.getElementById('msb-boc');
     if(msbBoc) msbBoc.textContent=`${n} cours live`;
