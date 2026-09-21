@@ -4172,7 +4172,7 @@ async function loadStatus(){
       const nAnnc=(await fetch('/api/announcements?limit=1').then(r=>r.json()).catch(()=>({})));
       const aCount=nAnnc.total;
       const _BBGCI1=[];
-      if(rCount) _BBGCI1.push(`${rCount} rapports archivés`);
+      if(rCount) _BBGCI1.push(`${rCount} rapports analysés`);
       if(aCount) _BBGCI1.push(`${aCount} annonces collectées`);
       _BBGCI1.push(`<a href="#" onclick="nav('methodo');return false" style="color:inherit;text-decoration:none;cursor:pointer">📖 Méthodologie</a>`);
       fsEl.innerHTML=_BBGCI1.join(' · ');

@@ -839,6 +839,19 @@ def api_reports(ticker):
     return jsonify({"ticker": ticker, "reports": reports, "total": len(reports)})
 
 
+@app.route("/api/reports-count")
+def api_reports_count():
+    """D.36 - nombre de rapports analyses (fichiers de pdf_analyses/).
+    listdir seulement : route appelee a chaque chargement de page.
+    En cas d erreur, total = None et le front masque le segment :
+    jamais de nombre de repli."""
+    try:
+        n = sum(1 for f in os.listdir(_PDF_ANALYSES_DIR) if f.endswith(".json"))
+    except OSError:
+        n = None
+    return jsonify({"total": n})
+
+
 @app.route("/api/analyze-report", methods=["POST"])
 def api_analyze_report():
     data = request.get_json() or {}
