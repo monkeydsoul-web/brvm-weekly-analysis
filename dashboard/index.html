@@ -2834,7 +2834,8 @@ function loadMarketWidget(){
     if(d.updated_at){
       var dt=new Date(d.updated_at);
       var timeStr=dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-      document.getElementById('market-time').textContent='MàJ '+timeStr;
+      var _mt=document.getElementById('market-time');
+      if(_mt) _mt.textContent='MàJ '+timeStr;
       var msbTime=document.getElementById('msb-time');
       if(msbTime) msbTime.textContent='MàJ '+timeStr;
     }
@@ -2850,7 +2851,7 @@ function loadMarketWidget(){
     if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
     if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
     _paintIndexCards();
-  }).catch(()=>{});
+  }).catch(e=>{console.error('[BRVM] loadMarketWidget:',e);});
 }
 
 function loadSidebar(){
