@@ -412,21 +412,26 @@ def fetch_macro_context() -> dict:
         logger.warning(f"Indices BRVM: {e}")
 
     # Taux de change FCFA (proxy via ECB — FCFA est arrimé à l'EUR)
+    # MACRO-FX-1 : aucun taux de repli. En cas d echec, les cles restent absentes
+    # et la carte du front se masque (un compteur en panne se tait).
     try:
         r = requests.get(
             "https://api.exchangerate-api.com/v4/latest/EUR",
             timeout=10, headers=HEADERS
         )
+        r.raise_for_status()
         data = r.json()
-        rates = data.get("rates", {})
-        eur_usd = rates.get("USD", 1.08)
+        rates = data.get("rates") if isinstance(data, dict) else None
+        eur_usd = rates.get("USD") if isinstance(rates, dict) else None
+        if not isinstance(eur_usd, (int, float)) or isinstance(eur_usd, bool):
+            raise ValueError(f"EUR/USD absent ou non numerique: {eur_usd!r}")
+        if not (0.5 <= eur_usd <= 2.0):
+            raise ValueError(f"EUR/USD hors bornes: {eur_usd}")
         macro["FCFA_per_EUR"] = 655.957  # taux fixe CFA
         macro["FCFA_per_USD"] = round(655.957 / eur_usd, 2)
         macro["EUR_USD"] = round(eur_usd, 4)
     except Exception as e:
-        logger.debug(f"Taux de change: {e}")
-        macro["FCFA_per_USD"] = 610.0
-        macro["EUR_USD"] = 1.076
+        logger.warning(f"Taux de change indisponible, cles omises: {e}")
 
     logger.info(f"Contexte macro: {macro}")
     return macro
