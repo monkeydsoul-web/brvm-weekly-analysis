@@ -766,16 +766,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </div>
 
   <div class="card" id="macroCard" style="display:none;margin-top:12px">
-    <div class="ct">Marché BRVM</div>
+    <div class="ct">Taux de change</div>
     <div style="display:flex;gap:20px;flex-wrap:wrap">
-      <div id="macroComposite" style="display:none">
-        <div style="font-size:10px;color:var(--text-3)">BRVM Composite</div>
-        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macroCompositeVal"></div>
-      </div>
-      <div id="macro30" style="display:none">
-        <div style="font-size:10px;color:var(--text-3)">BRVM-30</div>
-        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macro30Val"></div>
-      </div>
       <div id="macroFx" style="display:none">
         <div style="font-size:10px;color:var(--text-3)">1 USD</div>
         <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macroFxVal"></div>
@@ -3552,16 +3544,6 @@ function renderMacro(m){
   const ageH = (Date.now() - d.getTime()) / 3600000;
   if(ageH > 48) return;
   let any = false;
-  if(typeof m.BRVM_COMPOSITE === 'number'){
-    document.getElementById('macroCompositeVal').textContent = m.BRVM_COMPOSITE.toFixed(2);
-    document.getElementById('macroComposite').style.display = '';
-    any = true;
-  }
-  if(typeof m.BRVM_30 === 'number'){
-    document.getElementById('macro30Val').textContent = m.BRVM_30.toFixed(2);
-    document.getElementById('macro30').style.display = '';
-    any = true;
-  }
   if(typeof m.FCFA_per_USD === 'number'){
     document.getElementById('macroFxVal').textContent = Math.round(m.FCFA_per_USD) + ' FCFA';
     document.getElementById('macroFx').style.display = '';
@@ -3571,7 +3553,7 @@ function renderMacro(m){
   const dd = String(d.getDate()).padStart(2,'0');
   const mm = String(d.getMonth()+1).padStart(2,'0');
   const yyyy = d.getFullYear();
-  document.getElementById('macroMeta').textContent = 'Donnees du ' + dd + '/' + mm + '/' + yyyy;
+  document.getElementById('macroMeta').textContent = 'Données du ' + dd + '/' + mm + '/' + yyyy;
   document.getElementById('macroCard').style.display = '';
 }
 function renderComm(){
