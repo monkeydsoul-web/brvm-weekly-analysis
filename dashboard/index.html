@@ -4248,13 +4248,10 @@ function _renderMarketPage() {
   var fluxDst = document.getElementById('mkt-flux');
   if (fluxDst) renderFluxCapitaux(fluxDst);
 
-  // Insights
-  var insSrc = document.getElementById('insights');
+  // Insights (LOADSTUCK-1 : ancre source #insights supprimee du DOM, calcul direct)
   var insDst = document.getElementById('mkt-insights-full');
-  if (insSrc && insDst) {
-    if (insSrc.textContent.trim() && insSrc.textContent !== '—') {
-      insDst.innerHTML = insSrc.innerHTML;
-    } else if (window.scores && window.scores.length) {
+  if (insDst) {
+    if (window.scores && window.scores.length) {
       var sorted = [...window.scores].sort(function(a,b){return (b.composite_adj||0)-(a.composite_adj||0);});
       var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+((s.composite_adj||0)/80*10).toFixed(1)+'/10'; }).join(' · ');
       insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
