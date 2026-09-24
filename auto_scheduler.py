@@ -15,7 +15,7 @@ Jobs:
   - Lundis 2h          : analyse IA rapports (nouveau pipeline)
   - Lundis 4h          : résumés IA annonces BRVM
 """
-import logging, os, time, json
+import logging, os, time, json, tempfile, threading
 from datetime import datetime
 from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -27,6 +27,7 @@ warnings.filterwarnings('ignore')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 from paths import DATA_DIR
 _HIST_PATH = Path(DATA_DIR) / "scheduler_history.json"
+_HIST_LOCK = threading.Lock()
 logger = logging.getLogger(__name__)
 
 
@@ -44,16 +45,36 @@ def wrap_job(job_id: str, fn):
             logger.error(f"Job {job_id} failed: {e}")
         finally:
             try:
-                hist = json.loads(_HIST_PATH.read_text()) if _HIST_PATH.exists() else {}
-                hist[job_id] = {
-                    "started_at": datetime.fromtimestamp(start).isoformat(),
-                    "duration_s": round(time.time() - start, 1),
-                    "status": status,
-                    "error": err,
-                }
-                _HIST_PATH.write_text(json.dumps(hist, indent=2))
-            except Exception:
-                pass
+                with _HIST_LOCK:
+                    try:
+                        hist = json.loads(_HIST_PATH.read_text()) if _HIST_PATH.exists() else {}
+                    except Exception as e:
+                        logger.error(f"scheduler_history illisible, repart de zero: {e}")
+                        hist = {}
+                    if not isinstance(hist, dict):
+                        logger.error("scheduler_history n est pas un dict, repart de zero")
+                        hist = {}
+                    hist[job_id] = {
+                        "started_at": datetime.fromtimestamp(start).isoformat(),
+                        "duration_s": round(time.time() - start, 1),
+                        "status": status,
+                        "error": err,
+                    }
+                    tmp_path = None
+                    try:
+                        tmp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=str(_HIST_PATH.parent), delete=False)
+                        tmp_path = tmp.name
+                        with tmp:
+                            json.dump(hist, tmp, indent=2)
+                            tmp.flush()
+                            os.fsync(tmp.fileno())
+                        os.replace(tmp_path, str(_HIST_PATH))
+                    except Exception:
+                        if tmp_path and os.path.exists(tmp_path):
+                            os.unlink(tmp_path)
+                        raise
+            except Exception as e:
+                logger.error(f"scheduler_history: ecriture impossible: {e}")
     wrapped.__name__ = fn.__name__
     return wrapped
 
