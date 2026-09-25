@@ -1833,7 +1833,7 @@ window.TERMS = {
   'Graham': {short:'Méthode de Benjamin Graham',long:'Le modèle du père de l\'investissement value, calcule un cours "défensif" basé sur BNA et BVPA.'},
   'Buffett': {short:'Méthode de Warren Buffett',long:'Modèle inspiré de Buffett : recherche des sociétés avec ROE élevé et marge sur le long terme.'},
   'BRVM-C': {short:'Indice composite',long:'Moyenne pondérée de toutes les actions cotées à la BRVM.'},
-  'BRVM-30': {short:'Top 30',long:'Indice des 30 plus grosses sociétés (par capitalisation) cotées à la BRVM.'},
+  'BRVM-30': {short:'Top 30',long:'Indice des 30 valeurs les plus échangées à la BRVM, revu chaque trimestre.'},
   'Backtest': {short:'Test historique',long:'Simulation : "qu\'aurait gagné cette stratégie si on l\'avait suivie ces 3 dernières années ?".'},
   'Sharpe': {short:'Ratio de Sharpe',long:'Mesure le rendement par rapport au risque pris. Au-dessus de 1 = bon.'},
   'Markowitz': {short:'Optimisation portefeuille',long:'Méthode pour répartir son argent entre plusieurs actions afin de maximiser le rendement et minimiser le risque.'},
@@ -5275,7 +5275,7 @@ function checkTourFirst() {
 // ── Glossaire financier ────────────────────────────────────────────────────
 const _glossTerms = [
   { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
-  { term:'BRVM-30', def:'Indice des 30 plus grandes capitalisations boursières de la BRVM. C\'est l\'équivalent du CAC 40 français ou du Dow Jones américain pour l\'Afrique de l\'Ouest.', ex:'Si le BRVM-30 gagne +2.5% en un mois, les 30 plus grandes entreprises de la BRVM valent globalement 2.5% de plus qu\'un mois avant.' },
+  { term:'BRVM-30', def:'Indice des 30 valeurs les plus échangées de la BRVM, revu chaque trimestre selon la liquidité. C\'est l\'équivalent du CAC 40 français ou du Dow Jones américain pour l\'Afrique de l\'Ouest.', ex:'Si le BRVM-30 gagne +2.5% en un mois, les 30 valeurs les plus échangées de la BRVM valent globalement 2.5% de plus qu\'un mois avant.' },
   { term:'BRVM-COMPOSITE', def:'Indice qui inclut TOUTES les sociétés cotées à la BRVM. Plus large que le BRVM-30, il reflète la santé globale du marché boursier de l\'Afrique de l\'Ouest.', ex:'BRVM-COMPOSITE à 200 points et il y a 5 ans il était à 150 → croissance de 33% de l\'ensemble du marché.' },
   { term:'Buffett Score', def:'Critères d\'investissement de Warren Buffett : ROE ≥ 15%, croissance du BNA, avantage concurrentiel durable ("moat"), dette faible, gestion honnête. Score /10 dans notre dashboard.', ex:'SNTS (Sonatel) obtient souvent un bon score Buffett car elle a un quasi-monopole des télécoms au Sénégal = avantage concurrentiel fort.' },
   { term:'Capitalisation boursière', def:'La valeur totale de toutes les actions d\'une société sur le marché. Formule : cours × nombre d\'actions. Permet de classer les sociétés par taille.', ex:'SGBC : cours 12 000 XOF × 10 millions d\'actions = capitalisation de 120 milliards XOF (~183 millions €).' },
@@ -5404,7 +5404,7 @@ const _helpContent = {
       { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre score sur 80 points. Plus le score est élevé, plus la société est financièrement attractive.' },
       { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 6.9/10 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
       { h: '🌡️ Heatmap BRVM', p: 'Chaque carré = une société. La taille = la capitalisation boursière. La couleur = la performance du jour. Vert vif = forte hausse. Rouge vif = forte baisse.' },
-      { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus grandes). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
+      { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus échangées). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
       { tip: '💡 Que faire ? Cliquez sur n\'importe quel carré de la heatmap ou sur une société dans les podiums pour voir sa fiche détaillée complète.' },
       { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 8.5/10, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
     ]
