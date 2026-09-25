@@ -84,8 +84,13 @@ def save_cache(prices_dict):
         _inconnus = sorted(set(prices_dict.keys()) - set(STOCK_FUNDAMENTALS.keys()))
     except Exception:
         _inconnus = None
-    if _inconnus:
-        logger.warning("save_cache: %d ticker(s) cote(s) hors perimetre : %s", len(_inconnus), ", ".join(_inconnus))
+    # IPO-2 : n avertir que si la liste change (BBGC reste connue sans etre notee)
+    try:
+        _precedents = (load_cache() or {}).get("stats", {}).get("unknown_tickers", "ABSENT")
+    except Exception:
+        _precedents = "ILLISIBLE"
+    if _inconnus != _precedents:
+        logger.warning("save_cache: perimetre modifie, hors perimetre : %s (cycle precedent : %s)", _inconnus, _precedents)
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(), "market_open": is_market_open(),
                "prices": prices_dict, "stats": {"total": len(prices_dict),
                "with_price": len([v for v in prices_dict.values() if v.get("price")]), "sources": sources,
