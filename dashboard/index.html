@@ -731,7 +731,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
         <div style="margin-bottom:18px">
           <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">La BRVM, c'est quoi ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">La BRVM est la bourse commune aux <strong>8 pays de l'UEMOA</strong> (Afrique de l'Ouest), avec son siège à Abidjan. Créée en <strong>1998</strong>, elle réunit environ <strong>47 sociétés cotées</strong>. Sa performance se suit via deux indices : le <strong>BRVM Composite</strong> (tout le marché) et le <strong>BRVM 30</strong> (les 30 valeurs les plus actives).</p>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">La BRVM est la bourse commune aux <strong>8 pays de l'UEMOA</strong> (Afrique de l'Ouest), avec son siège à Abidjan. Créée en <strong>1998</strong>, elle réunit <strong>une cinquantaine de sociétés cotées</strong>. Sa performance se suit via deux indices : le <strong>BRVM Composite</strong> (tout le marché) et le <strong>BRVM 30</strong> (les 30 valeurs les plus actives).</p>
         </div>
 
         <div style="margin-bottom:18px">
@@ -761,7 +761,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
         <div>
           <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">À quoi sert ce site ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">Ce site attribue une <strong>note sur 10 transparente</strong> à chacune des 47 sociétés, pour aider les débutants à s'y retrouver — avec une <strong>méthodologie publiée</strong> et consultable. Les notes sont un <strong>outil d'aide à la décision, pas un conseil en investissement</strong> : à toi de te faire ton opinion.</p>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">Ce site attribue une <strong>note sur 10 transparente</strong> à chacune des sociétés suivies, pour aider les débutants à s'y retrouver — avec une <strong>méthodologie publiée</strong> et consultable. Les notes sont un <strong>outil d'aide à la décision, pas un conseil en investissement</strong> : à toi de te faire ton opinion.</p>
         </div>
       </div>
 
@@ -786,7 +786,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div style="padding:16px 20px">
     <div class="card">
       <div class="ct">Notre mission</div>
-      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Rendre l'analyse des 47 sociétés cotées à la BRVM accessible aux investisseurs débutants d'Afrique de l'Ouest. Chaque société reçoit une note sur 10 et un repère (✅ ⏳ ⚠️) — voici exactement comment ils sont fabriqués.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Rendre l'analyse des sociétés cotées à la BRVM accessible aux investisseurs débutants d'Afrique de l'Ouest. Chaque société reçoit une note sur 10 et un repère (✅ ⏳ ⚠️) — voici exactement comment ils sont fabriqués.</p>
     </div>
     <div class="card">
       <div class="ct">D'où viennent les prix</div>
@@ -815,7 +815,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- CLASSEMENT -->
 <div class="page" id="page-rank">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Toutes les 47 sociétés BRVM sont notées de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
+  <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Chaque société classée reçoit une note de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Classement complet</h2><p class="page-sub" id="rank-subtitle">Sociétés classées par score composite sur 8 modèles de valorisation</p></div>
     <div style="display:flex;gap:8px">
@@ -1832,7 +1832,7 @@ window.TERMS = {
   'EPV': {short:'Valeur du pouvoir bénéficiaire',long:'Earning Power Value : estime ce que la société vaut si ses bénéfices restent stables.'},
   'Graham': {short:'Méthode de Benjamin Graham',long:'Le modèle du père de l\'investissement value, calcule un cours "défensif" basé sur BNA et BVPA.'},
   'Buffett': {short:'Méthode de Warren Buffett',long:'Modèle inspiré de Buffett : recherche des sociétés avec ROE élevé et marge sur le long terme.'},
-  'BRVM-C': {short:'Indice composite',long:'Moyenne pondérée de toutes les 47 actions cotées à la BRVM.'},
+  'BRVM-C': {short:'Indice composite',long:'Moyenne pondérée de toutes les actions cotées à la BRVM.'},
   'BRVM-30': {short:'Top 30',long:'Indice des 30 plus grosses sociétés (par capitalisation) cotées à la BRVM.'},
   'Backtest': {short:'Test historique',long:'Simulation : "qu\'aurait gagné cette stratégie si on l\'avait suivie ces 3 dernières années ?".'},
   'Sharpe': {short:'Ratio de Sharpe',long:'Mesure le rendement par rapport au risque pris. Au-dessus de 1 = bon.'},
@@ -5187,7 +5187,7 @@ if(localStorage.getItem('brvm_intro_seen')){var _bi=document.getElementById('brv
 const _tourSteps = [
   {
     title: '👋 Bienvenue sur BRVM Analyzer !',
-    body: 'Ce dashboard vous permet d\'analyser les 47 actions cotées sur la Bourse Régionale des Valeurs Mobilières d\'Afrique de l\'Ouest.<br><br>Ce tour rapide (5 étapes) vous explique les fonctionnalités essentielles. Cliquez sur <strong>Suivant →</strong> pour commencer.',
+    body: 'Ce dashboard vous permet d\'analyser les actions cotées sur la Bourse Régionale des Valeurs Mobilières d\'Afrique de l\'Ouest.<br><br>Ce tour rapide (5 étapes) vous explique les fonctionnalités essentielles. Cliquez sur <strong>Suivant →</strong> pour commencer.',
     highlight: null,
     btn: 'Commencer →'
   },
@@ -5276,7 +5276,7 @@ function checkTourFirst() {
 const _glossTerms = [
   { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
   { term:'BRVM-30', def:'Indice des 30 plus grandes capitalisations boursières de la BRVM. C\'est l\'équivalent du CAC 40 français ou du Dow Jones américain pour l\'Afrique de l\'Ouest.', ex:'Si le BRVM-30 gagne +2.5% en un mois, les 30 plus grandes entreprises de la BRVM valent globalement 2.5% de plus qu\'un mois avant.' },
-  { term:'BRVM-COMPOSITE', def:'Indice qui inclut TOUTES les sociétés cotées à la BRVM (47 actuellement). Plus large que le BRVM-30, il reflète la santé globale du marché boursier de l\'Afrique de l\'Ouest.', ex:'BRVM-COMPOSITE à 200 points et il y a 5 ans il était à 150 → croissance de 33% de l\'ensemble du marché.' },
+  { term:'BRVM-COMPOSITE', def:'Indice qui inclut TOUTES les sociétés cotées à la BRVM. Plus large que le BRVM-30, il reflète la santé globale du marché boursier de l\'Afrique de l\'Ouest.', ex:'BRVM-COMPOSITE à 200 points et il y a 5 ans il était à 150 → croissance de 33% de l\'ensemble du marché.' },
   { term:'Buffett Score', def:'Critères d\'investissement de Warren Buffett : ROE ≥ 15%, croissance du BNA, avantage concurrentiel durable ("moat"), dette faible, gestion honnête. Score /10 dans notre dashboard.', ex:'SNTS (Sonatel) obtient souvent un bon score Buffett car elle a un quasi-monopole des télécoms au Sénégal = avantage concurrentiel fort.' },
   { term:'Capitalisation boursière', def:'La valeur totale de toutes les actions d\'une société sur le marché. Formule : cours × nombre d\'actions. Permet de classer les sociétés par taille.', ex:'SGBC : cours 12 000 XOF × 10 millions d\'actions = capitalisation de 120 milliards XOF (~183 millions €).' },
   { term:'DCF (Discounted Cash Flows)', def:'Valeur actualisée des flux de trésorerie futurs. Principe : 1 000 XOF dans 5 ans vaut moins que 1 000 XOF aujourd\'hui (inflation, risque). Le DCF calcule ce que vaut l\'entreprise basé sur ses bénéfices futurs projetés.', ex:'Si le DCF calcule une valeur de 10 000 XOF pour une action qui cote 7 000 XOF → potentiel de hausse de +43%.' },
@@ -5928,7 +5928,7 @@ function _renderCmdK(q) {
 // ── Onboarding tour 5 étapes ───────────────────────────────────────────────
 const _ONB_STEPS = [
   {title:'Bienvenue sur BRVM Analyzer 👋', desc:'Ce tour rapide de 1 minute va te montrer comment trouver des actions à acheter sur la BRVM. Tu peux passer à tout moment.'},
-  {title:'🏆 Le Classement — 47 sociétés notées', desc:'Toutes les sociétés cotées à la BRVM sont notées de 1 à 10 par notre IA. Plus la note est haute, mieux c\'est. Une note 7,5 ou plus = excellente opportunité ⭐⭐⭐⭐⭐.'},
+  {title:'🏆 Le Classement — 47 sociétés notées', desc:'Chaque société classée reçoit une note de 1 à 10, calculée par 8 modèles financiers. Plus la note est haute, mieux c\'est. Une note 7,5 ou plus = excellente opportunité ⭐⭐⭐⭐⭐.'},
   {title:'📋 Tout savoir sur une société en 1 clic', desc:'Clique sur n\'importe quelle société pour voir : son cours, ses dividendes, ses rapports annuels (avec résumé IA), les actualités, et une analyse stratégique détaillée.'},
   {title:'💼 Suivre tes achats', desc:'Dans la section Revenus → Mon portefeuille, enregistre tes positions pour suivre tes gains, tes pertes et tes dividendes annuels en temps réel.'},
   {title:'🌱 Mode débutant activé', desc:'Par défaut, tu es en mode expert. Active le mode débutant pour des explications simplifiées. Survole n\'importe quel sigle pour voir sa définition. Bon investissement !'},
