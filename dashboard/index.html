@@ -2555,7 +2555,7 @@ async function init(){
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
-    fetch('/data/companies_stories.json').then(r=>r.json()).then(d=>{_companyStories=d.stories||{};}).catch(()=>{});
+    fetch('/data/companies_stories.json').then(r=>r.json()).then(d=>{_companyStories=d.stories||{};}).catch(e=>{console.error('[BRVM] companies_stories:',e);});
     // Charger historique prix PUIS rendu — .finally() garantit le rendu même si l'API échoue
     fetch('/api/price-history').then(r=>r.json()).then(ph=>{
       window._priceHistory=ph;
@@ -2585,7 +2585,7 @@ async function init(){
       gSpinHide();
     });
     // Sparklines BOC en parallèle
-    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(()=>{});
+    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(e=>{console.error('[BRVM] sparklines:',e);});
     renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget,500);
     populateSelects();
     setTimeout(_autoTooltips, 1200);
@@ -4032,7 +4032,7 @@ async function showStock(ticker){
               const svg=sparkline(data.points.slice(-30).map(p=>({price:p.close})),120,40);
               if(_miniSpkEl)_miniSpkEl.innerHTML=svg;
             }
-          }).catch(()=>{});
+          }).catch(e=>{console.error('[BRVM] mini-sparkline:',e);});
         }
       }
     }
