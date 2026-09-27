@@ -938,18 +938,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </details>
   <div id="addAlertForm" style="display:none" class="card" style="margin-bottom:10px">
     <div class="ct" style="margin-bottom:10px">Créer une alerte</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:8px;align-items:end">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:8px;align-items:end">
       <div><label style="font-size:10px;color:var(--t2)">Action</label>
         <select id="alertTicker" onchange="_alertTickerChanged()"><option value="">Sélectionner...</option></select></div>
-      <div><label style="font-size:10px;color:var(--t2)">Type</label>
-        <select id="alertType" onchange="_alertTypeChanged()" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
-          <option value="price" title="Soyez notifié quand le cours atteint votre seuil">Prix XOF</option>
-          <option value="score" title="Soyez notifié quand le score global change de seuil">Score /10</option>
-          <option value="div_yield" title="Soyez notifié quand le rendement dividende franchit votre seuil">Rendement div.</option>
-          <option value="change_pct" title="Soyez notifié quand la variation journalière est atteinte">Variation jour%</option>
-        </select>
-      </div>
-      <div><label style="font-size:10px;color:var(--t2)" id="alertThresholdLabel">Seuil</label>
+      <div><label style="font-size:10px;color:var(--t2)" id="alertThresholdLabel">Seuil (XOF)</label>
         <input type="number" id="alertThreshold" placeholder="Ex: 30000" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text)">
         <div id="alertPriceHelper" style="font-size:10px;color:var(--t3);margin-top:3px"></div></div>
       <div><label style="font-size:10px;color:var(--t2)">Direction</label>
@@ -2336,22 +2328,6 @@ function sbToggle(id){
   }catch(e){}
 })();
 
-// ── Alert badge count ───────────────────────────────────────────────────────
-function _updateAlertBadge(){
-  try {
-    const alerts = JSON.parse(localStorage.getItem('brvm_alerts_v2') || '[]');
-    const badge = document.getElementById('alert-badge');
-    if (!badge) return;
-    if (alerts.length > 0) {
-      badge.textContent = alerts.length;
-      badge.style.display = 'inline-flex';
-    } else {
-      badge.style.display = 'none';
-    }
-  } catch(e){}
-}
-setTimeout(_updateAlertBadge, 1000);
-
 // ── Skeleton loader helper ──────────────────────────────────────────────────
 function skeletonRows(n=5){
   return Array.from({length:n}, (_,i)=>`<div class="sk-row" style="opacity:${1-i*0.12}">
@@ -3454,15 +3430,6 @@ function simCalc(){
 // ── Alertes ────────────────────────────────────────────────────────────────
 function showAddAlert(){document.getElementById('addAlertForm').style.display='block';}
 
-function _alertTypeChanged(){
-  const type = document.getElementById('alertType')?.value;
-  const lbl = document.getElementById('alertThresholdLabel');
-  const inp = document.getElementById('alertThreshold');
-  const placeholders = { price:'Ex: 30 000 XOF', score:'Ex: 60 (sur 80)', div_yield:'Ex: 8 (en %)', change_pct:'Ex: 5 (en %)' };
-  if(lbl) lbl.textContent = { price:'Seuil Prix (XOF)', score:'Seuil Score /10', div_yield:'Seuil Div%', change_pct:'Variation %' }[type]||'Seuil';
-  if(inp) inp.placeholder = placeholders[type]||'Seuil';
-  _alertTickerChanged();
-}
 function _alertTickerChanged(){
   const ticker = document.getElementById('alertTicker')?.value;
   const type   = document.getElementById('alertType')?.value || 'price';
@@ -3482,7 +3449,7 @@ function _alertTickerChanged(){
 
 function testAlertNow(){
   const ticker = document.getElementById('alertTicker')?.value;
-  const type   = document.getElementById('alertType')?.value;
+  const type   = 'price'; // ALERT-1 : seules les alertes de prix fonctionnent
   const threshold = parseFloat(document.getElementById('alertThreshold')?.value);
   const direction = document.getElementById('alertDir')?.value;
   const resEl = document.getElementById('alertTestResult');
