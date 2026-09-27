@@ -2666,7 +2666,7 @@ function renderHeatmap(containerId){
     const chg=x.change_pct||0;
     const sc=x.composite_adj||0;
     const cap=caps[i];
-    const sz=Math.round(38+(cap-minCap)/capRange*52); // 38–90px selon capitalisation
+    const sz=Math.round(44+(cap-minCap)/capRange*46); // 44-90px selon capitalisation (HEATMOB-1 : case tactile >= 44 px)
 
     let bg,borderCol;
     if(chg>=2){bg='rgba(34,197,94,0.88)';borderCol='#22c55e';}
@@ -2686,9 +2686,9 @@ function renderHeatmap(containerId){
       style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${borderCol};border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;box-sizing:border-box;opacity:0;transform:scale(0.7);transition:transform .15s,box-shadow .15s,opacity .3s ${delay}ms,transform .3s ${delay}ms ease-out"
       onmouseenter="this.style.transform='scale(1.12)';this.style.zIndex='10';this.style.boxShadow='0 6px 20px rgba(0,0,0,.55)'"
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
-      <span style="font-size:${Math.max(8,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
-      <span style="font-size:${Math.max(7,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
-      ${sz>=52?`<span style="font-size:${Math.max(6,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${(sc/80*10).toFixed(1)}</span>`:''}
+      <span style="font-size:${Math.max(11,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
+      <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
+      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${(sc/80*10).toFixed(1)}</span>`:''}
     </div>`;
   }).join('');
   // Déclencher animation après inject DOM
