@@ -2648,7 +2648,7 @@ async function renderFluxCapitaux(targetEl) {
           <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}22;border-radius:3px;transition:width .4s"></div>
           <div style="position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:9px;color:var(--t2)">${sign}${x.chg.toFixed(2)}% · ${(x.volume||0).toLocaleString('fr-FR')} titres</div>
         </div>
-        <div style="width:50px;text-align:right;font-size:10px;font-weight:600;color:${col}">${sign}${Math.abs(x.flow).toFixed(1)} M</div>
+        <div style="width:50px;text-align:right;font-size:10px;font-weight:600;color:${col}">${positive ? '+' : '−'}${Math.abs(x.flow).toFixed(1)} M</div>
       </div>`;
     }).join('');
   }
@@ -2667,7 +2667,7 @@ async function renderFluxCapitaux(targetEl) {
   const secBars = secArr.map(([sec, flow]) => {
     const col = flow > 0 ? 'var(--green)' : 'var(--red)';
     const pct = Math.min(100, Math.abs(flow) / maxSecFlow * 100);
-    const sign = flow > 0 ? '+' : '';
+    const sign = flow > 0 ? '+' : (flow < 0 ? '−' : '');
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
       <div style="width:72px;font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec}</div>
       <div style="flex:1;background:var(--bg3);border-radius:3px;height:12px;position:relative">
