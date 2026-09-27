@@ -1660,7 +1660,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Dernier scrape BOC</span><span id="settings-last-boc">—</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Dernier scrape rapports</span><span id="settings-last-reports">—</span></div>
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Rapports archivés</span><span id="settings-total-reports">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Rapports analysés</span><span id="settings-total-reports">—</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Total annonces</span><span id="settings-total-anns">—</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">Articles Google News</span><span id="settings-total-news">—</span></div>
       </div>
@@ -5276,7 +5276,7 @@ async function loadSettingsPage() {
     if (el) el.textContent = d.total ?? '—';
   } catch(e){}
   try {
-    const r2 = await fetch('/api/reports/stats');
+    const r2 = await fetch('/api/reports-count');
     const d2 = await r2.json();
     const elR = document.getElementById('settings-total-reports');
     if (elR) elR.textContent = d2.total ?? '—';
