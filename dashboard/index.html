@@ -284,7 +284,6 @@ input[type=range]{padding:0;height:20px}
   #cmp-modal-inner{padding:14px;width:98%}
   #help-fab{bottom:16px;right:16px;width:40px;height:40px;font-size:17px}
   #help-drawer{width:88vw}
-  #tour-box{padding:20px;margin:12px}
   .sso-nav-btn,.why-close,#mob-menu-btn,button[title="Thème"]{min-width:44px;min-height:44px}
   #rank-table-wrap{display:none}
   #rank-cards{display:flex;flex-direction:column;gap:10px;padding:4px 0}
@@ -352,13 +351,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 #help-drawer-body .help-tip{background:var(--bg-elevated);border-left:3px solid var(--bull);padding:8px 10px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:8px 0;font-size:11px;color:var(--text-1);line-height:1.6}
 #help-drawer-body .help-example{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:8px 10px;margin:8px 0;font-size:11px;color:var(--text-2);line-height:1.6}
 /* ── Tour guidé ──────────────────────────────────────────────────────────── */
-#tour-overlay{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.75);align-items:center;justify-content:center}
-#tour-overlay.show{display:flex}
-#tour-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:440px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.tour-step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;margin:0 3px;transition:background .2s}
-.tour-step-dot.on{background:var(--blue)}
-.tour-highlight{outline:3px solid var(--blue)!important;outline-offset:4px;border-radius:4px;animation:tour-pulse 1.2s infinite}
-@keyframes tour-pulse{0%,100%{outline-color:var(--blue)}50%{outline-color:var(--green)}}
 /* ── Recherche globale ───────────────────────────────────────────────────── */
 #g-search-overlay{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding-top:80px}
 #g-search-overlay.open{display:flex}
@@ -481,13 +473,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .news-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .news-filter-btn{font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-2);transition:all .15s}
 .news-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.onboarding-modal{display:none;position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center}
-.onboarding-modal.open{display:flex}
-.onb-content{background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:32px;max-width:480px;width:92vw;text-align:center}
-.onb-progress{font-size:10px;color:var(--text-3);margin-bottom:12px;font-family:var(--font-mono)}
-.onb-content h2{font-size:20px;font-weight:700;margin-bottom:12px}
-.onb-content p{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:20px}
-.onb-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
 .cmdk-modal{display:none;position:fixed;inset:0;z-index:5500;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding-top:80px}
 .cmdk-modal.open{display:flex}
 .cmdk-box{background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);width:min(600px,92vw);max-height:70vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
@@ -579,20 +564,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       oninput="_renderCmdK(this.value)"
       onkeydown="if(event.key==='Enter'){var f=document.querySelector('.cmdk-item');if(f)f.click();}">
     <div id="cmdk-results" class="cmdk-results"></div>
-  </div>
-</div>
-
-<!-- Onboarding 5 étapes -->
-<div id="brvm-onboarding" class="onboarding-modal" onclick="if(event.target===this)onbSkip()">
-  <div class="onb-content">
-    <div id="onb-progress" class="onb-progress">1 / 5</div>
-    <h2 id="onb-title">Bienvenue sur BRVM Analyzer 👋</h2>
-    <p id="onb-desc">Ce tour rapide de 1 minute va te montrer comment trouver des actions à acheter sur la BRVM.</p>
-    <div class="onb-actions">
-      <button class="btn-text" onclick="onbSkip()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:12px">Passer</button>
-      <button id="onb-prev" class="btn btn-o" onclick="onbPrev()" style="font-size:12px" disabled>← Précédent</button>
-      <button id="onb-next" class="btn btn-primary" onclick="onbNext()" style="font-size:12px;background:var(--accent);color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer">Suivant →</button>
-    </div>
   </div>
 </div>
 
@@ -1611,17 +1582,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 </div>
 <div id="help-overlay" onclick="closeHelpDrawer()" style="display:none;position:fixed;inset:0;z-index:2050;background:transparent"></div>
 
-<!-- ── Tour guidé ─────────────────────────────────────────────────────────── -->
-<div id="tour-overlay">
-  <div id="tour-box">
-    <div id="tour-content"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
-      <button onclick="endTour()" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer">Passer le tour</button>
-      <div id="tour-dots" style="text-align:center"></div>
-      <button id="tour-next-btn" onclick="tourNext()" class="btn" style="padding:8px 18px;font-size:12px">Suivant →</button>
-    </div>
-  </div>
-</div>
 <!-- ── Glossaire ──────────────────────────────────────────────────────────── -->
 <div class="page" id="page-glossaire">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
@@ -2526,7 +2486,7 @@ async function init(){
     renderMacro(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();checkTourFirst();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -5134,7 +5094,6 @@ function testPushNotification() {
 // Lancement statut live + auto-refresh toutes les 5 min
 updateLiveStatus();
 setInterval(updateLiveStatus, 300000);
-if(localStorage.getItem('brvm_intro_seen')){var _bi=document.getElementById('brvm-intro');if(_bi)_bi.style.display='none';}
 </script>
 
 <!-- ── Modal Comparaison ──────────────────────────────────────────────────── -->
@@ -5149,95 +5108,6 @@ if(localStorage.getItem('brvm_intro_seen')){var _bi=document.getElementById('brv
 </div>
 
 <script>
-// ── Tour guidé au premier lancement ───────────────────────────────────────
-const _tourSteps = [
-  {
-    title: '👋 Bienvenue sur BRVM Analyzer !',
-    body: 'Ce dashboard vous permet d\'analyser les actions cotées sur la Bourse Régionale des Valeurs Mobilières d\'Afrique de l\'Ouest.<br><br>Ce tour rapide (5 étapes) vous explique les fonctionnalités essentielles. Cliquez sur <strong>Suivant →</strong> pour commencer.',
-    highlight: null,
-    btn: 'Commencer →'
-  },
-  {
-    title: '🏆 Les scores /10 — comprendre d\'un coup d\'œil',
-    body: 'Chaque société reçoit un <strong>score sur 10 points</strong> calculé par 8 modèles financiers reconnus (Graham, DCF, Buffett…).<br><br>🟢 ≥ 7.5/10 = Excellente opportunité<br>🟡 5–7.5/10 = Société correcte<br>🔴 &lt; 5/10 = Prudence recommandée<br><br>Le classement complet est dans l\'onglet <strong>🏆 Classement</strong>.',
-    highlight: null,
-    btn: 'Suivant →'
-  },
-  {
-    title: '💎 Les Opportunités du moment',
-    body: 'Ce widget identifie automatiquement les <strong>meilleures affaires potentielles</strong> : sociétés avec un bon score, un dividende attrayant et un prix raisonnable.<br><br>Critères : Score ≥ 55 + Dividende ≥ 5% + P/E &lt; 10<br><br>Cliquez sur une carte pour voir la fiche détaillée.',
-    highlight: '#opportunities-widget',
-    btn: 'Suivant →'
-  },
-  {
-    title: '💱 Changer de devise (XOF / EUR / USD)',
-    body: 'Tous les prix sont en <strong>Francs CFA (XOF)</strong> par défaut. Vous pouvez basculer en Euros ou en Dollars américains en cliquant sur les boutons <strong>XOF · EUR · USD</strong> en haut de la barre latérale.<br><br>Les taux sont mis à jour automatiquement via l\'API de change.',
-    highlight: '.logo',
-    btn: 'Suivant →'
-  },
-  {
-    title: '🎉 Vous êtes prêt !',
-    body: 'Vous connaissez maintenant l\'essentiel. Voici vos prochaines étapes :<br><br>① Cliquez sur <strong>🏆 Classement</strong> pour voir toutes les 47 sociétés<br>② Cliquez sur une société pour ouvrir sa fiche détaillée<br>③ Cliquez sur <strong>❓</strong> (bas à droite) pour l\'aide contextuelle<br>④ Explorez le <strong>📚 Glossaire</strong> si un terme vous échappe<br><br><em>Bonne analyse !</em>',
-    highlight: null,
-    btn: '✓ Commencer'
-  }
-];
-
-let _tourStep = 0;
-let _tourActive = false;
-let _tourHighlightEl = null;
-
-function startTour() {
-  _tourStep = 0;
-  _tourActive = true;
-  document.getElementById('tour-overlay').classList.add('show');
-  renderTourStep();
-}
-
-function endTour() {
-  document.getElementById('tour-overlay').classList.remove('show');
-  _tourActive = false;
-  localStorage.setItem('brvm_tour_done', '1');
-  _clearTourHighlight();
-}
-
-function tourNext() {
-  _tourStep++;
-  if (_tourStep >= _tourSteps.length) { endTour(); return; }
-  renderTourStep();
-}
-
-function _clearTourHighlight() {
-  if (_tourHighlightEl) { _tourHighlightEl.classList.remove('tour-highlight'); _tourHighlightEl = null; }
-}
-
-function renderTourStep() {
-  const step = _tourSteps[_tourStep];
-  if (!step) return;
-  _clearTourHighlight();
-  // Highlight
-  if (step.highlight) {
-    const el = document.querySelector(step.highlight);
-    if (el) { el.classList.add('tour-highlight'); _tourHighlightEl = el; el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-  }
-  // Dots
-  document.getElementById('tour-dots').innerHTML = _tourSteps.map((_,i)=>`<span class="tour-step-dot${i===_tourStep?' on':''}"></span>`).join('');
-  // Content
-  document.getElementById('tour-content').innerHTML = `
-    <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:8px">Étape ${_tourStep+1} / ${_tourSteps.length}</div>
-    <h3 style="font-size:17px;font-weight:700;margin-bottom:12px;line-height:1.3">${step.title}</h3>
-    <div style="font-size:13px;color:var(--t2);line-height:1.7">${step.body}</div>`;
-  document.getElementById('tour-next-btn').textContent = step.btn || 'Suivant →';
-}
-
-function checkTourFirst() {
-  if (!localStorage.getItem('brvm_onboarding_done')) {
-    setTimeout(function() { if (typeof startOnboarding === 'function') startOnboarding(); }, 1200);
-  } else if (!localStorage.getItem('brvm_tour_done')) {
-    setTimeout(startTour, 1500);
-  }
-}
-
 // ── Glossaire financier ────────────────────────────────────────────────────
 const _glossTerms = [
   { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
@@ -5873,48 +5743,6 @@ function _renderCmdK(q) {
   res.innerHTML = html;
 }
 
-// ── Onboarding tour 5 étapes ───────────────────────────────────────────────
-const _ONB_STEPS = [
-  {title:'Bienvenue sur BRVM Analyzer 👋', desc:'Ce tour rapide de 1 minute va te montrer comment trouver des actions à acheter sur la BRVM. Tu peux passer à tout moment.'},
-  {title:'🏆 Le Classement — 47 sociétés notées', desc:'Chaque société classée reçoit une note de 1 à 10, calculée par 8 modèles financiers. Plus la note est haute, mieux c\'est. Une note 7,5 ou plus = excellente opportunité ⭐⭐⭐⭐⭐.'},
-  {title:'📋 Tout savoir sur une société en 1 clic', desc:'Clique sur n\'importe quelle société pour voir : son cours, ses dividendes, ses rapports annuels (avec résumé IA), les actualités, et une analyse stratégique détaillée.'},
-  {title:'💼 Suivre tes achats', desc:'Dans la section Revenus → Mon portefeuille, enregistre tes positions pour suivre tes gains, tes pertes et tes dividendes annuels en temps réel.'},
-  {title:'🌱 Mode débutant activé', desc:'Par défaut, tu es en mode expert. Active le mode débutant pour des explications simplifiées. Survole n\'importe quel sigle pour voir sa définition. Bon investissement !'},
-];
-let _onbStep = 0;
-
-function startOnboarding() {
-  _onbStep = 0;
-  _renderOnbStep();
-  var m = document.getElementById('brvm-onboarding');
-  if (m) m.classList.add('open');
-}
-function _renderOnbStep() {
-  var s = _ONB_STEPS[_onbStep];
-  var prog = document.getElementById('onb-progress');
-  var title = document.getElementById('onb-title');
-  var desc = document.getElementById('onb-desc');
-  var prevBtn = document.getElementById('onb-prev');
-  var nextBtn = document.getElementById('onb-next');
-  if (prog) prog.textContent = (_onbStep+1) + ' / ' + _ONB_STEPS.length;
-  if (title) title.textContent = s.title;
-  if (desc) desc.textContent = s.desc;
-  if (prevBtn) prevBtn.disabled = _onbStep === 0;
-  if (nextBtn) nextBtn.textContent = _onbStep < _ONB_STEPS.length - 1 ? 'Suivant →' : 'Commencer !';
-}
-function onbNext() {
-  if (_onbStep < _ONB_STEPS.length - 1) { _onbStep++; _renderOnbStep(); }
-  else onbFinish();
-}
-function onbPrev() { if (_onbStep > 0) { _onbStep--; _renderOnbStep(); } }
-function onbFinish() {
-  localStorage.setItem('brvm_onboarding_done', 'true');
-  var m = document.getElementById('brvm-onboarding');
-  if (m) m.classList.remove('open');
-}
-function onbSkip() { onbFinish(); }
-window.startOnboarding = startOnboarding; window.onbNext = onbNext; window.onbPrev = onbPrev; window.onbFinish = onbFinish; window.onbSkip = onbSkip;
-
 // ── Modal "Pourquoi ?" ─────────────────────────────────────────────────────
 function openWhyModal(ticker) {
   var modal = document.getElementById('why-modal');
@@ -6000,38 +5828,8 @@ gSpinShow = function() {
 };
 </script>
 
-<!-- Onboarding modal -->
-<div id="onboarding-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:none;align-items:center;justify-content:center">
-  <div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:32px;max-width:440px;width:90%">
-    <div id="ob-step-1">
-      <div style="font-size:32px;margin-bottom:12px">👋</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Bienvenue sur BRVM Analyzer !</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">Ce dashboard vous aide à investir à la BRVM même sans expérience. En 3 clics, vous trouverez les meilleures opportunités du marché.</div>
-      <button onclick="document.getElementById('ob-step-1').style.display='none';document.getElementById('ob-step-2').style.display='block'" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Commencer →</button>
-    </div>
-    <div id="ob-step-2" style="display:none">
-      <div style="font-size:32px;margin-bottom:12px">🏆</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Étape 1 : Le Classement</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">Chaque société reçoit une <strong>note de 1 à 10</strong>. Plus la note est haute, meilleure est la société selon nos 8 critères financiers.<br><br>✅ <strong>Note ≥ 7</strong> = signal d'achat potentiel<br>⏳ <strong>Note 5–7</strong> = à surveiller<br>⚠️ <strong>Note &lt; 5</strong> = à éviter</div>
-      <button onclick="document.getElementById('ob-step-2').style.display='none';document.getElementById('ob-step-3').style.display='block'" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Suivant →</button>
-    </div>
-    <div id="ob-step-3" style="display:none">
-      <div style="font-size:32px;margin-bottom:12px">🚀</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px">Vous êtes prêt !</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">🔍 Utilisez le <strong>Screener</strong> pour filtrer selon vos critères.<br><br>❓ Le bouton <strong>?</strong> en bas à droite contient le lexique complet.</div>
-      <button onclick="document.getElementById('onboarding-modal').style.display='none';localStorage.setItem('onboarding_done','1')" style="background:var(--accent);color:#0d1117;font-weight:700;padding:10px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;width:100%">Accéder au dashboard →</button>
-    </div>
-    <div style="text-align:center;margin-top:12px">
-      <button onclick="document.getElementById('onboarding-modal').style.display='none';localStorage.setItem('onboarding_done','1')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer">Passer →</button>
-    </div>
-  </div>
-</div>
 <script>
 (function(){
-  if (!localStorage.getItem('onboarding_done')) {
-    const m = document.getElementById('onboarding-modal');
-    if (m) { m.style.display = 'flex'; }
-  }
   if (localStorage.getItem('beginner_mode') === '1') {
     const lbl = document.getElementById('beginner-label');
     if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';
