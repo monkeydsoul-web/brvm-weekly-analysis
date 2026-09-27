@@ -1524,10 +1524,14 @@ def api_scheduler_jobs():
         jobs = []
         if sched and sched.running:
             for job in sched.get_jobs():
+                try:  # SCHED-1 : next_run depuis le declencheur (la copie du process web est figee)
+                    _nr = job.trigger.get_next_fire_time(None, datetime.now(job.trigger.timezone))
+                except Exception:
+                    _nr = job.next_run_time
                 jobs.append({
                     "id": job.id,
                     "name": job.name or job.id,
-                    "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+                    "next_run": _nr.isoformat() if _nr else None,
                     "trigger": str(job.trigger),
                 })
         hist_path = os.path.join(DATA_DIR, "scheduler_history.json")
@@ -1545,30 +1549,6 @@ def api_scheduler_jobs():
         return jsonify({"jobs": jobs, "now": datetime.now().isoformat()})
     except Exception as e:
         return jsonify({"error": str(e), "jobs": []}), 500
-
-@app.route("/api/scheduler/run/<job_id>", methods=["POST"])
-def api_scheduler_run(job_id):
-    try:
-        sched = get_scheduler()
-        if sched and sched.running:
-            job = sched.get_job(job_id)
-            if job:
-                t = threading.Thread(target=job.func, daemon=True)
-                t.start()
-                return jsonify({"ok": True, "message": f"Job {job_id} lancé"})
-        # Fallback legacy jobs
-        legacy = {
-            "news":    lambda: __import__("company_scraper").run_company_scraper(),
-            "ranking": lambda: __import__("live_ranker").compute_live_ranking(trigger="manual"),
-            "history": lambda: __import__("price_history_builder").append_live_prices(),
-        }
-        if job_id in legacy:
-            t = threading.Thread(target=legacy[job_id], daemon=True)
-            t.start()
-            return jsonify({"ok": True, "message": f"Job {job_id} lancé"})
-        return jsonify({"error": "Job inconnu"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @app.route("/sw.js")
 def serve_sw():

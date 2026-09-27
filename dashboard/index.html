@@ -1656,9 +1656,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
           <th style="text-align:left;padding:6px 8px">Prochaine exécution</th>
           <th style="text-align:left;padding:6px 8px">Dernière exécution</th>
           <th style="text-align:left;padding:6px 8px">Statut</th>
-          <th style="text-align:left;padding:6px 8px">Action</th>
         </tr></thead>
-        <tbody id="schedulerJobsTbody"><tr><td colspan="5" style="color:var(--text-2);padding:12px">Chargement…</td></tr></tbody>
+        <tbody id="schedulerJobsTbody"><tr><td colspan="4" style="color:var(--text-2);padding:12px">Chargement…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -5320,12 +5319,12 @@ async function loadSettingsPage() {
 async function loadSchedulerJobs() {
   const tbody = document.getElementById('schedulerJobsTbody');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-2);padding:12px">Chargement…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-2);padding:12px">Chargement…</td></tr>';
   try {
     const r = await fetch('/api/scheduler/jobs');
     const data = await r.json();
     if (!data.jobs || !data.jobs.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-2);padding:12px">Scheduler non démarré ou aucun job actif.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-2);padding:12px">Scheduler non démarré ou aucun job actif.</td></tr>';
       return;
     }
     tbody.innerHTML = data.jobs.map(j => {
@@ -5342,29 +5341,11 @@ async function loadSchedulerJobs() {
         <td style="padding:6px 8px;font-size:12px">${nextFr}</td>
         <td style="padding:6px 8px;font-size:12px">${lastFr}${dur}</td>
         <td style="padding:6px 8px">${badge}</td>
-        <td style="padding:6px 8px"><button class="btn-o" style="font-size:11px;padding:3px 8px" onclick="runSchedulerJob('${j.id}')">▶ Lancer</button></td>
       </tr>`;
     }).join('');
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--bear);padding:12px">Erreur : ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--bear);padding:12px">Erreur : ${e.message}</td></tr>`;
   }
-}
-
-async function runSchedulerJob(id) {
-  if (!confirm(`Lancer la tâche "${id}" maintenant ?`)) return;
-  try {
-    const r = await fetch(`/api/scheduler/run/${id}`, {method:'POST'});
-    const d = await r.json();
-    if (d.ok) {
-      const btn = event.target;
-      const orig = btn.textContent;
-      btn.textContent = '✓ Lancé';
-      btn.disabled = true;
-      setTimeout(() => { btn.textContent = orig; btn.disabled = false; loadSchedulerJobs(); }, 3000);
-    } else {
-      alert('Erreur : ' + (d.error || 'inconnue'));
-    }
-  } catch(e) { alert('Erreur : ' + e.message); }
 }
 
 function initGlossaire() {
