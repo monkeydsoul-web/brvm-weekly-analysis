@@ -75,6 +75,9 @@ def init_history():
 def append_live_prices():
     """Ajoute les prix live du jour à l'historique."""
     try:
+        if datetime.now().weekday() >= 5:  # PHWEEKEND-1 : pas de seance le week-end
+            logger.info("append_live_prices: week-end, aucun point ecrit")
+            return 0
         from live_data import get_live_data
         live = get_live_data(force_refresh=False)
         prices = live.get("prices", {})
