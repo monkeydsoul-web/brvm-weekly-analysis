@@ -422,21 +422,6 @@ except Exception as e:
 
 # ─── ROUTES AJOUTÉES PAR install_improvements.py ─────────────────────────────
 
-@app.route("/api/candlestick/<ticker>")
-def api_candlestick(ticker):
-    """Données OHLC + SVG candlestick pour un ticker."""
-    try:
-        from candlestick import get_candlestick_data_for_ticker
-        data = get_candlestick_data_for_ticker(ticker.upper())
-        period = request.args.get("period", "1y")
-        return jsonify({
-            "ticker": data["ticker"],
-            "ohlc":   data.get(f"ohlc_{period}", data["ohlc_1y"]),
-            "svg":    data.get(f"svg_{period}",  data["svg_1y"]),
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 @app.route("/api/backtesting")
 def api_backtesting():
     """Lance ou retourne le backtesting des scores."""

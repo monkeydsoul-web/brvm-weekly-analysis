@@ -18,4 +18,4 @@
 ## Code
 - JS contenant des apostrophes françaises → fichier `.js` séparé sous `dashboard/`, jamais inline dans index.html.
 - Ne JAMAIS réindenter ou reformater le gros bloc inline de `dashboard/index.html` : éditions chirurgicales uniquement.
-- Modules VIVANTS, interdiction de les supprimer : scraper.py, backtesting.py, portfolio_optimizer.py, candlestick.py, price_history.py.
+- Modules VIVANTS, interdiction de les supprimer : scraper.py, backtesting.py, portfolio_optimizer.py, price_history.py. (candlestick.py retire le 27/09/2026 sur decision de Souleymane : il servait des OHLC synthetiques sur la route publique /api/candlestick, appelee par aucune page.)
