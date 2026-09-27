@@ -862,7 +862,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
       <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
-      <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
+      <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th>
       <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col expert-only" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
       <th class="adv-col expert-only" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
@@ -904,7 +904,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </label>
     </div>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -1561,7 +1561,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="padding:0;overflow-x:auto">
       <table><thead><tr>
         <th>Ticker</th><th>Société</th>
-        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · &lt;5 = éviter">Note /10</th>
+        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th>
         <th>Conseil</th>
         <th>Dividende/an</th>
       </tr></thead>
@@ -1967,9 +1967,9 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
   if(typeof window[fn]==='undefined') window[fn]=()=>{console.warn('[fallback]',fn,'non défini');};
 });
 
-function col(v){return v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)'}
-function bcls(v){return v>=60?'bg':v>=45?'ba':'br'}
-function bcls10(v){return v>=7.5?'bg':v>=5.6?'ba':'br'}
+function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
+function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
+function bcls10(v){return v>=7.5?'bg':v>=5?'ba':'br'}
 function v10fmt(v){return (v/80*10).toFixed(1)}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
 
@@ -2848,7 +2848,7 @@ function loadMarketWidget(){
 function loadSidebar(){
   const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
+    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
     const isFav=favorites.includes(x.ticker);
     const checked=_cmpSelected&&_cmpSelected.has(x.ticker)?'checked':'';
     return`<div class="tb" style="display:flex;align-items:center;gap:3px">
@@ -2864,7 +2864,7 @@ function filterSidebar(q){
   const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0))
     .filter(x=>!q||x.ticker.includes(q)||((x.name||'').toUpperCase().includes(q)));
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=45?'var(--amber)':'var(--red)';
+    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
     return`<button class="tb" onclick="_openStock('${x.ticker}')">
       <span style="font-weight:600;font-size:11px">${x.ticker}</span>
       <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v10fmt(v)}</span>
@@ -3011,7 +3011,7 @@ function renderRank(){
       <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x.conseil)}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
     </tr>`;}).join('');
   }
@@ -3234,7 +3234,7 @@ async function renderTargets(){
       <td>${fmtXOF(t.current_price)}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
-      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 6-7.5 = bon · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
       <td style="font-size:11px"${uncTip}>${fmtAvis(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
@@ -3940,7 +3940,7 @@ async function showStock(ticker){
           })():''}
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
         <div class="ct">📊 Résumé rapide</div>
-        <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=65?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">Note ${(v/80*10).toFixed(1)}/10</strong>. ${v>=65?'C\'est une excellente opportunité selon nos analyses.':v>=50?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'}</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}">Note ${(v/80*10).toFixed(1)}/10</strong>. ${v>=60?'C\'est une excellente opportunité selon nos analyses.':v>=40?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'}</div>
       </div>
       ${fi.strengths||fi.risks?`<div class="g2 expert-only" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
@@ -4234,9 +4234,9 @@ function _renderMarketPage() {
   var sectDst = document.getElementById('mkt-sect');
   var _sc = window.scores || [];
   if (distDst && _sc.length) {
-    var bkts={'0–20':0,'20–35':0,'35–50':0,'50–65':0,'65–80':0};
-    _sc.forEach(function(x){var v=x.composite_adj||0;bkts[v<20?'0–20':v<35?'20–35':v<50?'35–50':v<65?'50–65':'65–80']++;});
-    svgBar(distDst,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#4ADE80','#22D3EE'],170);
+    var bkts={'0–2,5':0,'2,5–5':0,'5–6,25':0,'6,25–7,5':0,'7,5–10':0};
+    _sc.forEach(function(x){var v=(x.composite_adj||0)/8;bkts[v<2.5?'0–2,5':v<5?'2,5–5':v<6.25?'5–6,25':v<7.5?'6,25–7,5':'7,5–10']++;});
+    svgBar(distDst,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#FBBF24','#4ADE80'],170);
   }
   if (sectDst && _sc.length) {
     var secs={};_sc.forEach(function(x){if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
@@ -5289,7 +5289,7 @@ const _glossTerms = [
   { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
   { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
   { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
-  { term:'Score /10 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) ÷ 8, affiché /10. Score ≥ 8.1/10 = excellente opportunité, ≥ 6.25/10 = bonne société, < 5/10 = prudence.', ex:'SIBC 8.5/10 (68/80) : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9 = 68. Tous les modèles s\'accordent.' },
+  { term:'Score /10 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) ÷ 8, affiché /10. Score ≥ 7.5/10 = excellente opportunité, 5 à 7.5/10 = situation correcte, < 5/10 = prudence.', ex:'SIBC 8.5/10 (68/80) : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9 = 68. Tous les modèles s\'accordent.' },
   { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
   { term:'Verdict POSITIF / NEUTRE / NÉGATIF', def:'Résultat de l\'analyse IA (Claude) des rapports annuels de la société. POSITIF = la situation financière est bonne et en amélioration. NEUTRE = stable sans signal fort. NÉGATIF = des points d\'inquiétude identifiés.', ex:'Verdict POSITIF SIBC basé sur : croissance du BNA, dividende stable, faible endettement et bonne gouvernance identifiés dans le rapport annuel.' },
   { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },
@@ -5382,7 +5382,7 @@ const _helpContent = {
     title: 'Tableau de bord',
     sections: [
       { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
-      { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre score sur 80 points. Plus le score est élevé, plus la société est financièrement attractive.' },
+      { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre note sur 10. Plus le score est élevé, plus la société est financièrement attractive.' },
       { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 6.9/10 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
       { h: '🌡️ Heatmap BRVM', p: 'Chaque carré = une société. La taille = la capitalisation boursière. La couleur = la performance du jour. Vert vif = forte hausse. Rouge vif = forte baisse.' },
       { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus échangées). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
