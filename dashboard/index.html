@@ -526,7 +526,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .sb-grp-label{padding:10px 14px 3px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;flex-shrink:0}
 .sb-grp-label:first-child{margin-top:0}
 .sb .ni{height:auto;min-height:44px;padding:0 14px}
-/* ── Drawer-mode : tiroir sur tous les écrans (Sprint 17) ───────────────── */
+/* ── Drawer-mode : tiroir sous 1024 px (Sprint 17) ; barre fixe a partir de 1024 px (SIDEBAR-1) ── */
+@media(max-width:1023px){
 .sb{position:fixed;top:0;left:0;height:100vh;width:240px;transform:translateX(-100%);z-index:500;box-shadow:4px 0 24px rgba(0,0,0,.3)}
 .sb.mob-open{transform:translateX(0)}
 #mob-menu-btn{display:flex}
@@ -535,6 +536,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 #app-footer{left:0}
 .sb.compact~.main #app-footer{left:0}
 #breadcrumb{padding-left:56px}
+}
+@media(min-width:1024px){.sb{width:240px}#app-footer{left:240px}}
 #sb-compact-btn{display:none!important}
 </style></head>
 <body>
