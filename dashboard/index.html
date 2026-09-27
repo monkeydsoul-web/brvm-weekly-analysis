@@ -987,10 +987,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div class="ct" style="margin:0">🌡️ Heatmap BRVM — Performance du jour</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap" id="mkt-heatmap-filters">
         <button class="hf-btn hf-on" onclick="setHeatmapFilter('');_syncMktHeatmap()">Tous</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Banque');_syncMktHeatmap()">Banques</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Industrie');_syncMktHeatmap()">Industriel</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Telecom');_syncMktHeatmap()">Télécoms</button>
-        <button class="hf-btn" onclick="setHeatmapFilter('Distribution');_syncMktHeatmap()">Distribution</button>
       </div>
     </div>
     <div id="mkt-heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:80px"></div>
@@ -4157,6 +4153,7 @@ function _renderMarketPage() {
   if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
 
   // Heatmap — re-render directement dans mkt-heatmap-grid
+  _renderHeatmapFilters();
   renderHeatmap('mkt-heatmap-grid');
 
   // Distribution + sectoriel — re-render via svgBar/svgDonut
@@ -4190,6 +4187,13 @@ function _renderMarketPage() {
 
 function _syncMktHeatmap() {
   renderHeatmap('mkt-heatmap-grid');
+}
+
+function _renderHeatmapFilters(){ // SECTFILT-1 : boutons generes depuis les secteurs presents dans les donnees
+  const box=document.getElementById('mkt-heatmap-filters'); if(!box) return;
+  const cnt={}; (window.scores||[]).forEach(x=>{ if(x.sector) cnt[x.sector]=(cnt[x.sector]||0)+1; });
+  const secs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b));
+  box.innerHTML=`<button class="hf-btn${_heatmapFilter===''?' hf-on':''}" onclick="setHeatmapFilter('');_syncMktHeatmap()">Tous</button>`+secs.map(s=>`<button class="hf-btn${_heatmapFilter===s?' hf-on':''}" onclick="setHeatmapFilter('${s}');_syncMktHeatmap()">${s} (${cnt[s]})</button>`).join('');
 }
 
 function switchTab(pageId, tabId, btn) {
