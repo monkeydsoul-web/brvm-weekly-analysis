@@ -60,7 +60,7 @@ function renderLiveRankBadge(ticker) {
         🏆 Rang <strong style="color:${scoreC}">#${rank}</strong>/${total} ${badge}
       </span>
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
-        Note <strong style="color:${scoreC}">${((entry.composite_adj||0)/80*10).toFixed(1)}/10</strong>
+        Note <strong style="color:${scoreC}">${v10fmt(entry.composite_adj||0)}/10</strong>
       </span>
       ${verdict ? `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${verdC}22;color:${verdC};font-weight:700">${verdict}</span>` : ''}
       ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.eps)):Math.round(entry.eps).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}

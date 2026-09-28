@@ -43,7 +43,7 @@ function renderRankCards() {
   }
   cards.innerHTML = d.map((x, i) => {
       const v      = x.composite_adj || 0;
-      const v10    = (v / 80 * 10).toFixed(1);
+      const v10    = v10fmt(v);
       const scoreC = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
       const chg    = x.change_pct || 0;
       const chgC   = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';

@@ -83,7 +83,7 @@ function _renderScreenerTable() {
 
   tbody.innerHTML = _scrResults.map(x => {
     const sc  = x.composite_adj || 0;
-    const sc10 = (sc / 80 * 10).toFixed(1);
+    const sc10 = v10fmt(sc);
     const scC = sc >= 60 ? 'var(--green)' : sc >= 45 ? 'var(--amber)' : 'var(--red)';
     const scBarW = Math.round(sc / 80 * 100);
     const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
