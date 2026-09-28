@@ -2591,9 +2591,10 @@ async function renderFluxCapitaux(targetEl) {
   // Agrégation par secteur
   const sectorFlows = {};
   const all = window.scores || scores || [];
+  const _SECTBBGC1 = { BBGC: 'Banque' }; // SECTBBGC-1 : societes cotees non notees, a retirer quand BBGC sera notee
   flows.forEach(f => {
     const st = all.find(x => x.ticker === f.ticker);
-    const sec = (st && st.sector) || 'Autre';
+    const sec = (st && st.sector) || _SECTBBGC1[f.ticker] || 'Autre';
     if (!sectorFlows[sec]) sectorFlows[sec] = 0;
     sectorFlows[sec] += f.flow;
   });
