@@ -1921,7 +1921,7 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
 function bcls10(v){return v>=7.5?'bg':v>=5?'ba':'br'}
-function v10fmt(v){return (v/80*10).toFixed(1)}
+function v10fmt(v){return (Math.round(v/8*10)/10).toFixed(1)}
 function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
 
 // ── Convertisseur de devises ───────────────────────────────────────────────
@@ -2067,7 +2067,7 @@ function runGSearch(q){
           <div class="gsr-sub">${x.sector||'—'} · ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${(v/80*10).toFixed(1)}/10</span>
+          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${v10fmt(v)}/10</span>
           <span style="font-size:9px;color:${verdC}">${verdict}</span>
         </div>
       </div>`;
@@ -2118,7 +2118,7 @@ function runGSearch(q){
             <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
             <div class="gsr-sub">${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
           </div>
-          <span class="b ${bcls(v)}">${(v/80*10).toFixed(1)}/10</span>
+          <span class="b ${bcls(v)}">${v10fmt(v)}/10</span>
         </div>`;
       }).join('')+html;
     }
@@ -2676,7 +2676,7 @@ function renderHeatmap(containerId){
     const sign=chg>0?'+':'';
     const capFmt=cap>1e12?`${(cap/1e12).toFixed(1)}T`:cap>1e9?`${(cap/1e9).toFixed(1)}Md`:`${(cap/1e6).toFixed(0)}M`;
     const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
-    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${(sc/80*10).toFixed(1)}/10`;
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${v10fmt(sc)}/10`;
     const delay=i*18; // vague d'animation
     return `<div onclick="_openStock('${x.ticker}')"
       data-tip="${tip}"
@@ -2685,7 +2685,7 @@ function renderHeatmap(containerId){
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
       <span style="font-size:${Math.max(11,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
       <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
-      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${(sc/80*10).toFixed(1)}</span>`:''}
+      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${v10fmt(sc)}</span>`:''}
     </div>`;
   }).join('');
   // Déclencher animation après inject DOM
@@ -3289,7 +3289,7 @@ function simBuildSliders(){
     return`<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
-        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${((x.composite_adj||0)/80*10).toFixed(1)}/10</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${v10fmt(x.composite_adj||0)}/10</span>
         <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
       </div>
       <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
@@ -3403,7 +3403,7 @@ function _alertTickerChanged(){
   const field = fieldMap[type]||'price';
   const val = stock[field];
   if(val == null){ helper.textContent = ''; return; }
-  const fmtVal = type==='price' ? (Math.round(val).toLocaleString('fr-FR')+' XOF') : (type==='score' ? ((val/80*10).toFixed(1)+'/10') : (val.toFixed(2)+'%'));
+  const fmtVal = type==='price' ? (Math.round(val).toLocaleString('fr-FR')+' XOF') : (type==='score' ? (v10fmt(val)+'/10') : (val.toFixed(2)+'%'));
   helper.textContent = `${ticker} — ${labelMap[type]||'valeur'} : ${fmtVal}`;
 }
 
@@ -3600,7 +3600,7 @@ function _shareStockText(ticker){
   const s=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
   if(!s.ticker){console.warn('_shareStockText: ticker introuvable',ticker);return;}
   const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
-    `Score BRVM : ${((s.composite_adj||0)/80*10).toFixed(1)}/10\n`+
+    `Score BRVM : ${v10fmt(s.composite_adj||0)}/10\n`+
     `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
     `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× | ':''}`+
     `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% | ':''}`+
@@ -3731,7 +3731,7 @@ async function showStock(ticker){
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
         <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
-        ${_v0>0?`<span class="b ${bcls(_v0)}" style="margin-top:4px;display:inline-block">${(_v0/80*10).toFixed(1)}/10</span>`:''}
+        ${_v0>0?`<span class="b ${bcls(_v0)}" style="margin-top:4px;display:inline-block">${v10fmt(_v0)}/10</span>`:''}
       </div>
     </div>
     <div id="_skel-body" class="stock-skeleton">
@@ -3831,7 +3831,7 @@ async function showStock(ticker){
               <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
               <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
             </div>
-            <span class="b ${bcls(v)}" data-tip="Score composite sur 8 modèles · /10">${(v/80*10).toFixed(1)}/10</span>
+            <span class="b ${bcls(v)}" data-tip="Score composite sur 8 modèles · /10">${v10fmt(v)}/10</span>
           </div>
           <div id="live-score-container"></div>
           <div id="stock-spark-mini" style="margin:6px 0"></div>
@@ -3867,7 +3867,7 @@ async function showStock(ticker){
           })():''}
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
         <div class="ct">📊 Résumé rapide</div>
-        <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}">Note ${(v/80*10).toFixed(1)}/10</strong>. ${v>=60?'C\'est une excellente opportunité selon nos analyses.':v>=40?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'}</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société est <strong style="color:${v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}">Note ${v10fmt(v)}/10</strong>. ${v>=60?'C\'est une excellente opportunité selon nos analyses.':v>=40?'La société est dans une situation correcte.':'La valorisation suggère la prudence.'}</div>
       </div>
       ${fi.strengths||fi.risks?`<div class="g2 expert-only" style="margin-bottom:12px">
         <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
@@ -3885,7 +3885,7 @@ async function showStock(ticker){
             const sect=s.sector||'';const sc0=s.composite_adj||0;
             const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
             if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
-            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${(pv/80*10).toFixed(1)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${v10fmt(pv)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
           })()}
         </div>
       </div>
@@ -4180,7 +4180,7 @@ function _renderMarketPage() {
   if (insDst) {
     if (window.scores && window.scores.length) {
       var sorted = [...window.scores].sort(function(a,b){return (b.composite_adj||0)-(a.composite_adj||0);});
-      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+((s.composite_adj||0)/80*10).toFixed(1)+'/10'; }).join(' · ');
+      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+v10fmt(s.composite_adj||0)+'/10'; }).join(' · ');
       insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
     }
   }
@@ -5419,7 +5419,7 @@ function openCompareModal() {
   if (!rows.length) return;
 
   const kpis = [
-    ['Score /10', x => ((x.composite_adj||0)/80*10).toFixed(1)+'/10', x => x.composite_adj||0, true],
+    ['Score /10', x => v10fmt(x.composite_adj||0)+'/10', x => x.composite_adj||0, true],
     ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
     ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
@@ -5761,7 +5761,7 @@ function openWhyModal(ticker) {
   var body = document.getElementById('why-body');
   var actions = document.getElementById('why-actions');
   if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
-  if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + ((s.composite_adj||0)/80*10).toFixed(1) + '/10';
+  if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + v10fmt(s.composite_adj||0) + '/10';
   var decote = '';
   if (s.target_price && s.price && s.target_price > s.price) {
     decote = Math.round((s.target_price/s.price - 1)*100);
@@ -5801,7 +5801,7 @@ function _quickCompare(ticker) {
         var s=(window.scores||[]).find(function(x){return x.ticker===t;})||{};
         return '<button onclick="_pickQCmp(\''+ticker+'\',\''+t+'\')" style="text-align:left;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:12px;color:var(--text-1)">'
           +'<strong>'+t+'</strong> <span style="color:var(--t2);font-size:11px">'+( s.name||'').slice(0,30)+'</span>'
-          +'<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">'+((s.composite_adj||0)/80*10).toFixed(1)+'/10</span></button>';
+          +'<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">'+v10fmt(s.composite_adj||0)+'/10</span></button>';
       }).join('')
     +'</div>'
     +'<button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top:12px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px">Annuler</button>'
