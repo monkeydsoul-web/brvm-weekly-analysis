@@ -2537,7 +2537,7 @@ async function renderFluxCapitaux(targetEl) {
     const res = await fetch('/api/live');
     const data = await res.json();
     prices = data.prices || {};
-  } catch(e) { el.innerHTML = '<p style="color:var(--t2);font-size:11px">Données live indisponibles.</p>'; return; }
+  } catch(e) { el.innerHTML = '<p style="color:var(--t2);font-size:12px">Données live indisponibles.</p>'; return; }
 
   // Compute flow = change_pct × volume × price (positive = inflow, negative = outflow)
   const flows = Object.entries(prices).map(([ticker, d]) => {
@@ -2550,7 +2550,7 @@ async function renderFluxCapitaux(targetEl) {
   const outflow = sorted.filter(x => x.flow < 0).reverse().slice(0, 5);
 
   if (!inflow.length && !outflow.length) {
-    el.innerHTML = '<p style="color:var(--t2);font-size:11px">Aucun volume disponible pour calculer les flux.</p>';
+    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Aucun volume disponible pour calculer les flux.</p>';
     return;
   }
 
@@ -2561,12 +2561,12 @@ async function renderFluxCapitaux(targetEl) {
       const col = positive ? 'var(--green)' : 'var(--red)';
       const sign = positive ? '+' : '';
       return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="_openStock('${x.ticker}')">
-        <div style="width:42px;font-size:11px;font-weight:700;color:${col}">${x.ticker}</div>
+        <div style="width:48px;font-size:12px;font-weight:700;color:${col}">${x.ticker}</div>
         <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;position:relative">
           <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}22;border-radius:3px;transition:width .4s"></div>
-          <div style="position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:9px;color:var(--t2);white-space:nowrap">${sign}${x.chg.toFixed(2)}% · ${(x.volume||0).toLocaleString('fr-FR')} titres</div>
+          <div style="position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:12px;color:var(--t2);white-space:nowrap">${sign}${x.chg.toFixed(2)}% · ${(x.volume||0).toLocaleString('fr-FR')} titres</div>
         </div>
-        <div style="width:50px;text-align:right;font-size:10px;font-weight:600;color:${col}">${positive ? '+' : '−'}${Math.abs(x.flow).toFixed(1)} M</div>
+        <div style="min-width:64px;text-align:right;font-size:12px;font-weight:600;color:${col};white-space:nowrap">${positive ? '+' : '−'}${Math.abs(x.flow).toFixed(1)} M</div>
       </div>`;
     }).join('');
   }
@@ -2588,27 +2588,27 @@ async function renderFluxCapitaux(targetEl) {
     const pct = Math.min(100, Math.abs(flow) / maxSecFlow * 100);
     const sign = flow > 0 ? '+' : (flow < 0 ? '−' : '');
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="width:72px;font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec}</div>
-      <div style="flex:1;background:var(--bg3);border-radius:3px;height:12px;position:relative">
+      <div style="width:96px;font-size:12px;line-height:18px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:3px;height:18px;position:relative">
         <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}33;border-radius:3px"></div>
-        <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 5px;font-size:9px;color:${col};font-weight:600">${sign}${Math.abs(flow).toFixed(1)}M XOF</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 5px;font-size:12px;color:${col};font-weight:600">${sign}${Math.abs(flow).toFixed(1)}M XOF</div>
       </div>
     </div>`;
   }).join('');
 
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
     <div>
-      <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (achat)</div>
-      ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:11px">Aucun afflux</p>'}
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (achat)</div>
+      ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:12px">Aucun afflux</p>'}
     </div>
     <div>
-      <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux par action (vente)</div>
-      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:11px">Aucun reflux</p>'}
+      <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux par action (vente)</div>
+      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:12px">Aucun reflux</p>'}
     </div>
   </div>
   ${secArr.length ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-    <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🏭 Flux par secteur</div>
-    <div style="font-size:9px;color:var(--t3);margin-bottom:6px;font-style:italic">Somme des flux (var% × volume × cours) par secteur — positif = pression acheteuse nette, négatif = pression vendeuse</div>
+    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🏭 Flux par secteur</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:6px;font-style:italic">Somme des flux (var% × volume × cours) par secteur — positif = pression acheteuse nette, négatif = pression vendeuse</div>
     ${secBars}
   </div>` : ''}`;
 }
