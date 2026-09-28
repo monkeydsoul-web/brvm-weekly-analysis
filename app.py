@@ -1502,39 +1502,6 @@ def api_scheduler_status():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-@app.route("/api/scheduler/jobs")
-def api_scheduler_jobs():
-    try:
-        sched = get_scheduler()
-        jobs = []
-        if sched and sched.running:
-            for job in sched.get_jobs():
-                try:  # SCHED-1 : next_run depuis le declencheur (la copie du process web est figee)
-                    _nr = job.trigger.get_next_fire_time(None, datetime.now(job.trigger.timezone))
-                except Exception:
-                    _nr = job.next_run_time
-                jobs.append({
-                    "id": job.id,
-                    "name": job.name or job.id,
-                    "next_run": _nr.isoformat() if _nr else None,
-                    "trigger": str(job.trigger),
-                })
-        hist_path = os.path.join(DATA_DIR, "scheduler_history.json")
-        history = {}
-        if os.path.exists(hist_path):
-            with open(hist_path) as f:
-                history = json.load(f)
-        for j in jobs:
-            last = history.get(j["id"])
-            if last:
-                j["last_run"] = last.get("started_at")
-                j["last_status"] = last.get("status")
-                j["last_duration_s"] = last.get("duration_s")
-                j["last_error"] = last.get("error")
-        return jsonify({"jobs": jobs, "now": datetime.now().isoformat()})
-    except Exception as e:
-        return jsonify({"error": str(e), "jobs": []}), 500
-
 @app.route("/sw.js")
 def serve_sw():
     from flask import Response

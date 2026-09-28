@@ -1596,23 +1596,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
   <div class="ph"><h2>⚙️ Paramètres</h2><p class="page-sub">Tâches automatiques et statistiques</p></div>
 
-  <div class="card" style="margin-bottom:14px">
-    <div class="ct" style="margin-bottom:12px">📅 Tâches programmées
-      <button id="refreshJobsBtn" class="btn" style="float:right;font-size:11px;padding:4px 10px" onclick="loadSchedulerJobs()">🔄 Actualiser</button>
-    </div>
-    <div class="table-scroll">
-      <table id="schedulerJobsTable" style="width:100%;font-size:12px">
-        <thead><tr>
-          <th style="text-align:left;padding:6px 8px">Tâche</th>
-          <th style="text-align:left;padding:6px 8px">Prochaine exécution</th>
-          <th style="text-align:left;padding:6px 8px">Dernière exécution</th>
-          <th style="text-align:left;padding:6px 8px">Statut</th>
-        </tr></thead>
-        <tbody id="schedulerJobsTbody"><tr><td colspan="4" style="color:var(--text-2);padding:12px">Chargement…</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
   <div class="g2" style="gap:14px;margin-bottom:14px">
     <div class="card">
       <div class="ct" style="margin-bottom:12px">📊 Données</div>
@@ -5145,7 +5128,6 @@ let _glossFiltered = [..._glossTerms];
 
 // ── Paramètres / Scheduler ────────────────────────────────────────────────
 async function loadSettingsPage() {
-  loadSchedulerJobs();
   // Stats données
   try {
     const r = await fetch('/api/announcements/summary');
@@ -5159,38 +5141,6 @@ async function loadSettingsPage() {
     const elR = document.getElementById('settings-total-reports');
     if (elR) elR.textContent = d2.total ?? '—';
   } catch(e){}
-}
-
-async function loadSchedulerJobs() {
-  const tbody = document.getElementById('schedulerJobsTbody');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-2);padding:12px">Chargement…</td></tr>';
-  try {
-    const r = await fetch('/api/scheduler/jobs');
-    const data = await r.json();
-    if (!data.jobs || !data.jobs.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-2);padding:12px">Scheduler non démarré ou aucun job actif.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.jobs.map(j => {
-      const nextFr = j.next_run ? new Date(j.next_run).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}) : '—';
-      const lastFr = j.last_run ? new Date(j.last_run).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}) : '—';
-      const dur = j.last_duration_s ? ` (${j.last_duration_s}s)` : '';
-      const badge = j.last_status === 'success'
-        ? '<span style="color:var(--bull);font-weight:600">✓ OK</span>'
-        : j.last_status === 'error'
-          ? `<span style="color:var(--bear);font-weight:600" title="${j.last_error||''}">✗ Erreur</span>`
-          : '<span style="color:var(--text-2)">—</span>';
-      return `<tr>
-        <td style="padding:6px 8px"><strong style="font-size:12px">${j.name}</strong><br><span style="color:var(--text-2);font-size:10px">${j.id}</span></td>
-        <td style="padding:6px 8px;font-size:12px">${nextFr}</td>
-        <td style="padding:6px 8px;font-size:12px">${lastFr}${dur}</td>
-        <td style="padding:6px 8px">${badge}</td>
-      </tr>`;
-    }).join('');
-  } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--bear);padding:12px">Erreur : ${e.message}</td></tr>`;
-  }
 }
 
 function initGlossaire() {
