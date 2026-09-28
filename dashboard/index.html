@@ -656,7 +656,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- Topbar marché + breadcrumb -->
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
-    <span style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Accueil</span></span>
+    <span id="msb-breadcrumb" style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Accueil</span></span>
     <span id="msb-composite" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
@@ -969,6 +969,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <!-- ── Onglet Indices BRVM ── -->
   <div class="tab-content on" id="marche-tab-indices">
   <div class="beginner-banner">📊 Indices, tendances et température du marché BRVM, mis à jour en continu.</div>
+  <div id="mkt-idx-error" style="display:none;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:8px;padding:12px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:12px">
+    <span style="font-size:12px;color:var(--t2)">Données momentanément indisponibles</span>
+    <button onclick="loadMarketWidget()" class="btn btn-o" style="font-size:11px;padding:5px 14px">Réessayer</button>
+  </div>
   <div class="g4" id="market-indices-kpis" style="margin-bottom:20px">
     <div class="kpi"><div class="kl">BRVM-C</div><div class="kv" id="mkt-brvm-c">—</div><div id="mkt-brvm-c-chg" style="font-size:11px;color:var(--t2)">—</div></div>
     <div class="kpi"><div class="kl">BRVM-30</div><div class="kv" id="mkt-brvm-30">—</div><div id="mkt-brvm-30-chg" style="font-size:11px;color:var(--t2)">—</div></div>
@@ -2725,7 +2729,11 @@ function _renderMarketWeather(compChange, scores){
 }
 
 function loadMarketWidget(){
-  fetch('/api/market').then(r=>r.json()).then(d=>{
+  var _mktErrEl = document.getElementById('mkt-idx-error');
+  if (_mktErrEl) _mktErrEl.style.display = 'none';
+  var _mktAc = new AbortController();
+  var _mktTo = setTimeout(function(){ _mktAc.abort(); }, 10000); // LOADERR-1 : delai max 10 s, pas de relance automatique
+  fetch('/api/market', {signal:_mktAc.signal}).then(r=>{clearTimeout(_mktTo);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>{
     var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
     var b30  = (d.indices||[]).find(i=>i.name&&i.name.includes('30'));
     window._marketData = {composite: comp||{}, brvm30: b30||{}};
@@ -2750,6 +2758,9 @@ function loadMarketWidget(){
       if(msbTime) msbTime.textContent='MàJ '+timeStr;
     }
     // Market status bar — format mono compact
+    var msbBc=document.getElementById('msb-breadcrumb'), msbBoc=document.getElementById('msb-boc');
+    if(msbBc) msbBc.style.display='';
+    if(msbBoc) msbBoc.style.display='';
     var msbComp=document.getElementById('msb-composite');
     var msbB30=document.getElementById('msb-brvm30');
     if(msbComp&&comp){var cv=comp.change>=0?'var(--bull)':'var(--bear)';var cs=comp.change>=0?'+':'';msbComp.innerHTML='<span style="color:var(--text-2)">BRVM-C</span> <span style="color:var(--text-1)">'+Number(comp.current).toFixed(2)+'</span> <span style="color:'+cv+'">'+cs+Number(comp.change).toFixed(2)+'%</span>';}
@@ -2761,7 +2772,20 @@ function loadMarketWidget(){
     if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
     if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
     _paintIndexCards();
-  }).catch(e=>{console.error('[BRVM] loadMarketWidget:',e);});
+  }).catch(e=>{
+    clearTimeout(_mktTo);
+    console.error('[BRVM] loadMarketWidget:',e);
+    if (_mktErrEl) _mktErrEl.style.display = 'flex';
+    var msbComp2=document.getElementById('msb-composite');
+    var msbB302=document.getElementById('msb-brvm30');
+    var msbTime2=document.getElementById('msb-time');
+    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--bear)">Indices indispo.</span> <span role="button" tabindex="0" onclick="loadMarketWidget()" style="color:var(--text-1);text-decoration:underline;cursor:pointer">Réessayer</span>';
+    if(msbB302) msbB302.textContent='';
+    if(msbTime2) msbTime2.textContent='';
+    var msbBc2=document.getElementById('msb-breadcrumb'), msbBoc2=document.getElementById('msb-boc');
+    if(msbBc2) msbBc2.style.display='none'; // LOADERR-1 : libere de la place a 390px pour "Indices indisponibles · Reessayer"
+    if(msbBoc2) msbBoc2.style.display='none';
+  });
 }
 
 function loadSidebar(){
