@@ -72,11 +72,7 @@ def load_latest_scores():
 
 
 def load_price_history():
-    from price_history_builder import append_live_prices, get_price_history, load_history
-    try:
-        append_live_prices()
-    except Exception:
-        pass
+    from price_history_builder import load_history
     return load_history()
 
 def _load_price_history_legacy():
