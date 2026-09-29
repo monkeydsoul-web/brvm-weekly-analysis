@@ -3654,7 +3654,7 @@ function _genVerdict(s){
     :('background:'+badgeCol+';color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px');
   var noteGrise='';
   if(suspendu){
-    var n10=(typeof v10fmt==='function')?v10fmt(v):(Math.round(v/8*10)/10).toFixed(1);
+    var n10=(typeof note10txt==='function')?note10txt(s):String((typeof v10fmt==='function')?v10fmt(v):(Math.round(v/8*10)/10).toFixed(1)).replace('.',',');
     noteGrise='<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:8px">Note '+n10+'/10</div>';
   }
 

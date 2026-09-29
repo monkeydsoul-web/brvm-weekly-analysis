@@ -551,3 +551,35 @@ attend(noms('vend') === '', 'ancien vend');
         check=False,
     )
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_note_grise_suspendue_sur_10_avec_virgule():
+    """La fiche d'une societe suspendue affiche note10, pas le composite avec un point."""
+    assert "note10txt(s)" in _entre(HTML, "function _genVerdict", "function _shareStockText")
+    source = _entre(HTML, "function note10num", "function rapportAnnuelTxt")
+    source += _entre(HTML, "function conseilAffiche", "function fmtConseil")
+    source += _entre(HTML, "function _genVerdict", "function _shareStockText")
+    script = source + r"""
+const document = { documentElement: { dataset: { mode: 'beginner' } } };
+function attend(cond, msg) {
+  if (!cond) { console.error(msg); process.exit(1); }
+}
+const row = {
+  ticker: 'SICC', statut: 'suspendu', statut_depuis: '2026-09-16',
+  composite_adj: 54, note10: 6.8
+};
+const fiche = _genVerdict(row);
+attend(fiche.indexOf('Note 6,8/10') !== -1, fiche);
+attend(fiche.indexOf('6.8') === -1, 'point decimal');
+attend(fiche.indexOf('/80') === -1, 'slash 80');
+const repli = _genVerdict({ ticker: 'SICC', statut: 'suspendu', composite_adj: 80 });
+attend(repli.indexOf('Note 10,0/10') !== -1, repli);
+"""
+    resultat = subprocess.run(
+        ["node", "-e", script],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert resultat.returncode == 0, resultat.stderr or resultat.stdout
