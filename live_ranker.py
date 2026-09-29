@@ -848,6 +848,8 @@ def _poser_prix_cible(resultat, row):
     resultat["libelle_valeur"] = estimation["libelle"]
     resultat["pe_secteur"] = estimation["pe_secteur"]
     resultat["pb_secteur"] = estimation["pb_secteur"]
+    resultat["facteur_roe"] = estimation["facteur_roe"]
+    resultat["roe_secteur"] = estimation["roe_secteur"]
     return resultat
 
 

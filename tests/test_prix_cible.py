@@ -53,10 +53,10 @@ def _univers():
 def test_libelle_colle_a_lecart_affiche():
     """« Proche » seulement si l'écart affiché est entre -10 % et +10 %.
 
-    Banque : P/E 9,85 et P/B 1,51. Avec BNA 1 000 et BVPA 8 000,
-    la moyenne des trois calculs vaut 11 782.
+    Banque : P/E 9,85, P/B 1,51, ROE médian 14. Avec un ROE société
+    de 14 (facteur 1), BNA 1 000 et BVPA 8 000, la moyenne vaut 11 782.
     """
-    base = {"sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 15}
+    base = {"sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 14}
     cas = [
         ({**base, "price": 8000}, LIBELLE_FORT),
         ({**base, "price": 10000}, LIBELLE_MODERE),
@@ -94,11 +94,14 @@ def test_cible_tres_en_dessous_dit_trop_cher():
     estimation = estimer_prix_cible({
         "sector": "Banque", "price": 20000, "eps": 1000, "bvpa": 8000, "roe": 30,
     })
-    assert estimation["prix_cible"] == 11782
-    assert estimation["ecart_pct"] == -41.1
+    # ROE 30 / ROE médian banques 14 = 2,14, sous le plafond de 3.
+    assert estimation["facteur_roe"] == 30 / 14
+    assert estimation["prix_cible"] == 16384
+    assert estimation["ecart_pct"] == -18.1
     assert estimation["libelle"] == LIBELLE_CHER
     assert estimation["pe_secteur"] == 9.85
     assert estimation["pb_secteur"] == 1.51
+    assert estimation["roe_secteur"] == 14.0
 
 
 def test_sans_donnees_ne_dit_pas_proche():
@@ -192,16 +195,16 @@ def test_univers_conseils_inchanges_et_libelles_coherents(monkeypatch, tmp_path)
     assert comptes["Prudence"] == 35
     assert comptes[None] == 2
 
-    # Libellés APRÈS recalibrage, sur ce même fixture (pas la production).
-    # Avant (P/E fixe de 10) : Proche du prix cible 19,
-    # Au-dessus du prix cible 16, Décote modérée 2,
-    # Forte décote 1, sans libellé 9.
-    assert libelles[LIBELLE_CHER] == 15
-    assert libelles[LIBELLE_PROCHE] == 11
-    assert libelles["incertain"] == 9
+    # Libellés sur ce fixture (pas la production).
+    # Avant le ROE et la règle des 5 sociétés (P/E et P/B de secteur
+    # seuls) : Au-dessus 15, Proche 11, Cible à vérifier 9,
+    # sans libellé 9, Forte décote 2, Décote modérée 1.
+    assert libelles[LIBELLE_PROCHE] == 14
+    assert libelles[LIBELLE_CHER] == 12
+    assert libelles[LIBELLE_FORT] == 5
+    assert libelles["incertain"] == 7
     assert libelles[None] == 9
-    assert libelles[LIBELLE_FORT] == 2
-    assert libelles[LIBELLE_MODERE] == 1
+    assert libelles[LIBELLE_MODERE] == 0
 
     monkeypatch.setattr("features.DATA_DIR", str(tmp_path))
     (tmp_path / "live_ranking.json").write_text(
@@ -245,54 +248,129 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "fmtLibelleValeur(s.libelle_valeur)" in page
 
 
-def test_le_roe_ne_change_plus_le_prix_et_le_secteur_si():
-    """Même BNA : le P/E du secteur remplace le 10 fixe. Le ROE ne compte plus."""
-    faible = estimer_prix_cible({
-        "sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 5, "price": 10000,
+def test_le_roe_ajuste_le_pb_et_pas_le_benefice():
+    """Consommation : P/B 2, ROE médian 16. Le P/E 18 ne bouge pas."""
+    plancher = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 4, "price": 10000,
     })
-    fort = estimer_prix_cible({
-        "sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 30, "price": 10000,
+    neutre = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 16, "price": 10000,
     })
-    conso = estimer_prix_cible({
+    plafond = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 79, "price": 10000,
+    })
+    assert plancher["epv"] == neutre["epv"] == plafond["epv"] == 18000
+    assert plancher["pe_secteur"] == 18.0
+    assert plancher["facteur_roe"] == 0.5
+    assert plancher["pb"] == 8000
+    assert neutre["facteur_roe"] == 1.0
+    assert neutre["pb"] == 16000
+    assert plafond["facteur_roe"] == 3.0
+    assert plafond["pb"] == 48000
+    assert plafond["roe_secteur"] == 16.0
+    sans_roe = estimer_prix_cible({
         "sector": "Consommation", "eps": 1000, "price": 18000,
     })
-    assert faible["epv"] == fort["epv"] == 9850
-    assert faible["pb"] == fort["pb"] == 12080
-    assert faible["prix_cible"] == fort["prix_cible"] == 11782
-    assert faible["libelle"] == LIBELLE_MODERE
-    assert conso["epv"] == 18000
-    assert conso["pe_secteur"] == 18.0
-    assert conso["pb"] is None
+    assert sans_roe["epv"] == 18000
+    assert sans_roe["pb"] is None
+    assert sans_roe["facteur_roe"] == 1.0
+
+
+def test_jambe_pb_citee_pour_un_roe_de_79():
+    """Bénéfice 36 468 et P/B 5 119, tels que mesurés sans le ROE.
+
+    BNA 2 026 × P/E 18 = 36 468. Actif net 2 559,5 × P/B 2 = 5 119.
+    Avec un ROE de 79 % contre 16 % au milieu de la consommation,
+    le facteur est plafonné à 3 et la jambe P/B passe à 15 357.
+    Le cours de production n'est pas dans le dépôt : ce test ne
+    fige pas le libellé de STBC sur le marché réel.
+    """
+    avant = round(2559.5 * 2)
+    assert avant == 5119
+    estimation = estimer_prix_cible({
+        "sector": "Consommation", "eps": 2026, "bvpa": 2559.5, "roe": 79, "price": 22000,
+    })
+    assert estimation["epv"] == 36468
+    assert estimation["pb"] == 15357
+    assert estimation["facteur_roe"] == 3.0
+    faible = estimer_prix_cible({
+        "sector": "Consommation", "eps": 100, "bvpa": 1000, "roe": 8.8, "price": 1000,
+    })
+    assert faible["facteur_roe"] == 8.8 / 16
+    assert faible["pb"] == round(1000 * 2 * (8.8 / 16))
 
 
 def test_reperes_sont_la_mediane_des_historiques():
     table = calculer_reperes(STOCK_FUNDAMENTALS)
     par_nom = {ligne["secteur"]: ligne for ligne in table["secteurs"].values()}
     assert par_nom["Banque"]["n_pe"] == 16
-    assert par_nom["Banque"]["pe"] == 9.85
-    assert par_nom["Banque"]["pb"] == 1.51
-    assert par_nom["Télécoms"]["pe"] == 12.0
-    assert par_nom["Télécoms"]["pb"] == 3.5
+    assert par_nom["Banque"]["pe_observe"] == 9.85
+    assert par_nom["Banque"]["pb_observe"] == 1.51
+    assert par_nom["Banque"]["roe"] == 14.0
+    assert par_nom["Banque"]["utilise_marche"] is False
+    assert par_nom["Télécoms"]["pe_observe"] == 12.0
+    assert par_nom["Télécoms"]["pb_observe"] == 3.5
+    assert par_nom["Télécoms"]["n"] == 3
+    assert par_nom["Télécoms"]["utilise_marche"] is True
+    assert par_nom["Télécoms"]["pe"] == 14.0
+    assert par_nom["Télécoms"]["pb"] == 2.0
     assert par_nom["Consommation"]["pe"] == 18.0
-    assert par_nom["Agriculture"]["pe"] == 15.8
-    assert par_nom["Agriculture"]["pb"] == 1.9
-    assert par_nom["Énergie"]["pe"] == 12.5
-    assert par_nom["Énergie"]["pb"] == 2.75
+    assert par_nom["Consommation"]["roe"] == 16.0
+    assert par_nom["Agriculture"]["pe_observe"] == 15.8
+    assert par_nom["Agriculture"]["pb_observe"] == 1.9
+    assert par_nom["Agriculture"]["n"] == 4
+    assert par_nom["Agriculture"]["pe"] == 14.0
+    assert par_nom["Agriculture"]["roe"] == 12.0
+    assert par_nom["Énergie"]["pe_observe"] == 12.5
+    assert par_nom["Énergie"]["pb_observe"] == 2.75
+    assert par_nom["Énergie"]["utilise_marche"] is True
     assert par_nom["Industriel"]["pe"] == 16.0
-    assert par_nom["Utilités"]["pe"] == 14.0
-    assert par_nom["Utilités"]["pb"] == 2.25
+    assert par_nom["Industriel"]["roe"] == 8.0
+    assert par_nom["Utilités"]["pe_observe"] == 14.0
+    assert par_nom["Utilités"]["pb_observe"] == 2.25
     assert par_nom["Utilités"]["n_pe"] == 2
+    assert par_nom["Utilités"]["pe"] == 14.0
+    assert par_nom["Utilités"]["pb"] == 2.0
     assert table["n"] == 47
     assert table["pe_defaut"] == 14.0
     assert table["pb_defaut"] == 2.0
+    assert table["roe_defaut"] == 12.0
     assert sum(ligne["n_pe"] for ligne in par_nom.values()) == 47
+    for nom in ("Télécoms", "Agriculture", "Énergie", "Utilités"):
+        assert par_nom[nom]["utilise_marche"] is True
+        assert par_nom[nom]["n"] < 5
 
 
 def test_telecoms_sans_accent_utilise_le_meme_multiple():
+    """Trois télécoms : trop peu, donc la médiane de tout le marché."""
     avec = estimer_prix_cible({"sector": "Télécoms", "eps": 100, "price": 1200})
     sans = estimer_prix_cible({"sector": "Telecoms", "eps": 100, "price": 1200})
-    assert avec["epv"] == sans["epv"] == 1200
-    assert avec["pe_secteur"] == 12.0
+    assert avec["epv"] == sans["epv"] == 1400
+    assert avec["pe_secteur"] == 14.0
+    assert avec["pb_secteur"] == 2.0
+
+
+def test_cible_sous_le_tiers_du_cours_est_a_verifier():
+    """SIVC en production : 653 pour un cours de 2 140, écart d'environ −69 %.
+
+    La règle des 80 % ne voit pas cet écart. Moins du tiers du cours,
+    oui. Ici, même situation avec des chiffres de banque et un ROE
+    égal à la médiane (facteur 1) : 11 782 pour un cours de 36 000.
+    """
+    trop_bas = estimer_prix_cible({
+        "sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 14, "price": 36000,
+    })
+    assert trop_bas["prix_cible"] == 11782
+    assert trop_bas["ecart_pct"] == -67.3
+    assert abs(trop_bas["ecart_pct"]) < 80
+    assert trop_bas["prix_cible"] * 3 < 36000
+    assert trop_bas["libelle"] == "incertain"
+    encore_cher = estimer_prix_cible({
+        "sector": "Banque", "eps": 1000, "bvpa": 8000, "roe": 14, "price": 35000,
+    })
+    assert encore_cher["ecart_pct"] == -66.3
+    assert encore_cher["libelle"] == LIBELLE_CHER
+    assert encore_cher["incertain"] is False
 
 
 def test_methodo_affiche_les_multiples_et_protege_la_note():
@@ -311,4 +389,8 @@ def test_methodo_affiche_les_multiples_et_protege_la_note():
         assert str(ligne["n_pe"]) in bloc
     assert "P/E 14×" in bloc
     assert "P/B 2×" in bloc
+    assert "moins de 5" in bloc
+    assert "0,5 et 3" in bloc
+    assert "moins du tiers" in bloc
+    assert "3 fois le cours" in bloc
     assert "Cible à vérifier" in bloc
