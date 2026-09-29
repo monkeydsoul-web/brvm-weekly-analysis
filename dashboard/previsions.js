@@ -7,10 +7,10 @@ let _prevBacktest = null;
 let _sigFilter = '';
 
 function _sigAffiche(code){
-  if(code==='ACHETER') return 'Intéressant';
-  if(code==='CONSERVER') return 'À surveiller';
-  if(code==='ALLÉGER'||code==='ALLEGER') return 'Prudence';
-  if(code==='ÉVITER'||code==='EVITER') return 'Prudence';
+  if(code==='ACHETER') return 'Prévision favorable';
+  if(code==='CONSERVER') return 'Prévision neutre';
+  if(code==='ALLÉGER'||code==='ALLEGER') return 'Prévision défavorable';
+  if(code==='ÉVITER'||code==='EVITER') return 'Prévision défavorable';
   return code||'';
 }
 
@@ -23,7 +23,7 @@ async function renderPrevisionsPage() {
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
         ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique', false],
-        ['signaux','🤖 Recommandations IA','Signal par société : Intéressant, À surveiller ou Prudence', false],
+        ['signaux','🤖 Recommandations IA','Prévision favorable, neutre ou défavorable. Distinct du conseil de la note.', false],
         ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC', true],
         ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable', true],
       ].map(([id,lbl,tip,hidden])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}"${hidden?' style="display:none"':''}>${lbl}</div>`).join('')}
@@ -178,7 +178,7 @@ function _prevDrawSignaux(el) {
 
   el.innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      ${[['', 'Tous', _prevSignaux.length], ['ACHETER','🟢 Intéressant', counts['ACHETER']||0], ['CONSERVER','🟡 À surveiller', counts['CONSERVER']||0], ['ALLÉGER','🔴 Prudence', counts['ALLÉGER']||0], ['ÉVITER','⚫ Prudence', counts['ÉVITER']||0]].map(([v,l,n]) =>
+      ${[['', 'Tous', _prevSignaux.length], ['ACHETER','🟢 Prévision favorable', counts['ACHETER']||0], ['CONSERVER','🟡 Prévision neutre', counts['CONSERVER']||0], ['ALLÉGER','🔴 Prévision défavorable', counts['ALLÉGER']||0], ['ÉVITER','⚫ Prévision défavorable', counts['ÉVITER']||0]].map(([v,l,n]) =>
         `<button onclick="_sigSetFilter('${v}')" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${_sigFilter===v?'var(--blue)':'var(--bg3)'};color:${_sigFilter===v?'#fff':'var(--t2)'};cursor:pointer;font-size:11px">${l} <strong>${n}</strong></button>`
       ).join('')}
       <span style="margin-left:auto;font-size:10px;color:var(--t3);align-self:center">Mis à jour ${_prevSignaux[0]?.updated_at||'—'}</span>
@@ -270,7 +270,7 @@ function _prevDrawBacktest(el) {
   if (yrs.length) {
     const maxRet = Math.max(...yrs.map(y => Math.abs(yearly[y].avg_return_acheter || 0)), 10);
     yearBars = `<div style="margin-top:10px">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📅 Rendement simulé Intéressant par année</div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📅 Rendement simulé Prévision favorable par année</div>
       ${yrs.map(y => {
         const v = yearly[y];
         const ret = v.avg_return_acheter ?? 0;
@@ -283,7 +283,7 @@ function _prevDrawBacktest(el) {
             <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}44;border-radius:3px"></div>
             <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 6px;font-size:9px;gap:8px">
               <span style="color:${col};font-weight:700">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>
-              <span style="color:var(--t3)">· ${v.n_acheter} Intéressant / ${v.n_tickers} · précision ${acc}%</span>
+              <span style="color:var(--t3)">· ${v.n_acheter} Prévision favorable / ${v.n_tickers} · précision ${acc}%</span>
               <span style="color:${(v.alpha||0)>=0?'var(--green)':'var(--red)'}">alpha ${(v.alpha||0)>=0?'+':''}${(v.alpha||0).toFixed(1)}%</span>
             </div>
           </div>
@@ -324,8 +324,8 @@ function _prevDrawBacktest(el) {
   el.innerHTML = `
     <div style="background:rgba(96,165,250,0.06);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:10px;color:var(--t3)">
       <strong style="color:var(--blue)">Modèle :</strong> ${bt.model_description || 'Composite 4 facteurs'}
-      &nbsp;·&nbsp; Seuil Intéressant : score ≥ ${(bt.seuil_acheter||0.65)*100}%
-      &nbsp;·&nbsp; Seuil Prudence : score ≤ ${(bt.seuil_alleger||0.35)*100}%
+      &nbsp;·&nbsp; Seuil Prévision favorable : score ≥ ${(bt.seuil_acheter||0.65)*100}%
+      &nbsp;·&nbsp; Seuil Prévision défavorable : score ≤ ${(bt.seuil_alleger||0.35)*100}%
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
       <div class="card" style="margin-bottom:0;text-align:center">
@@ -348,12 +348,12 @@ function _prevDrawBacktest(el) {
       ${bt.best_year ? `<div style="background:rgba(74,222,128,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--green)">
         <div style="font-size:9px;color:var(--green);text-transform:uppercase;margin-bottom:2px">🏆 Meilleure année</div>
         <div style="font-size:18px;font-weight:700;color:var(--green)">${bt.best_year} · +${(bt.best_year_return||0).toFixed(1)}%</div>
-        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Intéressant</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Prévision favorable</div>
       </div>` : ''}
       ${bt.worst_year ? `<div style="background:rgba(248,113,113,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--red)">
         <div style="font-size:9px;color:var(--red);text-transform:uppercase;margin-bottom:2px">📉 Pire année</div>
         <div style="font-size:18px;font-weight:700;color:var(--red)">${bt.worst_year} · ${(bt.worst_year_return||0).toFixed(1)}%</div>
-        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Intéressant</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Prévision favorable</div>
       </div>` : ''}
     </div>
     <div class="card" style="margin-bottom:12px">

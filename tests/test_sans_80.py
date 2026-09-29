@@ -583,3 +583,25 @@ attend(repli.indexOf('Note 10,0/10') !== -1, repli);
         check=False,
     )
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout
+
+
+def test_pastilles_signaux_sont_une_prevision():
+    """La prévision ne reprend pas les mots du conseil tiré de la note."""
+    prev = (ROOT / "dashboard" / "previsions.js").read_text(encoding="utf-8")
+    assert "return 'Prévision favorable'" in prev
+    assert "return 'Prévision neutre'" in prev
+    assert "return 'Prévision défavorable'" in prev
+    assert "return 'Intéressant'" not in prev
+    assert "return 'À surveiller'" not in prev
+    assert "return 'Prudence'" not in prev
+    assert "['ACHETER','🟢 Prévision favorable'" in prev
+    assert "['CONSERVER','🟡 Prévision neutre'" in prev
+    assert "['ALLÉGER','🔴 Prévision défavorable'" in prev
+    assert "['ÉVITER','⚫ Prévision défavorable'" in prev
+    assert "s.signal === _sigFilter" in prev
+    assert "Prévision favorable = les modèles détectent un signal haussier" in HTML
+    assert "Prévision neutre = signaux mixtes" in HTML
+    assert "Prévision défavorable = valorisation trop élevée" in HTML
+    assert "≥ 7,5 = Intéressant" in HTML
+    assert "≥ 5 et &lt; 7,5 = À surveiller" in HTML
+    assert "&lt; 5 = Prudence" in HTML
