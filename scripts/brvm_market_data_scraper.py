@@ -108,6 +108,8 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("Société Générale de Banques en Côte d'Ivoire", "SGBC"),
     ("Société Générale Côte d'Ivoire", "SGBC"),
     ("Société Générale", "SGBC"),
+    ("SGBCI", "SGBC"),
+    ("SGB CI", "SGBC"),
     ("SGBC", "SGBC"),
     ("Société Ivoirienne de Banque SA", "SIBC"),
     ("SIB", "SIBC"),
@@ -119,6 +121,7 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("NSIA Banque", "NSBC"),
     ("NSBC", "NSBC"),
     ("Coris Bank International Burkina", "CBIBF"),
+    ("Coris Bank International", "CBIBF"),
     ("Coris Bank", "CBIBF"),
     ("CBIBF", "CBIBF"),
     ("Bank of Africa Bénin", "BOAB"),
@@ -147,6 +150,7 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("BICI", "BICC"),
     ("BICC", "BICC"),
     ("Ecobank Transnational Incorporated", "ETIT"),
+    ("Groupe Ecobank", "ETIT"),
     ("ETI", "ETIT"),
     ("ETIT", "ETIT"),
     ("Oragroup", "ORGT"),
@@ -176,6 +180,7 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("SLBC", "SLBC"),
     ("Société Multinationale de Bitumes", "SMBC"),
     ("SMB", "SMBC"),
+    # Slug BRVM de SMB (TICKER_SLUGS, google_news_scraper) : pas une autre société.
     ("SOACII", "SMBC"),
     ("SMBC", "SMBC"),
     ("Uniwax", "UNXC"),
@@ -197,11 +202,14 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("Sucrivoire", "SCRC"),
     ("SCRC", "SCRC"),
     ("TotalEnergies Marketing Côte d'Ivoire", "TTLC"),
+    ("Total Energies Marketing Côte d'Ivoire", "TTLC"),
     ("TotalEnergies Marketing CI", "TTLC"),
+    ("Total Energies Marketing CI", "TTLC"),
     ("Total CI", "TTLC"),
     ("TotalEnergies CI", "TTLC"),
     ("TTLC", "TTLC"),
     ("TotalEnergies Marketing Sénégal", "TTLS"),
+    ("Total Energies Marketing Sénégal", "TTLS"),
     ("TotalEnergies Marketing Senegal", "TTLS"),
     ("Total Sénégal", "TTLS"),
     ("Total Senegal", "TTLS"),
@@ -230,18 +238,13 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("CFAC", "CFAC"),
     ("Bernabé", "BNBC"),
     ("Bernabe", "BNBC"),
-    ("BACI", "BNBC"),
-    ("Banque Atlantique CI", "BNBC"),
     ("BNBC", "BNBC"),
-    ("SICOGI", "SICC"),
     ("Sicor", "SICC"),
     ("SICC", "SICC"),
     ("Tractafric Motors", "PRSC"),
     ("Tractafric", "PRSC"),
-    ("Prestige", "PRSC"),
     ("PRSC", "PRSC"),
     ("Servair Abidjan", "ABJC"),
-    ("Air Burkina", "ABJC"),
     ("ABJC", "ABJC"),
     ("Setao", "STAC"),
     ("SETACI", "STAC"),
@@ -249,6 +252,7 @@ _ALIAS_BRUTS: List[Tuple[str, str]] = [
     ("Erium CI", "SIVC"),
     ("Erium", "SIVC"),
     ("Air Liquide", "SIVC"),
+    # Slug BRVM d'Erium (TICKER_SLUGS, google_news_scraper).
     ("SIVOP", "SIVC"),
     ("SIVC", "SIVC"),
     ("BIIC", "BICB"),
@@ -294,11 +298,20 @@ _NON_COTES_BRUTS: List[str] = [
 ]
 
 # Si ce mot suit immédiatement un alias court, ce n'est pas la société cotée.
+_PAYS_HORS_FILIALE_CI: Tuple[str, ...] = (
+    "Sénégal", "Senegal", "Mali", "Niger", "Bénin", "Benin", "Togo",
+    "Burkina", "Guinée", "Guinee", "Ghana", "Cameroun", "Nigeria",
+)
+_PAYS_HORS_CORIS: Tuple[str, ...] = (
+    "Sénégal", "Senegal", "Mali", "Niger", "Côte d'Ivoire", "Cote d'Ivoire",
+    "Bénin", "Benin", "Togo", "Guinée", "Guinee", "Ghana", "Cameroun",
+)
 _SUITE_REJETEE_BRUTE: Dict[str, Tuple[str, ...]] = {
-    "NSIA Banque": ("Bénin", "Benin", "Sénégal", "Senegal", "Togo", "Mali", "Niger", "Burkina", "Ghana", "Cameroun", "Nigeria"),
-    "NSIA": ("Assurances", "Vie", "Bénin", "Benin", "Sénégal", "Senegal", "Ghana"),
-    "Société Générale": ("Sénégal", "Senegal", "Bénin", "Benin", "Mali", "Niger", "Burkina", "Togo", "Ghana", "Cameroun", "France", "Maroc", "Nigeria"),
-    "Coris Bank": ("Sénégal", "Senegal", "Mali", "Bénin", "Benin", "Togo", "Niger", "Ghana", "Cameroun"),
+    "NSIA Banque": _PAYS_HORS_FILIALE_CI,
+    "NSIA": ("Assurances", "Vie", "Bénin", "Benin", "Sénégal", "Senegal", "Ghana", "Guinée", "Guinee"),
+    "Société Générale": _PAYS_HORS_FILIALE_CI + ("France", "Maroc"),
+    "Coris Bank International": _PAYS_HORS_CORIS,
+    "Coris Bank": _PAYS_HORS_CORIS,
     "Unilever": ("Ghana", "Nigeria", "France", "Sénégal", "Senegal", "Kenya"),
     "Nestlé": ("Sénégal", "Senegal", "Ghana", "France", "Nigeria", "Cameroun"),
     "Nestle": ("Sénégal", "Senegal", "Ghana", "France", "Nigeria", "Cameroun"),
@@ -307,17 +320,50 @@ _SUITE_REJETEE_BRUTE: Dict[str, Tuple[str, ...]] = {
 }
 
 
-def _fold(text: str) -> str:
-    """Minuscules, sans accent, apostrophes d'/l' retirées, séparateurs en espaces."""
+def _fold_indexe(text: str) -> Tuple[str, List[int]]:
+    """Texte plié et, pour chaque caractère plié, son index dans l'original.
+
+    Minuscules, sans accent, d'/l' retirés, séparateurs en espaces.
+    """
     if not text:
-        return ""
+        return "", []
     t = text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
-    t = unicodedata.normalize("NFD", t)
-    t = "".join(c for c in t if unicodedata.category(c) != "Mn")
-    t = t.lower()
-    t = re.sub(r"\b[dl]'", " ", t)
-    t = re.sub(r"[^a-z0-9]+", " ", t)
-    return re.sub(r"\s+", " ", t).strip()
+    decomposes: List[str] = []
+    origines: List[int] = []
+    for i, ch in enumerate(t):
+        for c in unicodedata.normalize("NFD", ch):
+            if unicodedata.category(c) == "Mn":
+                continue
+            decomposes.append(c.lower())
+            origines.append(i)
+    out: List[str] = []
+    out_orig: List[int] = []
+    n = len(decomposes)
+    j = 0
+    while j < n:
+        ch = decomposes[j]
+        prev_sep = j == 0 or not decomposes[j - 1].isalnum()
+        if prev_sep and ch in ("d", "l") and j + 1 < n and decomposes[j + 1] == "'":
+            j += 2
+            continue
+        if ("a" <= ch <= "z") or ("0" <= ch <= "9"):
+            out.append(ch)
+            out_orig.append(origines[j])
+        elif not out or out[-1] != " ":
+            out.append(" ")
+            out_orig.append(origines[j])
+        j += 1
+    while out and out[0] == " ":
+        out.pop(0)
+        out_orig.pop(0)
+    while out and out[-1] == " ":
+        out.pop()
+        out_orig.pop()
+    return "".join(out), out_orig
+
+
+def _fold(text: str) -> str:
+    return _fold_indexe(text)[0]
 
 
 def _construire_alias():
@@ -407,26 +453,51 @@ def _positions_phrase(padded: str, phrase: str) -> List[int]:
         debut = at + len(phrase) + 1
 
 
-def _token_apres(norm: str, phrase: str, at: int) -> str:
-    reste = norm[at + len(phrase):].strip()
+def _rejete_suite(norm: str, alias: str, at: int) -> bool:
+    """Le mot ou le pays qui suit l'alias désigne une autre société."""
+    phrases = _SUITE_REJETEE.get(alias)
+    if not phrases:
+        return False
+    reste = norm[at + len(alias):].strip()
     if not reste:
-        return ""
-    return reste.split(" ", 1)[0]
+        return False
+    for phrase in phrases:
+        if reste == phrase or reste.startswith(phrase + " "):
+            return True
+    return False
 
 
-# ── Extraire ticker depuis texte ─────────────────────────────────────────────
-def _extract_ticker(text: str) -> Optional[str]:
-    """Rattache un texte à un ticker coté, par nom entier (mot ou expression).
+def _cie_accepte(original: str, origines: List[int], at: int) -> bool:
+    """« CIE » en capitales, ou « Cie » collé à Compagnie Ivoirienne.
 
-    Un bout de mot ne compte pas : « eti » dans « marketing », « cie » dans
-    « financière ». Un émetteur non coté nommé avant toute société cotée
-    (CRRH-UEMOA, BOAD, État, filiale étrangère) donne None.
+    « et Cie » et « & Cie » ne sont pas la compagnie d'électricité.
+    """
+    if at < 0 or at >= len(origines):
+        return False
+    origine = origines[at]
+    m = re.match(r"[A-Za-z]+", original[origine:])
+    jeton = m.group(0) if m else ""
+    if jeton == "CIE":
+        return True
+    debut = max(0, origine - 80)
+    fin = min(len(original), origine + len(jeton) + 80)
+    return re.search(r"Compagnie\s+Ivoirienne", original[debut:fin], re.I) is not None
+
+
+# Segment sans émetteur nommé (ni coté, ni bloqué).
+_SANS_EMETTEUR = object()
+
+
+def _segment_ticker(text: str) -> Any:
+    """Ticker du segment, None si l'émetteur n'est pas coté, _SANS_EMETTEUR sinon.
+
+    À position égale, l'alias le plus long gagne. Sinon le plus tôt dans le texte.
     """
     if not text or not str(text).strip():
-        return None
-    norm = _fold(text)
+        return _SANS_EMETTEUR
+    norm, origines = _fold_indexe(text)
     if not norm:
-        return None
+        return _SANS_EMETTEUR
     padded = " " + norm + " "
 
     bloque_at: Optional[int] = None
@@ -435,20 +506,33 @@ def _extract_ticker(text: str) -> Optional[str]:
             if bloque_at is None or at < bloque_at:
                 bloque_at = at
 
-    meilleur: Optional[Tuple[Tuple[int, int], str, int]] = None
+    rejetes: List[Tuple[int, int]] = []
+    valides: List[Tuple[int, int, str]] = []
     for alias, ticker in _ALIAS_ITEMS:
-        rejet = _SUITE_REJETEE.get(alias)
         for at in _positions_phrase(padded, alias):
-            if rejet and _token_apres(norm, alias, at) in rejet:
+            if alias == "cie" and not _cie_accepte(text, origines, at):
                 continue
-            rang = (len(alias), -at)
-            if meilleur is None or rang > meilleur[0]:
-                meilleur = (rang, ticker, at)
+            if _rejete_suite(norm, alias, at):
+                rejetes.append((at, len(alias)))
+                continue
+            valides.append((at, len(alias), ticker))
 
-    if meilleur is not None:
-        if bloque_at is not None and bloque_at < meilleur[2]:
+    gardes: List[Tuple[int, int, str]] = []
+    for at, longueur, ticker in valides:
+        masque = False
+        for r_at, r_len in rejetes:
+            if at == r_at and longueur < r_len:
+                masque = True
+                break
+        if not masque:
+            gardes.append((at, longueur, ticker))
+
+    if gardes:
+        gardes.sort(key=lambda item: (item[0], -item[1]))
+        at, _longueur, ticker = gardes[0]
+        if bloque_at is not None and bloque_at < at:
             return None
-        return meilleur[1]
+        return ticker
     if bloque_at is not None:
         return None
 
@@ -456,6 +540,24 @@ def _extract_ticker(text: str) -> Optional[str]:
         candidat = m.group(1)
         if candidat in _TICKERS_CONNUS:
             return candidat
+    return _SANS_EMETTEUR
+
+
+# ── Extraire ticker depuis texte ─────────────────────────────────────────────
+def _extract_ticker(text: str, titre: Optional[str] = None) -> Optional[str]:
+    """Rattache un communiqué à un ticker coté.
+
+    Le titre de l'annonce prime. Sinon le premier nom du texte. À la même
+    position, le nom le plus long gagne. Un bout de mot ne compte pas.
+    """
+    if titre and str(titre).strip():
+        decision = _segment_ticker(titre)
+        if decision is not _SANS_EMETTEUR:
+            return decision
+    if text and str(text).strip():
+        decision = _segment_ticker(text)
+        if decision is not _SANS_EMETTEUR:
+            return decision
     return None
 
 
@@ -575,11 +677,10 @@ def _ticker_connu(value: Any) -> Optional[str]:
     return None
 
 
-def _choisir_ticker(texte: str, indice: Any = None) -> Optional[str]:
-    """Ticker lu dans le texte. L'indice d'annonce ne sert que si le texte est vide."""
-    blob = (texte or "").strip()
-    if blob:
-        return _extract_ticker(blob)
+def _choisir_ticker(texte: str, indice: Any = None, titre: Optional[str] = None) -> Optional[str]:
+    """Ticker lu dans le titre, sinon dans le texte. L'indice ne sert que si les deux sont vides."""
+    if (titre and str(titre).strip()) or (texte and str(texte).strip()):
+        return _extract_ticker(texte or "", titre=titre)
     return _ticker_connu(indice)
 
 
@@ -634,7 +735,7 @@ def scrape_ratings() -> List[Dict]:
                 text = item["contenu"]
             titre = item.get("titre") or ""
             contexte = " ".join(p for p in (titre, text) if p)
-            ticker = _choisir_ticker(contexte, item.get("ticker"))
+            ticker = _choisir_ticker(text, item.get("ticker"), titre=titre)
             # Émetteur non coté ou illisible : pas d'entrée ticker null dans le fichier.
             if not ticker:
                 continue

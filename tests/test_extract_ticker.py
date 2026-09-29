@@ -192,3 +192,75 @@ def test_fixture_rattachement_et_affichage():
     }
     assert ignores
     assert not any(fiche["resume"] in ignores for fiche in fiches)
+
+
+def test_titre_prime_sur_le_corps():
+    corps = "Ecobank Transnational Incorporated publie ses comptes."
+    assert _extract_ticker(corps, titre="Ecobank Côte d'Ivoire") == "ECOC"
+
+
+def test_premier_nom_dans_le_texte():
+    assert _extract_ticker(
+        "Ecobank Côte d'Ivoire, filiale d'Ecobank Transnational Incorporated"
+    ) == "ECOC"
+
+
+def test_cie_mentionne_sodeci():
+    texte = (
+        "La Compagnie Ivoirienne d'Electricite informe ses actionnaires. "
+        "La Société de Distribution d'Eau de Côte d'Ivoire est citée."
+    )
+    assert _extract_ticker(texte) == "CIEC"
+
+
+def test_sgbc_mentionne_sodeci():
+    texte = (
+        "La Société Générale Côte d'Ivoire publie sa notation. "
+        "SODECI est mentionnée dans le secteur."
+    )
+    assert _extract_ticker(texte) == "SGBC"
+
+
+def test_coris_hors_burkina():
+    assert _extract_ticker("Coris Bank International") == "CBIBF"
+    assert _extract_ticker("Coris Bank International Sénégal") is None
+    assert _extract_ticker("Coris Bank International Mali") is None
+    assert _extract_ticker("Coris Bank International Niger") is None
+    assert _extract_ticker("Coris Bank International Côte d'Ivoire") is None
+    assert _extract_ticker("Coris Bank International Bénin") is None
+    assert _extract_ticker("Coris Bank International Togo") is None
+    assert _extract_ticker("Coris Bank International Guinée") is None
+
+
+def test_filiales_nsia_et_sg_hors_cote_ivoire():
+    assert _extract_ticker("NSIA Banque Côte d'Ivoire") == "NSBC"
+    assert _extract_ticker("NSIA Banque Sénégal") is None
+    assert _extract_ticker("NSIA Banque Guinée") is None
+    assert _extract_ticker("Société Générale Côte d'Ivoire") == "SGBC"
+    assert _extract_ticker("Société Générale Sénégal") is None
+    assert _extract_ticker("Société Générale Burkina") is None
+
+
+def test_alias_retires():
+    assert _extract_ticker("Banque Atlantique CI") is None
+    assert _extract_ticker("Notation BACI") is None
+    assert _extract_ticker("SICOGI publie ses comptes") is None
+    assert _extract_ticker("Air Burkina — note de long terme") is None
+    assert _extract_ticker("Prestige motors") is None
+
+
+def test_alias_ajoutes():
+    assert _extract_ticker("SGBCI") == "SGBC"
+    assert _extract_ticker("SGB CI") == "SGBC"
+    assert _extract_ticker("Total Energies Marketing Sénégal") == "TTLS"
+    assert _extract_ticker("Total Energies Marketing Côte d'Ivoire") == "TTLC"
+    assert _extract_ticker("Groupe Ecobank") == "ETIT"
+    assert _extract_ticker("SIVOP") == "SIVC"
+    assert _extract_ticker("SOACII") == "SMBC"
+
+
+def test_cie_mot_entier_pas_et_cie():
+    assert _extract_ticker("Dupont et Cie") is None
+    assert _extract_ticker("Dupont & Cie") is None
+    assert _extract_ticker("La CIE publie ses comptes") == "CIEC"
+    assert _extract_ticker("Compagnie Ivoirienne d'Electricite, dite Cie") == "CIEC"
