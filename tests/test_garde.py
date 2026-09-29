@@ -35,8 +35,6 @@ def test_fixtures_anonymes(fixtures_dir):
     assert "data" != fixtures_dir.parent.name
     fichiers = sorted(p.name for p in fixtures_dir.glob("*.json"))
     assert fichiers == [
-        "bna_cas.json",
-        "bna_univers.json",
         "boc_lignes.json",
         "live_cache.json",
         "live_ranking.json",
