@@ -123,6 +123,18 @@ def test_asset_v_commit_ou_empreinte(monkeypatch):
     int(empreinte, 16)
 
 
+def test_index_html_redirige_vers_la_racine(client):
+    from urllib.parse import urlparse
+    reponse = client.get("/index.html")
+    assert reponse.status_code == 301
+    assert urlparse(reponse.headers.get("Location", "")).path == "/"
+    assert "{{ASSET_V}}" not in reponse.get_data(as_text=True)
+    for chemin in ("/dashboard/index.html", "/foo/index.html"):
+        autre = client.get(chemin)
+        assert "{{ASSET_V}}" not in autre.get_data(as_text=True)
+        assert autre.status_code != 200
+
+
 def test_api_chat_reste_404(client):
     assert client.get("/api/chat").status_code == 404
     assert client.get("/").status_code == 200

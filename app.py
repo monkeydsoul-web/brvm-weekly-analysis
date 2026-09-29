@@ -11,7 +11,7 @@ import hmac
 import logging
 import threading
 from datetime import datetime, timedelta, timezone
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory
 try:
     from auto_scheduler import start_scheduler as start_auto_scheduler, get_scheduler_status, get_scheduler
 except Exception as _e:
@@ -357,6 +357,29 @@ def index():
     reponse = app.response_class(_corps_index(), mimetype="text/html; charset=utf-8")
     reponse.headers["Cache-Control"] = "no-cache"
     return reponse
+
+
+@app.route("/index.html")
+def index_html():
+    """Le dossier statique sert sinon le gabarit brut ({{ASSET_V}} non remplace)."""
+    return redirect("/", code=301)
+
+
+def _est_gabarit_index(filename):
+    nom = (filename or "").replace("\\", "/").rstrip("/")
+    return nom == "index.html" or nom.endswith("/index.html")
+
+
+_envoi_statique = app.send_static_file
+
+
+def _envoi_statique_sans_gabarit(filename):
+    if _est_gabarit_index(filename):
+        return redirect("/", code=301)
+    return _envoi_statique(filename)
+
+
+app.send_static_file = _envoi_statique_sans_gabarit
 
 
 @app.route("/api/scores")
