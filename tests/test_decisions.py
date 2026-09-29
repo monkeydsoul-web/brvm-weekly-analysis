@@ -11,7 +11,12 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from live_ranker import _compute_scores, _hysteresis_conseil, doit_recalculer_note
+from live_ranker import (
+    NOTE_FORMULE,
+    _compute_scores,
+    _hysteresis_conseil,
+    doit_recalculer_note,
+)
 from live_valuation import score_technique_live
 
 from test_valuation import ROW
@@ -86,7 +91,7 @@ def test_d2_job_cloture_non_lance():
     apres = datetime(2026, 9, 29, 15, 35, tzinfo=timezone.utc)
     samedi = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
     payload = {
-        "note_formule": "cloture-v1",
+        "note_formule": NOTE_FORMULE,
         "faits_empreinte": "fixe",
         "note_calculee_le": "2026-09-28T16:00:00+00:00",
         "ranking": [{

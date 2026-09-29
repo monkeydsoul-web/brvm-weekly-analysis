@@ -112,6 +112,32 @@ def parse_boc_pdf(url):
         logger.error(f"Erreur parse BOC {url}: {e}")
         return {}
 
+def nombres_ligne_boc(texte):
+    """Nombres d'une ligne du bulletin, sans coller un cours à un pourcentage.
+
+    « 1 495 113,57 % » est le cours 1 495 puis 113,57 %, pas 1 495 113,57.
+    Ce collage donnait à SEMC un BNA d'environ 40 180 au lieu de 40,2.
+    Un vrai décimal du bulletin s'écrit « 1157,2 » ou « 1 495,25 »,
+    virgule collée au dernier groupe, sans pourcentage juste derrière
+    un groupe de trois chiffres séparé par un espace.
+    """
+    if not texte:
+        return []
+    motif = re.compile(r"\b(\d{1,3}(?:\s\d{3})*(?:[,.]\d+)?)\b")
+    nombres = []
+    for trouve in motif.finditer(texte):
+        brut = trouve.group(1)
+        apres = texte[trouve.end():]
+        colle = re.match(r"\s*%", apres) and re.search(r"\s\d{3}[,.]\d+$", brut)
+        morceaux = brut.rsplit(" ", 1) if colle else (brut,)
+        for morceau in morceaux:
+            try:
+                nombres.append(float(morceau.replace(" ", "").replace(",", ".")))
+            except ValueError:
+                continue
+    return nombres
+
+
 def parse_boc_tables(url):
     """Extraction précise des données BOC."""
     try:
@@ -161,10 +187,7 @@ def parse_boc_tables(url):
                         if ticker in SKIP: continue
 
                         rest = line[len(ticker):].strip()
-                        nums_raw = re.findall(r'\b(\d{1,3}(?:\s\d{3})*(?:[,.]\d+)?)\b', rest)
-                        try:
-                            nums = [float(s.replace(' ','').replace(',','.')) for s in nums_raw]
-                        except: continue
+                        nums = nombres_ligne_boc(rest)
                         if len(nums) < 3: continue
 
                         try:
