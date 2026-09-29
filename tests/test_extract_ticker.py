@@ -301,6 +301,29 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_gcr_de_x_a_y_garde_la_note_nouvelle():
+    # Libellés relevés dans les PDF brvm.org (cran ancien à gauche).
+    cas = (
+        ("GCR réhausse de AA+ à AAA les notes d'émetteur de long terme", "AAA"),
+        ("GCR abaisse de AAA à AA+ les notes d'émetteur de long terme", "AA+"),
+        ("rehausse la note d'émetteur de long terme de A à A+", "A+"),
+        ("rehausse la note d'émetteur de long terme de SUCRIVOIRE de BB à BB+", "BB+"),
+        ("rehaussé la note d'émetteur de long terme de TotalEnergies Marketing Sénégal de A(WU) à AA-(WU)", "AA-"),
+        ("rehaussé la note d'émetteur de long terme de AA- à AA+", "AA+"),
+        ("rehaussé la note d'émetteur de long terme de la Société Ivoirienne de Câbles de A à AA-", "AA-"),
+    )
+    for texte, attendu in cas:
+        info = _extract_rating_info(texte)
+        assert info["note"] == attendu, texte
+        assert info["score_notation"] == _scraper.RATING_GRADES[attendu]
+
+
+def test_formulation_inverse_garde_la_note_nouvelle():
+    assert _extract_rating_info("La note de long terme est relevée à AA- (contre A)")["note"] == "AA-"
+    assert _extract_rating_info("La note est portée à A+, de A")["note"] == "A+"
+    assert _extract_rating_info("Note de long terme AA+, précédemment AA-")["note"] == "AA+"
+
+
 def test_long_terme_prime_sur_la_note_precedente():
     info = _extract_rating_info("Long terme : A+ (précédente : BBB+)")
     assert info["note"] == "A+"

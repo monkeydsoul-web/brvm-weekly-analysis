@@ -663,7 +663,41 @@ def _extraire_date_validite(text: str) -> Optional[str]:
 def _motif_cran(grade: str) -> str:
     # « + » et « - » ne sont pas des caractères de mot : \b après le signe ne matche jamais.
     # \w (unicode) évite de lire le C de « Côte » comme le cran C.
-    return r"(?<!\w)" + re.escape(grade) + r"(?!\w)"
+    # L'apostrophe évite de lire le D de « D'Ivoire » ou « D'OBLIGATIONS ».
+    return r"(?<![\w'’])" + re.escape(grade) + r"(?![\w'’])"
+
+
+def _expr_grade() -> str:
+    """Un cran, éventuellement suivi de (WU) ou (SF), sans capturer le suffixe."""
+    tokens = sorted(RATING_GRADES, key=len, reverse=True)
+    alt = "|".join(re.escape(t) for t in tokens)
+    return (
+        r"(?<![\w'’])(" + alt + r")(?![\w'’])"
+        r"(?:\s*\((?:WU|SF)\))*"
+    )
+
+
+def _note_mouvement(text: str) -> Optional[str]:
+    """Cran nouveau dans « de X à Y », « à Y (contre X) », « à Y, de X », « précédemment X ».
+
+    Le groupe 1 est l'ancien cran seulement pour « de X à Y ». Partout ailleurs, c'est le nouveau.
+    """
+    if not text:
+        return None
+    grade = _expr_grade()
+    de_a = re.search(r"\bde\s+" + grade + r"\s+[àa]\s+" + grade, text, re.I)
+    if de_a:
+        return de_a.group(2).upper()
+    for motif in (
+        r"\b[àa]\s+" + grade + r"\s*\(\s*contre\s+" + grade,
+        r"\b[àa]\s+" + grade + r"\s*,\s*de\s+" + grade,
+        grade + r"\s*[\(,]\s*pr[ée]c[ée]demment\s+" + grade,
+        grade + r".{0,20}?pr[ée]c[ée]dente\s*:?\s+" + grade,
+    ):
+        m = re.search(motif, text, re.I)
+        if m:
+            return m.group(1).upper()
+    return None
 
 
 def _fin_ancre_long_terme(text: str) -> Optional[int]:
@@ -704,6 +738,9 @@ def _choisir_note(text: str) -> Optional[str]:
     """
     if not text:
         return None
+    mouvement = _note_mouvement(text)
+    if mouvement:
+        return mouvement
     par_pos: Dict[int, Tuple[int, str]] = {}
     for grade in RATING_GRADES:
         for m in re.finditer(_motif_cran(grade), text):
