@@ -305,9 +305,10 @@ def test_bvpa_estime_puis_statique_sans_document_comptable():
 
 
 def test_garde_fou_ne_remplace_pas_un_rapport_par_un_boc_trop_petit(caplog):
-    """1,25 reste au rapport. 1,39 (PALC) bascule : le BOC vaut encore 70 %.
+    """1,25 reste au rapport. 1,39 bascule : le BOC vaut encore 70 %.
 
     1,85, comme BICC, ne bascule pas : le bulletin est trop petit.
+    Les chiffres ici sont ceux d'un rapport fictif (1 000 000 d'actions).
     """
     import logging
     caplog.set_level(logging.WARNING, logger="live_ranker")
@@ -564,8 +565,9 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
             "boc": "boc",
             "aucun": None,
         }[univers["groupes"][ticker]]
-        # PALC : ratio 1,39. Le BOC vaut encore au moins 70 % du rapport.
-        if ticker == "PALC":
+        # SDCC : 9 000 000 actions. Le rapport vaut 1 067, le BOC 800.
+        # Ratio 1,33, hors bande, et le BOC vaut encore au moins 70 % du rapport.
+        if ticker == "SDCC":
             source_attendue = "boc"
         assert row["bna_source"] == source_attendue
         if row["bna"] is None:
@@ -605,17 +607,16 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
         for t, avant, apres, c_avant, c_apres in conseils
     )
     assert par["ORAC"][0] == 1129.5
-    assert par["ORAC"][1] == 1000.0
+    assert par["ORAC"][1] == 937.0
     assert par["SNTS"][0] == 4135.6
     assert par["SNTS"][1] == 4000.0
     assert par["SGBC"][0] == 2800.0
     assert par["SGBC"][1] == 2500.0
     assert par["STBC"][0] == 2100.0
     assert par["STBC"][1] == 1800.0
-    # PALC : le rapport 2 000 / BOC 1 438,8 = 1,39.
-    # Le BOC vaut encore 70 % du rapport : il est retenu.
-    # Le nombre d'actions faux n'est pas corrigé ici.
-    assert par["PALC"][1] == 1438.8
+    # PALC : 15 459 316 actions. Rapport 1 426 / BOC 1 438,8 = 0,99.
+    # Le ratio est dans la bande : le rapport est conservé.
+    assert par["PALC"][1] == 1426.0
     palc = _ligne(
         STOCK_FUNDAMENTALS["PALC"],
         univers["prix"]["PALC"],
@@ -623,9 +624,21 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
         univers["boc"]["PALC"],
         ticker="PALC",
     )
-    assert palc["bna_source"] == "boc"
-    assert palc["bna_ecart_boc"] == 1.39
+    assert palc["bna_source"] == "rapport"
+    assert palc["bna_ecart_boc"] == 0.99
     assert palc["bvpa_source"] == "rapport"
+    # SDCC : 9 000 000 actions. Rapport 1 067 / BOC 800 = 1,33.
+    # Hors bande, le BOC vaut encore 70 % du rapport : il est retenu.
+    assert par["SDCC"][1] == 800.0
+    sdcc = _ligne(
+        STOCK_FUNDAMENTALS["SDCC"],
+        univers["prix"]["SDCC"],
+        univers["pdf"]["SDCC"],
+        univers["boc"]["SDCC"],
+        ticker="SDCC",
+    )
+    assert sdcc["bna_source"] == "boc"
+    assert sdcc["bna_ecart_boc"] == 1.33
 
     changements = sorted(
         (t, c_avant, c_apres)

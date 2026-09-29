@@ -104,8 +104,8 @@ def _convert_pdf_div(ticker, value, unite):
 # 70 % de ce rapport (la règle déjà en production). En dessous, le rapport
 # reste : c'est ce qui évitait, avant la bascule 0,8–1,25, de faire passer
 # BICC, ORGT, PRSC ou SAFC sur un BNA de bulletin beaucoup plus petit.
-# PALC, SLBC, SOGC et NSBC ont un nombre d'actions faux dans
-# STOCK_FUNDAMENTALS : on ne le corrige pas ici.
+# SLBC et NSBC ont encore un nombre d'actions faux dans
+# STOCK_FUNDAMENTALS. PALC et SOGC sont déjà corrigés.
 _BANDE_BAS = 0.8
 _BANDE_HAUT = 1.25
 _PLANCHER_BOC = 0.7
