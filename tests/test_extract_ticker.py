@@ -298,3 +298,55 @@ def test_cie_mot_entier_pas_et_cie():
     assert _extract_ticker("Dupont & Cie") is None
     assert _extract_ticker("La CIE publie ses comptes") == "CIEC"
     assert _extract_ticker("Compagnie Ivoirienne d'Electricite, dite Cie") == "CIEC"
+
+
+def test_ecriture_refuse_liste_vide(tmp_path, caplog):
+    import logging
+    path = tmp_path / "brvm_ratings.json"
+    ancien = [{"ticker": "SNTS"}]
+    path.write_text(json.dumps(ancien), encoding="utf-8")
+    with caplog.at_level(logging.INFO):
+        ok = _scraper._ecrire_notations(path, [], force=False)
+    assert ok is False
+    assert json.loads(path.read_text(encoding="utf-8")) == ancien
+    assert not Path(str(path) + ".tmp").exists()
+    assert "1 avant, 0 après" in caplog.text
+
+
+def test_ecriture_refuse_moins_de_la_moitie(tmp_path):
+    path = tmp_path / "brvm_ratings.json"
+    ancien = [{"ticker": "SNTS", "i": i} for i in range(10)]
+    path.write_text(json.dumps(ancien), encoding="utf-8")
+    court = [{"ticker": "SNTS", "i": i} for i in range(4)]
+    assert _scraper._ecrire_notations(path, court, force=False) is False
+    assert json.loads(path.read_text(encoding="utf-8")) == ancien
+    assert not Path(str(path) + ".tmp").exists()
+
+
+def test_ecriture_accepte_exactement_la_moitie(tmp_path):
+    path = tmp_path / "brvm_ratings.json"
+    ancien = [{"ticker": "SNTS", "i": i} for i in range(10)]
+    path.write_text(json.dumps(ancien), encoding="utf-8")
+    moitie = [{"ticker": "ECOC", "i": i} for i in range(5)]
+    assert _scraper._ecrire_notations(path, moitie, force=False) is True
+    assert json.loads(path.read_text(encoding="utf-8")) == moitie
+    assert not Path(str(path) + ".tmp").exists()
+
+
+def test_ecriture_remplace_atomiquement(tmp_path, caplog):
+    import logging
+    path = tmp_path / "brvm_ratings.json"
+    path.write_text("[]", encoding="utf-8")
+    neuf = [{"ticker": "CIEC", "note": "A+"}]
+    with caplog.at_level(logging.INFO):
+        assert _scraper._ecrire_notations(path, neuf, force=False) is True
+    assert json.loads(path.read_text(encoding="utf-8")) == neuf
+    assert not Path(str(path) + ".tmp").exists()
+    assert "0 avant, 1 après" in caplog.text
+
+
+def test_ecriture_force_autorise_le_vide(tmp_path):
+    path = tmp_path / "brvm_ratings.json"
+    path.write_text(json.dumps([{"ticker": "SNTS"}]), encoding="utf-8")
+    assert _scraper._ecrire_notations(path, [], force=True) is True
+    assert json.loads(path.read_text(encoding="utf-8")) == []

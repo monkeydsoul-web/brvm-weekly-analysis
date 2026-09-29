@@ -1033,6 +1033,43 @@ def scrape_fundamentals(tickers: Optional[List[str]] = None) -> Dict[str, Dict]:
     logging.info(f"Fondamentaux: {len(result)} tickers")
     return result
 
+def _compter_notations(path: Path) -> int:
+    if not path.exists():
+        return 0
+    try:
+        with open(path, encoding="utf-8") as f:
+            ancien = json.load(f)
+    except Exception:
+        logging.warning("Notations illisibles dans %s", path)
+        return 0
+    if isinstance(ancien, list):
+        return len(ancien)
+    return 0
+
+
+def _ecrire_notations(path, nouvelles, force: bool = False) -> bool:
+    """Écrit la liste atomiquement. Refuse le vide ou moins de la moitié, sauf --force."""
+    path = Path(path)
+    if nouvelles is None:
+        nouvelles = []
+    avant = _compter_notations(path)
+    apres = len(nouvelles)
+    logging.info("Notations : %d avant, %d après", avant, apres)
+    if not force and (apres == 0 or (avant > 0 and apres * 2 < avant)):
+        logging.warning(
+            "Écriture refusée (%d → %d). Relancer avec --force pour écraser.",
+            avant, apres,
+        )
+        return False
+    tmp = Path(str(path) + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(nouvelles, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(str(tmp), str(path))
+    return True
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1044,6 +1081,10 @@ def main():
     parser.add_argument("--market-only",      action="store_true")
     parser.add_argument("--fundamentals-only",action="store_true")
     parser.add_argument("--ticker", default=None, help="Un seul ticker pour --fundamentals-only")
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Écrase brvm_ratings.json même si la nouvelle liste est vide ou trop courte",
+    )
     args = parser.parse_args()
 
     LOG_DIR.mkdir(exist_ok=True)
@@ -1054,9 +1095,10 @@ def main():
     if run_all or args.ratings_only:
         print("\n━━━ A) Notations ━━━")
         ratings = scrape_ratings()
-        with open(RATINGS_PATH, "w", encoding="utf-8") as f:
-            json.dump(ratings, f, ensure_ascii=False, indent=2)
-        print(f"  → {RATINGS_PATH} ({len(ratings)} notations)")
+        if _ecrire_notations(RATINGS_PATH, ratings, force=args.force):
+            print(f"  → {RATINGS_PATH} ({len(ratings)} notations)")
+        else:
+            print(f"  → écriture refusée, fichier conservé ({RATINGS_PATH})")
 
     if run_all or args.market_only:
         print("\n━━━ B) Statistiques de marché ━━━")
