@@ -6,6 +6,7 @@ Cache : data/live_ranking.json (mis à jour à chaque déclenchement)
 
 import os
 import json
+import hashlib
 import logging
 import time
 import threading
@@ -97,7 +98,7 @@ def _convert_pdf_div(ticker, value, unite):
 # Construction du row fondamental enrichi
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
+def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_snapshot=None):
     """
     Fusionne les 3 sources de données pour un ticker :
     1. Fondamentaux statiques (scraper.py)
@@ -148,9 +149,14 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
 
     # ── BOC — PER réel, BNA dérivé, var_annee, ex_div_date ─────────────────
     try:
-        from boc_scraper import get_boc_price_history
-        _boc = get_boc_price_history()
-        boc_entry = _boc.get(ticker, {})
+        # Le classement passe le fichier déjà lu après l'empreinte.
+        # Sans ce cliché, on relirait boc_data.json au milieu du calcul.
+        if boc_snapshot is None:
+            from boc_scraper import get_boc_price_history
+            _boc = get_boc_price_history()
+        else:
+            _boc = boc_snapshot
+        boc_entry = _boc.get(ticker, {}) if isinstance(_boc, dict) else {}
         if boc_entry:
             per_boc = boc_entry.get('per_boc')
             if per_boc and 0 < float(per_boc) < 500:
@@ -484,16 +490,63 @@ def _lire_moment(valeur):
     return _moment_utc(moment)
 
 
-def _empreinte_fichier(path):
+class EmpreinteIllisible(Exception):
+    """Un fichier de faits existe mais son JSON n'est pas lisible.
+
+    Le classement ne doit pas enregistrer d'empreinte dans ce cas :
+    le passage suivant retentera.
+    """
+
+
+# Clés réécrites à chaque job sans changer le fait (date de scrape, etc.).
+_CLES_VOLATILES = {
+    "boc_data.json": frozenset({"last_update"}),
+    "analyses_summary.json": frozenset({"analyzed_at"}),
+    "external_dividends.json": frozenset({"scraped_at"}),
+}
+
+
+def _oter_cles(valeur, cles):
+    if isinstance(valeur, dict):
+        return dict(
+            (cle, _oter_cles(fils, cles))
+            for cle, fils in valeur.items()
+            if cle not in cles
+        )
+    if isinstance(valeur, list):
+        return [_oter_cles(fils, cles) for fils in valeur]
+    return valeur
+
+
+def _empreinte_contenu(path):
+    """sha1 du JSON canonique. Fichier absent : « absent ».
+
+    last_update, analyzed_at et scraped_at ne comptent pas : le job de 19h
+    les réécrit tous les jours, y compris le week-end, sans fait nouveau.
+    """
+    nom = os.path.basename(path)
     try:
-        st = os.stat(path)
-    except OSError:
+        with open(path, encoding="utf-8") as f:
+            brut = f.read()
+    except FileNotFoundError:
         return "absent"
-    return "%d:%d" % (st.st_mtime_ns, st.st_size)
+    except OSError as exc:
+        raise EmpreinteIllisible(path) from exc
+    if not brut.strip():
+        raise EmpreinteIllisible(path)
+    try:
+        data = json.loads(brut)
+    except ValueError as exc:
+        raise EmpreinteIllisible(path) from exc
+    if not isinstance(data, dict):
+        raise EmpreinteIllisible(path)
+    nettoye = _oter_cles(data, _CLES_VOLATILES.get(nom, frozenset()))
+    canon = json.dumps(nettoye, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(canon.encode("utf-8")).hexdigest()
 
 
 def chemins_faits():
-    """Fichiers dont une réécriture est un fait nouveau pour la note.
+    """Fichiers dont un changement de contenu est un fait nouveau pour la note.
 
     boc_data.json et external_dividends.json : job 19h00.
     analyses_summary.json : nouveau rapport annuel analysé.
@@ -506,9 +559,24 @@ def chemins_faits():
 
 
 def empreinte_faits(chemins=None):
+    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible."""
     if chemins is None:
         chemins = chemins_faits()
-    return "|".join(_empreinte_fichier(chemin) for chemin in chemins)
+    return "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+
+
+def _lire_fichier_faits(path):
+    """(dict, lisible). Un fichier absent n'est pas une erreur de lecture."""
+    if not os.path.exists(path):
+        return {}, True
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError, UnicodeError):
+        return {}, False
+    if not isinstance(data, dict):
+        return {}, False
+    return data, True
 
 
 def _note_calculee_payload(payload):
@@ -565,7 +633,9 @@ def _completer_ligne(ticker, base_row, live_price_data, pdf_analysis,
     """Row enrichi + dividende validé + variation plafonnée. Même règles qu'avant."""
     from data_validator import validate_dividend
 
-    row = _build_enriched_row(ticker, base_row, live_price_data or {}, pdf_analysis)
+    row = _build_enriched_row(
+        ticker, base_row, live_price_data or {}, pdf_analysis, boc_snapshot=boc_data,
+    )
     _boc_e = boc_data.get(ticker, {}) if isinstance(boc_data, dict) else {}
     if not isinstance(_boc_e, dict):
         _boc_e = {}
@@ -671,32 +741,9 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
         try:
             from scraper import STOCK_FUNDAMENTALS
             from live_data import get_live_data
-            # Charger les analyses PDF
-            summary_path = os.path.join(DATA_DIR, "analyses_summary.json")
-            pdf_summary  = {}
-            if os.path.exists(summary_path):
-                with open(summary_path, encoding="utf-8") as f:
-                    pdf_summary = json.load(f)
 
-            # Charger les données BOC (pour la validation multi-source)
-            boc_path = os.path.join(DATA_DIR, "boc_data.json")
-            boc_data = {}
-            if os.path.exists(boc_path):
-                try:
-                    with open(boc_path, encoding="utf-8") as f:
-                        boc_data = json.load(f)
-                except Exception:
-                    pass
-
-            # Historique prix pour le sas variation
-            _ph = {}
-            try:
-                from price_history_builder import load_history as _load_ph
-                _ph = _load_ph()
-            except Exception:
-                pass
-
-            # Note précédente (gel) et conseil précédent (amortisseur)
+            # Note précédente d'abord : si un fait est illisible, on garde
+            # son empreinte et on ne fige pas une note calculée à vide.
             _payload_precedent = None
             _precedent = {}
             _prev_conseil = {}
@@ -711,15 +758,54 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
             except Exception:
                 _payload_precedent = None
 
-            _empreinte = empreinte_faits()
-            _recalcul = doit_recalculer_note(_payload_precedent, moment, _empreinte)
+            _empreinte_precedente = None
+            if isinstance(_payload_precedent, dict):
+                _empreinte_precedente = _payload_precedent.get("faits_empreinte")
 
-            # Charger le cache african-markets (3e source, lecture seule — refresh dans job BOC)
+            # Empreinte AVANT de lire les faits pour scorer. boc_scraper écrit
+            # boc_data.json sans os.replace : une lecture pendant l'écriture
+            # peut voir un fichier vide, puis une empreinte du fichier fini.
+            _faits_lisibles = True
             try:
-                from external_source import get_cached_dividends as _get_am
-                am_cache = _get_am()
+                _empreinte = empreinte_faits()
+            except EmpreinteIllisible as exc:
+                logger.warning("Empreinte des faits illisible, calcul de note reporté: %s", exc)
+                _faits_lisibles = False
+                _empreinte = None
+
+            pdf_summary = {}
+            boc_data = {}
+            am_cache = {}
+            for _chemin in chemins_faits():
+                _data, _ok = _lire_fichier_faits(_chemin)
+                if not _ok:
+                    logger.warning("Fichier de faits illisible, empreinte precedente conservee: %s", _chemin)
+                    _faits_lisibles = False
+                    _data = {}
+                _nom = os.path.basename(_chemin)
+                if _nom == "analyses_summary.json":
+                    pdf_summary = _data
+                elif _nom == "boc_data.json":
+                    boc_data = _data
+                elif _nom == "external_dividends.json":
+                    am_cache = _data
+
+            if not _faits_lisibles and isinstance(_payload_precedent, dict) and _payload_precedent.get("ranking"):
+                _recalcul = False
+            else:
+                _recalcul = doit_recalculer_note(
+                    _payload_precedent,
+                    moment,
+                    _empreinte if _faits_lisibles else _empreinte_precedente,
+                )
+
+            # Historique prix pour le sas variation
+            _ph = {}
+            try:
+                from price_history_builder import load_history as _load_ph
+                _ph = _load_ph()
             except Exception:
-                am_cache = {}
+                pass
 
             # Charger les prix live (depuis cache, pas de re-fetch)
             live_cache  = get_live_data(force_refresh=False)
@@ -892,13 +978,22 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                             _note_le = _ligne["note_calculee_le"]
                             break
 
+            # Fichier illisible : on ne stocke pas la nouvelle empreinte,
+            # même si le hash avait réussi avant une lecture ratée.
+            if not _faits_lisibles:
+                _empreinte_stockee = _empreinte_precedente
+            elif _recalcul or _empreinte_precedente is None:
+                _empreinte_stockee = _empreinte
+            else:
+                _empreinte_stockee = _empreinte_precedente
+
             # Payload final
             payload = {
                 "updated_at":       _horodatage,
                 "note_calculee_le": _note_le,
                 "note_formule":     NOTE_FORMULE if (_recalcul or (isinstance(_payload_precedent, dict) and _payload_precedent.get("note_formule") == NOTE_FORMULE)) else (_payload_precedent or {}).get("note_formule"),
                 "note_recalculee":  _recalcul,
-                "faits_empreinte":  _empreinte if _recalcul else (isinstance(_payload_precedent, dict) and _payload_precedent.get("faits_empreinte")) or _empreinte,
+                "faits_empreinte":  _empreinte_stockee,
                 "trigger":          trigger,
                 "market_open":      _seance_ouverte(moment),
                 "changed_tickers":  changed_tickers,

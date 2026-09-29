@@ -10,7 +10,12 @@ from datetime import datetime, timezone
 import pytest
 
 import live_ranker
-from live_ranker import NOTE_FORMULE, compute_live_ranking
+from live_ranker import (
+    NOTE_FORMULE,
+    EmpreinteIllisible,
+    compute_live_ranking,
+    empreinte_faits as empreinte_reelle,
+)
 
 
 SEANCE = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
@@ -262,3 +267,105 @@ def test_premiere_formule_en_seance_garde_l_ancienne_note(classement):
     assert _ligne(resultat)["composite_adj"] == 3.3
     assert _ligne(resultat)["score_technique"] == 9.9
     assert resultat["note_formule"] != NOTE_FORMULE
+
+
+def _ecrire_faits(dossier, boc):
+    chemins = []
+    for nom, contenu in (
+        ("boc_data.json", boc),
+        ("analyses_summary.json", {"ALPH": {"verdict": "POSITIF", "analyzed_at": "2026-09-01T00:00:00+00:00"}}),
+        ("external_dividends.json", {"ALPH": {"amount": 100, "paid_date": "2026-06-01", "scraped_at": "2026-09-01T19:00:00"}}),
+    ):
+        chemin = dossier / nom
+        chemin.write_text(json.dumps(contenu), encoding="utf-8")
+        chemins.append(str(chemin))
+    return tuple(chemins)
+
+
+def _brancher_faits(monkeypatch, chemins):
+    monkeypatch.setattr(live_ranker, "empreinte_faits", empreinte_reelle)
+    monkeypatch.setattr(live_ranker, "chemins_faits", lambda: chemins)
+
+
+def test_empreinte_reelle_ignore_une_reecriture_identique(tmp_path):
+    chemins = _ecrire_faits(tmp_path, {"last_update": "lundi", "ALPH": {"div_net": 12, "per_boc": 8}})
+    avant = empreinte_reelle(chemins)
+    boc, analyses, dividendes = (tmp_path / nom for nom in (
+        "boc_data.json", "analyses_summary.json", "external_dividends.json",
+    ))
+    boc.write_text(json.dumps({"ALPH": {"per_boc": 8, "div_net": 12}, "last_update": "samedi"}), encoding="utf-8")
+    brut_a = json.loads(analyses.read_text(encoding="utf-8"))
+    brut_a["ALPH"]["analyzed_at"] = "2026-10-03T19:05:00+00:00"
+    analyses.write_text(json.dumps(brut_a), encoding="utf-8")
+    brut_d = json.loads(dividendes.read_text(encoding="utf-8"))
+    brut_d["ALPH"]["scraped_at"] = "2026-10-03T19:05:00"
+    dividendes.write_text(json.dumps(brut_d), encoding="utf-8")
+    assert empreinte_reelle(chemins) == avant
+    brut_b = json.loads(boc.read_text(encoding="utf-8"))
+    brut_b["ALPH"]["div_net"] = 40
+    boc.write_text(json.dumps(brut_b), encoding="utf-8")
+    assert empreinte_reelle(chemins) != avant
+
+
+def test_empreinte_reelle_fichier_coupé(tmp_path):
+    chemins = _ecrire_faits(tmp_path, {"ALPH": {"div_net": 12}})
+    (tmp_path / "boc_data.json").write_text("{", encoding="utf-8")
+    with pytest.raises(EmpreinteIllisible):
+        empreinte_reelle(chemins)
+
+
+def test_reecriture_identique_ne_recalcule_pas_un_vrai_changement_oui(classement, tmp_path, monkeypatch):
+    chemins = _ecrire_faits(tmp_path, {"last_update": "2026-09-28T19:00:00", "ALPH": {"div_net": 12}})
+    _brancher_faits(monkeypatch, chemins)
+    empreinte = empreinte_reelle(chemins)
+    _ecrire(classement["chemin"], faits_empreinte=empreinte)
+    classement["etat"]["cache"] = _prix(5000, 8.0, 90000, trend="top")
+
+    boc = tmp_path / "boc_data.json"
+    brut = json.loads(boc.read_text(encoding="utf-8"))
+    brut["last_update"] = "2026-10-03T19:00:00"
+    boc.write_text(json.dumps(brut), encoding="utf-8")
+    calme = compute_live_ranking(trigger="scheduler", moment=SEANCE)
+    assert calme["note_recalculee"] is False
+    assert calme["faits_empreinte"] == empreinte
+    assert _ligne(calme)["composite_adj"] == 3.3
+
+    vu = {}
+
+    def faux(row):
+        vu["price"] = row.get("price")
+        return {"composite_adj": 48.0, "composite_raw": 40.0, "score_technique": 4.0}
+
+    monkeypatch.setattr(live_ranker, "_compute_scores", faux)
+    brut["ALPH"]["div_net"] = 80
+    boc.write_text(json.dumps(brut), encoding="utf-8")
+    nouveau = compute_live_ranking(trigger="scheduler", moment=SEANCE)
+    assert nouveau["note_recalculee"] is True
+    assert nouveau["faits_empreinte"] == empreinte_reelle(chemins)
+    assert nouveau["faits_empreinte"] != empreinte
+    assert vu["price"] == 1000
+    assert _ligne(nouveau)["price"] == 5000
+
+
+def test_fichier_illisible_garde_l_empreinte_precedente(classement, tmp_path, monkeypatch):
+    chemins = _ecrire_faits(tmp_path, {"last_update": "2026-09-28T19:00:00", "ALPH": {"div_net": 12}})
+    _brancher_faits(monkeypatch, chemins)
+    empreinte = empreinte_reelle(chemins)
+    _ecrire(classement["chemin"], faits_empreinte=empreinte)
+    (tmp_path / "boc_data.json").write_text("{", encoding="utf-8")
+    classe = _prix(1100, 1.0, 3000, trend=None)
+    classement["etat"]["cache"] = classe
+    rate = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE)
+    assert rate["note_recalculee"] is False
+    assert rate["faits_empreinte"] == empreinte
+    assert _ligne(rate)["composite_adj"] == 3.3
+
+    (tmp_path / "boc_data.json").write_text(
+        json.dumps({"last_update": "2026-09-29T19:00:00", "ALPH": {"div_net": 99}}),
+        encoding="utf-8",
+    )
+    repris = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE)
+    assert repris["note_recalculee"] is True
+    assert repris["faits_empreinte"] == empreinte_reelle(chemins)
+    assert repris["faits_empreinte"] != empreinte
+
