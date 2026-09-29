@@ -127,6 +127,13 @@ def test_date_validite_numerique():
     assert info["date_validite"] == "2025-12-31"
 
 
+def test_periode_de_validite_du_au():
+    info = _extract_rating_info(
+        "Période de validité : du 01/07/2025 au 30/06/2026"
+    )
+    assert info["date_validite"] == "2026-06-30"
+
+
 def test_validite_du_au_retient_la_fin():
     info = _extract_rating_info(
         "Valable du 1er janvier 2025 au 31 décembre 2025. Note A."

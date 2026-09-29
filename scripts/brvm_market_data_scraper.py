@@ -641,7 +641,8 @@ def _extraire_date_validite(text: str) -> Optional[str]:
     motifs = (
         r"(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*(" + _FRAGMENT_DATE + r")",
         r"valable\s+jusqu[' ]?au\s+(" + _FRAGMENT_DATE + r")",
-        r"valable\s+du\s+.+?\s+au\s+(" + _FRAGMENT_DATE + r")",
+        r"(?:valable\s+|(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*)"
+        r"du\s+.+?\s+au\s+(" + _FRAGMENT_DATE + r")",
         r"(?<![A-Za-z])echeance\s*:?\s*(" + _FRAGMENT_DATE + r")",
     )
     for motif in motifs:
