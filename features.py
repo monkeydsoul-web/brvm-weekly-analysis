@@ -204,7 +204,6 @@ def chat_with_ai(message, history):
     _ctx = "Tu es analyste BRVM. Top actions: " + ", ".join(s["ticker"] for s in _top)
     _msgs = [{"role":"user","content":message}]
     import sys
-    open("/tmp/brvm_chat_debug.log","a").write("CHAT_CALLED key=" + _key[:15] + "\n")
     try:
         _r = _req.post("https://api.anthropic.com/v1/messages",
             headers={"x-api-key":_key,"anthropic-version":"2023-06-01","content-type":"application/json"},
@@ -248,23 +247,11 @@ def register_routes(app):
         return Response(csv_data, mimetype="text/csv",
             headers={"Content-Disposition": f"attachment;filename=BRVM_scores_{datetime.now().strftime('%Y%m%d')}.csv"})
 
-    @app.route("/api/chat", methods=["POST"])
+    @app.route("/api/chat", methods=["GET", "POST"])
     def api_chat():
-        import requests as _r2
-        d = request.json or {}
-        msg = d.get("message","")
-        _k = os.environ.get("ANTHROPIC_API_KEY", "")
-        try:
-            _resp = _r2.post("https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":_k,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":"claude-haiku-4-5-20251001","max_tokens":600,
-                      "system":"Tu es analyste BRVM. Réponds en français.",
-                      "messages":[{"role":"user","content":msg}]},
-                timeout=30)
-            _resp.raise_for_status()
-            return jsonify({"reply": _resp.json()["content"][0]["text"]})
-        except Exception as _ex:
-            return jsonify({"reply": "Erreur: " + str(_ex)})
+        # Route retiree (SEC-1). Sans cette reponse, un POST etait avale par
+        # la route statique Flask et renvoyait 405 au lieu de 404.
+        return jsonify({"error": "not found"}), 404
 
     @app.route("/api/search")
     def api_search():

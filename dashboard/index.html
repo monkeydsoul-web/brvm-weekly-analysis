@@ -807,7 +807,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <button id="fFav" onclick="toggleFavFilter()" style="height:auto;padding:6px 13px;border-radius:var(--r,6px);border:1px solid var(--border-1,var(--border));background:var(--bg2,var(--bg-elevated));color:var(--t2);font-size:13px;cursor:pointer">★ Mes favoris</button>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
       <button class="btn btn-o" style="padding:6px 13px" onclick="openBacktest((window.scores||scores||[]).slice(0,5).map(x=>x.ticker))">📊 Backtest</button>
-      <button class="btn btn-o" style="padding:6px 13px" onclick="openCompareAnalysis(_compareAnalysisTickers.length?_compareAnalysisTickers:(window.scores||scores||[]).slice(0,5).map(x=>x.ticker))" title="Synthèse générée automatiquement par intelligence artificielle · Cochez des actions pour une analyse ciblée">🤖 Analyse IA</button>
       <a href="/api/export/csv" download class="btn btn-o" style="text-decoration:none;padding:6px 13px">⬇ CSV</a>
     </div>
   </div>
@@ -1390,9 +1389,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div id="sc-count"><span style="font-size:15px;font-weight:700;color:var(--accent)">—</span> <span style="font-size:12px;color:var(--text-2)">sociétés correspondent à vos critères</span></div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button id="sc-ai-btn" onclick="screenerAnalyseAI()" class="btn btn-o"
-          style="padding:6px 12px;font-size:11px">
-          🤖 Analyser avec IA</button>
         <button onclick="screenerExportCSV()" class="btn btn-o" style="padding:6px 12px;font-size:11px">⬇ Export CSV</button>
       </div>
     </div>
@@ -1487,10 +1483,6 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         class="tt tt-r btn btn-o" data-tt="Test de la stratégie sur données historiques réelles · 💡 Simule ce que votre portefeuille aurait rapporté dans le passé"
         style="width:100%;padding:10px;border-radius:8px;font-size:12px;margin-bottom:8px">
         📊 Backtesting portefeuille</button>
-      <button onclick="openCompareAnalysis((window.scores||[]).slice(0,4).map(x=>x.ticker))"
-        class="tt tt-r btn btn-o" data-tt="Comparaison par IA de plusieurs actions · valorisation, dividendes, risques et attractivité côte à côte"
-        style="width:100%;padding:10px;border-radius:8px;font-size:12px">
-        🤖 Analyse comparative IA</button>
     </div>
 
 </div>
@@ -3799,7 +3791,6 @@ async function showStock(ticker){
       </div>
       <div class="ctab-action-strip">
         <button class="btn btn-g ctab-act-btn" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
-        <button class="btn btn-o ctab-act-btn" onclick="openCompareAnalysis(['${ticker}'])">🤖 Analyse IA</button>
         <button class="btn btn-o ctab-act-btn" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
         <button class="btn btn-o ctab-act-btn" onclick="navToRank('${ticker}')">📊 Voir classement</button>
       </div>
@@ -5257,7 +5248,6 @@ const _helpContent = {
     sections: [
       { h: '🔍 Le screener, c\'est quoi ?', p: 'Un screener est un outil de filtrage. Vous définissez vos critères et il vous liste instantanément toutes les sociétés qui correspondent à votre profil d\'investisseur.' },
       { h: '⚙️ Les filtres disponibles', p: '• Score min : 55 pour les meilleures sociétés seulement\n• P/E max : 10 pour les actions pas chères par rapport aux bénéfices\n• Dividende min% : 5 pour un rendement attrayant\n• ROE min% : 15 pour les sociétés très rentables\n• Secteur : filtrer par domaine d\'activité' },
-      { h: '🤖 Analyse IA', p: 'Cochez des actions dans les résultats (jusqu\'à 6), puis cliquez "Analyser avec IA". Claude analysera en détail pourquoi ces sociétés correspondent à vos critères et lesquelles privilégier.' },
       { tip: '💡 Recette "pépites BRVM" : Score ≥ 55 + Dividende ≥ 5% + P/E ≤ 10 → les meilleures opportunités selon nos modèles.' },
       { ex: '📌 Exemple : Score ≥ 60 + ROE ≥ 15% → vous obtenez les sociétés à la fois excellentes et très rentables. Exportez en CSV pour analyser dans Excel.' },
       { h: '⚖️ Étape 2 — Composer son portefeuille', p: 'Une fois vos actions repérées, l\'Étape 2 vous aide à les combiner intelligemment pour réduire le risque sans sacrifier le rendement.' },

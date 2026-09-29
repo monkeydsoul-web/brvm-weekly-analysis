@@ -7,6 +7,7 @@ Ouvre: http://localhost:5000
 
 import os
 import json
+import hmac
 import logging
 import threading
 from datetime import datetime, timedelta, timezone
@@ -18,7 +19,6 @@ except Exception as _e:
     def start_auto_scheduler(): pass
     def get_scheduler_status(): return {}
     def get_scheduler(): return None
-from flask_cors import CORS
 from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
 from history_merge import get_full_history
@@ -36,9 +36,23 @@ except ImportError:
     LIVE_DATA_OK = False
 
 app = Flask(__name__, static_folder="dashboard", static_url_path="")
-CORS(app)
+# Le tableau de bord est servi par cette meme app : les appels /api sont de meme origine.
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
+
+def _admin_token_ok():
+    """Vrai seulement si ADMIN_TOKEN est defini et identique a l en-tete X-Admin-Token.
+    Si la variable manque, ou si le jeton ne correspond pas : ferme (jamais ouvert par defaut)."""
+    attendu = os.environ.get("ADMIN_TOKEN")
+    if not attendu:
+        return False
+    fourni = request.headers.get("X-Admin-Token", "")
+    if not isinstance(fourni, str):
+        fourni = ""
+    try:
+        return hmac.compare_digest(fourni, attendu)
+    except Exception:
+        return False
 
 @app.after_request
 def _noindex_guard(response):
@@ -833,27 +847,18 @@ def api_reports_count():
     return jsonify({"total": n})
 
 
-@app.route("/api/analyze-report", methods=["POST"])
+@app.route("/api/analyze-report", methods=["GET", "POST"])
 def api_analyze_report():
-    data = request.get_json() or {}
-    url      = data.get("url")
-    ticker   = (data.get("ticker") or "").upper()
-    doc_type = data.get("doc_type", "Document")
-    year     = data.get("year")
-    force    = data.get("force", False)
-    if not url or not ticker:
-        return jsonify({"error": "url et ticker requis"}), 400
-    try:
-        from pdf_analyzer import analyze_report
-        result = analyze_report(url, ticker, doc_type, year, force=force)
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Route retiree (SEC-1) : plus de telechargement d URL ni d appel Claude.
+    # La reponse 404 evite le 405 de la route statique Flask sur un POST.
+    return jsonify({"error": "not found"}), 404
 
 @app.route("/api/analyze-ticker/<ticker>")
 def api_analyze_ticker(ticker):
     ticker = ticker.upper()
     force  = request.args.get("force", "0") == "1"
+    if force and not _admin_token_ok():
+        return jsonify({"error": "Non autorise"}), 401
     try:
         from reports_scraper import get_reports
         from pdf_analyzer    import get_analyses_for_ticker
@@ -868,10 +873,11 @@ def api_analyze_ticker(ticker):
 
 @app.route("/api/live-ranking")
 def api_live_ranking():
-    force = request.args.get("refresh", "0") == "1"
+    # refresh=1 sans jeton : ignore, la lecture publique reste en 200 (pas une erreur).
+    refresh = request.args.get("refresh", "0") == "1" and _admin_token_ok()
     try:
         from live_ranker import compute_live_ranking, load_ranking
-        if force:
+        if refresh:
             result = compute_live_ranking(trigger="manual")
         else:
             result = load_ranking() or {"ranking": load_latest_scores()}
@@ -891,6 +897,8 @@ def api_live_ranking_changes():
 @app.route("/api/sector-analysis", methods=["POST"])
 def api_sector_analysis():
     """Analyse IA d'un secteur BRVM complet."""
+    if not _admin_token_ok():
+        return jsonify({"error": "Non autorise"}), 401
     try:
         data = request.json or {}
         sector = data.get("sector", "Banque")
@@ -965,6 +973,8 @@ Sois précis, data-driven et pratique. Réponds en français."""
 @app.route("/api/compare-analysis", methods=["POST"])
 def api_compare_analysis():
     """Analyse comparative IA de plusieurs sociétés BRVM."""
+    if not _admin_token_ok():
+        return jsonify({"error": "Non autorise"}), 401
     try:
         data = request.json or {}
         tickers = data.get("tickers", [])[:6]  # max 6
