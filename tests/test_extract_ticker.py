@@ -370,6 +370,25 @@ def test_ecriture_remplace_atomiquement(tmp_path, caplog):
     assert "0 avant, 1 après" in caplog.text
 
 
+def test_dedoublonne_meme_source():
+    a = {
+        "ticker": "SNTS", "agence": "Bloomfield Investment", "note": "BBB",
+        "source_url": "https://www.brvm.org/n/1", "date": "2024-06-01", "resume": "a",
+    }
+    copie = dict(a)
+    copie["resume"] = "copie"
+    autre_note = dict(a)
+    autre_note["note"] = "A"
+    sans_url = {
+        "ticker": "SNTS", "agence": "Bloomfield Investment", "note": "BBB",
+        "source_url": "", "date": "2024-06-01", "resume": "d",
+    }
+    meme_date = dict(sans_url)
+    meme_date["resume"] = "e"
+    obtenu = _scraper._dedoublonner_notations([a, copie, autre_note, sans_url, meme_date])
+    assert obtenu == [a, autre_note, sans_url]
+
+
 def test_log_dir_cree_avant_le_handler():
     source = (_CHEMIN).read_text(encoding="utf-8")
     assert source.index("LOG_DIR.mkdir") < source.index("logging.FileHandler")

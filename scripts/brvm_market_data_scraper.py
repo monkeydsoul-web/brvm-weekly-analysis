@@ -761,6 +761,20 @@ def _choisir_ticker(texte: str, indice: Any = None, titre: Optional[str] = None)
     return _ticker_connu(indice)
 
 
+def _dedoublonner_notations(notations: List[Dict]) -> List[Dict]:
+    """Une même source ne compte qu'une fois : ticker, agence, note, url ou date."""
+    vus = set()
+    gardes: List[Dict] = []
+    for fiche in notations:
+        source = fiche.get("source_url") or fiche.get("date") or ""
+        cle = (fiche.get("ticker"), fiche.get("agence"), fiche.get("note"), source)
+        if cle in vus:
+            continue
+        vus.add(cle)
+        gardes.append(fiche)
+    return gardes
+
+
 def _fiche_notation(
     corps: str,
     contexte: str,
@@ -860,7 +874,7 @@ def scrape_ratings() -> List[Dict]:
         if not next_links:
             break
 
-    result = list(ratings.values())
+    result = _dedoublonner_notations(list(ratings.values()))
     logging.info(f"Notations: {len(result)} entrées")
     return result
 
