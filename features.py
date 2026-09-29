@@ -142,6 +142,8 @@ def get_price_targets() -> list:
             "prix_cible": estimation["prix_cible"],
             "ecart_pct": estimation["ecart_pct"],
             "libelle_valeur": estimation["libelle"],
+            "pe_secteur": estimation["pe_secteur"],
+            "pb_secteur": estimation["pb_secteur"],
         })
     targets.sort(key=lambda x: x.get("upside_pct") or -999, reverse=True)
     return targets
