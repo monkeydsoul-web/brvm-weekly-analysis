@@ -40,14 +40,12 @@ def _load_analyses():
 
 
 def _load_scores():
-    files = sorted(
-        [f for f in os.listdir(DATA_DIR) if f.startswith("scores_") and f.endswith(".json")],
-        reverse=True,
-    )
-    if files:
-        with open(os.path.join(DATA_DIR, files[0])) as f:
-            return json.load(f)
-    return []
+    """Lignes de live_ranking.json, seulement si aucun score n'est transmis.
+
+    Pas de repli sur d'anciens scores_*.json (notes d'un autre calcul).
+    """
+    from live_ranker import lire_lignes
+    return lire_lignes(os.path.join(DATA_DIR, "live_ranking.json"))
 
 
 # ── Math helpers ──────────────────────────────────────────────────────────────

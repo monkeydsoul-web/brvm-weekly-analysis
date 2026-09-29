@@ -5,6 +5,7 @@ Cache : data/live_ranking.json (mis à jour à chaque déclenchement)
 """
 
 import os
+import re
 import json
 import logging
 import time
@@ -31,7 +32,10 @@ HISTORY_PATH  = os.path.join(DATA_DIR, "ranking_history.json")
 
 # Verrou pour éviter les recalculs simultanés
 _lock = threading.Lock()
+_cache_lock = threading.Lock()
 _last_ranking = None          # Cache en mémoire
+_last_stamp = None            # (mtime_ns, taille) du fichier mis en cache
+_last_updated_at = None       # updated_at du fichier mis en cache
 _last_prices  = {}            # Derniers prix connus (pour détecter les changements)
 
 def _save_json_atomic(path, data):
@@ -680,7 +684,9 @@ def compute_live_ranking(trigger="manual", force=False):
             # Sauvegarder dans l'historique (top 10 seulement, max 30 entrées)
             _save_history(payload)
 
-            _last_ranking = payload
+            payload = _copier_updated_at(payload)
+            with _cache_lock:
+                _memo_cache(payload, _stamp_fichier(RANKING_PATH))
             logger.info(
                 f"Ranking recalculé — trigger={trigger} "
                 f"changements={len(changed_tickers)} "
@@ -717,19 +723,130 @@ def _save_history(payload):
         logger.warning(f"_save_history: {e}")
 
 
-def load_ranking():
-    """Charge le dernier classement depuis le cache fichier."""
-    global _last_ranking
-    if _last_ranking:
-        return _last_ranking
-    if os.path.exists(RANKING_PATH):
-        try:
-            with open(RANKING_PATH, encoding="utf-8") as f:
-                _last_ranking = json.load(f)
-                return _last_ranking
-        except Exception:
-            pass
+def _stamp_fichier(path):
+    """(mtime_ns, taille) ou None si le fichier manque."""
+    try:
+        st = os.stat(path)
+    except OSError:
+        return None
+    return (st.st_mtime_ns, st.st_size)
+
+
+def _lire_json(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _updated_at_de(data):
+    if isinstance(data, dict):
+        return data.get("updated_at")
     return None
+
+
+def _copier_updated_at(data):
+    """Recopie le updated_at du payload sur chaque ligne qui n'en a pas.
+
+    N'ecrit pas le fichier : les routes ajoutent le champ, elles n'en retirent aucun.
+    """
+    if not isinstance(data, dict):
+        return data
+    horodatage = data.get("updated_at")
+    lignes = data.get("ranking")
+    if not horodatage or not isinstance(lignes, list):
+        return data
+    for ligne in lignes:
+        if isinstance(ligne, dict) and not ligne.get("updated_at"):
+            ligne["updated_at"] = horodatage
+    return data
+
+
+def _updated_at_entete(path):
+    """updated_at en tete du fichier, chaine vide si la cle est absente."""
+    with open(path, encoding="utf-8") as f:
+        tete = f.read(8192)
+    trouve = re.search(r'"updated_at"\s*:\s*"([^"]*)"', tete)
+    if not trouve:
+        return ""
+    return trouve.group(1)
+
+
+def _memo_cache(data, stamp):
+    """A appeler en tenant _cache_lock."""
+    global _last_ranking, _last_stamp, _last_updated_at
+    _last_ranking = data
+    _last_stamp = stamp
+    _last_updated_at = _updated_at_de(data)
+
+
+def _oublier_cache():
+    """A appeler en tenant _cache_lock."""
+    global _last_ranking, _last_stamp, _last_updated_at
+    _last_ranking = None
+    _last_stamp = None
+    _last_updated_at = None
+
+
+def load_ranking():
+    """Dernier classement ecrit par compute_live_ranking.
+
+    Recharge le fichier des que son mtime ou son updated_at change.
+    Fichier absent ou illisible : None, jamais l'ancien cache.
+    """
+    stamp = _stamp_fichier(RANKING_PATH)
+    if stamp is None:
+        with _cache_lock:
+            _oublier_cache()
+        return None
+
+    with _cache_lock:
+        cached = _last_ranking
+        cached_stamp = _last_stamp
+        cached_at = _last_updated_at
+
+    if cached is not None and cached_stamp == stamp:
+        try:
+            apercu = _updated_at_entete(RANKING_PATH)
+        except OSError:
+            with _cache_lock:
+                _oublier_cache()
+            return None
+        if apercu == (cached_at or ""):
+            return cached
+
+    try:
+        data = _lire_json(RANKING_PATH)
+    except Exception as e:
+        logger.warning("load_ranking illisible: %s", e)
+        return None
+    data = _copier_updated_at(data)
+    stamp_apres = _stamp_fichier(RANKING_PATH)
+    with _cache_lock:
+        if stamp_apres == stamp:
+            _memo_cache(data, stamp)
+    return data
+
+
+def lire_lignes(path=None):
+    """Lignes du classement. Pas de repli sur d'anciens scores_*.json.
+
+    Le chemin canonique passe par load_ranking. Un autre chemin est lu
+    directement (tests qui pointent un repertoire temporaire).
+    """
+    if path is None or os.path.abspath(path) == os.path.abspath(RANKING_PATH):
+        data = load_ranking()
+    else:
+        try:
+            data = _lire_json(path)
+        except Exception:
+            return []
+        data = _copier_updated_at(data)
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        lignes = data.get("ranking")
+        if isinstance(lignes, list):
+            return lignes
+    return []
 
 
 def get_ranking_changes():

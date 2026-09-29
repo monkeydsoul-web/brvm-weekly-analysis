@@ -10,7 +10,7 @@ BRVM Features — Modules additionnels
 Portfolio · Alertes prix · Score personnalisé · Export · Chat IA · Prévisions
 """
 
-import os, json, glob, logging, csv, io
+import os, json, logging, csv, io
 from datetime import datetime
 from flask import jsonify, request, Response
 
@@ -44,18 +44,9 @@ def _save(path, data):
     json.dump(data, open(path,"w"), ensure_ascii=False, indent=2)
 
 def _load_scores():
-    live = os.path.join(DATA_DIR, "live_ranking.json")
-    if os.path.exists(live):
-        try:
-            data = json.load(open(live))
-            if isinstance(data, list):
-                return data
-            if isinstance(data, dict) and "ranking" in data:
-                return data["ranking"]
-        except Exception:
-            pass
-    files = sorted(glob.glob(os.path.join(DATA_DIR, "scores_*.json")))
-    return json.load(open(files[-1])) if files else []
+    """Lignes de live_ranking.json. Aucun repli sur scores_*.json."""
+    from live_ranker import lire_lignes
+    return lire_lignes(os.path.join(DATA_DIR, "live_ranking.json"))
 
 # ── Custom scoring ─────────────────────────────────────────────────────────
 def apply_custom_weights(scores: list, weights: dict) -> list:
