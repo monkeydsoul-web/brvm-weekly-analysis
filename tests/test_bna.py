@@ -523,7 +523,10 @@ def test_cibles_epv_graham_inchangees_si_seul_le_cours_bouge(fixtures_dir, monke
 
     a = cibles(bas, 12000)
     b = cibles(haut, 15000)
-    assert a["epv_target"] == b["epv_target"] == 10000
+    # Pas de secteur sur la ligne : P/E de repli 14 (médiane de toutes
+    # les sociétés), plus le 10 fixe. Le cours ne change pas ce multiple.
+    assert a["epv_target"] == b["epv_target"] == 14000
+    assert a["pb_target"] == b["pb_target"]
     assert a["graham_target"] == b["graham_target"]
     assert a["current_price"] != b["current_price"]
 
