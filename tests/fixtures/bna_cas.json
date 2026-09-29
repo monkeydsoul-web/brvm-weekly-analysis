@@ -27,7 +27,7 @@
     "annee": 2025,
     "year": 2025,
     "kpis": {
-      "resultat_net": {"valeur": 1200.0, "unite": "MFCFA"},
+      "resultat_net": {"valeur": 1080.0, "unite": "MFCFA"},
       "capitaux_propres": {"valeur": 5000.0, "unite": "MFCFA"}
     }
   },

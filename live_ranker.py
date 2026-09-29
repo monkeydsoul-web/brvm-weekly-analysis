@@ -99,11 +99,12 @@ def _convert_pdf_div(ticker, value, unite):
 # Construction du row fondamental enrichi
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Bande rapport/BOC. En dehors, le chiffre du rapport est écarté et le BOC
-# est retenu : un nombre d'actions faux dans les fondamentaux rend le rapport
-# invraisemblable. 1,43 est l'inverse de 0,70, arrondi.
-_BANDE_BAS = 0.7
-_BANDE_HAUT = 1.43
+# Bande rapport/BOC, fermée. En dehors, le chiffre du rapport est écarté et
+# le BOC est retenu. 0,80–1,25 (et non plus 0,70–1,43) : les ratios ~1,3–1,4
+# de PALC, SLBC, SOGC et NSBC viennent d'un nombre d'actions faux dans
+# STOCK_FUNDAMENTALS. On garde le BOC jusqu'au PR qui corrige ces nombres.
+_BANDE_BAS = 0.8
+_BANDE_HAUT = 1.25
 # Seuls ces documents publiés, en millions de FCFA, donnent un BNA ou un BVPA.
 _DOCS_COMPTABLES = frozenset(("etats financiers", "rapport annuel"))
 
@@ -183,10 +184,178 @@ def _ratio(valeur_rapport, valeur_boc):
 
 
 def _hors_bande(ratio):
-    """Vrai si le rapport et le BOC sont trop éloignés (bande fermée [0,7 ; 1,43])."""
+    """Vrai si le rapport et le BOC sont trop éloignés (bande fermée [0,8 ; 1,25])."""
     if ratio is None:
         return False
     return ratio < _BANDE_BAS or ratio > _BANDE_HAUT
+
+
+def _annee_entiere(valeur):
+    """Année civile plausible, ou None. Le cours et les pourcentages ne comptent pas."""
+    if isinstance(valeur, bool):
+        return None
+    if isinstance(valeur, int):
+        annee = valeur
+    elif isinstance(valeur, float) and valeur == int(valeur):
+        annee = int(valeur)
+    elif isinstance(valeur, str) and valeur.strip().isdigit():
+        annee = int(valeur.strip())
+    else:
+        return None
+    if 1990 <= annee <= 2100:
+        return annee
+    return None
+
+
+def _annee_du_rapport(pdf_analysis):
+    """Exercice du document analysé : `annee`, sinon `year` s'il n'y a pas d'annee."""
+    if not isinstance(pdf_analysis, dict):
+        return None
+    annee = _annee_entiere(pdf_analysis.get("annee"))
+    if annee is None:
+        annee = _annee_entiere(pdf_analysis.get("year"))
+    return annee
+
+
+def _annee_document_comptable(doc):
+    """Exercice d'un état financier ou d'un rapport annuel cité à côté."""
+    if not isinstance(doc, dict):
+        return None
+    brut = doc.get("doc_type") or doc.get("type")
+    if _pli(brut) not in _DOCS_COMPTABLES:
+        return None
+    return _annee_entiere(doc.get("annee") if doc.get("annee") is not None else doc.get("year"))
+
+
+def _annees_citees(pdf_analysis):
+    """Exercices comptables listés sur l'analyse (autres documents de la société)."""
+    annees = set()
+    if not isinstance(pdf_analysis, dict):
+        return annees
+    for cle in ("rapports", "reports", "documents"):
+        liste = pdf_analysis.get(cle)
+        if not isinstance(liste, list):
+            continue
+        for doc in liste:
+            annee = _annee_document_comptable(doc)
+            if annee is not None:
+                annees.add(annee)
+    return annees
+
+
+# (chemin, mtime) → années comptables par ticker. Évite de relire le
+# catalogue une fois par société à chaque classement.
+_CATALOG_ANNEES = {}
+
+
+def _annees_catalog_comptable(ticker):
+    """Exercices des états financiers et rapports annuels connus pour ce ticker.
+
+    Lit reports_full.json et reports_cache.json s'ils sont là. Un trimestriel
+    ne compte pas : son année ne doit pas écarter un rapport annuel encore
+    le plus récent.
+    """
+    if not ticker:
+        return set()
+    from paths import DATA_DIR
+    return set(_index_catalog(DATA_DIR).get(ticker, ()))
+
+
+def _index_catalog(data_dir):
+    """Années comptables par ticker, relues seulement si un fichier change."""
+    signatures = []
+    for nom in ("reports_full.json", "reports_cache.json"):
+        chemin = os.path.join(data_dir, nom)
+        try:
+            signatures.append((chemin, os.path.getmtime(chemin)))
+        except OSError:
+            signatures.append((chemin, None))
+    cle = tuple(signatures)
+    if cle in _CATALOG_ANNEES:
+        return _CATALOG_ANNEES[cle]
+
+    index = {}
+
+    def _ajouter(ticker_doc, doc):
+        if not ticker_doc or not isinstance(doc, dict):
+            return
+        if doc.get("ticker") not in (None, "", ticker_doc):
+            return
+        annee = _annee_document_comptable(doc)
+        if annee is None:
+            return
+        index.setdefault(ticker_doc, set()).add(annee)
+
+    plein = signatures[0][0]
+    if signatures[0][1] is not None:
+        try:
+            with open(plein, encoding="utf-8") as fichier:
+                data = json.load(fichier)
+            if isinstance(data, list):
+                for doc in data:
+                    if isinstance(doc, dict):
+                        _ajouter(doc.get("ticker"), doc)
+        except Exception:
+            logger.warning("Exercices illisibles : %s", plein)
+
+    cache = signatures[1][0]
+    if signatures[1][1] is not None:
+        try:
+            with open(cache, encoding="utf-8") as fichier:
+                data = json.load(fichier)
+            rapports = data.get("reports") if isinstance(data, dict) else None
+            if not isinstance(rapports, dict) and isinstance(data, dict):
+                rapports = data
+            if isinstance(rapports, dict):
+                for ticker_doc, liste in rapports.items():
+                    if not isinstance(liste, list):
+                        continue
+                    for doc in liste:
+                        _ajouter(ticker_doc, doc)
+        except Exception:
+            logger.warning("Exercices illisibles : %s", cache)
+
+    _CATALOG_ANNEES[cle] = index
+    return index
+
+
+def _plus_recent_exercice(ticker, pdf_analysis, boc_entry):
+    """Dernier exercice connu pour cette société (BOC ou rapports comptables)."""
+    annees = set()
+    annee = _annee_du_rapport(pdf_analysis)
+    if annee is not None:
+        annees.add(annee)
+    annees |= _annees_citees(pdf_analysis)
+    if isinstance(boc_entry, dict):
+        for cle in ("exercice", "annee"):
+            valeur = _annee_entiere(boc_entry.get(cle))
+            if valeur is not None:
+                annees.add(valeur)
+                break
+    annees |= _annees_catalog_comptable(ticker)
+    if not annees:
+        return None
+    return max(annees)
+
+
+def _rapport_perime(pdf_analysis, boc_entry, ticker):
+    """Vrai si l'exercice du rapport est plus vieux que le dernier connu.
+
+    BOAC 2024 et CFAC 2023 sont ce cas : un état plus récent existe déjà
+    dans le BOC ou dans les rapports de la société. On n'utilise alors
+    ni le BNA ni le BVPA de ce document.
+    """
+    annee = _annee_du_rapport(pdf_analysis)
+    if annee is None:
+        return False
+    plus_recent = _plus_recent_exercice(ticker, pdf_analysis, boc_entry)
+    if plus_recent is None or annee >= plus_recent:
+        return False
+    logger.warning(
+        "BNA %s : exercice %s plus ancien que %s — rapport ignoré",
+        ticker, annee, plus_recent,
+    )
+    return True
 
 
 def _nb_actions(row):
@@ -245,7 +414,7 @@ def _choisir_bna(bna_rapport, annee, bna_boc, date_boc, bna_statique):
 
     Retourne (bna, source, exercice, date, ecart, alerter).
     `ecart` est le ratio rapport/BOC arrondi, quand les deux existent.
-    Si ce ratio sort de [0,7 ; 1,43], le BOC est retenu et `alerter` est vrai.
+    Si ce ratio sort de [0,8 ; 1,25], le BOC est retenu et `alerter` est vrai.
     Sans aucune source, le BNA est absent (None), pas inventé depuis le cours.
     """
     ecart_brut = _ratio(bna_rapport, bna_boc)
@@ -300,10 +469,36 @@ def _bvpa_statique(base_row):
     return _flottant_positif(base_row.get("bvpa"))
 
 
-def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_statique):
-    """Rapport, puis BOC s'il existe, puis statique.
+def _bvpa_estime(pdf_analysis, nb_actions):
+    """BVPA tiré des capitaux propres d'un document qui n'est pas un état financier.
+
+    Même unité MFCFA. On ne s'en sert que s'il n'y a pas de BVPA comptable :
+    le BOC ne publie pas de valeur comptable, et sans ce repli le P/B des
+    modèles tombe. Source affichée : « estime ».
+    """
+    if not isinstance(pdf_analysis, dict) or pdf_analysis.get("status") != "ok":
+        return None
+    if _doc_comptable(pdf_analysis):
+        return None
+    bloc = _bloc_kpi(pdf_analysis, "capitaux_propres")
+    unite = bloc.get("unite")
+    if not isinstance(unite, str) or unite.strip() != "MFCFA":
+        return None
+    cap = _flottant_positif(bloc.get("valeur"))
+    if cap is None or not nb_actions:
+        return None
+    valeur = round(cap * 1000000.0 / nb_actions, 1)
+    if valeur <= 0:
+        return None
+    return valeur
+
+
+def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_estime, bvpa_statique):
+    """Rapport comptable, puis BOC s'il existe, puis estimation, puis statique.
 
     La bande rapport/BOC ne s'applique que lorsqu'un BVPA BOC existe.
+    Sans document comptable, les capitaux propres d'une autre pièce (MFCFA)
+    donnent un BVPA « estime », avant le chiffre statique.
     Retourne (bvpa, source, alerter).
     """
     ecart_brut = _ratio(bvpa_rapport, bvpa_boc)
@@ -311,6 +506,8 @@ def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_statique):
         return bvpa_rapport, "rapport", False
     if bvpa_boc is not None and bvpa_boc > 0:
         return bvpa_boc, "boc", _hors_bande(ecart_brut)
+    if bvpa_estime is not None and bvpa_estime > 0:
+        return bvpa_estime, "estime", False
     if bvpa_statique is not None and bvpa_statique > 0:
         return bvpa_statique, "statique", False
     return None, None, False
@@ -319,7 +516,9 @@ def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_statique):
 def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
     """Fige BNA et BVPA, puis P/E et P/B = cours actuel / ces chiffres."""
     nb = _nb_actions(row)
-    bna_rapport, annee = _bna_depuis_rapport(pdf_analysis, nb)
+    boc_meta = {"exercice": row.get("_boc_exercice")}
+    pdf_utile = None if _rapport_perime(pdf_analysis, boc_meta, ticker) else pdf_analysis
+    bna_rapport, annee = _bna_depuis_rapport(pdf_utile, nb)
     bna_boc = _bna_depuis_boc(row.get("_boc_cours"), row.get("_boc_per"))
     bna, source, exercice, date_boc, ecart, alerter_bna = _choisir_bna(
         bna_rapport,
@@ -330,8 +529,8 @@ def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
     )
     if alerter_bna:
         logger.warning(
-            "BNA %s : rapport/BOC = %s hors [0.7, 1.43] — le BOC est retenu",
-            ticker, ecart,
+            "BNA %s : rapport/BOC = %s hors [%.2f, %.2f] — le BOC est retenu",
+            ticker, ecart, _BANDE_BAS, _BANDE_HAUT,
         )
     row["bna"] = bna
     row["eps"] = bna
@@ -344,14 +543,15 @@ def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
         row.get("_boc_cours"), row.get("_boc_pb"), row.get("_boc_bvpa"),
     )
     bvpa, bvpa_source, alerter_bvpa = _choisir_bvpa(
-        _bvpa_depuis_rapport(pdf_analysis, nb),
+        _bvpa_depuis_rapport(pdf_utile, nb),
         bvpa_boc,
+        _bvpa_estime(pdf_utile, nb),
         _bvpa_statique(base_row),
     )
     if alerter_bvpa:
         logger.warning(
-            "BVPA %s : rapport/BOC hors [0.7, 1.43] — le BOC est retenu",
-            ticker,
+            "BVPA %s : rapport/BOC hors [%.2f, %.2f] — le BOC est retenu",
+            ticker, _BANDE_BAS, _BANDE_HAUT,
         )
     row["bvpa"] = bvpa
     row["bvpa_source"] = bvpa_source
@@ -430,6 +630,11 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
             row['_boc_date']     = boc_entry.get('date')
             row['_boc_pb']       = boc_entry.get('pb_boc')
             row['_boc_bvpa']     = boc_entry.get('bvpa')
+            # Exercice du bulletin s'il est écrit. La date du BOC est un jour
+            # de cotation, pas une année fiscale.
+            row['_boc_exercice'] = boc_entry.get('exercice')
+            if row['_boc_exercice'] is None:
+                row['_boc_exercice'] = boc_entry.get('annee')
     except Exception as _e:
         pass
 
@@ -538,7 +743,8 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
                 row['div_yield'] = round(boc_div / price_final * 100, 2)
 
     # Nettoyage des clés internes
-    for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours', '_boc_date', '_boc_pb', '_boc_bvpa'):
+    for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours', '_boc_date',
+              '_boc_pb', '_boc_bvpa', '_boc_exercice'):
         row.pop(k, None)
 
     return row
@@ -1142,7 +1348,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "trend":         row.get("trend"),
                         "pe_ref":        row.get("pe_ref") if row.get("bna") else None,
                         "pe_hist":       row.get("pe_hist"),
-                        "pb_ref":        row.get("pb_ref") or row.get("pb_hist"),
+                        "pb_ref":        row.get("pb_ref") if row.get("bvpa") else None,
                         "pb_hist":       row.get("pb_hist"),
                         "roe":           row.get("roe"),
                         "div_yield":              row.get("div_yield"),

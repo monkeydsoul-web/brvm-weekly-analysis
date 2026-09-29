@@ -110,7 +110,7 @@ def test_bna_change_avec_un_nouveau_rapport(fixtures_dir):
     apres = _ligne(cas["base"], 12000, cas["rapport_2025"], cas["boc"])
     assert avant["bna"] == 1000.0
     assert avant["bna_exercice"] == 2024
-    assert apres["bna"] == 1200.0
+    assert apres["bna"] == 1080.0
     assert apres["bna_source"] == "rapport"
     assert apres["bna_exercice"] == 2025
     assert avant["bvpa"] == apres["bvpa"] == 5000.0
@@ -192,7 +192,8 @@ def test_donnees_enrichies_sgbc_ignorees():
     assert row["bna"] == 3299.0
     assert row["bna"] != 2291.0
     assert row["bna_source"] == "boc"
-    assert row["bvpa_source"] != "rapport"
+    assert row["bvpa_source"] == "estime"
+    assert row["bvpa"] == round(200000.0 * 1000000.0 / base["shares"], 1)
     for doc in ("Données publiques", "Rapport trimestriel"):
         autre = _ligne(base, 34000, _rapport(doc, 71272.0, 200000.0), boc, ticker="SGBC")
         assert autre["bna_source"] == "boc"
@@ -265,6 +266,143 @@ def test_exercice_fiscal_pas_annee_de_publication(fixtures_dir):
     row = _ligne(cas["base"], 12000, pdf, cas["boc"])
     assert row["bna_source"] == "rapport"
     assert row["bna_exercice"] == 2025
+
+
+def test_bvpa_estime_puis_statique_sans_document_comptable():
+    """Sans état financier, les capitaux propres d'une note donnent un BVPA estimé.
+
+    Le chiffre statique ne sert qu'en dernier. Un état financier, lui, reste
+    « rapport » et ne passe pas par l'estimation.
+    """
+    base = {
+        "name": "Test", "shares": 1000000, "sector": "Banque",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1.5,
+        "bvpa": 2100,
+    }
+    note = _rapport("Données financières enrichies", 500.0, 4000.0, annee=2025, year=2026)
+    estime = _ligne(base, 12000, note, {"date": "2026-09-25", "cours_clot": 10000, "per_boc": 10})
+    assert estime["bna_source"] == "boc"
+    assert estime["bvpa"] == 4000.0
+    assert estime["bvpa_source"] == "estime"
+    assert _proche(estime["pb_ref"] * estime["bvpa"], 12000)
+
+    sans_capitaux = _rapport("Données publiques", 500.0, None, annee=2025, year=2026)
+    sans_capitaux["kpis"]["capitaux_propres"] = {"valeur": None, "unite": "MFCFA"}
+    statique = _ligne(base, 12000, sans_capitaux, None)
+    assert statique["bvpa"] == 2100
+    assert statique["bvpa_source"] == "statique"
+
+    officiel = _rapport("Etats financiers", 1000.0, 5000.0, annee=2025, year=2026)
+    rapport = _ligne(base, 12000, officiel, {"date": "2026-09-25", "cours_clot": 10000, "per_boc": 10})
+    assert rapport["bvpa_source"] == "rapport"
+    assert rapport["bvpa"] == 5000.0
+
+
+def test_bande_08_125_garde_le_boc_pour_un_ratio_de_1_39(caplog):
+    """1,25 reste dans la bande. 1,26 et le 1,39 de PALC basculent sur le BOC."""
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
+    base = {
+        "name": "Test", "shares": 1000000, "sector": "Industrie",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
+    }
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0}
+
+    def ligne(rn, ticker):
+        return _ligne(base, 12000, _rapport("Etats financiers", rn, rn * 3), boc, ticker=ticker)
+
+    dedans = ligne(1250.0, "HAUT")
+    assert dedans["bna"] == 1250.0
+    assert dedans["bna_source"] == "rapport"
+    assert dedans["bna_ecart_boc"] == 1.25
+
+    juste_au_dessus = ligne(1260.0, "PALC")
+    assert juste_au_dessus["bna"] == 1000.0
+    assert juste_au_dessus["bna_source"] == "boc"
+    assert juste_au_dessus["bna_ecart_boc"] == 1.26
+
+    palc = ligne(1390.0, "PALC")
+    assert palc["bna_source"] == "boc"
+    assert palc["bna_ecart_boc"] == 1.39
+    assert "PALC" in caplog.text
+
+    plancher = ligne(800.0, "BAS")
+    assert plancher["bna_source"] == "rapport"
+    assert plancher["bna_ecart_boc"] == 0.8
+
+    sous_plancher = ligne(790.0, "BAS")
+    assert sous_plancher["bna"] == 1000.0
+    assert sous_plancher["bna_source"] == "boc"
+    assert sous_plancher["bna_ecart_boc"] == 0.79
+
+
+def test_boac_2024_ignore_si_le_boc_a_un_exercice_2025(caplog):
+    """BOAC : l'état 2024 est écarté quand le BOC porte déjà l'exercice 2025."""
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
+    base = dict(STOCK_FUNDAMENTALS["BOAC"])
+    rn = 1000.0 * base["shares"] / 1000000.0
+    pdf = _rapport("Etats financiers", rn, rn * 4, annee=2024, year=2025)
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0, "exercice": 2025}
+    row = _ligne(base, 12000, pdf, boc, ticker="BOAC")
+    assert row["bna_source"] == "boc"
+    assert row["bna"] == 1000.0
+    assert row["bna_exercice"] is None
+    assert row["bvpa_source"] != "rapport"
+    assert "BOAC" in caplog.text
+    assert "2024" in caplog.text
+    assert "ignor" in caplog.text
+
+    # Le même état reste si aucun exercice plus récent n'est connu.
+    tenu = _ligne(
+        base, 12000, pdf,
+        {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0},
+        ticker="BOAC",
+    )
+    assert tenu["bna_source"] == "rapport"
+    assert tenu["bna_exercice"] == 2024
+
+
+def test_cfac_2023_ignore_si_un_etat_2025_est_deja_publie(tmp_path, monkeypatch, caplog):
+    """CFAC : un état financier 2025 dans le catalogue écarte le rapport 2023.
+
+    Un rapport trimestriel 2026, lui, ne compte pas comme exercice plus récent.
+    """
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
+    monkeypatch.setattr("paths.DATA_DIR", str(tmp_path))
+    (tmp_path / "reports_full.json").write_text(json.dumps([
+        {"ticker": "CFAC", "type": "Etats financiers", "annee": 2025},
+        {"ticker": "CFAC", "type": "Rapport trimestriel", "annee": 2026},
+        {"ticker": "SNTS", "type": "Etats financiers", "annee": 2025},
+    ]), encoding="utf-8")
+    base = dict(STOCK_FUNDAMENTALS["CFAC"])
+    rn = 800.0 * base["shares"] / 1000000.0
+    pdf = _rapport("Rapport annuel", rn, rn * 5, annee=2023, year=2024)
+    boc = {"date": "2026-09-25", "cours_clot": 8000.0, "per_boc": 10.0}
+    row = _ligne(base, 9000, pdf, boc, ticker="CFAC")
+    assert row["bna_source"] == "boc"
+    assert row["bna"] == 800.0
+    assert row["bna_exercice"] is None
+    assert "CFAC" in caplog.text
+    assert "2023" in caplog.text
+
+    monkeypatch.setattr("paths.DATA_DIR", str(tmp_path / "vide"))
+    (tmp_path / "vide").mkdir()
+    (tmp_path / "vide" / "reports_cache.json").write_text(json.dumps({
+        "reports": {
+            "CFAC": [
+                {"type": "Rapport trimestriel", "annee": 2026},
+            ],
+        },
+    }), encoding="utf-8")
+    caplog.clear()
+    garde = _ligne(base, 9000, pdf, boc, ticker="CFAC")
+    assert garde["bna_source"] == "rapport"
+    assert garde["bna_exercice"] == 2023
+    assert "ignor" not in caplog.text
 
 
 def test_bvpa_boc_seulement_si_le_bulletin_en_a_un(caplog):
@@ -374,11 +512,16 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
         autre = _ligne(base, prix + 250, pdf, boc, ticker=ticker)
         assert row["bna"] == autre["bna"]
         assert row["bvpa"] == autre["bvpa"]
-        assert row["bna_source"] == {
+        source_attendue = {
             "rapport": "rapport",
             "boc": "boc",
             "aucun": None,
         }[univers["groupes"][ticker]]
+        # PALC : ratio 1,39, hors [0,8 ; 1,25]. Le BOC est retenu tant que
+        # le nombre d'actions n'est pas corrigé.
+        if ticker == "PALC":
+            source_attendue = "boc"
+        assert row["bna_source"] == source_attendue
         if row["bna"] is None:
             sans_bna.append(ticker)
             assert row.get("pe_ref") is None
@@ -423,8 +566,9 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
     assert par["SGBC"][1] == 2500.0
     assert par["STBC"][0] == 2100.0
     assert par["STBC"][1] == 1800.0
-    # PALC : le BOC (cours live / PER = 500) est incohérent avec le rapport 2 000.
-    assert par["PALC"][0] == par["PALC"][1] == 2000.0
+    # PALC : le rapport 2 000 / BOC 1 438,8 = 1,39, hors [0,8 ; 1,25].
+    # Le BOC est retenu jusqu'au PR sur le nombre d'actions.
+    assert par["PALC"][1] == 1438.8
     palc = _ligne(
         STOCK_FUNDAMENTALS["PALC"],
         univers["prix"]["PALC"],
@@ -432,10 +576,9 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
         univers["boc"]["PALC"],
         ticker="PALC",
     )
-    # 1,39 est dans la bande : le rapport reste, en attendant la correction
-    # du nombre d'actions (autre PR).
-    assert palc["bna_source"] == "rapport"
+    assert palc["bna_source"] == "boc"
     assert palc["bna_ecart_boc"] == 1.39
+    assert palc["bvpa_source"] == "rapport"
 
     changements = sorted(
         (t, c_avant, c_apres)
@@ -541,6 +684,33 @@ def test_pe_ref_vide_quand_il_ny_a_pas_de_bna(gel):
     assert ligne["bna"] is None
     assert ligne["pe_ref"] is None
     assert ligne["pe_hist"] == 8.0
+
+
+def test_pb_ref_vide_quand_il_ny_a_pas_de_bvpa(gel):
+    """Sans BVPA, le classement ne montre pas le P/B statique à la place.
+
+    C'est le P/B que les modèles lisent (cours / BVPA), ou rien.
+    """
+    _ecrire(gel["chemin"], NOTE_FORMULE, NOTE_VEILLE)
+    resultat = compute_live_ranking(trigger="startup", moment=SEANCE)
+    ligne = resultat["ranking"][0]
+    assert ligne["bna"] == 1000.0
+    assert ligne["bvpa"] is None
+    assert ligne["pb_ref"] is None
+    assert ligne["pb_hist"] == 1.2
+
+    analyse = {
+        "ALPH": _rapport("Données financières enrichies", 1.0, 4.0, annee=2025, year=2026),
+    }
+    (gel["dossier"] / "analyses_summary.json").write_text(
+        json.dumps(analyse), encoding="utf-8",
+    )
+    avec = compute_live_ranking(trigger="startup", moment=SEANCE)
+    ligne = avec["ranking"][0]
+    assert ligne["bvpa_source"] == "estime"
+    assert ligne["bvpa"] == 4000.0
+    assert ligne["pb_ref"] == round(12000 / 4000.0, 2)
+    assert ligne["pb_ref"] != ligne["pb_hist"]
 
 
 def test_formule_v1_gardee_en_seance(gel):
