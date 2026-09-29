@@ -85,7 +85,7 @@ function createCompareAnalysisModal() {
 
 function refreshCASelector() {
   const all = window.scores || scores || [];
-  const sorted = [...all].sort((a,b) => (b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...all].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   
   // Sélectionnés
   const selEl = document.getElementById('ca-selected');
@@ -133,7 +133,7 @@ function caRemoveTicker(ticker) {
 
 function caSelectGroup(group) {
   const all = window.scores || scores || [];
-  const sorted = [...all].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...all].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   if (group === 'clear') { _compareAnalysisTickers = []; }
   else if (group === 'top5') { _compareAnalysisTickers = sorted.slice(0,5).map(x=>x.ticker); }
   else if (group === 'banque') { _compareAnalysisTickers = sorted.filter(x=>x.sector?.includes('Banque')).slice(0,5).map(x=>x.ticker); }

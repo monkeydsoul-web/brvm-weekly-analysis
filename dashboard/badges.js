@@ -49,20 +49,30 @@ function renderLiveRankBadge(ticker) {
   const rank = entry.rank || '?';
   const total = (window.scores || scores || []).length;
   const badge = getRankBadge(ticker, rank);
-  const scoreC = (entry.composite_adj||0) >= 60 ? 'var(--green)' : (entry.composite_adj||0) >= 40 ? 'var(--amber)' : 'var(--red)';
-  const verdict = entry.pdf_verdict || '';
-  const verdC = verdict.toLowerCase().includes('achet') || verdict === 'POSITIF' ? 'var(--green)'
-    : verdict.toLowerCase().includes('vend') || verdict === 'NEGATIF' ? 'var(--red)'
-    : 'var(--amber)';
+  const n10 = (typeof note10num==='function') ? note10num(entry) : (Math.round((entry.composite_adj||0)/8*10)/10);
+  const noteTxt = (typeof note10txt==='function') ? note10txt(entry) : n10.toFixed(1).replace('.',',');
+  const scoreC = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
+  if (entry.statut === 'suspendu') {
+    const dep = entry.statut_depuis || '';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dep);
+    const aff = m ? (m[3] + '/' + m[2] + '/' + m[1]) : '';
+    const mention = aff ? ('Cotation suspendue depuis le ' + aff) : 'Cotation suspendue';
+    el.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
+      <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(148,163,184,.22);color:var(--t2);font-weight:700">${mention}</span>
+      ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.eps)):Math.round(entry.eps).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
+      ${entry.bvpa ? `<span class="tt" data-tt="Book Value Per Action · valeur comptable par action — actif net / nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BVPA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.bvpa)):Math.round(entry.bvpa).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
+    </div>`;
+    return;
+  }
   el.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
         🏆 Rang <strong style="color:${scoreC}">#${rank}</strong>/${total} ${badge}
       </span>
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
-        Note <strong style="color:${scoreC}">${v10fmt(entry.composite_adj||0)}/10</strong>
+        Note <strong style="color:${scoreC}">${noteTxt}/10</strong>
       </span>
-      ${verdict ? `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${verdC}22;color:${verdC};font-weight:700">${verdict}</span>` : ''}
       ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.eps)):Math.round(entry.eps).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
       ${entry.bvpa ? `<span class="tt" data-tt="Book Value Per Action · valeur comptable par action — actif net / nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BVPA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.bvpa)):Math.round(entry.bvpa).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
     </div>`;
@@ -73,15 +83,16 @@ function renderSidebarScores(ranking) {
   const sidebar = document.getElementById('sidebarList');
   if (!sidebar) return;
   const arr = ranking || window.scores || scores || [];
-  const sorted = [...arr].sort((a,b) => (b.composite_adj||0) - (a.composite_adj||0));
+  const sorted = [...arr].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.rank||999)-(a.rank||999));
   sidebar.innerHTML = sorted.map(x => {
-    const v = x.composite_adj || 0;
-    const c = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
+    const n10 = (typeof note10num==='function') ? note10num(x) : 0;
+    const noteTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
+    const c = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
     const badge = getRankBadge(x.ticker, x.rank || 0);
     return `<div class="si" onclick="showStock('${x.ticker}')">
       <span style="flex:1;cursor:pointer;font-size:12px">${x.ticker}</span>
       ${badge}
-      <span style="color:${c};font-weight:700;font-size:12px;min-width:24px;text-align:right">${v.toFixed(0)}</span>
+      <span style="color:${c};font-weight:700;font-size:12px;min-width:24px;text-align:right">${noteTxt}</span>
     </div>`;
   }).join('');
 }
