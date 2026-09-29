@@ -259,6 +259,40 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_long_terme_prime_sur_la_note_precedente():
+    info = _extract_rating_info("Long terme : A+ (précédente : BBB+)")
+    assert info["note"] == "A+"
+    assert info["score_notation"] == 8
+
+
+def test_legende_avant_la_note_de_long_terme():
+    texte = (
+        "Échelle : AAA, AA, A, BBB, BB, B, CCC, CC, C, D. "
+        "Note de long terme : BBB+ perspective Stable."
+    )
+    info = _extract_rating_info(texte)
+    assert info["note"] == "BBB+"
+    assert info["score_notation"] == 6.5
+
+
+def test_sans_ancre_le_premier_cran_compte():
+    info = _extract_rating_info("La société est notée BBB+ (échelle AAA, AA, A).")
+    assert info["note"] == "BBB+"
+
+
+def test_cran_ccc_plus_conserve():
+    info = _extract_rating_info("Note de long terme CCC+ perspective Stable")
+    assert info["note"] == "CCC+"
+    assert info["score_notation"] == 2.25
+    nu = _extract_rating_info("notée CCC+")
+    assert nu["note"] == "CCC+"
+
+
+def test_lt_abrege():
+    info = _extract_rating_info("Note LT : A- perspective Stable. Précédente : BB.")
+    assert info["note"] == "A-"
+
+
 def test_cie_mot_entier_pas_et_cie():
     assert _extract_ticker("Dupont et Cie") is None
     assert _extract_ticker("Dupont & Cie") is None

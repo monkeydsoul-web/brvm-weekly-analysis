@@ -404,7 +404,7 @@ RATING_GRADES = {
     "BBB+":6.5,"BBB":6,"BBB-":5.5,
     "BB+":5,"BB":4.5,"BB-":4,
     "B+":3.5,"B":3,"B-":2.5,
-    "CCC":2,"CC":1.5,"C":1,"D":0,
+    "CCC+":2.25,"CCC":2,"CC":1.5,"C":1,"D":0,
 }
 
 # ── Helpers réseau ───────────────────────────────────────────────────────────
@@ -625,6 +625,50 @@ def _motif_cran(grade: str) -> str:
     return r"(?<!\w)" + re.escape(grade) + r"(?!\w)"
 
 
+def _fin_ancre_long_terme(text: str) -> Optional[int]:
+    """Fin de la première ancre « note de long terme », « long terme » ou « LT »."""
+    motifs = (
+        r"note\s+de\s+long\s+terme",
+        r"long\s+terme",
+        r"(?<!\w)LT(?!\w)",
+    )
+    debut_min = None
+    fin = None
+    for motif in motifs:
+        m = re.search(motif, text, re.I)
+        if not m:
+            continue
+        if debut_min is None or m.start() < debut_min:
+            debut_min = m.start()
+            fin = m.end()
+    return fin
+
+
+def _choisir_note(text: str) -> Optional[str]:
+    """Premier cran après l'ancre de long terme, sinon le premier du texte.
+
+    À la même position, le cran le plus long gagne (A+ plutôt que A, CCC+ plutôt que CCC).
+    """
+    if not text:
+        return None
+    par_pos: Dict[int, Tuple[int, str]] = {}
+    for grade in RATING_GRADES:
+        for m in re.finditer(_motif_cran(grade), text):
+            deja = par_pos.get(m.start())
+            if deja is None or len(grade) > deja[0]:
+                par_pos[m.start()] = (len(grade), grade)
+    if not par_pos:
+        return None
+    crans = sorted((debut, grade) for debut, (_longueur, grade) in par_pos.items())
+    ancre = _fin_ancre_long_terme(text)
+    if ancre is not None:
+        for debut, grade in crans:
+            if debut >= ancre:
+                return grade
+        return None
+    return crans[0][1]
+
+
 # ── Extraire note depuis texte ───────────────────────────────────────────────
 def _extract_rating_info(text: str) -> Dict[str, Any]:
     result: Dict[str, Any] = {
@@ -647,12 +691,10 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
             result["agence"] = name
             break
 
-    # Cran le plus long d'abord (AA- avant AA, A+ avant A, BBB- avant BBB, B- avant B).
-    for grade in sorted(RATING_GRADES.keys(), key=len, reverse=True):
-        if re.search(_motif_cran(grade), text):
-            result["note"] = grade
-            result["score_notation"] = RATING_GRADES[grade]
-            break
+    note = _choisir_note(text)
+    if note:
+        result["note"] = note
+        result["score_notation"] = RATING_GRADES[note]
 
     # Perspective
     if re.search(r'[Ss]table', text):
