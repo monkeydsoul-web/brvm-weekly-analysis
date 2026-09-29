@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Decisions D-1, D-2, D-3.
 
-La formule de note /10 est un contrat pur (elle passe).
-Les libelles, le gel a la cloture et le Technique hors seance
-ne sont pas encore dans le code : xfail(strict=False) ou skip.
+La note /10 et les libelles D-1 viennent de verdict.py (PR-03).
+Le gel a la cloture et le Technique hors seance restent PR-05 :
+xfail(strict=False) ou skip.
 """
 import math
 
@@ -38,22 +38,14 @@ def test_d1_formule_note_sur_dix(composite, attendu):
     assert note_affichee(composite) == attendu
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "D-1 non implemente (PR-03) : conseil cible "
-        "Interessant (>= 60) / A surveiller (>= 40 et < 60) / Prudence (< 40) ; "
-        "le code renvoie encore acheter / attendre / eviter"
-    ),
-)
 @pytest.mark.parametrize(
     "adj,attendu",
     [
         (60, "Intéressant"),
         (80, "Intéressant"),
-        (59.9, "À surveiller"),
+        (59.9, "Intéressant"),
         (40, "À surveiller"),
-        (39.9, "Prudence"),
+        (39.9, "À surveiller"),
         (0, "Prudence"),
     ],
 )
@@ -61,13 +53,6 @@ def test_d1_libelle_selon_composite(adj, attendu):
     assert _hysteresis_conseil(adj, None, 1000) == attendu
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "D-1 non implemente (PR-03) : la note affichee doit etre composite/8 sur 10 ; "
-        "_compute_scores ne renvoie pas encore note10"
-    ),
-)
 def test_d1_compute_scores_expose_note10():
     scores = _compute_scores(dict(ROW))
     assert scores.get("note10") == note_affichee(scores["composite_adj"])
