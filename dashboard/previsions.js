@@ -15,7 +15,7 @@ async function renderPrevisionsPage() {
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
         ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique', false],
-        ['signaux','🤖 Recommandations IA','Recommandation Acheter / Conserver / Vendre pour chaque société', false],
+        ['signaux','🤖 Recommandations IA','Signal par société : Intéressant, Conserver, Alléger ou Prudence', false],
         ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC', true],
         ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable', true],
       ].map(([id,lbl,tip,hidden])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}"${hidden?' style="display:none"':''}>${lbl}</div>`).join('')}
@@ -170,7 +170,7 @@ function _prevDrawSignaux(el) {
 
   el.innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      ${[['', 'Tous', _prevSignaux.length], ['ACHETER','🟢 Acheter', counts['ACHETER']||0], ['CONSERVER','🟡 Conserver', counts['CONSERVER']||0], ['ALLÉGER','🔴 Alléger', counts['ALLÉGER']||0], ['ÉVITER','⚫ Éviter', counts['ÉVITER']||0]].map(([v,l,n]) =>
+      ${[['', 'Tous', _prevSignaux.length], ['ACHETER','🟢 Intéressant', counts['ACHETER']||0], ['CONSERVER','🟡 Conserver', counts['CONSERVER']||0], ['ALLÉGER','🔴 Alléger', counts['ALLÉGER']||0], ['ÉVITER','⚫ Prudence', counts['ÉVITER']||0]].map(([v,l,n]) =>
         `<button onclick="_sigSetFilter('${v}')" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${_sigFilter===v?'var(--blue)':'var(--bg3)'};color:${_sigFilter===v?'#fff':'var(--t2)'};cursor:pointer;font-size:11px">${l} <strong>${n}</strong></button>`
       ).join('')}
       <span style="margin-left:auto;font-size:10px;color:var(--t3);align-self:center">Mis à jour ${_prevSignaux[0]?.updated_at||'—'}</span>
@@ -191,7 +191,7 @@ function _prevDrawSignaux(el) {
               <td style="padding:8px;font-weight:700">${s.ticker}</td>
               <td style="padding:8px;font-size:10px;color:var(--t2)">${(s.sector||'').substring(0,14)}</td>
               <td style="padding:8px;text-align:center">
-                <span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${sigBg[s.signal]||''};color:${sigCol[s.signal]||'var(--t2)'}">${s.emoji} ${s.signal}</span>
+                <span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${sigBg[s.signal]||''};color:${sigCol[s.signal]||'var(--t2)'}">${s.emoji} ${s.signal==='ACHETER'?'Intéressant':(s.signal==='ÉVITER'||s.signal==='EVITER')?'Prudence':s.signal}</span>
               </td>
               <td style="padding:8px;text-align:right;font-weight:600">${(typeof note10txt==='function'?note10txt(s):v10fmt(s.score))}/10</td>
               <td style="padding:8px;text-align:right">
@@ -262,7 +262,7 @@ function _prevDrawBacktest(el) {
   if (yrs.length) {
     const maxRet = Math.max(...yrs.map(y => Math.abs(yearly[y].avg_return_acheter || 0)), 10);
     yearBars = `<div style="margin-top:10px">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📅 Rendement simulé "ACHETER" par année</div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📅 Rendement simulé Intéressant par année</div>
       ${yrs.map(y => {
         const v = yearly[y];
         const ret = v.avg_return_acheter ?? 0;
@@ -275,7 +275,7 @@ function _prevDrawBacktest(el) {
             <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}44;border-radius:3px"></div>
             <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 6px;font-size:9px;gap:8px">
               <span style="color:${col};font-weight:700">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>
-              <span style="color:var(--t3)">· ${v.n_acheter} ACHETER / ${v.n_tickers} · précision ${acc}%</span>
+              <span style="color:var(--t3)">· ${v.n_acheter} Intéressant / ${v.n_tickers} · précision ${acc}%</span>
               <span style="color:${(v.alpha||0)>=0?'var(--green)':'var(--red)'}">alpha ${(v.alpha||0)>=0?'+':''}${(v.alpha||0).toFixed(1)}%</span>
             </div>
           </div>
@@ -316,7 +316,7 @@ function _prevDrawBacktest(el) {
   el.innerHTML = `
     <div style="background:rgba(96,165,250,0.06);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:10px;color:var(--t3)">
       <strong style="color:var(--blue)">Modèle :</strong> ${bt.model_description || 'Composite 4 facteurs'}
-      &nbsp;·&nbsp; Seuil ACHETER : score ≥ ${(bt.seuil_acheter||0.65)*100}%
+      &nbsp;·&nbsp; Seuil Intéressant : score ≥ ${(bt.seuil_acheter||0.65)*100}%
       &nbsp;·&nbsp; Seuil ALLÉGER : score ≤ ${(bt.seuil_alleger||0.35)*100}%
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
@@ -340,12 +340,12 @@ function _prevDrawBacktest(el) {
       ${bt.best_year ? `<div style="background:rgba(74,222,128,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--green)">
         <div style="font-size:9px;color:var(--green);text-transform:uppercase;margin-bottom:2px">🏆 Meilleure année</div>
         <div style="font-size:18px;font-weight:700;color:var(--green)">${bt.best_year} · +${(bt.best_year_return||0).toFixed(1)}%</div>
-        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille ACHETER</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Intéressant</div>
       </div>` : ''}
       ${bt.worst_year ? `<div style="background:rgba(248,113,113,0.08);border-radius:8px;padding:10px;border-left:3px solid var(--red)">
         <div style="font-size:9px;color:var(--red);text-transform:uppercase;margin-bottom:2px">📉 Pire année</div>
         <div style="font-size:18px;font-weight:700;color:var(--red)">${bt.worst_year} · ${(bt.worst_year_return||0).toFixed(1)}%</div>
-        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille ACHETER</div>
+        <div style="font-size:9px;color:var(--t3)">Rendement moyen portefeuille Intéressant</div>
       </div>` : ''}
     </div>
     <div class="card" style="margin-bottom:12px">
@@ -363,11 +363,12 @@ function _prevDrawBacktest(el) {
           <tbody>${(bt.results||[]).map(r=>{
             const sp = r.score_prevision ?? 0;
             const sig = r.signal || (sp > 0.65 ? 'ACHETER' : sp < 0.35 ? 'ALLÉGER' : 'CONSERVER');
+            const sigTxt = sig==='ACHETER'?'Intéressant':(sig==='ÉVITER'||sig==='EVITER')?'Prudence':sig;
             const sigC = sig==='ACHETER'?'var(--green)':sig==='ALLÉGER'?'var(--red)':'var(--amber)';
             return `<tr style="border-bottom:1px solid var(--border)">
               <td style="padding:5px 6px;font-weight:700;cursor:pointer;color:var(--blue)" onclick="showStock('${r.ticker}')">${r.ticker}</td>
               <td style="padding:5px 6px;text-align:center;font-size:10px">${(sp*100).toFixed(0)}%</td>
-              <td style="padding:5px 6px;text-align:center"><span style="color:${sigC};font-size:9px;font-weight:600">${sig}</span></td>
+              <td style="padding:5px 6px;text-align:center"><span style="color:${sigC};font-size:9px;font-weight:600">${sigTxt}</span></td>
               <td style="padding:5px 6px;text-align:center;font-weight:600;color:${(r.actual_return||0)>=0?'var(--green)':'var(--red)'}">${(r.actual_return||0)>=0?'+':''}${(r.actual_return||0).toFixed(1)}%</td>
               <td style="padding:5px 6px;text-align:center">${r.correct?'✅':'❌'}</td>
             </tr>`;
@@ -392,7 +393,7 @@ function _prevRenderRapport() {
         <br>• Résumé du marché BRVM (KPIs, scores)
         <br>• Top 3 actions par score composite
         <br>• Les 3 portefeuilles prévisionnels recommandés
-        <br>• Signaux d'achat actifs avec confiance et raison
+        <br>• Signaux en cours, avec confiance et raison
       </p>
       <button onclick="_prevGenererRapport(this)" class="btn btn-g" style="font-size:13px;padding:10px 24px;width:100%">
         📥 Générer le rapport PDF

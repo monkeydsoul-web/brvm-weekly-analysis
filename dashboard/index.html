@@ -634,7 +634,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <div class="sb-grp-label">Découvrir</div>
     <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
 
-    <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux d'achat/vente par intelligence artificielle"><span>📡</span> <span class="ni-label">Signaux</span></div>
+    <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux des modèles"><span>📡</span> <span class="ni-label">Signaux</span></div>
     <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
     <div class="sb-grp-label expert-only">Analyse</div>
   </nav>
@@ -710,7 +710,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 
         <div style="margin-bottom:18px">
           <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">Comment investir concrètement ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 12px">Pour acheter ou vendre une action à la BRVM, on passe <strong>obligatoirement par une SGI</strong> (Société de Gestion et d'Intermédiation) — un courtier agréé par l'<strong>AMF-UMOA</strong>. Le marché étant régional, tu peux choisir une SGI dans <strong>n'importe quel pays de l'UEMOA</strong>, où que tu vives.</p>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 12px">Pour passer un ordre à la BRVM, on passe <strong>obligatoirement par une SGI</strong> (Société de Gestion et d'Intermédiation) — un courtier agréé par l'<strong>AMF-UMOA</strong>. Le marché étant régional, tu peux choisir une SGI dans <strong>n'importe quel pays de l'UEMOA</strong>, où que tu vives.</p>
 
           <details style="margin:0;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-1)">🏦 Voir les SGI par pays (courtiers agréés)</summary><div style="padding:8px 10px 4px">
           <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇨🇮 Côte d'Ivoire <span style="color:var(--text-3);font-size:11px">· principales</span></summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Atlantique Finance · Attijari Securities West Africa · BOA Capital Securities · Bridge Securities</div></details>
@@ -773,7 +773,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     </div>
     <div class="card">
       <div class="ct">Comment naît la note et le conseil</div>
-      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les 8 modèles produisent une note sur 10. Le repère en découle : 7,5/10 ou plus → Intéressant ; de 5/10 à moins de 7,5/10 → À surveiller ; en dessous de 5/10 → Prudence. Pour éviter qu'une société change de repère à chaque petite variation, un amortisseur (« hystérésis ») exige un mouvement franc avant de basculer. Si le prix d'une société est en quarantaine, aucun conseil n'est affiché.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les 8 modèles produisent une note sur 10. Le repère en découle : 7,5/10 ou plus → Intéressant ; de 5/10 à moins de 7,5/10 → À surveiller ; en dessous de 5/10 → Prudence. Pour qu'une société ne change pas de repère à chaque petite variation, un amortisseur (« hystérésis ») exige un mouvement franc avant de basculer. Si le prix d'une société est en quarantaine, aucun conseil n'est affiché.</p>
     </div>
     <div class="card">
       <div class="ct">Fréquences de mise à jour</div>
@@ -789,7 +789,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- CLASSEMENT -->
 <div class="page" id="page-rank">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Chaque société classée reçoit une note de 1 à 10. Une note ≥ 7,5 = excellente opportunité. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
+  <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Chaque société classée reçoit une note de 1 à 10. Une note ≥ 7,5 = Intéressant, de 5 à moins de 7,5 = À surveiller, en dessous de 5 = Prudence. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Classement complet</h2><p class="page-sub" id="rank-subtitle">Sociétés classées par score composite sur 8 modèles de valorisation</p></div>
     <div style="display:flex;gap:8px">
@@ -799,10 +799,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <option value="pe_ref">Trier : P/E</option>
       </select>
       <select id="fVerdict" onchange="renderRankLive()">
-        <option value="">Tous les conseils</option>
-        <option value="achet">Acheter</option>
-        <option value="neutr">Neutre</option>
-        <option value="vend">Vendre</option>
+        <option value="">Toutes les tendances</option>
+        <option value="achet">Tendance positive</option>
+        <option value="neutr">Tendance neutre</option>
+        <option value="vend">Tendance négative</option>
       </select>
       <button id="fFav" onclick="toggleFavFilter()" style="height:auto;padding:6px 13px;border-radius:var(--r,6px);border:1px solid var(--border-1,var(--border));background:var(--bg2,var(--bg-elevated));color:var(--t2);font-size:13px;cursor:pointer">★ Mes favoris</button>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
@@ -815,8 +815,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
       · Cliquez sur une société pour voir sa fiche complète<br>
       · Utilisez "Trier par" pour classer les actions par dividende ou P/E<br>
-      · La Note /10 combine 8 critères financiers — au-dessus de 7 = bonne opportunité<br>
-      · Conseil "✅ Acheter" = signal positif · "⚠️ Éviter" = signal négatif
+      · La Note /10 combine 8 critères financiers — ≥ 7,5 = Intéressant, ≥ 5 et &lt; 7,5 = À surveiller, &lt; 5 = Prudence<br>
+      · Le conseil reprend ces trois repères
     </div>
   </details>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
@@ -834,7 +834,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="tt" data-tt="Variation de cours depuis la clôture d'hier">+/- aujourd'hui</th>
       <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
-      <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
+      <th class="tt" data-tt="Conseil lié à la note sur 10 · ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Conseil</th>
       <th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th>
       <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col expert-only" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
@@ -867,7 +867,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
         <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
           · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
-          · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée (opportunité d'achat potentielle)<br>
+          · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée<br>
           · "🟢 Bonne affaire" = potentiel ≥ 30% · "👀 À surveiller" = potentiel modéré · "⚖️ Prix correct" = juste prix
         </div>
       </details>
@@ -981,7 +981,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   <div class="g2" style="margin-bottom:16px">
     <div class="card" style="margin-bottom:0"><div class="ct">Distribution des scores /10</div>
       <div id="mkt-dist" style="width:100%;height:170px"></div>
-      <p style="font-size:10px;color:var(--t3);margin-top:6px">Répartition des 47 sociétés par score · vert = achat possible · rouge = éviter</p></div>
+      <p style="font-size:10px;color:var(--t3);margin-top:6px">Répartition des 47 sociétés par score · vert = note haute · rouge = note basse</p></div>
     <div class="card" style="margin-bottom:0"><div class="ct">Répartition sectorielle</div>
       <div id="mkt-sect" style="width:100%;height:170px"></div></div>
   </div>
@@ -1057,7 +1057,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="font-size:10px;color:var(--t3)">Inflation UEMOA estimée</div>
         <div style="font-size:28px;font-weight:700;color:var(--amber)">~1,4%</div>
         <div style="font-size:10px;color:var(--t2)">Nettement sous la cible 3% BCEAO</div>
-        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5">Quasi nulle en 2025 (déc. : -0,2%), remontée attendue en 2026 · une inflation basse protège le pouvoir d'achat</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5">Quasi nulle en 2025 (déc. : -0,2%), remontée attendue en 2026 · une inflation basse protège le revenu réel</div>
       </div>
       <div class="card" style="margin-bottom:0;text-align:center">
         <div style="font-size:10px;color:var(--t3)" title="Performance depuis le 1er janvier de l'année · YTD = Year To Date">BRVM-COMPOSITE YTD</div>
@@ -1326,7 +1326,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
       · Filtrez les 47 sociétés BRVM selon vos critères (ex : dividende ≥ 4%, note ≥ 7,5), ou cliquez sur une stratégie pré-configurée ci-dessous<br>
       · Laissez un filtre vide pour ne pas l'appliquer<br>
-      · Une Note ≥ 6/10 avec un Conseil "✅ Acheter" est un bon point de départ<br>
+      · Une note ≥ 7,5 (Intéressant) est un bon point de départ<br>
       · Le graphique Scatter montre les sociétés filtrées : zone idéale = P/E&lt;15 et Div&gt;5%
     </div>
   </details>
@@ -1335,7 +1335,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">⚡ Stratégies pré-configurées — cliquez pour appliquer les filtres automatiquement :</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
       <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
-        <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Idéal pour acheter à bon prix">💎 Value</button>
+        <button class="chat-chip tt" onclick="screenerPreset('value')" data-tt="Actions sous-évaluées façon Graham · Score≥5.5/10, P/E≤15, P/B≤1.5 · 💡 Cours bas au regard des bénéfices">💎 Value</button>
         <span style="font-size:9px;color:var(--t3);text-align:center">P/E &lt; 15 · P/B &lt; 1.5</span>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
@@ -1367,7 +1367,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">P/E max</label>
         <input id="sc-pe" type="number" placeholder="ex: 15" min="0" oninput="runScreener()"
-          title="Ratio cours / bénéfice maximum · 💡 Graham recommande ≤ 15 pour éviter de surpayer"
+          title="Ratio cours / bénéfice maximum · 💡 Graham recommande ≤ 15 pour ne pas surpayer"
           style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
         <div class="help-text">Graham : ≤ 15 · Croissance : ≤ 25</div>
       </div>
@@ -1403,7 +1403,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="change_pct" onclick="screenerSortBy('change_pct')" title="Variation de cours depuis la clôture d'hier">Var. j.<span class="sort-ind"></span></th>
-        <th style="padding:8px 12px;text-align:center" title="Conseil derive de la Note /10 : Acheter si 7,5 ou plus - Attendre entre 5 et 7,5 - Eviter sous 5 - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
+        <th style="padding:8px 12px;text-align:center" title="Conseil : ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Conseil</th>
       </tr></thead>
       <tbody id="screener-table"></tbody>
     </table>
@@ -1490,8 +1490,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- SIGNAUX (Prévisions IA + Score personnalisé) -->
 <div class="page" id="page-signals">
   <button class="brvm-back-btn" onclick="navBack()">← Retour</button>
-  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux d'achat/vente basés sur des modèles d'IA.  pour accéder à l'analyse complète.</div>
-  <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux d'achat/vente</p></div>
+  <div class="beginner-banner">🌱 Cette page est plutôt pour les utilisateurs expérimentés. Elle affiche les signaux des modèles.  pour accéder à l'analyse complète.</div>
+  <div class="ph"><div><h2>📡 Signaux</h2><p class="page-sub">Prévisions IA · score personnalisé · signaux des modèles</p></div>
     <span style="font-size:11px;color:var(--t2)">Basé sur scores /10 + historique <abbr data-tip="Bulletin Officiel de la Cote · publication quotidienne des cours officiels" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">BOC</abbr> 30j</span>
   </div>
   <div class="tab-bar">
@@ -1502,9 +1502,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
       <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--text-2);user-select:none;list-style:none">💡 Comment utiliser cette page ?</summary>
       <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
-        · ✅ Acheter = les modèles détectent un signal haussier<br>
-        · ⏳ Attendre = signaux mixtes, prudence conseillée<br>
-        · ⚠️ Éviter = valorisation trop élevée ou fondamentaux faibles<br>
+        · ✅ Intéressant = les modèles détectent un signal haussier<br>
+        · ⏳ À surveiller = signaux mixtes<br>
+        · ⚠️ Prudence = valorisation trop élevée ou fondamentaux faibles<br>
         · Ces prévisions sont indicatives — pas de conseil en investissement
       </div>
     </details>
@@ -1549,7 +1549,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
           <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
           <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
-            <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (opportunité d'achat) · RSI &gt; 70 = surachat (prudence).<br>
+            <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (cours bas) · RSI &gt; 70 = zone haute (prudence).<br>
             <strong>Momentum</strong> — compare le cours actuel au cours d'il y a 20 jours. Positif = tendance haussière confirmée.<br>
             <strong>Moyenne mobile 20j</strong> — lisse les variations pour détecter la tendance de fond.<br>
             <strong>Volume</strong> — un cours qui monte avec du volume élevé est plus fiable.<br>
@@ -1803,7 +1803,7 @@ window.TERMS = {
   'AGO': {short:'Assemblée Générale Ordinaire',long:'AG annuelle de routine (résultats, dividendes, etc.).'},
   'AGE': {short:'Assemblée Générale Extraordinaire',long:'AG exceptionnelle pour décisions importantes (fusion, etc.).'},
   'OPV': {short:'Offre Publique de Vente',long:'Mise en vente publique d\'actions, généralement pour une introduction en bourse.'},
-  'OPF': {short:'Offre Publique de Retrait',long:'Rachat des actions par la société pour les retirer de la cote.'},
+  'OPF': {short:'Offre Publique de Retrait',long:'La société reprend ses titres pour les retirer de la cote.'},
   'PDG': {short:'Président-Directeur Général',long:'Plus haut dirigeant de la société. Il préside le conseil d\'administration ET dirige la société.'},
   'AG':  {short:'Assemblée Générale',long:'Réunion annuelle des actionnaires où sont votés les dividendes, les comptes et les grandes décisions.'},
   'Haussier': {short:'Marché qui monte',long:'La majorité des actions progressent aujourd\'hui. Bon climat général pour investir.'},
@@ -1817,14 +1817,14 @@ window.TERMS = {
   'T4': {short:'4e trimestre (oct–déc)',long:'Résultats d\'octobre à décembre. Inclus dans les résultats annuels.'},
   'S1': {short:'1er semestre (jan–juin)',long:'Résultats des 6 premiers mois de l\'année.'},
   'S2': {short:'2e semestre (juil–déc)',long:'Résultats des 6 derniers mois de l\'année.'},
-  'Sous-évaluée': {short:'Prix en bourse < valeur estimée',long:'Le cours actuel est inférieur à ce que la société "devrait" valoir selon les modèles financiers. Opportunité potentielle d\'achat.'},
-  'Verdict': {short:'Recommandation globale de l\'IA',long:'Synthèse des 8 modèles : ✅ Acheter (score ≥ 7,5), ⏳ Attendre (5–7,5), ⚠️ Éviter (< 5).'},
+  'Sous-évaluée': {short:'Prix en bourse < valeur estimée',long:'Le cours actuel est en dessous de la valeur estimée par les modèles.'},
+  'Verdict': {short:'Conseil lié à la note sur 10',long:'7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.'},
 };
 
 window.MODE_LABELS = {
-  'POSITIF':        {beginner:'✅ Bonne action',   expert:'✅ POSITIF'},
-  'NEUTRE':         {beginner:'⏳ À surveiller',   expert:'⏳ NEUTRE'},
-  'NEGATIF':        {beginner:'⚠️ À éviter',       expert:'⚠️ NÉGATIF'},
+  'POSITIF':        {beginner:'Tendance positive', expert:'✅ POSITIF'},
+  'NEUTRE':         {beginner:'Tendance neutre',   expert:'⏳ NEUTRE'},
+  'NEGATIF':        {beginner:'Tendance négative', expert:'⚠️ NÉGATIF'},
   'Sous-évaluée':   {beginner:'💎 Prix attractif', expert:'Sous-évaluée'},
   'Haussier':       {beginner:'🟢 Marché qui monte',expert:'🟢 Haussier'},
   'Baissier':       {beginner:'🔴 Marché qui baisse',expert:'🔴 Baissier'},
@@ -2430,7 +2430,7 @@ function showTooltip(evt,text){
 }
 function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
 
-function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
+function fmtVerdict(v){return v==='POSITIF'?'Tendance positive':v==='NEGATIF'?'Tendance négative':v==='NEUTRE'?'Tendance neutre':v||'—';}
 function conseilAffiche(row){
   var src=(row&&typeof row==='object')?row:{conseil:row};
   var lib=src.conseil_libelle;
@@ -2680,7 +2680,7 @@ async function renderFluxCapitaux(targetEl) {
 
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
     <div>
-      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (achat)</div>
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (entrées)</div>
       ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:12px">Aucun afflux</p>'}
     </div>
     <div>
@@ -2959,7 +2959,7 @@ function _sparklineDots(hist30, w, h){
   // D.14b : plus de label de prix incrusté (redondant avec la colonne PRIX) -- la courbe utilise toute la largeur
   const PAD_Y=3, PAD_X=3;
   const W=w-2*PAD_X;
-  const H_inner=h-2*PAD_Y; // déclaré AVANT toY pour éviter TDZ ReferenceError
+  const H_inner=h-2*PAD_Y; // déclaré AVANT toY, sinon TDZ ReferenceError
   const mn=Math.min(...vals), mx=Math.max(...vals), range=mx-mn||1;
   const toX=i=>+(PAD_X+i/(vals.length-1)*W).toFixed(1);
   const toY=v=>+(H_inner-(v-mn)/range*H_inner).toFixed(1);
@@ -5246,9 +5246,9 @@ const _glossTerms = [
   { term:'Capitalisation boursière', def:'La valeur totale de toutes les actions d\'une société sur le marché. Formule : cours × nombre d\'actions. Permet de classer les sociétés par taille.', ex:'SGBC : cours 12 000 XOF × 10 millions d\'actions = capitalisation de 120 milliards XOF (~183 millions €).' },
   { term:'DCF (Discounted Cash Flows)', def:'Valeur actualisée des flux de trésorerie futurs. Principe : 1 000 XOF dans 5 ans vaut moins que 1 000 XOF aujourd\'hui (inflation, risque). Le DCF calcule ce que vaut l\'entreprise basé sur ses bénéfices futurs projetés.', ex:'Si le DCF calcule une valeur de 10 000 XOF pour une action qui cote 7 000 XOF → potentiel de hausse de +43%.' },
   { term:'DDM (Dividend Discount Model)', def:'Modèle Gordon-Shapiro : valeur d\'une action = dividende futur ÷ (taux de rendement requis − taux de croissance). Pertinent pour les sociétés versant des dividendes réguliers et croissants.', ex:'SIBC verse 330 XOF/an. Avec un taux requis de 10% et une croissance de 3% → valeur DDM = 330 ÷ (10%−3%) = 4 714 XOF.' },
-  { term:'Dividende', def:'Part des bénéfices annuels qu\'une société distribue à ses actionnaires. Versé généralement une fois par an. Le rendement = dividende ÷ cours actuel. Un dividende stable et croissant est signe de bonne santé financière.', ex:'Vous possédez 100 actions SIBC à 7 300 XOF. Dividende = 330 XOF/action → vous recevez 33 000 XOF cette année sans vendre.' },
+  { term:'Dividende', def:'Part des bénéfices annuels qu\'une société distribue à ses actionnaires. Versé généralement une fois par an. Le rendement = dividende ÷ cours actuel. Un dividende stable et croissant est signe de bonne santé financière.', ex:'Vous possédez 100 actions SIBC à 7 300 XOF. Dividende = 330 XOF/action → vous recevez 33 000 XOF cette année sans céder les actions.' },
   { term:'EPV (Earnings Power Value)', def:'Méthode Greenwald : valeur de la société si elle ne croît plus jamais. C\'est le scénario pessimiste. Si le cours est encore sous l\'EPV, l\'action est très bon marché même sans croissance future.', ex:'Si EPV = 5 000 XOF et cours = 4 000 XOF → même sans croissance future, l\'action semble sous-évaluée de 20%.' },
-  { term:'Ex-date (Ex-dividende)', def:'Date à partir de laquelle acheter l\'action ne donne plus droit au prochain dividende. Pour toucher le dividende, il faut posséder l\'action AVANT cette date.', ex:'Ex-date CABC : 15 juin. Si vous achetez le 14 juin → vous touchez le dividende. Si vous achetez le 16 juin → vous le ratez pour cette année.' },
+  { term:'Ex-date (Ex-dividende)', def:'Date à partir de laquelle un nouvel ordre ne donne plus droit au prochain dividende. Pour toucher le dividende, il faut posséder l\'action AVANT cette date.', ex:'Ex-date CABC : 15 juin. Si vous achetez le 14 juin → vous touchez le dividende. Si vous achetez le 16 juin → vous le ratez pour cette année.' },
   { term:'Frontière efficiente', def:'Concept de Markowitz : ensemble des portefeuilles offrant le meilleur rendement possible pour chaque niveau de risque. Aucun portefeuille ne peut offrir plus de rendement pour le même risque.', ex:'Un portefeuille sur la frontière avec 12% de rendement et 8% de volatilité est "efficient" — impossible de faire mieux à risque égal.' },
   { term:'Graham (Score)', def:'Critères de Benjamin Graham, le père de l\'analyse fondamentale : P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, stabilité des bénéfices. La "formule de Graham" = √(22.5 × BNA × BVPA).', ex:'Graham score SIBC = 10/10 car BNA élevé, P/E très faible (1.3×), P/B < 1.5 → tous les critères sont respectés.' },
   { term:'P/B (Price-to-Book)', def:'Cours ÷ Valeur comptable par action (BVPA). Mesure si l\'action est chère par rapport à ce que possède réellement la société (actifs nets). Graham recommande P/B ≤ 1.5.', ex:'P/B = 0.8 signifie que vous achetez 1 XOF d\'actifs nets pour 0.80 XOF. Vous payez moins que la valeur des actifs → opportunité potentielle.' },
@@ -5326,12 +5326,12 @@ const _helpContent = {
   rank: {
     title: 'Classement',
     sections: [
-      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /10 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. Au-dessus de 7.5/10 = excellente opportunité potentielle.' },
+      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /10 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. 7,5/10 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.' },
       { h: '📊 Les 8 modèles (colonnes G à Tech)', p: '• G = Graham : valeur intrinsèque classique\n• DCF = flux trésorerie actualisés\n• DDM = valorisation par les dividendes\n• EPV = pouvoir de gain normalisé\n• BUF = critères Warren Buffett\n• Rev = taux de croissance implicite\n• Rel = comparaison sectorielle\n• Tech = tendance technique' },
       { h: '📈 Sparklines 30 jours', p: 'Le mini-graphique dans la colonne "30j" montre l\'évolution du cours sur les 30 derniers jours. Ligne verte = hausse globale sur la période, rouge = baisse.' },
-      { h: '🔍 Filtres en haut', p: 'Filtrez par secteur (Banque, Industrie…), par critère de tri (Score, Dividende, ROE, P/E), ou par verdict IA (POSITIF / NEUTRE / NÉGATIF).' },
+      { h: '🔍 Filtres en haut', p: 'Filtrez par secteur (Banque, Industrie…), par critère de tri (Score, Dividende, ROE, P/E), ou par tendance du rapport annuel (positive / neutre / négative).' },
       { tip: '💡 Que faire ? Cliquez sur une ligne pour voir la fiche complète. Cochez les cases à gauche du ticker pour comparer plusieurs sociétés côte-à-côte (bouton "⚖️ Comparer" en bas de la barre).' },
-      { ex: '📌 Exemple : Filtrez "Verdict = POSITIF" + tri "Score /10" → vous verrez les meilleures sociétés validées par l\'IA en haut.' },
+      { ex: '📌 Exemple : Filtrez "Tendance positive" + tri "Score /10" → les sociétés au rapport annuel positif arrivent en haut.' },
     ]
   },
   div: {
@@ -5375,7 +5375,7 @@ const _helpContent = {
       { ex: '📌 Exemple : Score ≥ 60 + ROE ≥ 15% → vous obtenez les sociétés à la fois excellentes et très rentables. Exportez en CSV pour analyser dans Excel.' },
       { h: '⚖️ Étape 2 — Composer son portefeuille', p: 'Une fois vos actions repérées, l\'Étape 2 vous aide à les combiner intelligemment pour réduire le risque sans sacrifier le rendement.' },
       { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
-      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = à éviter.' },
+      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = médiocre.' },
       { h: '🛡️ Min Volatilité (pour les prudents)', p: 'Trouve le portefeuille avec les fluctuations les plus faibles. Idéal si vous êtes nerveux face aux variations de prix.' },
       { h: '🔗 Matrice de corrélation', p: 'Montre à quel point les actions bougent ensemble. Vert = très corrélées (bougent pareil), Rouge = inversement corrélées (se compensent). Pour diversifier, cherchez des corrélations faibles (gris).' },
       { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
@@ -5385,7 +5385,7 @@ const _helpContent = {
     title: 'Analyse & Optimisation',
     sections: [
       { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
-      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = à éviter.' },
+      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = médiocre.' },
       { h: '🛡️ Min Volatilité (pour les prudents)', p: 'Trouve le portefeuille avec les fluctuations les plus faibles. Idéal si vous êtes nerveux face aux variations de prix.' },
       { h: '🔗 Matrice de corrélation', p: 'Montre à quel point les actions bougent ensemble. Vert = très corrélées (bougent pareil), Rouge = inversement corrélées (se compensent). Pour diversifier, cherchez des corrélations faibles (gris).' },
       { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
@@ -5402,8 +5402,8 @@ const _helpContent = {
   port: {
     title: 'Portefeuille',
     sections: [
-      { h: '💼 Suivez vos investissements', p: 'Entrez vos actions avec le prix d\'achat pour suivre votre performance en temps réel. Les données de cours sont mises à jour automatiquement depuis la BRVM.' },
-      { h: '📊 P&L (Profit & Loss)', p: 'P&L = gain ou perte sur chaque position. Vert = vous êtes en gain par rapport à votre prix d\'achat. Rouge = vous êtes en perte actuellement.' },
+      { h: '💼 Suivez vos investissements', p: 'Entrez vos actions avec le prix payé pour suivre votre performance en temps réel. Les données de cours sont mises à jour automatiquement depuis la BRVM.' },
+      { h: '📊 P&L (Profit & Loss)', p: 'P&L = gain ou perte sur chaque position. Vert = vous êtes en gain par rapport à votre prix payé. Rouge = vous êtes en perte actuellement.' },
       { tip: '💡 Que faire ? Ajoutez vos actions avec le prix et la quantité achetés. Le tableau calcule automatiquement votre performance et votre poids sectoriel.' },
     ]
   },

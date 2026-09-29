@@ -46,7 +46,7 @@ function _renderLiveScore(ticker, d){
   if(!el)return;
   const sc=d.composite_adj||0;
   const col=sc>=57?'var(--green)':sc>=40?'var(--amber)':sc>=23?'var(--orange,#f97316)':'var(--red)';
-  const tier=sc>=57?'FORT':sc>=40?'MODERE':sc>=23?'FAIBLE':'EVITER';
+  const tier=sc>=57?'FORT':sc>=40?'MODERE':sc>=23?'FAIBLE':'Prudence';
   const chg=d.live_change_pct||0;
   const chgCol=chg>=0?'var(--green)':'var(--red)';
   const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';

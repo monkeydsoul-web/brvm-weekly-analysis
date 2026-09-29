@@ -116,6 +116,43 @@ def test_methodo_glossaire_fiche_et_partage():
     signaux = _entre(HTML, "function renderSignauxParSociete", "function toggleRankAdv")
     assert "≥7.5 excellent" not in signaux
     assert "≥ 7,5 = Intéressant" in signaux
+
+
+_MOTS_ORDRE = re.compile(r"acheter|achat|vendre|éviter|eviter|attendre", re.I)
+
+
+def _sans_ordre(src):
+    """Texte visible, sans commentaires ni valeurs de code a conserver."""
+    src = re.sub(r"<!--.*?-->", "", src, flags=re.S)
+    src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    src = re.sub(r"(?m)^\s*//.*$", "", src)
+    for debut, fin in (
+        ("function conseilAffiche", "function showChangelog"),
+        ("function _genVerdict", "function _shareStockText"),
+    ):
+        i = src.index(debut)
+        j = src.index(fin, i)
+        src = src[:i] + src[j:]
+    return src
+
+
+def test_pas_de_mots_achat_ou_vente_visibles():
+    visible = _sans_ordre(HTML)
+    trouves = []
+    for i, ligne in enumerate(visible.splitlines(), 1):
+        if _MOTS_ORDRE.search(ligne):
+            trouves.append("%s: %s" % (i, ligne.strip()[:160]))
+    assert not trouves, "\n".join(trouves)
+    assert 'value="achet"' in HTML
+    assert 'value="neutr"' in HTML
+    assert 'value="vend"' in HTML
+    assert ">Acheter<" not in HTML
+    assert ">Vendre<" not in HTML
+    fmt = _entre(HTML, "function fmtVerdict", "function conseilAffiche")
+    assert "Tendance positive" in fmt
+    assert "Tendance neutre" in fmt
+    assert "Tendance négative" in fmt
+    assert _MOTS_ORDRE.search(fmt) is None
     for rel in ("dashboard/compare_analysis.js", "dashboard/backtest.js", "dashboard/markowitz.js"):
         src = (ROOT / rel).read_text(encoding="utf-8")
         assert "note10txt" in src
