@@ -101,37 +101,16 @@ function checkSmartAlerts() {
       }
     }
 
-    // ── Alerte cours dépasse cible Graham ─────────────────────────────────
-    if (price > 0 && s.eps && s.eps > 0) {
-      // Cible Graham approx : √(22.5 × EPS × BVPA) — si BVPA dispo
-      const bvpa = s.bvpa || 0;
-      if (bvpa > 0) {
-        const grahamTarget = Math.round(Math.sqrt(22.5 * s.eps * bvpa));
-        if (price > grahamTarget * 1.05) { // 5% de marge
-          const key = `graham-${ticker}-${Math.round(price/100)}`;
-          if (!existingKeys.has(key)) {
-            newAlerts.push({
-              key, ticker, type: 'graham_over', seen: false,
-              msg: `⚠️ ${ticker} (${price.toLocaleString('fr-FR')} XOF) dépasse la cible Graham (${grahamTarget.toLocaleString('fr-FR')} XOF) de +${Math.round((price/grahamTarget-1)*100)}%`,
-              color: 'var(--red)',
-            });
-          }
-        }
-      }
-    }
-
-    // ── Alerte cours dépasse EPV ───────────────────────────────────────────
-    if (price > 0 && s.eps && s.eps > 0 && s.pe_ref && s.pe_ref > 0) {
-      const epv = Math.round((s.eps / 0.10)); // EPV = EPS normalisé / WACC
-      if (price > epv * 1.10) { // 10% de marge
-        const key = `epv-${ticker}-${Math.round(price/100)}`;
-        if (!existingKeys.has(key)) {
-          newAlerts.push({
-            key, ticker, type: 'epv_over', seen: false,
-            msg: `⚠️ ${ticker} (${price.toLocaleString('fr-FR')}) au-dessus EPV (${epv.toLocaleString('fr-FR')} XOF)`,
-            color: 'var(--red)',
-          });
-        }
+    // ── Cours au-dessus du prix cible unique (même chiffre que l'écran) ──
+    if (price > 0 && s.prix_cible > 0 && s.libelle_valeur === 'Trop cher') {
+      const key = `cible-${ticker}-${Math.round(price/100)}`;
+      if (!existingKeys.has(key)) {
+        const ecartTxt = (typeof s.ecart_pct === 'number') ? ` (${s.ecart_pct} %)` : '';
+        newAlerts.push({
+          key, ticker, type: 'cible_cher', seen: false,
+          msg: `⚠️ ${ticker} (${price.toLocaleString('fr-FR')} XOF) est au-dessus du prix cible (${s.prix_cible.toLocaleString('fr-FR')} XOF)${ecartTxt}`,
+          color: 'var(--red)',
+        });
       }
     }
   });

@@ -110,63 +110,38 @@ def simulate_dividends(investment_xof: float, years: int = 5, reinvest: bool = T
 
 # ── Price targets & forecasts ──────────────────────────────────────────────
 def get_price_targets() -> list:
+    """Même prix, même écart, même libellé que le classement (prix_cible.py)."""
+    from prix_cible import estimer_prix_cible
+
     scores = _load_scores()
     targets = []
     for s in scores:
         price = s.get("price")
-        # Compat: live_ranking.json → "eps"/"bna", scores_*.json → "eps_est"
-        eps = s.get("eps_est") or s.get("eps") or s.get("bna")
-        # Compat: live_ranking.json → "bvpa", scores_*.json → "book_value_per_share"
-        bv = s.get("book_value_per_share") or s.get("bvpa")
-        roe = s.get("roe", 0)
-        div_is_exceptional = bool(
-            s.get("div_is_exceptional") or s.get("div_flag") == "exceptionnel_non_recurrent"
-        )
-        if not price: continue
-        epv_target = round(eps / 0.10) if eps else None
-        graham_target = round((22.5 * eps * bv) ** 0.5) if eps and bv else None
-        warranted_pb = roe / 10.0 if roe else None
-        pb_target = round(bv * warranted_pb) if bv and warranted_pb else None
-        if div_is_exceptional:
-            avg_target = None
-            upside = None
-            verdict = "exceptional_div"
-            n_models = 0
-            target_unreliable = False
-        else:
-            available = [v for v in [epv_target, graham_target, pb_target] if v]
-            n_models = len(available)
-            avg_target = round(sum(available) / n_models) if available else None
-            upside = round((avg_target / price - 1) * 100, 1) if avg_target and price else None
-            # Sanity check: cible aberrante si écart >80%, ou >50% sur modèle unique
-            target_unreliable = bool(
-                upside is not None and (
-                    abs(upside) > 80 or
-                    (n_models == 1 and abs(upside) > 50)
-                )
+        if not price:
+            continue
+        estimation = estimer_prix_cible(s)
+        if estimation["incertain"]:
+            logger.warning(
+                "[price_targets] %s: upside=%.1f%% (%d modèle(s)) — cible marquée incertaine",
+                s.get("ticker", "?"), estimation["ecart_pct"], estimation["n_modeles"],
             )
-            if target_unreliable:
-                verdict = "incertain"
-                logger.warning(
-                    "[price_targets] %s: upside=%.1f%% (%d modèle(s)) — cible marquée incertaine",
-                    s.get("ticker", "?"), upside, n_models,
-                )
-            else:
-                verdict = ("Fort potentiel" if (upside or 0) > 30
-                           else "Potentiel modéré" if (upside or 0) > 10
-                           else "Proche valeur juste")
         targets.append({
             "ticker": s["ticker"], "name": s.get("name", ""),
             "current_price": price, "score": nombre_note(s.get("composite_adj")),
-            "epv_target": epv_target, "graham_target": graham_target,
-            "pb_target": pb_target, "avg_target": avg_target,
-            "upside_pct": upside,
-            "verdict": verdict,
-            "n_models": n_models,
-            "target_unreliable": target_unreliable,
-            "div_is_exceptional": div_is_exceptional,
+            "epv_target": estimation["epv"],
+            "graham_target": estimation["graham"],
+            "pb_target": estimation["pb"],
+            "avg_target": estimation["prix_cible"],
+            "upside_pct": estimation["ecart_pct"],
+            "verdict": estimation["libelle"],
+            "n_models": estimation["n_modeles"],
+            "target_unreliable": estimation["incertain"],
+            "div_is_exceptional": estimation["dividende_exceptionnel"],
             "div_confidence": s.get("div_confidence", "inconnue"),
             "div_flag": s.get("div_flag", ""),
+            "prix_cible": estimation["prix_cible"],
+            "ecart_pct": estimation["ecart_pct"],
+            "libelle_valeur": estimation["libelle"],
         })
     targets.sort(key=lambda x: x.get("upside_pct") or -999, reverse=True)
     return targets

@@ -868,7 +868,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
           · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
           · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée<br>
-          · "🟢 Bonne affaire" = potentiel ≥ 30% · "👀 À surveiller" = potentiel modéré · "⚖️ Prix correct" = juste prix
+          · "🟢 Bonne affaire" = écart &gt; 30 % · "👀 À surveiller" = écart de plus de 10 % jusqu'à 30 % · "⚖️ Prix correct" = écart entre −10 % et +10 % · "⚠️ Trop cher" = cours plus de 10 % au-dessus du prix cible
         </div>
       </details>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap">
@@ -877,7 +877,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </label>
     </div>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Moyenne Graham, EPV et P/B · le même chiffre sur toutes les pages">Prix juste estimé</th><th data-tip="Écart entre le cours et ce prix cible · le libellé de la dernière colonne lit ce même écart">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Lit l'écart de la colonne Opportunité · &gt; 30 % Bonne affaire · &gt; 10 % À surveiller · de −10 % à +10 % Prix correct · &lt; −10 % Trop cher">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -1399,7 +1399,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <th style="padding:8px 12px;text-align:left">Ticker</th>
         <th style="padding:8px 12px;text-align:left">Société</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Score /10<span class="sort-ind"> ↓</span></th>
-        <th style="padding:8px 12px;text-align:right" title="Prix cible estimé selon Graham ou EPV · vert = cours sous la cible">Cible</th>
+        <th style="padding:8px 12px;text-align:right" title="Même prix cible que la page Valorisation · vert = cours sous la cible">Cible</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="change_pct" onclick="screenerSortBy('change_pct')" title="Variation de cours depuis la clôture d'hier">Var. j.<span class="sort-ind"></span></th>
@@ -3230,6 +3230,15 @@ async function renderDiv(){
 }
 
 // ── Prix cibles ────────────────────────────────────────────────────────────
+function fmtLibelleValeur(v){
+  if(v==='Fort potentiel') return '✅ Bonne affaire';
+  if(v==='Potentiel modéré') return '👀 À surveiller';
+  if(v==='Proche valeur juste') return '⚖️ Prix correct';
+  if(v==='Trop cher') return '⚠️ Trop cher';
+  if(v==='exceptional_div') return '🔶 Div. exceptionnel';
+  if(v==='incertain') return '⚠️ Cible à vérifier';
+  return '—';
+}
 async function renderTargets(){
   const [targets, ratings] = await Promise.all([
     fetch('/api/targets').then(r=>r.json()),
@@ -3257,11 +3266,10 @@ async function renderTargets(){
 
   document.getElementById('targetsTable').innerHTML=rows.map(t=>{
     const isUncertain = t.verdict==='incertain';
-    const up=t.upside_pct||0;
-    const cls=isUncertain?'':up>=30?'target-up':up<0?'target-dn':'';
-    const vc=isUncertain?'var(--t3)':up>=30?'var(--green)':up<0?'var(--red)':'var(--amber)';
-    const fmtAvis=(v)=>v==='Fort potentiel'?'✅ Bonne affaire':v==='Potentiel modéré'?'👀 À surveiller':v==='Proche valeur juste'?'⚖️ Prix correct':v==='exceptional_div'?'🔶 Div. exceptionnel':v==='incertain'?'⚠️ Cible à vérifier':v?'⚠️ Trop cher':'—';
-    const fmtOpp=isUncertain?`<span style="color:var(--t3)">${up>=0?'+':''}${up.toFixed(1)}%</span>`:up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`;
+    const up = (t.upside_pct==null) ? null : t.upside_pct;
+    const cls=isUncertain?'':(up!=null&&up>=30)?'target-up':(up!=null&&up<0)?'target-dn':'';
+    const vc=isUncertain?'var(--t3)':(up!=null&&up>=30)?'var(--green)':(up!=null&&up<0)?'var(--red)':'var(--amber)';
+    const fmtOpp=up==null?'—':(isUncertain?`<span style="color:var(--t3)">${up>=0?'+':''}${up.toFixed(1)}%</span>`:up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`);
     const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
     const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
     const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
@@ -3271,10 +3279,10 @@ async function renderTargets(){
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
-      <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
+      <td class="${cls}" style="font-size:11px">${fmtOpp}</td>
       <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
-      <td style="font-size:11px"${uncTip}>${fmtAvis(t.verdict)}${confBadge}</td>
+      <td style="font-size:11px"${uncTip}>${fmtLibelleValeur(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
 }
 
@@ -3999,6 +4007,7 @@ async function showStock(ticker){
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
+      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${s.ecart_pct>0?'+':''}${s.ecart_pct}%)</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div></div>`:''}
       ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
             const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
             const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
@@ -5882,13 +5891,14 @@ function openWhyModal(ticker) {
   if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
   if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + v10fmt(s.composite_adj||0) + '/10';
   var decote = '';
-  if (s.target_price && s.price && s.target_price > s.price) {
-    decote = Math.round((s.target_price/s.price - 1)*100);
+  var ciblePourquoi = s.prix_cible || s.target_price;
+  if (ciblePourquoi && s.price && ciblePourquoi > s.price) {
+    decote = Math.round((ciblePourquoi/s.price - 1)*100);
   }
   var divYield = s.div_yield ? (s.div_yield*100).toFixed(1) + '%' : (s.rendement_pct ? s.rendement_pct.toFixed(1) + '%' : '—');
   if (body) body.innerHTML =
     '<h3>🏦 L\'entreprise</h3><p>' + (s.sector||'') + (s.country?' · '+s.country:'') + '</p>' +
-    (decote ? '<h3>📊 Pourquoi elle est attractive</h3><p>Son cours (' + (s.price?fmtXOF(s.price):'—') + ') est inférieur à sa valeur estimée (' + (s.target_price?fmtXOF(s.target_price):'—') + '). Vous l\'achetez environ <strong>' + decote + '%</strong> moins cher.</p>' : '') +
+    (decote ? '<h3>📊 Pourquoi elle est attractive</h3><p>Son cours (' + (s.price?fmtXOF(s.price):'—') + ') est inférieur à sa valeur estimée (' + (ciblePourquoi?fmtXOF(ciblePourquoi):'—') + '). Vous l\'achetez environ <strong>' + decote + '%</strong> moins cher. ' + (typeof fmtLibelleValeur==='function'?fmtLibelleValeur(s.libelle_valeur):'') + '</p>' : '') +
     '<h3>💰 Ce que ça veut dire pour vous</h3><p>En attendant une revalorisation, vous recevez un dividende de <strong>' + divYield + '</strong> par an.</p>';
   if (actions) actions.innerHTML =
     '<button class="btn btn-primary" onclick="closeWhyModal();openStockDetail(\''+ticker+'\')" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px">📋 Voir la fiche complète</button>';

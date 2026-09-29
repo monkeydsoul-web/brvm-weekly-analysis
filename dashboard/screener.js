@@ -96,15 +96,13 @@ function _renderScreenerTable() {
     const verd = x.pdf_verdict || '';
     const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
     const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
-    // Prix cible Graham ou EPV
-    const eps = x.eps || 0; const bvpa = x.bvpa || 0;
-    const grahamT = (eps > 0 && bvpa > 0) ? Math.round(Math.sqrt(22.5 * eps * bvpa)) : 0;
-    const epvT = eps > 0 ? Math.round(eps / 0.10) : 0;
-    const target = grahamT || epvT;
-    const price = x.price || 0;
+    // Même prix, même écart, même libellé que le serveur (prix_cible.py).
+    const target = x.prix_cible || 0;
+    const ecart = (typeof x.ecart_pct === 'number') ? x.ecart_pct : null;
     const targetStr = target > 0 ? target.toLocaleString('fr-FR') + ' XOF' : '—';
-    const targetC = target > 0 && price > 0 ? (price < target ? 'var(--bull)' : 'var(--bear)') : 'var(--text-2)';
-    const targetArrow = target > 0 && price > 0 ? (price < target ? ' ↑' : ' ↓') : '';
+    const mots = (typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—');
+    const targetC = ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
+    const ecartStr = ecart == null ? '' : ((ecart > 0 ? '+' : '') + ecart + '%');
 
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td style="padding:8px 12px">
@@ -116,7 +114,7 @@ function _renderScreenerTable() {
         <span style="font-weight:700;color:${scC}">${sc10}/10</span>
         <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px"><div style="height:100%;width:${scBarW}%;background:${scC};border-radius:2px"></div></div>
       </td>
-      <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${target>0?'600':'400'}">${targetStr}${targetArrow}</td>
+      <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${target>0?'600':'400'}">${targetStr}${ecartStr?`<div style="font-size:9px">${ecartStr}</div>`:''}<div style="font-size:9px;font-weight:400">${mots}</div></td>
       <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pe}</td>
       <td style="padding:8px 12px;text-align:right;font-weight:600;color:${dyC}">${dy}</td>
       <td style="padding:8px 12px;text-align:right;color:${chgC};font-weight:600">${chgS}</td>
