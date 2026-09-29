@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Extraction ticker / cran de notation.
+"""Extraction ticker / cran de notation (RATINGS-1, audit B-5).
 
-Les cas qui decrivent le comportement juste et echouent aujourd'hui
-sont marques xfail : ils documentent le bug B-5, ils ne le corrigent pas.
+Le rattachement se fait par mot entier ou par nom complet d'émetteur.
+Les émetteurs non cotés ne produisent pas de fiche.
 """
 import importlib.util
+import json
 from pathlib import Path
-
-import pytest
 
 _CHEMIN = Path(__file__).resolve().parents[1] / "scripts" / "brvm_market_data_scraper.py"
 _spec = importlib.util.spec_from_file_location("brvm_market_data_scraper", str(_CHEMIN))
@@ -16,6 +15,29 @@ _spec.loader.exec_module(_scraper)
 
 _extract_ticker = _scraper._extract_ticker
 _extract_rating_info = _scraper._extract_rating_info
+_fiche_notation = _scraper._fiche_notation
+
+_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "ratings_emetteurs.json"
+_CLES_HISTORIQUES = {
+    "ticker", "agence", "note", "score_notation", "perspective",
+    "date", "source_url", "resume",
+}
+
+
+def _charger_fixture():
+    with open(str(_FIXTURE), encoding="utf-8") as f:
+        return json.load(f)["entrees"]
+
+
+def _fiches(entrees):
+    """Même forme que brvm_ratings.json : les ticker null ne sont pas émis."""
+    fiches = []
+    for entree in entrees:
+        ticker = _extract_ticker(entree["texte"])
+        if not ticker:
+            continue
+        fiches.append(_fiche_notation(entree["texte"], entree["texte"], ticker, None, "", None))
+    return fiches
 
 
 def test_extract_ticker_sonatel():
@@ -41,61 +63,132 @@ def test_extract_rating_bbb_et_perspective():
     assert info["perspective"] == "Stable"
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "B-5 : _extract_ticker rattache « TotalEnergies Marketing CI » a ETIT "
-        "car la cle « eti » est un bout de « marketing » (la cible est TTLC)"
-    ),
-)
 def test_extract_ticker_marketing_ci_pas_etit():
     texte = "TotalEnergies Marketing CI — notation financiere long terme"
     assert _extract_ticker(texte) == "TTLC"
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "B-5 : _extract_ticker rattache « TotalEnergies Marketing Senegal » a ETIT "
-        "car la cle « eti » est un bout de « marketing » (la cible est TTLS)"
-    ),
-)
 def test_extract_ticker_marketing_sn_pas_etit():
     texte = "TotalEnergies Marketing Senegal — notation"
     assert _extract_ticker(texte) == "TTLS"
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "B-5 : _extract_ticker rattache une « Societe Financiere » a CIEC "
-        "car la cle « cie » est un bout de mot (la cible est None)"
-    ),
-)
 def test_extract_ticker_financiere_pas_ciec():
     texte = "Notation de la Societe Financiere de l'Ouest"
     assert _extract_ticker(texte) is None
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "B-5 : _extract_rating_info lit « A » au lieu de « A+ » "
-        "(pas de frontiere de mot apres le signe +)"
-    ),
-)
 def test_cran_a_plus_conserve():
     info = _extract_rating_info("Note long terme A+ perspective Stable")
     assert info["note"] == "A+"
+    assert info["score_notation"] == 8
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "B-5 : _extract_rating_info lit « AA » au lieu de « AA- » "
-        "(meme defaut de regex que pour A+)"
-    ),
-)
 def test_cran_aa_moins_conserve():
     info = _extract_rating_info("Note long terme AA- perspective Stable")
     assert info["note"] == "AA-"
+    assert info["score_notation"] == 8.5
+
+
+def test_cran_a_sans_signe_reste_a():
+    info = _extract_rating_info("Note long terme A perspective Stable")
+    assert info["note"] == "A"
+    assert info["score_notation"] == 7.5
+
+
+def test_cran_bbb_moins_conserve():
+    info = _extract_rating_info("Note long terme BBB- perspective Stable")
+    assert info["note"] == "BBB-"
+    assert info["score_notation"] == 5.5
+
+
+def test_cran_b_moins_conserve():
+    info = _extract_rating_info("Unilever CI notation B- perspective Négative")
+    assert info["note"] == "B-"
+    assert info["score_notation"] == 2.5
+    assert _extract_ticker("Unilever CI notation B- perspective Négative") == "UNLC"
+
+
+def test_cran_c_ne_lit_pas_cote():
+    info = _extract_rating_info("République de Côte d'Ivoire")
+    assert info["note"] is None
+
+
+def test_date_validite_en_lettres():
+    info = _extract_rating_info(
+        "Note long terme A+ perspective Stable. Date de validité : 30 juin 2026."
+    )
+    assert info["date_validite"] == "2026-06-30"
+
+
+def test_date_validite_numerique():
+    info = _extract_rating_info("Valable jusqu'au 31/12/2025. Note AA-.")
+    assert info["note"] == "AA-"
+    assert info["date_validite"] == "2025-12-31"
+
+
+def test_compagnie_ivoirienne_electricite():
+    assert _extract_ticker("Compagnie Ivoirienne d'Electricite — notation") == "CIEC"
+    assert _extract_ticker("Compagnie Ivoirienne d'Électricité — notation") == "CIEC"
+
+
+def test_eti_mot_entier_pas_dans_marketing():
+    assert _extract_ticker("Campagne marketing de la societe") is None
+    assert _extract_ticker("Notation ETI long terme BBB") == "ETIT"
+
+
+def test_emetteurs_non_cotes_ignores():
+    assert _extract_ticker("CRRH-UEMOA — Note long terme AA-") is None
+    assert _extract_ticker("BOAD — Banque Ouest Africaine de Développement") is None
+    assert _extract_ticker("Etat du Sénégal — Note long terme B+") is None
+    assert _extract_ticker("Ecobank Ghana — Note long terme A-") is None
+    assert _extract_ticker("NSIA Banque Bénin — Note long terme BBB") is None
+
+
+def test_noms_stock_fundamentals_retrouvent_leur_ticker():
+    from scraper import STOCK_FUNDAMENTALS
+    assert len(STOCK_FUNDAMENTALS) == 47
+    for ticker, info in STOCK_FUNDAMENTALS.items():
+        assert _extract_ticker(info["name"]) == ticker
+
+
+def test_fixture_rattachement_et_affichage():
+    """Après correction : ETIT sans notes étrangères, CIEC <= 2, pas de ticker null."""
+    entrees = _charger_fixture()
+    for entree in entrees:
+        obtenu = _extract_ticker(entree["texte"])
+        attendu = entree["apres"]
+        assert obtenu == attendu, entree["id"]
+        info = _extract_rating_info(entree["texte"])
+        if "note" in entree:
+            assert info["note"] == entree["note"], entree["id"]
+        if "date_validite" in entree:
+            assert info["date_validite"] == entree["date_validite"], entree["id"]
+
+    fiches = _fiches(entrees)
+    assert all(f["ticker"] for f in fiches)
+    assert _CLES_HISTORIQUES <= set(fiches[0])
+    assert "date_validite" in fiches[0]
+
+    par_ticker = {}
+    for fiche in fiches:
+        par_ticker.setdefault(fiche["ticker"], []).append(fiche)
+
+    etit = par_ticker.get("ETIT", [])
+    assert etit
+    for fiche in etit:
+        resume = fiche["resume"].lower()
+        assert "totalenergies" not in resume
+        assert "unilever" not in resume
+        assert "smb" not in resume
+
+    assert len(par_ticker.get("CIEC", [])) <= 2
+    assert par_ticker["TTLC"][0]["note"] == "A+"
+    assert par_ticker["TTLS"][0]["note"] == "AA-"
+    assert par_ticker["TTLC"][0]["date_validite"] == "2026-06-30"
+
+    ignores = {
+        e["texte"] for e in entrees if e["apres"] is None
+    }
+    assert ignores
+    assert not any(fiche["resume"] in ignores for fiche in fiches)
