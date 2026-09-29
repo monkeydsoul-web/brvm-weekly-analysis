@@ -26,6 +26,9 @@ HEADERS = {
 
 # Données de référence statiques (enrichies manuellement)
 # Mises à jour lors de chaque publication de résultats annuels
+# Actions en circulation (sources citées dans tests/test_actions_en_circulation.py) :
+#   NTLC 22 070 400 · SOGC 21 601 840 · PALC 15 459 316
+#   CIEC 56 000 000 · ORAC 150 655 350 · SDCC 9 000 000
 STOCK_FUNDAMENTALS = {
     "SGBC":  {"name": "Société Générale CI",          "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 31_111_110,  "pe_hist": 8.5,  "pb_hist": 1.96, "roe": 24, "div_hist": 1863, "debt": "Faible",   "stable": True},
     "SIBC":  {"name": "Société Ivoirienne de Banque", "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 100_000_000, "pe_hist": 10.7, "pb_hist": 2.2,  "roe": 31, "div_hist": 338,  "debt": "Faible",   "stable": True},
@@ -43,9 +46,9 @@ STOCK_FUNDAMENTALS = {
     "ETIT":  {"name": "Ecobank Transnational",         "sector": "Banque",        "country": "Togo",          "shares": 28_000_000_000, "pe_hist": 30.0, "pb_hist": 0.5, "roe": 4, "div_hist": 0,   "debt": "Élevée",   "stable": False},
     "ORGT":  {"name": "Oragroup Togo",                 "sector": "Banque",        "country": "Togo",          "shares": 39_200_000,  "pe_hist": 15.0, "pb_hist": 1.4,  "roe": 9,  "div_hist": 0,    "debt": "Modérée",  "stable": False},
     "SAFC":  {"name": "SAFCA CI",                      "sector": "Banque",        "country": "Côte d'Ivoire", "shares": 5_000_000,   "pe_hist": 20.0, "pb_hist": 1.8,  "roe": 10, "div_hist": 200,  "debt": "Faible",   "stable": False},
-    "ORAC":  {"name": "Orange CI",                     "sector": "Télécoms",     "country": "Côte d'Ivoire", "shares": 141_174_476, "pe_hist": 15.0, "pb_hist": 4.5,  "roe": 25, "div_hist": 700,  "debt": "Modérée",  "stable": True},
+    "ORAC":  {"name": "Orange CI",                     "sector": "Télécoms",     "country": "Côte d'Ivoire", "shares": 150_655_350, "pe_hist": 15.0, "pb_hist": 4.5,  "roe": 25, "div_hist": 700,  "debt": "Modérée",  "stable": True},
     "ONTBF": {"name": "Onatel Burkina Faso",           "sector": "Télécoms",     "country": "Burkina Faso",  "shares": 157_500_000, "pe_hist": 12.0, "pb_hist": 2.0,  "roe": 15, "div_hist": 155,  "debt": "Faible",   "stable": True},
-    "NTLC":  {"name": "Nestlé CI",                     "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 36_364_848,  "pe_hist": 18.0, "pb_hist": 5.0,  "roe": 28, "div_hist": 410,  "debt": "Faible",   "stable": True},
+    "NTLC":  {"name": "Nestlé CI",                     "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 22_070_400,  "pe_hist": 18.0, "pb_hist": 5.0,  "roe": 28, "div_hist": 410,  "debt": "Faible",   "stable": True},
     "STBC":  {"name": "SITAB CI",                      "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 18_000_000,  "pe_hist": 14.0, "pb_hist": 2.8,  "roe": 16, "div_hist": 2096, "debt": "Faible",   "stable": True},
     "UNLC":  {"name": "Unilever CI",                   "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 6_884_660,   "pe_hist": 22.0, "pb_hist": 8.0,  "roe": 22, "div_hist": 900,  "debt": "Faible",   "stable": True},
     "SLBC":  {"name": "SOLIBRA CI",                    "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 11_852_972,  "pe_hist": 11.7, "pb_hist": 1.3,  "roe": 13, "div_hist": 1500, "debt": "Faible",   "stable": False},
@@ -53,16 +56,16 @@ STOCK_FUNDAMENTALS = {
     "UNXC":  {"name": "Uniwax CI",                     "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 12_816_480,  "pe_hist": 22.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 200,  "debt": "Modérée",  "stable": False},
     "LNBB":  {"name": "Loterie Nationale Bénin",       "sector": "Consommation", "country": "Bénin",         "shares": 45_000_000,  "pe_hist": 9.0,  "pb_hist": 2.0,  "roe": 16, "div_hist": 120,  "debt": "Faible",   "stable": True},
     "NEIC":  {"name": "NEI-CEDA CI",                   "sector": "Consommation", "country": "Côte d'Ivoire", "shares": 18_974_000,  "pe_hist": 18.0, "pb_hist": 1.5,  "roe": 8,  "div_hist": 50,   "debt": "Faible",   "stable": False},
-    "PALC":  {"name": "Palm CI",                       "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 11_021_655,  "pe_hist": 14.0, "pb_hist": 2.0,  "roe": 8,  "div_hist": 300,  "debt": "Modérée",  "stable": False},
+    "PALC":  {"name": "Palm CI",                       "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 15_459_316,  "pe_hist": 14.0, "pb_hist": 2.0,  "roe": 8,  "div_hist": 300,  "debt": "Modérée",  "stable": False},
     "SPHC":  {"name": "SAPH CI",                       "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 23_745_000,  "pe_hist": 16.6, "pb_hist": 2.0,  "roe": 6,  "div_hist": 250,  "debt": "Élevée",   "stable": False},
-    "SOGC":  {"name": "SOGB CI",                       "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 15_000_000,  "pe_hist": 15.0, "pb_hist": 1.8,  "roe": 8,  "div_hist": 300,  "debt": "Modérée",  "stable": False},
+    "SOGC":  {"name": "SOGB CI",                       "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 21_601_840,  "pe_hist": 15.0, "pb_hist": 1.8,  "roe": 8,  "div_hist": 300,  "debt": "Modérée",  "stable": False},
     "SCRC":  {"name": "Sucrivoire CI",                 "sector": "Agriculture",  "country": "Côte d'Ivoire", "shares": 27_591_750,  "pe_hist": 18.0, "pb_hist": 1.5,  "roe": 7,  "div_hist": 50,   "debt": "Élevée",   "stable": False},
     "TTLC":  {"name": "TotalEnergies CI",              "sector": "Énergie",      "country": "Côte d'Ivoire", "shares": 75_676_670,  "pe_hist": 11.0, "pb_hist": 3.5,  "roe": 14, "div_hist": 100,  "debt": "Faible",   "stable": True},
     "TTLS":  {"name": "TotalEnergies Sénégal",         "sector": "Énergie",      "country": "Sénégal",       "shares": 38_750_000,  "pe_hist": 12.0, "pb_hist": 2.5,  "roe": 14, "div_hist": 80,   "debt": "Faible",   "stable": True},
     "SHEC":  {"name": "Vivo Energy CI",                "sector": "Énergie",      "country": "Côte d'Ivoire", "shares": 120_000_000, "pe_hist": 13.0, "pb_hist": 3.0,  "roe": 12, "div_hist": 70,   "debt": "Faible",   "stable": True},
     "SEMC":  {"name": "Crown Siem CI",                 "sector": "Énergie",      "country": "Côte d'Ivoire", "shares": 10_000_000,  "pe_hist": 20.0, "pb_hist": 2.0,  "roe": 6,  "div_hist": 20,   "debt": "Élevée",   "stable": False},
-    "CIEC":  {"name": "CIE CI",                        "sector": "Utilités",     "country": "Côte d'Ivoire", "shares": 65_536_000,  "pe_hist": 14.0, "pb_hist": 2.5,  "roe": 12, "div_hist": 120,  "debt": "Modérée",  "stable": True},
-    "SDCC":  {"name": "SODECI CI",                     "sector": "Utilités",     "country": "Côte d'Ivoire", "shares": 12_000_000,  "pe_hist": 14.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 250,  "debt": "Élevée",   "stable": True},
+    "CIEC":  {"name": "CIE CI",                        "sector": "Utilités",     "country": "Côte d'Ivoire", "shares": 56_000_000,  "pe_hist": 14.0, "pb_hist": 2.5,  "roe": 12, "div_hist": 120,  "debt": "Modérée",  "stable": True},
+    "SDCC":  {"name": "SODECI CI",                     "sector": "Utilités",     "country": "Côte d'Ivoire", "shares": 9_000_000,   "pe_hist": 14.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 250,  "debt": "Élevée",   "stable": True},
     "FTSC":  {"name": "Filtisac CI",                   "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 45_294_490,  "pe_hist": 5.5,  "pb_hist": 1.2,  "roe": 12, "div_hist": 150,  "debt": "Faible",   "stable": False},
     "SDSC":  {"name": "Africa Global Logistics CI",    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 33_000_000,  "pe_hist": 16.0, "pb_hist": 2.2,  "roe": 8,  "div_hist": 50,   "debt": "Élevée",   "stable": False},
     "CABC":  {"name": "Sicable CI",                    "sector": "Industriel",   "country": "Côte d'Ivoire", "shares": 5_920_000,   "pe_hist": 12.0, "pb_hist": 2.0,  "roe": 10, "div_hist": 120,  "debt": "Modérée",  "stable": False},
