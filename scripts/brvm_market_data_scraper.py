@@ -781,6 +781,48 @@ def _notation_retiree(text: str) -> bool:
     ) is not None
 
 
+def _libelle_perspective(mot: str) -> Optional[str]:
+    brut = _fold_accents(mot).lower()
+    if brut.startswith("positiv"):
+        return "Positive"
+    if brut.startswith("negativ"):
+        return "Négative"
+    if brut.startswith("stable"):
+        return "Stable"
+    if "developpement" in brut:
+        return "En développement"
+    if "surveillance" in brut:
+        return "Surveillance"
+    return None
+
+
+def _extraire_perspective(text: str) -> Optional[str]:
+    """Perspective seulement si le texte l'attribue, pas si le mot « stable » passe.
+
+    Une liste « positive, stable ou négative » est une légende : elle ne compte pas.
+    """
+    if not text:
+        return None
+    mot = (
+        r"(?<!\w)(?:positives?|n[ée]gatives?|stables?"
+        r"|en\s+d[ée]veloppement|sous\s+surveillance)(?!\w)"
+    )
+    for ancre in re.finditer(r"perspectives?|outlooks?", text, re.I):
+        fenetre = text[ancre.end():ancre.end() + 120]
+        point = re.search(r"\.\s", fenetre)
+        if point and point.start() >= 8:
+            fenetre = fenetre[:point.start()]
+        trouves = re.findall(mot, fenetre, re.I)
+        distincts = set()
+        for item in trouves:
+            libelle = _libelle_perspective(item)
+            if libelle:
+                distincts.add(libelle)
+        if len(distincts) == 1:
+            return distincts.pop()
+    return None
+
+
 def _extract_rating_info(text: str) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "note": None, "perspective": None, "agence": None, "date_validite": None,
@@ -811,15 +853,7 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
             result["note"] = note
             result["score_notation"] = RATING_GRADES[note]
 
-    # Perspective
-    if re.search(r'[Ss]table', text):
-        result["perspective"] = "Stable"
-    elif re.search(r'[Pp]ositiv', text):
-        result["perspective"] = "Positive"
-    elif re.search(r'[Nn]égatif|[Nn]egatif|[Nn]egative', text):
-        result["perspective"] = "Négative"
-    elif re.search(r'[Ss]ous surveillance|[Cc]reditwatch', text):
-        result["perspective"] = "Surveillance"
+    result["perspective"] = _extraire_perspective(text)
 
     result["date_validite"] = _extraire_date_validite(text)
     return result

@@ -301,6 +301,37 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_perspective_seulement_si_elle_est_dite():
+    assert _extract_rating_info(
+        "La perspective est stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "Les perspectives restent stables."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective demeure stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective attachée à ces notations est stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective est positive."
+    )["perspective"] == "Positive"
+    assert _extract_rating_info(
+        "Note de long terme A, perspective en développement."
+    )["perspective"] == "En développement"
+    nu = _extract_rating_info(
+        "Le ratio dette nette/EBITDA est stable. Note de long terme A+."
+    )
+    assert nu["note"] == "A+"
+    assert nu["perspective"] is None
+    legende = _extract_rating_info(
+        "Échelle des perspectives : positive, stable ou négative. Note de long terme A."
+    )
+    assert legende["perspective"] is None
+    assert legende["note"] == "A"
+
+
 def test_date_manquante_lue_dans_le_nom_du_pdf():
     nom = "20260303_-_notation_financiere_-_safca_ci.pdf"
     assert _scraper._date_depuis_nom_pdf(nom) == "2026-03-03"
