@@ -824,7 +824,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <button class="rank-tog-btn" id="rank-adv-tog" onclick="toggleRankAdv()">Voir l'analyse détaillée →</button>
   </div>
   <div style="font-size:11px;color:var(--t2);margin-bottom:8px">
-    <span style="color:var(--green)">✅ Note ≥ 7.5 = Excellent</span> · <span style="color:var(--amber)">⏳ Note 5–7 = Correct</span> · <span style="color:var(--red)">⚠️ Note &lt; 5 = À éviter</span>
+    <span style="color:var(--green)">✅ Note ≥ 7,5 = Intéressant</span> · <span style="color:var(--amber)">⏳ Note ≥ 5 et &lt; 7,5 = À surveiller</span> · <span style="color:var(--red)">⚠️ Note &lt; 5 = Prudence</span>
   </div>
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
@@ -835,7 +835,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
       <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
       <th class="tt" data-tt="Recommandation issue de l'analyse des rapports PDF par IA · ACHETER / NEUTRE / VENDRE - Anti zigzag : le conseil ne change que sur franchissement net du seuil">Conseil</th>
-      <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th>
+      <th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th>
       <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
       <th class="adv-col expert-only" data-tip="DCF /10 — Actualisation des flux de trésorerie futurs"><abbr data-tip="Actualisation des flux de trésorerie futurs · méthode pour estimer la valeur réelle" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DCF</abbr></th>
       <th class="adv-col expert-only" data-tip="DDM /10 — prix juste selon les dividendes futurs (modèle Gordon)"><abbr data-tip="Modèle d'actualisation des dividendes · valeur basée sur les dividendes futurs" style="border-bottom:1px dotted var(--t3);cursor:help;text-decoration:none">DDM</abbr></th>
@@ -877,7 +877,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </label>
     </div>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Estimation du prix raisonnable selon 3 méthodes financières · Graham, EPV, P/B">Prix juste estimé</th><th data-tip="Écart entre le prix actuel et le prix juste estimé · 🟢 Positif = potentiel de hausse">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Avis basé sur l'analyse des rapports financiers de la société">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -1398,7 +1398,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       <thead id="screener-thead"><tr style="font-size:10px;color:var(--t3);background:var(--bg3)">
         <th style="padding:8px 12px;text-align:left">Ticker</th>
         <th style="padding:8px 12px;text-align:left">Société</th>
-        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Score global sur 8 modèles · ≥ 7.5/10 = signal fort">Score /10<span class="sort-ind"> ↓</span></th>
+        <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="composite_adj" onclick="screenerSortBy('composite_adj')" title="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Score /10<span class="sort-ind"> ↓</span></th>
         <th style="padding:8px 12px;text-align:right" title="Prix cible estimé selon Graham ou EPV · vert = cours sous la cible">Cible</th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="pe_ref" onclick="screenerSortBy('pe_ref')" title="Cours ÷ bénéfice · Bon signe : ≤ 15">P/E<span class="sort-ind"></span></th>
         <th style="padding:8px 12px;text-align:right;cursor:pointer" data-col="div_yield" onclick="screenerSortBy('div_yield')" title="Dividende annuel ÷ cours · Revenu passif direct">Div%<span class="sort-ind"></span></th>
@@ -1519,7 +1519,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
     <div class="card" style="padding:0;overflow-x:auto">
       <table><thead><tr>
         <th>Ticker</th><th>Société</th>
-        <th data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · &lt;5 = éviter">Note /10</th>
+        <th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th>
         <th>Conseil</th>
         <th>Dividende/an</th>
       </tr></thead>
@@ -1937,11 +1937,20 @@ function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
 function bcls10(v){return v>=7.5?'bg':v>=5?'ba':'br'}
 function v10fmt(v){return (Math.round(v/8*10)/10).toFixed(1)}
-function note10txt(row){
+function note10num(row){
   if(row && row.note10!=null && row.note10!=='' && isFinite(Number(row.note10))){
-    return (Math.round(Number(row.note10)*10)/10).toFixed(1);
+    return Math.round(Number(row.note10)*10)/10;
   }
-  return v10fmt((row&&row.composite_adj)||0);
+  var brut=0;
+  if(row && row.composite_adj!=null && row.composite_adj!=='' && isFinite(Number(row.composite_adj))){
+    brut=Number(row.composite_adj);
+  } else if(row && row.score!=null && row.score!=='' && isFinite(Number(row.score))){
+    brut=Number(row.score);
+  }
+  return Math.round(brut/8*10)/10;
+}
+function note10txt(row){
+  return note10num(row).toFixed(1).replace('.',',');
 }
 function rapportAnnuelTxt(row){
   var u=String((row&&row.pdf_verdict)||'').toUpperCase();
@@ -2327,6 +2336,11 @@ function skeletonRows(n=5){
 function svgBar(el,labels,values,colors,height=170,horizontal=false,valueSuffix=''){
   if(!el)return;
   if(!values.length){el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:${height}px;gap:6px;color:var(--t2);font-size:12px"><span style="font-size:22px">📊</span><span>Aucune donnée disponible</span></div>`;return;}
+  function barTxt(v){
+    var txt=horizontal&&typeof v==='number'&&v<10?v.toFixed(1):String(Math.round(v));
+    if(valueSuffix==='/10'&&typeof v==='number'&&v<10) txt=v.toFixed(1).replace('.',',');
+    return txt+valueSuffix;
+  }
   if(horizontal){
     const max=Math.max(...values)||1;
     const bh=Math.min(22,Math.floor((height-20)/values.length));
@@ -2338,7 +2352,7 @@ function svgBar(el,labels,values,colors,height=170,horizontal=false,valueSuffix=
       const c=Array.isArray(colors)?colors[i%colors.length]:colors;
       s+=`<text x="85" y="${y+bh/2+4}" text-anchor="end" fill="#64748B" font-size="10" font-family="sans-serif">${labels[i]}</text>`;
       s+=`<rect x="90" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${c}" opacity="0.85"/>`;
-      s+=`<text x="${90+bw+5}" y="${y+bh/2+4}" fill="#94A3B8" font-size="10" font-family="sans-serif">${typeof v==='number'&&v<10?v.toFixed(1):Math.round(v)}${valueSuffix}</text>`;
+      s+=`<text x="${90+bw+5}" y="${y+bh/2+4}" fill="#94A3B8" font-size="10" font-family="sans-serif">${barTxt(v)}</text>`;
     });
     s+='</svg>';el.innerHTML=s;
   } else {
@@ -2351,7 +2365,7 @@ function svgBar(el,labels,values,colors,height=170,horizontal=false,valueSuffix=
       const y=height-30-bh;
       const c=Array.isArray(colors)?colors[i%colors.length]:colors;
       s+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="4" fill="${c}" opacity="0.85"/>`;
-      s+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" fill="#94A3B8" font-size="11">${Math.round(v)}${valueSuffix}</text>`;
+      s+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" fill="#94A3B8" font-size="11">${barTxt(v)}</text>`;
       s+=`<text x="${x+bw/2}" y="${height-8}" text-anchor="middle" fill="#64748B" font-size="9">${labels[i]}</text>`;
     });
     s+='</svg>';el.innerHTML=s;
@@ -2912,7 +2926,7 @@ function renderSignauxParSociete(){
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note sur 8 critères · ≥7.5 excellent">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note sur 8 critères · ≥7.5 excellent">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
     </tr>`;
@@ -3018,7 +3032,7 @@ function renderRank(){
       <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · <5 = éviter">${v10fmt(v)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
     </tr>`;}).join('');
   }
@@ -3241,7 +3255,7 @@ async function renderTargets(){
       <td>${fmtXOF(t.current_price)}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
-      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note calculée sur 8 critères financiers · ≥7.5 = excellent · 5-7.5 = correct · <5 = éviter">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
       <td style="font-size:11px"${uncTip}>${fmtAvis(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
@@ -3419,7 +3433,7 @@ function simCalc(){
     }
     if(years>0)divAn1+=yearly[0];
     divTotal+=cumDiv;
-    return{ticker:p.ticker,sector:p.sector,alloc,dy_pct:(p.div_yield||0),div_yr1:yearly[0]||0,div_total:cumDiv,ex_div:p.ex_div_date||'—',score:p.composite_adj||0,w:p.w/total};
+    return{ticker:p.ticker,sector:p.sector,alloc,dy_pct:(p.div_yield||0),div_yr1:yearly[0]||0,div_total:cumDiv,ex_div:p.ex_div_date||'—',score:p.composite_adj||0,note10:p.note10,w:p.w/total};
   });
 
   // KPIs
@@ -3451,7 +3465,7 @@ function simCalc(){
       <td style="color:var(--amber);font-weight:600">${p.dy_pct.toFixed(2)}%</td>
       <td style="color:var(--green);font-weight:700">${fmtXOF(Math.round(p.div_yr1))}</td>
       <td style="color:var(--t3);font-size:10px">${p.ex_div}</td>
-      <td><span class="b ${bcls10(p.score/80*10)}">${v10fmt(p.score)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(p.score/80*10)}">${note10txt(p)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
     </tr>`).join('');
   }
 
@@ -3564,8 +3578,7 @@ function renderComm(){
     </div>`).join('');
   const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   svgBar(document.getElementById('cCommDiv'),exp.map(x=>x.ticker),exp.map(function(x){
-    var n=parseFloat(note10txt(x));
-    return isFinite(n)?n:0;
+    return note10num(x);
   }),exp.map(x=>COMM_PROD[x.ticker]?.col||'#94A3B8'),260,true,'/10');
   document.getElementById('commTable').innerHTML=exp.map(x=>{
     const ci=COMM_PROD[x.ticker],v=x.composite_adj||0;
@@ -5242,9 +5255,9 @@ const _glossTerms = [
   { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
   { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
   { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
-  { term:'Score /10 (composite)', def:'Notre indicateur principal. Somme de 8 modèles de valorisation (10 points chacun) ÷ 8, affiché /10. Score ≥ 7.5/10 = excellente opportunité, 5 à 7.5/10 = situation correcte, < 5/10 = prudence.', ex:'SIBC 8.5/10 : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9. Tous les modèles s\'accordent.' },
+  { term:'Score /10 (composite)', def:'Note sur 10 issue des 8 modèles. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'SIBC 8,5/10 : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9. Tous les modèles s\'accordent.' },
   { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
-  { term:'Verdict POSITIF / NEUTRE / NÉGATIF', def:'Résultat de l\'analyse IA (Claude) des rapports annuels de la société. POSITIF = la situation financière est bonne et en amélioration. NEUTRE = stable sans signal fort. NÉGATIF = des points d\'inquiétude identifiés.', ex:'Verdict POSITIF SIBC basé sur : croissance du BNA, dividende stable, faible endettement et bonne gouvernance identifiés dans le rapport annuel.' },
+  { term:'Verdict', def:'Conseil lié à la note sur 10. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'Note 8,5 : conseil Intéressant. Note 6,0 : conseil À surveiller. Note 4,0 : conseil Prudence.' },
   { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },
   { term:'YTD (Year-to-Date)', def:'Performance depuis le 1er janvier de l\'année en cours. Permet de comparer les performances sur la même période pour tous les acteurs du marché.', ex:'BRVM-COMPOSITE YTD +8.3% au 13 mai signifie que l\'indice a gagné 8.3% depuis le 1er janvier de cette année.' },
 ];

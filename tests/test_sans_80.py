@@ -77,7 +77,33 @@ def test_methodo_glossaire_fiche_et_partage():
     assert "/10" in partage
     commodites = _entre(HTML, "function renderComm", "function _stockTab")
     assert "note10txt" in commodites
+    assert "note10num" in commodites
     assert "'/10'" in commodites
+    legende = _entre(HTML, 'id="rank-counter"', 'id="rank-table-wrap"')
+    assert "≥ 7,5 = Intéressant" in legende
+    assert "≥ 5 et &lt; 7,5 = À surveiller" in legende
+    assert "&lt; 5 = Prudence" in legende
+    assert "Excellent" not in legende
+    assert "Correct" not in legende
+    assert "À éviter" not in legende
+    assert "5-7.5 = correct" not in HTML
+    assert "Note ≥ 7.5 = Excellent" not in HTML
+    screener = _entre(HTML, 'data-col="composite_adj"', "Score /10")
+    assert "Intéressant" in screener
+    assert "À surveiller" in screener
+    assert "Prudence" in screener
+    glossaire = _entre(HTML, "const _glossTerms", "let _glossFiltered")
+    assert "÷ 8" not in glossaire
+    assert "Résultat de l" not in glossaire
+    assert "term:'Verdict'" in glossaire
+    assert "Intéressant" in glossaire
+    assert "À surveiller" in glossaire
+    assert "Prudence" in glossaire
+    prev = (ROOT / "dashboard" / "previsions.js").read_text(encoding="utf-8")
+    assert prev.count("note10txt(s)") == 2
+    ecran = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
+    assert "note10txt(x)" in ecran
+    assert "/80*10" not in ecran
     for rel in ("dashboard/compare_analysis.js", "dashboard/backtest.js", "dashboard/markowitz.js"):
         src = (ROOT / rel).read_text(encoding="utf-8")
         assert "note10txt" in src
@@ -327,23 +353,27 @@ var scores = [
 ];
 var window = { scores: scores };
 
-attend(note10txt({ note10: 1.2, composite_adj: 54 }) === '1.2', 'note10 serveur');
-attend(note10txt({ composite_adj: 7 }) === '0.9', 'repli v10fmt');
-attend(note10txt({ composite_adj: 54 }) === '6.8', 'repli 54');
+attend(note10txt({ note10: 1.2, composite_adj: 54 }) === '1,2', 'note10 serveur');
+attend(note10txt({ composite_adj: 7 }) === '0,9', 'repli v10fmt');
+attend(note10txt({ composite_adj: 54 }) === '6,8', 'repli 54');
+attend(note10txt({ score: 54 }) === '6,8', 'repli score');
+attend(note10txt({ note10: 6.8, score: 7 }) === '6,8', 'note10 prime');
+attend(note10num({ note10: 0.9, composite_adj: 7 }) === 0.9, 'nombre barre');
 
 renderComm();
 var graphe = _els.cCommDiv.innerHTML;
 var table = _els.commTable.innerHTML;
-attend(graphe.indexOf('0.9/10') !== -1, 'SCRC graphe /10');
-attend(graphe.indexOf('6.8/10') !== -1, 'SNTS graphe /10');
+attend(graphe.indexOf('0,9/10') !== -1, 'SCRC graphe /10');
+attend(graphe.indexOf('6,8/10') !== -1, 'SNTS graphe /10');
 attend(graphe.indexOf('7.0') === -1, 'plus de 7.0');
+attend(graphe.indexOf('NaN') === -1, 'largeur numerique');
 attend(graphe.indexOf('/80') === -1, 'graphe sans /80');
-attend(table.indexOf('0.9/10') !== -1, 'table SCRC');
-attend(table.indexOf('6.8/10') !== -1, 'table SNTS');
+attend(table.indexOf('0,9/10') !== -1, 'table SCRC');
+attend(table.indexOf('6,8/10') !== -1, 'table SNTS');
 attend(table.indexOf('/80') === -1, 'table sans /80');
 
 var texte = _shareStockText('SNTS');
-attend(texte.indexOf('6.8/10') !== -1, 'partage note');
+attend(texte.indexOf('6,8/10') !== -1, 'partage note');
 attend(texte.indexOf('À surveiller') !== -1, 'partage conseil');
 attend(texte.indexOf('Rapport annuel : positif') !== -1, 'partage rapport');
 attend(texte.indexOf('Verdict IA') === -1, 'partage sans verdict ia');
@@ -354,7 +384,7 @@ scores = [{ ticker: 'SCRC', name: 'Sucrivoire', composite_adj: 7, note10: 0.9,
   conseil_libelle: null, pdf_verdict: null, price: 1000, change_pct: 0 }];
 window.scores = scores;
 var vide = _shareStockText('SCRC');
-attend(vide.indexOf('0.9/10') !== -1, 'partage repli note');
+attend(vide.indexOf('0,9/10') !== -1, 'partage repli note');
 attend(vide.indexOf('Pas de conseil') !== -1, 'partage sans conseil');
 attend(vide.indexOf('Verdict IA') === -1, 'partage vide sans verdict ia');
 """
