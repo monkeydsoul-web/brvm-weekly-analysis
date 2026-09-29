@@ -326,15 +326,25 @@ _INDEX_HTML_CACHE = {"mtime": None, "corps": None}
 
 
 def _corps_index():
-    """HTML avec {{ASSET_V}} remplace, en cache tant que index.html ne change pas."""
+    """HTML avec {{ASSET_V}} et les seuils du conseil remplaces."""
+    from verdict import SEUIL_NOTE_BAS, SEUIL_NOTE_HAUT
+
     chemin = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard", "index.html")
     mtime = os.path.getmtime(chemin)
-    if _INDEX_HTML_CACHE["mtime"] == mtime and _INDEX_HTML_CACHE["corps"] is not None:
+    seuils = (SEUIL_NOTE_HAUT, SEUIL_NOTE_BAS)
+    if (
+        _INDEX_HTML_CACHE["mtime"] == mtime
+        and _INDEX_HTML_CACHE.get("seuils") == seuils
+        and _INDEX_HTML_CACHE["corps"] is not None
+    ):
         return _INDEX_HTML_CACHE["corps"]
     with open(chemin, encoding="utf-8") as f:
         brut = f.read()
     corps = brut.replace("{{ASSET_V}}", ASSET_V)
+    corps = corps.replace("{{SEUIL_NOTE_HAUT}}", format(float(SEUIL_NOTE_HAUT), ".10g"))
+    corps = corps.replace("{{SEUIL_NOTE_BAS}}", format(float(SEUIL_NOTE_BAS), ".10g"))
     _INDEX_HTML_CACHE["mtime"] = mtime
+    _INDEX_HTML_CACHE["seuils"] = seuils
     _INDEX_HTML_CACHE["corps"] = corps
     return corps
 

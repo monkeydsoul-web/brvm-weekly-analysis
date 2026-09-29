@@ -1696,6 +1696,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
 <script>
 window.BRVM_ASSET_V="{{ASSET_V}}";
+window.SEUIL_NOTE_HAUT={{SEUIL_NOTE_HAUT}};
+window.SEUIL_NOTE_BAS={{SEUIL_NOTE_BAS}};
 window.BRVM_PENDING_ERRORS=[];
 window._brvmLoaderTries=0;
 window.brvmRetryLoader=function(){

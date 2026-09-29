@@ -101,3 +101,40 @@ attend(ordre.join(',') === 'BRAV,ALPH,SICC,SEMC', ordre.join(','));
 const secours = rows.slice().sort(function(a, b){ return (a.rank||999)-(b.rank||999); });
 attend(secours.map(function(x){ return x.ticker; }).join(',') === 'BRAV,ALPH,SICC,SEMC', 'secours');
 """)
+
+
+def test_page_injecte_les_seuils_du_conseil():
+    from verdict import SEUIL_NOTE_BAS, SEUIL_NOTE_HAUT
+    import app as application
+
+    html = application.app.test_client().get("/").get_data(as_text=True)
+    assert "window.SEUIL_NOTE_HAUT=%s" % format(float(SEUIL_NOTE_HAUT), ".10g") in html
+    assert "window.SEUIL_NOTE_BAS=%s" % format(float(SEUIL_NOTE_BAS), ".10g") in html
+    assert "{{SEUIL_NOTE_HAUT}}" not in html
+    assert "{{SEUIL_NOTE_BAS}}" not in html
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_palier_fort_suit_le_seuil_interessant():
+    live = (ROOT / "dashboard" / "live_score.js").read_text(encoding="utf-8")
+    debut = live.index("function _palierScoreLive")
+    fin = live.index("function _renderLiveScore")
+    _node(live[debut:fin] + r"""
+function attend(cond, msg) { if (!cond) { console.error(msg); process.exit(1); } }
+global.window = { SEUIL_NOTE_HAUT: 7.5, SEUIL_NOTE_BAS: 5 };
+function mot(note, statut) { return _palierScoreLive(note, statut).tier; }
+function couleur(note, statut) { return _palierScoreLive(note, statut).col; }
+attend(mot(7.5) === 'Fort' && couleur(7.5).indexOf('green') !== -1, '7,5');
+attend(mot(7.4) === 'Modéré', '7,4');
+attend(mot(7.3) === 'Modéré', 'SNTS 7,3');
+attend(mot(7.1) === 'Modéré', 'STBC 7,1');
+attend(mot(5) === 'Modéré' && couleur(5).indexOf('amber') !== -1, '5');
+attend(mot(4.9) === 'Faible', '4,9');
+attend(mot(2.9) === 'Faible', '2,9');
+attend(mot(2.8) === 'Très faible', '2,8');
+attend(mot(8, 'suspendu') === 'Cotation suspendue', 'suspendu');
+attend(couleur(6.8, 'suspendu').indexOf('--t2') !== -1, 'gris');
+attend(mot(6.8, 'suspendu') !== 'Faible', 'pas faible');
+global.window.SEUIL_NOTE_HAUT = 8;
+attend(mot(7.5) === 'Modéré', 'le seuil vient de la constante');
+""")

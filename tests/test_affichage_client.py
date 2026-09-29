@@ -42,7 +42,10 @@ def test_sources_lisent_la_note_du_serveur():
     assert "note10:          r.note10" in live
     assert "note10txt(d)" in live
     assert "'Fort'" in live and "'Modéré'" in live and "'Faible'" in live and "'Très faible'" in live
-    assert "n10>=7.1" in live and "n10>=5" in live and "n10>=2.9" in live
+    assert "window.SEUIL_NOTE_HAUT" in live and "window.SEUIL_NOTE_BAS" in live
+    assert "n10 >= haut" in live and "n10 >= bas" in live and "n10 >= 2.9" in live
+    assert "n10>=7.1" not in live and "n10>=7.5" not in live
+    assert "Cotation suspendue" in live
     assert "'Prudence'" not in live
     assert "'FORT'" not in live and "'MODERE'" not in live and "'FAIBLE'" not in live
 

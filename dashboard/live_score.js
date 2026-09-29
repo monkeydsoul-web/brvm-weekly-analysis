@@ -29,6 +29,7 @@ async function fetchLiveScore(ticker){
           detail_relatif:  r.detail_relatif,
           detail_technique:r.detail_technique,
           note10:          r.note10,
+          statut:          r.statut,
           pe_ref_live:     r.pe_ref,
           pb_ref_live:     r.pb_ref,
           div_yield_live:  r.div_yield,
@@ -41,14 +42,25 @@ async function fetchLiveScore(ticker){
   _fetchLiveScoreFallback(ticker);
 }
 
+function _palierScoreLive(n10, statut){
+  if (statut === 'suspendu') return { tier: 'Cotation suspendue', col: 'var(--t2)' };
+  var haut = Number(window.SEUIL_NOTE_HAUT);
+  var bas = Number(window.SEUIL_NOTE_BAS);
+  if (n10 >= haut) return { tier: 'Fort', col: 'var(--green)' };
+  if (n10 >= bas) return { tier: 'Modéré', col: 'var(--amber)' };
+  if (n10 >= 2.9) return { tier: 'Faible', col: 'var(--orange,#f97316)' };
+  return { tier: 'Très faible', col: 'var(--red)' };
+}
+
 function _renderLiveScore(ticker, d){
   // D.14d : extrait de _fetchLiveScoreFallback pour etre partage avec le chemin rapide (live-ranking) -- fix du bug _renderLiveScore manquante
   const el=document.getElementById('live-score-container');
   if(!el)return;
   const sc=d.composite_adj||0;
   const n10=(typeof note10num==='function')?note10num(d):(Math.round(sc/8*10)/10);
-  const col=n10>=7.1?'var(--green)':n10>=5?'var(--amber)':n10>=2.9?'var(--orange,#f97316)':'var(--red)';
-  const tier=n10>=7.1?'Fort':n10>=5?'Modéré':n10>=2.9?'Faible':'Très faible';
+  const palier=_palierScoreLive(n10, d.statut);
+  const col=palier.col;
+  const tier=palier.tier;
   const chg=d.live_change_pct||0;
   const chgCol=chg>=0?'var(--green)':'var(--red)';
   const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
