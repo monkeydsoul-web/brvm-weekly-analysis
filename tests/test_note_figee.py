@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import pytest
 
 import live_ranker
+import price_history_builder
 from live_ranker import (
     NOTE_FORMULE,
     EmpreinteIllisible,
@@ -466,3 +467,66 @@ def test_lundi_8h_garde_la_note_du_vendredi(classement):
     assert _ligne(resultat)["composite_adj"] == 3.3
     assert _ligne(resultat)["note_calculee_le"] == vendredi
     assert _ligne(resultat)["price"] == 1600
+
+
+def _horloge(jour):
+    class Horloge:
+        @staticmethod
+        def now():
+            return jour
+    return Horloge
+
+
+def test_append_live_prices_enregistre_le_volume(tmp_path, monkeypatch):
+    chemin = tmp_path / "price_history.json"
+    monkeypatch.setattr(price_history_builder, "HISTORY_PATH", str(chemin))
+    monkeypatch.setattr(
+        price_history_builder, "datetime",
+        _horloge(datetime(2026, 9, 29, 18, 0, tzinfo=timezone.utc)),
+    )
+    chemin.write_text(json.dumps({
+        "ALPH": [{"date": "2026-09-28", "price": 1400, "volume": 10, "source": "live"}],
+    }), encoding="utf-8")
+    monkeypatch.setattr("live_data.get_live_data", lambda force_refresh=False: {
+        "prices": {"ALPH": {"price": 1500, "volume": 4200}},
+    })
+    assert price_history_builder.append_live_prices() == 1
+    point = json.loads(chemin.read_text(encoding="utf-8"))["ALPH"][-1]
+    assert point["date"] == "2026-09-29"
+    assert point["price"] == 1500
+    assert point["volume"] == 4200
+    assert point["source"] == "live"
+
+
+def test_append_live_prices_jour_identique_non_ecrit(tmp_path, monkeypatch):
+    chemin = tmp_path / "price_history.json"
+    monkeypatch.setattr(price_history_builder, "HISTORY_PATH", str(chemin))
+    monkeypatch.setattr(
+        price_history_builder, "datetime",
+        _horloge(datetime(2026, 9, 29, 18, 0, tzinfo=timezone.utc)),
+    )
+    veille = {
+        "ALPH": [{"date": "2026-09-28", "price": 1500, "volume": 4200, "source": "live"}],
+        "BETA": [{"date": "2026-09-28", "price": 800, "volume": 0, "source": "live"}],
+    }
+    chemin.write_text(json.dumps(veille), encoding="utf-8")
+    monkeypatch.setattr("live_data.get_live_data", lambda force_refresh=False: {
+        "prices": {
+            "ALPH": {"price": 1500, "volume": 4200},
+            "BETA": {"price": 800, "volume": 0},
+        },
+    })
+    assert price_history_builder.append_live_prices() == 0
+    assert json.loads(chemin.read_text(encoding="utf-8")) == veille
+
+    monkeypatch.setattr("live_data.get_live_data", lambda force_refresh=False: {
+        "prices": {
+            "ALPH": {"price": 1510, "volume": 4200},
+            "BETA": {"price": 800, "volume": 0},
+        },
+    })
+    assert price_history_builder.append_live_prices() == 2
+    points = json.loads(chemin.read_text(encoding="utf-8"))
+    assert points["ALPH"][-1]["date"] == "2026-09-29"
+    assert points["ALPH"][-1]["volume"] == 4200
+    assert points["BETA"][-1]["price"] == 800

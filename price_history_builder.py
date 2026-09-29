@@ -72,6 +72,62 @@ def init_history():
         save_history(history)
     return history
 
+def _volume_seance(data):
+    if not isinstance(data, dict):
+        return None
+    volume = data.get("volume")
+    if isinstance(volume, bool) or not isinstance(volume, (int, float)):
+        return None
+    if volume < 0 or volume != volume or volume in (float("inf"), float("-inf")):
+        return None
+    return int(volume)
+
+
+def _seance_precedente(points, today):
+    """Dernier point de séance avant `today`. Les points annuels ne comptent pas."""
+    meilleur = None
+    for point in points or []:
+        if not isinstance(point, dict) or point.get("source") == "historical":
+            continue
+        date = point.get("date") or ""
+        if not isinstance(date, str) or date >= today:
+            continue
+        if meilleur is None or date > (meilleur.get("date") or ""):
+            meilleur = point
+    return meilleur
+
+
+def _meme_cours(a, b):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return False
+    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        return False
+    return float(a) == float(b)
+
+
+def _reproduit_seance_precedente(history, prices, today):
+    """True si chaque cours live et son volume recopient la séance précédente.
+
+    TODO: calendrier des jours fériés BRVM. Sans calendrier, un férié en
+    semaine republie souvent le dernier cours et le dernier volume pour
+    toutes les valeurs : on n'ajoute pas de point ce jour-là. Dès qu'un
+    ticker diffère (cours ou volume), c'est une vraie séance.
+    """
+    vus = 0
+    if not isinstance(history, dict):
+        return False
+    for ticker, data in (prices or {}).items():
+        if not isinstance(data, dict) or not data.get("price"):
+            continue
+        vus += 1
+        precedent = _seance_precedente(history.get(ticker), today)
+        if precedent is None or not _meme_cours(precedent.get("price"), data.get("price")):
+            return False
+        if _volume_seance(precedent) != _volume_seance(data):
+            return False
+    return vus > 0
+
+
 def append_live_prices():
     """Ajoute les prix live du jour à l'historique."""
     try:
@@ -85,6 +141,11 @@ def append_live_prices():
         history = load_history()
         if not history and os.path.exists(HISTORY_PATH) and os.path.getsize(HISTORY_PATH) > 100:
             logger.error("append_live_prices: lecture vide alors qu'un fichier non trivial existe, historique probablement corrompu, ecriture annulee")
+            return 0
+        if _reproduit_seance_precedente(history, prices, today):
+            logger.info(
+                "append_live_prices: cours et volumes identiques a la seance precedente, point non ajoute"
+            )
             return 0
         updated = []
         for ticker, data in prices.items():
