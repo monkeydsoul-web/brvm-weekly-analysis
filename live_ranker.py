@@ -618,7 +618,10 @@ def doit_recalculer_note(payload, moment, empreinte):
 
 
 def _a_une_note(ligne):
+    """Une ligne en erreur (composite souvent à 0) n'est pas une note figée."""
     if not isinstance(ligne, dict):
+        return False
+    if ligne.get("error"):
         return False
     valeur = ligne.get("composite_adj")
     return isinstance(valeur, (int, float)) and not isinstance(valeur, bool)
@@ -696,6 +699,8 @@ def _prix_pour_la_note(prix_live, points, moment):
 
     Après la clôture du jour : le cours live (c'est la clôture).
     Sinon : la dernière clôture de l'historique, pas le tick de séance.
+    En séance, sans aucune clôture : None. La société reste non notée.
+    On ne met pas le cours de la minute à la place.
     """
     from live_valuation import _nombre, serie_clotures
     moment = _moment_utc(moment)
@@ -705,6 +710,8 @@ def _prix_pour_la_note(prix_live, points, moment):
     serie = serie_clotures(points, moment.date().isoformat())
     if serie:
         return serie[-1]["cours"]
+    if _seance_ouverte(moment):
+        return None
     if cours_live is not None and cours_live > 0:
         return cours_live
     return None
@@ -838,7 +845,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                     else:
                         points = _ph.get(ticker, []) if isinstance(_ph, dict) else []
                         prix_note = _prix_pour_la_note(row.get("price"), points, moment)
-                        if prix_note and prix_note != row.get("price"):
+                        if prix_note is None or prix_note != row.get("price"):
                             row_note = _completer_ligne(
                                 ticker, base_row,
                                 _donnees_prix_note(live_price_data, prix_note),
@@ -846,6 +853,8 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                             )
                         else:
                             row_note = dict(row)
+                        if prix_note is None:
+                            row_note["price"] = None
                         row_note["_moment"] = moment
                         row_note["_inclure_cloture_du_jour"] = _cloture_du_jour_incluse(moment)
                         row_note["historique_clotures"] = points

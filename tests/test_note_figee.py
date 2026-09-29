@@ -369,3 +369,58 @@ def test_fichier_illisible_garde_l_empreinte_precedente(classement, tmp_path, mo
     assert repris["faits_empreinte"] == empreinte_reelle(chemins)
     assert repris["faits_empreinte"] != empreinte
 
+
+def test_redemarrage_sans_classement_prend_la_derniere_cloture(classement, monkeypatch):
+    vu = {}
+
+    def faux(row):
+        vu["price"] = row.get("price")
+        vu["change_pct"] = row.get("change_pct")
+        vu["volume"] = row.get("volume")
+        return {"composite_adj": 42.0, "composite_raw": 40.0, "score_technique": 4.0}
+
+    monkeypatch.setattr(live_ranker, "_compute_scores", faux)
+    assert not classement["chemin"].exists()
+    classement["hist"]["ALPH"][-1]["price"] = 1234
+    classement["etat"]["cache"] = _prix(1800, 5.0, 99999, trend="top")
+    resultat = compute_live_ranking(trigger="startup", moment=SEANCE)
+    assert resultat["note_recalculee"] is True
+    assert vu["price"] == 1234
+    assert vu["change_pct"] == 0
+    assert vu["volume"] == 0
+    assert _ligne(resultat)["price"] == 1800
+    assert _ligne(resultat)["composite_adj"] == 42.0
+
+
+def test_sans_historique_en_seance_la_societe_reste_non_notee(classement, monkeypatch):
+    vu = {}
+
+    def faux(row):
+        vu["price"] = row.get("price")
+        return {"composite_adj": 12.0, "composite_raw": 10.0, "score_technique": 5.0}
+
+    monkeypatch.setattr(live_ranker, "_compute_scores", faux)
+    classement["hist"]["ALPH"] = []
+    classement["etat"]["cache"] = _prix(1800, 5.0, 99999, trend="top")
+    resultat = compute_live_ranking(trigger="startup", moment=SEANCE)
+    assert vu["price"] is None
+    ligne = _ligne(resultat)
+    assert ligne["price"] == 1800
+    assert ligne["statut"] == "non_note"
+    assert ligne["conseil"] is None
+
+
+def test_ligne_en_erreur_est_recalculee(classement):
+    _ecrire(classement["chemin"])
+    donnees = json.loads(classement["chemin"].read_text(encoding="utf-8"))
+    donnees["ranking"][0]["composite_adj"] = 0
+    donnees["ranking"][0]["error"] = "scoring casse"
+    classement["chemin"].write_text(json.dumps(donnees), encoding="utf-8")
+    classement["etat"]["cache"] = _prix(1500, 2.0, 1000, trend="top")
+    resultat = compute_live_ranking(trigger="scheduler", moment=SEANCE)
+    ligne = _ligne(resultat)
+    assert "error" not in ligne
+    assert ligne["composite_adj"] != 0
+    assert ligne["note_calculee_le"] == SEANCE.isoformat()
+    assert ligne["price"] == 1500
+    assert resultat["faits_empreinte"] == "fixe"
