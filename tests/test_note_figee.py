@@ -424,3 +424,45 @@ def test_ligne_en_erreur_est_recalculee(classement):
     assert ligne["note_calculee_le"] == SEANCE.isoformat()
     assert ligne["price"] == 1500
     assert resultat["faits_empreinte"] == "fixe"
+
+
+def test_frontiere_15h29_puis_15h30(classement):
+    _ecrire(classement["chemin"])
+    classement["etat"]["cache"] = _prix(1300, 1.0, 50, trend=None)
+    avant = compute_live_ranking(
+        trigger="scheduler",
+        moment=datetime(2026, 9, 29, 15, 29, tzinfo=timezone.utc),
+    )
+    assert avant["market_open"] is True
+    assert avant["note_recalculee"] is False
+    assert _ligne(avant)["composite_adj"] == 3.3
+    assert _ligne(avant)["note_calculee_le"] == NOTE_VEILLE
+
+    classement["etat"]["cache"] = _prix(1310, 1.2, 60, trend=None)
+    pile = compute_live_ranking(
+        trigger="scheduler",
+        moment=datetime(2026, 9, 29, 15, 30, tzinfo=timezone.utc),
+    )
+    assert pile["market_open"] is False
+    assert pile["note_recalculee"] is True
+    assert _ligne(pile)["composite_adj"] != 3.3
+    assert _ligne(pile)["note_calculee_le"] == "2026-09-29T15:30:00+00:00"
+    assert _ligne(pile)["price"] == 1310
+
+
+def test_lundi_8h_garde_la_note_du_vendredi(classement):
+    vendredi = "2026-09-25T16:00:00+00:00"
+    _ecrire(classement["chemin"], note_calculee_le=vendredi, updated_at=vendredi)
+    donnees = json.loads(classement["chemin"].read_text(encoding="utf-8"))
+    donnees["ranking"][0]["note_calculee_le"] = vendredi
+    classement["chemin"].write_text(json.dumps(donnees), encoding="utf-8")
+    classement["etat"]["cache"] = _prix(1600, 0.2, 10, trend=None)
+    resultat = compute_live_ranking(
+        trigger="scheduler",
+        moment=datetime(2026, 9, 28, 8, 0, tzinfo=timezone.utc),
+    )
+    assert resultat["market_open"] is False
+    assert resultat["note_recalculee"] is False
+    assert _ligne(resultat)["composite_adj"] == 3.3
+    assert _ligne(resultat)["note_calculee_le"] == vendredi
+    assert _ligne(resultat)["price"] == 1600
