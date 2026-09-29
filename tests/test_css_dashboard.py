@@ -30,7 +30,7 @@ def test_css_app_repond_200_text_css(client):
     assert reponse.status_code == 200
     assert (reponse.content_type or "").startswith("text/css")
     assert "nosniff" in (reponse.headers.get("X-Content-Type-Options") or "")
-    assert "no-cache" in (reponse.headers.get("Cache-Control") or "")
+    assert reponse.headers.get("Cache-Control") == "no-store"
     corps = reponse.get_data()
     assert b":root{" in corps
     assert b"#sb-compact-btn{display:none!important}" in corps
@@ -39,6 +39,21 @@ def test_css_app_repond_200_text_css(client):
     assert (versionne.content_type or "").startswith("text/css")
     assert versionne.get_data() == corps
     assert "immutable" in (versionne.headers.get("Cache-Control") or "")
+
+
+def test_css_cache_long_seulement_si_v_correspond(client):
+    """Cache immutable seulement si v est le jeton de cette instance."""
+    import app as application
+    sans = client.get("/css/app.css")
+    assert sans.status_code == 200
+    assert sans.headers.get("Cache-Control") == "no-store"
+    autre = client.get("/css/app.css?v=pas-cette-instance")
+    assert autre.status_code == 200
+    assert autre.headers.get("Cache-Control") == "no-store"
+    assert application.ASSET_V != "pas-cette-instance"
+    bon = client.get("/css/app.css?v=%s" % application.ASSET_V)
+    assert bon.status_code == 200
+    assert bon.headers.get("Cache-Control") == "public, max-age=31536000, immutable"
 
 
 def test_page_charge_le_css_au_meme_jeton(client):

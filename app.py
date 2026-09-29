@@ -410,10 +410,10 @@ def servir_css_dashboard(nom):
     reponse = send_from_directory(dossier, nom, mimetype="text/css")
     reponse.headers["Content-Type"] = "text/css; charset=utf-8"
     reponse.headers["X-Content-Type-Options"] = "nosniff"
-    if request.args.get("v"):
+    if request.args.get("v") == ASSET_V:
         reponse.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     else:
-        reponse.headers["Cache-Control"] = "no-cache"
+        reponse.headers["Cache-Control"] = "no-store"
     return reponse
 
 
