@@ -83,6 +83,19 @@ Le port 5000 est fixe et ne doit pas être modifié (références hardcodées da
 
 ---
 
+## Tests
+
+Filet pytest (Python 3.9). Il ne modifie pas l'application : aucun appel réseau, aucune écriture dans `/var/data`.
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+pytest -q
+```
+
+Les jeux figés sont dans `tests/fixtures/` (classement, cache de cours, cinq lignes BOC). `tests/conftest.py` force `BRVM_DATA_DIR` vers un répertoire temporaire.
+
+---
+
 ## Structure des dossiers
 
 ```

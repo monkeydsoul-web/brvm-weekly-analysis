@@ -1,0 +1,62 @@
+{
+  "ALPH": {
+    "date": "2026-01-14",
+    "cours_prev": 9800,
+    "cours_ouv": 9850,
+    "cours_clot": 10200,
+    "variation": 4.08,
+    "per_boc": 8.5,
+    "div_net": 500,
+    "div_date": "18-juin-25",
+    "div_rdt": 5.0,
+    "var_annee": 12.0
+  },
+  "BRAV": {
+    "date": "2026-01-14",
+    "cours_prev": 4900,
+    "cours_ouv": 4950,
+    "cours_clot": 4800,
+    "variation": -2.04,
+    "per_boc": 6.2,
+    "div_net": 320,
+    "div_date": "02-mai-25",
+    "div_rdt": 6.4,
+    "var_annee": 8.0
+  },
+  "CHER": {
+    "date": "2026-01-14",
+    "cours_prev": 4100,
+    "cours_ouv": 4050,
+    "cours_clot": 4000,
+    "variation": -2.44,
+    "per_boc": 22.0,
+    "div_net": 100,
+    "div_date": "11-avr-25",
+    "div_rdt": 2.5,
+    "var_annee": -6.0
+  },
+  "EXCP": {
+    "date": "2026-01-14",
+    "cours_prev": 7900,
+    "cours_ouv": 7950,
+    "cours_clot": 8000,
+    "variation": 1.27,
+    "per_boc": 14.0,
+    "div_net": 900,
+    "div_date": "20-juil-25",
+    "div_rdt": 11.0,
+    "var_annee": 3.0
+  },
+  "SANS": {
+    "date": "2026-01-14",
+    "cours_prev": 1480,
+    "cours_ouv": 1490,
+    "cours_clot": 1500,
+    "variation": 1.35,
+    "per_boc": 9.0,
+    "div_net": 40,
+    "div_date": "01-mar-25",
+    "div_rdt": 2.7,
+    "var_annee": 1.0
+  }
+}
