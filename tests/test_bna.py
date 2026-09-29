@@ -43,13 +43,14 @@ def _univers(fixtures_dir):
     return json.loads((fixtures_dir / "bna_univers.json").read_text(encoding="utf-8"))
 
 
-def _ligne(base, prix, pdf, boc, ticker="TEST"):
+def _ligne(base, prix, pdf, boc, ticker="TEST", moment=SEANCE):
     return _build_enriched_row(
         ticker,
         base,
         {"price": prix, "change_pct": 0, "volume": 0},
         pdf,
         boc_snapshot={ticker: boc} if boc else {},
+        moment=moment,
     )
 
 
@@ -66,7 +67,7 @@ def test_bna_identique_si_seul_le_cours_change(fixtures_dir):
     assert bas["eps"] == haut["eps"] == 1000.0
     assert bas["bvpa"] == haut["bvpa"] == 5000.0
     assert bas["bna_source"] == haut["bna_source"] == "rapport"
-    assert bas["bna_exercice"] == 2024
+    assert bas["bna_exercice"] == 2025
     assert bas["bna_date"] is None
     assert bas["bna_ecart_boc"] == round(1000.0 / 900.0, 2)
     assert bas["bvpa_source"] == "rapport"
@@ -109,7 +110,7 @@ def test_bna_change_avec_un_nouveau_rapport(fixtures_dir):
     avant = _ligne(cas["base"], 12000, cas["rapport_2024"], cas["boc"])
     apres = _ligne(cas["base"], 12000, cas["rapport_2025"], cas["boc"])
     assert avant["bna"] == 1000.0
-    assert avant["bna_exercice"] == 2024
+    assert avant["bna_exercice"] == 2025
     assert apres["bna"] == 1080.0
     assert apres["bna_source"] == "rapport"
     assert apres["bna_exercice"] == 2025
@@ -338,71 +339,80 @@ def test_bande_08_125_garde_le_boc_pour_un_ratio_de_1_39(caplog):
     assert sous_plancher["bna_ecart_boc"] == 0.79
 
 
-def test_boac_2024_ignore_si_le_boc_a_un_exercice_2025(caplog):
-    """BOAC : l'état 2024 est écarté quand le BOC porte déjà l'exercice 2025."""
-    import logging
-    caplog.set_level(logging.WARNING, logger="live_ranker")
-    base = dict(STOCK_FUNDAMENTALS["BOAC"])
-    rn = 1000.0 * base["shares"] / 1000000.0
-    pdf = _rapport("Etats financiers", rn, rn * 4, annee=2024, year=2025)
-    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0, "exercice": 2025}
-    row = _ligne(base, 12000, pdf, boc, ticker="BOAC")
-    assert row["bna_source"] == "boc"
-    assert row["bna"] == 1000.0
-    assert row["bna_exercice"] is None
-    assert row["bvpa_source"] != "rapport"
-    assert "BOAC" in caplog.text
-    assert "2024" in caplog.text
-    assert "ignor" in caplog.text
-
-    # Le même état reste si aucun exercice plus récent n'est connu.
-    tenu = _ligne(
-        base, 12000, pdf,
-        {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0},
-        ticker="BOAC",
-    )
-    assert tenu["bna_source"] == "rapport"
-    assert tenu["bna_exercice"] == 2024
+def _base_exercice():
+    return {
+        "name": "Test", "shares": 1000000, "sector": "Banque",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
+    }
 
 
-def test_cfac_2023_ignore_si_un_etat_2025_est_deja_publie(tmp_path, monkeypatch, caplog):
-    """CFAC : un état financier 2025 dans le catalogue écarte le rapport 2023.
+def test_exercice_trop_ancien_apres_le_1er_juillet(caplog):
+    """Le 29 septembre 2026, un exercice avant 2025 est ignoré.
 
-    Un rapport trimestriel 2026, lui, ne compte pas comme exercice plus récent.
+    Ça écarte BOAC 2024, CFAC 2023, UNLC 2023 et SEMC 2023. 2025 reste.
     """
     import logging
     caplog.set_level(logging.WARNING, logger="live_ranker")
+    base = _base_exercice()
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0}
+    jour = datetime(2026, 9, 29, 12, 0, tzinfo=timezone.utc)
+    for ticker, annee in (("BOAC", 2024), ("CFAC", 2023), ("UNLC", 2023), ("SEMC", 2023)):
+        pdf = _rapport("Etats financiers", 1000.0, 4000.0, annee=annee, year=annee + 1)
+        row = _ligne(base, 12000, pdf, boc, ticker=ticker, moment=jour)
+        assert row["bna_source"] == "boc", ticker
+        assert row["bna"] == 1000.0
+        assert row["bna_exercice"] is None
+        assert row["bvpa_source"] != "rapport"
+        assert ticker in caplog.text
+        assert str(annee) in caplog.text
+
+    garde = _ligne(
+        base, 12000,
+        _rapport("Etats financiers", 1000.0, 4000.0, annee=2025, year=2026),
+        boc, ticker="SNTS", moment=jour,
+    )
+    assert garde["bna_source"] == "rapport"
+    assert garde["bna_exercice"] == 2025
+
+
+def test_grace_avant_le_1er_juillet():
+    """Avant le 1er juillet, l'exercice N-2 est encore accepté. N-3 ne l'est pas."""
+    base = _base_exercice()
+    boc = {"date": "2026-06-15", "cours_clot": 10000.0, "per_boc": 10.0}
+    juin = datetime(2026, 6, 30, 12, 0, tzinfo=timezone.utc)
+    juillet = datetime(2026, 7, 1, 0, 0, tzinfo=timezone.utc)
+    pdf_2024 = _rapport("Etats financiers", 1000.0, 4000.0, annee=2024, year=2025)
+    assert _ligne(base, 12000, pdf_2024, boc, moment=juin)["bna_source"] == "rapport"
+    assert _ligne(base, 12000, pdf_2024, boc, ticker="BOAC", moment=juillet)["bna_source"] == "boc"
+    pdf_2023 = _rapport("Rapport annuel", 1000.0, 4000.0, annee=2023, year=2024)
+    assert _ligne(base, 12000, pdf_2023, boc, ticker="CFAC", moment=juin)["bna_source"] == "boc"
+
+
+def test_catalogue_annee_de_publication_ne_jette_pas_lexercice(tmp_path, monkeypatch):
+    """2026 dans le catalogue est une année de publication. L'exercice 2025 reste."""
     monkeypatch.setattr("paths.DATA_DIR", str(tmp_path))
     (tmp_path / "reports_full.json").write_text(json.dumps([
-        {"ticker": "CFAC", "type": "Etats financiers", "annee": 2025},
-        {"ticker": "CFAC", "type": "Rapport trimestriel", "annee": 2026},
-        {"ticker": "SNTS", "type": "Etats financiers", "annee": 2025},
+        {
+            "ticker": "SNTS",
+            "type": "Etats financiers",
+            "annee": 2026,
+            "titre": "20260221 - etats financiers - exercice 2025",
+        },
     ]), encoding="utf-8")
-    base = dict(STOCK_FUNDAMENTALS["CFAC"])
-    rn = 800.0 * base["shares"] / 1000000.0
-    pdf = _rapport("Rapport annuel", rn, rn * 5, annee=2023, year=2024)
-    boc = {"date": "2026-09-25", "cours_clot": 8000.0, "per_boc": 10.0}
-    row = _ligne(base, 9000, pdf, boc, ticker="CFAC")
-    assert row["bna_source"] == "boc"
-    assert row["bna"] == 800.0
-    assert row["bna_exercice"] is None
-    assert "CFAC" in caplog.text
-    assert "2023" in caplog.text
-
-    monkeypatch.setattr("paths.DATA_DIR", str(tmp_path / "vide"))
-    (tmp_path / "vide").mkdir()
-    (tmp_path / "vide" / "reports_cache.json").write_text(json.dumps({
+    (tmp_path / "reports_cache.json").write_text(json.dumps({
         "reports": {
-            "CFAC": [
-                {"type": "Rapport trimestriel", "annee": 2026},
-            ],
+            "SNTS": [{"type": "Rapport annuel", "annee": 2026, "title": "Rapport 2026"}],
         },
     }), encoding="utf-8")
-    caplog.clear()
-    garde = _ligne(base, 9000, pdf, boc, ticker="CFAC")
-    assert garde["bna_source"] == "rapport"
-    assert garde["bna_exercice"] == 2023
-    assert "ignor" not in caplog.text
+    base = _base_exercice()
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0}
+    pdf = _rapport("Etats financiers", 1000.0, 4000.0, annee=2025, year=2026)
+    row = _ligne(base, 12000, pdf, boc, ticker="SNTS")
+    assert row["bna_source"] == "rapport"
+    assert row["bna"] == 1000.0
+    assert row["bna_exercice"] == 2025
+    assert row["bvpa_source"] == "rapport"
 
 
 def test_bvpa_boc_seulement_si_le_bulletin_en_a_un(caplog):
@@ -414,7 +424,7 @@ def test_bvpa_boc_seulement_si_le_bulletin_en_a_un(caplog):
         "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
         "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
     }
-    pdf = _rapport("Etats financiers", 1000.0, 5000.0, annee=2024, year=2024)
+    pdf = _rapport("Etats financiers", 1000.0, 5000.0, annee=2025, year=2026)
     sans = _ligne(base, 12000, pdf, {"date": "2026-09-25", "cours_clot": 9000, "per_boc": 10})
     assert sans["bvpa"] == 5000.0
     assert sans["bvpa_source"] == "rapport"
@@ -618,7 +628,9 @@ def gel(tmp_path, monkeypatch):
     monkeypatch.setattr(live_ranker, "_last_prices", {})
     monkeypatch.setattr(live_ranker, "_last_ranking", None)
     monkeypatch.setattr("scraper.STOCK_FUNDAMENTALS", FOND)
-    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None: "fixe")
+    monkeypatch.setattr(
+        live_ranker, "empreinte_faits", lambda chemins=None, moment=None: "fixe",
+    )
     monkeypatch.setattr(
         "price_history_builder.load_history",
         lambda: {"ALPH": [{"date": "2026-09-28", "price": 8000, "volume": 100}]},

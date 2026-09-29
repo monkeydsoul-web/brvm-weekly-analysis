@@ -14,7 +14,7 @@
   "rapport_2024": {
     "status": "ok",
     "doc_type": "Etats financiers",
-    "annee": 2024,
+    "annee": 2025,
     "year": 2024,
     "kpis": {
       "resultat_net": {"valeur": 1000.0, "unite": "MFCFA"},

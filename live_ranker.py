@@ -217,143 +217,40 @@ def _annee_du_rapport(pdf_analysis):
     return annee
 
 
-def _annee_document_comptable(doc):
-    """Exercice d'un état financier ou d'un rapport annuel cité à côté."""
-    if not isinstance(doc, dict):
-        return None
-    brut = doc.get("doc_type") or doc.get("type")
-    if _pli(brut) not in _DOCS_COMPTABLES:
-        return None
-    return _annee_entiere(doc.get("annee") if doc.get("annee") is not None else doc.get("year"))
+def _plancher_exercice(moment):
+    """Plus petit exercice encore accepté.
 
+    Les catalogues de rapports portent l'année de publication (souvent 2026
+    pour un exercice 2025) : on ne les compare pas à `annee`.
 
-def _annees_citees(pdf_analysis):
-    """Exercices comptables listés sur l'analyse (autres documents de la société)."""
-    annees = set()
-    if not isinstance(pdf_analysis, dict):
-        return annees
-    for cle in ("rapports", "reports", "documents"):
-        liste = pdf_analysis.get(cle)
-        if not isinstance(liste, list):
-            continue
-        for doc in liste:
-            annee = _annee_document_comptable(doc)
-            if annee is not None:
-                annees.add(annee)
-    return annees
-
-
-# (chemin, mtime) → années comptables par ticker. Évite de relire le
-# catalogue une fois par société à chaque classement.
-_CATALOG_ANNEES = {}
-
-
-def _annees_catalog_comptable(ticker):
-    """Exercices des états financiers et rapports annuels connus pour ce ticker.
-
-    Lit reports_full.json et reports_cache.json s'ils sont là. Un trimestriel
-    ne compte pas : son année ne doit pas écarter un rapport annuel encore
-    le plus récent.
+    À partir du 1er juillet, l'exercice doit être au moins l'année précédente.
+    Avant cette date, les états de N-1 ne sont pas tous sortis : on accepte
+    encore N-2. Le 29 septembre 2026, 2024 et avant sont écartés
+    (BOAC 2024, CFAC 2023, UNLC 2023, SEMC 2023). 2025 reste.
     """
-    if not ticker:
-        return set()
-    from paths import DATA_DIR
-    return set(_index_catalog(DATA_DIR).get(ticker, ()))
+    if moment is None:
+        moment = datetime.now(timezone.utc)
+    else:
+        moment = _moment_utc(moment)
+    if moment.month < 7:
+        return moment.year - 2
+    return moment.year - 1
 
 
-def _index_catalog(data_dir):
-    """Années comptables par ticker, relues seulement si un fichier change."""
-    signatures = []
-    for nom in ("reports_full.json", "reports_cache.json"):
-        chemin = os.path.join(data_dir, nom)
-        try:
-            signatures.append((chemin, os.path.getmtime(chemin)))
-        except OSError:
-            signatures.append((chemin, None))
-    cle = tuple(signatures)
-    if cle in _CATALOG_ANNEES:
-        return _CATALOG_ANNEES[cle]
+def _rapport_perime(pdf_analysis, ticker="", moment=None):
+    """Vrai si l'exercice est trop ancien pour la date du classement.
 
-    index = {}
-
-    def _ajouter(ticker_doc, doc):
-        if not ticker_doc or not isinstance(doc, dict):
-            return
-        if doc.get("ticker") not in (None, "", ticker_doc):
-            return
-        annee = _annee_document_comptable(doc)
-        if annee is None:
-            return
-        index.setdefault(ticker_doc, set()).add(annee)
-
-    plein = signatures[0][0]
-    if signatures[0][1] is not None:
-        try:
-            with open(plein, encoding="utf-8") as fichier:
-                data = json.load(fichier)
-            if isinstance(data, list):
-                for doc in data:
-                    if isinstance(doc, dict):
-                        _ajouter(doc.get("ticker"), doc)
-        except Exception:
-            logger.warning("Exercices illisibles : %s", plein)
-
-    cache = signatures[1][0]
-    if signatures[1][1] is not None:
-        try:
-            with open(cache, encoding="utf-8") as fichier:
-                data = json.load(fichier)
-            rapports = data.get("reports") if isinstance(data, dict) else None
-            if not isinstance(rapports, dict) and isinstance(data, dict):
-                rapports = data
-            if isinstance(rapports, dict):
-                for ticker_doc, liste in rapports.items():
-                    if not isinstance(liste, list):
-                        continue
-                    for doc in liste:
-                        _ajouter(ticker_doc, doc)
-        except Exception:
-            logger.warning("Exercices illisibles : %s", cache)
-
-    _CATALOG_ANNEES[cle] = index
-    return index
-
-
-def _plus_recent_exercice(ticker, pdf_analysis, boc_entry):
-    """Dernier exercice connu pour cette société (BOC ou rapports comptables)."""
-    annees = set()
-    annee = _annee_du_rapport(pdf_analysis)
-    if annee is not None:
-        annees.add(annee)
-    annees |= _annees_citees(pdf_analysis)
-    if isinstance(boc_entry, dict):
-        for cle in ("exercice", "annee"):
-            valeur = _annee_entiere(boc_entry.get(cle))
-            if valeur is not None:
-                annees.add(valeur)
-                break
-    annees |= _annees_catalog_comptable(ticker)
-    if not annees:
-        return None
-    return max(annees)
-
-
-def _rapport_perime(pdf_analysis, boc_entry, ticker):
-    """Vrai si l'exercice du rapport est plus vieux que le dernier connu.
-
-    BOAC 2024 et CFAC 2023 sont ce cas : un état plus récent existe déjà
-    dans le BOC ou dans les rapports de la société. On n'utilise alors
-    ni le BNA ni le BVPA de ce document.
+    On n'utilise alors ni le BNA ni le BVPA de ce document.
     """
     annee = _annee_du_rapport(pdf_analysis)
     if annee is None:
         return False
-    plus_recent = _plus_recent_exercice(ticker, pdf_analysis, boc_entry)
-    if plus_recent is None or annee >= plus_recent:
+    plancher = _plancher_exercice(moment)
+    if annee >= plancher:
         return False
     logger.warning(
-        "BNA %s : exercice %s plus ancien que %s — rapport ignoré",
-        ticker, annee, plus_recent,
+        "BNA %s : exercice %s antérieur à %s — rapport ignoré",
+        ticker, annee, plancher,
     )
     return True
 
@@ -513,11 +410,10 @@ def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_estime, bvpa_statique):
     return None, None, False
 
 
-def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
+def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker="", moment=None):
     """Fige BNA et BVPA, puis P/E et P/B = cours actuel / ces chiffres."""
     nb = _nb_actions(row)
-    boc_meta = {"exercice": row.get("_boc_exercice")}
-    pdf_utile = None if _rapport_perime(pdf_analysis, boc_meta, ticker) else pdf_analysis
+    pdf_utile = None if _rapport_perime(pdf_analysis, ticker, moment) else pdf_analysis
     bna_rapport, annee = _bna_depuis_rapport(pdf_utile, nb)
     bna_boc = _bna_depuis_boc(row.get("_boc_cours"), row.get("_boc_per"))
     bna, source, exercice, date_boc, ecart, alerter_bna = _choisir_bna(
@@ -568,7 +464,7 @@ def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
     return row
 
 
-def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_snapshot=None):
+def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_snapshot=None, moment=None):
     """
     Fusionne les 3 sources de données pour un ticker :
     1. Fondamentaux statiques (scraper.py)
@@ -630,11 +526,6 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
             row['_boc_date']     = boc_entry.get('date')
             row['_boc_pb']       = boc_entry.get('pb_boc')
             row['_boc_bvpa']     = boc_entry.get('bvpa')
-            # Exercice du bulletin s'il est écrit. La date du BOC est un jour
-            # de cotation, pas une année fiscale.
-            row['_boc_exercice'] = boc_entry.get('exercice')
-            if row['_boc_exercice'] is None:
-                row['_boc_exercice'] = boc_entry.get('annee')
     except Exception as _e:
         pass
 
@@ -730,7 +621,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
     price_final  = row.get('price') or boc_cours or 0
 
     # BNA et BVPA figés avant le dividende : le cours du jour ne les change pas.
-    _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker)
+    _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker, moment)
 
     # Dividende BOC : appliqué si date récente ET cohérent avec existant (≥ 50%)
     # Exception : si PDF a explicitement fixé 0 (dividende non récurrent), le BOC ne peut pas l'écraser
@@ -744,7 +635,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
 
     # Nettoyage des clés internes
     for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours', '_boc_date',
-              '_boc_pb', '_boc_bvpa', '_boc_exercice'):
+              '_boc_pb', '_boc_bvpa'):
         row.pop(k, None)
 
     return row
@@ -1098,7 +989,8 @@ def _completer_ligne(ticker, base_row, live_price_data, pdf_analysis,
     from data_validator import validate_dividend
 
     row = _build_enriched_row(
-        ticker, base_row, live_price_data or {}, pdf_analysis, boc_snapshot=boc_data,
+        ticker, base_row, live_price_data or {}, pdf_analysis,
+        boc_snapshot=boc_data, moment=moment,
     )
     _boc_e = boc_data.get(ticker, {}) if isinstance(boc_data, dict) else {}
     if not isinstance(_boc_e, dict):
