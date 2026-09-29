@@ -963,6 +963,159 @@ def api_live_ranking_changes():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def _note10_valeur(row):
+    """Note /10. Champ serveur note10, sinon composite interne / 8."""
+    if not isinstance(row, dict):
+        return None
+    brut = row.get("note10")
+    if brut is not None and brut != "":
+        try:
+            return float(brut)
+        except (TypeError, ValueError):
+            pass
+    from verdict import note10 as note10_de
+    return note10_de(row.get("composite_adj"))
+
+
+def _note10_fr(row):
+    """Note avec une virgule, sans le suffixe /10."""
+    valeur = _note10_valeur(row)
+    if valeur is None:
+        return None
+    return ("%.1f" % valeur).replace(".", ",")
+
+
+def _conseil_visible(row):
+    """Libelle du site, ou Pas de conseil (suspendu, non note, absent)."""
+    if not isinstance(row, dict):
+        return "Pas de conseil"
+    lib = row.get("conseil_libelle")
+    if lib in ("Intéressant", "À surveiller", "Prudence"):
+        return lib
+    return "Pas de conseil"
+
+
+def _rapport_annuel_visible(row):
+    """Verdict du rapport annuel, en minuscules. Distinct du conseil du site."""
+    if not isinstance(row, dict):
+        return "—"
+    brut = str(row.get("pdf_verdict") or "").strip().upper().replace("É", "E")
+    return {
+        "POSITIF": "positif",
+        "NEUTRE": "neutre",
+        "NEGATIF": "négatif",
+    }.get(brut, "—")
+
+
+def contexte_prompt_secteur(societe, analysis):
+    """Ligne envoyee au modele : note /10 et conseil, pas le score interne."""
+    analysis = analysis if isinstance(analysis, dict) else {}
+    kpis = analysis.get("kpis") or {}
+
+    def kv(cle):
+        bloc = kpis.get(cle) or {}
+        if isinstance(bloc, dict):
+            return bloc.get("valeur")
+        return None
+
+    dividende = societe.get("div_yield", 0)
+    if isinstance(dividende, bool) or not isinstance(dividende, (int, float)):
+        dividende = 0
+    note = _note10_fr(societe) or "N/D"
+    return (
+        "• %s (%s) — Note %s/10 | Conseil: %s | P/E %s | ROE %s%% | Div %.1f%% | "
+        "Rapport annuel: %s | CA: %s MFCFA | RN: %s MFCFA"
+        % (
+            societe["ticker"],
+            societe.get("country", ""),
+            note,
+            _conseil_visible(societe),
+            societe.get("pe_ref", "?"),
+            societe.get("roe", "?"),
+            dividende,
+            analysis.get("verdict_investisseur", "N/D"),
+            kv("chiffre_affaires"),
+            kv("resultat_net"),
+        )
+    )
+
+
+def contexte_prompt_comparaison(stock, analysis, boc_data):
+    """Bloc envoye au modele : note /10 et conseil, pas le score interne."""
+    stock = stock if isinstance(stock, dict) else {}
+    analysis = analysis if isinstance(analysis, dict) else {}
+    boc_data = boc_data if isinstance(boc_data, dict) else {}
+    kpis = analysis.get("kpis") or {}
+
+    def kv(cle):
+        bloc = kpis.get(cle) or {}
+        if isinstance(bloc, dict):
+            return bloc.get("valeur")
+        return None
+
+    note = _note10_fr(stock) or "N/D"
+    dividende = stock.get("div_yield", 0)
+    if isinstance(dividende, bool) or not isinstance(dividende, (int, float)):
+        dividende = 0.0
+    prix = stock.get("price", 0)
+    if isinstance(prix, bool) or not isinstance(prix, (int, float)):
+        prix = 0
+    perspectives = analysis.get("perspectives") or ""
+    perspectives = perspectives[:200] if perspectives else "N/D"
+    n = live_ranker.nombre_note
+    return (
+        "\n=== %s — %s (%s · %s) ===\n"
+        "Note: %s/10 | Conseil: %s | Rang: #%s\n"
+        "Cours: %s XOF | Var annuelle: %s%%\n"
+        "P/E: %s | P/B: %s | ROE: %s%%\n"
+        "BNA: %s XOF | BVPA: %s XOF\n"
+        "Dividende: %s XOF (%.1f%%) | Ex-div: %s\n"
+        "Scores modèles: Graham=%.0f DCF=%.0f DDM=%.0f EPV=%.0f "
+        "Buffett=%.0f RevDCF=%.0f Relatif=%.0f Tech=%.0f\n"
+        "CA: %s MFCFA | RN: %s MFCFA | EBITDA: %s MFCFA\n"
+        "Capitaux propres: %s MFCFA | Dette nette: %s MFCFA\n"
+        "Rapport annuel: %s\n"
+        "Points clés: %s\n"
+        "Risques: %s\n"
+        "Perspectives: %s\n"
+    ) % (
+        stock.get("ticker", ""),
+        stock.get("name", ""),
+        stock.get("sector", ""),
+        stock.get("country", ""),
+        note,
+        _conseil_visible(stock),
+        stock.get("rank", "?"),
+        format(prix, ","),
+        boc_data.get("var_annee", "?"),
+        stock.get("pe_ref", "?"),
+        stock.get("pb_ref", "?"),
+        stock.get("roe", "?"),
+        stock.get("eps", "?"),
+        stock.get("bvpa", "?"),
+        stock.get("div_per_share", 0),
+        dividende,
+        stock.get("ex_div_date", "N/D"),
+        n(stock.get("score_graham")),
+        n(stock.get("score_dcf")),
+        n(stock.get("score_ddm")),
+        n(stock.get("score_epv")),
+        n(stock.get("score_buffett")),
+        n(stock.get("score_rev_dcf")),
+        n(stock.get("score_relatif")),
+        n(stock.get("score_technique")),
+        kv("chiffre_affaires"),
+        kv("resultat_net"),
+        kv("ebitda"),
+        kv("capitaux_propres"),
+        kv("dette_nette"),
+        analysis.get("verdict_investisseur", "N/D"),
+        " | ".join((analysis.get("points_cles") or [])[:3]),
+        " | ".join((analysis.get("risques") or [])[:2]),
+        perspectives,
+    )
+
+
 @app.route("/api/sector-analysis", methods=["POST"])
 def api_sector_analysis():
     """Analyse IA d'un secteur BRVM complet."""
@@ -996,10 +1149,7 @@ def api_sector_analysis():
         companies_ctx = []
         for s in sector_stocks:
             a = analyses.get(s["ticker"], {})
-            kpis = a.get("kpis", {})
-            def kv(k): return (kpis.get(k) or {}).get("valeur")
-            ctx = f"• {s['ticker']} ({s.get('country','')}) — Score {live_ranker.nombre_note(s.get('composite_adj')):.0f}/80 | P/E {s.get('pe_ref','?')} | ROE {s.get('roe','?')}% | Div {s.get('div_yield',0):.1f}% | Verdict: {a.get('verdict_investisseur','N/D')} | CA: {kv('chiffre_affaires')} MFCFA | RN: {kv('resultat_net')} MFCFA"
-            companies_ctx.append(ctx)
+            companies_ctx.append(contexte_prompt_secteur(s, a))
         
         idx_ctx = f"Indice BRVM {sector}: {idx_data.get('current','N/D')} ({idx_data.get('change',0):+.2f}% jour, YTD {idx_data.get('ytd',0):+.2f}%)" if idx_data else ""
         
@@ -1068,26 +1218,7 @@ def api_compare_analysis():
             stock = next((s for s in scores if s.get("ticker") == ticker), {})
             analysis = analyses.get(ticker, {})
             boc_data = boc.get(ticker, {})
-            kpis = analysis.get("kpis", {})
-            
-            def kv(k): return (kpis.get(k) or {}).get("valeur")
-            
-            ctx = f"""
-=== {ticker} — {stock.get("name", "")} ({stock.get("sector", "")} · {stock.get("country", "")}) ===
-Score global: {live_ranker.nombre_note(stock.get("composite_adj")):.1f}/80 | Rang: #{stock.get("rank", "?")}
-Cours: {stock.get("price", 0):,} XOF | Var annuelle: {boc_data.get("var_annee", "?")}%
-P/E: {stock.get("pe_ref", "?")} | P/B: {stock.get("pb_ref", "?")} | ROE: {stock.get("roe", "?")}%
-BNA: {stock.get("eps", "?")} XOF | BVPA: {stock.get("bvpa", "?")} XOF
-Dividende: {stock.get("div_per_share", 0)} XOF ({stock.get("div_yield", 0):.1f}%) | Ex-div: {stock.get("ex_div_date", "N/D")}
-Scores modèles: Graham={live_ranker.nombre_note(stock.get("score_graham")):.0f} DCF={live_ranker.nombre_note(stock.get("score_dcf")):.0f} DDM={live_ranker.nombre_note(stock.get("score_ddm")):.0f} EPV={live_ranker.nombre_note(stock.get("score_epv")):.0f} Buffett={live_ranker.nombre_note(stock.get("score_buffett")):.0f} RevDCF={live_ranker.nombre_note(stock.get("score_rev_dcf")):.0f} Relatif={live_ranker.nombre_note(stock.get("score_relatif")):.0f} Tech={live_ranker.nombre_note(stock.get("score_technique")):.0f}
-CA: {kv("chiffre_affaires")} MFCFA | RN: {kv("resultat_net")} MFCFA | EBITDA: {kv("ebitda")} MFCFA
-Capitaux propres: {kv("capitaux_propres")} MFCFA | Dette nette: {kv("dette_nette")} MFCFA
-Verdict IA: {analysis.get("verdict_investisseur", "N/D")}
-Points clés: {" | ".join((analysis.get("points_cles") or [])[:3])}
-Risques: {" | ".join((analysis.get("risques") or [])[:2])}
-Perspectives: {analysis.get("perspectives", "")[:200] if analysis.get("perspectives") else "N/D"}
-"""
-            companies_ctx.append(ctx)
+            companies_ctx.append(contexte_prompt_comparaison(stock, analysis, boc_data))
         
         question_part = ("\n\nQuestion spécifique: " + question) if question else ""
         
@@ -1631,9 +1762,13 @@ def api_rapport_pdf(ticker):
                 break
 
         buf = io.BytesIO()
+        nom = row.get("name") or ticker.upper()
+        titre_meta = "BRVM Analyzer — %s (%s)" % (nom, ticker.upper())
         doc = SimpleDocTemplate(buf, pagesize=A4,
                                 leftMargin=2*cm, rightMargin=2*cm,
-                                topMargin=2*cm, bottomMargin=2*cm)
+                                topMargin=2*cm, bottomMargin=2*cm,
+                                title=titre_meta,
+                                author="BRVM Analyzer")
 
         styles = getSampleStyleSheet()
         h1 = ParagraphStyle("h1", parent=styles["Title"], fontSize=20, textColor=colors.HexColor("#1E293B"), spaceAfter=4)
@@ -1642,9 +1777,19 @@ def api_rapport_pdf(ticker):
         small = ParagraphStyle("small", parent=styles["Normal"], fontSize=8, textColor=colors.HexColor("#64748B"))
         green = colors.HexColor("#16A34A"); red = colors.HexColor("#DC2626"); amber = colors.HexColor("#D97706")
 
-        sc = live_ranker.nombre_note(row.get("composite_adj"))
-        sc_color = green if sc >= 60 else (amber if sc >= 40 else red)
-        verdict = row.get("pdf_verdict", "—")
+        note_val = _note10_valeur(row)
+        note_fr = _note10_fr(row)
+        note_cell = ("%s/10" % note_fr) if note_fr else "—"
+        if note_val is None:
+            sc_color = colors.HexColor("#64748B")
+        elif note_val >= 7.5:
+            sc_color = green
+        elif note_val >= 5:
+            sc_color = amber
+        else:
+            sc_color = red
+        conseil = _conseil_visible(row)
+        annuel = _rapport_annuel_visible(row)
 
         story = []
         # En-tête
@@ -1653,11 +1798,12 @@ def api_rapport_pdf(ticker):
         story.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} — Source : BRVM Analyzer", small))
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0"), spaceAfter=10))
 
-        # Score + Cours
+        # Note /10 + cours. Le verdict du rapport annuel reste une ligne a part.
         score_data = [
-            ["Score composite", f"{sc:.0f} / 80", "Rang", f"#{row.get('rank','?')}"],
+            ["Note", note_cell, "Rang", "#%s" % row.get("rank", "?")],
             ["Cours", f"{row.get('price', 0):,.0f} XOF".replace(",", " "), "Variation", f"{row.get('change_pct', 0):+.2f}%"],
-            ["Verdict IA", verdict, "Secteur", row.get("sector", "—")],
+            ["Conseil", conseil, "Secteur", row.get("sector", "—")],
+            ["Rapport annuel", annuel, "", ""],
         ]
         ts_score = TableStyle([
             ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#F8FAFC")),
