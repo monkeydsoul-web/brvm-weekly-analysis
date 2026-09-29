@@ -348,25 +348,48 @@ def test_reecriture_identique_ne_recalcule_pas_un_vrai_changement_oui(classement
     assert _ligne(nouveau)["price"] == 5000
 
 
-def test_fichier_illisible_garde_l_empreinte_precedente(classement, tmp_path, monkeypatch):
+def test_fichier_illisible_en_seance_ne_recalcule_pas(classement, tmp_path, monkeypatch):
     chemins = _ecrire_faits(tmp_path, {"last_update": "2026-09-28T19:00:00", "ALPH": {"div_net": 12}})
     _brancher_faits(monkeypatch, chemins)
     empreinte = empreinte_reelle(chemins)
     _ecrire(classement["chemin"], faits_empreinte=empreinte)
     (tmp_path / "boc_data.json").write_text("{", encoding="utf-8")
-    classe = _prix(1100, 1.0, 3000, trend=None)
-    classement["etat"]["cache"] = classe
-    rate = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE)
+    classement["etat"]["cache"] = _prix(1100, 1.0, 3000, trend=None)
+    rate = compute_live_ranking(trigger="scheduler", moment=SEANCE)
     assert rate["note_recalculee"] is False
     assert rate["faits_empreinte"] == empreinte
+    assert rate["faits_illisibles"] == ["boc_data.json"]
     assert _ligne(rate)["composite_adj"] == 3.3
+
+
+def test_fichier_illisible_apres_cloture_recalcule_sans_cette_source(classement, tmp_path, monkeypatch):
+    chemins = _ecrire_faits(tmp_path, {"last_update": "2026-09-28T19:00:00", "ALPH": {"div_net": 12}})
+    _brancher_faits(monkeypatch, chemins)
+    empreinte = empreinte_reelle(chemins)
+    _ecrire(classement["chemin"], faits_empreinte=empreinte)
+    (tmp_path / "boc_data.json").write_text("{", encoding="utf-8")
+    classement["etat"]["cache"] = _prix(1100, 1.0, 3000, trend=None)
+    rate = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE)
+    assert rate["note_recalculee"] is True
+    assert rate["faits_empreinte"] == empreinte
+    assert rate["faits_illisibles"] == ["boc_data.json"]
+    assert _ligne(rate)["composite_adj"] != 3.3
+
+    encore = compute_live_ranking(
+        trigger="scheduler", moment=APRES_CLOTURE.replace(minute=40),
+    )
+    assert encore["note_recalculee"] is False
+    assert encore["faits_empreinte"] == empreinte
+    assert encore["faits_illisibles"] == ["boc_data.json"]
+    assert _ligne(encore)["composite_adj"] == _ligne(rate)["composite_adj"]
 
     (tmp_path / "boc_data.json").write_text(
         json.dumps({"last_update": "2026-09-29T19:00:00", "ALPH": {"div_net": 99}}),
         encoding="utf-8",
     )
-    repris = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE)
+    repris = compute_live_ranking(trigger="scheduler", moment=APRES_CLOTURE.replace(minute=45))
     assert repris["note_recalculee"] is True
+    assert repris["faits_illisibles"] == []
     assert repris["faits_empreinte"] == empreinte_reelle(chemins)
     assert repris["faits_empreinte"] != empreinte
 
@@ -394,21 +417,32 @@ def test_redemarrage_sans_classement_prend_la_derniere_cloture(classement, monke
 
 
 def test_sans_historique_en_seance_la_societe_reste_non_notee(classement, monkeypatch):
-    vu = {}
-
-    def faux(row):
-        vu["price"] = row.get("price")
-        return {"composite_adj": 12.0, "composite_raw": 10.0, "score_technique": 5.0}
-
-    monkeypatch.setattr(live_ranker, "_compute_scores", faux)
+    fond = {
+        "BETA": dict(FOND["ALPH"], name="Emetteur Beta"),
+        "ALPH": dict(FOND["ALPH"]),
+    }
+    monkeypatch.setattr("scraper.STOCK_FUNDAMENTALS", fond)
+    classement["hist"]["BETA"] = list(classement["hist"]["ALPH"])
     classement["hist"]["ALPH"] = []
-    classement["etat"]["cache"] = _prix(1800, 5.0, 99999, trend="top")
+    cache = _prix(1800, 5.0, 99999, trend="top")
+    cache["prices"]["BETA"] = {
+        "price": 1100, "open": 1100, "change_pct": 0, "volume": 10,
+        "trend": None, "source": "brvm.org",
+    }
+    classement["etat"]["cache"] = cache
     resultat = compute_live_ranking(trigger="startup", moment=SEANCE)
-    assert vu["price"] is None
-    ligne = _ligne(resultat)
-    assert ligne["price"] == 1800
-    assert ligne["statut"] == "non_note"
-    assert ligne["conseil"] is None
+    par = dict((ligne["ticker"], ligne) for ligne in resultat["ranking"])
+    vide = par["ALPH"]
+    assert vide["price"] == 1800
+    assert vide["statut"] == "non_note"
+    assert vide["conseil"] is None
+    assert vide["composite_adj"] is None
+    assert vide["composite_raw"] is None
+    assert vide["note10"] is None
+    assert vide["score_technique"] is None
+    assert vide["score_graham"] is None
+    assert par["BETA"]["composite_adj"] is not None
+    assert [ligne["ticker"] for ligne in resultat["ranking"]] == ["BETA", "ALPH"]
 
 
 def test_ligne_en_erreur_est_recalculee(classement):

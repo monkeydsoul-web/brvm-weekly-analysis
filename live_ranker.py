@@ -494,8 +494,13 @@ class EmpreinteIllisible(Exception):
     """Un fichier de faits existe mais son JSON n'est pas lisible.
 
     Le classement ne doit pas enregistrer d'empreinte dans ce cas :
-    le passage suivant retentera.
+    le passage suivant retentera. Après une nouvelle clôture, la note
+    est quand même recalculée sans cette source.
     """
+
+    def __init__(self, path):
+        super().__init__(path)
+        self.path = path
 
 
 # Clés réécrites à chaque job sans changer le fait (date de scrape, etc.).
@@ -617,6 +622,23 @@ def doit_recalculer_note(payload, moment, empreinte):
     return calcule < cloture
 
 
+def nombre_note(valeur, defaut=0):
+    """None (société non notée) ne casse pas un calcul ni un format."""
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return defaut
+    return valeur
+
+
+def cle_tri_note(ligne):
+    """Notes chiffrées d'abord, sociétés sans note en dernier."""
+    if not isinstance(ligne, dict):
+        return (0, 0.0)
+    valeur = ligne.get("composite_adj")
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return (0, 0.0)
+    return (1, float(valeur))
+
+
 def _a_une_note(ligne):
     """Une ligne en erreur (composite souvent à 0) n'est pas une note figée."""
     if not isinstance(ligne, dict):
@@ -625,6 +647,21 @@ def _a_une_note(ligne):
         return False
     valeur = ligne.get("composite_adj")
     return isinstance(valeur, (int, float)) and not isinstance(valeur, bool)
+
+
+def _note_sans_prix(moment):
+    """Pas de clôture à noter : scores vides, pas un composite calculé sans cours."""
+    scores = dict((cle, None) for cle in (
+        "score_graham", "score_dcf", "score_ddm", "score_epv",
+        "score_buffett", "score_rev_dcf", "score_relatif", "score_technique",
+        "detail_graham", "detail_dcf", "detail_ddm", "detail_epv",
+        "detail_buffett", "detail_rev_dcf", "detail_relatif", "detail_technique",
+        "geo_penalty", "composite_raw", "composite_adj",
+        "note10", "conseil", "conseil_libelle", "conseil_couleur",
+    ))
+    scores["statut"] = STATUT_NON_NOTE
+    scores["note_calculee_le"] = _moment_utc(moment).isoformat()
+    return scores
 
 
 def _extraire_note(ligne):
@@ -773,12 +810,20 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
             # boc_data.json sans os.replace : une lecture pendant l'écriture
             # peut voir un fichier vide, puis une empreinte du fichier fini.
             _faits_lisibles = True
+            _illisibles = []
+
+            def _marquer_illisible(chemin):
+                nom = os.path.basename(chemin) if chemin else ""
+                if nom and nom not in _illisibles:
+                    _illisibles.append(nom)
+
             try:
                 _empreinte = empreinte_faits()
             except EmpreinteIllisible as exc:
-                logger.warning("Empreinte des faits illisible, calcul de note reporté: %s", exc)
+                logger.warning("Empreinte des faits illisible: %s", exc)
                 _faits_lisibles = False
                 _empreinte = None
+                _marquer_illisible(getattr(exc, "path", None) or str(exc))
 
             pdf_summary = {}
             boc_data = {}
@@ -786,9 +831,10 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
             for _chemin in chemins_faits():
                 _data, _ok = _lire_fichier_faits(_chemin)
                 if not _ok:
-                    logger.warning("Fichier de faits illisible, empreinte precedente conservee: %s", _chemin)
+                    logger.warning("Fichier de faits illisible, traité comme vide: %s", _chemin)
                     _faits_lisibles = False
                     _data = {}
+                    _marquer_illisible(_chemin)
                 _nom = os.path.basename(_chemin)
                 if _nom == "analyses_summary.json":
                     pdf_summary = _data
@@ -797,14 +843,11 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                 elif _nom == "external_dividends.json":
                     am_cache = _data
 
-            if not _faits_lisibles and isinstance(_payload_precedent, dict) and _payload_precedent.get("ranking"):
-                _recalcul = False
-            else:
-                _recalcul = doit_recalculer_note(
-                    _payload_precedent,
-                    moment,
-                    _empreinte if _faits_lisibles else _empreinte_precedente,
-                )
+            # En séance, un fichier illisible ne change pas la note (écriture
+            # en cours). À la première clôture où il est encore illisible, on
+            # recalcule sans cette source, comme avant, et on le signale.
+            _empreinte_decision = _empreinte if _faits_lisibles else _empreinte_precedente
+            _recalcul = doit_recalculer_note(_payload_precedent, moment, _empreinte_decision)
 
             # Historique prix pour le sas variation
             _ph = {}
@@ -845,27 +888,28 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                     else:
                         points = _ph.get(ticker, []) if isinstance(_ph, dict) else []
                         prix_note = _prix_pour_la_note(row.get("price"), points, moment)
-                        if prix_note is None or prix_note != row.get("price"):
-                            row_note = _completer_ligne(
-                                ticker, base_row,
-                                _donnees_prix_note(live_price_data, prix_note),
-                                pdf_analysis, boc_data, am_cache, _ph, moment,
-                            )
-                        else:
-                            row_note = dict(row)
                         if prix_note is None:
-                            row_note["price"] = None
-                        row_note["_moment"] = moment
-                        row_note["_inclure_cloture_du_jour"] = _cloture_du_jour_incluse(moment)
-                        row_note["historique_clotures"] = points
-                        scores = _compute_scores(row_note)
-                        _poser_verdict(
-                            scores,
-                            scores.get("composite_adj", 0),
-                            _prev_conseil.get(ticker),
-                            row_note,
-                        )
-                        scores["note_calculee_le"] = moment.isoformat()
+                            scores = _note_sans_prix(moment)
+                        else:
+                            if prix_note != row.get("price"):
+                                row_note = _completer_ligne(
+                                    ticker, base_row,
+                                    _donnees_prix_note(live_price_data, prix_note),
+                                    pdf_analysis, boc_data, am_cache, _ph, moment,
+                                )
+                            else:
+                                row_note = dict(row)
+                            row_note["_moment"] = moment
+                            row_note["_inclure_cloture_du_jour"] = _cloture_du_jour_incluse(moment)
+                            row_note["historique_clotures"] = points
+                            scores = _compute_scores(row_note)
+                            _poser_verdict(
+                                scores,
+                                nombre_note(scores.get("composite_adj")),
+                                _prev_conseil.get(ticker),
+                                row_note,
+                            )
+                            scores["note_calculee_le"] = moment.isoformat()
 
                     result = {
                         "ticker":        ticker,
@@ -939,8 +983,8 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                             "error": str(e),
                         })
 
-            # Trier par score décroissant
-            results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+            # Notes chiffrées d'abord. composite_adj None (non noté) en dernier.
+            results.sort(key=cle_tri_note, reverse=True)
 
             # Calculer les mouvements de rang
             old_ranks = {}
@@ -1003,6 +1047,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                 "note_formule":     NOTE_FORMULE if (_recalcul or (isinstance(_payload_precedent, dict) and _payload_precedent.get("note_formule") == NOTE_FORMULE)) else (_payload_precedent or {}).get("note_formule"),
                 "note_recalculee":  _recalcul,
                 "faits_empreinte":  _empreinte_stockee,
+                "faits_illisibles": _illisibles,
                 "trigger":          trigger,
                 "market_open":      _seance_ouverte(moment),
                 "changed_tickers":  changed_tickers,
@@ -1209,7 +1254,7 @@ if __name__ == "__main__":
             roe = f"{r.get('roe',0):.0f}%" if r.get("roe") else "—"
             print(
                 f"{r['rank']:3d} {r['ticker']:8s} "
-                f"{r.get('composite_adj',0):5.1f}  "
+                f"{nombre_note(r.get('composite_adj')):5.1f}  "
                 f"{pe:6s} {roe:6s} {pdf:8s} {delta_str:4s}"
             )
 
