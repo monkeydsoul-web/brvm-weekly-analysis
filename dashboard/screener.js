@@ -83,9 +83,10 @@ function _renderScreenerTable() {
 
   tbody.innerHTML = _scrResults.map(x => {
     const sc  = x.composite_adj || 0;
-    const sc10 = v10fmt(sc);
-    const scC = sc >= 60 ? 'var(--green)' : sc >= 45 ? 'var(--amber)' : 'var(--red)';
-    const scBarW = Math.round(sc / 80 * 100);
+    const n10 = (typeof note10num==='function') ? note10num(x) : (Math.round(sc/8*10)/10);
+    const sc10 = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
+    const scC = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
+    const scBarW = Math.round(Math.min(10, Math.max(0, n10)) / 10 * 100);
     const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
     const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
@@ -204,7 +205,7 @@ function screenerReset() {
 
 function screenerExportCSV() {
   if (!_scrResults.length) { return; }
-  const cols = ['Ticker','Nom','Secteur','Score/10','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Verdict IA','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
+  const cols = ['Ticker','Nom','Secteur','Score/10','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Conseil','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
   const rows = _scrResults.map(x => [
     x.ticker,
     (x.name||'').replace(/,/g,''),
@@ -216,7 +217,7 @@ function screenerExportCSV() {
     x.roe ? x.roe.toFixed(1) : '',
     x.change_pct != null ? x.change_pct.toFixed(2) : '',
     x.price ? Math.round(x.price) : '',
-    x.pdf_verdict||'',
+    x.conseil_libelle||'',
     (x.score_graham||0).toFixed(1),
     (x.score_dcf||0).toFixed(1),
     (x.score_ddm||0).toFixed(1),

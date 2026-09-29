@@ -31,6 +31,22 @@ def _note10_txt(composite):
     return ("%.1f" % valeur).replace(".", ",")
 
 
+def _libelle_conseil_ligne(ligne):
+    """Conseil déjà calculé par le serveur, amortisseur compris.
+
+    On ne recalcule pas « note >= 7,5 » : une société déjà Intéressante
+    le reste dès 7,2/10.
+    """
+    from verdict import libelle_conseil
+    if not isinstance(ligne, dict):
+        return None
+    for cle in ("conseil_libelle", "conseil"):
+        libelle = libelle_conseil(ligne.get(cle))
+        if libelle:
+            return libelle
+    return None
+
+
 def _lignes_cotes(scores):
     """Garde les sociétés cotées. Un statut absent (ancien fichier) reste inclus.
 
@@ -550,15 +566,17 @@ def generate_rapport_pdf(scores=None, price_history=None):
     story.append(Paragraph(f"Généré le {now.strftime('%d/%m/%Y à %H:%M')}", body))
     story.append(Spacer(1, 0.4*cm))
 
-    from verdict import note10 as _note10
-    n_forte = len([s for s in scores if (_note10(_note(s)) or 0) >= 7.5])
+    from verdict import CONSEIL_INTERESSANT
+    n_interessant = len([
+        s for s in scores if _libelle_conseil_ligne(s) == CONSEIL_INTERESSANT
+    ])
     n_surveiller = len([s for s in signals if s["signal"] == "CONSERVER"])
     n_prudence = len([s for s in signals if s["signal"] in ("ALLÉGER", "ÉVITER")])
     top3     = sorted(scores, key=lambda x: -(x.get("composite_adj") or 0))[:3]
     story.append(Paragraph("Résumé du marché BRVM", h2))
     t = Table([[
         "Actions analysées", str(len(scores)),
-        "Conseil Intéressant (≥ 7,5)", str(n_forte),
+        "Conseil Intéressant", str(n_interessant),
         "Prévisions favorables", str(len(buy_signals)),
     ]], colWidths=[4*cm, 2.5*cm, 4*cm, 2.5*cm, 3.5*cm, 2.5*cm])
     t.setStyle(TableStyle([
@@ -568,6 +586,10 @@ def generate_rapport_pdf(scores=None, price_history=None):
         ("PADDING", (0, 0), (-1, -1), 5),
     ]))
     story.append(t)
+    story.append(Paragraph(
+        "Une société déjà Intéressante le reste dès 7,2/10.",
+        body
+    ))
     story.append(Paragraph(
         "Prévisions favorables : %d. Prévisions neutres : %d. Prévisions défavorables : %d." % (
             len(buy_signals), n_surveiller, n_prudence),

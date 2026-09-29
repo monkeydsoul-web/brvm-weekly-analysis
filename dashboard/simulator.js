@@ -70,7 +70,9 @@ function simRender() {
     var w = simData[t].weight || 0;
     var sc = window.scores ? window.scores.find(function(x){ return x.ticker===t; }) : null;
     var price = sc && sc.price ? Math.round(sc.price).toLocaleString('fr-FR') + ' XOF' : '---';
-    var score = sc ? Math.round(sc.composite_adj||0) : 0;
+    var noteTxt = '';
+    if (sc && typeof note10txt === 'function') noteTxt = note10txt(sc);
+    else if (sc && typeof v10fmt === 'function') noteTxt = v10fmt(sc.composite_adj||0).replace('.', ',');
     var color = COLORS[i % COLORS.length];
     html += '<div style="margin-bottom:10px">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
@@ -78,7 +80,7 @@ function simRender() {
     html += '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block"></span>';
     html += '<span style="font-weight:600;font-size:12px;cursor:pointer" onclick="showStock(\'' + t + '\')">' + t + '</span>';
     html += '<span style="font-size:10px;color:var(--t3)">' + price + '</span>';
-    if (score) html += '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.07)">' + v10fmt(score) + '/10</span>';
+    if (noteTxt && noteTxt !== '0,0') html += '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.07)">' + noteTxt + '/10</span>';
     html += '</div>';
     html += '<div style="display:flex;align-items:center;gap:8px">';
     html += '<span style="font-size:12px;font-weight:700;color:' + color + ';min-width:36px;text-align:right" id="sim-pct-' + t + '">' + w + '%</span>';

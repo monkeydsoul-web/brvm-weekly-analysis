@@ -103,7 +103,7 @@ function createBacktestModal() {
 
 function _refreshBTSelector() {
   const all = window.scores || scores || [];
-  const sorted = [...all].sort((a,b) => (b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...all].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
 
   const selEl = document.getElementById('bt-selected');
   if (selEl) {
@@ -171,7 +171,7 @@ function btToggle(t) {
 function btRemove(t) { _btTickers = _btTickers.filter(x=>x!==t); _refreshBTSelector(); }
 function btGroup(g) {
   const all = window.scores||scores||[];
-  const sorted = [...all].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...all].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   if (g==='Effacer') _btTickers=[];
   else if (g==='Top5') _btTickers=sorted.slice(0,5).map(x=>x.ticker);
   else if (g==='Banques') _btTickers=sorted.filter(x=>x.sector?.includes('Banque')).slice(0,5).map(x=>x.ticker);
