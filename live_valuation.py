@@ -414,7 +414,13 @@ def compute_all_live_scores(base_fundamentals_dict: dict, live_cache: dict) -> l
             logger.warning(f"Erreur score live {ticker}: {e}")
             results.append({"ticker": ticker, "composite_adj": 0, "error": str(e), "conseil": None})
 
-    results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+    def _cle(ligne):
+        valeur = ligne.get("composite_adj")
+        if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+            return (0, 0.0)
+        return (1, float(valeur))
+
+    results.sort(key=_cle, reverse=True)
     for i, r in enumerate(results):
         r["rank"] = i + 1
 
