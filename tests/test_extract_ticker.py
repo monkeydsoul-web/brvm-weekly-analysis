@@ -281,6 +281,16 @@ def test_alias_retires():
     assert _extract_ticker("Prestige motors") is None
 
 
+def test_raisons_sociales_brvm_org():
+    assert _extract_ticker("Moov Africa Burkina Faso") == "ONTBF"
+    assert _extract_ticker("Filature Tissage Sacs de Côte d'Ivoire") == "FTSC"
+    assert _extract_ticker(
+        "Compagnie Française de l'Afrique Occidentale en Côte d'Ivoire"
+    ) == "CFAC"
+    assert _extract_ticker("Huilerie Savonnerie Lipochimie") == "UNLC"
+    assert _extract_ticker("Nouvelles Editions Ivoiriennes") == "NEIC"
+
+
 def test_alias_ajoutes():
     assert _extract_ticker("SGBCI") == "SGBC"
     assert _extract_ticker("SGB CI") == "SGBC"
