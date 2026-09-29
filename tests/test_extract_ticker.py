@@ -433,6 +433,26 @@ def test_pdf_relatif_resolu_sous_data_dir(tmp_path, monkeypatch):
     assert _scraper._resoudre_pdf("https://www.brvm.org/x.pdf") == ""
 
 
+def test_ecriture_refusee_quitte_en_erreur(tmp_path, monkeypatch):
+    path = tmp_path / "brvm_ratings.json"
+    ancien = [{"ticker": "SNTS", "i": i} for i in range(10)]
+    path.write_text(json.dumps(ancien), encoding="utf-8")
+    monkeypatch.setattr(_scraper, "RATINGS_PATH", path)
+    monkeypatch.setattr(_scraper, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(_scraper, "LOG_DIR", tmp_path)
+    monkeypatch.setattr(_scraper, "scrape_ratings", lambda: [{"ticker": "SNTS"}])
+    monkeypatch.setattr(
+        _scraper.sys, "argv", ["brvm_market_data_scraper.py", "--ratings-only"],
+    )
+    try:
+        _scraper.main()
+    except SystemExit as exc:
+        assert exc.code == 1
+    else:
+        raise AssertionError("le refus d'écriture doit quitter avec le code 1")
+    assert json.loads(path.read_text(encoding="utf-8")) == ancien
+
+
 def test_ecriture_force_autorise_le_vide(tmp_path):
     path = tmp_path / "brvm_ratings.json"
     path.write_text(json.dumps([{"ticker": "SNTS"}]), encoding="utf-8")

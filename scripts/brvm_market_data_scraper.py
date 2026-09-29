@@ -1172,6 +1172,7 @@ def main():
             print(f"  → {RATINGS_PATH} ({len(ratings)} notations)")
         else:
             print(f"  → écriture refusée, fichier conservé ({RATINGS_PATH})")
+            sys.exit(1)
 
     if run_all or args.market_only:
         print("\n━━━ B) Statistiques de marché ━━━")
