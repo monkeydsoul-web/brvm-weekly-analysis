@@ -610,11 +610,23 @@ def chemins_faits():
     )
 
 
-def empreinte_faits(chemins=None):
-    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible."""
+def empreinte_faits(chemins=None, moment=None):
+    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible.
+
+    Le suffixe ``suspensions:`` dépend des entrées actives à ``moment``
+    (défaut : aujourd'hui UTC), pas seulement des octets du fichier.
+    Le lendemain d'une fin, la note est donc recalculée en séance.
+    """
     if chemins is None:
         chemins = chemins_faits()
-    return "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+    base = "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+    try:
+        from statuts_cotation import empreinte_actives
+        actif = empreinte_actives(moment)
+    except Exception:
+        logger.warning("Empreinte des suspensions indisponible")
+        actif = "illisible"
+    return base + "|suspensions:" + actif
 
 
 def _lire_fichier_faits(path):
@@ -865,7 +877,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                     _illisibles.append(nom)
 
             try:
-                _empreinte = empreinte_faits()
+                _empreinte = empreinte_faits(moment=moment)
             except EmpreinteIllisible as exc:
                 logger.warning("Empreinte des faits illisible: %s", exc)
                 _faits_lisibles = False

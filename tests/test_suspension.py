@@ -66,15 +66,35 @@ def test_constante_cinq_seances():
     assert SEANCES_COURS_FIGE == 5
 
 
-def test_liste_reelle_sicc_et_scrc():
+def test_liste_reelle_sicc_semc_et_scrc():
     invalider_cache()
     assert statut_de("SICC", MOMENT) == "suspendu"
-    assert statut_de("SCRC", MOMENT) == "suspendu"
+    assert statut_de("SEMC", MOMENT) == "suspendu"
     sicc = entree_active("SICC", MOMENT)
-    assert sicc["depuis"] == "2026-09-17"
+    semc = entree_active("SEMC", MOMENT)
+    assert sicc["depuis"] == "2026-09-16"
     assert sicc["fin"] is None
-    assert "agenceecofin.com" in sicc["source"]
-    assert statut_de("SONOCO", MOMENT) is None
+    assert "268" in sicc["source"]
+    assert semc["depuis"] == "2026-09-16"
+    assert semc["fin"] is None
+    assert "270" in semc["source"]
+    assert "CI0000000345" in semc["source"]
+    # Le 29/09, la levée de SCRC (fin 21/09) est déjà passée.
+    assert statut_de("SCRC", MOMENT) is None
+    assert entree_active("SCRC", MOMENT) is None
+    effet = datetime(2026, 9, 16, 10, 0, tzinfo=timezone.utc)
+    dernier = datetime(2026, 9, 21, 10, 0, tzinfo=timezone.utc)
+    reprise = datetime(2026, 9, 22, 10, 0, tzinfo=timezone.utc)
+    veille = datetime(2026, 9, 15, 10, 0, tzinfo=timezone.utc)
+    assert statut_de("SCRC", effet) == "suspendu"
+    assert statut_de("SCRC", dernier) == "suspendu"
+    assert statut_de("SCRC", reprise) is None
+    scrc = entree_active("SCRC", effet)
+    assert scrc["fin"] == "2026-09-21"
+    assert "269" in scrc["source"]
+    assert "276" in scrc["source"]
+    assert statut_de("SICC", veille) is None
+    assert statut_de("SEMC", veille) is None
     assert statut_de("ALPH", MOMENT) is None
 
 
@@ -142,14 +162,39 @@ def test_detection_ignore_les_points_annuels():
     assert detecter_alerte(points, moment=MOMENT) is None
 
 
-def test_detection_reprise_probable():
-    points = _seances([8400, 8400, 8400, 8400, 8500], volume=0, n=5)
-    alerte = detecter_alerte(points, suspendu=True, moment=MOMENT)
-    assert alerte == {"type": "reprise_probable", "depuis": "2026-09-26", "seances": 1}
-    # Le cours reste figé : pas d'alerte de reprise, et pas de cours_fige
-    # tant que le titre est sur la liste.
-    plat = _seances(8400, volume=0, n=6)
-    assert detecter_alerte(plat, suspendu=True, moment=MOMENT) is None
+def test_reprise_ignore_un_passe_qui_a_cote():
+    """Cotations normales avant ``depuis``, cours figé ensuite : pas d'alerte."""
+    avant = []
+    jour = datetime(2026, 9, 8)
+    for i, prix in enumerate((1400, 1450, 1480, 1495)):
+        avant.append({
+            "date": (jour + timedelta(days=i)).date().isoformat(),
+            "price": prix,
+            "volume": 80,
+            "source": "live",
+        })
+    # Dernière clôture avant le 16/09 : 1 495 le 11/09. Puis le cours ne bouge plus.
+    plat = _seances(1495, volume=0, n=6, debut="2026-09-16")
+    assert detecter_alerte(
+        avant + plat, suspendu=True, moment=MOMENT, depuis="2026-09-16",
+    ) is None
+
+
+def test_reprise_si_le_cours_bouge_apres_depuis():
+    avant = [
+        {"date": "2026-09-10", "price": 1400, "volume": 50, "source": "live"},
+        {"date": "2026-09-15", "price": 1495, "volume": 30, "source": "live"},
+    ]
+    apres = _seances([1495, 1495, 1520], volume=0, n=3, debut="2026-09-16")
+    alerte = detecter_alerte(
+        avant + apres, suspendu=True, moment=MOMENT, depuis="2026-09-16",
+    )
+    assert alerte == {"type": "reprise_probable", "depuis": "2026-09-18", "seances": 1}
+    # Sans clôture d'avant, un plateau ne déclenche rien.
+    plat = _seances(1495, volume=0, n=6, debut="2026-09-16")
+    assert detecter_alerte(
+        plat, suspendu=True, moment=MOMENT, depuis="2026-09-16",
+    ) is None
 
 
 def test_lire_seances_passe_par_load_history(monkeypatch):
@@ -179,7 +224,7 @@ def test_appliquer_garde_la_note():
     assert ligne["conseil_couleur"] is None
     assert ligne["note10"] == 8.0
     assert ligne["composite_adj"] == 64.0
-    assert ligne["statut_depuis"] == "2026-09-17"
+    assert ligne["statut_depuis"] == "2026-09-16"
     assert alerte["type"] == "reprise_probable"
     assert ligne["alerte_cotation"] == alerte
 
@@ -210,7 +255,7 @@ def marche(tmp_path, monkeypatch):
     monkeypatch.setattr(live_ranker, "_last_prices", {})
     monkeypatch.setattr(live_ranker, "_last_ranking", None)
     monkeypatch.setattr(live_ranker, "get_reference_prices", lambda ttl=300: {})
-    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None: "fixe")
+    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None, moment=None: "fixe")
     scores = {"SICC": 79.0, "GAMM": 60.0, "BETA": 50.0, "ALPH": 40.0, "DELT": 30.0}
 
     def faux(row):
@@ -251,7 +296,7 @@ def test_sicc_classe_apres_les_cotes(marche, monkeypatch, caplog):
     assert sicc["conseil"] is None
     assert sicc["conseil_libelle"] is None
     assert sicc["conseil_couleur"] is None
-    assert sicc["statut_depuis"] == "2026-09-17"
+    assert sicc["statut_depuis"] == "2026-09-16"
     assert sicc["note10"] == note10(79.0)
     assert sicc["composite_adj"] == 79.0
     assert sicc["classe"] is False
@@ -336,6 +381,104 @@ def test_changement_de_liste_change_lempreinte_et_sapplique_en_seance(tmp_path, 
     assert sicc2["note10"] == note10(70.0)
     assert sicc2["rank"] == 2
     assert second["ranking"][0]["ticker"] == "ALPH"
+
+
+def test_depuis_futur_ne_sapplique_pas(tmp_path):
+    invalider_cache()
+    chemin = tmp_path / "futur.json"
+    chemin.write_text(json.dumps({
+        "ZZZZ": {
+            "statut": "suspendu",
+            "depuis": "2026-10-01",
+            "fin": None,
+            "source": "avis de test",
+        },
+    }), encoding="utf-8")
+    assert statut_de("ZZZZ", MOMENT, str(chemin)) is None
+    jour = datetime(2026, 10, 1, 10, 0, tzinfo=timezone.utc)
+    assert statut_de("ZZZZ", jour, str(chemin)) == "suspendu"
+
+
+def test_fichier_absent_avertit(tmp_path, caplog):
+    invalider_cache()
+    absent = str(tmp_path / "pas_la.json")
+    with caplog.at_level(logging.WARNING, logger="statuts_cotation"):
+        assert charger_liste(absent) == {}
+    assert any("absent" in r.message for r in caplog.records)
+
+
+def test_empreinte_change_le_jour_apres_fin(tmp_path, monkeypatch):
+    liste = tmp_path / "statuts_cotation.json"
+    liste.write_text(json.dumps({
+        "ZZZZ": {
+            "statut": "suspendu",
+            "depuis": "2026-09-16",
+            "fin": "2026-09-21",
+            "source": "avis de test",
+        },
+    }), encoding="utf-8")
+    monkeypatch.setattr(statuts_cotation, "CHEMIN_LISTE", str(liste))
+    monkeypatch.setattr(live_ranker, "DATA_DIR", str(tmp_path))
+    invalider_cache()
+    jour_fin = datetime(2026, 9, 21, 10, 0, tzinfo=timezone.utc)
+    lendemain = datetime(2026, 9, 22, 10, 0, tzinfo=timezone.utc)
+    encore = datetime(2026, 9, 23, 10, 0, tzinfo=timezone.utc)
+    assert empreinte_faits(moment=jour_fin) != empreinte_faits(moment=lendemain)
+    assert empreinte_faits(moment=lendemain) == empreinte_faits(moment=encore)
+
+
+def test_jour_apres_fin_recalcule_la_note(tmp_path, monkeypatch):
+    liste = tmp_path / "statuts_cotation.json"
+    liste.write_text(json.dumps({
+        "SICC": {
+            "statut": "suspendu",
+            "depuis": "2026-09-16",
+            "fin": "2026-09-21",
+            "source": "avis de test",
+        },
+    }), encoding="utf-8")
+    monkeypatch.setattr(statuts_cotation, "CHEMIN_LISTE", str(liste))
+    monkeypatch.setattr(live_ranker, "DATA_DIR", str(tmp_path))
+    invalider_cache()
+    monkeypatch.setattr(live_ranker, "RANKING_PATH", str(tmp_path / "live_ranking.json"))
+    monkeypatch.setattr(live_ranker, "HISTORY_PATH", str(tmp_path / "hist.json"))
+    monkeypatch.setattr(live_ranker, "_last_prices", {})
+    monkeypatch.setattr(live_ranker, "_last_ranking", None)
+    monkeypatch.setattr(live_ranker, "get_reference_prices", lambda ttl=300: {})
+    monkeypatch.setattr(live_ranker, "empreinte_faits", empreinte_faits)
+    monkeypatch.setattr(
+        "scraper.STOCK_FUNDAMENTALS",
+        {"SICC": dict(FOND, name="Sicor")},
+    )
+    monkeypatch.setattr(
+        "price_history_builder.load_history",
+        lambda: {"SICC": _seances(8400, volume=10, n=8, debut="2026-09-14")},
+    )
+    monkeypatch.setattr(
+        "live_data.get_live_data",
+        lambda force_refresh=False: _prix_live({"SICC": 8400}),
+    )
+
+    def faux(row):
+        return {"composite_adj": 70.0, "composite_raw": 70.0}
+
+    monkeypatch.setattr(live_ranker, "_compute_scores", faux)
+    lundi = datetime(2026, 9, 21, 10, 0, tzinfo=timezone.utc)
+    mardi = datetime(2026, 9, 22, 10, 0, tzinfo=timezone.utc)
+    premier = compute_live_ranking(trigger="scheduler", moment=lundi)
+    sicc = next(l for l in premier["ranking"] if l["ticker"] == "SICC")
+    assert sicc["statut"] == "suspendu"
+    assert sicc["conseil"] is None
+    assert sicc["statut_depuis"] == "2026-09-16"
+    assert sicc["alerte_cotation"] is None
+
+    second = compute_live_ranking(trigger="scheduler", moment=mardi)
+    assert second["note_recalculee"] is True
+    sicc2 = next(l for l in second["ranking"] if l["ticker"] == "SICC")
+    assert sicc2["statut"] == "cote"
+    assert sicc2["conseil"] is not None
+    assert sicc2["statut_depuis"] is None
+    assert sicc2["alerte_cotation"] is None
 
 
 def test_liste_malforme_ne_casse_pas_le_classement(marche, monkeypatch, tmp_path, caplog):
@@ -466,20 +609,20 @@ function attend(cond, msg) {
   if (!cond) { console.error(msg); process.exit(1); }
 }
 const row = {
-  ticker: 'SICC', statut: 'suspendu', statut_depuis: '2026-09-17',
+  ticker: 'SICC', statut: 'suspendu', statut_depuis: '2026-09-16',
   composite_adj: 80, conseil: 'Intéressant', conseil_libelle: 'Intéressant',
   conseil_couleur: 'vert', pe_ref: 8, div_yield: 6, roe: 20
 };
 const avis = conseilAffiche(row);
-attend(avis.texte === 'Cotation suspendue depuis le 17/09/2026', avis.texte);
+attend(avis.texte === 'Cotation suspendue depuis le 16/09/2026', avis.texte);
 attend(avis.css === 'var(--t2)', 'badge gris');
 attend(avis.suspendu === true, 'marque suspendu');
 const htmlConseil = fmtConseil(row);
-attend(htmlConseil.indexOf('Cotation suspendue depuis le 17/09/2026') !== -1, 'fmt');
+attend(htmlConseil.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'fmt');
 attend(htmlConseil.indexOf('var(--t2)') !== -1, 'fmt gris');
 attend(htmlConseil.indexOf('Intéressant') === -1, 'fmt sans conseil');
 const fiche = _genVerdict(row);
-attend(fiche.indexOf('Cotation suspendue depuis le 17/09/2026') !== -1, 'fiche badge');
+attend(fiche.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'fiche badge');
 attend(fiche.indexOf('Note ') !== -1, 'note presente');
 attend(fiche.indexOf('color:var(--t2)') !== -1, 'note grise');
 ['ACHETER','ACCUMULER','CONSERVER','SURVEILLER','ALLÉGER','Intéressant','Prudence','À surveiller'].forEach(function (mot) {
@@ -487,7 +630,7 @@ attend(fiche.indexOf('color:var(--t2)') !== -1, 'note grise');
 });
 document.documentElement.dataset.mode = 'beginner';
 const ficheDeb = _genVerdict(row);
-attend(ficheDeb.indexOf('Cotation suspendue depuis le 17/09/2026') !== -1, 'mode debutant');
+attend(ficheDeb.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'mode debutant');
 const normal = conseilAffiche({conseil:'acheter'});
 attend(normal.texte === '✅ Intéressant', 'repli intact');
 """

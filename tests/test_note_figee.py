@@ -75,7 +75,7 @@ def classement(tmp_path, monkeypatch):
     monkeypatch.setattr(live_ranker, "_last_prices", {})
     monkeypatch.setattr(live_ranker, "_last_ranking", None)
     monkeypatch.setattr("scraper.STOCK_FUNDAMENTALS", FOND)
-    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None: "fixe")
+    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None, moment=None: "fixe")
     monkeypatch.setattr(live_ranker, "get_reference_prices", lambda ttl=300: {})
     hist = _historique()
     monkeypatch.setattr(
@@ -199,7 +199,7 @@ def test_fait_nouveau_recalcule_sur_la_cloture_pas_le_tick(classement, monkeypat
     monkeypatch.setattr(live_ranker, "_compute_scores", faux)
     _ecrire(classement["chemin"])
     classement["etat"]["cache"] = _prix(5000, 8.0, 90000, trend="top")
-    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None: "boc-neuf")
+    monkeypatch.setattr(live_ranker, "empreinte_faits", lambda chemins=None, moment=None: "boc-neuf")
     resultat = compute_live_ranking(trigger="scheduler", moment=SEANCE)
     assert resultat["note_recalculee"] is True
     assert vu["price"] == 1000

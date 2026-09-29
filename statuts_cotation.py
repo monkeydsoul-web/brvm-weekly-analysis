@@ -15,20 +15,24 @@ une PR ; personne ne commit ``data/*.json``) :
    ``note`` = rappel libre pour le propriétaire.
 3. Pour lever : poser ``fin`` au dernier jour de suspension. Une ``fin``
    déjà passée (strictement avant le jour du calcul) est ignorée : le titre
-   redevient coté au prochain classement, sans attendre la clôture.
+   redevient coté. Un ``depuis`` dans le futur ne s'applique pas encore.
    On peut ensuite supprimer la clé.
-4. Merger la PR. Le fichier entre dans l'empreinte des faits : le
-   classement applique le changement pendant la séance.
+4. Merger la PR. Le fichier entre dans l'empreinte des faits. L'empreinte
+   retient les entrées actives ce jour-là : le lendemain d'une ``fin``,
+   ou le jour où un ``depuis`` arrive, la note est recalculée en séance
+   même si le fichier n'a pas bougé.
 
-SONOCO Metal Packaging n'a pas de ticker dans les 47 sociétés : ne pas
-inventer de ligne.
+SONOCO Metal Packaging SIEM (ex-Crown SIEM / Eviosys, ISIN CI0000000345)
+est le ticker SEMC. Le site l'appelle Crown Siem CI.
 
 Détection (alerte seulement) :
 - ``SEANCES_COURS_FIGE`` séances de clôture de suite au même cours, et
   volume 0 quand l'historique porte un volume, → ``cours_fige``.
   Le statut reste ``cote`` et le conseil ne bouge pas.
-- Titre listé suspendu dont le dernier cours diffère d'une séance
-  précédente → ``reprise_probable``, pour penser à poser ``fin``.
+- Titre listé suspendu : on ne regarde que les séances à partir de
+  ``depuis``, comparées à la dernière clôture d'avant ``depuis``.
+  Si ce cours a bougé, ``reprise_probable``. Un historique plus ancien
+  qui a varié ne déclenche rien.
 
 Lecture des cours : ``price_history_builder.load_history`` (module
 protégé, non modifié). ``price_sanity.resolve_price`` garde le dernier
@@ -134,7 +138,7 @@ def _valider_entree(ticker, brut):
 def charger_liste(chemin=None):
     """Dict ticker → entrée valide.
 
-    Fichier absent : dict vide, sans warning (rien à suspendre).
+    Fichier absent : dict vide et un warning (rien à suspendre).
     Fichier illisible ou qui n'est pas un objet JSON : dict vide et un
     warning. Ne lève pas.
     """
@@ -154,6 +158,10 @@ def _lire_liste(chemin):
         with open(chemin, encoding="utf-8") as f:
             brut = json.load(f)
     except FileNotFoundError:
+        logger.warning(
+            "statuts_cotation absent, liste vide: %s",
+            os.path.basename(chemin),
+        )
         return {}
     except (OSError, ValueError, UnicodeError):
         logger.warning(
@@ -177,22 +185,52 @@ def _lire_liste(chemin):
     return liste
 
 
-def entree_active(ticker, moment=None, chemin=None):
-    """Entrée encore en vigueur, ou None.
+def _en_vigueur(entree, jour):
+    """Active si ``depuis`` est déjà atteint et ``fin`` n'est pas passée.
 
-    ``fin`` nulle : active. ``fin`` égale au jour du calcul : encore
-    active. ``fin`` strictement avant ce jour : ignorée.
+    ``depuis`` égal au jour : oui. ``depuis`` futur : non.
+    ``fin`` égale au jour : encore oui. ``fin`` strictement avant : non.
     """
+    depuis = entree.get("depuis")
+    if not depuis or depuis > jour:
+        return False
+    fin = entree.get("fin")
+    if fin and fin < jour:
+        return False
+    return True
+
+
+def entree_active(ticker, moment=None, chemin=None):
+    """Entrée encore en vigueur à ``moment``, ou None."""
     if not isinstance(ticker, str) or not ticker.strip():
         return None
     liste = charger_liste(chemin)
     entree = liste.get(ticker.strip().upper())
     if not entree:
         return None
-    fin = entree.get("fin")
-    if fin and fin < _jour(moment):
+    if not _en_vigueur(entree, _jour(moment)):
         return None
     return entree
+
+
+def empreinte_actives(moment=None, chemin=None):
+    """Signature des entrées actives ce jour-là.
+
+    Le fichier peut rester identique : le lendemain d'une ``fin``, ou le
+    jour où un ``depuis`` tombe, la signature change. Ce n'est pas la date
+    toute seule : un jour sans changement d'entrées actives ne bouge pas.
+    """
+    jour = _jour(moment)
+    liste = charger_liste(chemin)
+    morceaux = []
+    for ticker in sorted(liste):
+        entree = liste[ticker]
+        if not _en_vigueur(entree, jour):
+            continue
+        morceaux.append("%s:%s:%s" % (ticker, entree["depuis"], entree.get("fin") or ""))
+    if not morceaux:
+        return "aucune"
+    return ",".join(morceaux)
 
 
 def statut_de(ticker, moment=None, chemin=None):
@@ -268,15 +306,15 @@ def _serie_finale(seances):
     return run
 
 
-def detecter_alerte(points, suspendu=False, moment=None):
+def detecter_alerte(points, suspendu=False, moment=None, depuis=None):
     """None ou ``{type, depuis, seances}``.
 
-    Ne décide pas du statut. ``suspendu`` True cherche ``reprise_probable`` ;
-    False cherche ``cours_fige``.
+    Ne décide pas du statut. ``suspendu`` True cherche ``reprise_probable``
+    à partir de ``depuis`` seulement. False cherche ``cours_fige``.
     """
     seances = _seances(points, moment)
     if suspendu:
-        return _reprise_probable(seances)
+        return _reprise_probable(seances, depuis)
     return _cours_fige(seances)
 
 
@@ -295,11 +333,31 @@ def _cours_fige(seances):
     }
 
 
-def _reprise_probable(seances):
-    if len(seances) < 2:
+def _reprise_probable(seances, depuis):
+    """Mouvement à partir de ``depuis``, contre la dernière clôture d'avant.
+
+    Les séances antérieures ne comptent pas : un titre qui a coté normalement
+    puis est resté figé après la suspension ne doit pas alerter.
+    """
+    if not isinstance(depuis, str) or len(depuis) < 10:
         return None
-    run = _serie_finale(seances)
-    if len(run) == len(seances):
+    depuis = depuis[:10]
+    avant = [point for point in seances if point["date"] < depuis]
+    apres = [point for point in seances if point["date"] >= depuis]
+    if not apres:
+        return None
+    if avant:
+        reference = avant[-1]["price"]
+        if all(point["price"] == reference for point in apres):
+            return None
+    else:
+        reference = None
+        if all(point["price"] == apres[0]["price"] for point in apres):
+            return None
+    run = _serie_finale(apres)
+    if not run:
+        return None
+    if reference is not None and run[-1]["price"] == reference:
         return None
     return {
         "type": "reprise_probable",
@@ -324,7 +382,12 @@ def appliquer(ligne, points=None, moment=None):
         logger.warning("statuts_cotation illisible, liste vide")
         entree = None
     try:
-        alerte = detecter_alerte(points, suspendu=bool(entree), moment=moment)
+        alerte = detecter_alerte(
+            points,
+            suspendu=bool(entree),
+            moment=moment,
+            depuis=entree.get("depuis") if entree else None,
+        )
     except Exception:
         logger.warning("detection cotation ignoree pour %s", ticker)
         alerte = None
