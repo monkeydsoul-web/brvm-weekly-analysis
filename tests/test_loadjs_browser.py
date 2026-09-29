@@ -214,5 +214,11 @@ def test_chargement_complet_sans_message(base_url):
         page = session.page
         page.wait_for_timeout(1500)
         expect(page.locator("[data-brvm-fallback]")).to_have_count(0)
-        assert page.evaluate("() => window.BRVM_ASSET_V") == "20260929-1"
+        jeton = page.evaluate("() => window.BRVM_ASSET_V")
+        assert jeton and len(jeton) == 12
+        assert page.evaluate(
+            "() => Array.prototype.every.call(document.querySelectorAll('script[data-brvm-mod]'), function (s) {"
+            " return s.src.indexOf('v=' + encodeURIComponent(window.BRVM_ASSET_V)) !== -1;"
+            "})"
+        )
     assert session.erreurs == []

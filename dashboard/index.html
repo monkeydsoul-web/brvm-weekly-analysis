@@ -1693,9 +1693,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </span>
 </footer>
 </main></div>
-<!-- LOADJS-1 : BRVM_ASSET_V est le jeton commun des URL JS. L'incrémenter à chaque changement de script pour qu'un déploiement ne serve pas un mélange d'anciens et de nouveaux fichiers. -->
+<!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
 <script>
-window.BRVM_ASSET_V="20260929-1";
+window.BRVM_ASSET_V="{{ASSET_V}}";
 window.BRVM_PENDING_ERRORS=[];
 window._brvmLoaderTries=0;
 window.brvmRetryLoader=function(){
@@ -1718,28 +1718,28 @@ window.brvmScriptError=function(el){
   window.BRVM_PENDING_ERRORS.push(file);
 };
 </script>
-<script src="/js_loader.js?v=20260929-1" data-brvm-mod="js_loader.js" onerror="brvmScriptError(this)"></script>
-<script src="/simulator.js?v=20260929-1" data-brvm-mod="simulator.js" onerror="brvmScriptError(this)"></script>
-<script src="/live_score.js?v=20260929-1" data-brvm-mod="live_score.js" onerror="brvmScriptError(this)"></script>
-<script src="/ranking.js?v=20260929-1" data-brvm-mod="ranking.js" onerror="brvmScriptError(this)"></script>
-<script src="/stock_chart.js?v=20260929-1" data-brvm-mod="stock_chart.js" onerror="brvmScriptError(this)"></script>
-<script src="/badges.js?v=20260929-1" data-brvm-mod="badges.js" onerror="brvmScriptError(this)"></script>
-<script src="/data_confidence.js?v=20260929-1" data-brvm-mod="data_confidence.js" onerror="brvmScriptError(this)"></script>
-<script src="/compare.js?v=20260929-1" data-brvm-mod="compare.js" onerror="brvmScriptError(this)"></script>
-<script src="/alerts.js?v=20260929-1" data-brvm-mod="alerts.js" onerror="brvmScriptError(this)"></script>
-<script src="/screener.js?v=20260929-1" data-brvm-mod="screener.js" onerror="brvmScriptError(this)"></script>
-<script src="/performance.js?v=20260929-1" data-brvm-mod="performance.js" onerror="brvmScriptError(this)"></script>
-<script src="/compare_analysis.js?v=20260929-1" data-brvm-mod="compare_analysis.js" onerror="brvmScriptError(this)"></script>
-<script src="/backtest.js?v=20260929-1" data-brvm-mod="backtest.js" onerror="brvmScriptError(this)"></script>
-<script src="/markowitz.js?v=20260929-1" data-brvm-mod="markowitz.js" onerror="brvmScriptError(this)"></script>
-<script src="/previsions.js?v=20260929-1" data-brvm-mod="previsions.js" onerror="brvmScriptError(this)"></script>
-<script src="/company-tabs.js?v=20260929-1" data-brvm-mod="company-tabs.js" onerror="brvmScriptError(this)"></script>
-<script src="/news_v2.js?v=20260929-1" data-brvm-mod="news_v2.js" onerror="brvmScriptError(this)"></script>
-<script src="/signaux_v2.js?v=20260929-1" data-brvm-mod="signaux_v2.js" onerror="brvmScriptError(this)"></script>
-<script src="/rank_v2.js?v=20260929-1" data-brvm-mod="rank_v2.js" onerror="brvmScriptError(this)"></script>
-<script src="/welcome_v2.js?v=20260929-1" data-brvm-mod="welcome_v2.js" onerror="brvmScriptError(this)"></script>
-<script src="/top3_podium.js?v=20260929-1" data-brvm-mod="top3_podium.js" onerror="brvmScriptError(this)"></script>
-<script src="/screener_lazy.js?v=20260929-1" data-brvm-mod="screener_lazy.js" onerror="brvmScriptError(this)"></script>
+<script src="/js_loader.js?v={{ASSET_V}}" data-brvm-mod="js_loader.js" onerror="brvmScriptError(this)"></script>
+<script src="/simulator.js?v={{ASSET_V}}" data-brvm-mod="simulator.js" onerror="brvmScriptError(this)"></script>
+<script src="/live_score.js?v={{ASSET_V}}" data-brvm-mod="live_score.js" onerror="brvmScriptError(this)"></script>
+<script src="/ranking.js?v={{ASSET_V}}" data-brvm-mod="ranking.js" onerror="brvmScriptError(this)"></script>
+<script src="/stock_chart.js?v={{ASSET_V}}" data-brvm-mod="stock_chart.js" onerror="brvmScriptError(this)"></script>
+<script src="/badges.js?v={{ASSET_V}}" data-brvm-mod="badges.js" onerror="brvmScriptError(this)"></script>
+<script src="/data_confidence.js?v={{ASSET_V}}" data-brvm-mod="data_confidence.js" onerror="brvmScriptError(this)"></script>
+<script src="/compare.js?v={{ASSET_V}}" data-brvm-mod="compare.js" onerror="brvmScriptError(this)"></script>
+<script src="/alerts.js?v={{ASSET_V}}" data-brvm-mod="alerts.js" onerror="brvmScriptError(this)"></script>
+<script src="/screener.js?v={{ASSET_V}}" data-brvm-mod="screener.js" onerror="brvmScriptError(this)"></script>
+<script src="/performance.js?v={{ASSET_V}}" data-brvm-mod="performance.js" onerror="brvmScriptError(this)"></script>
+<script src="/compare_analysis.js?v={{ASSET_V}}" data-brvm-mod="compare_analysis.js" onerror="brvmScriptError(this)"></script>
+<script src="/backtest.js?v={{ASSET_V}}" data-brvm-mod="backtest.js" onerror="brvmScriptError(this)"></script>
+<script src="/markowitz.js?v={{ASSET_V}}" data-brvm-mod="markowitz.js" onerror="brvmScriptError(this)"></script>
+<script src="/previsions.js?v={{ASSET_V}}" data-brvm-mod="previsions.js" onerror="brvmScriptError(this)"></script>
+<script src="/company-tabs.js?v={{ASSET_V}}" data-brvm-mod="company-tabs.js" onerror="brvmScriptError(this)"></script>
+<script src="/news_v2.js?v={{ASSET_V}}" data-brvm-mod="news_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/signaux_v2.js?v={{ASSET_V}}" data-brvm-mod="signaux_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/rank_v2.js?v={{ASSET_V}}" data-brvm-mod="rank_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/welcome_v2.js?v={{ASSET_V}}" data-brvm-mod="welcome_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/top3_podium.js?v={{ASSET_V}}" data-brvm-mod="top3_podium.js" onerror="brvmScriptError(this)"></script>
+<script src="/screener_lazy.js?v={{ASSET_V}}" data-brvm-mod="screener_lazy.js" onerror="brvmScriptError(this)"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');

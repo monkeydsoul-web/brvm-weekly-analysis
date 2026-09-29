@@ -3,13 +3,11 @@
    section concernee affiche un message et un bouton pour recharger.
    Les autres sections ne sont pas touchees.
 
-   Cache : window.BRVM_ASSET_V (pose dans index.html) est ajoute a chaque
-   URL (?v=). Un seul jeton pour tout le lot : avec le nouveau HTML, le
-   navigateur recharge tous les JS ensemble et ne melange pas une version
-   precedente gardee en cache. Le parametre &retry=N evite en plus de
-   reutiliser une reponse 502 mise en cache pendant la bascule. La query
-   string ne change pas la route Flask : app.py n'est pas modifie.
-   Ce n'est pas un cache immutable de longue duree (sujet de PERF-1).
+   Jeton : le serveur ecrit window.BRVM_ASSET_V (commit Render, sinon
+   empreinte des JS) dans le HTML. Chaque module est demande avec ?v=.
+   Une instance qui n'a pas ce jeton repond 503 no-store : onerror relance
+   la requete, qui peut atteindre la nouvelle instance. &retry=N evite
+   de reutiliser une 502 mise en cache pendant la bascule.
 */
 (function () {
   if (window.__BRVM_LOADER) return;

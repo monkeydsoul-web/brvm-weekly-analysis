@@ -41,13 +41,30 @@ def client():
     return application.app.test_client()
 
 
+def _source_index():
+    return (os.path.join(os.path.dirname(__file__), "..", "dashboard", "index.html"))
+
+
+def test_source_sans_jeton_manuel():
+    with open(_source_index(), encoding="utf-8") as f:
+        source = f.read()
+    assert "?v=2026" not in source
+    assert "{{ASSET_V}}" in source
+    assert 'window.BRVM_ASSET_V="{{ASSET_V}}"' in source
+
+
 def test_page_reference_le_chargeur(client):
+    import app as application
     reponse = client.get("/")
     assert reponse.status_code == 200
+    assert "no-cache" in (reponse.headers.get("Cache-Control") or "")
     html = reponse.get_data(as_text=True)
+    assert "{{ASSET_V}}" not in html
     jeton = re.search(r'window\.BRVM_ASSET_V="([^"]+)"', html)
     assert jeton, "jeton de cache absent"
     version = jeton.group(1)
+    assert version == application.ASSET_V
+    assert "?v=%s" % version in html
     assert "/js_loader.js?v=%s" % version in html
     assert "brvmScriptError" in html
     balises = re.findall(
@@ -66,7 +83,8 @@ def test_page_reference_le_chargeur(client):
 
 
 def test_chargeur_servi_avec_retry_et_message(client):
-    reponse = client.get("/js_loader.js?v=test")
+    import app as application
+    reponse = client.get("/js_loader.js?v=%s" % application.ASSET_V)
     assert reponse.status_code == 200
     assert "javascript" in (reponse.content_type or "")
     corps = reponse.get_data(as_text=True)
@@ -79,9 +97,30 @@ def test_chargeur_servi_avec_retry_et_message(client):
 
 
 def test_modules_versionnes_restent_en_200(client):
+    import app as application
     for nom in MODULES:
-        reponse = client.get("/%s?v=20260929-1" % nom)
-        assert reponse.status_code == 200, nom
+        bon = client.get("/%s?v=%s" % (nom, application.ASSET_V))
+        assert bon.status_code == 200, nom
+        sans = client.get("/" + nom)
+        assert sans.status_code == 200, nom
+
+
+def test_js_v_different_renvoie_503(client):
+    import app as application
+    reponse = client.get("/rank_v2.js?v=pas-cette-instance")
+    assert reponse.status_code == 503
+    assert "no-store" in (reponse.headers.get("Cache-Control") or "")
+    assert application.ASSET_V != "pas-cette-instance"
+
+
+def test_asset_v_commit_ou_empreinte(monkeypatch):
+    import app as application
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "abcdef1234567890extra")
+    assert application._calcul_asset_v() == "abcdef123456"
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "")
+    empreinte = application._calcul_asset_v()
+    assert len(empreinte) == 12
+    int(empreinte, 16)
 
 
 def test_api_chat_reste_404(client):

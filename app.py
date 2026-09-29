@@ -303,9 +303,60 @@ def serve_simulator():
     return send_from_directory("dashboard", "simulator.js",
                                mimetype="application/javascript")
 
+def _calcul_asset_v():
+    """Empreinte du deploiement : commit Render, sinon sha1 des JS du dashboard."""
+    commit = (os.environ.get("RENDER_GIT_COMMIT") or "")[:12]
+    if commit:
+        return commit
+    import hashlib
+    empreinte = hashlib.sha1()
+    dossier = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard")
+    noms = sorted(
+        nom for nom in os.listdir(dossier)
+        if nom.endswith(".js") and os.path.isfile(os.path.join(dossier, nom))
+    )
+    for nom in noms:
+        with open(os.path.join(dossier, nom), "rb") as f:
+            empreinte.update(f.read())
+    return empreinte.hexdigest()[:12]
+
+
+ASSET_V = _calcul_asset_v()
+_INDEX_HTML_CACHE = {"mtime": None, "corps": None}
+
+
+def _corps_index():
+    """HTML avec {{ASSET_V}} remplace, en cache tant que index.html ne change pas."""
+    chemin = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard", "index.html")
+    mtime = os.path.getmtime(chemin)
+    if _INDEX_HTML_CACHE["mtime"] == mtime and _INDEX_HTML_CACHE["corps"] is not None:
+        return _INDEX_HTML_CACHE["corps"]
+    with open(chemin, encoding="utf-8") as f:
+        brut = f.read()
+    corps = brut.replace("{{ASSET_V}}", ASSET_V)
+    _INDEX_HTML_CACHE["mtime"] = mtime
+    _INDEX_HTML_CACHE["corps"] = corps
+    return corps
+
+
+@app.before_request
+def _js_version_mismatch():
+    """Une instance ancienne renvoie 503 : le chargeur retente vers la nouvelle."""
+    if not request.path.endswith(".js"):
+        return None
+    v = request.args.get("v")
+    if v is None or v == ASSET_V:
+        return None
+    reponse = app.response_class(status=503)
+    reponse.headers["Cache-Control"] = "no-store"
+    return reponse
+
+
 @app.route("/")
 def index():
-    return send_from_directory("dashboard", "index.html")
+    reponse = app.response_class(_corps_index(), mimetype="text/html; charset=utf-8")
+    reponse.headers["Cache-Control"] = "no-cache"
+    return reponse
 
 
 @app.route("/api/scores")
