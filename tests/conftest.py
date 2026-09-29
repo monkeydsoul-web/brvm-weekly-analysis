@@ -20,6 +20,8 @@ _TEST_DATA = tempfile.mkdtemp(prefix="brvm-pr02-")
 if os.path.abspath(_TEST_DATA).startswith("/var/data"):
     raise RuntimeError("le repertoire de test ne doit pas etre sous /var/data")
 os.environ["BRVM_DATA_DIR"] = _TEST_DATA
+# Importer app.py ne doit pas demarrer le planificateur ni ecrire un classement.
+os.environ["BRVM_DISABLE_SCHEDULER"] = "1"
 os.environ.pop("ANTHROPIC_API_KEY", None)
 
 # brvm_market_data_scraper ouvre logs/brvm_market.log des l'import.

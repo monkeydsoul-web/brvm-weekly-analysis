@@ -19,7 +19,6 @@ except Exception as _e:
     def start_auto_scheduler(): pass
     def get_scheduler_status(): return {}
     def get_scheduler(): return None
-from live_valuation import compute_live_score, compute_all_live_scores
 from live_data import get_live_data
 from history_merge import get_full_history
 import live_ranker  # CIRC-2: import complet et synchrone AVANT _init_app()/fork gunicorn — le worker herite toujours d un module fini (fix « partially initialized » sur instance fraiche)
@@ -67,22 +66,31 @@ REPORTS_DIR = "reports"
 
 _LIVE_UNAVAIL_MSG = "Données live indisponibles — relancer la régénération du ranking"
 
+def _payload_classement():
+    """Payload unique produit par live_ranker, ou None si le fichier manque."""
+    try:
+        from live_ranker import load_ranking
+        data = load_ranking()
+    except Exception as e:
+        logger.error("classement illisible: %s — %s", e, _LIVE_UNAVAIL_MSG)
+        return None
+    if not isinstance(data, dict):
+        return None
+    ranking = data.get("ranking")
+    if not isinstance(ranking, list) or not ranking:
+        return None
+    for r in ranking:
+        if isinstance(r, dict):
+            r.setdefault("composite_adj", 0)
+    return data
+
+
 def load_latest_scores():
-    live_path = os.path.join(DATA_DIR, "live_ranking.json")
-    if os.path.exists(live_path):
-        try:
-            with open(live_path, encoding="utf-8") as f:
-                data = json.load(f)
-            ranking = data.get("ranking", [])
-            if ranking:
-                for r in ranking:
-                    r.setdefault("composite_adj", r.get("composite_adj", 0))
-                return ranking
-        except Exception as e:
-            logger.error(f"live_ranking.json illisible: {e} — {_LIVE_UNAVAIL_MSG}")
-            return []
-    logger.error(f"live_ranking.json absent — {_LIVE_UNAVAIL_MSG}")
-    return []
+    data = _payload_classement()
+    if not data:
+        logger.error("live_ranking.json absent ou vide — %s", _LIVE_UNAVAIL_MSG)
+        return []
+    return data["ranking"]
 
 
 def load_price_history():
@@ -302,15 +310,11 @@ def index():
 
 @app.route("/api/scores")
 def api_scores():
-    live_path = os.path.join(DATA_DIR, "live_ranking.json")
-    if not os.path.exists(live_path):
-        logger.error(f"/api/scores — {_LIVE_UNAVAIL_MSG}")
+    data = _payload_classement()
+    if not data:
+        logger.error("/api/scores — %s", _LIVE_UNAVAIL_MSG)
         return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
-    scores = load_latest_scores()
-    if not scores:
-        logger.error(f"/api/scores — live_ranking.json vide ou illisible — {_LIVE_UNAVAIL_MSG}")
-        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
-    return jsonify(scores)
+    return jsonify(data["ranking"])
 
 
 @app.route("/api/top3-constance")
@@ -325,8 +329,11 @@ def api_top3_constance():
 
 @app.route("/api/stock/<ticker>")
 def api_stock(ticker):
-    scores = load_latest_scores()
-    stock = next((s for s in scores if s.get("ticker") == ticker.upper()), None)
+    data = _payload_classement()
+    if not data:
+        logger.error("/api/stock — %s", _LIVE_UNAVAIL_MSG)
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
+    stock = next((s for s in data["ranking"] if s.get("ticker") == ticker.upper()), None)
     if not stock:
         return jsonify({"error": "Ticker non trouvé"}), 404
 
@@ -350,6 +357,7 @@ def api_stock(ticker):
 
     return jsonify({
         "stock": stock,
+        "updated_at": data.get("updated_at"),
         "price_history": price_history[-52:],  # 52 semaines max
         "news": stock_news[:10],
         "commodity_impact": commodity_info["impact"],
@@ -653,46 +661,30 @@ def api_live_score_ticker(ticker):
     ticker = ticker.upper()
     if ticker not in STOCK_FUNDAMENTALS:
         return jsonify({"error": f"Ticker {ticker} inconnu"}), 404
-    try:
-        from live_ranker import load_ranking
-        ranking_data = load_ranking()
-        if ranking_data and "ranking" in ranking_data:
-            entry = next((r for r in ranking_data["ranking"] if r.get("ticker") == ticker), None)
-            if entry:
-                return jsonify(entry)
-    except Exception as e:
-        print(f"[live-score] fallback live_valuation: {e}")
-    # Fallback : notes du jour (pas de recalcul a la volee)
-    entry = next((r for r in load_latest_scores() if r.get("ticker") == ticker), None)
-    if entry:
-        return jsonify(entry)
-    return jsonify({"error": "ranking indisponible"}), 503
+    data = _payload_classement()
+    if not data:
+        logger.error("/api/live-score/%s — %s", ticker, _LIVE_UNAVAIL_MSG)
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
+    entry = next((r for r in data["ranking"] if r.get("ticker") == ticker), None)
+    if not entry:
+        return jsonify({"error": "Ticker non trouvé"}), 404
+    return jsonify(entry)
 
 
 @app.route("/api/live-scores")
 def api_live_scores_all():
-    try:
-        from live_ranker import load_ranking
-        ranking_data = load_ranking()
-        if ranking_data and "ranking" in ranking_data:
-            r = ranking_data["ranking"]
-            return jsonify({
-                "scores":     r,
-                "ranking":    r,
-                "updated_at": ranking_data.get("updated_at"),
-                "market_open": ranking_data.get("market_open"),
-                "total":      len(r)
-            })
-    except Exception as e:
-        print(f"[live-scores] fallback compute_all: {e}")
-    # Fallback
-    force = request.args.get("refresh", "0") == "1"
-    try:
-        live_cache = get_live_data(force_refresh=force)
-        results = compute_all_live_scores(STOCK_FUNDAMENTALS, live_cache)
-        return jsonify({"scores": results, "updated_at": live_cache.get("updated_at"), "market_open": live_cache.get("market_open"), "total": len(results)})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    data = _payload_classement()
+    if not data:
+        logger.error("/api/live-scores — %s", _LIVE_UNAVAIL_MSG)
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
+    r = data["ranking"]
+    return jsonify({
+        "scores":     r,
+        "ranking":    r,
+        "updated_at": data.get("updated_at"),
+        "market_open": data.get("market_open"),
+        "total":      len(r)
+    })
 
 
 @app.route("/live_score.js")
@@ -876,15 +868,18 @@ def api_live_ranking():
     # refresh=1 sans jeton : ignore, la lecture publique reste en 200 (pas une erreur).
     refresh = request.args.get("refresh", "0") == "1" and _admin_token_ok()
     try:
-        from live_ranker import compute_live_ranking, load_ranking
         if refresh:
+            from live_ranker import compute_live_ranking
             result = compute_live_ranking(trigger="manual")
         else:
-            result = load_ranking() or {"ranking": load_latest_scores()}
-        return jsonify(result)
+            result = _payload_classement()
     except Exception as e:
-        logger.warning(f"/api/live-ranking indisponible, fallback notes du jour: {e}")
-        return jsonify({"ranking": load_latest_scores()})
+        logger.error("/api/live-ranking: %s — %s", e, _LIVE_UNAVAIL_MSG)
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
+    if not isinstance(result, dict) or not result.get("ranking"):
+        logger.error("/api/live-ranking — %s", _LIVE_UNAVAIL_MSG)
+        return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
+    return jsonify(result)
 
 @app.route("/api/live-ranking/changes")
 def api_live_ranking_changes():
@@ -1529,12 +1524,10 @@ def api_rapport_pdf(ticker):
         from reportlab.lib.enums import TA_CENTER, TA_LEFT
         import io
 
-        # Récupérer les données du ticker
-        ranking_path = os.path.join(DATA_DIR, "live_ranking.json")
+        # Meme classement que les routes de note (pas une relecture divergeante).
+        data = _payload_classement()
         row = {}
-        if os.path.exists(ranking_path):
-            with open(ranking_path) as f:
-                data = json.load(f)
+        if data:
             for x in data.get("ranking", []):
                 if x.get("ticker") == ticker.upper():
                     row = x
@@ -1702,19 +1695,15 @@ def api_rapport_pdf(ticker):
 
 
 def _get_live_scores_list():
-    """Retourne la liste de scores live (ranking ou calcul à la volée)."""
-    try:
-        from live_ranker import load_ranking
-        rd = load_ranking()
-        if rd and rd.get("ranking"):
-            return rd["ranking"]
-    except Exception:
-        pass
-    try:
-        live_cache = get_live_data()
-        return compute_all_live_scores(STOCK_FUNDAMENTALS, live_cache)
-    except Exception:
-        return []
+    """Lignes du classement unique.
+
+    None si le fichier manque ou est vide : l'appelant repond 503,
+    sans recalculer une note de repli.
+    """
+    data = _payload_classement()
+    if not data:
+        return None
+    return data["ranking"]
 
 
 def _get_price_history_dict():
@@ -1730,6 +1719,9 @@ def api_prevision_portfolios():
     try:
         from backtest_previsionnel import generate_portfolios
         scores = _get_live_scores_list()
+        if scores is None:
+            logger.error("previsions/portfolios — %s", _LIVE_UNAVAIL_MSG)
+            return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
         ph = _get_price_history_dict()
         result = generate_portfolios(scores, ph)
         return jsonify(result)
@@ -1743,6 +1735,9 @@ def api_prevision_signaux():
     try:
         from backtest_previsionnel import compute_signals
         scores = _get_live_scores_list()
+        if scores is None:
+            logger.error("previsions/signaux — %s", _LIVE_UNAVAIL_MSG)
+            return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
         ph = _get_price_history_dict()
         result = compute_signals(scores, ph)
         return jsonify(result)
@@ -1757,6 +1752,9 @@ def api_prevision_backtest():
         import importlib, backtest_previsionnel as _bp
         importlib.reload(_bp)
         scores = _get_live_scores_list()
+        if scores is None:
+            logger.error("previsions/backtest — %s", _LIVE_UNAVAIL_MSG)
+            return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
         ph = _get_price_history_dict()
         result = _bp.compute_backtest_previsionnel(scores, ph)
         return jsonify(result)
@@ -1779,6 +1777,9 @@ def api_rapport_mensuel():
     try:
         from backtest_previsionnel import generate_rapport_pdf
         scores = _get_live_scores_list()
+        if scores is None:
+            logger.error("rapport-mensuel — %s", _LIVE_UNAVAIL_MSG)
+            return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
         ph = _get_price_history_dict()
         pdf_bytes = generate_rapport_pdf(scores, ph)
         from flask import Response
@@ -2009,6 +2010,12 @@ def _init_app():
     if _INIT_DONE:
         return
     _INIT_DONE = True
+
+    # Tests : ne pas lancer le planificateur, le rechauffement (ecrit le classement)
+    # ni les threads reseau. Inactif en production tant que la variable n'est pas posee.
+    if os.environ.get("BRVM_DISABLE_SCHEDULER") == "1":
+        logger.info("BRVM_DISABLE_SCHEDULER=1 — planificateur et rechauffement non demarres")
+        return
 
     try:
         from dotenv import load_dotenv as _ldenv
