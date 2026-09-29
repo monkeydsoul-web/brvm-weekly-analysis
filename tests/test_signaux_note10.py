@@ -51,21 +51,24 @@ def test_raisons_note10_virgule_et_libelles():
     by = dict((s["ticker"], s) for s in sigs)
     assert by["HAUT"]["signal"] == "ACHETER"
     assert by["HAUT"]["score"] == 80
-    assert "Intéressant" in by["HAUT"]["raison"]
+    assert "Prévision favorable" in by["HAUT"]["raison"]
     assert "10,0/10" in by["HAUT"]["raison"]
     assert by["MID"]["signal"] == "CONSERVER"
     assert by["MID"]["score"] == 54
-    assert "À surveiller" in by["MID"]["raison"]
+    assert "Prévision neutre" in by["MID"]["raison"]
     assert "6,8/10" in by["MID"]["raison"]
     assert by["BAS"]["signal"] == "ALLÉGER"
-    assert "Prudence" in by["BAS"]["raison"]
+    assert "Prévision défavorable" in by["BAS"]["raison"]
     assert "5,0/10" in by["BAS"]["raison"]
     assert by["FAIBLE"]["signal"] == "ÉVITER"
-    assert "Prudence" in by["FAIBLE"]["raison"]
+    assert "Prévision défavorable" in by["FAIBLE"]["raison"]
     assert "0,9/10" in by["FAIBLE"]["raison"]
     for s in sigs:
         assert "/80" not in s["raison"]
         assert "ACHAT" not in s["raison"]
+        assert "Intéressant" not in s["raison"]
+        assert "À surveiller" not in s["raison"]
+        assert "Prudence" not in s["raison"]
 
 
 def test_pdf_mensuel_note10_et_trois_libelles():
@@ -78,7 +81,9 @@ def test_pdf_mensuel_note10_et_trois_libelles():
     assert "Score/80" not in texte
     assert "ACHAT" not in texte
     assert "10,0" in texte
-    assert "Intéressant" in texte
-    assert "À surveiller" in texte
-    assert "Prudence" in texte
-    assert "≥ 7,5" in texte or "7,5" in texte
+    assert "Conseil Intéressant (≥ 7,5)" in texte
+    assert "Prévisions favorables :" in texte
+    assert "Prévisions neutres :" in texte
+    assert "Prévisions défavorables :" in texte
+    assert "À surveiller" not in texte
+    assert "Prudence" not in texte
