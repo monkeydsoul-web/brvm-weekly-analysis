@@ -345,6 +345,18 @@ def test_ecriture_remplace_atomiquement(tmp_path, caplog):
     assert "0 avant, 1 après" in caplog.text
 
 
+def test_pdf_relatif_resolu_sous_data_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr(_scraper, "DATA_DIR", tmp_path)
+    dossier = tmp_path / "brvm_docs" / "notations"
+    dossier.mkdir(parents=True)
+    (dossier / "note.pdf").write_bytes(b"%PDF")
+    obtenu = _scraper._resoudre_pdf("brvm_docs/notations/note.pdf")
+    assert obtenu == str(dossier / "note.pdf")
+    assert Path(obtenu).exists()
+    assert _scraper._resoudre_pdf("/tmp/absolu.pdf") == "/tmp/absolu.pdf"
+    assert _scraper._resoudre_pdf("https://www.brvm.org/x.pdf") == ""
+
+
 def test_ecriture_force_autorise_le_vide(tmp_path):
     path = tmp_path / "brvm_ratings.json"
     path.write_text(json.dumps([{"ticker": "SNTS"}]), encoding="utf-8")

@@ -429,6 +429,18 @@ def _soup(url: str) -> Optional[BeautifulSoup]:
     return None
 
 # ── Lecture PDF ──────────────────────────────────────────────────────────────
+def _resoudre_pdf(pdf_path: str) -> str:
+    """Chemin disque d'un PDF. Un chemin relatif est lu sous DATA_DIR."""
+    if not pdf_path:
+        return ""
+    if pdf_path.startswith("http://") or pdf_path.startswith("https://"):
+        return ""
+    chemin = Path(pdf_path)
+    if not chemin.is_absolute():
+        chemin = DATA_DIR / chemin
+    return str(chemin)
+
+
 def _read_pdf(path: str) -> str:
     if not HAS_PDF or not os.path.exists(path):
         return ""
@@ -771,8 +783,9 @@ def scrape_ratings() -> List[Dict]:
             key = pdf or url
             if not key or key in ratings:
                 continue
-            # Lire PDF si disponible
-            text = _read_pdf(pdf) if pdf and os.path.exists(pdf) else ""
+            # Lire PDF si disponible (chemin relatif : sous DATA_DIR)
+            pdf_disque = _resoudre_pdf(pdf)
+            text = _read_pdf(pdf_disque) if pdf_disque else ""
             if not text and item.get("contenu"):
                 text = item["contenu"]
             titre = item.get("titre") or ""
