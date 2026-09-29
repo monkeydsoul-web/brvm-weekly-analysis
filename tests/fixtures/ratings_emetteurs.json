@@ -1,0 +1,131 @@
+{
+  "commentaire": "Communiques types. avant = rattachement par sous-chaine (code avant PR-12). apres = mot entier. null = aucun ticker cote.",
+  "entrees": [
+    {
+      "id": "ttlc",
+      "texte": "TotalEnergies Marketing CI — Note long terme A+ perspective Stable. Date de validité : 30 juin 2026. Bloomfield Investment.",
+      "avant": "ETIT",
+      "apres": "TTLC",
+      "note": "A+",
+      "date_validite": "2026-06-30"
+    },
+    {
+      "id": "ttls",
+      "texte": "TotalEnergies Marketing Sénégal — Note long terme AA- perspective Stable. Valable jusqu'au 31/12/2025.",
+      "avant": "ETIT",
+      "apres": "TTLS",
+      "note": "AA-",
+      "date_validite": "2025-12-31"
+    },
+    {
+      "id": "ttls_sans_accent",
+      "texte": "TotalEnergies Marketing Senegal — notation",
+      "avant": "ETIT",
+      "apres": "TTLS"
+    },
+    {
+      "id": "smb",
+      "texte": "SMB CI présente de petites marges. Note long terme B- perspective Stable.",
+      "avant": "ETIT",
+      "apres": "SMBC",
+      "note": "B-"
+    },
+    {
+      "id": "unlc",
+      "texte": "Unilever CI dégage de petites marges. Note long terme B- perspective Négative.",
+      "avant": "ETIT",
+      "apres": "UNLC",
+      "note": "B-"
+    },
+    {
+      "id": "etit",
+      "texte": "Ecobank Transnational Incorporated (ETI). Note long terme BBB perspective Stable.",
+      "avant": "ECOC",
+      "apres": "ETIT",
+      "note": "BBB"
+    },
+    {
+      "id": "ciec_electricite",
+      "texte": "Compagnie Ivoirienne d'Electricite — Note long terme A+ perspective Stable.",
+      "avant": null,
+      "apres": "CIEC",
+      "note": "A+"
+    },
+    {
+      "id": "ciec_accent",
+      "texte": "Compagnie Ivoirienne d'Électricité — Note long terme A perspective Stable. Date de validité : 15 mars 2026.",
+      "avant": null,
+      "apres": "CIEC",
+      "note": "A",
+      "date_validite": "2026-03-15"
+    },
+    {
+      "id": "financiere",
+      "texte": "Notation de la Societe Financiere de l'Ouest",
+      "avant": "CIEC",
+      "apres": null
+    },
+    {
+      "id": "efficience",
+      "texte": "Analyse de l'efficience et de la situation financiere de l'emetteur",
+      "avant": "CIEC",
+      "apres": null
+    },
+    {
+      "id": "science",
+      "texte": "Rapport scientifique, ancienne methodologie officielle appreciee par le comite",
+      "avant": "CIEC",
+      "apres": null
+    },
+    {
+      "id": "marketing",
+      "texte": "Campagne marketing de la societe, sans emetteur cote",
+      "avant": "ETIT",
+      "apres": null
+    },
+    {
+      "id": "crrh",
+      "texte": "CRRH-UEMOA — Note long terme AA- perspective Stable",
+      "avant": null,
+      "apres": null,
+      "note": "AA-"
+    },
+    {
+      "id": "boad",
+      "texte": "BOAD — Banque Ouest Africaine de Développement. Note long terme A+ perspective Stable",
+      "avant": null,
+      "apres": null,
+      "note": "A+"
+    },
+    {
+      "id": "etat",
+      "texte": "Etat du Sénégal — Note long terme B+ perspective Stable",
+      "avant": null,
+      "apres": null
+    },
+    {
+      "id": "ecobank_ghana",
+      "texte": "Ecobank Ghana — Note long terme A- perspective Stable",
+      "avant": "ECOC",
+      "apres": null
+    },
+    {
+      "id": "nsia_benin",
+      "texte": "NSIA Banque Bénin — Note long terme BBB perspective Stable",
+      "avant": "NSBC",
+      "apres": null
+    },
+    {
+      "id": "coris_senegal",
+      "texte": "Coris Bank Sénégal — Note long terme BBB perspective Stable",
+      "avant": "CBIBF",
+      "apres": null
+    },
+    {
+      "id": "sg_senegal",
+      "texte": "Société Générale Sénégal — Note long terme A perspective Stable",
+      "avant": "SGBC",
+      "apres": null
+    }
+  ]
+}

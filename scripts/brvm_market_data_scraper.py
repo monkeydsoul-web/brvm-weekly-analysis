@@ -12,9 +12,9 @@ Sources :
   - https://www.brvm.org/fr/emetteurs/{slug} (pages emetteurs)
   - live_cache.json + market_cache.json (données locales)
 """
-import os, re, sys, json, time, logging, datetime, warnings
+import os, re, sys, json, time, logging, datetime, warnings, unicodedata, calendar
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
 warnings.filterwarnings("ignore")
 import requests
@@ -31,6 +31,7 @@ BASE_DIR    = Path(__file__).parent.parent
 DATA_DIR    = Path(os.environ.get("BRVM_DATA_DIR", str(BASE_DIR / "data")))  # dupliqué depuis paths.py (racine) — script lancé en subprocess isolé
 DOCS_DIR    = DATA_DIR / "brvm_docs"
 LOG_DIR     = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 RATINGS_PATH     = DATA_DIR / "brvm_ratings.json"
 MARKET_PATH      = DATA_DIR / "brvm_market_stats.json"
@@ -51,57 +52,357 @@ logging.basicConfig(
     ],
 )
 
-# ── Mapping nom société → ticker ────────────────────────────────────────────
-COMPANY_TO_TICKER: Dict[str, str] = {
-    "erium": "STAC", "erium cote d'ivoire": "STAC",
-    "societe ivoirienne des tabacs": "STBC", "sitab": "STBC",
-    "oragroup": "ORGT",
-    "sonatel": "SNTS",
-    "sgbc": "SGBC", "societe generale": "SGBC",
-    "nsia banque": "NSBC", "nsia": "NSBC",
-    "coris bank": "CBIBF",
-    "boa benin": "BOAB", "bank of africa benin": "BOAB",
-    "boa burkina": "BOABF", "bank of africa burkina": "BOABF",
-    "boa cote d'ivoire": "BOAC", "bank of africa ci": "BOAC",
-    "boa mali": "BOAM", "bank of africa mali": "BOAM",
-    "boa niger": "BOAN", "bank of africa niger": "BOAN",
-    "boa senegal": "BOAS", "bank of africa senegal": "BOAS",
-    "ecobank": "ECOC", "ecobank ci": "ECOC",
-    "ecobank transnational": "ETIT", "eti": "ETIT",
-    "orange ci": "ORAC", "orange cote d'ivoire": "ORAC",
-    "total ci": "TTLC", "totalenergies ci": "TTLC",
-    "total senegal": "TTLS", "totalenergies senegal": "TTLS",
-    "nestle ci": "NTLC", "nestle": "NTLC",
-    "unilever ci": "UNLC",
-    "palmci": "PALC", "palm ci": "PALC",
-    "saph": "SPHC",
-    "sogb": "SOGC", "caoutchoucs grand bereby": "SOGC",
-    "solibra": "SLBC",
-    "bicici": "BICC", "bici ci": "BICC",
-    "sibc": "SIBC", "societe ivoirienne de banque": "SIBC",
-    "sodeci": "SDCC",
-    "cie": "CIEC", "compagnie ivoirienne electricite": "CIEC",
-    "cfao": "CFAC",
-    "onatel": "ONTBF",
-    "sicable": "CABC",
-    "filtisac": "FTSC",
-    "sucrivoire": "SCRC",
-    "air burkina": "ABJC",
-    "lnbb": "LNBB", "lonab": "LNBB",
-    "prsc": "PRSC", "prestige": "PRSC",
-    "safc": "SAFC", "safca": "SAFC",
-    "sdsc": "SDSC",
-    "semc": "SEMC",
-    "sicc": "SICC", "sicogi": "SICC",
-    "sivc": "SIVC",
-    "smbc": "SMBC", "soacii": "SMBC",
-    "stac": "STAC", "setaci": "STAC",
-    "unxc": "UNXC", "uniwax": "UNXC",
-    "neic": "NEIC", "nei ceda": "NEIC",
-    "bnbc": "BNBC",
-    "bicb": "BICB",
-    "cbibf": "CBIBF",
+# ── Alias émetteur coté → ticker (mot entier, jamais un bout de mot) ────────
+# Noms officiels recopiés de STOCK_FUNDAMENTALS (scraper.py, lecture seule)
+# plus les raisons sociales lues dans les communiqués de notation.
+# « eti » dans « marketing » et « cie » dans « financière » ne doivent plus matcher.
+_ALIAS_BRUTS: List[Tuple[str, str]] = [
+    # Noms STOCK_FUNDAMENTALS (47)
+    ("Société Générale CI", "SGBC"),
+    ("Société Ivoirienne de Banque", "SIBC"),
+    ("Sonatel Senegal", "SNTS"),
+    ("NSIA Banque CI", "NSBC"),
+    ("Coris Bank International", "CBIBF"),
+    ("BOA Benin", "BOAB"),
+    ("BOA Burkina Faso", "BOABF"),
+    ("BOA Côte d'Ivoire", "BOAC"),
+    ("BOA Mali", "BOAM"),
+    ("BOA Niger", "BOAN"),
+    ("BOA Sénégal", "BOAS"),
+    ("Ecobank CI", "ECOC"),
+    ("BICI CI", "BICC"),
+    ("Ecobank Transnational", "ETIT"),
+    ("Oragroup Togo", "ORGT"),
+    ("SAFCA CI", "SAFC"),
+    ("Orange CI", "ORAC"),
+    ("Onatel Burkina Faso", "ONTBF"),
+    ("Nestlé CI", "NTLC"),
+    ("SITAB CI", "STBC"),
+    ("Unilever CI", "UNLC"),
+    ("SOLIBRA CI", "SLBC"),
+    ("SMB CI", "SMBC"),
+    ("Uniwax CI", "UNXC"),
+    ("Loterie Nationale Bénin", "LNBB"),
+    ("NEI-CEDA CI", "NEIC"),
+    ("Palm CI", "PALC"),
+    ("SAPH CI", "SPHC"),
+    ("SOGB CI", "SOGC"),
+    ("Sucrivoire CI", "SCRC"),
+    ("TotalEnergies CI", "TTLC"),
+    ("TotalEnergies Sénégal", "TTLS"),
+    ("Vivo Energy CI", "SHEC"),
+    ("Crown Siem CI", "SEMC"),
+    ("CIE CI", "CIEC"),
+    ("SODECI CI", "SDCC"),
+    ("Filtisac CI", "FTSC"),
+    ("Africa Global Logistics CI", "SDSC"),
+    ("Sicable CI", "CABC"),
+    ("CFAO Motors CI", "CFAC"),
+    ("Bernabé CI", "BNBC"),
+    ("Sicor CI", "SICC"),
+    ("Tractafric Motors CI", "PRSC"),
+    ("Servair Abidjan CI", "ABJC"),
+    ("Setao CI", "STAC"),
+    ("Erium CI (Air Liquide)", "SIVC"),
+    ("BIIC Bénin", "BICB"),
+    # Raisons sociales et noms courants des mêmes 47
+    ("Société Générale de Banques en Côte d'Ivoire", "SGBC"),
+    ("Société Générale Côte d'Ivoire", "SGBC"),
+    ("Société Générale", "SGBC"),
+    ("SGBCI", "SGBC"),
+    ("SGB CI", "SGBC"),
+    ("SGBC", "SGBC"),
+    ("Société Ivoirienne de Banque SA", "SIBC"),
+    ("SIB", "SIBC"),
+    ("Sonatel", "SNTS"),
+    ("Sonatel Sénégal", "SNTS"),
+    ("Orange Sénégal", "SNTS"),
+    ("SNTS", "SNTS"),
+    ("NSIA Banque Côte d'Ivoire", "NSBC"),
+    ("NSIA Banque", "NSBC"),
+    ("NSBC", "NSBC"),
+    ("Coris Bank International Burkina", "CBIBF"),
+    ("Coris Bank International", "CBIBF"),
+    ("Coris Bank", "CBIBF"),
+    ("CBIBF", "CBIBF"),
+    ("Bank of Africa Bénin", "BOAB"),
+    ("Bank of Africa Benin", "BOAB"),
+    ("BOA Bénin", "BOAB"),
+    ("BOAB", "BOAB"),
+    ("Bank of Africa Burkina Faso", "BOABF"),
+    ("Bank of Africa Burkina", "BOABF"),
+    ("BOA Burkina", "BOABF"),
+    ("BOABF", "BOABF"),
+    ("Bank of Africa Côte d'Ivoire", "BOAC"),
+    ("Bank of Africa CI", "BOAC"),
+    ("BOA CI", "BOAC"),
+    ("BOAC", "BOAC"),
+    ("Bank of Africa Mali", "BOAM"),
+    ("BOAM", "BOAM"),
+    ("Bank of Africa Niger", "BOAN"),
+    ("BOAN", "BOAN"),
+    ("Bank of Africa Sénégal", "BOAS"),
+    ("Bank of Africa Senegal", "BOAS"),
+    ("BOAS", "BOAS"),
+    ("Ecobank Côte d'Ivoire", "ECOC"),
+    ("ECOC", "ECOC"),
+    ("Banque Internationale pour le Commerce et l'Industrie de la Côte d'Ivoire", "BICC"),
+    ("BICICI", "BICC"),
+    ("BICI", "BICC"),
+    ("BICC", "BICC"),
+    ("Ecobank Transnational Incorporated", "ETIT"),
+    ("Groupe Ecobank", "ETIT"),
+    ("ETI", "ETIT"),
+    ("ETIT", "ETIT"),
+    ("Oragroup", "ORGT"),
+    ("ORGT", "ORGT"),
+    ("SAFCA", "SAFC"),
+    ("Société Africaine de Crédit Automobile", "SAFC"),
+    ("SAFC", "SAFC"),
+    ("Orange Côte d'Ivoire", "ORAC"),
+    ("ORAC", "ORAC"),
+    ("Onatel", "ONTBF"),
+    ("Moov Africa Burkina Faso", "ONTBF"),
+    ("Office National des Télécommunications du Burkina Faso", "ONTBF"),
+    ("ONTBF", "ONTBF"),
+    ("Nestlé Côte d'Ivoire", "NTLC"),
+    ("Nestle CI", "NTLC"),
+    ("Nestle Côte d'Ivoire", "NTLC"),
+    ("Nestlé", "NTLC"),
+    ("Nestle", "NTLC"),
+    ("NTLC", "NTLC"),
+    ("Société Ivoirienne des Tabacs", "STBC"),
+    ("SITAB", "STBC"),
+    ("STBC", "STBC"),
+    ("Unilever Côte d'Ivoire", "UNLC"),
+    ("Huilerie Savonnerie Lipochimie", "UNLC"),
+    ("Unilever", "UNLC"),
+    ("UNLC", "UNLC"),
+    ("Solibra", "SLBC"),
+    ("Société de Limonaderies et Brasseries d'Afrique", "SLBC"),
+    ("SLBC", "SLBC"),
+    ("Société Multinationale de Bitumes", "SMBC"),
+    ("SMB", "SMBC"),
+    # Slug BRVM de SMB (TICKER_SLUGS, google_news_scraper) : pas une autre société.
+    ("SOACII", "SMBC"),
+    ("SMBC", "SMBC"),
+    ("Uniwax", "UNXC"),
+    ("UNXC", "UNXC"),
+    ("LONAB", "LNBB"),
+    ("Loterie Nationale du Bénin", "LNBB"),
+    ("LNBB", "LNBB"),
+    ("NEI CEDA", "NEIC"),
+    ("Nouvelles Editions Ivoiriennes", "NEIC"),
+    ("NEIC", "NEIC"),
+    ("PALMCI", "PALC"),
+    ("PALC", "PALC"),
+    ("SAPH", "SPHC"),
+    ("Société Africaine de Plantations d'Hévéas", "SPHC"),
+    ("SPHC", "SPHC"),
+    ("SOGB", "SOGC"),
+    ("Caoutchoucs de Grand-Béréby", "SOGC"),
+    ("Société des Caoutchoucs de Grand-Béréby", "SOGC"),
+    ("SOGC", "SOGC"),
+    ("Sucrivoire", "SCRC"),
+    ("SCRC", "SCRC"),
+    ("TotalEnergies Marketing Côte d'Ivoire", "TTLC"),
+    ("Total Energies Marketing Côte d'Ivoire", "TTLC"),
+    ("TotalEnergies Marketing CI", "TTLC"),
+    ("Total Energies Marketing CI", "TTLC"),
+    ("Total CI", "TTLC"),
+    ("TotalEnergies CI", "TTLC"),
+    ("TTLC", "TTLC"),
+    ("TotalEnergies Marketing Sénégal", "TTLS"),
+    ("Total Energies Marketing Sénégal", "TTLS"),
+    ("TotalEnergies Marketing Senegal", "TTLS"),
+    ("Total Sénégal", "TTLS"),
+    ("Total Senegal", "TTLS"),
+    ("TTLS", "TTLS"),
+    ("Vivo Energy Côte d'Ivoire", "SHEC"),
+    ("Vivo Energy", "SHEC"),
+    ("Shell CI", "SHEC"),
+    ("SHEC", "SHEC"),
+    ("Crown Siem", "SEMC"),
+    ("SEMC", "SEMC"),
+    ("Compagnie Ivoirienne d'Électricité", "CIEC"),
+    ("Compagnie Ivoirienne d'Electricite", "CIEC"),
+    ("CIE", "CIEC"),
+    ("CIEC", "CIEC"),
+    ("SODECI", "SDCC"),
+    ("Société de Distribution d'Eau de Côte d'Ivoire", "SDCC"),
+    ("SDCC", "SDCC"),
+    ("Filtisac", "FTSC"),
+    ("Filature Tissage Sacs de Côte d'Ivoire", "FTSC"),
+    ("FTSC", "FTSC"),
+    ("Africa Global Logistics", "SDSC"),
+    ("SDSC", "SDSC"),
+    ("Sicable", "CABC"),
+    ("CABC", "CABC"),
+    ("CFAO Motors", "CFAC"),
+    ("Compagnie Française de l'Afrique Occidentale en Côte d'Ivoire", "CFAC"),
+    ("CFAO", "CFAC"),
+    ("CFAC", "CFAC"),
+    ("Bernabé", "BNBC"),
+    ("Bernabe", "BNBC"),
+    ("BNBC", "BNBC"),
+    ("Sicor", "SICC"),
+    ("SICC", "SICC"),
+    ("Tractafric Motors", "PRSC"),
+    ("Tractafric", "PRSC"),
+    ("PRSC", "PRSC"),
+    ("Servair Abidjan", "ABJC"),
+    ("ABJC", "ABJC"),
+    ("Setao", "STAC"),
+    ("SETACI", "STAC"),
+    ("STAC", "STAC"),
+    ("Erium CI", "SIVC"),
+    ("Erium", "SIVC"),
+    ("Air Liquide", "SIVC"),
+    # Slug BRVM d'Erium (TICKER_SLUGS, google_news_scraper).
+    ("SIVOP", "SIVC"),
+    ("SIVC", "SIVC"),
+    ("BIIC", "BICB"),
+    ("BIC Bénin", "BICB"),
+    ("BIC Benin", "BICB"),
+    ("BICB", "BICB"),
+]
+
+# Émetteurs non cotés : un communiqué à leur nom ne doit pas être affiché
+# comme la note d'une société de la cote (CRRH-UEMOA, BOAD, États, filiales).
+_NON_COTES_BRUTS: List[str] = [
+    "CRRH-UEMOA",
+    "CRRH",
+    "BOAD",
+    "Banque Ouest Africaine de Développement",
+    "Etat de Côte d'Ivoire",
+    "État de Côte d'Ivoire",
+    "Etat du Sénégal",
+    "État du Sénégal",
+    "Etat du Mali",
+    "Etat du Bénin",
+    "Etat du Burkina",
+    "Etat du Niger",
+    "Etat du Togo",
+    "République de Côte d'Ivoire",
+    "Republique de Côte d'Ivoire",
+    "République du Sénégal",
+    "Trésor public",
+    "Ecobank Ghana",
+    "Ecobank Nigeria",
+    "Ecobank Cameroun",
+    "NSIA Banque Bénin",
+    "NSIA Banque Benin",
+    "NSIA Banque Sénégal",
+    "NSIA Assurances",
+    "Société Générale Sénégal",
+    "Société Générale Cameroun",
+    "Coris Bank Sénégal",
+    "Coris Bank Senegal",
+    "Unilever Ghana",
+    "Nestlé Sénégal",
+    "Nestle Senegal",
+]
+
+# Si ce mot suit immédiatement un alias court, ce n'est pas la société cotée.
+_PAYS_HORS_FILIALE_CI: Tuple[str, ...] = (
+    "Sénégal", "Senegal", "Mali", "Niger", "Bénin", "Benin", "Togo",
+    "Burkina", "Guinée", "Guinee", "Ghana", "Cameroun", "Nigeria",
+)
+_PAYS_HORS_CORIS: Tuple[str, ...] = (
+    "Sénégal", "Senegal", "Mali", "Niger", "Côte d'Ivoire", "Cote d'Ivoire",
+    "Bénin", "Benin", "Togo", "Guinée", "Guinee", "Ghana", "Cameroun",
+)
+_SUITE_REJETEE_BRUTE: Dict[str, Tuple[str, ...]] = {
+    "NSIA Banque": _PAYS_HORS_FILIALE_CI,
+    "NSIA": ("Assurances", "Vie", "Bénin", "Benin", "Sénégal", "Senegal", "Ghana", "Guinée", "Guinee"),
+    "Société Générale": _PAYS_HORS_FILIALE_CI + ("France", "Maroc"),
+    "Coris Bank International": _PAYS_HORS_CORIS,
+    "Coris Bank": _PAYS_HORS_CORIS,
+    "Unilever": ("Ghana", "Nigeria", "France", "Sénégal", "Senegal", "Kenya"),
+    "Nestlé": ("Sénégal", "Senegal", "Ghana", "France", "Nigeria", "Cameroun"),
+    "Nestle": ("Sénégal", "Senegal", "Ghana", "France", "Nigeria", "Cameroun"),
+    "Vivo Energy": ("Ghana", "Sénégal", "Senegal", "Kenya", "Maroc"),
+    "CFAO": ("Sénégal", "Senegal", "Cameroun", "Ghana", "Nigeria"),
 }
+
+
+def _fold_indexe(text: str) -> Tuple[str, List[int]]:
+    """Texte plié et, pour chaque caractère plié, son index dans l'original.
+
+    Minuscules, sans accent, d'/l' retirés, séparateurs en espaces.
+    """
+    if not text:
+        return "", []
+    t = text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
+    decomposes: List[str] = []
+    origines: List[int] = []
+    for i, ch in enumerate(t):
+        for c in unicodedata.normalize("NFD", ch):
+            if unicodedata.category(c) == "Mn":
+                continue
+            decomposes.append(c.lower())
+            origines.append(i)
+    out: List[str] = []
+    out_orig: List[int] = []
+    n = len(decomposes)
+    j = 0
+    while j < n:
+        ch = decomposes[j]
+        prev_sep = j == 0 or not decomposes[j - 1].isalnum()
+        if prev_sep and ch in ("d", "l") and j + 1 < n and decomposes[j + 1] == "'":
+            j += 2
+            continue
+        if ("a" <= ch <= "z") or ("0" <= ch <= "9"):
+            out.append(ch)
+            out_orig.append(origines[j])
+        elif not out or out[-1] != " ":
+            out.append(" ")
+            out_orig.append(origines[j])
+        j += 1
+    while out and out[0] == " ":
+        out.pop(0)
+        out_orig.pop(0)
+    while out and out[-1] == " ":
+        out.pop()
+        out_orig.pop()
+    return "".join(out), out_orig
+
+
+def _fold(text: str) -> str:
+    return _fold_indexe(text)[0]
+
+
+def _construire_alias():
+    # type: () -> Tuple[Dict[str, str], List[Tuple[str, str]], List[str], Dict[str, frozenset]]
+    table: Dict[str, str] = {}
+    for phrase, ticker in _ALIAS_BRUTS:
+        cle = _fold(phrase)
+        if len(cle) < 3:
+            continue
+        deja = table.get(cle)
+        if deja and deja != ticker:
+            raise RuntimeError("alias %r pointe vers %s et %s" % (cle, deja, ticker))
+        table[cle] = ticker
+    items = list(table.items())
+    non_cotes = []
+    vus = set()
+    for phrase in _NON_COTES_BRUTS:
+        cle = _fold(phrase)
+        if len(cle) < 3 or cle in vus:
+            continue
+        vus.add(cle)
+        non_cotes.append(cle)
+    suites: Dict[str, frozenset] = {}
+    for phrase, mots in _SUITE_REJETEE_BRUTE.items():
+        cle = _fold(phrase)
+        if cle not in table:
+            continue
+        suites[cle] = frozenset(_fold(m) for m in mots if _fold(m))
+    return table, items, non_cotes, suites
+
+
+COMPANY_TO_TICKER, _ALIAS_ITEMS, _NON_COTES, _SUITE_REJETEE = _construire_alias()
+_TICKERS_CONNUS = frozenset(COMPANY_TO_TICKER.values())
 
 RATING_GRADES = {
     "AAA":10,"AA+":9.5,"AA":9,"AA-":8.5,
@@ -109,7 +410,7 @@ RATING_GRADES = {
     "BBB+":6.5,"BBB":6,"BBB-":5.5,
     "BB+":5,"BB":4.5,"BB-":4,
     "B+":3.5,"B":3,"B-":2.5,
-    "CCC":2,"CC":1.5,"C":1,"D":0,
+    "CCC+":2.25,"CCC":2,"CC":1.5,"C":1,"D":0,
 }
 
 # ── Helpers réseau ───────────────────────────────────────────────────────────
@@ -134,6 +435,18 @@ def _soup(url: str) -> Optional[BeautifulSoup]:
     return None
 
 # ── Lecture PDF ──────────────────────────────────────────────────────────────
+def _resoudre_pdf(pdf_path: str) -> str:
+    """Chemin disque d'un PDF. Un chemin relatif est lu sous DATA_DIR."""
+    if not pdf_path:
+        return ""
+    if pdf_path.startswith("http://") or pdf_path.startswith("https://"):
+        return ""
+    chemin = Path(pdf_path)
+    if not chemin.is_absolute():
+        chemin = DATA_DIR / chemin
+    return str(chemin)
+
+
 def _read_pdf(path: str) -> str:
     if not HAS_PDF or not os.path.exists(path):
         return ""
@@ -146,23 +459,279 @@ def _read_pdf(path: str) -> str:
     except Exception:
         return ""
 
+def _positions_phrase(padded: str, phrase: str) -> List[int]:
+    needle = " " + phrase + " "
+    trouvees: List[int] = []
+    debut = 0
+    while True:
+        at = padded.find(needle, debut)
+        if at < 0:
+            return trouvees
+        trouvees.append(at)
+        debut = at + len(phrase) + 1
+
+
+def _rejete_suite(norm: str, alias: str, at: int) -> bool:
+    """Le mot ou le pays qui suit l'alias désigne une autre société."""
+    phrases = _SUITE_REJETEE.get(alias)
+    if not phrases:
+        return False
+    reste = norm[at + len(alias):].strip()
+    if not reste:
+        return False
+    for phrase in phrases:
+        if reste == phrase or reste.startswith(phrase + " "):
+            return True
+    return False
+
+
+def _cie_accepte(original: str, origines: List[int], at: int) -> bool:
+    """« CIE » en capitales, ou « Cie » collé à Compagnie Ivoirienne.
+
+    « et Cie » et « & Cie » ne sont pas la compagnie d'électricité.
+    """
+    if at < 0 or at >= len(origines):
+        return False
+    origine = origines[at]
+    m = re.match(r"[A-Za-z]+", original[origine:])
+    jeton = m.group(0) if m else ""
+    if jeton == "CIE":
+        return True
+    debut = max(0, origine - 80)
+    fin = min(len(original), origine + len(jeton) + 80)
+    return re.search(r"Compagnie\s+Ivoirienne", original[debut:fin], re.I) is not None
+
+
+# Segment sans émetteur nommé (ni coté, ni bloqué).
+_SANS_EMETTEUR = object()
+
+
+def _segment_ticker(text: str) -> Any:
+    """Ticker du segment, None si l'émetteur n'est pas coté, _SANS_EMETTEUR sinon.
+
+    À position égale, l'alias le plus long gagne. Sinon le plus tôt dans le texte.
+    """
+    if not text or not str(text).strip():
+        return _SANS_EMETTEUR
+    norm, origines = _fold_indexe(text)
+    if not norm:
+        return _SANS_EMETTEUR
+    padded = " " + norm + " "
+
+    bloque_at: Optional[int] = None
+    for phrase in _NON_COTES:
+        for at in _positions_phrase(padded, phrase):
+            if bloque_at is None or at < bloque_at:
+                bloque_at = at
+
+    rejetes: List[Tuple[int, int]] = []
+    valides: List[Tuple[int, int, str]] = []
+    for alias, ticker in _ALIAS_ITEMS:
+        for at in _positions_phrase(padded, alias):
+            if alias == "cie" and not _cie_accepte(text, origines, at):
+                continue
+            if _rejete_suite(norm, alias, at):
+                rejetes.append((at, len(alias)))
+                continue
+            valides.append((at, len(alias), ticker))
+
+    gardes: List[Tuple[int, int, str]] = []
+    for at, longueur, ticker in valides:
+        masque = False
+        for r_at, r_len in rejetes:
+            if at == r_at and longueur < r_len:
+                masque = True
+                break
+        if not masque:
+            gardes.append((at, longueur, ticker))
+
+    if gardes:
+        gardes.sort(key=lambda item: (item[0], -item[1]))
+        at, _longueur, ticker = gardes[0]
+        if bloque_at is not None and bloque_at < at:
+            return None
+        return ticker
+    if bloque_at is not None:
+        return None
+
+    for m in re.finditer(r"\b([A-Z]{3,5}C|[A-Z]{4,5})\b", text):
+        candidat = m.group(1)
+        if candidat in _TICKERS_CONNUS:
+            return candidat
+    return _SANS_EMETTEUR
+
+
 # ── Extraire ticker depuis texte ─────────────────────────────────────────────
-def _extract_ticker(text: str) -> Optional[str]:
-    t = text.lower()
-    for name, ticker in COMPANY_TO_TICKER.items():
-        if name in t:
-            return ticker
-    # Chercher un pattern TICKER (4-5 lettres majuscules)
-    m = re.search(r'\b([A-Z]{3,5}C|[A-Z]{4,5})\b', text)
-    if m:
-        candidate = m.group(1)
-        if candidate in {v for v in COMPANY_TO_TICKER.values()}:
-            return candidate
+def _extract_ticker(text: str, titre: Optional[str] = None) -> Optional[str]:
+    """Rattache un communiqué à un ticker coté.
+
+    Le titre de l'annonce prime. Sinon le premier nom du texte. À la même
+    position, le nom le plus long gagne. Un bout de mot ne compte pas.
+    """
+    if titre and str(titre).strip():
+        decision = _segment_ticker(titre)
+        if decision is not _SANS_EMETTEUR:
+            return decision
+    if text and str(text).strip():
+        decision = _segment_ticker(text)
+        if decision is not _SANS_EMETTEUR:
+            return decision
     return None
+
+
+_MOIS_FR = {
+    "janvier": 1, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6,
+    "juillet": 7, "aout": 8, "septembre": 9, "octobre": 10, "novembre": 11,
+    "decembre": 12, "janv": 1, "fevr": 2, "sept": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+
+def _fold_accents(text: str) -> str:
+    t = text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
+    t = unicodedata.normalize("NFD", t)
+    return "".join(c for c in t if unicodedata.category(c) != "Mn")
+
+
+def _iso_date(jour: int, mois: int, annee: int) -> Optional[str]:
+    if not (1 <= jour <= 31 and 1 <= mois <= 12 and 1990 <= annee <= 2100):
+        return None
+    return "%04d-%02d-%02d" % (annee, mois, jour)
+
+
+# Une date isolée. Le point est permis (jj.mm.aaaa) ; la phrase s'arrête avant.
+_FRAGMENT_DATE = (
+    r"(?:"
+    r"\d{4}-\d{2}-\d{2}"
+    r"|\d{1,2}[./-]\d{1,2}[./-]\d{4}"
+    r"|\d{1,2}(?:er)?\s+[A-Za-z]{3,12}\.?\s+\d{4}"
+    r"|[A-Za-z]{3,12}\.?\s+\d{4}"
+    r")"
+)
+
+
+def _parse_fragment_date(fragment: str) -> Optional[str]:
+    if not fragment:
+        return None
+    f = _fold_accents(fragment)
+    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", f)
+    if m:
+        return _iso_date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+    m = re.search(r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})", f)
+    if m:
+        return _iso_date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    m = re.search(r"(\d{1,2})(?:er)?\s+([A-Za-z]+)\.?\s+(\d{4})", f)
+    if m:
+        mois = _MOIS_FR.get(m.group(2).lower().rstrip("."))
+        if mois:
+            return _iso_date(int(m.group(1)), mois, int(m.group(3)))
+    m = re.search(r"(?<![A-Za-z])([A-Za-z]+)\.?\s+(\d{4})", f)
+    if m:
+        mois = _MOIS_FR.get(m.group(1).lower().rstrip("."))
+        if mois:
+            annee = int(m.group(2))
+            if 1990 <= annee <= 2100:
+                dernier = calendar.monthrange(annee, mois)[1]
+                return _iso_date(dernier, mois, annee)
+    return None
+
+
+def _extraire_date_validite(text: str) -> Optional[str]:
+    """Date de validité du cran, si le communiqué la donne.
+
+    « du X au Y » retient Y. Un mois et une année retiennent le dernier jour.
+    """
+    if not text:
+        return None
+    plat = _fold_accents(text)
+    motifs = (
+        r"(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*(" + _FRAGMENT_DATE + r")",
+        r"valable\s+jusqu[' ]?au\s+(" + _FRAGMENT_DATE + r")",
+        r"(?:valable\s+|(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*)"
+        r"du\s+.+?\s+au\s+(" + _FRAGMENT_DATE + r")",
+        r"(?<![A-Za-z])echeance\s*:?\s*(" + _FRAGMENT_DATE + r")",
+    )
+    for motif in motifs:
+        m = re.search(motif, plat, re.I)
+        if not m:
+            continue
+        iso = _parse_fragment_date(m.group(1))
+        if iso:
+            return iso
+    return None
+
+
+def _motif_cran(grade: str) -> str:
+    # « + » et « - » ne sont pas des caractères de mot : \b après le signe ne matche jamais.
+    # \w (unicode) évite de lire le C de « Côte » comme le cran C.
+    return r"(?<!\w)" + re.escape(grade) + r"(?!\w)"
+
+
+def _fin_ancre_long_terme(text: str) -> Optional[int]:
+    """Fin de la première ancre « note de long terme », « long terme » ou « LT »."""
+    motifs = (
+        r"note\s+de\s+long\s+terme",
+        r"long\s+terme",
+        r"(?<!\w)LT(?!\w)",
+    )
+    debut_min = None
+    fin = None
+    for motif in motifs:
+        m = re.search(motif, text, re.I)
+        if not m:
+            continue
+        if debut_min is None or m.start() < debut_min:
+            debut_min = m.start()
+            fin = m.end()
+    return fin
+
+
+def _suit_mot_note(text: str, debut: int) -> bool:
+    """Le cran suit de près « note », « notation » ou « rating »."""
+    gauche = text[max(0, debut - 40):debut]
+    return re.search(
+        r"(?<!\w)(?:notation|rating|note)(?!\w)[\s:;,\-]*$",
+        gauche,
+        re.I,
+    ) is not None
+
+
+def _choisir_note(text: str) -> Optional[str]:
+    """Premier cran après l'ancre de long terme, sinon le premier du texte.
+
+    À la même position, le cran le plus long gagne (A+ plutôt que A, CCC+ plutôt que CCC).
+    Sans ancre de long terme, un C, D ou B isolé cède devant le cran qui suit
+    « note », « notation » ou « rating ».
+    """
+    if not text:
+        return None
+    par_pos: Dict[int, Tuple[int, str]] = {}
+    for grade in RATING_GRADES:
+        for m in re.finditer(_motif_cran(grade), text):
+            deja = par_pos.get(m.start())
+            if deja is None or len(grade) > deja[0]:
+                par_pos[m.start()] = (len(grade), grade)
+    if not par_pos:
+        return None
+    crans = sorted((debut, grade) for debut, (_longueur, grade) in par_pos.items())
+    ancre = _fin_ancre_long_terme(text)
+    if ancre is not None:
+        for debut, grade in crans:
+            if debut >= ancre:
+                return grade
+        return None
+    premier_at, premier = crans[0]
+    if premier in ("C", "D", "B") and not _suit_mot_note(text, premier_at):
+        for debut, grade in crans:
+            if _suit_mot_note(text, debut):
+                return grade
+    return premier
+
 
 # ── Extraire note depuis texte ───────────────────────────────────────────────
 def _extract_rating_info(text: str) -> Dict[str, Any]:
-    result: Dict[str, Any] = {"note": None, "perspective": None, "agence": None}
+    result: Dict[str, Any] = {
+        "note": None, "perspective": None, "agence": None, "date_validite": None,
+    }
 
     # Agence
     agences = [
@@ -180,13 +749,10 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
             result["agence"] = name
             break
 
-    # Note long terme (ex: BBB, AA+, A-)
-    for grade in sorted(RATING_GRADES.keys(), key=len, reverse=True):
-        pattern = rf'\b{re.escape(grade)}\b'
-        if re.search(pattern, text):
-            result["note"] = grade
-            result["score_notation"] = RATING_GRADES[grade]
-            break
+    note = _choisir_note(text)
+    if note:
+        result["note"] = note
+        result["score_notation"] = RATING_GRADES[note]
 
     # Perspective
     if re.search(r'[Ss]table', text):
@@ -198,7 +764,65 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
     elif re.search(r'[Ss]ous surveillance|[Cc]reditwatch', text):
         result["perspective"] = "Surveillance"
 
+    result["date_validite"] = _extraire_date_validite(text)
     return result
+
+
+def _ticker_connu(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    brut = str(value).strip().upper()
+    if brut in _TICKERS_CONNUS:
+        return brut
+    return None
+
+
+def _choisir_ticker(texte: str, indice: Any = None, titre: Optional[str] = None) -> Optional[str]:
+    """Ticker lu dans le titre, sinon dans le texte. L'indice ne sert que si les deux sont vides."""
+    if (titre and str(titre).strip()) or (texte and str(texte).strip()):
+        return _extract_ticker(texte or "", titre=titre)
+    return _ticker_connu(indice)
+
+
+def _dedoublonner_notations(notations: List[Dict]) -> List[Dict]:
+    """Une même source ne compte qu'une fois : ticker, agence, note, url ou date."""
+    vus = set()
+    gardes: List[Dict] = []
+    for fiche in notations:
+        source = fiche.get("source_url") or fiche.get("date") or ""
+        cle = (fiche.get("ticker"), fiche.get("agence"), fiche.get("note"), source)
+        if cle in vus:
+            continue
+        vus.add(cle)
+        gardes.append(fiche)
+    return gardes
+
+
+def _fiche_notation(
+    corps: str,
+    contexte: str,
+    ticker: str,
+    date: Optional[str],
+    source_url: str,
+    note_repli: Any = None,
+) -> Dict[str, Any]:
+    """Entrée au format historique de brvm_ratings.json, plus date_validite."""
+    info = _extract_rating_info(contexte or corps or "")
+    note = info.get("note") or note_repli
+    score = info.get("score_notation")
+    if note != info.get("note"):
+        score = RATING_GRADES.get(note) if isinstance(note, str) else None
+    return {
+        "ticker": ticker,
+        "agence": info.get("agence"),
+        "note": note,
+        "score_notation": score,
+        "perspective": info.get("perspective"),
+        "date": date,
+        "date_validite": info.get("date_validite"),
+        "source_url": source_url or "",
+        "resume": (corps or "")[:500],
+    }
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # A) NOTATIONS
@@ -219,24 +843,20 @@ def scrape_ratings() -> List[Dict]:
             key = pdf or url
             if not key or key in ratings:
                 continue
-            # Lire PDF si disponible
-            text = _read_pdf(pdf) if pdf and os.path.exists(pdf) else ""
+            # Lire PDF si disponible (chemin relatif : sous DATA_DIR)
+            pdf_disque = _resoudre_pdf(pdf)
+            text = _read_pdf(pdf_disque) if pdf_disque else ""
             if not text and item.get("contenu"):
                 text = item["contenu"]
-            info = _extract_rating_info(text)
-            ticker = item.get("ticker")
-            if not ticker or ticker == "None":
-                ticker = _extract_ticker(text)
-            ratings[key] = {
-                "ticker": ticker,
-                "agence": info.get("agence"),
-                "note": info.get("note") or item.get("notation"),
-                "score_notation": info.get("score_notation"),
-                "perspective": info.get("perspective"),
-                "date": item.get("date"),
-                "source_url": url,
-                "resume": text[:500] if text else "",
-            }
+            titre = item.get("titre") or ""
+            contexte = " ".join(p for p in (titre, text) if p)
+            ticker = _choisir_ticker(text, item.get("ticker"), titre=titre)
+            # Émetteur non coté ou illisible : pas d'entrée ticker null dans le fichier.
+            if not ticker:
+                continue
+            ratings[key] = _fiche_notation(
+                text, contexte, ticker, item.get("date"), url, item.get("notation"),
+            )
 
     # 2. Scraper nouvelles notations depuis brvm.org
     logging.info("Scraping notations BRVM...")
@@ -267,25 +887,17 @@ def scrape_ratings() -> List[Dict]:
                     local.write_bytes(r.content)
                     logging.info(f"  ↓ {fname}")
             text = _read_pdf(str(local))
-            info = _extract_rating_info(text)
-            ticker = _extract_ticker(text)
-            ratings[pdf_url] = {
-                "ticker": ticker,
-                "agence": info.get("agence"),
-                "note": info.get("note"),
-                "score_notation": info.get("score_notation"),
-                "perspective": info.get("perspective"),
-                "date": None,
-                "source_url": pdf_url,
-                "resume": text[:500] if text else "",
-            }
+            ticker = _choisir_ticker(text, None)
+            if not ticker:
+                continue
+            ratings[pdf_url] = _fiche_notation(text, text, ticker, None, pdf_url, None)
         # Vérifier pagination
         next_links = [a for a in soup.find_all("a", href=True)
                       if f"page={page+1}" in a.get("href","")]
         if not next_links:
             break
 
-    result = list(ratings.values())
+    result = _dedoublonner_notations(list(ratings.values()))
     logging.info(f"Notations: {len(result)} entrées")
     return result
 
@@ -494,6 +1106,43 @@ def scrape_fundamentals(tickers: Optional[List[str]] = None) -> Dict[str, Dict]:
     logging.info(f"Fondamentaux: {len(result)} tickers")
     return result
 
+def _compter_notations(path: Path) -> int:
+    if not path.exists():
+        return 0
+    try:
+        with open(path, encoding="utf-8") as f:
+            ancien = json.load(f)
+    except Exception:
+        logging.warning("Notations illisibles dans %s", path)
+        return 0
+    if isinstance(ancien, list):
+        return len(ancien)
+    return 0
+
+
+def _ecrire_notations(path, nouvelles, force: bool = False) -> bool:
+    """Écrit la liste atomiquement. Refuse le vide ou moins de la moitié, sauf --force."""
+    path = Path(path)
+    if nouvelles is None:
+        nouvelles = []
+    avant = _compter_notations(path)
+    apres = len(nouvelles)
+    logging.info("Notations : %d avant, %d après", avant, apres)
+    if not force and (apres == 0 or (avant > 0 and apres * 2 < avant)):
+        logging.warning(
+            "Écriture refusée (%d → %d). Relancer avec --force pour écraser.",
+            avant, apres,
+        )
+        return False
+    tmp = Path(str(path) + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(nouvelles, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(str(tmp), str(path))
+    return True
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -505,6 +1154,10 @@ def main():
     parser.add_argument("--market-only",      action="store_true")
     parser.add_argument("--fundamentals-only",action="store_true")
     parser.add_argument("--ticker", default=None, help="Un seul ticker pour --fundamentals-only")
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Écrase brvm_ratings.json même si la nouvelle liste est vide ou trop courte",
+    )
     args = parser.parse_args()
 
     LOG_DIR.mkdir(exist_ok=True)
@@ -515,9 +1168,11 @@ def main():
     if run_all or args.ratings_only:
         print("\n━━━ A) Notations ━━━")
         ratings = scrape_ratings()
-        with open(RATINGS_PATH, "w", encoding="utf-8") as f:
-            json.dump(ratings, f, ensure_ascii=False, indent=2)
-        print(f"  → {RATINGS_PATH} ({len(ratings)} notations)")
+        if _ecrire_notations(RATINGS_PATH, ratings, force=args.force):
+            print(f"  → {RATINGS_PATH} ({len(ratings)} notations)")
+        else:
+            print(f"  → écriture refusée, fichier conservé ({RATINGS_PATH})")
+            sys.exit(1)
 
     if run_all or args.market_only:
         print("\n━━━ B) Statistiques de marché ━━━")

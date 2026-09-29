@@ -34,7 +34,12 @@ def test_fixtures_anonymes(fixtures_dir):
     assert fixtures_dir.parent.name == "tests"
     assert "data" != fixtures_dir.parent.name
     fichiers = sorted(p.name for p in fixtures_dir.glob("*.json"))
-    assert fichiers == ["boc_lignes.json", "live_cache.json", "live_ranking.json"]
+    assert fichiers == [
+        "boc_lignes.json",
+        "live_cache.json",
+        "live_ranking.json",
+        "ratings_emetteurs.json",
+    ]
     boc = json.loads((fixtures_dir / "boc_lignes.json").read_text(encoding="utf-8"))
     assert len(boc) == 5
     for ligne in boc.values():
