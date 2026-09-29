@@ -320,6 +320,9 @@ def test_perspective_seulement_si_elle_est_dite():
     assert _extract_rating_info(
         "Note de long terme A, perspective en développement."
     )["perspective"] == "En développement"
+    assert _extract_rating_info(
+        "La perspective est en évolution."
+    )["perspective"] == "En évolution"
     nu = _extract_rating_info(
         "Le ratio dette nette/EBITDA est stable. Note de long terme A+."
     )

@@ -835,6 +835,8 @@ def _libelle_perspective(mot: str) -> Optional[str]:
         return "Stable"
     if "developpement" in brut:
         return "En développement"
+    if "evolution" in brut:
+        return "En évolution"
     if "surveillance" in brut:
         return "Surveillance"
     return None
@@ -849,7 +851,7 @@ def _extraire_perspective(text: str) -> Optional[str]:
         return None
     mot = (
         r"(?<!\w)(?:positives?|n[ée]gatives?|stables?"
-        r"|en\s+d[ée]veloppement|sous\s+surveillance)(?!\w)"
+        r"|en\s+d[ée]veloppement|en\s+[eé]volution|sous\s+surveillance)(?!\w)"
     )
     for ancre in re.finditer(r"perspectives?|outlooks?", text, re.I):
         fenetre = text[ancre.end():ancre.end() + 120]
