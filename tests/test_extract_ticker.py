@@ -385,6 +385,32 @@ def test_titrisation_nest_pas_la_note_de_la_societe():
         "obligataire senior non sécurisé de la Société Nationale des Télécommunications."
     )
     assert _scraper._document_hors_emetteur(emetteur) is False
+    # Le cartouche GCR est loin dans le PDF : il ne doit pas effacer la note d'émetteur.
+    cartouche = "Responsable de groupe – Titrisation (et fonds)"
+    sitab = (
+        "GCR affirme la note d'émetteur de long terme de la Société Ivoirienne "
+        "de Tabacs (SITAB) à AA-. La perspective est sous surveillance."
+    )
+    assert len(sitab) < 400
+    texte_sitab = sitab + ("." * 500) + cartouche
+    assert _scraper._document_hors_emetteur(texte_sitab) is False
+    assert _extract_rating_info(texte_sitab)["note"] == "AA-"
+    assert _extract_rating_info(texte_sitab)["perspective"] == "Surveillance"
+    retrait = (
+        "GCR retire les notations d'émetteur de long et court terme de la "
+        "Société Générale Côte d'Ivoire. Notation WD."
+    )
+    texte_sgbc = retrait + ("." * 500) + cartouche
+    assert _scraper._document_hors_emetteur(texte_sgbc) is False
+    fiche = _fiche_notation(texte_sgbc, texte_sgbc, "SGBC", "2023-12-13", "", "D")
+    assert fiche["note"] is None
+    assert fiche["score_notation"] is None
+    assert fiche["statut"] == "retirée"
+    assert _scraper._document_hors_emetteur(
+        "Note d'émetteur de long terme AA-.",
+        "",
+        "20260914_-_notation_financiere_-_fctc_ept_2025-2040.pdf",
+    ) is True
 
 
 def test_gcr_de_x_a_y_garde_la_note_nouvelle():

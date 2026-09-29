@@ -922,25 +922,33 @@ def _date_annonce(date: Any, *noms: str) -> Optional[str]:
     return None
 
 
-def _document_hors_emetteur(texte: str, titre: str = "") -> bool:
+def _document_hors_emetteur(texte: str, titre: str = "", source: str = "") -> bool:
     """Titrisation, FCTC, RMBS ou emprunt obligataire : pas la note de la société cotée.
 
     Un communiqué qui note l'émetteur et, en plus, son emprunt obligataire est conservé.
+    Le cartouche GCR « Responsable de groupe – Titrisation » est vers le caractère 900 :
+    on ne regarde que le titre, le nom du PDF et les 400 premiers caractères.
     """
-    blob = ((titre or "") + "\n" + (texte or "")).strip()
-    if not blob:
+    nom = Path(str(source).split("?")[0]).name if source else ""
+    tete = (texte or "")[:400]
+    zones = "\n".join(p for p in (titre or "", nom, source or "", tete) if p)
+    if not zones.strip():
         return False
-    if re.search(r"\bFCTC\b|\bRMBS\b|titrisations?", blob, re.I):
+    # « _ » colle les mots dans un nom de fichier : fctc_ept n'a pas de frontière \b.
+    if re.search(
+        r"(?<![A-Za-z])(?:FCTC|RMBS)(?![A-Za-z])|titrisations?",
+        zones,
+        re.I,
+    ):
         return True
-    tete = blob[:1200]
     if re.search(
         r"emprunts?\s+obligataires?|[eé]missions?\s+obligataires?|\btranches?\b",
-        tete,
+        zones,
         re.I,
     ):
         if not re.search(
             r"notes?\s+d['’]?\s*[eé]metteur|[eé]metteur\s+de\s+long\s+terme",
-            tete,
+            zones,
             re.I,
         ):
             return True
@@ -1029,7 +1037,7 @@ def scrape_ratings() -> List[Dict]:
                 text = item["contenu"]
             titre = item.get("titre") or ""
             contexte = " ".join(p for p in (titre, text) if p)
-            if _document_hors_emetteur(text, titre):
+            if _document_hors_emetteur(text, titre, pdf or url):
                 continue
             ticker = _choisir_ticker(text, item.get("ticker"), titre=titre)
             # Émetteur non coté ou illisible : pas d'entrée ticker null dans le fichier.
@@ -1070,7 +1078,7 @@ def scrape_ratings() -> List[Dict]:
                     local.write_bytes(r.content)
                     logging.info(f"  ↓ {fname}")
             text = _read_pdf(str(local))
-            if _document_hors_emetteur(text, ""):
+            if _document_hors_emetteur(text, "", pdf_url):
                 continue
             ticker = _choisir_ticker(text, None)
             if not ticker:
