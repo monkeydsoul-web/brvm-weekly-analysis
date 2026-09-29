@@ -326,15 +326,25 @@ _INDEX_HTML_CACHE = {"mtime": None, "corps": None}
 
 
 def _corps_index():
-    """HTML avec {{ASSET_V}} remplace, en cache tant que index.html ne change pas."""
+    """HTML avec {{ASSET_V}} et les seuils du conseil remplaces."""
+    from verdict import SEUIL_NOTE_BAS, SEUIL_NOTE_HAUT
+
     chemin = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard", "index.html")
     mtime = os.path.getmtime(chemin)
-    if _INDEX_HTML_CACHE["mtime"] == mtime and _INDEX_HTML_CACHE["corps"] is not None:
+    seuils = (SEUIL_NOTE_HAUT, SEUIL_NOTE_BAS)
+    if (
+        _INDEX_HTML_CACHE["mtime"] == mtime
+        and _INDEX_HTML_CACHE.get("seuils") == seuils
+        and _INDEX_HTML_CACHE["corps"] is not None
+    ):
         return _INDEX_HTML_CACHE["corps"]
     with open(chemin, encoding="utf-8") as f:
         brut = f.read()
     corps = brut.replace("{{ASSET_V}}", ASSET_V)
+    corps = corps.replace("{{SEUIL_NOTE_HAUT}}", format(float(SEUIL_NOTE_HAUT), ".10g"))
+    corps = corps.replace("{{SEUIL_NOTE_BAS}}", format(float(SEUIL_NOTE_BAS), ".10g"))
     _INDEX_HTML_CACHE["mtime"] = mtime
+    _INDEX_HTML_CACHE["seuils"] = seuils
     _INDEX_HTML_CACHE["corps"] = corps
     return corps
 
@@ -769,9 +779,32 @@ def serve_live_score_js():
 def serve_ranking_js():
     return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
 
+def _histoire_sicc():
+    """Fiche d'affichage SICOR. Écrase un texte qui décrivait Sicable."""
+    chemin = os.path.join(os.path.dirname(__file__), "stories", "sicc.json")
+    with open(chemin, encoding="utf-8") as f:
+        return json.load(f)
+
+
 @app.route("/data/companies_stories.json")
 def serve_companies_stories():
-    return send_from_directory(DATA_DIR, "companies_stories.json", mimetype="application/json")
+    """Sert les fiches, avec la fiche SICC corrigée (coco, pas les câbles)."""
+    payload = {"stories": {}}
+    chemin = os.path.join(DATA_DIR, "companies_stories.json")
+    if os.path.isfile(chemin):
+        try:
+            with open(chemin, encoding="utf-8") as f:
+                lu = json.load(f)
+            if isinstance(lu, dict):
+                payload = lu
+        except (OSError, json.JSONDecodeError):
+            payload = {"stories": {}}
+    stories = payload.get("stories")
+    if not isinstance(stories, dict):
+        stories = {}
+        payload["stories"] = stories
+    stories["SICC"] = _histoire_sicc()
+    return jsonify(payload)
 
 @app.route("/stock_chart.js")
 def serve_stock_chart_js():

@@ -1696,6 +1696,8 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 <!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
 <script>
 window.BRVM_ASSET_V="{{ASSET_V}}";
+window.SEUIL_NOTE_HAUT={{SEUIL_NOTE_HAUT}};
+window.SEUIL_NOTE_BAS={{SEUIL_NOTE_BAS}};
 window.BRVM_PENDING_ERRORS=[];
 window._brvmLoaderTries=0;
 window.brvmRetryLoader=function(){
@@ -1967,16 +1969,6 @@ function triCommeClassement(a, b){
   var na=note10num(a), nb=note10num(b);
   if(na!==nb) return nb-na;
   return String((a&&a.ticker)||'').localeCompare(String((b&&b.ticker)||''), 'fr');
-}
-function texteEnBref(ticker, story){
-  var brut=(story && story.en_bref) ? String(story.en_bref) : '';
-  if(ticker==='SICC'){
-    var bas=brut.toLowerCase();
-    if(bas.indexOf('sicable')!==-1 || bas.indexOf('câble')!==-1 || bas.indexOf('cable')!==-1 || bas.indexOf('électri')!==-1 || bas.indexOf('electri')!==-1){
-      return "SICOR, la Société ivoirienne de coco râpé, transforme la noix de coco en Côte d'Ivoire. Elle produit du coco râpé, de l'huile de coprah et des tourteaux.";
-    }
-  }
-  return brut;
 }
 function rapportAnnuelTxt(row){
   var u=String((row&&row.pdf_verdict)||'').toUpperCase();
@@ -3869,7 +3861,7 @@ function renderStockStory(ticker) {
     `<div class="story-inline">${items.map(p => escapeHtml(p)).join(' · ')}</div>`;
   container.innerHTML = [
     story.en_bref
-      ? sec('📖', 'En bref', `<p>${escapeHtml(texteEnBref(ticker, story))}</p>`) : '',
+      ? sec('📖', 'En bref', `<p>${escapeHtml(story.en_bref)}</p>`) : '',
     story.points_forts?.length
       ? sec('💪', 'Points forts', list(story.points_forts)) : '',
     story.points_attention?.length
@@ -3878,6 +3870,8 @@ function renderStockStory(ticker) {
       ? sec('🏢', 'Activités', inline(story.activites)) : '',
     story.presence?.length
       ? sec('🌍', 'Présence', inline(story.presence)) : '',
+    story.sources?.length
+      ? sec('📎', 'Sources', list(story.sources)) : '',
   ].join('');
 }
 
@@ -5322,7 +5316,7 @@ const _glossTerms = [
   { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
   { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
   { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
-  { term:'Score /10 (composite)', def:'Note sur 10 issue des 8 modèles. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'SIBC 8,5/10 : Graham 10 + DCF 8 + DDM 7 + EPV 9 + Buffett 8 + RevDCF 8 + Relatif 9 + Technique 9. Tous les modèles s\'accordent.' },
+  { term:'Score /10 (composite)', def:'Note sur 10 issue des 8 modèles. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'Exemple fictif, pas une société cotée : « EXEMPLE » à 8,5/10, avec Graham 10, DCF 8, DDM 7, EPV 9, Buffett 8, RevDCF 8, Relatif 9 et Technique 9. Ce n\'est pas une note réelle.' },
   { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
   { term:'Verdict', def:'Conseil lié à la note sur 10. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'Note 8,5 : conseil Intéressant. Note 6,0 : conseil À surveiller. Note 4,0 : conseil Prudence.' },
   { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },

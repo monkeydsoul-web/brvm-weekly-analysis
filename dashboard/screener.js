@@ -54,11 +54,7 @@ function runScreener() {
     return true;
   });
 
-  _scrResults.sort((a, b) => {
-    const va = a[_scrSort.col] ?? -Infinity;
-    const vb = b[_scrSort.col] ?? -Infinity;
-    return _scrSort.asc ? va - vb : vb - va;
-  });
+  _scrResults.sort(_triScreener);
 
   const count = document.getElementById('sc-count');
   if (count) {
@@ -127,6 +123,16 @@ function _renderScreenerTable() {
   }).join('');
 }
 
+
+function _triScreener(a, b) {
+  if (_scrSort.col === 'composite_adj' && typeof triCommeClassement === 'function') {
+    var ordre = triCommeClassement(a, b);
+    return _scrSort.asc ? -ordre : ordre;
+  }
+  const va = a[_scrSort.col] ?? -Infinity;
+  const vb = b[_scrSort.col] ?? -Infinity;
+  return _scrSort.asc ? va - vb : vb - va;
+}
 
 function screenerSortBy(col) {
   if (_scrSort.col === col) {

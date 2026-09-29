@@ -41,7 +41,12 @@ def test_sources_lisent_la_note_du_serveur():
     live = (ROOT / "dashboard" / "live_score.js").read_text(encoding="utf-8")
     assert "note10:          r.note10" in live
     assert "note10txt(d)" in live
-    assert "'Fort'" in live and "'Modéré'" in live and "'Faible'" in live and "'Prudence'" in live
+    assert "'Fort'" in live and "'Modéré'" in live and "'Faible'" in live and "'Très faible'" in live
+    assert "window.SEUIL_NOTE_HAUT" in live and "window.SEUIL_NOTE_BAS" in live
+    assert "n10 >= haut" in live and "n10 >= bas" in live and "n10 >= 2.9" in live
+    assert "n10>=7.1" not in live and "n10>=7.5" not in live
+    assert "Cotation suspendue" in live
+    assert "'Prudence'" not in live
     assert "'FORT'" not in live and "'MODERE'" not in live and "'FAIBLE'" not in live
 
     badges = (ROOT / "dashboard" / "badges.js").read_text(encoding="utf-8")
@@ -74,7 +79,7 @@ def test_tri_suit_le_rang_du_serveur():
     ):
         assert "triCommeClassement" in (ROOT / rel).read_text(encoding="utf-8")
     assert "triCommeClassement" in _entre(HTML, "function _renderMarketPage", "function _syncMktHeatmap")
-    source = _entre(HTML, "function triCommeClassement", "function texteEnBref")
+    source = _entre(HTML, "function triCommeClassement", "function rapportAnnuelTxt")
     source += _entre(HTML, "function note10num", "function note10txt")
     _node(source + r"""
 function attend(cond, msg) { if (!cond) { console.error(msg); process.exit(1); } }
@@ -147,22 +152,10 @@ attend(html.indexOf('POSITIF') === -1, 'positif semc');
 """)
 
 
-@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
-def test_en_bref_sicc_decrit_sicor():
-    source = _entre(HTML, "function texteEnBref", "function rapportAnnuelTxt")
-    _node(source + r"""
-function attend(cond, msg) { if (!cond) { console.error(msg); process.exit(1); } }
-const faux = { en_bref: 'SICABLE fabrique des câbles électriques en Côte d\'Ivoire.' };
-const corrige = texteEnBref('SICC', faux);
-attend(corrige.indexOf('SICOR') !== -1, corrige);
-attend(corrige.toLowerCase().indexOf('coco') !== -1, corrige);
-attend(corrige.toLowerCase().indexOf('sicable') === -1, corrige);
-attend(corrige.toLowerCase().indexOf('câble') === -1, corrige);
-const deja = texteEnBref('SICC', { en_bref: 'SICOR transforme la noix de coco.' });
-attend(deja === 'SICOR transforme la noix de coco.', deja);
-const autre = texteEnBref('CABC', { en_bref: 'Sicable fabrique des câbles.' });
-attend(autre.indexOf('Sicable') !== -1, autre);
-""")
+def test_en_bref_sicc_vient_de_la_fiche_sans_texte_en_dur():
+    assert "function texteEnBref" not in HTML
+    assert "SICABLE fabrique" not in HTML
+    assert "escapeHtml(story.en_bref)" in HTML
 
 
 def test_libelles_flux_et_csv():

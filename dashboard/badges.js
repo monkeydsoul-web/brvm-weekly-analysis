@@ -83,7 +83,7 @@ function renderSidebarScores(ranking) {
   const sidebar = document.getElementById('sidebarList');
   if (!sidebar) return;
   const arr = ranking || window.scores || scores || [];
-  const sorted = [...arr].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.rank||999)-(a.rank||999));
+  const sorted = [...arr].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(a.rank||999)-(b.rank||999));
   sidebar.innerHTML = sorted.map(x => {
     const n10 = (typeof note10num==='function') ? note10num(x) : 0;
     const noteTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
