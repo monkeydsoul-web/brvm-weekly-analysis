@@ -17,6 +17,15 @@ from price_sanity import resolve_price, get_reference_prices
 logger = logging.getLogger(__name__)
 
 from paths import DATA_DIR
+from verdict import (
+    note10,
+    conseil as conseil_verdict,
+    libelle_conseil,
+    couleur,
+    normaliser_statut,
+    STATUT_COTE,
+    STATUT_NON_NOTE,
+)
 RANKING_PATH  = os.path.join(DATA_DIR, "live_ranking.json")
 HISTORY_PATH  = os.path.join(DATA_DIR, "ranking_history.json")
 
@@ -339,7 +348,7 @@ def _compute_scores(row):
     composite_adj_70 = max(0, composite_raw + geo_penalty * 7 / 10)
     composite_adj_80 = round(min(80, composite_adj_70 + tec["score"]), 1)
 
-    return {
+    resultat = {
         "score_graham":    g["score"],
         "score_dcf":       dcf["score"],
         "score_ddm":       ddm["score"],
@@ -359,23 +368,51 @@ def _compute_scores(row):
         "geo_penalty":     geo_penalty,
         "composite_raw":   round(composite_raw, 1),
         "composite_adj":   composite_adj_80,
-        "conseil":         None if not row.get('price') else ('acheter' if composite_adj_80 >= 60 else 'attendre' if composite_adj_80 >= 40 else 'eviter'),
     }
+    return _poser_verdict(resultat, composite_adj_80, None, row)
 
 
-def _hysteresis_conseil(adj, prev, price):
+def _statut_ligne(row):
+    """cote si un prix est la, non_note sinon. Un statut explicite prime."""
+    if row.get("statut") not in (None, ""):
+        explicite = normaliser_statut(row.get("statut"))
+        if explicite:
+            return explicite
+        return STATUT_NON_NOTE
+    if row.get("price"):
+        return STATUT_COTE
+    return STATUT_NON_NOTE
+
+
+def _poser_verdict(scores, composite, precedent, row):
+    """Remplit note10, conseil, libelle, couleur, statut. N'ecrit rien sur disque."""
+    statut = _statut_ligne(row)
+    prix = row.get("price")
+    if statut == STATUT_COTE and not prix:
+        statut = STATUT_NON_NOTE
+    avis = _hysteresis_conseil(composite, precedent, prix, statut)
+    scores["statut"] = statut
+    scores["note10"] = note10(composite)
+    scores["conseil"] = avis
+    scores["conseil_libelle"] = libelle_conseil(avis) if avis else None
+    # Couleur de la note /10 (7,5 / 5), distincte du libelle : l'amortisseur
+    # peut garder "Intéressant" alors que la note affichee est sous 7,5.
+    scores["conseil_couleur"] = couleur(scores["note10"]) if avis else None
+    if "note_calculee_le" not in scores:
+        scores["note_calculee_le"] = datetime.now(timezone.utc).isoformat()
+    return scores
+
+
+def _hysteresis_conseil(adj, prev, price, statut=None):
+    """Conseil avec amortisseur. None sans prix.
+
+    Le gel a la cloture (PR-05) reste dehors : on recoit le composite deja choisi.
+    """
     if not price:
         return None
-    std = 'acheter' if adj >= 60 else 'attendre' if adj >= 40 else 'eviter'
-    if prev == 'acheter':
-        return 'acheter' if adj >= 57.6 else std
-    if prev == 'attendre':
-        if adj >= 60: return 'acheter'
-        if adj < 37.6: return 'eviter'
-        return 'attendre'
-    if prev == 'eviter':
-        return 'eviter' if adj < 42.4 else std
-    return std
+    if statut is None:
+        statut = STATUT_COTE
+    return conseil_verdict(adj, prev, statut)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -514,12 +551,13 @@ def compute_live_ranking(trigger="manual", force=False):
                         else:
                             row["change_pct"] = None
 
-                    # Calculer les 8 scores
+                    # Calculer les 8 scores, puis le conseil (amortisseur sur le precedent)
                     scores = _compute_scores(row)
-                    scores["conseil"] = _hysteresis_conseil(
+                    _poser_verdict(
+                        scores,
                         scores.get("composite_adj", 0),
                         _prev_conseil.get(ticker),
-                        row.get("price")
+                        row,
                     )
 
                     result = {
@@ -621,9 +659,15 @@ def compute_live_ranking(trigger="manual", force=False):
                         f"(div_per_share={r.get('div_per_share')}, price={r.get('price')})"
                     )
 
+            # Un seul horodatage pour le fichier et chaque ligne notee.
+            _calcule_le = datetime.now(timezone.utc).isoformat()
+            for _ligne in results:
+                if "note10" in _ligne:
+                    _ligne["note_calculee_le"] = _calcule_le
+
             # Payload final
             payload = {
-                "updated_at":       datetime.now(timezone.utc).isoformat(),
+                "updated_at":       _calcule_le,
                 "trigger":          trigger,
                 "market_open":      live_cache.get("market_open", False),
                 "changed_tickers":  changed_tickers,

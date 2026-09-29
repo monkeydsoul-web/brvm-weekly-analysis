@@ -5,7 +5,18 @@ Injecte le prix live dans le row avant appel des 7 modèles + score technique.
 """
 
 import logging
+from datetime import datetime, timezone
+
 from price_sanity import resolve_price, get_reference_prices
+from verdict import (
+    note10,
+    conseil as conseil_verdict,
+    libelle_conseil,
+    couleur,
+    normaliser_statut,
+    STATUT_COTE,
+    STATUT_NON_NOTE,
+)
 from valuation import (
     score_graham, score_dcf, score_ddm, score_epv,
     score_buffett, score_reverse_dcf, score_relative,
@@ -270,6 +281,16 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
     # Score total /80 avec technique
     composite_adj_80 = round(min(80, composite_adj_70 + tec["score"]), 1)
 
+    # Meme regle que live_ranker, sans amortisseur (ce chemin n'a pas de precedent).
+    _statut = normaliser_statut(base_fundamentals.get("statut"))
+    if not _statut:
+        _statut = STATUT_COTE if live_price else STATUT_NON_NOTE
+    _note = note10(composite_adj_80)
+    if live_price and _statut == STATUT_COTE:
+        _avis = conseil_verdict(composite_adj_80, None, _statut)
+    else:
+        _avis = None
+
     result = {
         "ticker":           ticker,
         "live_price":       live_price,
@@ -299,7 +320,12 @@ def compute_live_score(ticker: str, base_fundamentals: dict, live_cache: dict) -
         "geo_penalty":      geo_penalty,
         "composite_raw":    round(composite_raw, 1),
         "composite_adj":    composite_adj_80,
-        "conseil":          None if not live_price else ('acheter' if composite_adj_80 >= 60 else 'attendre' if composite_adj_80 >= 40 else 'eviter'),
+        "note10":           _note,
+        "conseil":          _avis,
+        "conseil_libelle":  libelle_conseil(_avis) if _avis else None,
+        "conseil_couleur":  couleur(_note) if _avis else None,
+        "statut":           _statut,
+        "note_calculee_le": datetime.now(timezone.utc).isoformat(),
         "pe_ref_live":      row.get("pe_ref") or row.get("pe_hist") or row.get("pe_hist"),
         "pb_ref_live":      row.get("pb_ref") or row.get("pb_hist") or row.get("pb_hist"),
         "div_yield_live":   row.get("div_yield"),
