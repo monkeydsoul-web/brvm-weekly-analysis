@@ -20,9 +20,12 @@
       if (txt.indexOf('indisponible') > -1) attempt(n + 1);
     }, 3000);
   }
+  var armed = false;
   function arm() {
+    if (armed) return;
     var anchor = document.getElementById('etape2-anchor');
     if (!anchor) return;
+    armed = true;
     var scroller = findScroller(anchor);
     var target = (scroller === window) ? window : scroller;
     function check() {
@@ -37,6 +40,7 @@
     target.addEventListener('scroll', check, { passive: true });
     check();
   }
+  window._brvmScreenerLazyArm = arm;
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', arm);
   } else {

@@ -1693,27 +1693,53 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
   </span>
 </footer>
 </main></div>
-<script src="/simulator.js"></script>
-<script src="/live_score.js"></script>
-<script src="/ranking.js"></script>
-<script src="/stock_chart.js"></script>
-<script src="/badges.js"></script>
-<script src="/data_confidence.js"></script>
-<script src="/compare.js"></script>
-<script src="/alerts.js"></script>
-<script src="/screener.js"></script>
-<script src="/performance.js"></script>
-<script src="/compare_analysis.js"></script>
-<script src="/backtest.js"></script>
-<script src="/markowitz.js"></script>
-<script src="/previsions.js"></script>
-<script src="/company-tabs.js"></script>
-<script src="/news_v2.js"></script>
-<script src="/signaux_v2.js"></script>
-<script src="/rank_v2.js"></script>
-<script src="/welcome_v2.js"></script>
-<script src="/top3_podium.js"></script>
-<script src="/screener_lazy.js"></script>
+<!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
+<script>
+window.BRVM_ASSET_V="{{ASSET_V}}";
+window.BRVM_PENDING_ERRORS=[];
+window._brvmLoaderTries=0;
+window.brvmRetryLoader=function(){
+  if(window._brvmLoaderTries>=2) return;
+  window._brvmLoaderTries++;
+  var n=window._brvmLoaderTries;
+  setTimeout(function(){
+    var s=document.createElement("script");
+    s.src="/js_loader.js?v="+encodeURIComponent(window.BRVM_ASSET_V)+"&retry="+n;
+    s.onload=function(){ if(window.brvmFlushPending) window.brvmFlushPending(); };
+    s.onerror=function(){ window.brvmRetryLoader(); };
+    document.head.appendChild(s);
+  }, n===1?250:700);
+};
+window.brvmScriptError=function(el){
+  var file=el&&el.getAttribute("data-brvm-mod");
+  if(!file) return;
+  if(file==="js_loader.js"){ window.brvmRetryLoader(); return; }
+  if(typeof window.brvmOnScriptError==="function"){ window.brvmOnScriptError(file); return; }
+  window.BRVM_PENDING_ERRORS.push(file);
+};
+</script>
+<script src="/js_loader.js?v={{ASSET_V}}" data-brvm-mod="js_loader.js" onerror="brvmScriptError(this)"></script>
+<script src="/simulator.js?v={{ASSET_V}}" data-brvm-mod="simulator.js" onerror="brvmScriptError(this)"></script>
+<script src="/live_score.js?v={{ASSET_V}}" data-brvm-mod="live_score.js" onerror="brvmScriptError(this)"></script>
+<script src="/ranking.js?v={{ASSET_V}}" data-brvm-mod="ranking.js" onerror="brvmScriptError(this)"></script>
+<script src="/stock_chart.js?v={{ASSET_V}}" data-brvm-mod="stock_chart.js" onerror="brvmScriptError(this)"></script>
+<script src="/badges.js?v={{ASSET_V}}" data-brvm-mod="badges.js" onerror="brvmScriptError(this)"></script>
+<script src="/data_confidence.js?v={{ASSET_V}}" data-brvm-mod="data_confidence.js" onerror="brvmScriptError(this)"></script>
+<script src="/compare.js?v={{ASSET_V}}" data-brvm-mod="compare.js" onerror="brvmScriptError(this)"></script>
+<script src="/alerts.js?v={{ASSET_V}}" data-brvm-mod="alerts.js" onerror="brvmScriptError(this)"></script>
+<script src="/screener.js?v={{ASSET_V}}" data-brvm-mod="screener.js" onerror="brvmScriptError(this)"></script>
+<script src="/performance.js?v={{ASSET_V}}" data-brvm-mod="performance.js" onerror="brvmScriptError(this)"></script>
+<script src="/compare_analysis.js?v={{ASSET_V}}" data-brvm-mod="compare_analysis.js" onerror="brvmScriptError(this)"></script>
+<script src="/backtest.js?v={{ASSET_V}}" data-brvm-mod="backtest.js" onerror="brvmScriptError(this)"></script>
+<script src="/markowitz.js?v={{ASSET_V}}" data-brvm-mod="markowitz.js" onerror="brvmScriptError(this)"></script>
+<script src="/previsions.js?v={{ASSET_V}}" data-brvm-mod="previsions.js" onerror="brvmScriptError(this)"></script>
+<script src="/company-tabs.js?v={{ASSET_V}}" data-brvm-mod="company-tabs.js" onerror="brvmScriptError(this)"></script>
+<script src="/news_v2.js?v={{ASSET_V}}" data-brvm-mod="news_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/signaux_v2.js?v={{ASSET_V}}" data-brvm-mod="signaux_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/rank_v2.js?v={{ASSET_V}}" data-brvm-mod="rank_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/welcome_v2.js?v={{ASSET_V}}" data-brvm-mod="welcome_v2.js" onerror="brvmScriptError(this)"></script>
+<script src="/top3_podium.js?v={{ASSET_V}}" data-brvm-mod="top3_podium.js" onerror="brvmScriptError(this)"></script>
+<script src="/screener_lazy.js?v={{ASSET_V}}" data-brvm-mod="screener_lazy.js" onerror="brvmScriptError(this)"></script>
 <script>
 window.onerror = (msg, src, line, col, err) => {
   console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
@@ -1893,8 +1919,18 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 ['loadAlertsLocal','updateAlertBadge','renderAlertsPanel','renderSmartAlertsPanel',
  'initRankHistory','startAutoRefresh','renderPerfPage',
  'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
- 'simBuildSliders','simCalc'].forEach(fn=>{
-  if(typeof window[fn]==='undefined') window[fn]=()=>{console.warn('[fallback]',fn,'non défini');};
+ 'simBuildSliders','simCalc',
+ 'loadRankDash','loadSignauxValoAlertes','loadWelcomeHero','initTop3Podium','renderNewsV2',
+ 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerExportCSV','screenerAnalyseAI',
+ 'renderPrevisionsPage','loadPriceChart','fetchLiveScore','loadLiveRank','renderLiveRankBadge','renderRankCards',
+ 'openMarkowitz','launchMarkowitz','initCompanyTabs','getDivConfidenceBadge','getDivYieldHtml',
+ 'openCompare','renderCompare',
+ 'setAlert','showAlertModal','checkAlertsWithPrices'].forEach(fn=>{
+  if(typeof window[fn]==='undefined'){
+    var stub=function(){ if(typeof brvmMissing==='function') brvmMissing(fn); return ''; };
+    stub._brvmStub=true;
+    window[fn]=stub;
+  }
 });
 
 function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
@@ -2134,7 +2170,7 @@ function gsActivate(el){
   if(action==='stock'){ _openStock(val); }
   else if(action==='page'){
     nav(val);
-    if(pageLoaders[val]) pageLoaders[val]();
+    if(typeof pageLoaders!=='undefined'&&pageLoaders[val]) pageLoaders[val]();
   } else if(action==='gloss'){
     nav('glossaire'); initGlossaire();
     setTimeout(()=>{ const si=document.getElementById('gloss-search');if(si){si.value=val;filterGlossaire(val);}},200);
@@ -3960,11 +3996,11 @@ async function showStock(ticker){
     if (typeof initCompanyTabs === 'function') initCompanyTabs(ticker);
     // Charts dans la fiche
     if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
-    loadPriceChart(ticker, 'stockChartDiv');
+    if(typeof loadPriceChart==='function') loadPriceChart(ticker, 'stockChartDiv');
     loadStockRatingsFundamentals(ticker);
-    fetchLiveScore(ticker);
+    if(typeof fetchLiveScore==='function') fetchLiveScore(ticker);
     window._openTicker = ticker;
-    renderLiveRankBadge(ticker);
+    if(typeof renderLiveRankBadge==='function') renderLiveRankBadge(ticker);
     // Mini sparkline 30j dans l'en-tête (préférer données BOC étendues)
     const _miniSpkEl = document.getElementById('stock-spark-mini');
     if(_miniSpkEl){
@@ -4143,11 +4179,11 @@ function initWelcome() { /* page statique — rien à charger */ }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
-  rank:      loadRankDash,
+  rank:      function(){ if(typeof loadRankDash==='function') loadRankDash(); },
   welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
   alerts:    ()=>{nav('signals');},
   valuation: ()=>{nav('signals');},
-  signals:   loadSignauxValoAlertes,
+  signals:   function(){ if(typeof loadSignauxValoAlertes==='function') loadSignauxValoAlertes(); },
   optim:     ()=>nav('screener'),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
