@@ -868,7 +868,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
         <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
           · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
           · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée<br>
-          · "🟢 Bonne affaire" = écart &gt; 30 % · "👀 À surveiller" = écart de plus de 10 % jusqu'à 30 % · "⚖️ Prix correct" = écart entre −10 % et +10 % · "⚠️ Trop cher" = cours plus de 10 % au-dessus du prix cible
+          · Plus de +30 % : Forte décote · de +10 % à +30 % : Décote modérée · de −10 % à +10 % : Proche du prix cible · en dessous de −10 % : Au-dessus du prix cible · écart trop grand : Cible à vérifier
         </div>
       </details>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap">
@@ -877,7 +877,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </label>
     </div>
     <div class="card" style="padding:0;overflow-x:auto">
-      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Moyenne Graham, EPV et P/B · le même chiffre sur toutes les pages">Prix juste estimé</th><th data-tip="Écart entre le cours et ce prix cible · le libellé de la dernière colonne lit ce même écart">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Lit l'écart de la colonne Opportunité · &gt; 30 % Bonne affaire · &gt; 10 % À surveiller · de −10 % à +10 % Prix correct · &lt; −10 % Trop cher">Avis</th></tr></thead>
+      <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Moyenne Graham, EPV et P/B · le même chiffre sur toutes les pages">Prix juste estimé</th><th data-tip="Écart entre le cours et ce prix cible · le libellé de la dernière colonne lit ce même écart">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Lit l'écart de la colonne Opportunité · plus de +30 % Forte décote · de +10 % à +30 % Décote modérée · de −10 % à +10 % Proche du prix cible · en dessous de −10 % Au-dessus du prix cible">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
@@ -3231,12 +3231,9 @@ async function renderDiv(){
 
 // ── Prix cibles ────────────────────────────────────────────────────────────
 function fmtLibelleValeur(v){
-  if(v==='Fort potentiel') return '✅ Bonne affaire';
-  if(v==='Potentiel modéré') return '👀 À surveiller';
-  if(v==='Proche valeur juste') return '⚖️ Prix correct';
-  if(v==='Trop cher') return '⚠️ Trop cher';
-  if(v==='exceptional_div') return '🔶 Div. exceptionnel';
-  if(v==='incertain') return '⚠️ Cible à vérifier';
+  if(v==='Forte décote'||v==='Décote modérée'||v==='Proche du prix cible'||v==='Au-dessus du prix cible') return v;
+  if(v==='exceptional_div') return 'Div. exceptionnel';
+  if(v==='incertain') return 'Cible à vérifier';
   return '—';
 }
 async function renderTargets(){

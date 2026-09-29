@@ -102,13 +102,13 @@ function checkSmartAlerts() {
     }
 
     // ── Cours au-dessus du prix cible unique (même chiffre que l'écran) ──
-    if (price > 0 && s.prix_cible > 0 && s.libelle_valeur === 'Trop cher') {
+    if (price > 0 && s.prix_cible > 0 && s.libelle_valeur === 'Au-dessus du prix cible') {
       const key = `cible-${ticker}-${Math.round(price/100)}`;
       if (!existingKeys.has(key)) {
         const ecartTxt = (typeof s.ecart_pct === 'number') ? ` (${s.ecart_pct} %)` : '';
         newAlerts.push({
-          key, ticker, type: 'cible_cher', seen: false,
-          msg: `⚠️ ${ticker} (${price.toLocaleString('fr-FR')} XOF) est au-dessus du prix cible (${s.prix_cible.toLocaleString('fr-FR')} XOF)${ecartTxt}`,
+          key, ticker, type: 'cible_au_dessus', seen: false,
+          msg: `${ticker} (${price.toLocaleString('fr-FR')} XOF) : Au-dessus du prix cible (${s.prix_cible.toLocaleString('fr-FR')} XOF)${ecartTxt}`,
           color: 'var(--red)',
         });
       }

@@ -12,22 +12,20 @@ Règle unique :
 - Prix cible = moyenne des modèles disponibles, arrondie.
 - Écart % = (prix cible / cours − 1) × 100, arrondi au dixième.
 - Le libellé lit CET écart, pas un autre chiffre :
-  plus de 30 % → « Fort potentiel »
-  plus de 10 % → « Potentiel modéré »
-  de −10 % à +10 % → « Proche valeur juste »
-  en dessous de −10 % → « Trop cher »
+  plus de +30 % → « Forte décote »
+  de +10 % à +30 % → « Décote modérée »
+  de −10 % à +10 % → « Proche du prix cible »
+  en dessous de −10 % → « Au-dessus du prix cible »
 - Écart trop grand pour être cru (|écart| > 80 %, ou > 50 % avec un
-  seul modèle) → « incertain ». Le prix reste affiché, le libellé
-  ne dit pas que c'est proche.
+  seul modèle) → « incertain », affiché « Cible à vérifier ».
 - Dividende exceptionnel : pas de prix cible, libellé « exceptional_div ».
-- Pas assez de données : pas de prix, pas de libellé. On ne dit pas
-  « Proche valeur juste » sans chiffre.
+- Pas assez de données : pas de prix, pas de libellé.
 """
 
-LIBELLE_FORT = "Fort potentiel"
-LIBELLE_MODERE = "Potentiel modéré"
-LIBELLE_PROCHE = "Proche valeur juste"
-LIBELLE_CHER = "Trop cher"
+LIBELLE_FORT = "Forte décote"
+LIBELLE_MODERE = "Décote modérée"
+LIBELLE_PROCHE = "Proche du prix cible"
+LIBELLE_CHER = "Au-dessus du prix cible"
 LIBELLE_INCERTAIN = "incertain"
 LIBELLE_EXCEPT = "exceptional_div"
 

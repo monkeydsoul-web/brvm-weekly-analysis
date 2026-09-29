@@ -205,8 +205,19 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "libelle_valeur" in screener
     assert "22.5" not in alertes
     assert "eps / 0.10" not in alertes
-    assert "libelle_valeur === 'Trop cher'" in alertes
+    assert "libelle_valeur === 'Au-dessus du prix cible'" in alertes
+    assert "Trop cher" not in alertes
+    assert "Bonne affaire" not in alertes
     page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+    bloc = page[page.index("function fmtLibelleValeur"):page.index("async function renderTargets")]
+    assert "Forte décote" in bloc
+    assert "Décote modérée" in bloc
+    assert "Proche du prix cible" in bloc
+    assert "Au-dessus du prix cible" in bloc
+    assert "Cible à vérifier" in bloc
+    for mot in ("Bonne affaire", "Trop cher", "À surveiller"):
+        assert mot not in bloc
+        assert mot not in (ROOT / "prix_cible.py").read_text(encoding="utf-8")
     assert "function fmtLibelleValeur" in page
     assert "fmtLibelleValeur(t.verdict)" in page
     assert "fmtLibelleValeur(s.libelle_valeur)" in page
