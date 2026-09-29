@@ -847,6 +847,12 @@ def api_reports_count():
     return jsonify({"total": n})
 
 
+@app.route("/api/analyze-report", methods=["GET", "POST"])
+def api_analyze_report():
+    # Route retiree (SEC-1) : plus de telechargement d URL ni d appel Claude.
+    # La reponse 404 evite le 405 de la route statique Flask sur un POST.
+    return jsonify({"error": "not found"}), 404
+
 @app.route("/api/analyze-ticker/<ticker>")
 def api_analyze_ticker(ticker):
     ticker = ticker.upper()

@@ -247,6 +247,12 @@ def register_routes(app):
         return Response(csv_data, mimetype="text/csv",
             headers={"Content-Disposition": f"attachment;filename=BRVM_scores_{datetime.now().strftime('%Y%m%d')}.csv"})
 
+    @app.route("/api/chat", methods=["GET", "POST"])
+    def api_chat():
+        # Route retiree (SEC-1). Sans cette reponse, un POST etait avale par
+        # la route statique Flask et renvoyait 405 au lieu de 404.
+        return jsonify({"error": "not found"}), 404
+
     @app.route("/api/search")
     def api_search():
         q = request.args.get("q","").upper()
