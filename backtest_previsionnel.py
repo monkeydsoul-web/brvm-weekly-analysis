@@ -19,6 +19,18 @@ def _note(ligne):
     return valeur
 
 
+def _note10_txt(composite):
+    """Note affichee sur 10, une decimale, virgule francaise.
+
+    Meme arrondi que verdict.note10. Le composite interne reste sur 80.
+    """
+    from verdict import note10
+    valeur = note10(composite)
+    if valeur is None:
+        valeur = 0.0
+    return ("%.1f" % valeur).replace(".", ",")
+
+
 def _lignes_cotes(scores):
     """Garde les sociétés cotées. Un statut absent (ancien fichier) reste inclus.
 
@@ -365,21 +377,21 @@ def compute_signals(scores=None, price_history=None):
 
         if sp > 0.65:
             signal, emoji = "ACHETER", "🟢"
-            reasons = [f"Score prévision {sp:.2f}"]
-            if div_yield >= 5: reasons.append(f"div {div_yield:.1f}%")
-            if (s.get("pe_ref") or 99) < 10: reasons.append(f'P/E {s["pe_ref"]:.1f}×')
-            if mom > 0: reasons.append(f"momentum +{mom:.1f}%")
-            if var_annee > 5: reasons.append(f"var annuelle +{var_annee:.1f}%")
-            raison = ", ".join(reasons)
+            reasons = ["prévision %.2f" % sp]
+            if div_yield >= 5: reasons.append("div %.1f%%" % div_yield)
+            if (s.get("pe_ref") or 99) < 10: reasons.append("P/E %.1f×" % s["pe_ref"])
+            if mom > 0: reasons.append("momentum +%.1f%%" % mom)
+            if var_annee > 5: reasons.append("var annuelle +%.1f%%" % var_annee)
+            raison = "Intéressant — Note %s/10 — %s" % (_note10_txt(score), ", ".join(reasons))
         elif sp > 0.50:
             signal, emoji = "CONSERVER", "🟡"
-            raison = f"Score {score:.0f}/80, prévision {sp:.2f} — fondamentaux corrects"
+            raison = "À surveiller — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
         elif sp > 0.35:
             signal, emoji = "ALLÉGER", "🔴"
-            raison = f"Score {score:.0f}/80, prévision {sp:.2f} — signaux mitigés"
+            raison = "Prudence — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
         else:
             signal, emoji = "ÉVITER", "⚫"
-            raison = f"Score {score:.0f}/80, prévision {sp:.2f} — risque élevé"
+            raison = "Prudence — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
 
         out.append({
             "ticker": ticker, "name": s.get("name", ""),
@@ -538,13 +550,16 @@ def generate_rapport_pdf(scores=None, price_history=None):
     story.append(Paragraph(f"Généré le {now.strftime('%d/%m/%Y à %H:%M')}", body))
     story.append(Spacer(1, 0.4*cm))
 
-    n_strong = len([s for s in scores if (s.get("composite_adj") or 0) >= 60])
+    from verdict import note10 as _note10
+    n_forte = len([s for s in scores if (_note10(_note(s)) or 0) >= 7.5])
+    n_surveiller = len([s for s in signals if s["signal"] == "CONSERVER"])
+    n_prudence = len([s for s in signals if s["signal"] in ("ALLÉGER", "ÉVITER")])
     top3     = sorted(scores, key=lambda x: -(x.get("composite_adj") or 0))[:3]
     story.append(Paragraph("Résumé du marché BRVM", h2))
     t = Table([[
         "Actions analysées", str(len(scores)),
-        "Score fort (≥60)", str(n_strong),
-        "Signaux ACHAT", str(len(buy_signals)),
+        "Intéressant (≥ 7,5)", str(n_forte),
+        "Signaux Intéressant", str(len(buy_signals)),
     ]], colWidths=[4*cm, 2.5*cm, 4*cm, 2.5*cm, 3.5*cm, 2.5*cm])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
@@ -553,14 +568,19 @@ def generate_rapport_pdf(scores=None, price_history=None):
         ("PADDING", (0, 0), (-1, -1), 5),
     ]))
     story.append(t)
+    story.append(Paragraph(
+        "Signaux : Intéressant %d, À surveiller %d, Prudence %d." % (
+            len(buy_signals), n_surveiller, n_prudence),
+        body
+    ))
     story.append(Spacer(1, 0.3*cm))
 
-    story.append(Paragraph("Top 3 actions par score composite", h2))
-    top_data = [["#", "Ticker", "Score/80", "P/E", "Div%", "Secteur"]]
+    story.append(Paragraph("Top 3 actions par note", h2))
+    top_data = [["#", "Ticker", "Note/10", "P/E", "Div%", "Secteur"]]
     for i, s in enumerate(top3, 1):
         top_data.append([
             str(i), s["ticker"],
-            f"{_note(s):.0f}",
+            _note10_txt(_note(s)),
             f"{s.get('pe_ref', 0):.1f}×" if s.get("pe_ref") else "—",
             f"{s.get('div_yield', 0):.1f}%" if s.get("div_yield") else "—",
             (s.get("sector", "—") or "—")[:20],
@@ -583,11 +603,11 @@ def generate_rapport_pdf(scores=None, price_history=None):
             f"<b>{pf['name']}</b> — Risque {pf['risk']} — Objectif +{pf['target_min']}% à +{pf['target_max']}%",
             body
         ))
-        pf_data = [["Ticker", "Poids", "Score", "Div%", "Momentum"]]
+        pf_data = [["Ticker", "Poids", "Note/10", "Div%", "Momentum"]]
         for st in pf.get("stocks", []):
             pf_data.append([
                 st["ticker"], f"{st['weight']:.1f}%",
-                f"{st['score']:.0f}/80", f"{st.get('div_yield', 0):.1f}%",
+                "%s/10" % _note10_txt(st.get("score")), f"{st.get('div_yield', 0):.1f}%",
                 f"{st.get('momentum', 0):+.1f}%",
             ])
         tp = Table(pf_data, colWidths=[2.5*cm, 2*cm, 2.5*cm, 2*cm, 2.5*cm])
@@ -601,11 +621,11 @@ def generate_rapport_pdf(scores=None, price_history=None):
         story.append(tp)
         story.append(Spacer(1, 0.2*cm))
 
-    story.append(Paragraph("Signaux d'achat actifs", h2))
-    sig_data = [["Ticker", "Score", "Prévision", "Confiance", "Raison"]]
+    story.append(Paragraph("Signaux Intéressant", h2))
+    sig_data = [["Ticker", "Note/10", "Prévision", "Confiance", "Raison"]]
     for sig in buy_signals[:10]:
         sig_data.append([
-            sig["ticker"], f"{sig['score']:.0f}/80",
+            sig["ticker"], "%s/10" % _note10_txt(sig.get("score")),
             f"{sig.get('score_prevision', 0):.2f}",
             f"{sig['confidence']}%", sig["raison"][:45],
         ])
