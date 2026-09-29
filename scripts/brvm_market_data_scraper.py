@@ -765,6 +765,22 @@ def _choisir_note(text: str) -> Optional[str]:
 
 
 # ── Extraire note depuis texte ───────────────────────────────────────────────
+def _notation_retiree(text: str) -> bool:
+    """La notation est retirée : ce n'est pas le cran D."""
+    if not text:
+        return False
+    if re.search(r"\bWD\b", text):
+        return True
+    if re.search(r"\bwithdrawn\b", text, re.I):
+        return True
+    return re.search(
+        r"(?:\bretire\b|\bretir(?:é|e|ée|és|ees)s?\b|\bretrait\b).{0,80}\bnotations?\b"
+        r"|\bnotations?\b.{0,50}\bretir",
+        text,
+        re.I,
+    ) is not None
+
+
 def _extract_rating_info(text: str) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "note": None, "perspective": None, "agence": None, "date_validite": None,
@@ -786,10 +802,14 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
             result["agence"] = name
             break
 
-    note = _choisir_note(text)
-    if note:
-        result["note"] = note
-        result["score_notation"] = RATING_GRADES[note]
+    if _notation_retiree(text):
+        result["note"] = None
+        result["statut"] = "retirée"
+    else:
+        note = _choisir_note(text)
+        if note:
+            result["note"] = note
+            result["score_notation"] = RATING_GRADES[note]
 
     # Perspective
     if re.search(r'[Ss]table', text):
@@ -870,11 +890,17 @@ def _fiche_notation(
 ) -> Dict[str, Any]:
     """Entrée au format historique de brvm_ratings.json, plus date_validite."""
     info = _extract_rating_info(contexte or corps or "")
-    note = info.get("note") or note_repli
-    score = info.get("score_notation")
-    if note != info.get("note"):
-        score = RATING_GRADES.get(note) if isinstance(note, str) else None
-    return {
+    retiree = info.get("statut") == "retirée"
+    if retiree:
+        # /api/ratings ne renvoie que les lignes qui ont une note : le D n'est pas affiché.
+        note = None
+        score = None
+    else:
+        note = info.get("note") or note_repli
+        score = info.get("score_notation")
+        if note != info.get("note"):
+            score = RATING_GRADES.get(note) if isinstance(note, str) else None
+    fiche = {
         "ticker": ticker,
         "agence": info.get("agence"),
         "note": note,
@@ -885,6 +911,9 @@ def _fiche_notation(
         "source_url": source_url or "",
         "resume": (corps or "")[:500],
     }
+    if retiree:
+        fiche["statut"] = "retirée"
+    return fiche
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # A) NOTATIONS

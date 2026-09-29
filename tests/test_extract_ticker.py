@@ -301,6 +301,23 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_notation_retiree_nest_pas_un_d():
+    texte = (
+        "GCR retire les notations d'émetteur de long et court terme de la "
+        "Société Générale Côte d'Ivoire. Dakar, le 12 décembre 2023. "
+        "Société Générale Côte D'ivoire. Notation WD. Historique : AA+."
+    )
+    info = _extract_rating_info(texte)
+    assert info["note"] is None
+    assert info.get("score_notation") is None
+    assert info["statut"] == "retirée"
+    fiche = _fiche_notation(texte, texte, "SGBC", "2023-12-13", "", "D")
+    assert fiche["note"] is None
+    assert fiche["score_notation"] is None
+    assert fiche["statut"] == "retirée"
+    assert _extract_rating_info("Rating withdrawn for the issuer.")["statut"] == "retirée"
+
+
 def test_titrisation_nest_pas_la_note_de_la_societe():
     ept = (
         "GCR affirme les notations d'émission de long terme de AA de la Tranche A, "
