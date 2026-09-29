@@ -96,7 +96,7 @@ function refreshCASelector() {
       const c = v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
       return `<span style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid ${c};border-radius:6px;padding:3px 8px;font-size:11px">
         <strong style="color:${c}">${t}</strong>
-        <span style="color:var(--t2);font-size:10px">${v.toFixed(0)}/80</span>
+        <span style="color:var(--t2);font-size:10px">${(typeof note10txt==='function'?note10txt(s||{}):v10fmt(v))}/10</span>
         <button onclick="caRemoveTicker('${t}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;padding:0 2px">✕</button>
       </span>`;
     }).join('') || '<span style="color:var(--t3);font-size:11px">Aucune société sélectionnée</span>';
@@ -111,7 +111,7 @@ function refreshCASelector() {
       const c = v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
       return `<button onclick="caToggleTicker('${x.ticker}')"
         style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid ${selected?c:'var(--border)'};background:${selected?c+'22':'var(--bg3)'};color:${selected?c:'var(--t2)'};cursor:pointer;font-weight:${selected?'700':'400'}">
-        ${x.ticker} <span style="opacity:0.7">${v.toFixed(0)}</span></button>`;
+        ${x.ticker} <span style="opacity:0.7">${(typeof note10txt==='function'?note10txt(x):v10fmt(v))}/10</span></button>`;
     }).join('');
   }
 }
