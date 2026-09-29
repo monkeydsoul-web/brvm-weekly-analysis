@@ -220,7 +220,7 @@
     },
     "PALC": {
       "date": "2026-09-25",
-      "cours_clot": 4000.0,
+      "cours_clot": 14388.0,
       "per_boc": 10.0
     },
     "SPHC": {
@@ -302,7 +302,9 @@
           "valeur": 248888.88,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SIBC": {
       "status": "ok",
@@ -316,7 +318,9 @@
           "valeur": 400000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SNTS": {
       "status": "ok",
@@ -330,7 +334,9 @@
           "valeur": 1200000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "NSBC": {
       "status": "ok",
@@ -344,7 +350,9 @@
           "valeur": 80000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "CBIBF": {
       "status": "ok",
@@ -358,7 +366,9 @@
           "valeur": 76928.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "BOAB": {
       "status": "ok",
@@ -372,7 +382,9 @@
           "valeur": 162400.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "ECOC": {
       "status": "ok",
@@ -386,7 +398,9 @@
           "valeur": 259154.4,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "ORAC": {
       "status": "ok",
@@ -400,7 +414,9 @@
           "valeur": 705872.38,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "ONTBF": {
       "status": "ok",
@@ -414,7 +430,9 @@
           "valeur": 630000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "NTLC": {
       "status": "ok",
@@ -428,7 +446,9 @@
           "valeur": 145459.392,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "STBC": {
       "status": "ok",
@@ -442,7 +462,9 @@
           "valeur": 108000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2023
     },
     "UNLC": {
       "status": "ok",
@@ -456,7 +478,9 @@
           "valeur": 27538.64,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SLBC": {
       "status": "ok",
@@ -470,7 +494,9 @@
           "valeur": 47411.888,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SMBC": {
       "status": "ok",
@@ -484,7 +510,9 @@
           "valeur": 19600.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "PALC": {
       "status": "ok",
@@ -498,7 +526,9 @@
           "valeur": 49597.4475,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "TTLC": {
       "status": "ok",
@@ -512,7 +542,9 @@
           "valeur": 302706.68,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SHEC": {
       "status": "ok",
@@ -526,7 +558,9 @@
           "valeur": 480000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "CIEC": {
       "status": "ok",
@@ -540,7 +574,9 @@
           "valeur": 262144.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "SDCC": {
       "status": "ok",
@@ -554,7 +590,9 @@
           "valeur": 48000.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     },
     "BICB": {
       "status": "ok",
@@ -568,7 +606,9 @@
           "valeur": 231040.0,
           "unite": "MFCFA"
         }
-      }
+      },
+      "doc_type": "Etats financiers",
+      "annee": 2024
     }
   }
 }

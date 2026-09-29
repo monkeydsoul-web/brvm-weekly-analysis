@@ -13,6 +13,8 @@
   },
   "rapport_2024": {
     "status": "ok",
+    "doc_type": "Etats financiers",
+    "annee": 2024,
     "year": 2024,
     "kpis": {
       "resultat_net": {"valeur": 1000.0, "unite": "MFCFA"},
@@ -21,9 +23,11 @@
   },
   "rapport_2025": {
     "status": "ok",
+    "doc_type": "Etats financiers",
+    "annee": 2025,
     "year": 2025,
     "kpis": {
-      "resultat_net": {"valeur": 1500.0, "unite": "MFCFA"},
+      "resultat_net": {"valeur": 1200.0, "unite": "MFCFA"},
       "capitaux_propres": {"valeur": 5000.0, "unite": "MFCFA"}
     }
   },

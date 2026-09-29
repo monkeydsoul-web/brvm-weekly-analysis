@@ -11,6 +11,7 @@ import logging
 import time
 import threading
 import tempfile
+import unicodedata
 from datetime import datetime, timezone
 from copy import deepcopy
 from price_sanity import resolve_price, get_reference_prices
@@ -98,9 +99,13 @@ def _convert_pdf_div(ticker, value, unite):
 # Construction du row fondamental enrichi
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Un BNA BOC en dessous de ce ratio du BNA de rapport est incohérent :
-# on l'ignore. Le rapport reste devant même quand le BOC est cohérent.
-_SEUIL_BNA_BOC = 0.7
+# Bande rapport/BOC. En dehors, le chiffre du rapport est écarté et le BOC
+# est retenu : un nombre d'actions faux dans les fondamentaux rend le rapport
+# invraisemblable. 1,43 est l'inverse de 0,70, arrondi.
+_BANDE_BAS = 0.7
+_BANDE_HAUT = 1.43
+# Seuls ces documents publiés, en millions de FCFA, donnent un BNA ou un BVPA.
+_DOCS_COMPTABLES = frozenset(("etats financiers", "rapport annuel"))
 
 
 def _flottant_positif(valeur):
@@ -124,17 +129,64 @@ def _flottant_positif(valeur):
     return nombre
 
 
-def _kpi_pdf(pdf_analysis, key):
-    """Valeur d'un KPI de rapport annuel, ou None si le rapport n'est pas exploitable."""
+def _pli(texte):
+    """Minuscules, sans accent, espaces simples. Pour comparer un type de document."""
+    if not isinstance(texte, str):
+        return ""
+    decompose = unicodedata.normalize("NFD", texte)
+    sans = "".join(c for c in decompose if not unicodedata.combining(c))
+    return " ".join(sans.lower().split())
+
+
+def _doc_comptable(pdf_analysis):
+    """Vrai pour un état financier ou un rapport annuel, pas un trimestriel ni une note enrichie."""
     if not isinstance(pdf_analysis, dict) or pdf_analysis.get("status") != "ok":
-        return None
+        return False
+    brut = pdf_analysis.get("doc_type") or pdf_analysis.get("type")
+    return _pli(brut) in _DOCS_COMPTABLES
+
+
+def _bloc_kpi(pdf_analysis, key):
+    if not isinstance(pdf_analysis, dict):
+        return {}
     kpis = pdf_analysis.get("kpis") or {}
     if not isinstance(kpis, dict):
-        return None
+        return {}
     bloc = kpis.get(key) or {}
     if not isinstance(bloc, dict):
+        return {}
+    return bloc
+
+
+def _kpi_pdf(pdf_analysis, key):
+    """Valeur d'un KPI, ou None si le rapport n'est pas un document comptable en MFCFA."""
+    if not _doc_comptable(pdf_analysis):
+        return None
+    bloc = _bloc_kpi(pdf_analysis, key)
+    unite = bloc.get("unite")
+    if not isinstance(unite, str) or unite.strip() != "MFCFA":
         return None
     return _flottant_positif(bloc.get("valeur"))
+
+
+def _exercice_rapport(pdf_analysis):
+    """Année de l'exercice (`annee`), pas l'année de publication (`year`)."""
+    if not isinstance(pdf_analysis, dict):
+        return None
+    return pdf_analysis.get("annee") or pdf_analysis.get("year")
+
+
+def _ratio(valeur_rapport, valeur_boc):
+    if not valeur_rapport or not valeur_boc:
+        return None
+    return float(valeur_rapport) / float(valeur_boc)
+
+
+def _hors_bande(ratio):
+    """Vrai si le rapport et le BOC sont trop éloignés (bande fermée [0,7 ; 1,43])."""
+    if ratio is None:
+        return False
+    return ratio < _BANDE_BAS or ratio > _BANDE_HAUT
 
 
 def _nb_actions(row):
@@ -148,17 +200,18 @@ def _nb_actions(row):
 
 
 def _bna_depuis_rapport(pdf_analysis, nb_actions):
-    """BNA du rapport : résultat net (MFCFA) / nombre d'actions. Avec l'exercice."""
+    """BNA du rapport : résultat net (MFCFA) / nombre d'actions. Avec l'exercice.
+
+    Un autre type de document, ou une unité qui n'est pas MFCFA, est traité
+    comme un rapport absent.
+    """
     rn = _kpi_pdf(pdf_analysis, "resultat_net")
     if rn is None or not nb_actions:
         return None, None
     eps = rn * 1000000.0 / nb_actions
     if eps <= 0:
         return None, None
-    annee = None
-    if isinstance(pdf_analysis, dict):
-        annee = pdf_analysis.get("year")
-    return round(eps, 0), annee
+    return round(eps, 0), _exercice_rapport(pdf_analysis)
 
 
 def _bna_depuis_boc(cours_clot, per_boc):
@@ -187,35 +240,31 @@ def _bna_statique(base_row):
     return None
 
 
-def _boc_incoherent(bna_boc, bna_rapport):
-    """Vrai si le BNA BOC est trop bas face à un BNA de rapport fiable (< 70 %)."""
-    if bna_rapport is None or bna_rapport <= 0 or bna_boc is None:
-        return False
-    return bna_boc < bna_rapport * _SEUIL_BNA_BOC
-
-
 def _choisir_bna(bna_rapport, annee, bna_boc, date_boc, bna_statique):
-    """Priorité rapport > BOC > statique. Retourne (bna, source, exercice, date).
+    """Priorité rapport > BOC > statique.
 
-    Le BOC incohérent avec un rapport fiable est ignoré. Un BOC cohérent ne
-    passe pas non plus devant le rapport : le bénéfice publié reste la source.
+    Retourne (bna, source, exercice, date, ecart, alerter).
+    `ecart` est le ratio rapport/BOC arrondi, quand les deux existent.
+    Si ce ratio sort de [0,7 ; 1,43], le BOC est retenu et `alerter` est vrai.
     Sans aucune source, le BNA est absent (None), pas inventé depuis le cours.
     """
-    if bna_rapport is not None and bna_rapport > 0:
-        return bna_rapport, "rapport", annee, None
-    if (
-        bna_boc is not None
-        and bna_boc > 0
-        and not _boc_incoherent(bna_boc, bna_rapport)
-    ):
-        return bna_boc, "boc", None, date_boc or None
+    ecart_brut = _ratio(bna_rapport, bna_boc)
+    ecart = None if ecart_brut is None else round(ecart_brut, 2)
+    if bna_rapport is not None and bna_rapport > 0 and not _hors_bande(ecart_brut):
+        return bna_rapport, "rapport", annee, None, ecart, False
+    if bna_boc is not None and bna_boc > 0:
+        alerter = _hors_bande(ecart_brut)
+        return bna_boc, "boc", None, date_boc or None, ecart, alerter
     if bna_statique is not None and bna_statique > 0:
-        return bna_statique, "statique", None, None
-    return None, None, None, None
+        return bna_statique, "statique", None, None, None, False
+    return None, None, None, None, None, False
 
 
 def _bvpa_depuis_rapport(pdf_analysis, nb_actions):
-    """BVPA du rapport : capitaux propres (MFCFA) / nombre d'actions."""
+    """BVPA du rapport : capitaux propres (MFCFA) / nombre d'actions.
+
+    Même filtre que le BNA : états financiers ou rapport annuel, unité MFCFA.
+    """
     cap = _kpi_pdf(pdf_analysis, "capitaux_propres")
     if cap is None or not nb_actions:
         return None
@@ -225,6 +274,25 @@ def _bvpa_depuis_rapport(pdf_analysis, nb_actions):
     return round(vcp, 1)
 
 
+def _bvpa_depuis_boc(cours_clot, pb_boc, bvpa_explicite):
+    """BVPA du BOC seulement s'il est déjà dans le bulletin.
+
+    Soit un BVPA explicite, soit cours de clôture du jour BOC / P/B du même
+    BOC. Jamais le cours de la séance. Sans ces champs, il n'y a pas de BVPA BOC.
+    """
+    explicite = _flottant_positif(bvpa_explicite)
+    if explicite is not None:
+        return explicite
+    cours = _flottant_positif(cours_clot)
+    pb = _flottant_positif(pb_boc)
+    if cours is None or pb is None or pb >= 500:
+        return None
+    valeur = round(cours / pb, 1)
+    if valeur <= 0:
+        return None
+    return valeur
+
+
 def _bvpa_statique(base_row):
     """BVPA déjà porté par les fondamentaux. Jamais cours / P/B."""
     if not isinstance(base_row, dict):
@@ -232,37 +300,59 @@ def _bvpa_statique(base_row):
     return _flottant_positif(base_row.get("bvpa"))
 
 
-def _choisir_bvpa(bvpa_rapport, bvpa_statique):
-    """Priorité rapport > statique. Le cours live ne fabrique pas le BVPA."""
-    if bvpa_rapport is not None and bvpa_rapport > 0:
-        return bvpa_rapport, "rapport"
+def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_statique):
+    """Rapport, puis BOC s'il existe, puis statique.
+
+    La bande rapport/BOC ne s'applique que lorsqu'un BVPA BOC existe.
+    Retourne (bvpa, source, alerter).
+    """
+    ecart_brut = _ratio(bvpa_rapport, bvpa_boc)
+    if bvpa_rapport is not None and bvpa_rapport > 0 and not _hors_bande(ecart_brut):
+        return bvpa_rapport, "rapport", False
+    if bvpa_boc is not None and bvpa_boc > 0:
+        return bvpa_boc, "boc", _hors_bande(ecart_brut)
     if bvpa_statique is not None and bvpa_statique > 0:
-        return bvpa_statique, "statique"
-    return None, None
+        return bvpa_statique, "statique", False
+    return None, None, False
 
 
-def _appliquer_bna_bvpa(row, base_row, pdf_analysis):
+def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker=""):
     """Fige BNA et BVPA, puis P/E et P/B = cours actuel / ces chiffres."""
     nb = _nb_actions(row)
     bna_rapport, annee = _bna_depuis_rapport(pdf_analysis, nb)
     bna_boc = _bna_depuis_boc(row.get("_boc_cours"), row.get("_boc_per"))
-    bna, source, exercice, date_boc = _choisir_bna(
+    bna, source, exercice, date_boc, ecart, alerter_bna = _choisir_bna(
         bna_rapport,
         annee,
         bna_boc,
         row.get("_boc_date"),
         _bna_statique(base_row),
     )
+    if alerter_bna:
+        logger.warning(
+            "BNA %s : rapport/BOC = %s hors [0.7, 1.43] — le BOC est retenu",
+            ticker, ecart,
+        )
     row["bna"] = bna
     row["eps"] = bna
     row["bna_source"] = source
     row["bna_exercice"] = exercice
     row["bna_date"] = date_boc
+    row["bna_ecart_boc"] = ecart
 
-    bvpa, bvpa_source = _choisir_bvpa(
+    bvpa_boc = _bvpa_depuis_boc(
+        row.get("_boc_cours"), row.get("_boc_pb"), row.get("_boc_bvpa"),
+    )
+    bvpa, bvpa_source, alerter_bvpa = _choisir_bvpa(
         _bvpa_depuis_rapport(pdf_analysis, nb),
+        bvpa_boc,
         _bvpa_statique(base_row),
     )
+    if alerter_bvpa:
+        logger.warning(
+            "BVPA %s : rapport/BOC hors [0.7, 1.43] — le BOC est retenu",
+            ticker,
+        )
     row["bvpa"] = bvpa
     row["bvpa_source"] = bvpa_source
 
@@ -338,6 +428,8 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
             row['_boc_div_date'] = boc_entry.get('div_date', '')
             row['_boc_cours']    = boc_entry.get('cours_clot')
             row['_boc_date']     = boc_entry.get('date')
+            row['_boc_pb']       = boc_entry.get('pb_boc')
+            row['_boc_bvpa']     = boc_entry.get('bvpa')
     except Exception as _e:
         pass
 
@@ -433,7 +525,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
     price_final  = row.get('price') or boc_cours or 0
 
     # BNA et BVPA figés avant le dividende : le cours du jour ne les change pas.
-    _appliquer_bna_bvpa(row, base_row, pdf_analysis)
+    _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker)
 
     # Dividende BOC : appliqué si date récente ET cohérent avec existant (≥ 50%)
     # Exception : si PDF a explicitement fixé 0 (dividende non récurrent), le BOC ne peut pas l'écraser
@@ -446,7 +538,7 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_sna
                 row['div_yield'] = round(boc_div / price_final * 100, 2)
 
     # Nettoyage des clés internes
-    for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours', '_boc_date'):
+    for k in ('_boc_per', '_boc_div', '_boc_div_date', '_boc_cours', '_boc_date', '_boc_pb', '_boc_bvpa'):
         row.pop(k, None)
 
     return row
@@ -1048,7 +1140,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "change_pct":    row.get("change_pct", 0),
                         "volume":        row.get("volume", 0),
                         "trend":         row.get("trend"),
-                        "pe_ref":        row.get("pe_ref") or row.get("pe_hist"),
+                        "pe_ref":        row.get("pe_ref") if row.get("bna") else None,
                         "pe_hist":       row.get("pe_hist"),
                         "pb_ref":        row.get("pb_ref") or row.get("pb_hist"),
                         "pb_hist":       row.get("pb_hist"),
@@ -1078,6 +1170,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "bna_source":    row.get("bna_source"),
                         "bna_exercice":  row.get("bna_exercice"),
                         "bna_date":      row.get("bna_date"),
+                        "bna_ecart_boc": row.get("bna_ecart_boc"),
                         "bvpa":          row.get("bvpa"),
                         "bvpa_source":   row.get("bvpa_source"),
                         "var_annee":       row.get("var_annee"),

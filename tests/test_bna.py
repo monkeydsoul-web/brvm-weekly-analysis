@@ -68,6 +68,7 @@ def test_bna_identique_si_seul_le_cours_change(fixtures_dir):
     assert bas["bna_source"] == haut["bna_source"] == "rapport"
     assert bas["bna_exercice"] == 2024
     assert bas["bna_date"] is None
+    assert bas["bna_ecart_boc"] == round(1000.0 / 900.0, 2)
     assert bas["bvpa_source"] == "rapport"
     assert bas["pe_ref"] != haut["pe_ref"]
     assert _proche(bas["pe_ref"] * bas["bna"], 12000)
@@ -85,6 +86,7 @@ def test_bna_boc_ne_suit_pas_le_cours(fixtures_dir):
     assert bas["bna_source"] == "boc"
     assert bas["bna_date"] == "2026-09-25"
     assert bas["bna_exercice"] is None
+    assert bas["bna_ecart_boc"] is None
     assert bas["bvpa"] is None
     assert bas["bvpa_source"] is None
     assert _proche(bas["pe_ref"] * bas["bna"], 12000)
@@ -108,7 +110,7 @@ def test_bna_change_avec_un_nouveau_rapport(fixtures_dir):
     apres = _ligne(cas["base"], 12000, cas["rapport_2025"], cas["boc"])
     assert avant["bna"] == 1000.0
     assert avant["bna_exercice"] == 2024
-    assert apres["bna"] == 1500.0
+    assert apres["bna"] == 1200.0
     assert apres["bna_source"] == "rapport"
     assert apres["bna_exercice"] == 2025
     assert avant["bvpa"] == apres["bvpa"] == 5000.0
@@ -147,13 +149,146 @@ def test_estimation_prix_sur_pe_nest_pas_un_bna(fixtures_dir):
     assert row["bna_source"] is None
 
 
-def test_boc_incoherent_ignore(fixtures_dir):
+def test_ratio_hors_bande_prend_le_boc(fixtures_dir, caplog):
+    """Rapport 1 000 et BOC 100 : le rapport est écarté, le BOC est gardé."""
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
     cas = _cas(fixtures_dir)
-    row = _ligne(cas["base"], 12000, cas["rapport_2024"], cas["boc_incoherent"])
-    assert row["bna"] == 1000.0
-    assert row["bna_source"] == "rapport"
-    assert row["bna"] != 100.0
+    row = _ligne(cas["base"], 12000, cas["rapport_2024"], cas["boc_incoherent"], ticker="TEST")
+    assert row["bna"] == 100.0
+    assert row["bna_source"] == "boc"
+    assert row["bna_date"] == "2026-09-25"
+    assert row["bna_exercice"] is None
+    assert row["bna_ecart_boc"] == 10.0
     assert _proche(row["pe_ref"] * row["bna"], 12000)
+    assert "TEST" in caplog.text
+    assert "hors" in caplog.text
+
+
+def _rapport(doc_type, rn, cap, annee=2025, year=2026, unite="MFCFA"):
+    return {
+        "status": "ok",
+        "doc_type": doc_type,
+        "annee": annee,
+        "year": year,
+        "kpis": {
+            "resultat_net": {"valeur": rn, "unite": unite},
+            "capitaux_propres": {"valeur": cap, "unite": unite},
+        },
+    }
+
+
+def test_donnees_enrichies_sgbc_ignorees():
+    """SGBC : 71 272 MFCFA d'une note enrichie ne doit pas remplacer le BOC.
+
+    71 272 / 31 111 110 actions = 2 291. Le BOC, lui, vaut 3 299.
+    """
+    from scraper import STOCK_FUNDAMENTALS as fond
+    base = dict(fond["SGBC"])
+    pdf = _rapport("Données financières enrichies", 71272.0, 200000.0)
+    boc = {"date": "2026-09-25", "cours_clot": 32990.0, "per_boc": 10.0}
+    row = _ligne(base, 34000, pdf, boc, ticker="SGBC")
+    assert round(71272.0 * 1000000.0 / base["shares"], 0) == 2291.0
+    assert row["bna"] == 3299.0
+    assert row["bna"] != 2291.0
+    assert row["bna_source"] == "boc"
+    assert row["bvpa_source"] != "rapport"
+    for doc in ("Données publiques", "Rapport trimestriel"):
+        autre = _ligne(base, 34000, _rapport(doc, 71272.0, 200000.0), boc, ticker="SGBC")
+        assert autre["bna_source"] == "boc"
+        assert autre["bna"] == 3299.0
+
+
+def test_etats_financiers_accepte_avec_ou_sans_accent():
+    cas_base = {
+        "name": "Test", "shares": 1000000, "sector": "Banque",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
+    }
+    boc = {"date": "2026-09-25", "cours_clot": 10000, "per_boc": 10}
+    for doc in ("Etats financiers", "États financiers", "RAPPORT ANNUEL", "Rapport annuel"):
+        row = _ligne(cas_base, 11000, _rapport(doc, 1000.0, 4000.0), boc)
+        assert row["bna_source"] == "rapport", doc
+        assert row["bna"] == 1000.0
+        assert row["bvpa_source"] == "rapport"
+
+
+def test_unite_autre_que_mfcfa_ignoree():
+    cas_base = {
+        "name": "Test", "shares": 1000000, "sector": "Banque",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
+    }
+    boc = {"date": "2026-09-25", "cours_clot": 10000, "per_boc": 10}
+    pdf = _rapport("Etats financiers", 1000.0, 4000.0, unite="FCFA")
+    row = _ligne(cas_base, 11000, pdf, boc)
+    assert row["bna_source"] == "boc"
+    assert row["bna"] == 1000.0
+    assert row["bvpa"] is None
+
+
+def test_ntlc_ratio_06_prend_le_boc(caplog):
+    """Nombre d'actions trop haut : le BNA de rapport vaut 0,6 fois le BOC."""
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
+    base = dict(STOCK_FUNDAMENTALS["NTLC"])
+    # BNA rapport volontairement à 60 % du BOC, quelles que soient les actions.
+    boc_bna = 1000.0
+    rn = 0.6 * boc_bna * base["shares"] / 1000000.0
+    pdf = _rapport("Etats financiers", rn, rn, annee=2025, year=2026)
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0}
+    row = _ligne(base, 12000, pdf, boc, ticker="NTLC")
+    assert row["bna_ecart_boc"] == 0.6
+    assert row["bna"] == 1000.0
+    assert row["bna_source"] == "boc"
+    assert row["bna_exercice"] is None
+    assert "NTLC" in caplog.text
+
+
+def test_snts_ratio_1_garde_le_rapport():
+    base = dict(STOCK_FUNDAMENTALS["SNTS"])
+    boc_bna = 4000.0
+    rn = boc_bna * base["shares"] / 1000000.0
+    pdf = _rapport("Rapport annuel", rn, rn * 3, annee=2025, year=2026)
+    boc = {"date": "2026-09-25", "cours_clot": boc_bna * 8, "per_boc": 8.0}
+    row = _ligne(base, 33000, pdf, boc, ticker="SNTS")
+    assert row["bna_ecart_boc"] == 1.0
+    assert row["bna"] == 4000.0
+    assert row["bna_source"] == "rapport"
+    assert row["bna_exercice"] == 2025
+    assert row["bna_date"] is None
+
+
+def test_exercice_fiscal_pas_annee_de_publication(fixtures_dir):
+    cas = _cas(fixtures_dir)
+    pdf = dict(cas["rapport_2024"], annee=2025, year=2026)
+    row = _ligne(cas["base"], 12000, pdf, cas["boc"])
+    assert row["bna_source"] == "rapport"
+    assert row["bna_exercice"] == 2025
+
+
+def test_bvpa_boc_seulement_si_le_bulletin_en_a_un(caplog):
+    """Sans P/B BOC, le BVPA du rapport reste. S'il diverge trop, le BOC gagne."""
+    import logging
+    caplog.set_level(logging.WARNING, logger="live_ranker")
+    base = {
+        "name": "Test", "shares": 1000000, "sector": "Banque",
+        "country": "Côte d'Ivoire", "roe": 10, "div_hist": 0,
+        "debt": "Faible", "stable": True, "pe_hist": 10, "pb_hist": 1,
+    }
+    pdf = _rapport("Etats financiers", 1000.0, 5000.0, annee=2024, year=2024)
+    sans = _ligne(base, 12000, pdf, {"date": "2026-09-25", "cours_clot": 9000, "per_boc": 10})
+    assert sans["bvpa"] == 5000.0
+    assert sans["bvpa_source"] == "rapport"
+    # cours 9000 / P/B 1 = 9 000, rapport 5 000, ratio 0,56 : hors bande.
+    avec = _ligne(
+        base, 12000, pdf,
+        {"date": "2026-09-25", "cours_clot": 9000, "per_boc": 10, "pb_boc": 1},
+        ticker="BV",
+    )
+    assert avec["bvpa"] == 9000.0
+    assert avec["bvpa_source"] == "boc"
+    assert "BVPA BV" in caplog.text
 
 
 def test_sans_bna_pas_de_plantage(fixtures_dir):
@@ -290,6 +425,17 @@ def test_univers_47_bna_bvpa_et_conseils(fixtures_dir):
     assert par["STBC"][1] == 1800.0
     # PALC : le BOC (cours live / PER = 500) est incohérent avec le rapport 2 000.
     assert par["PALC"][0] == par["PALC"][1] == 2000.0
+    palc = _ligne(
+        STOCK_FUNDAMENTALS["PALC"],
+        univers["prix"]["PALC"],
+        univers["pdf"]["PALC"],
+        univers["boc"]["PALC"],
+        ticker="PALC",
+    )
+    # 1,39 est dans la bande : le rapport reste, en attendant la correction
+    # du nombre d'actions (autre PR).
+    assert palc["bna_source"] == "rapport"
+    assert palc["bna_ecart_boc"] == 1.39
 
     changements = sorted(
         (t, c_avant, c_apres)
@@ -357,7 +503,7 @@ def gel(tmp_path, monkeypatch):
         }}}
 
     monkeypatch.setattr("live_data.get_live_data", lire)
-    return {"chemin": tmp_path / "live_ranking.json", "etat": etat}
+    return {"chemin": tmp_path / "live_ranking.json", "etat": etat, "dossier": tmp_path}
 
 
 def _ecrire(chemin, formule, quand):
@@ -384,6 +530,17 @@ def _ecrire(chemin, formule, quand):
         }],
     }
     chemin.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_pe_ref_vide_quand_il_ny_a_pas_de_bna(gel):
+    """Sans BNA, le classement ne montre pas le P/E statique à la place."""
+    (gel["dossier"] / "boc_data.json").write_text("{}", encoding="utf-8")
+    _ecrire(gel["chemin"], NOTE_FORMULE, NOTE_VEILLE)
+    resultat = compute_live_ranking(trigger="startup", moment=SEANCE)
+    ligne = resultat["ranking"][0]
+    assert ligne["bna"] is None
+    assert ligne["pe_ref"] is None
+    assert ligne["pe_hist"] == 8.0
 
 
 def test_formule_v1_gardee_en_seance(gel):
