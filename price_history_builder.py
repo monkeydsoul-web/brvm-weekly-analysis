@@ -95,18 +95,23 @@ def append_live_prices():
                 history[ticker] = []
             # Eviter doublons du même jour
             existing_dates = {p["date"] for p in history[ticker]}
+            # Volume de la séance close (job 18h). Absent des points anciens :
+            # le Technique le traite comme « pas de volume », pas comme zéro.
+            point = {"date": today, "price": price, "source": "live"}
+            volume = data.get("volume")
+            if isinstance(volume, (int, float)) and not isinstance(volume, bool) and volume >= 0:
+                point["volume"] = int(volume)
             if today not in existing_dates:
-                history[ticker].append({
-                    "date": today,
-                    "price": price,
-                    "source": "live"
-                })
+                history[ticker].append(point)
                 updated.append(ticker)
             else:
                 # Mettre à jour le prix du jour
                 for p in history[ticker]:
                     if p["date"] == today:
                         p["price"] = price
+                        p["source"] = "live"
+                        if "volume" in point:
+                            p["volume"] = point["volume"]
                         break
         save_history(history)
         logger.info(f"Historique mis à jour: {len(updated)} tickers")
