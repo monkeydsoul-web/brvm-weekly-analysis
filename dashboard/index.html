@@ -800,9 +800,9 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
       </select>
       <select id="fVerdict" onchange="renderRankLive()">
         <option value="">Toutes les tendances</option>
-        <option value="achet">Tendance positive</option>
-        <option value="neutr">Tendance neutre</option>
-        <option value="vend">Tendance négative</option>
+        <option value="positif">Tendance positive</option>
+        <option value="neutre">Tendance neutre</option>
+        <option value="negatif">Tendance négative</option>
       </select>
       <button id="fFav" onclick="toggleFavFilter()" style="height:auto;padding:6px 13px;border-radius:var(--r,6px);border:1px solid var(--border-1,var(--border));background:var(--bg2,var(--bg-elevated));color:var(--t2);font-size:13px;cursor:pointer">★ Mes favoris</button>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
@@ -2976,13 +2976,22 @@ function _sparklineDots(hist30, w, h){
   return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}</svg></span>`;
 }
 
+function tendanceCle(v){
+  return String(v||'').toUpperCase().replace(/É/g,'E');
+}
+function filtreTendance(rows, verd){
+  var liste=rows||[];
+  if(!verd) return liste.slice();
+  var cible=tendanceCle(verd);
+  return liste.filter(function(x){ return tendanceCle(x&&x.pdf_verdict)===cible; });
+}
 function renderRank(){
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
   const verd=document.getElementById('fVerdict')?.value||'';
   let d=[...scores];
   if(sec)d=d.filter(x=>x.sector===sec);
-  if(verd)d=d.filter(x=>(x.pdf_verdict||'').toLowerCase().includes(verd));
+  if(verd)d=filtreTendance(d, verd);
   if(window._favOnly)d=d.filter(x=>favorites.includes(x.ticker));
   d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
 

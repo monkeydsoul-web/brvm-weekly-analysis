@@ -143,9 +143,11 @@ def test_pas_de_mots_achat_ou_vente_visibles():
         if _MOTS_ORDRE.search(ligne):
             trouves.append("%s: %s" % (i, ligne.strip()[:160]))
     assert not trouves, "\n".join(trouves)
-    assert 'value="achet"' in HTML
-    assert 'value="neutr"' in HTML
-    assert 'value="vend"' in HTML
+    assert 'value="positif"' in HTML
+    assert 'value="neutre"' in HTML
+    assert 'value="negatif"' in HTML
+    assert 'value="achet"' not in HTML
+    assert 'value="vend"' not in HTML
     assert ">Acheter<" not in HTML
     assert ">Vendre<" not in HTML
     fmt = _entre(HTML, "function fmtVerdict", "function conseilAffiche")
@@ -492,6 +494,55 @@ if (lignes[2].split(',')[3] !== '0.9') {
   console.error('repli ' + lignes[2].split(',')[3]);
   process.exit(1);
 }
+"""
+    resultat = subprocess.run(
+        ["node", "-e", script],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert resultat.returncode == 0, resultat.stderr or resultat.stdout
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_filtre_tendance_retourne_le_verdict_pdf():
+    """Chaque option du filtre ne garde que les lignes du meme pdf_verdict."""
+    assert 'value="positif"' in HTML
+    assert 'value="neutre"' in HTML
+    assert 'value="negatif"' in HTML
+    rang = _entre(HTML, "function renderRank", "function renderRankLive")
+    assert "filtreTendance(d, verd)" in rang
+    cartes = (ROOT / "dashboard" / "ranking.js").read_text(encoding="utf-8")
+    assert "filtreTendance(d, verdict)" in cartes
+    helpers = _entre(HTML, "function tendanceCle", "function renderRank")
+    script = helpers + r"""
+var rows = [
+  { ticker: 'P1', pdf_verdict: 'POSITIF' },
+  { ticker: 'P2', pdf_verdict: 'POSITIF' },
+  { ticker: 'N1', pdf_verdict: 'NEUTRE' },
+  { ticker: 'G1', pdf_verdict: 'NEGATIF' },
+  { ticker: 'G2', pdf_verdict: 'NÉGATIF' },
+  { ticker: 'X', pdf_verdict: null }
+];
+function noms(verd) {
+  return filtreTendance(rows, verd).map(function(x) { return x.ticker; }).sort().join(',');
+}
+function attend(cond, msg) {
+  if (!cond) { console.error(msg); process.exit(1); }
+}
+attend(noms('positif') === 'P1,P2', 'positif ' + noms('positif'));
+attend(noms('neutre') === 'N1', 'neutre ' + noms('neutre'));
+attend(noms('negatif') === 'G1,G2', 'negatif ' + noms('negatif'));
+attend(noms('') === 'G1,G2,N1,P1,P2,X', 'tous ' + noms(''));
+attend(noms('achet') === '', 'ancien achet');
+attend(noms('vend') === '', 'ancien vend');
+['positif', 'neutre', 'negatif'].forEach(function(opt) {
+  var gardes = filtreTendance(rows, opt);
+  attend(gardes.length > 0, 'option vide ' + opt);
+  gardes.forEach(function(x) {
+    attend(tendanceCle(x.pdf_verdict) === tendanceCle(opt), opt + ' vs ' + x.pdf_verdict);
+  });
+});
 """
     resultat = subprocess.run(
         ["node", "-e", script],

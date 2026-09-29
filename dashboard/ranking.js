@@ -29,7 +29,7 @@ function renderRankCards() {
 
   let d = [...(window.scores || scores || [])];
   if (sec)     d = d.filter(x => x.sector === sec);
-  if (verdict) d = d.filter(x => (x.pdf_verdict || '').toLowerCase().includes(verdict.toLowerCase()));
+  if (verdict) d = filtreTendance(d, verdict);
   if (window._favOnly) d = d.filter(x => (window.favorites || favorites || []).includes(x.ticker));
   d.sort((a, b) => srt === 'pe_ref'
     ? (a[srt] || 999) - (b[srt] || 999)
