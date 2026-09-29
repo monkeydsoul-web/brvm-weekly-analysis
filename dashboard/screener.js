@@ -211,7 +211,7 @@ function screenerExportCSV() {
     x.ticker,
     (x.name||'').replace(/,/g,''),
     (x.sector||'').replace(/,/g,''),
-    (typeof note10txt==='function'?note10txt(x):v10fmt(x.composite_adj||0)),
+    (typeof note10num==='function'?note10num(x).toFixed(1):v10fmt(x.composite_adj||0)),
     x.pe_ref ? x.pe_ref.toFixed(2) : '',
     x.pb_ref ? x.pb_ref.toFixed(2) : '',
     x.div_yield ? x.div_yield.toFixed(2) : '',

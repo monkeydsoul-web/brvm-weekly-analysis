@@ -2926,7 +2926,7 @@ function renderSignauxParSociete(){
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note sur 8 critères · ≥7.5 excellent">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
     </tr>`;
@@ -5433,7 +5433,7 @@ function openHelpDrawer(page) {
   document.getElementById('help-page-title').textContent = content.title;
   const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
     <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🚀 Pour commencer</div>
-    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--gold);font-weight:700">≥ 7.5/10</span> = bonne opportunité · <span style="color:var(--green);font-weight:700">✅ Acheter</span> = signal positif · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--gold);font-weight:700">≥ 7,5/10</span> = Intéressant · <span style="color:var(--amber);font-weight:700">≥ 5 et &lt; 7,5</span> = À surveiller · <span style="color:var(--red);font-weight:700">&lt; 5</span> = Prudence · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
     <div style="font-weight:700;color:var(--accent);margin-bottom:4px">📖 Mini-lexique</div>
     <div style="color:var(--t2);line-height:2.1">
       <strong>Note /10</strong> — qualité globale de l'action selon 8 critères financiers<br>
@@ -5441,7 +5441,7 @@ function openHelpDrawer(page) {
       <strong>Dividende</strong> — revenu versé chaque année par la société à ses actionnaires<br>
       <strong>Prix juste estimé</strong> — valeur calculée à partir des bénéfices réels de la société<br>
       <strong>Opportunité</strong> — écart entre le prix actuel et le prix juste (positif = potentiel de hausse)<br>
-      <strong>✅ Acheter / ⏳ Attendre / ⚠️ Éviter</strong> — conseil issu de l'analyse IA
+      <strong>Intéressant / À surveiller / Prudence</strong> — conseil lié à la note sur 10
     </div>
   </div>`;
   document.getElementById('help-drawer-body').innerHTML = _universalHelp + content.sections.map(s => {
