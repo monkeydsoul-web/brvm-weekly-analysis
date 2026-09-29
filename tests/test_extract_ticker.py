@@ -301,6 +301,154 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_perspective_seulement_si_elle_est_dite():
+    assert _extract_rating_info(
+        "La perspective est stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "Les perspectives restent stables."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective demeure stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective attachée à ces notations est stable."
+    )["perspective"] == "Stable"
+    assert _extract_rating_info(
+        "La perspective est positive."
+    )["perspective"] == "Positive"
+    assert _extract_rating_info(
+        "Note de long terme A, perspective en développement."
+    )["perspective"] == "En développement"
+    assert _extract_rating_info(
+        "La perspective est en évolution."
+    )["perspective"] == "En évolution"
+    nu = _extract_rating_info(
+        "Le ratio dette nette/EBITDA est stable. Note de long terme A+."
+    )
+    assert nu["note"] == "A+"
+    assert nu["perspective"] is None
+    legende = _extract_rating_info(
+        "Échelle des perspectives : positive, stable ou négative. Note de long terme A."
+    )
+    assert legende["perspective"] is None
+    assert legende["note"] == "A"
+
+
+def test_date_manquante_lue_dans_le_nom_du_pdf():
+    nom = "20260303_-_notation_financiere_-_safca_ci.pdf"
+    assert _scraper._date_depuis_nom_pdf(nom) == "2026-03-03"
+    assert _scraper._date_annonce(None, nom) == "2026-03-03"
+    assert _scraper._date_annonce("2024-05-01", nom) == "2024-05-01"
+    assert _scraper._date_annonce(None, "fiche_de_notation_-_oragroup_sa_-_2025.pdf") is None
+    assert _scraper._date_depuis_nom_pdf("20260231_-_notation.pdf") is None
+
+
+def test_notation_retiree_nest_pas_un_d():
+    texte = (
+        "GCR retire les notations d'émetteur de long et court terme de la "
+        "Société Générale Côte d'Ivoire. Dakar, le 12 décembre 2023. "
+        "Société Générale Côte D'ivoire. Notation WD. Historique : AA+."
+    )
+    info = _extract_rating_info(texte)
+    assert info["note"] is None
+    assert info.get("score_notation") is None
+    assert info["statut"] == "retirée"
+    fiche = _fiche_notation(texte, texte, "SGBC", "2023-12-13", "", "D")
+    assert fiche["note"] is None
+    assert fiche["score_notation"] is None
+    assert fiche["statut"] == "retirée"
+    assert _extract_rating_info("Rating withdrawn for the issuer.")["statut"] == "retirée"
+
+
+def test_titrisation_nest_pas_la_note_de_la_societe():
+    ept = (
+        "GCR affirme les notations d'émission de long terme de AA de la Tranche A, "
+        "AA- de la Tranche B et A+ de la Tranche C des obligations émises par le "
+        "FCTC EPT 2025-2040. Le maître d'œuvre est la Compagnie Ivoirienne d'Electricité."
+    )
+    assert _scraper._document_hors_emetteur(ept) is True
+    assert _extract_ticker(ept) == "CIEC"
+    zaka = (
+        "GCR assigne la notation d'émission de long terme de AAA aux obligations "
+        "seniors émises par le FCTC ZAKA RMBS NSIA BANQUE CÔTE D'IVOIRE 2025-2044. "
+        "Titrisation."
+    )
+    assert _scraper._document_hors_emetteur(zaka) is True
+    assert _extract_ticker(zaka) == "NSBC"
+    nsia = (
+        "GCR affirme la notation de long terme des obligations séniors émises par "
+        "le FCTC NSIA BANQUE 7% 2020-2025 à AAA."
+    )
+    assert _scraper._document_hors_emetteur(nsia) is True
+    emission = "Notation de l'émission obligataire SONATEL FCFA 100 milliards 6,50% 2020-2027."
+    assert _scraper._document_hors_emetteur(emission) is True
+    emetteur = (
+        "GCR réhausse de AA+ à AAA les notes d'émetteur de long terme et d'emprunt "
+        "obligataire senior non sécurisé de la Société Nationale des Télécommunications."
+    )
+    assert _scraper._document_hors_emetteur(emetteur) is False
+    # Le cartouche GCR est loin dans le PDF : il ne doit pas effacer la note d'émetteur.
+    cartouche = "Responsable de groupe – Titrisation (et fonds)"
+    sitab = (
+        "GCR affirme la note d'émetteur de long terme de la Société Ivoirienne "
+        "de Tabacs (SITAB) à AA-. La perspective est sous surveillance."
+    )
+    assert len(sitab) < 400
+    texte_sitab = sitab + ("." * 500) + cartouche
+    assert _scraper._document_hors_emetteur(texte_sitab) is False
+    assert _extract_rating_info(texte_sitab)["note"] == "AA-"
+    assert _extract_rating_info(texte_sitab)["perspective"] == "Surveillance"
+    retrait = (
+        "GCR retire les notations d'émetteur de long et court terme de la "
+        "Société Générale Côte d'Ivoire. Notation WD."
+    )
+    texte_sgbc = retrait + ("." * 500) + cartouche
+    assert _scraper._document_hors_emetteur(texte_sgbc) is False
+    fiche = _fiche_notation(texte_sgbc, texte_sgbc, "SGBC", "2023-12-13", "", "D")
+    assert fiche["note"] is None
+    assert fiche["score_notation"] is None
+    assert fiche["statut"] == "retirée"
+    assert _scraper._document_hors_emetteur(
+        "Note d'émetteur de long terme AA-.",
+        "",
+        "20260914_-_notation_financiere_-_fctc_ept_2025-2040.pdf",
+    ) is True
+
+
+def test_gcr_de_x_a_y_garde_la_note_nouvelle():
+    # Libellés relevés dans les PDF brvm.org (cran ancien à gauche).
+    cas = (
+        ("GCR réhausse de AA+ à AAA les notes d'émetteur de long terme", "AAA"),
+        ("GCR abaisse de AAA à AA+ les notes d'émetteur de long terme", "AA+"),
+        ("rehausse la note d'émetteur de long terme de A à A+", "A+"),
+        ("rehausse la note d'émetteur de long terme de SUCRIVOIRE de BB à BB+", "BB+"),
+        ("rehaussé la note d'émetteur de long terme de TotalEnergies Marketing Sénégal de A(WU) à AA-(WU)", "AA-"),
+        ("rehaussé la note d'émetteur de long terme de AA- à AA+", "AA+"),
+        ("rehaussé la note d'émetteur de long terme de la Société Ivoirienne de Câbles de A à AA-", "AA-"),
+    )
+    for texte, attendu in cas:
+        info = _extract_rating_info(texte)
+        assert info["note"] == attendu, texte
+        assert info["score_notation"] == _scraper.RATING_GRADES[attendu]
+
+
+def test_guillemets_gcr_autour_des_crans():
+    # PDF anciens : guillemets et espaces autour des deux crans, parfois sans espace avant « à ».
+    assert _extract_rating_info("de ‘A- ’ à ‘AA- ’")["note"] == "AA-"
+    assert _extract_rating_info("de ‘BBB+ ’ à ‘A ’")["note"] == "A"
+    assert _extract_rating_info("de ‘BBB ’à ‘BBB+ ’")["note"] == "BBB+"
+    assert _extract_rating_info(
+        "Emetteur de long terme Régionale A. La perspective est stable."
+    )["note"] == "A"
+
+
+def test_formulation_inverse_garde_la_note_nouvelle():
+    assert _extract_rating_info("La note de long terme est relevée à AA- (contre A)")["note"] == "AA-"
+    assert _extract_rating_info("La note est portée à A+, de A")["note"] == "A+"
+    assert _extract_rating_info("Note de long terme AA+, précédemment AA-")["note"] == "AA+"
+
+
 def test_long_terme_prime_sur_la_note_precedente():
     info = _extract_rating_info("Long terme : A+ (précédente : BBB+)")
     assert info["note"] == "A+"
@@ -324,6 +472,14 @@ def test_categorie_isolee_cede_devant_la_note():
     assert _extract_rating_info("Catégorie D ; notation BBB")["note"] == "BBB"
     assert _extract_rating_info("Classe B ; rating A-")["note"] == "A-"
     assert _extract_rating_info("Catégorie C")["note"] == "C"
+
+
+def test_legende_sans_long_terme_cede_devant_la_note():
+    info = _extract_rating_info(
+        "Echelle : AAA, AA, A, BBB, BB, B. La SGBC obtient la note A+."
+    )
+    assert info["note"] == "A+"
+    assert info["score_notation"] == 8
 
 
 def test_sans_ancre_le_premier_cran_compte():

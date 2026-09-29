@@ -663,7 +663,58 @@ def _extraire_date_validite(text: str) -> Optional[str]:
 def _motif_cran(grade: str) -> str:
     # « + » et « - » ne sont pas des caractères de mot : \b après le signe ne matche jamais.
     # \w (unicode) évite de lire le C de « Côte » comme le cran C.
-    return r"(?<!\w)" + re.escape(grade) + r"(?!\w)"
+    # L'apostrophe évite de lire le D de « D'Ivoire » ou « D'OBLIGATIONS ».
+    return r"(?<![\w'’])" + re.escape(grade) + r"(?![\w'’])"
+
+
+def _expr_grade() -> str:
+    """Un cran, éventuellement suivi de (WU) ou (SF), sans capturer le suffixe."""
+    tokens = sorted(RATING_GRADES, key=len, reverse=True)
+    alt = "|".join(re.escape(t) for t in tokens)
+    return (
+        r"(?<!\w)(" + alt + r")(?!\w)"
+        r"(?:\s*\((?:WU|SF)\))*"
+    )
+
+
+# Guillemets et espaces autour d'un cran : de ‘A- ’ à ‘AA- ’, ou de ‘BBB ’à ‘BBB+ ’.
+_CITE_CRAN = r"[\s‘’'\"«»]*"
+
+
+def _note_mouvement(text: str) -> Optional[str]:
+    """Cran nouveau dans « de X à Y », « à Y (contre X) », « à Y, de X », « précédemment X ».
+
+    Le groupe 1 est l'ancien cran seulement pour « de X à Y ». Partout ailleurs, c'est le nouveau.
+    À défaut, la ligne de tableau « Emetteur/Note de long terme Régionale X ».
+    """
+    if not text:
+        return None
+    grade = _expr_grade()
+    cite = _CITE_CRAN
+    de_a = re.search(
+        r"\bde\s+" + cite + grade + cite + r"[àa]" + cite + grade,
+        text,
+        re.I,
+    )
+    if de_a:
+        return de_a.group(2).upper()
+    for motif in (
+        r"\b[àa]\s+" + cite + grade + r"\s*\(\s*contre\s+" + cite + grade,
+        r"\b[àa]\s+" + cite + grade + r"\s*,\s*de\s+" + cite + grade,
+        cite + grade + cite + r"[\(,]\s*pr[ée]c[ée]demment\s+" + cite + grade,
+        cite + grade + cite + r".{0,20}?pr[ée]c[ée]dente\s*:?\s+" + cite + grade,
+    ):
+        m = re.search(motif, text, re.I)
+        if m:
+            return m.group(1).upper()
+    tableau = re.search(
+        r"(?:[eé]metteur|note)\s+de\s+long\s+terme\s+r[eé]gionale\s+" + cite + grade,
+        text,
+        re.I,
+    )
+    if tableau:
+        return tableau.group(1).upper()
+    return None
 
 
 def _fin_ancre_long_terme(text: str) -> Optional[int]:
@@ -689,10 +740,31 @@ def _suit_mot_note(text: str, debut: int) -> bool:
     """Le cran suit de près « note », « notation » ou « rating »."""
     gauche = text[max(0, debut - 40):debut]
     return re.search(
-        r"(?<!\w)(?:notation|rating|note)(?!\w)[\s:;,\-]*$",
+        r"(?<!\w)(?:notation|rating|note|obtient)(?!\w)[\s:;,\-]*$",
         gauche,
         re.I,
     ) is not None
+
+
+def _crans_de_legende(text: str, crans: List[Tuple[int, str]]) -> set:
+    """Positions d'une échelle (AAA, AA, A, BBB…) : au moins trois crans serrés."""
+    legend = set()
+    run: List[int] = []
+    for i, (debut, grade) in enumerate(crans):
+        if not run:
+            run = [i]
+            continue
+        prev = crans[i - 1][0] + len(crans[i - 1][1])
+        gap = text[prev:debut]
+        if len(gap) <= 8 and re.fullmatch(r"[\s,;/\.…·\-]*", gap or ""):
+            run.append(i)
+            continue
+        if len(run) >= 3:
+            legend.update(crans[j][0] for j in run)
+        run = [i]
+    if len(run) >= 3:
+        legend.update(crans[j][0] for j in run)
+    return legend
 
 
 def _choisir_note(text: str) -> Optional[str]:
@@ -704,6 +776,9 @@ def _choisir_note(text: str) -> Optional[str]:
     """
     if not text:
         return None
+    mouvement = _note_mouvement(text)
+    if mouvement:
+        return mouvement
     par_pos: Dict[int, Tuple[int, str]] = {}
     for grade in RATING_GRADES:
         for m in re.finditer(_motif_cran(grade), text):
@@ -719,15 +794,81 @@ def _choisir_note(text: str) -> Optional[str]:
             if debut >= ancre:
                 return grade
         return None
-    premier_at, premier = crans[0]
+    legend = _crans_de_legende(text, crans)
+    utiles = [(debut, grade) for debut, grade in crans if debut not in legend] or crans
+    if legend:
+        for debut, grade in utiles:
+            if _suit_mot_note(text, debut):
+                return grade
+    premier_at, premier = utiles[0]
     if premier in ("C", "D", "B") and not _suit_mot_note(text, premier_at):
-        for debut, grade in crans:
+        for debut, grade in utiles:
             if _suit_mot_note(text, debut):
                 return grade
     return premier
 
 
 # ── Extraire note depuis texte ───────────────────────────────────────────────
+def _notation_retiree(text: str) -> bool:
+    """La notation est retirée : ce n'est pas le cran D."""
+    if not text:
+        return False
+    if re.search(r"\bWD\b", text):
+        return True
+    if re.search(r"\bwithdrawn\b", text, re.I):
+        return True
+    return re.search(
+        r"(?:\bretire\b|\bretir(?:é|e|ée|és|ees)s?\b|\bretrait\b).{0,80}\bnotations?\b"
+        r"|\bnotations?\b.{0,50}\bretir",
+        text,
+        re.I,
+    ) is not None
+
+
+def _libelle_perspective(mot: str) -> Optional[str]:
+    brut = _fold_accents(mot).lower()
+    if brut.startswith("positiv"):
+        return "Positive"
+    if brut.startswith("negativ"):
+        return "Négative"
+    if brut.startswith("stable"):
+        return "Stable"
+    if "developpement" in brut:
+        return "En développement"
+    if "evolution" in brut:
+        return "En évolution"
+    if "surveillance" in brut:
+        return "Surveillance"
+    return None
+
+
+def _extraire_perspective(text: str) -> Optional[str]:
+    """Perspective seulement si le texte l'attribue, pas si le mot « stable » passe.
+
+    Une liste « positive, stable ou négative » est une légende : elle ne compte pas.
+    """
+    if not text:
+        return None
+    mot = (
+        r"(?<!\w)(?:positives?|n[ée]gatives?|stables?"
+        r"|en\s+d[ée]veloppement|en\s+[eé]volution|sous\s+surveillance)(?!\w)"
+    )
+    for ancre in re.finditer(r"perspectives?|outlooks?", text, re.I):
+        fenetre = text[ancre.end():ancre.end() + 120]
+        point = re.search(r"\.\s", fenetre)
+        if point and point.start() >= 8:
+            fenetre = fenetre[:point.start()]
+        trouves = re.findall(mot, fenetre, re.I)
+        distincts = set()
+        for item in trouves:
+            libelle = _libelle_perspective(item)
+            if libelle:
+                distincts.add(libelle)
+        if len(distincts) == 1:
+            return distincts.pop()
+    return None
+
+
 def _extract_rating_info(text: str) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "note": None, "perspective": None, "agence": None, "date_validite": None,
@@ -749,20 +890,16 @@ def _extract_rating_info(text: str) -> Dict[str, Any]:
             result["agence"] = name
             break
 
-    note = _choisir_note(text)
-    if note:
-        result["note"] = note
-        result["score_notation"] = RATING_GRADES[note]
+    if _notation_retiree(text):
+        result["note"] = None
+        result["statut"] = "retirée"
+    else:
+        note = _choisir_note(text)
+        if note:
+            result["note"] = note
+            result["score_notation"] = RATING_GRADES[note]
 
-    # Perspective
-    if re.search(r'[Ss]table', text):
-        result["perspective"] = "Stable"
-    elif re.search(r'[Pp]ositiv', text):
-        result["perspective"] = "Positive"
-    elif re.search(r'[Nn]égatif|[Nn]egatif|[Nn]egative', text):
-        result["perspective"] = "Négative"
-    elif re.search(r'[Ss]ous surveillance|[Cc]reditwatch', text):
-        result["perspective"] = "Surveillance"
+    result["perspective"] = _extraire_perspective(text)
 
     result["date_validite"] = _extraire_date_validite(text)
     return result
@@ -775,6 +912,66 @@ def _ticker_connu(value: Any) -> Optional[str]:
     if brut in _TICKERS_CONNUS:
         return brut
     return None
+
+
+def _date_depuis_nom_pdf(nom: str) -> Optional[str]:
+    """20260303_-_notation_….pdf -> 2026-03-03. None si le nom n'a pas ce préfixe."""
+    if not nom:
+        return None
+    base = Path(str(nom).split("?")[0]).name
+    m = re.match(r"(20\d{2})(\d{2})(\d{2})", base)
+    if not m:
+        return None
+    annee, mois, jour = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not (1 <= mois <= 12):
+        return None
+    if jour < 1 or jour > calendar.monthrange(annee, mois)[1]:
+        return None
+    return _iso_date(jour, mois, annee)
+
+
+def _date_annonce(date: Any, *noms: str) -> Optional[str]:
+    """Date de l'annonce, sinon le préfixe AAAAMMJJ du nom de PDF."""
+    if date is not None and str(date).strip():
+        return str(date).strip()
+    for nom in noms:
+        trouve = _date_depuis_nom_pdf(nom or "")
+        if trouve:
+            return trouve
+    return None
+
+
+def _document_hors_emetteur(texte: str, titre: str = "", source: str = "") -> bool:
+    """Titrisation, FCTC, RMBS ou emprunt obligataire : pas la note de la société cotée.
+
+    Un communiqué qui note l'émetteur et, en plus, son emprunt obligataire est conservé.
+    Le cartouche GCR « Responsable de groupe – Titrisation » est vers le caractère 900 :
+    on ne regarde que le titre, le nom du PDF et les 400 premiers caractères.
+    """
+    nom = Path(str(source).split("?")[0]).name if source else ""
+    tete = (texte or "")[:400]
+    zones = "\n".join(p for p in (titre or "", nom, source or "", tete) if p)
+    if not zones.strip():
+        return False
+    # « _ » colle les mots dans un nom de fichier : fctc_ept n'a pas de frontière \b.
+    if re.search(
+        r"(?<![A-Za-z])(?:FCTC|RMBS)(?![A-Za-z])|titrisations?",
+        zones,
+        re.I,
+    ):
+        return True
+    if re.search(
+        r"emprunts?\s+obligataires?|[eé]missions?\s+obligataires?|\btranches?\b",
+        zones,
+        re.I,
+    ):
+        if not re.search(
+            r"notes?\s+d['’]?\s*[eé]metteur|[eé]metteur\s+de\s+long\s+terme",
+            zones,
+            re.I,
+        ):
+            return True
+    return False
 
 
 def _choisir_ticker(texte: str, indice: Any = None, titre: Optional[str] = None) -> Optional[str]:
@@ -808,11 +1005,17 @@ def _fiche_notation(
 ) -> Dict[str, Any]:
     """Entrée au format historique de brvm_ratings.json, plus date_validite."""
     info = _extract_rating_info(contexte or corps or "")
-    note = info.get("note") or note_repli
-    score = info.get("score_notation")
-    if note != info.get("note"):
-        score = RATING_GRADES.get(note) if isinstance(note, str) else None
-    return {
+    retiree = info.get("statut") == "retirée"
+    if retiree:
+        # /api/ratings ne renvoie que les lignes qui ont une note : le D n'est pas affiché.
+        note = None
+        score = None
+    else:
+        note = info.get("note") or note_repli
+        score = info.get("score_notation")
+        if note != info.get("note"):
+            score = RATING_GRADES.get(note) if isinstance(note, str) else None
+    fiche = {
         "ticker": ticker,
         "agence": info.get("agence"),
         "note": note,
@@ -823,6 +1026,9 @@ def _fiche_notation(
         "source_url": source_url or "",
         "resume": (corps or "")[:500],
     }
+    if retiree:
+        fiche["statut"] = "retirée"
+    return fiche
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # A) NOTATIONS
@@ -850,12 +1056,16 @@ def scrape_ratings() -> List[Dict]:
                 text = item["contenu"]
             titre = item.get("titre") or ""
             contexte = " ".join(p for p in (titre, text) if p)
+            if _document_hors_emetteur(text, titre, pdf or url):
+                continue
             ticker = _choisir_ticker(text, item.get("ticker"), titre=titre)
             # Émetteur non coté ou illisible : pas d'entrée ticker null dans le fichier.
             if not ticker:
                 continue
             ratings[key] = _fiche_notation(
-                text, contexte, ticker, item.get("date"), url, item.get("notation"),
+                text, contexte, ticker,
+                _date_annonce(item.get("date"), pdf, url),
+                url, item.get("notation"),
             )
 
     # 2. Scraper nouvelles notations depuis brvm.org
@@ -887,10 +1097,14 @@ def scrape_ratings() -> List[Dict]:
                     local.write_bytes(r.content)
                     logging.info(f"  ↓ {fname}")
             text = _read_pdf(str(local))
+            if _document_hors_emetteur(text, "", pdf_url):
+                continue
             ticker = _choisir_ticker(text, None)
             if not ticker:
                 continue
-            ratings[pdf_url] = _fiche_notation(text, text, ticker, None, pdf_url, None)
+            ratings[pdf_url] = _fiche_notation(
+                text, text, ticker, _date_annonce(None, fname, pdf_url), pdf_url, None,
+            )
         # Vérifier pagination
         next_links = [a for a in soup.find_all("a", href=True)
                       if f"page={page+1}" in a.get("href","")]
