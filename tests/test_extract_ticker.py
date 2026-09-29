@@ -435,6 +435,14 @@ def test_categorie_isolee_cede_devant_la_note():
     assert _extract_rating_info("Catégorie C")["note"] == "C"
 
 
+def test_legende_sans_long_terme_cede_devant_la_note():
+    info = _extract_rating_info(
+        "Echelle : AAA, AA, A, BBB, BB, B. La SGBC obtient la note A+."
+    )
+    assert info["note"] == "A+"
+    assert info["score_notation"] == 8
+
+
 def test_sans_ancre_le_premier_cran_compte():
     info = _extract_rating_info("La société est notée BBB+ (échelle AAA, AA, A).")
     assert info["note"] == "BBB+"

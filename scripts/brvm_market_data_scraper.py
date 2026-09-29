@@ -723,10 +723,31 @@ def _suit_mot_note(text: str, debut: int) -> bool:
     """Le cran suit de près « note », « notation » ou « rating »."""
     gauche = text[max(0, debut - 40):debut]
     return re.search(
-        r"(?<!\w)(?:notation|rating|note)(?!\w)[\s:;,\-]*$",
+        r"(?<!\w)(?:notation|rating|note|obtient)(?!\w)[\s:;,\-]*$",
         gauche,
         re.I,
     ) is not None
+
+
+def _crans_de_legende(text: str, crans: List[Tuple[int, str]]) -> set:
+    """Positions d'une échelle (AAA, AA, A, BBB…) : au moins trois crans serrés."""
+    legend = set()
+    run: List[int] = []
+    for i, (debut, grade) in enumerate(crans):
+        if not run:
+            run = [i]
+            continue
+        prev = crans[i - 1][0] + len(crans[i - 1][1])
+        gap = text[prev:debut]
+        if len(gap) <= 8 and re.fullmatch(r"[\s,;/\.…·\-]*", gap or ""):
+            run.append(i)
+            continue
+        if len(run) >= 3:
+            legend.update(crans[j][0] for j in run)
+        run = [i]
+    if len(run) >= 3:
+        legend.update(crans[j][0] for j in run)
+    return legend
 
 
 def _choisir_note(text: str) -> Optional[str]:
@@ -756,9 +777,15 @@ def _choisir_note(text: str) -> Optional[str]:
             if debut >= ancre:
                 return grade
         return None
-    premier_at, premier = crans[0]
+    legend = _crans_de_legende(text, crans)
+    utiles = [(debut, grade) for debut, grade in crans if debut not in legend] or crans
+    if legend:
+        for debut, grade in utiles:
+            if _suit_mot_note(text, debut):
+                return grade
+    premier_at, premier = utiles[0]
     if premier in ("C", "D", "B") and not _suit_mot_note(text, premier_at):
-        for debut, grade in crans:
+        for debut, grade in utiles:
             if _suit_mot_note(text, debut):
                 return grade
     return premier
