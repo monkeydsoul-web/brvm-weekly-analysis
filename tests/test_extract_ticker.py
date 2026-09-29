@@ -127,6 +127,31 @@ def test_date_validite_numerique():
     assert info["date_validite"] == "2025-12-31"
 
 
+def test_validite_du_au_retient_la_fin():
+    info = _extract_rating_info(
+        "Valable du 1er janvier 2025 au 31 décembre 2025. Note A."
+    )
+    assert info["date_validite"] == "2025-12-31"
+    assert info["note"] == "A"
+
+
+def test_validite_du_au_avec_points():
+    info = _extract_rating_info("Valable du 01.01.2025 au 31.12.2025.")
+    assert info["date_validite"] == "2025-12-31"
+
+
+def test_validite_jj_mm_aaaa():
+    info = _extract_rating_info("Date de validité : 31.12.2025.")
+    assert info["date_validite"] == "2025-12-31"
+
+
+def test_validite_mois_annee_dernier_jour():
+    info = _extract_rating_info("Date de validité : Juin 2026.")
+    assert info["date_validite"] == "2026-06-30"
+    bissextile = _extract_rating_info("Date de validité : Février 2024.")
+    assert bissextile["date_validite"] == "2024-02-29"
+
+
 def test_compagnie_ivoirienne_electricite():
     assert _extract_ticker("Compagnie Ivoirienne d'Electricite — notation") == "CIEC"
     assert _extract_ticker("Compagnie Ivoirienne d'Électricité — notation") == "CIEC"

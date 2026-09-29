@@ -12,7 +12,7 @@ Sources :
   - https://www.brvm.org/fr/emetteurs/{slug} (pages emetteurs)
   - live_cache.json + market_cache.json (données locales)
 """
-import os, re, sys, json, time, logging, datetime, warnings, unicodedata
+import os, re, sys, json, time, logging, datetime, warnings, unicodedata, calendar
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
 
@@ -593,6 +593,17 @@ def _iso_date(jour: int, mois: int, annee: int) -> Optional[str]:
     return "%04d-%02d-%02d" % (annee, mois, jour)
 
 
+# Une date isolée. Le point est permis (jj.mm.aaaa) ; la phrase s'arrête avant.
+_FRAGMENT_DATE = (
+    r"(?:"
+    r"\d{4}-\d{2}-\d{2}"
+    r"|\d{1,2}[./-]\d{1,2}[./-]\d{4}"
+    r"|\d{1,2}(?:er)?\s+[A-Za-z]{3,12}\.?\s+\d{4}"
+    r"|[A-Za-z]{3,12}\.?\s+\d{4}"
+    r")"
+)
+
+
 def _parse_fragment_date(fragment: str) -> Optional[str]:
     if not fragment:
         return None
@@ -603,24 +614,35 @@ def _parse_fragment_date(fragment: str) -> Optional[str]:
     m = re.search(r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})", f)
     if m:
         return _iso_date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-    m = re.search(r"(\d{1,2})\s+([A-Za-z]+)\.?\s+(\d{4})", f)
+    m = re.search(r"(\d{1,2})(?:er)?\s+([A-Za-z]+)\.?\s+(\d{4})", f)
     if m:
         mois = _MOIS_FR.get(m.group(2).lower().rstrip("."))
         if mois:
             return _iso_date(int(m.group(1)), mois, int(m.group(3)))
+    m = re.search(r"(?<![A-Za-z])([A-Za-z]+)\.?\s+(\d{4})", f)
+    if m:
+        mois = _MOIS_FR.get(m.group(1).lower().rstrip("."))
+        if mois:
+            annee = int(m.group(2))
+            if 1990 <= annee <= 2100:
+                dernier = calendar.monthrange(annee, mois)[1]
+                return _iso_date(dernier, mois, annee)
     return None
 
 
 def _extraire_date_validite(text: str) -> Optional[str]:
-    """Date de validité du cran, si le communiqué la donne."""
+    """Date de validité du cran, si le communiqué la donne.
+
+    « du X au Y » retient Y. Un mois et une année retiennent le dernier jour.
+    """
     if not text:
         return None
     plat = _fold_accents(text)
     motifs = (
-        r"(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*([^\n\.;]{6,48})",
-        r"valable\s+jusqu[' ]?au\s+([^\n\.;]{6,48})",
-        r"valable\s+du\s+[^\n\.;]{6,48}?\s+au\s+([^\n\.;]{6,48})",
-        r"(?<![A-Za-z])echeance\s*:?\s*([^\n\.;]{6,48})",
+        r"(?<![A-Za-z])(?:date\s+de\s+)?validite\s*:?\s*(" + _FRAGMENT_DATE + r")",
+        r"valable\s+jusqu[' ]?au\s+(" + _FRAGMENT_DATE + r")",
+        r"valable\s+du\s+.+?\s+au\s+(" + _FRAGMENT_DATE + r")",
+        r"(?<![A-Za-z])echeance\s*:?\s*(" + _FRAGMENT_DATE + r")",
     )
     for motif in motifs:
         m = re.search(motif, plat, re.I)
