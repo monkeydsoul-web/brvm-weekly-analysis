@@ -108,7 +108,10 @@ def test_load_ranking_relit_un_fichier_reecrit(tmp_path, monkeypatch):
                 "conseil_libelle": "LIBELLE-SENTINELLE",
             }],
         }
-        chemin.write_text(json.dumps(payload), encoding="utf-8")
+        # Comme _save_json_atomic : un temporaire puis os.replace change l'inode.
+        tmp = chemin.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(payload), encoding="utf-8")
+        os.replace(str(tmp), str(chemin))
 
     ecrire(10.0, "2026-09-29T10:00:00+00:00")
     assert live_ranker.load_ranking()["ranking"][0]["composite_adj"] == 10.0
@@ -119,28 +122,81 @@ def test_load_ranking_relit_un_fichier_reecrit(tmp_path, monkeypatch):
     assert relu["ranking"][0]["updated_at"] == "2026-09-29T10:05:00+00:00"
 
 
-def test_load_ranking_voit_updated_at_si_mtime_fige(tmp_path, monkeypatch):
+def _classement_comme_en_prod(composite, horodatage):
+    """Cles triees, updated_at en dernier, plus de 8 Ko de lignes.
+
+    En prod le fichier est ecrit avec sort_keys : updated_at est vers
+    l'octet 149 000, pas dans les 8 premiers Ko.
+    """
+    lignes = []
+    for i in range(400):
+        lignes.append({
+            "composite_adj": composite,
+            "conseil": "SENTINELLE",
+            "note10": 1.2,
+            "ticker": "T%03d" % i,
+        })
+    payload = {
+        "changed_tickers": [],
+        "market_open": False,
+        "ranking": lignes,
+        "total": len(lignes),
+        "trigger": "fixture",
+        "updated_at": horodatage,
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def test_load_ranking_ne_reparse_pas_si_fichier_inchange(tmp_path, monkeypatch):
     chemin = tmp_path / "live_ranking.json"
     monkeypatch.setattr(live_ranker, "RANKING_PATH", str(chemin))
+    texte = _classement_comme_en_prod(54.0, HORODATAGE)
+    brut = texte.encode("utf-8")
+    assert len(brut) > 8192
+    assert list(json.loads(texte).keys())[-1] == "updated_at"
+    assert brut.rfind(b'"updated_at"') > 8192
+    chemin.write_text(texte, encoding="utf-8")
 
-    def ecrire(composite, horodatage):
-        payload = {
-            "updated_at": horodatage,
-            "ranking": [{"ticker": "SNTS", "composite_adj": composite}],
-        }
-        texte = json.dumps(payload, separators=(",", ":"))
-        chemin.write_text(texte, encoding="utf-8")
-        return texte
+    appels = []
+    reel = live_ranker._lire_json
 
-    ancien = ecrire(10.0, "2026-09-29T10:00:00+00:00")
+    def compte(path):
+        appels.append(1)
+        return reel(path)
+
+    monkeypatch.setattr(live_ranker, "_lire_json", compte)
+    premier = live_ranker.load_ranking()
+    assert premier["ranking"][0]["composite_adj"] == 54.0
+    assert premier["updated_at"] == HORODATAGE
+    assert len(appels) == 1
+    second = live_ranker.load_ranking()
+    assert second["ranking"][0]["composite_adj"] == 54.0
+    assert len(appels) == 1
+
+
+def test_load_ranking_voit_remplacement_atomique_meme_mtime(tmp_path, monkeypatch):
+    chemin = tmp_path / "live_ranking.json"
+    monkeypatch.setattr(live_ranker, "RANKING_PATH", str(chemin))
+    ancien = _classement_comme_en_prod(10.0, "2026-09-29T10:00:00+00:00")
+    nouveau = _classement_comme_en_prod(62.1, "2026-09-29T10:05:00+00:00")
+    assert len(ancien) == len(nouveau)
+    assert ancien.encode("utf-8").rfind(b'"updated_at"') > 8192
+    chemin.write_text(ancien, encoding="utf-8")
     assert live_ranker.load_ranking()["ranking"][0]["composite_adj"] == 10.0
     stat = chemin.stat()
-    nouveau = ecrire(62.1, "2026-09-29T10:05:00+00:00")
-    assert len(ancien) == len(nouveau)
+
+    tmp = tmp_path / "live_ranking.json.tmp"
+    tmp.write_text(nouveau, encoding="utf-8")
+    os.replace(str(tmp), str(chemin))
     os.utime(chemin, ns=(stat.st_atime_ns, stat.st_mtime_ns))
-    assert chemin.stat().st_mtime_ns == stat.st_mtime_ns
-    assert chemin.stat().st_size == stat.st_size
-    assert live_ranker.load_ranking()["ranking"][0]["composite_adj"] == 62.1
+    apres = chemin.stat()
+    assert apres.st_mtime_ns == stat.st_mtime_ns
+    assert apres.st_size == stat.st_size
+    assert apres.st_ino != stat.st_ino
+
+    relu = live_ranker.load_ranking()
+    assert relu["ranking"][0]["composite_adj"] == 62.1
+    assert relu["updated_at"] == "2026-09-29T10:05:00+00:00"
 
 
 def test_load_ranking_oublie_le_cache_si_fichier_supprime(tmp_path, monkeypatch):

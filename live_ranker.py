@@ -5,7 +5,6 @@ Cache : data/live_ranking.json (mis à jour à chaque déclenchement)
 """
 
 import os
-import re
 import json
 import logging
 import time
@@ -34,7 +33,7 @@ HISTORY_PATH  = os.path.join(DATA_DIR, "ranking_history.json")
 _lock = threading.Lock()
 _cache_lock = threading.Lock()
 _last_ranking = None          # Cache en mémoire
-_last_stamp = None            # (mtime_ns, taille) du fichier mis en cache
+_last_stamp = None            # (inode, mtime_ns, taille) du fichier mis en cache
 _last_updated_at = None       # updated_at du fichier mis en cache
 _last_prices  = {}            # Derniers prix connus (pour détecter les changements)
 
@@ -724,12 +723,17 @@ def _save_history(payload):
 
 
 def _stamp_fichier(path):
-    """(mtime_ns, taille) ou None si le fichier manque."""
+    """(inode, mtime_ns, taille) ou None si le fichier manque.
+
+    _save_json_atomic ecrit un temporaire puis os.replace : chaque
+    reecriture change l'inode, meme si le mtime et la taille restent
+    identiques. Pas de lecture du JSON pour decider du cache.
+    """
     try:
         st = os.stat(path)
     except OSError:
         return None
-    return (st.st_mtime_ns, st.st_size)
+    return (st.st_ino, st.st_mtime_ns, st.st_size)
 
 
 def _lire_json(path):
@@ -760,16 +764,6 @@ def _copier_updated_at(data):
     return data
 
 
-def _updated_at_entete(path):
-    """updated_at en tete du fichier, chaine vide si la cle est absente."""
-    with open(path, encoding="utf-8") as f:
-        tete = f.read(8192)
-    trouve = re.search(r'"updated_at"\s*:\s*"([^"]*)"', tete)
-    if not trouve:
-        return ""
-    return trouve.group(1)
-
-
 def _memo_cache(data, stamp):
     """A appeler en tenant _cache_lock."""
     global _last_ranking, _last_stamp, _last_updated_at
@@ -789,7 +783,7 @@ def _oublier_cache():
 def load_ranking():
     """Dernier classement ecrit par compute_live_ranking.
 
-    Recharge le fichier des que son mtime ou son updated_at change.
+    Recharge le fichier si l'inode, le mtime ou la taille change.
     Fichier absent ou illisible : None, jamais l'ancien cache.
     """
     stamp = _stamp_fichier(RANKING_PATH)
@@ -801,17 +795,9 @@ def load_ranking():
     with _cache_lock:
         cached = _last_ranking
         cached_stamp = _last_stamp
-        cached_at = _last_updated_at
 
     if cached is not None and cached_stamp == stamp:
-        try:
-            apercu = _updated_at_entete(RANKING_PATH)
-        except OSError:
-            with _cache_lock:
-                _oublier_cache()
-            return None
-        if apercu == (cached_at or ""):
-            return cached
+        return cached
 
     try:
         data = _lire_json(RANKING_PATH)
