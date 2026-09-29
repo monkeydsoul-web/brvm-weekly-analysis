@@ -1,0 +1,9 @@
+{
+  "ZZZZ": {
+    "statut": "suspendu",
+    "depuis": "2026-09-01",
+    "fin": null,
+    "source": "fixture active",
+    "note": "entree de test, encore en vigueur"
+  }
+}

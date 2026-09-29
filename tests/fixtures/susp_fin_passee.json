@@ -1,0 +1,9 @@
+{
+  "ZZZZ": {
+    "statut": "suspendu",
+    "depuis": "2026-01-01",
+    "fin": "2026-02-01",
+    "source": "fixture fin passee",
+    "note": "la fin est avant le jour du calcul : entree ignoree"
+  }
+}

@@ -382,7 +382,23 @@ def _compute_scores(row):
 
 
 def _statut_ligne(row):
-    """cote si un prix est la, non_note sinon. Un statut explicite prime."""
+    """La liste manuelle prime. Sinon un statut explicite, sinon le prix.
+
+    Une suspension datee et encore active gagne sur le prix et sur un
+    statut deja pose sur la ligne. Liste illisible : on n'en tient pas
+    compte, le classement continue.
+    """
+    if not isinstance(row, dict):
+        return STATUT_NON_NOTE
+    manuel = None
+    try:
+        from statuts_cotation import statut_de
+        manuel = statut_de(row.get("ticker"), row.get("_moment"))
+    except Exception:
+        logger.warning("Liste des statuts de cotation indisponible, ignoree")
+        manuel = None
+    if manuel:
+        return manuel
     if row.get("statut") not in (None, ""):
         explicite = normaliser_statut(row.get("statut"))
         if explicite:
@@ -391,6 +407,34 @@ def _statut_ligne(row):
     if row.get("price"):
         return STATUT_COTE
     return STATUT_NON_NOTE
+
+
+def _annoter_suspensions(results, historique, moment):
+    """Pose statut_depuis, statut_source, alerte_cotation. Liste active :
+    statut suspendu, conseil vide. Ne touche pas a la note."""
+    from statuts_cotation import appliquer
+    hist = historique if isinstance(historique, dict) else {}
+    for ligne in results:
+        if not isinstance(ligne, dict):
+            continue
+        ticker = ligne.get("ticker")
+        try:
+            alerte = appliquer(ligne, hist.get(ticker), moment)
+        except Exception:
+            logger.warning("statuts cotation: annotation ignoree pour %s", ticker)
+            ligne.setdefault("statut_depuis", None)
+            ligne.setdefault("statut_source", None)
+            ligne.setdefault("alerte_cotation", None)
+            continue
+        if not alerte:
+            continue
+        logger.warning(
+            "alerte cotation %s type=%s depuis=%s seances=%s",
+            ticker,
+            alerte.get("type"),
+            alerte.get("depuis"),
+            alerte.get("seances"),
+        )
 
 
 def _poser_verdict(scores, composite, precedent, row):
@@ -555,19 +599,34 @@ def chemins_faits():
 
     boc_data.json et external_dividends.json : job 19h00.
     analyses_summary.json : nouveau rapport annuel analysé.
+    statuts_cotation.json : suspension ajoutée ou levée, appliquée en séance.
     """
+    from statuts_cotation import CHEMIN_LISTE
     return (
         os.path.join(DATA_DIR, "boc_data.json"),
         os.path.join(DATA_DIR, "analyses_summary.json"),
         os.path.join(DATA_DIR, "external_dividends.json"),
+        CHEMIN_LISTE,
     )
 
 
-def empreinte_faits(chemins=None):
-    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible."""
+def empreinte_faits(chemins=None, moment=None):
+    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible.
+
+    Le suffixe ``suspensions:`` dépend des entrées actives à ``moment``
+    (défaut : aujourd'hui UTC), pas seulement des octets du fichier.
+    Le lendemain d'une fin, la note est donc recalculée en séance.
+    """
     if chemins is None:
         chemins = chemins_faits()
-    return "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+    base = "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+    try:
+        from statuts_cotation import empreinte_actives
+        actif = empreinte_actives(moment)
+    except Exception:
+        logger.warning("Empreinte des suspensions indisponible")
+        actif = "illisible"
+    return base + "|suspensions:" + actif
 
 
 def _lire_fichier_faits(path):
@@ -818,7 +877,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                     _illisibles.append(nom)
 
             try:
-                _empreinte = empreinte_faits()
+                _empreinte = empreinte_faits(moment=moment)
             except EmpreinteIllisible as exc:
                 logger.warning("Empreinte des faits illisible: %s", exc)
                 _faits_lisibles = False
@@ -899,6 +958,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                                 )
                             else:
                                 row_note = dict(row)
+                            row_note["ticker"] = ticker
                             row_note["_moment"] = moment
                             row_note["_inclure_cloture_du_jour"] = _cloture_du_jour_incluse(moment)
                             row_note["historique_clotures"] = points
@@ -965,6 +1025,9 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "debt_level":      row.get("debt_level"),
                         "debt_level":    row.get("debt_level"),
                         **scores,
+                        "statut_depuis": None,
+                        "statut_source": None,
+                        "alerte_cotation": None,
                     }
                     results.append(result)
 
@@ -983,8 +1046,17 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                             "error": str(e),
                         })
 
-            # Notes chiffrées d'abord. composite_adj None (non noté) en dernier.
-            results.sort(key=cle_tri_note, reverse=True)
+            # La liste manuelle et les alertes, avant le tri : un suspendu
+            # ne peut pas rester devant les titres cotes a cause de sa note.
+            _annoter_suspensions(results, _ph, moment)
+
+            def _cle_avec_suspension(ligne):
+                cote = 1 if isinstance(ligne, dict) and ligne.get("statut") == STATUT_COTE else 0
+                return (cote,) + cle_tri_note(ligne)
+
+            # Notes chiffrées d'abord, parmi les titres cotes. Les suspendus
+            # (note conservee, classe fausse) passent apres tous les cotes.
+            results.sort(key=_cle_avec_suspension, reverse=True)
 
             # Calculer les mouvements de rang
             old_ranks = {}
@@ -996,6 +1068,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                 r["rank"]      = i + 1
                 old_rank       = old_ranks.get(r["ticker"], i + 1)
                 r["rank_delta"] = old_rank - (i + 1)  # positif = monté
+                r["classe"] = r.get("statut") == STATUT_COTE
 
             # ── Garde-fou dividendes aberrants ────────────────────────────
             _YIELD_HARD_CAP = 15.0   # % — au-dessus = forcé à 0
