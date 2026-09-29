@@ -9,6 +9,7 @@ Hors CI (Playwright n'est pas installe dans le workflow pytest) :
 
 En CI (variable CI=true), ce module est ignore.
 """
+import json
 import os
 import threading
 
@@ -26,14 +27,86 @@ MESSAGE = "Cette partie n'a pas pu se charger. Rechargez la page."
 
 
 @pytest.fixture(autouse=True)
-def interdire_reseau_et_cle():
-    """Le serveur local et Chromium ont besoin des sockets. Le filet reseau du conftest est leve ici."""
+def interdire_reseau_et_cle(monkeypatch):
+    """Chromium et le serveur local parlent a 127.0.0.1. Tout autre hote est refuse."""
+    import socket
+
+    reel_connect = socket.socket.connect
+    reel_connect_ex = socket.socket.connect_ex
+    reel_create = socket.create_connection
+    reel_dns = socket.getaddrinfo
+    locaux = ("127.0.0.1", "::1", "localhost")
+
+    def _hote(adresse):
+        if isinstance(adresse, tuple) and adresse:
+            return adresse[0]
+        return adresse
+
+    def connect(self, adresse):
+        if _hote(adresse) not in locaux:
+            raise RuntimeError("appel reseau interdit dans les tests")
+        return reel_connect(self, adresse)
+
+    def connect_ex(self, adresse):
+        if _hote(adresse) not in locaux:
+            raise RuntimeError("appel reseau interdit dans les tests")
+        return reel_connect_ex(self, adresse)
+
+    def create_connection(adresse, *args, **kwargs):
+        if _hote(adresse) not in locaux:
+            raise RuntimeError("appel reseau interdit dans les tests")
+        return reel_create(adresse, *args, **kwargs)
+
+    def getaddrinfo(hote, *args, **kwargs):
+        if hote not in locaux and hote not in (None, ""):
+            raise RuntimeError("appel reseau interdit dans les tests")
+        return reel_dns(hote, *args, **kwargs)
+
+    monkeypatch.setattr(socket.socket, "connect", connect)
+    monkeypatch.setattr(socket.socket, "connect_ex", connect_ex)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     yield
+
+
+def _chemin_classement():
+    dossier = os.environ.get("BRVM_DATA_DIR")
+    if not dossier:
+        return None
+    return os.path.join(dossier, "live_ranking.json")
+
+
+def _ecrire_classement_minimal():
+    """Sans ce fichier, /api/scores renvoie 503 et le JS leve « scores is not iterable »."""
+    chemin = _chemin_classement()
+    if not chemin or os.path.exists(chemin):
+        return False
+    payload = {
+        "updated_at": "2026-09-29T10:00:00+00:00",
+        "market_open": False,
+        "total": 1,
+        "ranking": [{
+            "ticker": "SNTS",
+            "name": "Sonatel",
+            "sector": "Telecoms",
+            "price": 43000,
+            "composite_adj": 54,
+            "change_pct": 0.1,
+            "div_yield": 1.0,
+            "pe_ref": 10,
+            "pdf_verdict": "NEUTRE",
+        }],
+    }
+    with open(chemin, "w", encoding="utf-8") as f:
+        json.dump(payload, f)
+    return True
 
 
 @pytest.fixture(scope="module")
 def base_url():
     os.environ["BRVM_DISABLE_SCHEDULER"] = "1"
+    cree = _ecrire_classement_minimal()
     import app as application
     from werkzeug.serving import make_server
 
@@ -43,6 +116,10 @@ def base_url():
     url = "http://127.0.0.1:%d" % serveur.server_address[1]
     yield url
     serveur.shutdown()
+    if cree:
+        chemin = _chemin_classement()
+        if chemin and os.path.exists(chemin):
+            os.remove(chemin)
 
 
 class _Session(object):
