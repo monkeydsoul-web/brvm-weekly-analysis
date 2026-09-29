@@ -769,9 +769,32 @@ def serve_live_score_js():
 def serve_ranking_js():
     return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
 
+def _histoire_sicc():
+    """Fiche d'affichage SICOR. Écrase un texte qui décrivait Sicable."""
+    chemin = os.path.join(os.path.dirname(__file__), "stories", "sicc.json")
+    with open(chemin, encoding="utf-8") as f:
+        return json.load(f)
+
+
 @app.route("/data/companies_stories.json")
 def serve_companies_stories():
-    return send_from_directory(DATA_DIR, "companies_stories.json", mimetype="application/json")
+    """Sert les fiches, avec la fiche SICC corrigée (coco, pas les câbles)."""
+    payload = {"stories": {}}
+    chemin = os.path.join(DATA_DIR, "companies_stories.json")
+    if os.path.isfile(chemin):
+        try:
+            with open(chemin, encoding="utf-8") as f:
+                lu = json.load(f)
+            if isinstance(lu, dict):
+                payload = lu
+        except (OSError, json.JSONDecodeError):
+            payload = {"stories": {}}
+    stories = payload.get("stories")
+    if not isinstance(stories, dict):
+        stories = {}
+        payload["stories"] = stories
+    stories["SICC"] = _histoire_sicc()
+    return jsonify(payload)
 
 @app.route("/stock_chart.js")
 def serve_stock_chart_js():

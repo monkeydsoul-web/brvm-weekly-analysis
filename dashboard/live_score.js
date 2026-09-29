@@ -46,8 +46,9 @@ function _renderLiveScore(ticker, d){
   const el=document.getElementById('live-score-container');
   if(!el)return;
   const sc=d.composite_adj||0;
-  const col=sc>=57?'var(--green)':sc>=40?'var(--amber)':sc>=23?'var(--orange,#f97316)':'var(--red)';
-  const tier=sc>=57?'Fort':sc>=40?'Modéré':sc>=23?'Faible':'Prudence';
+  const n10=(typeof note10num==='function')?note10num(d):(Math.round(sc/8*10)/10);
+  const col=n10>=7.1?'var(--green)':n10>=5?'var(--amber)':n10>=2.9?'var(--orange,#f97316)':'var(--red)';
+  const tier=n10>=7.1?'Fort':n10>=5?'Modéré':n10>=2.9?'Faible':'Très faible';
   const chg=d.live_change_pct||0;
   const chgCol=chg>=0?'var(--green)':'var(--red)';
   const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
