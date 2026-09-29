@@ -31,10 +31,10 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     assert alph["score"] == 55.0
     assert alph["epv_target"] == 9850
     assert alph["graham_target"] == 13416
-    # ROE 15 / médiane banques 14 : la jambe P/B passe de 12 080 à 12 943.
-    assert alph["pb_target"] == 12943
-    assert alph["avg_target"] == 12070
-    assert alph["upside_pct"] == 20.7
+    # ROE du jour = 1 000 / 8 000 = 12,5 %, égal au milieu de ce petit jeu.
+    assert alph["pb_target"] == 12080
+    assert alph["avg_target"] == 11782
+    assert alph["upside_pct"] == 17.8
     assert alph["n_models"] == 3
     assert alph["target_unreliable"] is False
     assert alph["verdict"] == "Décote modérée"
@@ -46,13 +46,13 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     brav = par_ticker["BRAV"]
     assert brav["epv_target"] == 14000
     assert brav["graham_target"] == 13416
-    # ROE 20 / ROE médian du marché 12 : facteur 20/12, P/B 26 667.
-    assert brav["pb_target"] == 26667
-    assert brav["avg_target"] == 18028
-    assert brav["upside_pct"] == 260.6
+    # +189 % mais la cible (14 472) vaut moins de 3 × 5 000 : Forte décote.
+    assert brav["pb_target"] == 16000
+    assert brav["avg_target"] == 14472
+    assert brav["upside_pct"] == 189.4
     assert brav["n_models"] == 3
-    assert brav["target_unreliable"] is True
-    assert brav["verdict"] == "incertain"
+    assert brav["target_unreliable"] is False
+    assert brav["verdict"] == "Forte décote"
     assert brav["pe_secteur"] == 14.0
     assert brav["pb_secteur"] == 2.0
 
@@ -60,13 +60,12 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     cher = par_ticker["CHER"]
     assert cher["epv_target"] == 7000
     assert cher["graham_target"] == 6708
-    # 6 347 est sous le tiers de 20 000 : « Cible à vérifier », même si
-    # l'écart (−68,3 %) ne dépasse pas 80 %.
-    assert cher["pb_target"] == 5333
-    assert cher["avg_target"] == 6347
-    assert cher["upside_pct"] == -68.3
-    assert cher["target_unreliable"] is True
-    assert cher["verdict"] == "incertain"
+    # 7 236 est au-dessus du tiers de 20 000 : le libellé suit l'écart.
+    assert cher["pb_target"] == 8000
+    assert cher["avg_target"] == 7236
+    assert cher["upside_pct"] == -63.8
+    assert cher["target_unreliable"] is False
+    assert cher["verdict"] == "Au-dessus du prix cible"
     assert cher["prix_cible"] == cher["avg_target"]
     assert cher["ecart_pct"] == cher["upside_pct"]
     assert cher["libelle_valeur"] == cher["verdict"]
@@ -74,7 +73,7 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     excp = par_ticker["EXCP"]
     assert excp["epv_target"] == 5600
     assert excp["graham_target"] == 5196
-    assert excp["pb_target"] == 6000
+    assert excp["pb_target"] == 6400
     assert excp["avg_target"] is None
     assert excp["upside_pct"] is None
     assert excp["n_models"] == 0
@@ -99,12 +98,12 @@ def test_cibles_alias_eps_est_et_book_value(monkeypatch, tmp_path):
     row = get_price_targets()[0]
     assert row["epv_target"] == 1400
     assert row["graham_target"] == 1061
-    # Pas de secteur : P/B 2 et ROE médian 12. ROE 10 → facteur 10/12.
-    assert row["pb_target"] == 833
-    assert row["avg_target"] == 1098
-    assert row["upside_pct"] == 9.8
-    assert row["verdict"] == "Proche du prix cible"
-    assert row["libelle_valeur"] == "Proche du prix cible"
+    # Une seule société : son ROE du jour est aussi le milieu, facteur 1.
+    assert row["pb_target"] == 1000
+    assert row["avg_target"] == 1154
+    assert row["upside_pct"] == 15.4
+    assert row["verdict"] == "Décote modérée"
+    assert row["libelle_valeur"] == "Décote modérée"
 
 
 def test_cibles_accepte_une_liste_brute(monkeypatch, tmp_path):

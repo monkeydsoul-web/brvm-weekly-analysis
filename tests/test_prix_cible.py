@@ -22,6 +22,9 @@ from prix_cible import (
     calculer_reperes,
     estimer_prix_cible,
     formater_multiple,
+    medianes_roe_du_jour,
+    roe_du_jour,
+    roe_median_pour,
 )
 from scraper import STOCK_FUNDAMENTALS
 
@@ -62,7 +65,7 @@ def test_libelle_colle_a_lecart_affiche():
         ({**base, "price": 10000}, LIBELLE_MODERE),
         ({**base, "price": 12000}, LIBELLE_PROCHE),
         ({**base, "price": 20000}, LIBELLE_CHER),
-        ({**base, "price": 5000}, "incertain"),
+        ({**base, "price": 5000}, LIBELLE_FORT),
         ({"price": 8000}, None),
     ]
     for ligne, attendu in cas:
@@ -93,15 +96,15 @@ def test_cible_tres_au_dessus_n_est_pas_proche():
 def test_cible_tres_en_dessous_dit_trop_cher():
     estimation = estimer_prix_cible({
         "sector": "Banque", "price": 20000, "eps": 1000, "bvpa": 8000, "roe": 30,
-    })
-    # ROE 30 / ROE médian banques 14 = 2,14, sous le plafond de 3.
-    assert estimation["facteur_roe"] == 30 / 14
-    assert estimation["prix_cible"] == 16384
-    assert estimation["ecart_pct"] == -18.1
+    }, roe_median=12.5)
+    # ROE du jour = 1 000 / 8 000 = 12,5 %, pas le 30 enregistré. Facteur 1.
+    assert estimation["facteur_roe"] == 1.0
+    assert estimation["prix_cible"] == 11782
+    assert estimation["ecart_pct"] == -41.1
     assert estimation["libelle"] == LIBELLE_CHER
     assert estimation["pe_secteur"] == 9.85
     assert estimation["pb_secteur"] == 1.51
-    assert estimation["roe_secteur"] == 14.0
+    assert estimation["roe_secteur"] == 12.5
 
 
 def test_sans_donnees_ne_dit_pas_proche():
@@ -166,7 +169,6 @@ def test_univers_conseils_inchanges_et_libelles_coherents(monkeypatch, tmp_path)
     univers = _univers()
     lignes = []
     comptes = Counter()
-    libelles = Counter()
     for ticker, base in STOCK_FUNDAMENTALS.items():
         row = _ligne(
             base,
@@ -179,16 +181,27 @@ def test_univers_conseils_inchanges_et_libelles_coherents(monkeypatch, tmp_path)
         row["name"] = base.get("name", "")
         scores = _compute_scores(row)
         avant = (scores["conseil"], scores["composite_adj"], scores["note10"])
-        estimation = estimer_prix_cible(row)
         scores_apres = _compute_scores(row)
         assert (scores_apres["conseil"], scores_apres["composite_adj"], scores_apres["note10"]) == avant
         comptes[avant[0]] += 1
+        row["composite_adj"] = scores["composite_adj"]
+        row["conseil"] = scores["conseil"]
+        row["note10"] = scores["note10"]
+        lignes.append(row)
+    table_roe = medianes_roe_du_jour(lignes)
+    libelles = Counter()
+    for row in lignes:
+        estimation = estimer_prix_cible(row, roe_median=roe_median_pour(row, table_roe))
         libelles[estimation["libelle"]] += 1
         if estimation["libelle"] == LIBELLE_PROCHE:
             assert estimation["ecart_pct"] is not None
             assert -10.0 <= estimation["ecart_pct"] <= 10.0
-        row["composite_adj"] = scores["composite_adj"]
-        lignes.append(row)
+        # La note ne change pas le prix : un conseil différent, mêmes chiffres.
+        autre = dict(row)
+        autre["conseil"] = "Intéressant"
+        autre["note10"] = 9.9
+        autre["composite_adj"] = 90
+        assert estimer_prix_cible(autre, roe_median=roe_median_pour(row, table_roe))["prix_cible"] == estimation["prix_cible"]
 
     assert comptes["Intéressant"] == 1
     assert comptes["À surveiller"] == 9
@@ -196,15 +209,15 @@ def test_univers_conseils_inchanges_et_libelles_coherents(monkeypatch, tmp_path)
     assert comptes[None] == 2
 
     # Libellés sur ce fixture (pas la production).
-    # Avant le ROE et la règle des 5 sociétés (P/E et P/B de secteur
-    # seuls) : Au-dessus 15, Proche 11, Cible à vérifier 9,
-    # sans libellé 9, Forte décote 2, Décote modérée 1.
-    assert libelles[LIBELLE_PROCHE] == 14
-    assert libelles[LIBELLE_CHER] == 12
-    assert libelles[LIBELLE_FORT] == 5
-    assert libelles["incertain"] == 7
+    # Juste avant (ROE médian en dur, plafond 3, règle des 80 %) :
+    # Proche 14, Au-dessus 12, Forte décote 5, Cible à vérifier 7,
+    # Décote modérée 0, sans libellé 9.
+    assert libelles[LIBELLE_PROCHE] == 11
+    assert libelles[LIBELLE_CHER] == 15
+    assert libelles[LIBELLE_FORT] == 11
+    assert libelles[LIBELLE_MODERE] == 1
+    assert libelles["incertain"] == 0
     assert libelles[None] == 9
-    assert libelles[LIBELLE_MODERE] == 0
 
     monkeypatch.setattr("features.DATA_DIR", str(tmp_path))
     (tmp_path / "live_ranking.json").write_text(
@@ -213,7 +226,7 @@ def test_univers_conseils_inchanges_et_libelles_coherents(monkeypatch, tmp_path)
     )
     for cible in get_price_targets():
         source = next(x for x in lignes if x["ticker"] == cible["ticker"])
-        estimation = estimer_prix_cible(source)
+        estimation = estimer_prix_cible(source, roe_median=roe_median_pour(source, table_roe))
         assert cible["avg_target"] == estimation["prix_cible"]
         assert cible["upside_pct"] == estimation["ecart_pct"]
         assert cible["verdict"] == estimation["libelle"]
@@ -248,56 +261,98 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "fmtLibelleValeur(s.libelle_valeur)" in page
 
 
-def test_le_roe_ajuste_le_pb_et_pas_le_benefice():
-    """Consommation : P/B 2, ROE médian 16. Le P/E 18 ne bouge pas."""
-    plancher = estimer_prix_cible({
-        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 4, "price": 10000,
-    })
-    neutre = estimer_prix_cible({
-        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 16, "price": 10000,
-    })
-    plafond = estimer_prix_cible({
-        "sector": "Consommation", "eps": 1000, "bvpa": 8000, "roe": 79, "price": 10000,
-    })
-    assert plancher["epv"] == neutre["epv"] == plafond["epv"] == 18000
-    assert plancher["pe_secteur"] == 18.0
-    assert plancher["facteur_roe"] == 0.5
-    assert plancher["pb"] == 8000
-    assert neutre["facteur_roe"] == 1.0
-    assert neutre["pb"] == 16000
-    assert plafond["facteur_roe"] == 3.0
-    assert plafond["pb"] == 48000
-    assert plafond["roe_secteur"] == 16.0
-    sans_roe = estimer_prix_cible({
-        "sector": "Consommation", "eps": 1000, "price": 18000,
-    })
-    assert sans_roe["epv"] == 18000
-    assert sans_roe["pb"] is None
-    assert sans_roe["facteur_roe"] == 1.0
+def test_le_roe_du_jour_ajuste_le_pb_et_ignore_le_roe_en_dur():
+    """Même bénéfice : le ROE du jour est bénéfice / actif net.
 
-
-def test_jambe_pb_citee_pour_un_roe_de_79():
-    """Bénéfice 36 468 et P/B 5 119, tels que mesurés sans le ROE.
-
-    BNA 2 026 × P/E 18 = 36 468. Actif net 2 559,5 × P/B 2 = 5 119.
-    Avec un ROE de 79 % contre 16 % au milieu de la consommation,
-    le facteur est plafonné à 3 et la jambe P/B passe à 15 357.
-    Le cours de production n'est pas dans le dépôt : ce test ne
-    fige pas le libellé de STBC sur le marché réel.
+    La clé ``roe`` (chiffre enregistré) ne change pas le facteur.
+    Médiane du groupe passée explicitement : 16 %. Plafond 2, plancher 0,5.
     """
-    avant = round(2559.5 * 2)
-    assert avant == 5119
-    estimation = estimer_prix_cible({
-        "sector": "Consommation", "eps": 2026, "bvpa": 2559.5, "roe": 79, "price": 22000,
+    plancher = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 20000, "roe": 79, "price": 10000,
+    }, roe_median=16)
+    neutre = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 6250, "roe": 4, "price": 10000,
+    }, roe_median=16)
+    plafond = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "bvpa": 1250, "roe": 8, "price": 10000,
+    }, roe_median=16)
+    assert plancher["epv"] == neutre["epv"] == plafond["epv"] == 18000
+    assert roe_du_jour(plancher and {"eps": 1000, "bvpa": 20000}) == 5.0
+    assert plancher["facteur_roe"] == 0.5
+    assert plancher["pb"] == 20000
+    assert neutre["facteur_roe"] == 1.0
+    assert neutre["pb"] == 12500
+    assert plafond["facteur_roe"] == 2.0
+    assert plafond["pb"] == 5000
+    assert plafond["roe_secteur"] == 16.0
+    sans = estimer_prix_cible({
+        "sector": "Consommation", "eps": 1000, "price": 18000, "roe": 79,
+    }, roe_median=16)
+    assert sans["epv"] == 18000
+    assert sans["pb"] is None
+    assert sans["facteur_roe"] == 1.0
+
+
+def test_mediane_roe_du_groupe_ignore_les_chiffres_en_dur():
+    """Six industrielles. Le ROE enregistré vaut 8 partout.
+
+    Les ROE du jour sont 10, 12, 14, 16, 18 et 40. Le milieu est 15.
+    40 / 15 dépasse 2 : le facteur est plafonné à 2, pas à 3.
+    """
+    lignes = []
+    for i, roe_jour in enumerate((10, 12, 14, 16, 18, 40)):
+        lignes.append({
+            "ticker": "I%d" % i,
+            "sector": "Industriel",
+            "eps": roe_jour * 10,
+            "bvpa": 1000,
+            "roe": 8,
+            "price": 8000,
+        })
+    table = medianes_roe_du_jour(lignes)
+    assert table["utilise"]["industriel"] == 15.0
+    assert table["observe"]["industriel"] == 15.0
+    fort = estimer_prix_cible(lignes[-1], roe_median=roe_median_pour(lignes[-1], table))
+    assert roe_du_jour(lignes[-1]) == 40.0
+    assert fort["facteur_roe"] == 2.0
+    # Trois télécoms très rentables, six banques à 10 % : le petit
+    # groupe prend le milieu de tout le marché, pas son propre 30 %.
+    telecoms = [
+        {"sector": "Télécoms", "eps": 300, "bvpa": 1000, "roe": 15, "price": 5000},
+        {"sector": "Télécoms", "eps": 300, "bvpa": 1000, "roe": 15, "price": 5000},
+        {"sector": "Telecoms", "eps": 300, "bvpa": 1000, "roe": 15, "price": 5000},
+    ]
+    banques = [
+        {"sector": "Banque", "eps": 100, "bvpa": 1000, "roe": 4, "price": 5000}
+        for _ in range(6)
+    ]
+    tout = telecoms + banques
+    melange = medianes_roe_du_jour(tout)
+    assert melange["effectifs"]["telecoms"] == 3
+    assert melange["observe"]["telecoms"] == 30.0
+    assert melange["utilise"]["telecoms"] == melange["marche"]
+    assert melange["utilise"]["telecoms"] != 30.0
+
+
+def test_ecart_eleve_reste_un_libelle_si_la_cible_est_dans_la_fourchette():
+    """+139 % comme SMBC : la cible vaut moins de 3 fois le cours.
+
+    Ce n'est pas « Cible à vérifier ». Seule la fourchette 1/3 à 3×
+    retire le libellé.
+    """
+    dans = estimer_prix_cible({
+        "sector": "Banque", "eps": 1000, "bvpa": 8000, "price": 5000, "roe": 4,
     })
-    assert estimation["epv"] == 36468
-    assert estimation["pb"] == 15357
-    assert estimation["facteur_roe"] == 3.0
-    faible = estimer_prix_cible({
-        "sector": "Consommation", "eps": 100, "bvpa": 1000, "roe": 8.8, "price": 1000,
+    assert dans["prix_cible"] == 11782
+    assert dans["ecart_pct"] > 80
+    assert dans["prix_cible"] < 5000 * 3
+    assert dans["libelle"] == LIBELLE_FORT
+    assert dans["incertain"] is False
+    hors = estimer_prix_cible({
+        "sector": "Banque", "eps": 1000, "bvpa": 8000, "price": 3000,
     })
-    assert faible["facteur_roe"] == 8.8 / 16
-    assert faible["pb"] == round(1000 * 2 * (8.8 / 16))
+    assert hors["prix_cible"] > 3000 * 3
+    assert hors["libelle"] == "incertain"
 
 
 def test_reperes_sont_la_mediane_des_historiques():
@@ -306,8 +361,8 @@ def test_reperes_sont_la_mediane_des_historiques():
     assert par_nom["Banque"]["n_pe"] == 16
     assert par_nom["Banque"]["pe_observe"] == 9.85
     assert par_nom["Banque"]["pb_observe"] == 1.51
-    assert par_nom["Banque"]["roe"] == 14.0
     assert par_nom["Banque"]["utilise_marche"] is False
+    assert "roe" not in par_nom["Banque"]
     assert par_nom["Télécoms"]["pe_observe"] == 12.0
     assert par_nom["Télécoms"]["pb_observe"] == 3.5
     assert par_nom["Télécoms"]["n"] == 3
@@ -315,17 +370,14 @@ def test_reperes_sont_la_mediane_des_historiques():
     assert par_nom["Télécoms"]["pe"] == 14.0
     assert par_nom["Télécoms"]["pb"] == 2.0
     assert par_nom["Consommation"]["pe"] == 18.0
-    assert par_nom["Consommation"]["roe"] == 16.0
     assert par_nom["Agriculture"]["pe_observe"] == 15.8
     assert par_nom["Agriculture"]["pb_observe"] == 1.9
     assert par_nom["Agriculture"]["n"] == 4
     assert par_nom["Agriculture"]["pe"] == 14.0
-    assert par_nom["Agriculture"]["roe"] == 12.0
     assert par_nom["Énergie"]["pe_observe"] == 12.5
     assert par_nom["Énergie"]["pb_observe"] == 2.75
     assert par_nom["Énergie"]["utilise_marche"] is True
     assert par_nom["Industriel"]["pe"] == 16.0
-    assert par_nom["Industriel"]["roe"] == 8.0
     assert par_nom["Utilités"]["pe_observe"] == 14.0
     assert par_nom["Utilités"]["pb_observe"] == 2.25
     assert par_nom["Utilités"]["n_pe"] == 2
@@ -334,7 +386,7 @@ def test_reperes_sont_la_mediane_des_historiques():
     assert table["n"] == 47
     assert table["pe_defaut"] == 14.0
     assert table["pb_defaut"] == 2.0
-    assert table["roe_defaut"] == 12.0
+    assert "roe_defaut" not in table
     assert sum(ligne["n_pe"] for ligne in par_nom.values()) == 47
     for nom in ("Télécoms", "Agriculture", "Énergie", "Utilités"):
         assert par_nom[nom]["utilise_marche"] is True
@@ -390,7 +442,10 @@ def test_methodo_affiche_les_multiples_et_protege_la_note():
     assert "P/E 14×" in bloc
     assert "P/B 2×" in bloc
     assert "moins de 5" in bloc
-    assert "0,5 et 3" in bloc
+    assert "0,5 et 2" in bloc
+    assert "donnée du jour" in bloc
+    assert "repères enregistrés" in bloc
+    assert "80 %" not in bloc
     assert "moins du tiers" in bloc
     assert "3 fois le cours" in bloc
     assert "Cible à vérifier" in bloc

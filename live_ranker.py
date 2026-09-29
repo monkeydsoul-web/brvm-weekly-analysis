@@ -833,16 +833,20 @@ def _annoter_suspensions(results, historique, moment):
         )
 
 
-def _poser_prix_cible(resultat, row):
+def _poser_prix_cible(resultat, row, roe_median=None):
     """Prix, écart et libellé sur la ligne publiée.
 
     N'écrit rien dans le dictionnaire de note : le conseil ne bouge pas.
+    ``roe_median`` est le ROE du jour du groupe. Sans lui, le facteur vaut 1.
     """
     from prix_cible import estimer_prix_cible
 
     if not isinstance(resultat, dict):
         return resultat
-    estimation = estimer_prix_cible(row if isinstance(row, dict) else {})
+    estimation = estimer_prix_cible(
+        row if isinstance(row, dict) else {},
+        roe_median=roe_median,
+    )
     resultat["prix_cible"] = estimation["prix_cible"]
     resultat["ecart_pct"] = estimation["ecart_pct"]
     resultat["libelle_valeur"] = estimation["libelle"]
@@ -851,6 +855,23 @@ def _poser_prix_cible(resultat, row):
     resultat["facteur_roe"] = estimation["facteur_roe"]
     resultat["roe_secteur"] = estimation["roe_secteur"]
     return resultat
+
+
+def _poser_prix_cibles(resultats):
+    """Recalcule chaque prix cible avec le ROE du jour du groupe.
+
+    Le milieu se prend sur le classement entier, pas sur les ROE en dur.
+    """
+    from prix_cible import medianes_roe_du_jour, roe_median_pour
+
+    if not isinstance(resultats, list):
+        return resultats
+    table = medianes_roe_du_jour(resultats)
+    for resultat in resultats:
+        if not isinstance(resultat, dict):
+            continue
+        _poser_prix_cible(resultat, resultat, roe_median=roe_median_pour(resultat, table))
+    return resultats
 
 
 def _poser_verdict(scores, composite, precedent, row):
@@ -1452,7 +1473,6 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "statut_source": None,
                         "alerte_cotation": None,
                     }
-                    _poser_prix_cible(result, row)
                     results.append(result)
 
                 except Exception as e:
@@ -1469,6 +1489,10 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                             "composite_adj": 0,
                             "error": str(e),
                         })
+
+            # Prix cible après la boucle : le ROE médian a besoin de tout
+            # le classement. Il n'entre pas dans la note ni dans le tri.
+            _poser_prix_cibles(results)
 
             # La liste manuelle et les alertes, avant le tri : un suspendu
             # ne peut pas rester devant les titres cotes a cause de sa note.

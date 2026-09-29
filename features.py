@@ -111,15 +111,16 @@ def simulate_dividends(investment_xof: float, years: int = 5, reinvest: bool = T
 # ── Price targets & forecasts ──────────────────────────────────────────────
 def get_price_targets() -> list:
     """Même prix, même écart, même libellé que le classement (prix_cible.py)."""
-    from prix_cible import estimer_prix_cible
+    from prix_cible import estimer_prix_cible, medianes_roe_du_jour, roe_median_pour
 
     scores = _load_scores()
+    table_roe = medianes_roe_du_jour(scores)
     targets = []
     for s in scores:
         price = s.get("price")
         if not price:
             continue
-        estimation = estimer_prix_cible(s)
+        estimation = estimer_prix_cible(s, roe_median=roe_median_pour(s, table_roe))
         if estimation["incertain"]:
             logger.warning(
                 "[price_targets] %s: upside=%.1f%% (%d modèle(s)) — cible marquée incertaine",
