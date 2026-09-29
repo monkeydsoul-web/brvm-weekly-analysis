@@ -1,0 +1,574 @@
+{
+  "groupes": {
+    "SGBC": "rapport",
+    "SIBC": "rapport",
+    "SNTS": "rapport",
+    "NSBC": "rapport",
+    "CBIBF": "rapport",
+    "BOAB": "rapport",
+    "BOABF": "boc",
+    "BOAC": "boc",
+    "BOAM": "boc",
+    "BOAN": "boc",
+    "BOAS": "boc",
+    "ECOC": "rapport",
+    "BICC": "boc",
+    "ETIT": "boc",
+    "ORGT": "boc",
+    "SAFC": "boc",
+    "ORAC": "rapport",
+    "ONTBF": "rapport",
+    "NTLC": "rapport",
+    "STBC": "rapport",
+    "UNLC": "rapport",
+    "SLBC": "rapport",
+    "SMBC": "rapport",
+    "UNXC": "aucun",
+    "LNBB": "boc",
+    "NEIC": "aucun",
+    "PALC": "rapport",
+    "SPHC": "boc",
+    "SOGC": "boc",
+    "SCRC": "aucun",
+    "TTLC": "rapport",
+    "TTLS": "boc",
+    "SHEC": "rapport",
+    "SEMC": "aucun",
+    "CIEC": "rapport",
+    "SDCC": "rapport",
+    "FTSC": "boc",
+    "SDSC": "aucun",
+    "CABC": "boc",
+    "CFAC": "boc",
+    "BNBC": "aucun",
+    "SICC": "boc",
+    "PRSC": "boc",
+    "ABJC": "aucun",
+    "STAC": "aucun",
+    "SIVC": "aucun",
+    "BICB": "rapport"
+  },
+  "prix": {
+    "SGBC": 23800.0,
+    "SIBC": 12000.0,
+    "SNTS": 33084.8,
+    "NSBC": 12000.0,
+    "CBIBF": 12000.0,
+    "BOAB": 12000.0,
+    "BOABF": 9600.0,
+    "BOAC": 9600.0,
+    "BOAM": 9600.0,
+    "BOAN": 9600.0,
+    "BOAS": 9600.0,
+    "ECOC": 12000.0,
+    "BICC": 9600.0,
+    "ETIT": 9600.0,
+    "ORGT": 9600.0,
+    "SAFC": 9600.0,
+    "ORAC": 14118.75,
+    "ONTBF": 12000.0,
+    "NTLC": 12000.0,
+    "STBC": 29400.0,
+    "UNLC": 12000.0,
+    "SLBC": 12000.0,
+    "SMBC": 12000.0,
+    "UNXC": 5000.0,
+    "LNBB": 9600.0,
+    "NEIC": 5000.0,
+    "PALC": 5000.0,
+    "SPHC": 9600.0,
+    "SOGC": 9600.0,
+    "SCRC": 5000.0,
+    "TTLC": 12000.0,
+    "TTLS": 9600.0,
+    "SHEC": 12000.0,
+    "SEMC": 5000.0,
+    "CIEC": 12000.0,
+    "SDCC": 12000.0,
+    "FTSC": 9600.0,
+    "SDSC": 5000.0,
+    "CABC": 9600.0,
+    "CFAC": 9600.0,
+    "BNBC": 5000.0,
+    "SICC": 9600.0,
+    "PRSC": 9600.0,
+    "ABJC": 5000.0,
+    "STAC": 5000.0,
+    "SIVC": 5000.0,
+    "BICB": 12000.0
+  },
+  "boc": {
+    "SGBC": {
+      "date": "2026-09-25",
+      "cours_clot": 22100.0,
+      "per_boc": 8.5
+    },
+    "SIBC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "SNTS": {
+      "date": "2026-09-25",
+      "cours_clot": 33076.8,
+      "per_boc": 8.0
+    },
+    "NSBC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "CBIBF": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "BOAB": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "BOABF": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "BOAC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "BOAM": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "BOAN": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "BOAS": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "ECOC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "BICC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "ETIT": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "ORGT": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "SAFC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "ORAC": {
+      "date": "2026-09-25",
+      "cours_clot": 13925,
+      "per_boc": 12.5
+    },
+    "ONTBF": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "NTLC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "STBC": {
+      "date": "2026-09-25",
+      "cours_clot": 26600.0,
+      "per_boc": 14.0
+    },
+    "UNLC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "SLBC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "SMBC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "LNBB": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "PALC": {
+      "date": "2026-09-25",
+      "cours_clot": 4000.0,
+      "per_boc": 10.0
+    },
+    "SPHC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "SOGC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "TTLC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "TTLS": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "SHEC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "CIEC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "SDCC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    },
+    "FTSC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "CABC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "CFAC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "SICC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "PRSC": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 8.0
+    },
+    "BICB": {
+      "date": "2026-09-25",
+      "cours_clot": 8000.0,
+      "per_boc": 10.0
+    }
+  },
+  "pdf": {
+    "SGBC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 77777.775,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 248888.88,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SIBC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 80000.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 400000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SNTS": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 400000.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 1200000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "NSBC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 16000.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 80000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "CBIBF": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 15385.6,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 76928.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "BOAB": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 32480.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 162400.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "ECOC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 51830.88,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 259154.4,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "ORAC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 141174.476,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 705872.38,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "ONTBF": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 126000.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 630000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "NTLC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 29091.8784,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 145459.392,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "STBC": {
+      "status": "ok",
+      "year": 2023,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 32400.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 108000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "UNLC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 5507.728,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 27538.64,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SLBC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 9482.3776,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 47411.888,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SMBC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 3920.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 19600.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "PALC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 22043.31,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 49597.4475,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "TTLC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 60541.336,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 302706.68,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SHEC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 96000.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 480000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "CIEC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 52428.8,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 262144.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "SDCC": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 9600.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 48000.0,
+          "unite": "MFCFA"
+        }
+      }
+    },
+    "BICB": {
+      "status": "ok",
+      "year": 2024,
+      "kpis": {
+        "resultat_net": {
+          "valeur": 46208.0,
+          "unite": "MFCFA"
+        },
+        "capitaux_propres": {
+          "valeur": 231040.0,
+          "unite": "MFCFA"
+        }
+      }
+    }
+  }
+}

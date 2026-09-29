@@ -1,0 +1,45 @@
+{
+  "base": {
+    "name": "Societe test",
+    "sector": "Banque",
+    "country": "Côte d'Ivoire",
+    "shares": 1000000,
+    "pe_hist": 10.0,
+    "pb_hist": 1.5,
+    "roe": 18,
+    "div_hist": 100,
+    "debt": "Faible",
+    "stable": true
+  },
+  "rapport_2024": {
+    "status": "ok",
+    "year": 2024,
+    "kpis": {
+      "resultat_net": {"valeur": 1000.0, "unite": "MFCFA"},
+      "capitaux_propres": {"valeur": 5000.0, "unite": "MFCFA"}
+    }
+  },
+  "rapport_2025": {
+    "status": "ok",
+    "year": 2025,
+    "kpis": {
+      "resultat_net": {"valeur": 1500.0, "unite": "MFCFA"},
+      "capitaux_propres": {"valeur": 5000.0, "unite": "MFCFA"}
+    }
+  },
+  "boc": {
+    "date": "2026-09-25",
+    "cours_clot": 9000,
+    "per_boc": 10
+  },
+  "boc_nouveau": {
+    "date": "2026-09-26",
+    "cours_clot": 11000,
+    "per_boc": 10
+  },
+  "boc_incoherent": {
+    "date": "2026-09-25",
+    "cours_clot": 1000,
+    "per_boc": 10
+  }
+}
