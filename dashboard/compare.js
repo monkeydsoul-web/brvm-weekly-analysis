@@ -23,9 +23,10 @@ function renderCompare() {
   const all = window.scores || scores || [];
   const items = compareList.map(t => all.find(x => x.ticker === t)).filter(Boolean);
   if (items.length < 2) return;
+  if (typeof triCommeClassement === 'function') items.sort(triCommeClassement);
 
   const metrics = [
-    ['Score /10',    x => v10fmt(x.composite_adj||0),   x => x.composite_adj||0,  true],
+    ['Score /10',    x => (typeof note10txt==='function'?note10txt(x):v10fmt(x.composite_adj||0).replace('.',',')),   x => (typeof note10num==='function'?note10num(x):0),  true],
     ['P/E',         x => x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—', x => -(x.pe_ref||999),    true],
     ['P/B',         x => x.pb_ref ? x.pb_ref.toFixed(1)+'×' : '—', x => -(x.pb_ref||999),    true],
     ['ROE %',       x => x.roe ? x.roe.toFixed(1)+'%' : '—',        x => x.roe||0,             true],
@@ -38,14 +39,14 @@ function renderCompare() {
   ];
 
   // Couleur score
-  const scoreC = v => v >= 60 ? '#4ADE80' : v >= 40 ? '#FBBF24' : '#F87171';
+  const scoreC = v => v >= 7.5 ? '#4ADE80' : v >= 5 ? '#FBBF24' : '#F87171';
   const verdC  = v => v === 'POSITIF' ? '#4ADE80' : v === 'NEGATIF' ? '#F87171' : '#FBBF24';
 
   const cols = items.map(x => `
     <th style="text-align:center;padding:8px 12px;min-width:110px">
       <div style="font-weight:700;font-size:13px">${x.ticker}</div>
       <div style="font-size:10px;color:var(--t2)">${x.name||''}</div>
-      <span style="font-size:11px;font-weight:700;color:${scoreC(x.composite_adj||0)}">${v10fmt(x.composite_adj||0)}/10</span>
+      <span style="font-size:11px;font-weight:700;color:${scoreC(typeof note10num==='function'?note10num(x):0)}">${typeof note10txt==='function'?note10txt(x):v10fmt(x.composite_adj||0).replace('.',',')}/10</span>
       <button onclick="toggleCompare('${x.ticker}')" style="display:block;margin:4px auto 0;font-size:9px;padding:1px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--t2);cursor:pointer">✕ Retirer</button>
     </th>`).join('');
 
@@ -68,12 +69,14 @@ function renderCompare() {
   const barW = Math.floor((W - pad * (items.length+1)) / items.length);
   const bars = items.map((x, i) => {
     const v = x.composite_adj || 0;
+    const n10 = (typeof note10num==='function') ? note10num(x) : (Math.round(v/8*10)/10);
     const bh = Math.round((v / maxScore) * (H - 20));
     const bx = pad + i * (barW + pad);
     const by = H - bh - 4;
-    return `<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" rx="3" fill="${scoreC(v)}"/>
+    const nTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
+    return `<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" rx="3" fill="${scoreC(n10)}"/>
             <text x="${bx + barW/2}" y="${H}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.5)">${x.ticker}</text>
-            <text x="${bx + barW/2}" y="${by - 3}" text-anchor="middle" font-size="10" font-weight="700" fill="${scoreC(v)}">${v.toFixed(0)}</text>`;
+            <text x="${bx + barW/2}" y="${by - 3}" text-anchor="middle" font-size="10" font-weight="700" fill="${scoreC(n10)}">${nTxt}</text>`;
   }).join('');
   const chart = `<svg width="${W}" height="${H}" style="margin:8px auto;display:block">${bars}</svg>`;
 

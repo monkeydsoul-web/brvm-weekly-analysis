@@ -81,7 +81,7 @@ function _createMrkModal() {
 
 function _refreshMrkSelector() {
   const all = window.scores || (typeof scores !== "undefined" ? scores : []) || [];
-  const sorted = [...(all||[])].sort((a,b) => (b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...(all||[])].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   const selEl = document.getElementById('mrk-selected');
   if (selEl) {
     selEl.innerHTML = _mrkTickers.map(t => {
@@ -115,7 +115,7 @@ function mrkToggle(t) {
 function mrkRemove(t) { _mrkTickers = _mrkTickers.filter(x=>x!==t); _refreshMrkSelector(); }
 function mrkGroup(g) {
   const all = window.scores || (typeof scores !== "undefined" ? scores : []);
-  const sorted = [...(all||[])].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const sorted = [...(all||[])].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   if (g==='Effacer') _mrkTickers=[];
   else if (g==='Top5') _mrkTickers=sorted.slice(0,5).map(x=>x.ticker);
   else if (g==='Top8') _mrkTickers=sorted.slice(0,8).map(x=>x.ticker);

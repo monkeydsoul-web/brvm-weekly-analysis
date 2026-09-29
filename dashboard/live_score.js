@@ -28,6 +28,7 @@ async function fetchLiveScore(ticker){
           detail_rev_dcf:  r.detail_rev_dcf,
           detail_relatif:  r.detail_relatif,
           detail_technique:r.detail_technique,
+          note10:          r.note10,
           pe_ref_live:     r.pe_ref,
           pb_ref_live:     r.pb_ref,
           div_yield_live:  r.div_yield,
@@ -46,7 +47,7 @@ function _renderLiveScore(ticker, d){
   if(!el)return;
   const sc=d.composite_adj||0;
   const col=sc>=57?'var(--green)':sc>=40?'var(--amber)':sc>=23?'var(--orange,#f97316)':'var(--red)';
-  const tier=sc>=57?'FORT':sc>=40?'MODERE':sc>=23?'FAIBLE':'Prudence';
+  const tier=sc>=57?'Fort':sc>=40?'Modéré':sc>=23?'Faible':'Prudence';
   const chg=d.live_change_pct||0;
   const chgCol=chg>=0?'var(--green)':'var(--red)';
   const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
@@ -62,7 +63,7 @@ function _renderLiveScore(ticker, d){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
     '<div><div style="font-size:11px;color:var(--t2);margin-bottom:3px">Score live '+badge+'</div>'+
     '<div style="font-size:12px">'+price+' <span style="color:'+chgCol+'">'+chgStr+'</span></div></div>'+
-    '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+v10fmt(sc)+'<span style="font-size:13px;color:var(--t2)">/10</span></div>'+
+    '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+((typeof note10txt==='function')?note10txt(d):v10fmt(sc).replace('.',','))+'<span style="font-size:13px;color:var(--t2)">/10</span></div>'+
     '<div style="font-size:11px;font-weight:600;color:'+col+'">'+tier+'</div></div></div>'+
     '<div style="background:var(--border);border-radius:4px;height:5px;margin-bottom:10px">'+
     '<div style="width:'+(sc/80*100).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+
@@ -95,6 +96,7 @@ async function loadLiveRank(ticker) {
     if (!d.ranking) return;
     const r = d.ranking.find(x => x.ticker === ticker);
     if (!r) return;
+    if (r.statut === 'suspendu') return;
     const el = document.getElementById('live-rank-badge');
     if (!el) return;
     const delta = r.rank_delta || 0;

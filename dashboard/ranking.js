@@ -31,7 +31,8 @@ function renderRankCards() {
   if (sec)     d = d.filter(x => x.sector === sec);
   if (verdict) d = filtreTendance(d, verdict);
   if (window._favOnly) d = d.filter(x => (window.favorites || favorites || []).includes(x.ticker));
-  d.sort((a, b) => srt === 'pe_ref'
+  if (srt === 'composite_adj' && typeof triCommeClassement === 'function') d.sort(triCommeClassement);
+  else d.sort((a, b) => srt === 'pe_ref'
     ? (a[srt] || 999) - (b[srt] || 999)
     : (b[srt] || 0) - (a[srt] || 0));
 
@@ -43,8 +44,9 @@ function renderRankCards() {
   }
   cards.innerHTML = d.map((x, i) => {
       const v      = x.composite_adj || 0;
-      const v10    = v10fmt(v);
-      const scoreC = v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
+      const v10    = (typeof note10txt==='function') ? note10txt(x) : v10fmt(v).replace('.',',');
+      const n10    = (typeof note10num==='function') ? note10num(x) : (Math.round(v/8*10)/10);
+      const scoreC = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
       const chg    = x.change_pct || 0;
       const chgC   = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
       const chgStr = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';

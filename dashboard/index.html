@@ -1952,6 +1952,32 @@ function note10num(row){
 function note10txt(row){
   return note10num(row).toFixed(1).replace('.',',');
 }
+function triCommeClassement(a, b){
+  function rang(x){
+    if(x && x.rank!=null && x.rank!=='' && isFinite(Number(x.rank))) return Number(x.rank);
+    return null;
+  }
+  var ra=rang(a), rb=rang(b);
+  if(ra!=null && rb!=null && ra!==rb) return ra-rb;
+  if(ra!=null && rb==null) return -1;
+  if(rb!=null && ra==null) return 1;
+  var sa=a && a.statut==='suspendu' ? 1 : 0;
+  var sb=b && b.statut==='suspendu' ? 1 : 0;
+  if(sa!==sb) return sa-sb;
+  var na=note10num(a), nb=note10num(b);
+  if(na!==nb) return nb-na;
+  return String((a&&a.ticker)||'').localeCompare(String((b&&b.ticker)||''), 'fr');
+}
+function texteEnBref(ticker, story){
+  var brut=(story && story.en_bref) ? String(story.en_bref) : '';
+  if(ticker==='SICC'){
+    var bas=brut.toLowerCase();
+    if(bas.indexOf('sicable')!==-1 || bas.indexOf('câble')!==-1 || bas.indexOf('cable')!==-1 || bas.indexOf('électri')!==-1 || bas.indexOf('electri')!==-1){
+      return "SICOR, la Société ivoirienne de coco râpé, transforme la noix de coco en Côte d'Ivoire. Elle produit du coco râpé, de l'huile de coprah et des tourteaux.";
+    }
+  }
+  return brut;
+}
 function rapportAnnuelTxt(row){
   var u=String((row&&row.pdf_verdict)||'').toUpperCase();
   if(u==='POSITIF') return 'positif';
@@ -2104,7 +2130,7 @@ function runGSearch(q){
           <div class="gsr-sub">${x.sector||'—'} · ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <span class="b ${bcls(v)}" style="display:block;margin-bottom:2px">${v10fmt(v)}/10</span>
+          <span class="b ${bcls10(note10num(x))}" style="display:block;margin-bottom:2px">${note10txt(x)}/10</span>
           <span style="font-size:9px;color:${verdC}">${verdict}</span>
         </div>
       </div>`;
@@ -2155,7 +2181,7 @@ function runGSearch(q){
             <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
             <div class="gsr-sub">${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
           </div>
-          <span class="b ${bcls(v)}">${v10fmt(v)}/10</span>
+          <span class="b ${bcls10(note10num(x))}">${note10txt(x)}/10</span>
         </div>`;
       }).join('')+html;
     }
@@ -2606,7 +2632,7 @@ async function init(){
 }
 
 function populateSelects(){
-  const sorted=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const sorted=[...scores].sort(triCommeClassement);
   ['portTicker','alertTicker'].forEach(id=>{
     const sel=document.getElementById(id);
     if(sel&&sel.options&&sel.options.length<=1) sorted.forEach(s=>sel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
@@ -2692,8 +2718,8 @@ async function renderFluxCapitaux(targetEl) {
       ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:12px">Aucun afflux</p>'}
     </div>
     <div>
-      <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📉 Reflux par action (vente)</div>
-      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:12px">Aucun reflux</p>'}
+      <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px;letter-spacing:.2px">📉 Argent qui sort, par action</div>
+      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:12px">Aucune sortie d’argent</p>'}
     </div>
   </div>
   ${secArr.length ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
@@ -2749,7 +2775,7 @@ function renderHeatmap(containerId){
     const sign=chg>0?'+':'';
     const capFmt=cap>1e12?`${(cap/1e12).toFixed(1)}T`:cap>1e9?`${(cap/1e9).toFixed(1)}Md`:`${(cap/1e6).toFixed(0)}M`;
     const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
-    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Score: ${v10fmt(sc)}/10`;
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Note: ${note10txt(x)}/10`;
     const delay=i*18; // vague d'animation
     return `<div onclick="_openStock('${x.ticker}')"
       data-tip="${tip}"
@@ -2758,7 +2784,7 @@ function renderHeatmap(containerId){
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
       <span style="font-size:${Math.max(11,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
       <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
-      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${v10fmt(sc)}</span>`:''}
+      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${note10txt(x)}</span>`:''}
     </div>`;
   }).join('');
   // Déclencher animation après inject DOM
@@ -2875,28 +2901,28 @@ function loadMarketWidget(){
 }
 
 function loadSidebar(){
-  const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const s=[...scores].sort(triCommeClassement);
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
     const isFav=favorites.includes(x.ticker);
     const checked=_cmpSelected&&_cmpSelected.has(x.ticker)?'checked':'';
     return`<div class="tb" style="display:flex;align-items:center;gap:3px">
       <input type="checkbox" class="cmp-cb" data-ticker="${x.ticker}" ${checked} title="Comparer" onchange="toggleCompare('${x.ticker}')" style="flex-shrink:0"/>
       <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 3px 0 0">★</button>
       <span onclick="_openStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
-      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v10fmt(v)}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${note10txt(x)}</span>
     </div>`;}).join('');
 }
 
 function filterSidebar(q){
   q=q.toUpperCase();
-  const s=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0))
+  const s=[...scores].sort(triCommeClassement)
     .filter(x=>!q||x.ticker.includes(q)||((x.name||'').toUpperCase().includes(q)));
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const v=x.composite_adj||0,tc=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
     return`<button class="tb" onclick="_openStock('${x.ticker}')">
       <span style="font-weight:600;font-size:11px">${x.ticker}</span>
-      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${v10fmt(v)}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${note10txt(x)}</span>
     </button>`;}).join('');
 }
 
@@ -2925,7 +2951,7 @@ function toggleFavFilter(){
 function renderSignauxParSociete(){
   const tab = document.getElementById('signals-tab-parsociete');
   if (!tab) return;
-  const all = (window.scores || scores || []).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const all = [...(window.scores || scores || [])].sort(triCommeClassement);
   const body = document.getElementById('signaux-parsociete-body');
   if (!body) return;
   if (!all.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--t2)">Chargement...</td></tr>'; return; }
@@ -2934,7 +2960,7 @@ function renderSignauxParSociete(){
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
     </tr>`;
@@ -3001,7 +3027,8 @@ function renderRank(){
   if(sec)d=d.filter(x=>x.sector===sec);
   if(verd)d=filtreTendance(d, verd);
   if(window._favOnly)d=d.filter(x=>favorites.includes(x.ticker));
-  d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
+  if(srt==='composite_adj') d.sort(triCommeClassement);
+  else d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
 
   // Contre
   const ctr=document.getElementById('rank-counter');
@@ -3049,7 +3076,7 @@ function renderRank(){
       <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
     </tr>`;}).join('');
   }
@@ -3272,7 +3299,7 @@ async function renderTargets(){
       <td>${fmtXOF(t.current_price)}</td>
       <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
       <td class="${cls}" style="font-size:11px">${up?fmtOpp:'—'}</td>
-      <td><span class="b ${bcls10(v10fmt(t.score||0))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${v10fmt(t.score||0)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(note10num((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
       <td style="font-size:11px"${uncTip}>${fmtAvis(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
@@ -3324,8 +3351,8 @@ async function applyCustomScores(){
     return`<tr onclick="_openStock('${x.ticker}')">
       <td>${i+1}</td><td><strong>${x.ticker}</strong></td>
       <td style="color:var(--t2);font-size:11px">${x.name||''}</td>
-      <td style="color:var(--t2)">${v10fmt(x.composite_adj||0)}/10</td>
-      <td style="font-weight:600;color:${col(x.composite_custom)}">${v10fmt(x.composite_custom)}/10</td>
+      <td style="color:var(--t2)">${note10txt(x)}/10</td>
+      <td style="font-weight:600;color:${col(x.composite_custom)}">${v10fmt(x.composite_custom).replace('.',',')}/10</td>
       <td style="color:${dc}">${diff>=0?'+':''}${(diff/80*10).toFixed(2)}</td>
     </tr>`;}).join('');
 }
@@ -3391,7 +3418,7 @@ function simBuildSliders(){
     return`<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
-        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | score ${v10fmt(x.composite_adj||0)}/10</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | note ${note10txt(x)}/10</span>
         <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
       </div>
       <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
@@ -3482,7 +3509,7 @@ function simCalc(){
       <td style="color:var(--amber);font-weight:600">${p.dy_pct.toFixed(2)}%</td>
       <td style="color:var(--green);font-weight:700">${fmtXOF(Math.round(p.div_yr1))}</td>
       <td style="color:var(--t3);font-size:10px">${p.ex_div}</td>
-      <td><span class="b ${bcls10(p.score/80*10)}">${note10txt(p)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td><span class="b ${bcls10(note10num(p))}">${note10txt(p)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
     </tr>`).join('');
   }
 
@@ -3505,7 +3532,7 @@ function _alertTickerChanged(){
   const field = fieldMap[type]||'price';
   const val = stock[field];
   if(val == null){ helper.textContent = ''; return; }
-  const fmtVal = type==='price' ? (Math.round(val).toLocaleString('fr-FR')+' XOF') : (type==='score' ? (v10fmt(val)+'/10') : (val.toFixed(2)+'%'));
+  const fmtVal = type==='price' ? (Math.round(val).toLocaleString('fr-FR')+' XOF') : (type==='score' ? (note10txt(stock)+'/10') : (val.toFixed(2)+'%'));
   helper.textContent = `${ticker} — ${labelMap[type]||'valeur'} : ${fmtVal}`;
 }
 
@@ -3593,7 +3620,7 @@ function renderComm(){
       <div style="font-size:9px;color:var(--t3)">${d.unit||''}</div>
       ${timeAgo(d.fetched_at)?`<div style="font-size:9px;color:var(--t3)">MàJ ${timeAgo(d.fetched_at)}</div>`:''}
     </div>`).join('');
-  const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort(triCommeClassement);
   svgBar(document.getElementById('cCommDiv'),exp.map(x=>x.ticker),exp.map(function(x){
     return note10num(x);
   }),exp.map(x=>COMM_PROD[x.ticker]?.col||'#94A3B8'),260,true,'/10');
@@ -3604,7 +3631,7 @@ function renderComm(){
       <td style="font-size:11px;color:var(--t2)">${ci.prod}</td>
       <td><span class="ctag"><span class="cdot" style="background:${ci.col}"></span>${ci.com[0]}</span></td>
       <td style="color:${ec};font-weight:600">${ci.exp}</td>
-      <td><span class="b ${bcls10(v/80*10)}" data-tip="Note /10">${note10txt(x)}/10</span></td></tr>`;}).join('');
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note /10">${note10txt(x)}/10</span></td></tr>`;}).join('');
 }
 
 
@@ -3641,10 +3668,8 @@ function _genVerdict(s){
   const suspendu=!!(avis&&avis.suspendu);
   const col=suspendu?'var(--t2)':(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
   const bg=suspendu?'rgba(148,163,184,.12)':(v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)');
-  const label=v>=65?'ACHETER':v>=55?'ACCUMULER':v>=45?'CONSERVER':v>=35?'SURVEILLER':'ALLÉGER';
-  const labelBeg=avis?avis.texte:'—';
-  var labelShow=document.documentElement.dataset.mode==='beginner'?labelBeg:label;
-  var badgeCol=document.documentElement.dataset.mode==='beginner'?(avis?avis.css:'var(--t2)'):col;
+  var labelShow=avis?avis.texte:'—';
+  var badgeCol=avis?avis.css:'var(--t2)';
   if(suspendu){
     labelShow=avis.texte;
     badgeCol='var(--t2)';
@@ -3839,7 +3864,7 @@ function renderStockStory(ticker) {
     `<div class="story-inline">${items.map(p => escapeHtml(p)).join(' · ')}</div>`;
   container.innerHTML = [
     story.en_bref
-      ? sec('📖', 'En bref', `<p>${escapeHtml(story.en_bref)}</p>`) : '',
+      ? sec('📖', 'En bref', `<p>${escapeHtml(texteEnBref(ticker, story))}</p>`) : '',
     story.points_forts?.length
       ? sec('💪', 'Points forts', list(story.points_forts)) : '',
     story.points_attention?.length
@@ -3881,7 +3906,9 @@ async function showStock(ticker){
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
         <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
-        ${_v0>0?`<span class="b ${bcls(_v0)}" style="margin-top:4px;display:inline-block">${v10fmt(_v0)}/10</span>`:''}
+        ${_staticEntry.statut==='suspendu'
+          ? '<span style="margin-top:4px;display:inline-block;color:var(--t2);font-weight:700">Cotation suspendue</span>'
+          : (_v0>0?`<span class="b ${bcls10(note10num(_staticEntry))}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
       </div>
     </div>
     <div id="_skel-body" class="stock-skeleton">
@@ -3984,7 +4011,9 @@ async function showStock(ticker){
               <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
               <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
             </div>
-            <span class="b ${bcls(v)}" data-tip="Score composite sur 8 modèles · /10">${v10fmt(v)}/10</span>
+            ${s.statut==='suspendu'
+              ? '<span style="color:var(--t2);font-weight:700" data-tip="Cotation suspendue">'+note10txt(s)+'/10</span>'
+              : '<span class="b '+bcls10(note10num(s))+'" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">'+note10txt(s)+'/10</span>'}
           </div>
           <div id="live-score-container"></div>
           <div id="stock-spark-mini" style="margin:6px 0"></div>
@@ -4038,7 +4067,7 @@ async function showStock(ticker){
             const sect=s.sector||'';const sc0=s.composite_adj||0;
             const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
             if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
-            return peers.map(p=>{const pv=p.composite_adj||0;const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls(pv)}">${v10fmt(pv)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+            return peers.map(p=>{const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls10(note10num(p))}">${note10txt(p)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
           })()}
         </div>
       </div>
@@ -4316,7 +4345,7 @@ function _renderMarketPage() {
   var _sc = window.scores || [];
   if (distDst && _sc.length) {
     var bkts={'0–2,5':0,'2,5–5':0,'5–6,25':0,'6,25–7,5':0,'7,5–10':0};
-    _sc.forEach(function(x){var v=(x.composite_adj||0)/8;bkts[v<2.5?'0–2,5':v<5?'2,5–5':v<6.25?'5–6,25':v<7.5?'6,25–7,5':'7,5–10']++;});
+    _sc.forEach(function(x){var v=note10num(x);bkts[v<2.5?'0–2,5':v<5?'2,5–5':v<6.25?'5–6,25':v<7.5?'6,25–7,5':'7,5–10']++;});
     svgBar(distDst,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#FBBF24','#4ADE80'],170);
   }
   if (sectDst && _sc.length) {
@@ -4332,8 +4361,8 @@ function _renderMarketPage() {
   var insDst = document.getElementById('mkt-insights-full');
   if (insDst) {
     if (window.scores && window.scores.length) {
-      var sorted = [...window.scores].sort(function(a,b){return (b.composite_adj||0)-(a.composite_adj||0);});
-      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+v10fmt(s.composite_adj||0)+'/10'; }).join(' · ');
+      var sorted = [...window.scores].sort(triCommeClassement);
+      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+note10txt(s)+'/10'; }).join(' · ');
       insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
     }
   }
@@ -5536,9 +5565,10 @@ function openCompareModal() {
   const all = window.scores || scores || [];
   const rows = tickers.map(t => all.find(x => x.ticker === t)).filter(Boolean);
   if (!rows.length) return;
+  rows.sort(triCommeClassement);
 
   const kpis = [
-    ['Score /10', x => v10fmt(x.composite_adj||0)+'/10', x => x.composite_adj||0, true],
+    ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
     ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
     ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
@@ -5551,7 +5581,7 @@ function openCompareModal() {
     ['EPV /10', x => (x.score_epv||0).toFixed(1), x => x.score_epv||0, true],
     ['Buffett /10', x => (x.score_buffett||0).toFixed(1), x => x.score_buffett||0, true],
     ['Technique /10', x => (x.score_technique||0).toFixed(1), x => x.score_technique||0, true],
-    ['Verdict IA', x => x.pdf_verdict || '—', () => null, false],
+    ['Rapport annuel', x => (typeof rapportAnnuelTxt==='function'?rapportAnnuelTxt(x):(x.pdf_verdict||'—')), () => null, false],
   ];
 
   const cols = rows.length;
@@ -5880,7 +5910,7 @@ function openWhyModal(ticker) {
   var body = document.getElementById('why-body');
   var actions = document.getElementById('why-actions');
   if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
-  if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + v10fmt(s.composite_adj||0) + '/10';
+  if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + note10txt(s) + '/10';
   var decote = '';
   if (s.target_price && s.price && s.target_price > s.price) {
     decote = Math.round((s.target_price/s.price - 1)*100);
@@ -5920,7 +5950,7 @@ function _quickCompare(ticker) {
         var s=(window.scores||[]).find(function(x){return x.ticker===t;})||{};
         return '<button onclick="_pickQCmp(\''+ticker+'\',\''+t+'\')" style="text-align:left;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:12px;color:var(--text-1)">'
           +'<strong>'+t+'</strong> <span style="color:var(--t2);font-size:11px">'+( s.name||'').slice(0,30)+'</span>'
-          +'<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">'+v10fmt(s.composite_adj||0)+'/10</span></button>';
+          +'<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">'+note10txt(s)+'/10</span></button>';
       }).join('')
     +'</div>'
     +'<button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top:12px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px">Annuler</button>'

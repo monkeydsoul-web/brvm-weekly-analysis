@@ -103,7 +103,7 @@ def test_methodo_glossaire_fiche_et_partage():
     assert prev.count("note10txt(s)") == 2
     ecran = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
     assert "note10num(x).toFixed(1)" in ecran
-    assert "note10txt(x)" not in ecran
+    assert "note10txt(x)" in ecran
     assert "/80*10" not in ecran
     aide = _entre(HTML, "🚀 Pour commencer", "function closeHelpDrawer")
     assert "≥ 7,5/10" in aide
