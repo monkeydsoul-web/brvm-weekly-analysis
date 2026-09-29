@@ -21,10 +21,10 @@ def _entre(debut, fin):
     return HTML[i:j]
 
 
-def test_fmt_verdict_pdf_inchange():
+def test_fmt_verdict_pdf_est_une_tendance():
     assert (
-        "function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter'"
-        ":v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}"
+        "function fmtVerdict(v){return v==='POSITIF'?'Tendance positive'"
+        ":v==='NEGATIF'?'Tendance négative':v==='NEUTRE'?'Tendance neutre':v||'—';}"
     ) in HTML
 
 

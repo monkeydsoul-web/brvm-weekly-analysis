@@ -128,7 +128,7 @@ function _refreshBTSelector() {
       const c = v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
       return `<button onclick="btToggle('${x.ticker}')"
         style="font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid ${sel?c:'var(--border)'};background:${sel?c+'22':'var(--bg3)'};color:${sel?c:'var(--t2)'};cursor:pointer">
-        ${x.ticker} <span style="opacity:0.6">${v.toFixed(0)}</span></button>`;
+        ${x.ticker} <span style="opacity:0.6">${(typeof note10txt==='function'?note10txt(x):v10fmt(v))}/10</span></button>`;
     }).join('');
   }
 

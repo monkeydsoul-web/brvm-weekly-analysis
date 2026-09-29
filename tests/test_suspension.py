@@ -623,7 +623,9 @@ attend(htmlConseil.indexOf('var(--t2)') !== -1, 'fmt gris');
 attend(htmlConseil.indexOf('Intéressant') === -1, 'fmt sans conseil');
 const fiche = _genVerdict(row);
 attend(fiche.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'fiche badge');
-attend(fiche.indexOf('Note ') !== -1, 'note presente');
+attend(fiche.indexOf('Note 10,0/10') !== -1, 'note sur 10 avec virgule');
+attend(fiche.indexOf('10.0') === -1, 'pas de point decimal');
+attend(fiche.indexOf('/80') === -1, 'pas de slash 80');
 attend(fiche.indexOf('color:var(--t2)') !== -1, 'note grise');
 ['ACHETER','ACCUMULER','CONSERVER','SURVEILLER','ALLÉGER','Intéressant','Prudence','À surveiller'].forEach(function (mot) {
   attend(fiche.indexOf(mot) === -1, 'mot interdit ' + mot);
