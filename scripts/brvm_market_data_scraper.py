@@ -814,6 +814,31 @@ def _ticker_connu(value: Any) -> Optional[str]:
     return None
 
 
+def _document_hors_emetteur(texte: str, titre: str = "") -> bool:
+    """Titrisation, FCTC, RMBS ou emprunt obligataire : pas la note de la société cotée.
+
+    Un communiqué qui note l'émetteur et, en plus, son emprunt obligataire est conservé.
+    """
+    blob = ((titre or "") + "\n" + (texte or "")).strip()
+    if not blob:
+        return False
+    if re.search(r"\bFCTC\b|\bRMBS\b|titrisations?", blob, re.I):
+        return True
+    tete = blob[:1200]
+    if re.search(
+        r"emprunts?\s+obligataires?|[eé]missions?\s+obligataires?|\btranches?\b",
+        tete,
+        re.I,
+    ):
+        if not re.search(
+            r"notes?\s+d['’]?\s*[eé]metteur|[eé]metteur\s+de\s+long\s+terme",
+            tete,
+            re.I,
+        ):
+            return True
+    return False
+
+
 def _choisir_ticker(texte: str, indice: Any = None, titre: Optional[str] = None) -> Optional[str]:
     """Ticker lu dans le titre, sinon dans le texte. L'indice ne sert que si les deux sont vides."""
     if (titre and str(titre).strip()) or (texte and str(texte).strip()):
@@ -887,6 +912,8 @@ def scrape_ratings() -> List[Dict]:
                 text = item["contenu"]
             titre = item.get("titre") or ""
             contexte = " ".join(p for p in (titre, text) if p)
+            if _document_hors_emetteur(text, titre):
+                continue
             ticker = _choisir_ticker(text, item.get("ticker"), titre=titre)
             # Émetteur non coté ou illisible : pas d'entrée ticker null dans le fichier.
             if not ticker:
@@ -924,6 +951,8 @@ def scrape_ratings() -> List[Dict]:
                     local.write_bytes(r.content)
                     logging.info(f"  ↓ {fname}")
             text = _read_pdf(str(local))
+            if _document_hors_emetteur(text, ""):
+                continue
             ticker = _choisir_ticker(text, None)
             if not ticker:
                 continue

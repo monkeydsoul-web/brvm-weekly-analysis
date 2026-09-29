@@ -301,6 +301,35 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_titrisation_nest_pas_la_note_de_la_societe():
+    ept = (
+        "GCR affirme les notations d'émission de long terme de AA de la Tranche A, "
+        "AA- de la Tranche B et A+ de la Tranche C des obligations émises par le "
+        "FCTC EPT 2025-2040. Le maître d'œuvre est la Compagnie Ivoirienne d'Electricité."
+    )
+    assert _scraper._document_hors_emetteur(ept) is True
+    assert _extract_ticker(ept) == "CIEC"
+    zaka = (
+        "GCR assigne la notation d'émission de long terme de AAA aux obligations "
+        "seniors émises par le FCTC ZAKA RMBS NSIA BANQUE CÔTE D'IVOIRE 2025-2044. "
+        "Titrisation."
+    )
+    assert _scraper._document_hors_emetteur(zaka) is True
+    assert _extract_ticker(zaka) == "NSBC"
+    nsia = (
+        "GCR affirme la notation de long terme des obligations séniors émises par "
+        "le FCTC NSIA BANQUE 7% 2020-2025 à AAA."
+    )
+    assert _scraper._document_hors_emetteur(nsia) is True
+    emission = "Notation de l'émission obligataire SONATEL FCFA 100 milliards 6,50% 2020-2027."
+    assert _scraper._document_hors_emetteur(emission) is True
+    emetteur = (
+        "GCR réhausse de AA+ à AAA les notes d'émetteur de long terme et d'emprunt "
+        "obligataire senior non sécurisé de la Société Nationale des Télécommunications."
+    )
+    assert _scraper._document_hors_emetteur(emetteur) is False
+
+
 def test_gcr_de_x_a_y_garde_la_note_nouvelle():
     # Libellés relevés dans les PDF brvm.org (cran ancien à gauche).
     cas = (
