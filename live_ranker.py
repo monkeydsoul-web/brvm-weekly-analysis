@@ -21,7 +21,7 @@ from verdict import (
     note10,
     conseil as conseil_verdict,
     libelle_conseil,
-    couleur,
+    couleur_conseil,
     normaliser_statut,
     STATUT_COTE,
     STATUT_NON_NOTE,
@@ -395,9 +395,8 @@ def _poser_verdict(scores, composite, precedent, row):
     scores["note10"] = note10(composite)
     scores["conseil"] = avis
     scores["conseil_libelle"] = libelle_conseil(avis) if avis else None
-    # Couleur de la note /10 (7,5 / 5), distincte du libelle : l'amortisseur
-    # peut garder "Intéressant" alors que la note affichee est sous 7,5.
-    scores["conseil_couleur"] = couleur(scores["note10"]) if avis else None
+    # Couleur du mot (vert / orange / rouge), pas celle de la note /10.
+    scores["conseil_couleur"] = couleur_conseil(avis)
     if "note_calculee_le" not in scores:
         scores["note_calculee_le"] = datetime.now(timezone.utc).isoformat()
     return scores

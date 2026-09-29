@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """Caracterisation de live_ranker._hysteresis_conseil.
 
-Bandes inchangees (D-2) : repere 60 / 40, amortisseur 57,6
-(rester Intéressant), 37,6 (sortir d'À surveiller vers Prudence),
-42,4 (sortir de Prudence). Les jetons historiques acheter / attendre /
-eviter restent des precedents valides. Les libelles renvoyes sont ceux
-de D-1.
+Les seuils sont ceux de la note affichee /10 : 7,5 et 5.
+Amortisseur : rester Intéressant des 7,2, quitter À surveiller sous 4,7,
+quitter Prudence des 5,3. Les jetons historiques acheter / attendre /
+eviter restent des precedents valides.
 """
 import pytest
 
@@ -16,19 +15,19 @@ from live_ranker import _hysteresis_conseil
     "adj,prev,price,attendu",
     [
         (60, None, 1000, "Intéressant"),
-        (59.9, None, 1000, "À surveiller"),
+        (59.9, None, 1000, "Intéressant"),
         (40, None, 1000, "À surveiller"),
-        (39.9, None, 1000, "Prudence"),
+        (39.9, None, 1000, "À surveiller"),
         (80, None, 1000, "Intéressant"),
         (0, None, 1000, "Prudence"),
         (57.6, "acheter", 1000, "Intéressant"),
-        (57.5, "acheter", 1000, "À surveiller"),
+        (57.5, "acheter", 1000, "Intéressant"),
         (39, "acheter", 1000, "Prudence"),
         (60, "attendre", 1000, "Intéressant"),
-        (59.9, "attendre", 1000, "À surveiller"),
+        (59.9, "attendre", 1000, "Intéressant"),
         (37.6, "attendre", 1000, "À surveiller"),
-        (37.5, "attendre", 1000, "Prudence"),
-        (42.3, "eviter", 1000, "Prudence"),
+        (37.5, "attendre", 1000, "À surveiller"),
+        (42.3, "eviter", 1000, "À surveiller"),
         (42.4, "eviter", 1000, "À surveiller"),
         (60, "eviter", 1000, "Intéressant"),
         (50, "inconnu", 1000, "À surveiller"),

@@ -2,7 +2,7 @@
 """verdict.py : note /10, seuils 60/40, amortisseur, suspension."""
 import pytest
 
-from live_ranker import _compute_scores, _hysteresis_conseil
+from live_ranker import _compute_scores, _hysteresis_conseil, _poser_verdict
 from live_valuation import compute_live_score
 from verdict import (
     CONSEIL_INTERESSANT,
@@ -13,6 +13,7 @@ from verdict import (
     STATUT_SUSPENDU,
     conseil,
     couleur,
+    couleur_conseil,
     libelle_conseil,
     note10,
 )
@@ -62,9 +63,16 @@ def test_note10_invalide(valeur):
     [
         (60, "Intéressant"),
         (80, "Intéressant"),
-        (59.99, "À surveiller"),
+        (59.99, "Intéressant"),
+        (59.95, "Intéressant"),
+        (59.94, "Intéressant"),
+        (59.60, "Intéressant"),
+        (59.59, "À surveiller"),
         (40, "À surveiller"),
-        (39.99, "Prudence"),
+        (39.99, "À surveiller"),
+        (39.95, "À surveiller"),
+        (39.60, "À surveiller"),
+        (39.59, "Prudence"),
         (0, "Prudence"),
     ],
 )
@@ -76,21 +84,24 @@ def test_conseil_bornes_sans_precedent(composite, attendu):
 @pytest.mark.parametrize(
     "composite,precedent,attendu",
     [
-        (57.6, "Intéressant", "Intéressant"),
+        (57.20, "Intéressant", "Intéressant"),
+        (57.20, "acheter", "Intéressant"),
+        (57.19, "Intéressant", "À surveiller"),
+        (57.19, "acheter", "À surveiller"),
         (57.6, "acheter", "Intéressant"),
-        (57.59, "Intéressant", "À surveiller"),
-        (57.59, "acheter", "À surveiller"),
         (39.99, "À surveiller", "À surveiller"),
         (39.99, "attendre", "À surveiller"),
-        (37.6, "À surveiller", "À surveiller"),
-        (37.59, "attendre", "Prudence"),
-        (42.39, "Prudence", "Prudence"),
-        (42.39, "eviter", "Prudence"),
-        (42.4, "Prudence", "À surveiller"),
+        (37.20, "À surveiller", "À surveiller"),
+        (37.20, "attendre", "À surveiller"),
+        (37.19, "attendre", "Prudence"),
+        (41.99, "Prudence", "Prudence"),
+        (41.99, "eviter", "Prudence"),
+        (42.00, "Prudence", "À surveiller"),
+        (42.00, "eviter", "À surveiller"),
         (42.4, "eviter", "À surveiller"),
         (60, "Prudence", "Intéressant"),
         (40, "eviter", "Prudence"),
-        (59.99, "inconnu", "À surveiller"),
+        (59.59, "inconnu", "À surveiller"),
     ],
 )
 def test_amortisseur(composite, precedent, attendu):
@@ -125,14 +136,21 @@ def test_libelle_et_couleur_suivent_la_note():
     assert couleur(0) == "rouge"
     assert couleur(None) is None
 
-    # 59,99 reste sous 60 (À surveiller) mais s'affiche 7,5, donc vert.
-    assert conseil(59.99, None, "cote") == "À surveiller"
-    assert note10(59.99) == 7.5
+    # La note /10 et le mot coincident : 59,99 s'affiche 7,5 et est Intéressant.
+    assert note10(59.94) == 7.5
+    assert note10(59.95) == 7.5
+    assert conseil(59.94, None, "cote") == "Intéressant"
+    assert conseil(59.95, None, "cote") == "Intéressant"
     assert couleur(note10(59.99)) == "vert"
-    # 39,99 est Prudence, affiche 5,0, donc orange.
-    assert conseil(39.99, None, "cote") == "Prudence"
+    assert couleur_conseil(conseil(59.99, None, "cote")) == "vert"
+    # 39,99 s'affiche 5,0 : À surveiller, orange. couleur() de la note aussi.
     assert note10(39.99) == 5.0
+    assert conseil(39.99, None, "cote") == "À surveiller"
     assert couleur(note10(39.99)) == "orange"
+    assert couleur_conseil("À surveiller") == "orange"
+    assert couleur_conseil("Prudence") == "rouge"
+    assert couleur_conseil(None) is None
+    assert couleur_conseil("acheter") == "vert"
 
 
 def test_compute_scores_champs_additifs():
@@ -141,9 +159,20 @@ def test_compute_scores_champs_additifs():
     assert scores["note10"] == note10(scores["composite_adj"])
     assert scores["conseil"] == conseil(scores["composite_adj"], None, "cote")
     assert scores["conseil_libelle"] == scores["conseil"]
-    assert scores["conseil_couleur"] == couleur(scores["note10"])
+    assert scores["conseil_couleur"] == couleur_conseil(scores["conseil"])
     assert isinstance(scores["note_calculee_le"], str)
     assert "T" in scores["note_calculee_le"]
+
+
+def test_couleur_du_conseil_suit_le_libelle_pas_la_note():
+    """Amortisseur : Intéressant a 7,2 reste vert, la note /10 reste orange."""
+    scores = {}
+    _poser_verdict(scores, 57.6, "acheter", {"price": 1000})
+    assert scores["note10"] == 7.2
+    assert scores["conseil"] == "Intéressant"
+    assert scores["conseil_libelle"] == "Intéressant"
+    assert scores["conseil_couleur"] == "vert"
+    assert couleur(scores["note10"]) == "orange"
 
 
 def test_compute_scores_suspendu():

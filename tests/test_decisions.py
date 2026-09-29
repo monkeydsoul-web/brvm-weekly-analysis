@@ -43,9 +43,9 @@ def test_d1_formule_note_sur_dix(composite, attendu):
     [
         (60, "Intéressant"),
         (80, "Intéressant"),
-        (59.9, "À surveiller"),
+        (59.9, "Intéressant"),
         (40, "À surveiller"),
-        (39.9, "Prudence"),
+        (39.9, "À surveiller"),
         (0, "Prudence"),
     ],
 )

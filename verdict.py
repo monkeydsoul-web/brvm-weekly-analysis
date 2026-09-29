@@ -6,12 +6,17 @@ Aucune lecture disque, aucun reseau : PR-05 (gel a la cloture) pourra
 rappeler ces fonctions avec un composite deja fige, sans les modifier.
 
 Decisions encodees ici :
-- D-1 : trois niveaux sur les seuils 60 / 40 du composite.
-  "Intéressant" (>= 60), "À surveiller" (40 inclus, 60 exclus),
-  "Prudence" (< 40). Une valeur suspendue ou non notee n'a pas de conseil.
-- D-2 : l'amortisseur historique est conserve (57,6 / 37,6 / 42,4).
+- D-1 : trois niveaux sur la note affichee /10 (pas le composite brut,
+  pour que le mot colle a ce qui est affiche).
+  "Intéressant" (note10 >= 7,5), "À surveiller" (note10 >= 5),
+  "Prudence" (note10 < 5). Une valeur suspendue ou non notee n'a pas de conseil.
+- D-2 : amortisseur sur la meme note /10 : rester Intéressant tant que
+  note10 >= 7,2 (57,6/8), quitter À surveiller vers Prudence sous 4,7
+  (37,6/8), quitter Prudence des note10 >= 5,3 (42,4/8).
   Les anciens jetons acheter / attendre / eviter restent reconnus comme
   conseil precedent, pour le fichier deja en production.
+- La couleur du conseil suit le libelle (vert / orange / rouge).
+  couleur() reste la couleur de la note /10, distincte.
 """
 
 import math
@@ -32,13 +37,13 @@ COULEUR_ROUGE = "rouge"
 SEUIL_COULEUR_VERT = 7.5
 SEUIL_COULEUR_ORANGE = 5.0
 
-# Bornes du conseil sur le composite /80, et amortisseur historique.
-# Literaux (pas 60 * 0,96) : 60 * 0,96 vaut 57,5999... en flottant.
-SEUIL_HAUT = 60.0
-SEUIL_BAS = 40.0
-BANDE_RESTER_HAUT = 57.6
-BANDE_SORTIR_MILIEU = 37.6
-BANDE_SORTIR_BAS = 42.4
+# Conseil et amortisseur sur la note affichee /10.
+# 7,2 / 4,7 / 5,3 = 57,6 / 37,6 / 42,4 divises par 8.
+SEUIL_NOTE_HAUT = 7.5
+SEUIL_NOTE_BAS = 5.0
+BANDE_NOTE_RESTER_HAUT = 7.2
+BANDE_NOTE_SORTIR_MILIEU = 4.7
+BANDE_NOTE_SORTIR_BAS = 5.3
 
 _ABSENT = object()
 
@@ -85,24 +90,24 @@ def conseil(composite, precedent, statut):
     """
     if normaliser_statut(statut) != STATUT_COTE:
         return None
-    adj = _flottant(composite)
-    if adj is None:
+    note = note10(composite)
+    if note is None:
         return None
 
-    standard = _conseil_brut(adj)
+    standard = _conseil_brut(note)
     famille = _famille(precedent)
     if famille == "haut":
-        if adj >= BANDE_RESTER_HAUT:
+        if note >= BANDE_NOTE_RESTER_HAUT:
             return CONSEIL_INTERESSANT
         return standard
     if famille == "milieu":
-        if adj >= SEUIL_HAUT:
+        if note >= SEUIL_NOTE_HAUT:
             return CONSEIL_INTERESSANT
-        if adj < BANDE_SORTIR_MILIEU:
+        if note < BANDE_NOTE_SORTIR_MILIEU:
             return CONSEIL_PRUDENCE
         return CONSEIL_SURVEILLER
     if famille == "bas":
-        if adj < BANDE_SORTIR_BAS:
+        if note < BANDE_NOTE_SORTIR_BAS:
             return CONSEIL_PRUDENCE
         return standard
     return standard
@@ -154,10 +159,27 @@ def normaliser_statut(statut):
     return _STATUTS.get(statut.strip().lower())
 
 
-def _conseil_brut(adj):
-    if adj >= SEUIL_HAUT:
+def couleur_conseil(avis):
+    """Couleur du libelle. None s'il n'y a pas de conseil.
+
+    Distinct de couleur(), qui colore la note /10.
+    """
+    if avis is None:
+        return None
+    libelle = libelle_conseil(avis)
+    if libelle == CONSEIL_INTERESSANT:
+        return COULEUR_VERT
+    if libelle == CONSEIL_SURVEILLER:
+        return COULEUR_ORANGE
+    if libelle == CONSEIL_PRUDENCE:
+        return COULEUR_ROUGE
+    return None
+
+
+def _conseil_brut(note):
+    if note >= SEUIL_NOTE_HAUT:
         return CONSEIL_INTERESSANT
-    if adj >= SEUIL_BAS:
+    if note >= SEUIL_NOTE_BAS:
         return CONSEIL_SURVEILLER
     return CONSEIL_PRUDENCE
 
