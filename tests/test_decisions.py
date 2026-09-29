@@ -7,7 +7,7 @@ D-2 : le composite ne bouge pas si seule la seance change.
 Le gel du classement en seance est couvert par tests/test_note_figee.py.
 """
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -61,9 +61,23 @@ def test_d1_compute_scores_expose_note10():
 
 
 def test_d2_composite_inchange_si_seule_la_seance_change():
-    calme = dict(ROW, change_pct=0, open=ROW["price"], volume=0, trend=None, var_annee=0)
-    seance = dict(ROW, change_pct=6, open=9000, volume=80000, trend="top", var_annee=0)
-    assert _compute_scores(calme)["composite_adj"] == _compute_scores(seance)["composite_adj"]
+    """30 clôtures : le composite ne vient pas du repli neutre 5,0."""
+    moment = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    hist = _clotures(30, 100, 130, volume=20000)
+    calme = dict(
+        ROW, change_pct=0, open=ROW["price"], volume=0, trend=None, var_annee=0,
+        historique_clotures=hist, _moment=moment,
+    )
+    seance = dict(
+        ROW, change_pct=6, open=9000, volume=80000, trend="top", var_annee=40,
+        historique_clotures=hist, _moment=moment,
+    )
+    note_calme = _compute_scores(calme)
+    note_seance = _compute_scores(seance)
+    assert note_calme["score_technique"] == 10.0
+    assert note_calme["score_technique"] != 5.0
+    assert note_calme["composite_adj"] == note_seance["composite_adj"]
+    assert note_calme["score_technique"] == note_seance["score_technique"]
 
 
 def test_d2_job_cloture_non_lance():
@@ -119,27 +133,56 @@ def test_technique_sans_historique_est_neutre():
 
 
 def test_d3_technique_ignore_la_seance():
+    """Même historique de 30 clôtures : le cours et le volume du jour ne comptent pas."""
+    moment = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    hist = _clotures(30, 100, 130, volume=20000)
     calme = {
         "ticker": "ALPH", "price": 1000, "open": 1000,
-        "change_pct": 0, "volume": 0, "var_annee": 0,
-        "historique_clotures": [],
+        "change_pct": 0, "volume": 0, "trend": None, "var_annee": 0,
+        "historique_clotures": hist, "_moment": moment,
     }
-    seance = _seance()
-    assert score_technique_live(calme)["score"] == score_technique_live(seance)["score"]
+    seance = {
+        "ticker": "ALPH", "price": 2500, "open": 9000,
+        "change_pct": 6, "volume": 80000, "trend": "top", "var_annee": 40,
+        "historique_clotures": hist, "_moment": moment,
+    }
+    note_calme = score_technique_live(calme)
+    note_seance = score_technique_live(seance)
+    assert note_calme["score"] == 10.0
+    assert note_calme["score"] != 5.0
+    assert note_calme["score"] == note_seance["score"]
+    assert note_calme["details"] == note_seance["details"]
 
 
 def _clotures(n, prix_de, prix_vers, volume=None):
+    """n séances de semaine à partir du lundi 2026-06-01."""
     points = []
-    for i in range(n):
-        if n == 1:
-            prix = prix_vers
-        else:
-            prix = prix_de + (prix_vers - prix_de) * i / float(n - 1)
-        point = {"date": "2026-08-%02d" % (i + 1), "price": prix}
-        if volume is not None:
-            point["volume"] = volume
-        points.append(point)
+    jour = datetime(2026, 6, 1, tzinfo=timezone.utc)
+    while len(points) < n:
+        if jour.weekday() < 5:
+            i = len(points)
+            if n == 1:
+                prix = prix_vers
+            else:
+                prix = prix_de + (prix_vers - prix_de) * i / float(n - 1)
+            point = {"date": jour.date().isoformat(), "price": prix}
+            if volume is not None:
+                point["volume"] = volume
+            points.append(point)
+        jour += timedelta(days=1)
     return points
+
+
+def test_serie_clotures_ignore_le_week_end():
+    from live_valuation import serie_clotures
+    points = [
+        {"date": "2026-09-25", "price": 100, "volume": 10},
+        {"date": "2026-09-26", "price": 1, "volume": 999999},
+        {"date": "2026-09-27", "price": 9999, "volume": 1},
+        {"date": "2026-09-28", "price": 110, "volume": 20},
+    ]
+    serie = serie_clotures(points, "2026-09-29")
+    assert [point["date"] for point in serie] == ["2026-09-25", "2026-09-28"]
 
 
 def test_technique_tendance_et_liquidite_sur_clotures():

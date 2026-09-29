@@ -100,9 +100,18 @@ def _jour_iso(moment):
     return moment, moment.date().isoformat()
 
 
+def _est_samedi_ou_dimanche(date):
+    try:
+        jour = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return jour.weekday() >= 5
+
+
 def serie_clotures(points, jour_exclu):
-    """Clôtures complètes, une par date, hors séance `jour_exclu` et hors
-    points annuels (source historical). `volume` vaut None s'il manque.
+    """Clôtures complètes, une par date, hors séance `jour_exclu`, hors
+    samedi et dimanche, et hors points annuels (source historical).
+    `volume` vaut None s'il manque.
     """
     par_date = {}
     for point in points or []:
@@ -115,6 +124,8 @@ def serie_clotures(points, jour_exclu):
             continue
         date = date[:10]
         if len(date) != 10:
+            continue
+        if _est_samedi_ou_dimanche(date):
             continue
         if jour_exclu and date >= jour_exclu:
             continue
