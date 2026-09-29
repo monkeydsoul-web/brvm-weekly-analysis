@@ -672,31 +672,48 @@ def _expr_grade() -> str:
     tokens = sorted(RATING_GRADES, key=len, reverse=True)
     alt = "|".join(re.escape(t) for t in tokens)
     return (
-        r"(?<![\w'’])(" + alt + r")(?![\w'’])"
+        r"(?<!\w)(" + alt + r")(?!\w)"
         r"(?:\s*\((?:WU|SF)\))*"
     )
+
+
+# Guillemets et espaces autour d'un cran : de ‘A- ’ à ‘AA- ’, ou de ‘BBB ’à ‘BBB+ ’.
+_CITE_CRAN = r"[\s‘’'\"«»]*"
 
 
 def _note_mouvement(text: str) -> Optional[str]:
     """Cran nouveau dans « de X à Y », « à Y (contre X) », « à Y, de X », « précédemment X ».
 
     Le groupe 1 est l'ancien cran seulement pour « de X à Y ». Partout ailleurs, c'est le nouveau.
+    À défaut, la ligne de tableau « Emetteur/Note de long terme Régionale X ».
     """
     if not text:
         return None
     grade = _expr_grade()
-    de_a = re.search(r"\bde\s+" + grade + r"\s+[àa]\s+" + grade, text, re.I)
+    cite = _CITE_CRAN
+    de_a = re.search(
+        r"\bde\s+" + cite + grade + cite + r"[àa]" + cite + grade,
+        text,
+        re.I,
+    )
     if de_a:
         return de_a.group(2).upper()
     for motif in (
-        r"\b[àa]\s+" + grade + r"\s*\(\s*contre\s+" + grade,
-        r"\b[àa]\s+" + grade + r"\s*,\s*de\s+" + grade,
-        grade + r"\s*[\(,]\s*pr[ée]c[ée]demment\s+" + grade,
-        grade + r".{0,20}?pr[ée]c[ée]dente\s*:?\s+" + grade,
+        r"\b[àa]\s+" + cite + grade + r"\s*\(\s*contre\s+" + cite + grade,
+        r"\b[àa]\s+" + cite + grade + r"\s*,\s*de\s+" + cite + grade,
+        cite + grade + cite + r"[\(,]\s*pr[ée]c[ée]demment\s+" + cite + grade,
+        cite + grade + cite + r".{0,20}?pr[ée]c[ée]dente\s*:?\s+" + cite + grade,
     ):
         m = re.search(motif, text, re.I)
         if m:
             return m.group(1).upper()
+    tableau = re.search(
+        r"(?:[eé]metteur|note)\s+de\s+long\s+terme\s+r[eé]gionale\s+" + cite + grade,
+        text,
+        re.I,
+    )
+    if tableau:
+        return tableau.group(1).upper()
     return None
 
 

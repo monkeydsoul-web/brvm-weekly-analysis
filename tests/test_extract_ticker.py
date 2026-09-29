@@ -430,6 +430,16 @@ def test_gcr_de_x_a_y_garde_la_note_nouvelle():
         assert info["score_notation"] == _scraper.RATING_GRADES[attendu]
 
 
+def test_guillemets_gcr_autour_des_crans():
+    # PDF anciens : guillemets et espaces autour des deux crans, parfois sans espace avant « à ».
+    assert _extract_rating_info("de ‘A- ’ à ‘AA- ’")["note"] == "AA-"
+    assert _extract_rating_info("de ‘BBB+ ’ à ‘A ’")["note"] == "A"
+    assert _extract_rating_info("de ‘BBB ’à ‘BBB+ ’")["note"] == "BBB+"
+    assert _extract_rating_info(
+        "Emetteur de long terme Régionale A. La perspective est stable."
+    )["note"] == "A"
+
+
 def test_formulation_inverse_garde_la_note_nouvelle():
     assert _extract_rating_info("La note de long terme est relevée à AA- (contre A)")["note"] == "AA-"
     assert _extract_rating_info("La note est portée à A+, de A")["note"] == "A+"
