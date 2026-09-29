@@ -345,6 +345,12 @@ def test_ecriture_remplace_atomiquement(tmp_path, caplog):
     assert "0 avant, 1 après" in caplog.text
 
 
+def test_log_dir_cree_avant_le_handler():
+    source = (_CHEMIN).read_text(encoding="utf-8")
+    assert source.index("LOG_DIR.mkdir") < source.index("logging.FileHandler")
+    assert _scraper.LOG_DIR.is_dir()
+
+
 def test_pdf_relatif_resolu_sous_data_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(_scraper, "DATA_DIR", tmp_path)
     dossier = tmp_path / "brvm_docs" / "notations"
