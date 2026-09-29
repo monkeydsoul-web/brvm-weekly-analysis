@@ -833,6 +833,22 @@ def _annoter_suspensions(results, historique, moment):
         )
 
 
+def _poser_prix_cible(resultat, row):
+    """Prix, écart et libellé sur la ligne publiée.
+
+    N'écrit rien dans le dictionnaire de note : le conseil ne bouge pas.
+    """
+    from prix_cible import estimer_prix_cible
+
+    if not isinstance(resultat, dict):
+        return resultat
+    estimation = estimer_prix_cible(row if isinstance(row, dict) else {})
+    resultat["prix_cible"] = estimation["prix_cible"]
+    resultat["ecart_pct"] = estimation["ecart_pct"]
+    resultat["libelle_valeur"] = estimation["libelle"]
+    return resultat
+
+
 def _poser_verdict(scores, composite, precedent, row):
     """Remplit note10, conseil, libelle, couleur, statut. N'ecrit rien sur disque."""
     statut = _statut_ligne(row)
@@ -1432,6 +1448,7 @@ def compute_live_ranking(trigger="manual", force=False, moment=None):
                         "statut_source": None,
                         "alerte_cotation": None,
                     }
+                    _poser_prix_cible(result, row)
                     results.append(result)
 
                 except Exception as e:

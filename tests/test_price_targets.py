@@ -35,7 +35,7 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     assert alph["upside_pct"] == 18.1
     assert alph["n_models"] == 3
     assert alph["target_unreliable"] is False
-    assert alph["verdict"] == "Potentiel modéré"
+    assert alph["verdict"] == "Décote modérée"
     assert alph["div_confidence"] == "inconnue"
 
     brav = par_ticker["BRAV"]
@@ -48,7 +48,7 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     assert brav["target_unreliable"] is True
     assert brav["verdict"] == "incertain"
 
-    # Ecart largement negatif : le code actuel n'a pas de categorie « trop cher » (G-5).
+    # Cible loin sous le cours : le libellé suit l'écart, il ne dit pas « proche ».
     cher = par_ticker["CHER"]
     assert cher["epv_target"] == 5000
     assert cher["graham_target"] == 6708
@@ -56,7 +56,10 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     assert cher["avg_target"] == 4969
     assert cher["upside_pct"] == -75.2
     assert cher["target_unreliable"] is False
-    assert cher["verdict"] == "Proche valeur juste"
+    assert cher["verdict"] == "Au-dessus du prix cible"
+    assert cher["prix_cible"] == cher["avg_target"]
+    assert cher["ecart_pct"] == cher["upside_pct"]
+    assert cher["libelle_valeur"] == cher["verdict"]
 
     excp = par_ticker["EXCP"]
     assert excp["epv_target"] == 4000
@@ -89,7 +92,8 @@ def test_cibles_alias_eps_est_et_book_value(monkeypatch, tmp_path):
     assert row["pb_target"] == 500
     assert row["avg_target"] == 854
     assert row["upside_pct"] == -14.6
-    assert row["verdict"] == "Proche valeur juste"
+    assert row["verdict"] == "Au-dessus du prix cible"
+    assert row["libelle_valeur"] == "Au-dessus du prix cible"
 
 
 def test_cibles_accepte_une_liste_brute(monkeypatch, tmp_path):
