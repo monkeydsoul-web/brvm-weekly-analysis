@@ -307,6 +307,15 @@ def test_legende_avant_la_note_de_long_terme():
     assert info["score_notation"] == 6.5
 
 
+def test_categorie_isolee_cede_devant_la_note():
+    info = _extract_rating_info("Catégorie C ; note A")
+    assert info["note"] == "A"
+    assert info["score_notation"] == 7.5
+    assert _extract_rating_info("Catégorie D ; notation BBB")["note"] == "BBB"
+    assert _extract_rating_info("Classe B ; rating A-")["note"] == "A-"
+    assert _extract_rating_info("Catégorie C")["note"] == "C"
+
+
 def test_sans_ancre_le_premier_cran_compte():
     info = _extract_rating_info("La société est notée BBB+ (échelle AAA, AA, A).")
     assert info["note"] == "BBB+"

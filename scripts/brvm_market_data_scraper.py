@@ -680,10 +680,22 @@ def _fin_ancre_long_terme(text: str) -> Optional[int]:
     return fin
 
 
+def _suit_mot_note(text: str, debut: int) -> bool:
+    """Le cran suit de près « note », « notation » ou « rating »."""
+    gauche = text[max(0, debut - 40):debut]
+    return re.search(
+        r"(?<!\w)(?:notation|rating|note)(?!\w)[\s:;,\-]*$",
+        gauche,
+        re.I,
+    ) is not None
+
+
 def _choisir_note(text: str) -> Optional[str]:
     """Premier cran après l'ancre de long terme, sinon le premier du texte.
 
     À la même position, le cran le plus long gagne (A+ plutôt que A, CCC+ plutôt que CCC).
+    Sans ancre de long terme, un C, D ou B isolé cède devant le cran qui suit
+    « note », « notation » ou « rating ».
     """
     if not text:
         return None
@@ -702,7 +714,12 @@ def _choisir_note(text: str) -> Optional[str]:
             if debut >= ancre:
                 return grade
         return None
-    return crans[0][1]
+    premier_at, premier = crans[0]
+    if premier in ("C", "D", "B") and not _suit_mot_note(text, premier_at):
+        for debut, grade in crans:
+            if _suit_mot_note(text, debut):
+                return grade
+    return premier
 
 
 # ── Extraire note depuis texte ───────────────────────────────────────────────
