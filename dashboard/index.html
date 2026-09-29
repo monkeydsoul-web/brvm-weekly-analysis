@@ -1924,7 +1924,8 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
  'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerExportCSV','screenerAnalyseAI',
  'renderPrevisionsPage','loadPriceChart','fetchLiveScore','loadLiveRank','renderLiveRankBadge','renderRankCards',
  'openMarkowitz','launchMarkowitz','initCompanyTabs','getDivConfidenceBadge','getDivYieldHtml',
- 'openCompare','renderCompare'].forEach(fn=>{
+ 'openCompare','renderCompare',
+ 'setAlert','showAlertModal','checkAlertsWithPrices'].forEach(fn=>{
   if(typeof window[fn]==='undefined'){
     var stub=function(){ if(typeof brvmMissing==='function') brvmMissing(fn); return ''; };
     stub._brvmStub=true;
