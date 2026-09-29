@@ -41,138 +41,199 @@ def _set_cached(ticker, data):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Score technique /10 — momentum prix live
+# Score technique /10 — clôtures passées seulement (D-3 = B)
+#
+# Ne lit pas la séance : ni variation du jour, ni ouverture, ni volume du jour,
+# ni top/flop. Deux composantes :
+#   - tendance sur 20 à 30 clôtures (7 points)
+#   - liquidité moyenne sur 20 séances (3 points)
+# Repli si l'historique est trop court : milieu de la composante, signalé
+# dans le détail (« historique insuffisant », « historique court »,
+# « volumes insuffisants »). La variation annuelle BOC n'entre plus ici.
 # ──────────────────────────────────────────────────────────────────────────────
-def score_technique_live(row: dict) -> dict:
+
+TENDANCE_SEANCES_MAX = 30
+TENDANCE_SEANCES_MIN = 20
+TENDANCE_SEANCES_REPLI = 5
+LIQUIDITE_SEANCES = 20
+LIQUIDITE_SEANCES_REPLI = 5
+# Milieu de chaque composante : ni récompense ni punition sans données.
+TENDANCE_NEUTRE = 3.5
+LIQUIDITE_NEUTRE = 1.5
+
+
+def _nombre(valeur):
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return None
+    if valeur != valeur or valeur in (float("inf"), float("-inf")):
+        return None
+    return float(valeur)
+
+
+def _cours_point(point):
+    if not isinstance(point, dict):
+        return None
+    for cle in ("price", "close"):
+        cours = _nombre(point.get(cle))
+        if cours is not None and cours > 0:
+            return cours
+    return None
+
+
+def _volume_point(point):
+    """None si le volume n'est pas renseigné (distinct d'un volume à 0)."""
+    if not isinstance(point, dict) or "volume" not in point:
+        return None
+    volume = _nombre(point.get("volume"))
+    if volume is None or volume < 0:
+        return None
+    return volume
+
+
+def _jour_iso(moment):
+    if moment is None:
+        moment = datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    else:
+        moment = moment.astimezone(timezone.utc)
+    return moment, moment.date().isoformat()
+
+
+def _est_samedi_ou_dimanche(date):
+    try:
+        jour = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return jour.weekday() >= 5
+
+
+def serie_clotures(points, jour_exclu):
+    """Clôtures complètes, une par date, hors séance `jour_exclu`, hors
+    samedi et dimanche, et hors points annuels (source historical).
+    `volume` vaut None s'il manque.
     """
-    Score technique /10 basé sur les données live :
-    - Variation jour (change_pct)
-    - Momentum intraday (prix vs ouverture)
-    - Volume relatif
-    """
-    score = 0.0
-    details = []
+    par_date = {}
+    for point in points or []:
+        if not isinstance(point, dict):
+            continue
+        if point.get("source") == "historical":
+            continue
+        date = point.get("date") or ""
+        if not isinstance(date, str):
+            continue
+        date = date[:10]
+        if len(date) != 10:
+            continue
+        if _est_samedi_ou_dimanche(date):
+            continue
+        if jour_exclu and date >= jour_exclu:
+            continue
+        cours = _cours_point(point)
+        if cours is None:
+            continue
+        par_date[date] = {"date": date, "cours": cours, "volume": _volume_point(point)}
+    return [par_date[date] for date in sorted(par_date)]
 
-    change_pct  = row.get("change_pct", 0) or 0
-    price       = row.get("price") or 0
-    open_price  = row.get("open") or price
-    volume      = row.get("volume", 0) or 0
 
-    # Variation du jour
-    if change_pct >= 3:
-        score += 3.0
-        details.append(f"Variation={change_pct:+.1f}% ✓✓")
-    elif change_pct >= 1:
-        score += 2.0
-        details.append(f"Variation={change_pct:+.1f}% ✓")
-    elif change_pct >= -1:
-        score += 1.0
-        details.append(f"Variation={change_pct:+.1f}% neutre")
-    elif change_pct >= -3:
-        score += 0.0
-        details.append(f"Variation={change_pct:+.1f}% ✗")
+def _points_rendement(rendement):
+    if rendement >= 15:
+        return 7.0
+    if rendement >= 8:
+        return 5.5
+    if rendement >= 3:
+        return 4.5
+    if rendement >= -3:
+        return 3.5
+    if rendement >= -8:
+        return 2.0
+    if rendement >= -15:
+        return 1.0
+    return 0.0
+
+
+def _points_tendance(serie):
+    n = len(serie)
+    if n < TENDANCE_SEANCES_REPLI:
+        return TENDANCE_NEUTRE, (
+            "Tendance : historique insuffisant (%d clôtures, seuil %d) — neutre"
+            % (n, TENDANCE_SEANCES_REPLI)
+        )
+    fenetre = min(TENDANCE_SEANCES_MAX, n)
+    debut = serie[-fenetre]["cours"]
+    fin = serie[-1]["cours"]
+    if not debut:
+        return TENDANCE_NEUTRE, "Tendance: cours de depart nul — neutre"
+    rendement = (fin / debut - 1.0) * 100.0
+    points = _points_rendement(rendement)
+    texte = "Tendance %d séances %+.1f %%" % (fenetre, rendement)
+    if n < TENDANCE_SEANCES_MIN:
+        texte += " — historique court (seuil %d)" % TENDANCE_SEANCES_MIN
+    return points, texte
+
+
+def _points_liquidite(serie):
+    fenetre = serie[-LIQUIDITE_SEANCES:]
+    volumes = [point["volume"] for point in fenetre if point.get("volume") is not None]
+    if len(volumes) < LIQUIDITE_SEANCES_REPLI:
+        return LIQUIDITE_NEUTRE, (
+            "Liquidité : volumes insuffisants (%d séances, seuil %d) — neutre"
+            % (len(volumes), LIQUIDITE_SEANCES_REPLI)
+        )
+    moyenne = sum(volumes) / float(len(volumes))
+    if moyenne > 10000:
+        points, mot = 3.0, "liquide"
+    elif moyenne > 1000:
+        points, mot = 2.0, "correcte"
+    elif moyenne > 0:
+        points, mot = 1.0, "faible"
     else:
-        score -= 1.0
-        details.append(f"Variation={change_pct:+.1f}% forte baisse ✗✗")
+        points, mot = 0.0, "sans echange"
+    return points, "Liquidité moyenne %d séances = %d — %s" % (
+        len(volumes), int(round(moyenne)), mot,
+    )
 
-    # Prix au-dessus de l'ouverture = momentum intraday positif
-    if open_price and open_price > 0:
-        above = (price / open_price - 1) * 100
-        if above > 2:
-            score += 3.0
-            details.append(f"Au-dessus ouverture +{above:.1f}% ✓✓")
-        elif above > 0:
-            score += 2.0
-            details.append(f"Au-dessus ouverture +{above:.1f}% ✓")
-        elif above > -2:
-            score += 1.0
-            details.append("En ligne avec ouverture")
-        else:
-            details.append(f"En dessous ouverture {above:.1f}% ✗")
 
-    # Volume : signal de liquidité (bonus si > 0)
-    if volume > 10000:
-        score += 2.0
-        details.append(f"Volume={volume:,} — Liquide ✓✓")
-    elif volume > 1000:
-        score += 1.0
-        details.append(f"Volume={volume:,} — Correct ✓")
-    elif volume > 0:
-        score += 0.5
-        details.append(f"Volume={volume:,} — Faible")
-    else:
-        details.append("Volume=0 — Pas d'échange ✗")
-
-    # Trend top5/flop5 brvm.org
-    trend = row.get("trend")
-    if trend == "top":
-        score += 2.0
-        details.append("Top 5 du jour ✓✓")
-    elif trend == "flop":
-        score -= 1.0
-        details.append("Flop 5 du jour ✗")
-
-    # Variation annuelle BOC — bandes élargies pour performances exceptionnelles
-    var_annee = row.get("var_annee") or 0
-    if var_annee >= 80:
-        score += 3.0
-        details.append(f"Perf annuelle +{var_annee:.1f}% ✓✓✓")
-    elif var_annee >= 30:
-        score += 2.0
-        details.append(f"Perf annuelle +{var_annee:.1f}% ✓✓")
-    elif var_annee >= 10:
-        score += 1.0
-        details.append(f"Perf annuelle +{var_annee:.1f}% ✓")
-    elif var_annee >= 0:
-        score += 0.5
-        details.append(f"Perf annuelle +{var_annee:.1f}% stable")
-    elif var_annee >= -10:
-        score -= 0.5
-        details.append(f"Perf annuelle {var_annee:.1f}% ✗")
-    else:
-        score -= 1.0
-        details.append(f"Perf annuelle {var_annee:.1f}% ✗✗")
-
-    # Tendance 30j BOC (données quotidiennes BRVM)
+def _historique_ticker(row):
+    """Liste de points. La clé présente (même vide) empêche la lecture disque."""
+    if "historique_clotures" in row:
+        return row.get("historique_clotures") or []
+    ticker = row.get("ticker") or ""
+    if not ticker:
+        return []
     try:
         from price_history_builder import load_history
-        ph = load_history()
-        ticker_hist = ph.get(row.get("ticker", ""), [])
-        boc_pts = sorted(
-            [p for p in ticker_hist if p.get("source") == "boc" and p.get("price")],
-            key=lambda x: x["date"]
-        )
-        if len(boc_pts) >= 5:
-            price_now  = boc_pts[-1]["price"]
-            price_30d  = boc_pts[-min(30, len(boc_pts))]["price"]
-            if price_30d > 0:
-                trend_30 = (price_now / price_30d - 1) * 100
-                if trend_30 >= 10:
-                    score += 1.5
-                    details.append(f"Tendance 30j BOC +{trend_30:.1f}% ✓✓")
-                elif trend_30 >= 3:
-                    score += 1.0
-                    details.append(f"Tendance 30j BOC +{trend_30:.1f}% ✓")
-                elif trend_30 >= -3:
-                    score += 0.5
-                    details.append(f"Tendance 30j BOC {trend_30:+.1f}% stable")
-                elif trend_30 >= -10:
-                    details.append(f"Tendance 30j BOC {trend_30:.1f}% ✗")
-                else:
-                    score -= 0.5
-                    details.append(f"Tendance 30j BOC {trend_30:.1f}% ✗✗")
-            # Bonus combo : var_annee positive ET tendance 30j positive
-            if var_annee >= 5 and len(boc_pts) >= 5:
-                price_now_  = boc_pts[-1]["price"]
-                price_30d_  = boc_pts[-min(30, len(boc_pts))]["price"]
-                if price_30d_ > 0 and price_now_ > price_30d_:
-                    score += 0.5
-                    details.append("Combo var_annee ↑ + 30j ↑ ✓")
+        historique = load_history()
     except Exception:
-        pass
+        return []
+    if not isinstance(historique, dict):
+        return []
+    points = historique.get(ticker) or []
+    return points if isinstance(points, list) else []
 
-    score = min(10.0, max(0.0, score))
-    return {"score": round(score, 1), "label": "Technique", "details": " | ".join(details)}
+
+def score_technique_live(row: dict) -> dict:
+    """Technique /10 sur les clôtures, pas sur la séance en cours.
+
+    `_inclure_cloture_du_jour` (posé par le classement après 15h30 UTC) ajoute
+    le cours du row comme dernière clôture. Le volume de ce cours n'est pas
+    utilisé : la liquidité reste celle des séances déjà enregistrées.
+    """
+    jour = _jour_iso(row.get("_moment"))[1]
+    serie = serie_clotures(_historique_ticker(row), jour)
+    points_liq, texte_liq = _points_liquidite(serie)
+    if row.get("_inclure_cloture_du_jour"):
+        cours = _nombre(row.get("price"))
+        if cours is not None and cours > 0:
+            serie = list(serie)
+            serie.append({"date": jour, "cours": cours, "volume": None})
+    points_tendance, texte_tendance = _points_tendance(serie)
+    score = min(10.0, max(0.0, points_tendance + points_liq))
+    return {
+        "score": round(score, 1),
+        "label": "Technique",
+        "details": texte_tendance + " | " + texte_liq,
+    }
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -353,7 +414,13 @@ def compute_all_live_scores(base_fundamentals_dict: dict, live_cache: dict) -> l
             logger.warning(f"Erreur score live {ticker}: {e}")
             results.append({"ticker": ticker, "composite_adj": 0, "error": str(e), "conseil": None})
 
-    results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+    def _cle(ligne):
+        valeur = ligne.get("composite_adj")
+        if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+            return (0, 0.0)
+        return (1, float(valeur))
+
+    results.sort(key=_cle, reverse=True)
     for i, r in enumerate(results):
         r["rank"] = i + 1
 

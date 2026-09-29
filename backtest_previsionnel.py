@@ -11,6 +11,14 @@ from collections import defaultdict
 from paths import DATA_DIR
 
 
+def _note(ligne):
+    """composite_adj manquant ou None (société non notée) vaut 0 pour les calculs."""
+    valeur = ligne.get("composite_adj") if isinstance(ligne, dict) else None
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return 0
+    return valeur
+
+
 # ── Loaders ───────────────────────────────────────────────────────────────────
 
 def _load_price_history():
@@ -151,7 +159,7 @@ def _backtest_yearly(price_history, score_map, boc_data):
 
             # Fondamentaux = scores live (proxy pour les années historiques)
             sc = score_map.get(ticker, {})
-            score_adj = sc.get("composite_adj", 0)
+            score_adj = _note(sc)
             div_yield = sc.get("div_yield", 0)
 
             # var_annee = from boc_data (actuel) — proxy historique
@@ -245,7 +253,7 @@ def generate_portfolios(scores=None, price_history=None):
             "stocks": [
                 {
                     "ticker": s["ticker"], "name": s.get("name", ""),
-                    "weight": w, "score": s.get("composite_adj", 0),
+                    "weight": w, "score": _note(s),
                     "div_yield": s.get("div_yield", 0), "pe": s.get("pe_ref"),
                     "pb": s.get("pb_ref"), "roe": s.get("roe"),
                     "momentum": s.get("momentum_30d", 0),
@@ -258,24 +266,24 @@ def generate_portfolios(scores=None, price_history=None):
 
     # Conservateur
     cand_c = sorted(
-        [s for s in enriched if s.get("composite_adj", 0) >= 50 and
+        [s for s in enriched if _note(s) >= 50 and
          s.get("div_yield", 0) >= 4 and (s.get("pe_ref") or 99) < 15],
-        key=lambda x: -(x.get("div_yield", 0) + x.get("composite_adj", 0) * 0.05),
+        key=lambda x: -(x.get("div_yield", 0) + _note(x) * 0.05),
     )[:5]
     if len(cand_c) < 3:
         cand_c = sorted([s for s in enriched if s.get("div_yield", 0) >= 3],
                         key=lambda x: -x.get("div_yield", 0))[:5]
 
     # Équilibré
-    cand_b = sorted([s for s in enriched if s.get("composite_adj", 0) >= 58],
-                    key=lambda x: -x.get("composite_adj", 0))[:6]
+    cand_b = sorted([s for s in enriched if _note(s) >= 58],
+                    key=lambda x: -_note(x))[:6]
     if len(cand_b) < 3:
-        cand_b = sorted(enriched, key=lambda x: -x.get("composite_adj", 0))[:6]
+        cand_b = sorted(enriched, key=lambda x: -_note(x))[:6]
 
     # Croissance
     cand_g = sorted(
-        [s for s in enriched if s.get("composite_adj", 0) >= 48 and s.get("momentum_30d", -999) > 0],
-        key=lambda x: -(x.get("momentum_30d", 0) + x.get("composite_adj", 0) * 0.3),
+        [s for s in enriched if _note(s) >= 48 and s.get("momentum_30d", -999) > 0],
+        key=lambda x: -(x.get("momentum_30d", 0) + _note(x) * 0.3),
     )[:5]
     if len(cand_g) < 3:
         cand_g = sorted([s for s in enriched if s.get("momentum_30d", -999) > 0],
@@ -303,7 +311,7 @@ def compute_signals(scores=None, price_history=None):
     out = []
     for s in scores:
         ticker = s.get("ticker", "")
-        score  = s.get("composite_adj", 0)
+        score  = _note(s)
         pts    = sorted(price_history.get(ticker, []), key=lambda x: x["date"])
         prices = [p["price"] for p in pts if p.get("price")]
         mom    = _momentum(prices, 30)
@@ -387,7 +395,7 @@ def compute_backtest_previsionnel(scores=None, price_history=None):
         boc_d      = boc_data.get(ticker, {})
         div_yield  = sc.get("div_yield", 0) or boc_d.get("div_rdt", 0) or 0
         var_annee  = boc_d.get("var_annee", 0) or 0
-        sp         = _score_prevision(sc.get("composite_adj", 0), div_yield, mom_train, var_annee)
+        sp         = _score_prevision(_note(sc), div_yield, mom_train, var_annee)
         pred_ret   = (sp - 0.5) * 20   # [-10, +10]%
         actual_ret = (ap[-1] - ap[0]) / ap[0] * 100 if ap[0] > 0 else 0
 
@@ -397,7 +405,7 @@ def compute_backtest_previsionnel(scores=None, price_history=None):
             "ticker": ticker,
             "score_prevision": sp,
             "signal": _signal_from_score(sp),
-            "score": sc.get("composite_adj", 0),
+            "score": _note(sc),
             "mom_train": round(mom_train, 2),
             "predicted_return": round(pred_ret, 2),
             "actual_return": round(actual_ret, 2),
@@ -514,7 +522,7 @@ def generate_rapport_pdf(scores=None, price_history=None):
     for i, s in enumerate(top3, 1):
         top_data.append([
             str(i), s["ticker"],
-            f"{s.get('composite_adj', 0):.0f}",
+            f"{_note(s):.0f}",
             f"{s.get('pe_ref', 0):.1f}×" if s.get("pe_ref") else "—",
             f"{s.get('div_yield', 0):.1f}%" if s.get("div_yield") else "—",
             (s.get("sector", "—") or "—")[:20],

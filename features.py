@@ -17,6 +17,7 @@ from flask import jsonify, request, Response
 logger = logging.getLogger(__name__)
 
 from paths import DATA_DIR
+from live_ranker import cle_tri_note, nombre_note
 
 # ── Default score weights ──────────────────────────────────────────────────
 DEFAULT_WEIGHTS = {
@@ -55,14 +56,14 @@ def apply_custom_weights(scores: list, weights: dict) -> list:
     norm = 8 / total_w  # normalise to keep /80 scale
     for s in scores:
         custom = (
-            (s.get("score_graham",0)  * weights.get("graham",1) +
-             s.get("score_dcf",0)     * weights.get("dcf",1) +
-             s.get("score_ddm",0)     * weights.get("ddm",1) +
-             s.get("score_epv",0)     * weights.get("epv",1) +
-             s.get("score_buffett",0) * weights.get("buffett",1) +
-             s.get("score_rev_dcf",0) * weights.get("rev_dcf",1) +
-             s.get("score_relatif",0) * weights.get("relatif",1) +
-             s.get("score_technique",0)* weights.get("technique",1))
+            (nombre_note(s.get("score_graham"))  * weights.get("graham",1) +
+             nombre_note(s.get("score_dcf"))     * weights.get("dcf",1) +
+             nombre_note(s.get("score_ddm"))     * weights.get("ddm",1) +
+             nombre_note(s.get("score_epv"))     * weights.get("epv",1) +
+             nombre_note(s.get("score_buffett")) * weights.get("buffett",1) +
+             nombre_note(s.get("score_rev_dcf")) * weights.get("rev_dcf",1) +
+             nombre_note(s.get("score_relatif")) * weights.get("relatif",1) +
+             nombre_note(s.get("score_technique"))* weights.get("technique",1))
             * norm
         )
         row = dict(s)
@@ -75,7 +76,7 @@ def apply_custom_weights(scores: list, weights: dict) -> list:
 # ── Dividend simulator ─────────────────────────────────────────────────────
 def simulate_dividends(investment_xof: float, years: int = 5, reinvest: bool = True) -> dict:
     scores = _load_scores()
-    top = sorted(scores, key=lambda x: (x.get("composite_adj",0)), reverse=True)[:10]
+    top = sorted(scores, key=cle_tri_note, reverse=True)[:10]
     # Equal weight portfolio from top 10
     per_stock = investment_xof / len(top) if top else 0
     results = []
@@ -156,7 +157,7 @@ def get_price_targets() -> list:
                            else "Proche valeur juste")
         targets.append({
             "ticker": s["ticker"], "name": s.get("name", ""),
-            "current_price": price, "score": s.get("composite_adj", 0),
+            "current_price": price, "score": nombre_note(s.get("composite_adj")),
             "epv_target": epv_target, "graham_target": graham_target,
             "pb_target": pb_target, "avg_target": avg_target,
             "upside_pct": upside,
@@ -182,7 +183,7 @@ def export_csv() -> str:
               "ex_div_date","pay_div_date"]
     w = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore")
     w.writeheader()
-    for s in sorted(scores, key=lambda x: x.get("composite_adj",0), reverse=True):
+    for s in sorted(scores, key=cle_tri_note, reverse=True):
         w.writerow(s)
     return buf.getvalue()
 
@@ -191,7 +192,7 @@ def chat_with_ai(message, history):
     import requests as _req
     _key = os.environ.get("ANTHROPIC_API_KEY", "")
     _scores = _load_scores()
-    _top = sorted(_scores, key=lambda x: x.get("composite_adj",0), reverse=True)[:5]
+    _top = sorted(_scores, key=cle_tri_note, reverse=True)[:5]
     _ctx = "Tu es analyste BRVM. Top actions: " + ", ".join(s["ticker"] for s in _top)
     _msgs = [{"role":"user","content":message}]
     import sys

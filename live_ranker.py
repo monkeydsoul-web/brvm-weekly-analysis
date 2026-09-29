@@ -6,6 +6,7 @@ Cache : data/live_ranking.json (mis à jour à chaque déclenchement)
 
 import os
 import json
+import hashlib
 import logging
 import time
 import threading
@@ -97,7 +98,7 @@ def _convert_pdf_div(ticker, value, unite):
 # Construction du row fondamental enrichi
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
+def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis, boc_snapshot=None):
     """
     Fusionne les 3 sources de données pour un ticker :
     1. Fondamentaux statiques (scraper.py)
@@ -148,9 +149,14 @@ def _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis):
 
     # ── BOC — PER réel, BNA dérivé, var_annee, ex_div_date ─────────────────
     try:
-        from boc_scraper import get_boc_price_history
-        _boc = get_boc_price_history()
-        boc_entry = _boc.get(ticker, {})
+        # Le classement passe le fichier déjà lu après l'empreinte.
+        # Sans ce cliché, on relirait boc_data.json au milieu du calcul.
+        if boc_snapshot is None:
+            from boc_scraper import get_boc_price_history
+            _boc = get_boc_price_history()
+        else:
+            _boc = boc_snapshot
+        boc_entry = _boc.get(ticker, {}) if isinstance(_boc, dict) else {}
         if boc_entry:
             per_boc = boc_entry.get('per_boc')
             if per_boc and 0 < float(per_boc) < 500:
@@ -408,7 +414,8 @@ def _poser_verdict(scores, composite, precedent, row):
 def _hysteresis_conseil(adj, prev, price, statut=None):
     """Conseil avec amortisseur. None sans prix.
 
-    Le gel a la cloture (PR-05) reste dehors : on recoit le composite deja choisi.
+    Le composite reçu est déjà celui de la note figée ou celui du recalcul
+    de clôture : l'amortisseur ne voit pas le cours de la séance.
     """
     if not price:
         return None
@@ -418,38 +425,429 @@ def _hysteresis_conseil(adj, prev, price, statut=None):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Gel de la note en séance (D-2 = C)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Présent dans live_ranking.json une fois la note calculée par cette formule.
+# Un fichier sans cette marque vient de l'ancienne note (séance). On ne la
+# remplace pas tant que le marché est ouvert.
+NOTE_FORMULE = "cloture-v1"
+
+_CHAMPS_NOTE = (
+    "score_graham", "score_dcf", "score_ddm", "score_epv",
+    "score_buffett", "score_rev_dcf", "score_relatif", "score_technique",
+    "detail_graham", "detail_dcf", "detail_ddm", "detail_epv",
+    "detail_buffett", "detail_rev_dcf", "detail_relatif", "detail_technique",
+    "geo_penalty", "composite_raw", "composite_adj",
+    "note10", "conseil", "conseil_libelle", "conseil_couleur", "statut",
+    "note_calculee_le",
+)
+
+
+def _moment_utc(moment=None):
+    from live_data import _en_utc
+    return _en_utc(moment)
+
+
+def _seance_ouverte(moment):
+    from live_data import is_market_open_at
+    return is_market_open_at(moment)
+
+
+def _cloture_du_jour_incluse(moment):
+    """Vrai après 15h30 UTC un jour de semaine : le cours live est la clôture."""
+    from live_data import CLOTURE_HEURE, CLOTURE_MINUTE
+    moment = _moment_utc(moment)
+    if moment.weekday() >= 5:
+        return False
+    return (moment.hour, moment.minute) >= (CLOTURE_HEURE, CLOTURE_MINUTE)
+
+
+def derniere_cloture(moment):
+    """Dernier instant de clôture (15h30 UTC, lun-ven) déjà passé."""
+    from datetime import timedelta, time as heure
+    from live_data import CLOTURE_HEURE, CLOTURE_MINUTE
+    moment = _moment_utc(moment)
+    jour = moment.date()
+    for _ in range(8):
+        if jour.weekday() < 5:
+            cloture = datetime.combine(
+                jour, heure(CLOTURE_HEURE, CLOTURE_MINUTE), tzinfo=timezone.utc,
+            )
+            if cloture <= moment:
+                return cloture
+        jour = jour - timedelta(days=1)
+    return None
+
+
+def _lire_moment(valeur):
+    if not isinstance(valeur, str) or not valeur:
+        return None
+    try:
+        moment = datetime.fromisoformat(valeur.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return _moment_utc(moment)
+
+
+class EmpreinteIllisible(Exception):
+    """Un fichier de faits existe mais son JSON n'est pas lisible.
+
+    Le classement ne doit pas enregistrer d'empreinte dans ce cas :
+    le passage suivant retentera. Après une nouvelle clôture, la note
+    est quand même recalculée sans cette source.
+    """
+
+    def __init__(self, path):
+        super().__init__(path)
+        self.path = path
+
+
+# Clés réécrites à chaque job sans changer le fait (date de scrape, etc.).
+_CLES_VOLATILES = {
+    "boc_data.json": frozenset({"last_update"}),
+    "analyses_summary.json": frozenset({"analyzed_at"}),
+    "external_dividends.json": frozenset({"scraped_at"}),
+}
+
+
+def _oter_cles(valeur, cles):
+    if isinstance(valeur, dict):
+        return dict(
+            (cle, _oter_cles(fils, cles))
+            for cle, fils in valeur.items()
+            if cle not in cles
+        )
+    if isinstance(valeur, list):
+        return [_oter_cles(fils, cles) for fils in valeur]
+    return valeur
+
+
+def _empreinte_contenu(path):
+    """sha1 du JSON canonique. Fichier absent : « absent ».
+
+    last_update, analyzed_at et scraped_at ne comptent pas : le job de 19h
+    les réécrit tous les jours, y compris le week-end, sans fait nouveau.
+    """
+    nom = os.path.basename(path)
+    try:
+        with open(path, encoding="utf-8") as f:
+            brut = f.read()
+    except FileNotFoundError:
+        return "absent"
+    except OSError as exc:
+        raise EmpreinteIllisible(path) from exc
+    if not brut.strip():
+        raise EmpreinteIllisible(path)
+    try:
+        data = json.loads(brut)
+    except ValueError as exc:
+        raise EmpreinteIllisible(path) from exc
+    if not isinstance(data, dict):
+        raise EmpreinteIllisible(path)
+    nettoye = _oter_cles(data, _CLES_VOLATILES.get(nom, frozenset()))
+    canon = json.dumps(nettoye, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(canon.encode("utf-8")).hexdigest()
+
+
+def chemins_faits():
+    """Fichiers dont un changement de contenu est un fait nouveau pour la note.
+
+    boc_data.json et external_dividends.json : job 19h00.
+    analyses_summary.json : nouveau rapport annuel analysé.
+    """
+    return (
+        os.path.join(DATA_DIR, "boc_data.json"),
+        os.path.join(DATA_DIR, "analyses_summary.json"),
+        os.path.join(DATA_DIR, "external_dividends.json"),
+    )
+
+
+def empreinte_faits(chemins=None):
+    """Empreinte de contenu. Lève EmpreinteIllisible si un fichier est illisible."""
+    if chemins is None:
+        chemins = chemins_faits()
+    return "|".join(_empreinte_contenu(chemin) for chemin in chemins)
+
+
+def _lire_fichier_faits(path):
+    """(dict, lisible). Un fichier absent n'est pas une erreur de lecture."""
+    if not os.path.exists(path):
+        return {}, True
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError, UnicodeError):
+        return {}, False
+    if not isinstance(data, dict):
+        return {}, False
+    return data, True
+
+
+def _note_calculee_payload(payload):
+    if not isinstance(payload, dict):
+        return None
+    moment = _lire_moment(payload.get("note_calculee_le"))
+    if moment is not None:
+        return moment
+    for ligne in payload.get("ranking") or []:
+        if isinstance(ligne, dict):
+            moment = _lire_moment(ligne.get("note_calculee_le"))
+            if moment is not None:
+                return moment
+    return None
+
+
+def doit_recalculer_note(payload, moment, empreinte):
+    """True si composite / note10 / conseil doivent être recalculés.
+
+    En séance : seulement sur un fait nouveau, ou s'il n'existe aucune note.
+    Une formule inconnue (fichier d'avant ce PR) est conservée en séance.
+    Marché fermé : recalcul si la formule a changé, si un fait est nouveau,
+    ou si la dernière clôture est postérieure à note_calculee_le.
+    """
+    moment = _moment_utc(moment)
+    if not isinstance(payload, dict) or not payload.get("ranking"):
+        return True
+    if payload.get("note_formule") != NOTE_FORMULE:
+        return not _seance_ouverte(moment)
+    if payload.get("faits_empreinte") != empreinte:
+        return True
+    if _seance_ouverte(moment):
+        return False
+    calcule = _note_calculee_payload(payload)
+    cloture = derniere_cloture(moment)
+    if calcule is None or cloture is None:
+        return True
+    return calcule < cloture
+
+
+def nombre_note(valeur, defaut=0):
+    """None (société non notée) ne casse pas un calcul ni un format."""
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return defaut
+    return valeur
+
+
+def cle_tri_note(ligne):
+    """Notes chiffrées d'abord, sociétés sans note en dernier."""
+    if not isinstance(ligne, dict):
+        return (0, 0.0)
+    valeur = ligne.get("composite_adj")
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return (0, 0.0)
+    return (1, float(valeur))
+
+
+def _a_une_note(ligne):
+    """Une ligne en erreur (composite souvent à 0) n'est pas une note figée."""
+    if not isinstance(ligne, dict):
+        return False
+    if ligne.get("error"):
+        return False
+    valeur = ligne.get("composite_adj")
+    return isinstance(valeur, (int, float)) and not isinstance(valeur, bool)
+
+
+def _note_sans_prix(moment):
+    """Pas de clôture à noter : scores vides, pas un composite calculé sans cours."""
+    scores = dict((cle, None) for cle in (
+        "score_graham", "score_dcf", "score_ddm", "score_epv",
+        "score_buffett", "score_rev_dcf", "score_relatif", "score_technique",
+        "detail_graham", "detail_dcf", "detail_ddm", "detail_epv",
+        "detail_buffett", "detail_rev_dcf", "detail_relatif", "detail_technique",
+        "geo_penalty", "composite_raw", "composite_adj",
+        "note10", "conseil", "conseil_libelle", "conseil_couleur",
+    ))
+    scores["statut"] = STATUT_NON_NOTE
+    scores["note_calculee_le"] = _moment_utc(moment).isoformat()
+    return scores
+
+
+def _extraire_note(ligne):
+    return dict((cle, ligne[cle]) for cle in _CHAMPS_NOTE if cle in ligne)
+
+
+def _completer_ligne(ticker, base_row, live_price_data, pdf_analysis,
+                     boc_data, am_cache, ph, moment):
+    """Row enrichi + dividende validé + variation plafonnée. Même règles qu'avant."""
+    from data_validator import validate_dividend
+
+    row = _build_enriched_row(
+        ticker, base_row, live_price_data or {}, pdf_analysis, boc_snapshot=boc_data,
+    )
+    _boc_e = boc_data.get(ticker, {}) if isinstance(boc_data, dict) else {}
+    if not isinstance(_boc_e, dict):
+        _boc_e = {}
+    _boc_div = _boc_e.get("div_net") if _boc_e else None
+    _pdf_kpis = ((pdf_analysis or {}).get("kpis") or {}) if pdf_analysis else {}
+    _pdf_raw = (_pdf_kpis.get("dividende_par_action") or {}).get("valeur")
+    _pdf_unite = (_pdf_kpis.get("dividende_par_action") or {}).get("unite")
+    _pdf_raw = _convert_pdf_div(ticker, _pdf_raw, _pdf_unite)
+    _pdf_div = float(_pdf_raw) if (_pdf_raw is not None and _pdf_raw > 0) else None
+    _hist_div = base_row.get("div_hist")
+    _price = row.get("price") or 0
+    _boc_date = _boc_e.get("div_date") if _boc_e else None
+    _am_entry = am_cache.get(ticker, {}) if isinstance(am_cache, dict) else {}
+    if not isinstance(_am_entry, dict):
+        _am_entry = {}
+    _dv = validate_dividend(
+        ticker, _hist_div, _pdf_div, _boc_div, _price,
+        am_div=_am_entry.get("amount"), am_date=_am_entry.get("paid_date"),
+        boc_date=_boc_date,
+    )
+    row["div_per_share"] = _dv["value"]
+    row["div_yield"] = _dv["yield_for_calc"]
+    row["div_confidence"] = _dv["confidence"]
+    row["div_flag"] = _dv["flag"]
+    row["div_is_exceptional"] = _dv["is_exceptional"]
+    row["div_exceptional_value"] = _dv["raw_value"]
+    row["div_source_used"] = _dv["source_used"]
+    row["div_source_detail"] = _dv["source_detail"]
+    row["div_ecart_boc_pdf"] = _dv["ecart_boc_pdf"]
+    row["div_am_value"] = _dv["am_div_raw"]
+    row["div_am_date"] = _dv["am_paid_date"]
+    row["div_am_split"] = _dv["am_split_flag"]
+    row["div_am_net_brut"] = _dv["am_net_brut_flag"]
+
+    _raw_chg = row.get("change_pct")
+    if _raw_chg is not None and abs(_raw_chg) > 7.5:
+        _today = _moment_utc(moment).date().isoformat()
+        _hist = ph.get(ticker, []) if isinstance(ph, dict) else []
+        _ref = None
+        if _hist:
+            if len(_hist) >= 2 and _hist[-1].get("date") == _today:
+                _ref = _hist[-2].get("price")
+            else:
+                _ref = _hist[-1].get("price")
+        if _ref is None:
+            _ref = _boc_e.get("cours_prev")
+        _cur = row.get("price")
+        if _ref and _ref > 0 and _cur:
+            _chg2 = (_cur / _ref - 1) * 100
+            row["change_pct"] = _chg2 if abs(_chg2) <= 7.5 else None
+        else:
+            row["change_pct"] = None
+    return row
+
+
+def _prix_pour_la_note(prix_live, points, moment):
+    """Cours qui entre dans les 8 modèles.
+
+    Après la clôture du jour : le cours live (c'est la clôture).
+    Sinon : la dernière clôture de l'historique, pas le tick de séance.
+    En séance, sans aucune clôture : None. La société reste non notée.
+    On ne met pas le cours de la minute à la place.
+    """
+    from live_valuation import _nombre, serie_clotures
+    moment = _moment_utc(moment)
+    cours_live = _nombre(prix_live)
+    if _cloture_du_jour_incluse(moment) and cours_live is not None and cours_live > 0:
+        return cours_live
+    serie = serie_clotures(points, moment.date().isoformat())
+    if serie:
+        return serie[-1]["cours"]
+    if _seance_ouverte(moment):
+        return None
+    if cours_live is not None and cours_live > 0:
+        return cours_live
+    return None
+
+
+def _donnees_prix_note(live_price_data, prix_note):
+    data = dict(live_price_data or {})
+    data["price"] = prix_note
+    data["change_pct"] = 0
+    data["volume"] = 0
+    data["open"] = prix_note
+    data["trend"] = None
+    return data
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Reclassement complet
 # ─────────────────────────────────────────────────────────────────────────────
 
-def compute_live_ranking(trigger="manual", force=False):
+def compute_live_ranking(trigger="manual", force=False, moment=None):
     """
-    Recalcule le classement complet des 47 sociétés.
-    trigger: "price_update" | "pdf_analysis" | "manual" | "scheduler"
+    Met à jour le classement des 47 sociétés.
+
+    En séance, le prix et la variation du jour bougent ; la note
+    (composite, note10, conseil) reste celle de la dernière clôture
+    ou du dernier fait nouveau. `moment` sert aux tests.
+    `force` ne débloque pas une note intraday.
+    trigger: "price_update" | "pdf_analysis" | "manual" | "scheduler" | "startup"
     """
     global _last_ranking, _last_prices
+    moment = _moment_utc(moment)
 
     with _lock:
         try:
             from scraper import STOCK_FUNDAMENTALS
             from live_data import get_live_data
-            from data_validator import validate_dividend
 
-            # Charger les analyses PDF
-            summary_path = os.path.join(DATA_DIR, "analyses_summary.json")
-            pdf_summary  = {}
-            if os.path.exists(summary_path):
-                with open(summary_path, encoding="utf-8") as f:
-                    pdf_summary = json.load(f)
+            # Note précédente d'abord : si un fait est illisible, on garde
+            # son empreinte et on ne fige pas une note calculée à vide.
+            _payload_precedent = None
+            _precedent = {}
+            _prev_conseil = {}
+            try:
+                with open(RANKING_PATH, encoding="utf-8") as _f:
+                    _payload_precedent = json.load(_f)
+                for _r in (_payload_precedent or {}).get("ranking", []):
+                    if isinstance(_r, dict) and _r.get("ticker"):
+                        _precedent[_r["ticker"]] = _r
+                        if _r.get("conseil"):
+                            _prev_conseil[_r["ticker"]] = _r["conseil"]
+            except Exception:
+                _payload_precedent = None
 
-            # Charger les données BOC (pour la validation multi-source)
-            boc_path = os.path.join(DATA_DIR, "boc_data.json")
+            _empreinte_precedente = None
+            if isinstance(_payload_precedent, dict):
+                _empreinte_precedente = _payload_precedent.get("faits_empreinte")
+
+            # Empreinte AVANT de lire les faits pour scorer. boc_scraper écrit
+            # boc_data.json sans os.replace : une lecture pendant l'écriture
+            # peut voir un fichier vide, puis une empreinte du fichier fini.
+            _faits_lisibles = True
+            _illisibles = []
+
+            def _marquer_illisible(chemin):
+                nom = os.path.basename(chemin) if chemin else ""
+                if nom and nom not in _illisibles:
+                    _illisibles.append(nom)
+
+            try:
+                _empreinte = empreinte_faits()
+            except EmpreinteIllisible as exc:
+                logger.warning("Empreinte des faits illisible: %s", exc)
+                _faits_lisibles = False
+                _empreinte = None
+                _marquer_illisible(getattr(exc, "path", None) or str(exc))
+
+            pdf_summary = {}
             boc_data = {}
-            if os.path.exists(boc_path):
-                try:
-                    with open(boc_path, encoding="utf-8") as f:
-                        boc_data = json.load(f)
-                except Exception:
-                    pass
+            am_cache = {}
+            for _chemin in chemins_faits():
+                _data, _ok = _lire_fichier_faits(_chemin)
+                if not _ok:
+                    logger.warning("Fichier de faits illisible, traité comme vide: %s", _chemin)
+                    _faits_lisibles = False
+                    _data = {}
+                    _marquer_illisible(_chemin)
+                _nom = os.path.basename(_chemin)
+                if _nom == "analyses_summary.json":
+                    pdf_summary = _data
+                elif _nom == "boc_data.json":
+                    boc_data = _data
+                elif _nom == "external_dividends.json":
+                    am_cache = _data
+
+            # En séance, un fichier illisible ne change pas la note (écriture
+            # en cours). À la première clôture où il est encore illisible, on
+            # recalcule sans cette source, comme avant, et on le signale.
+            _empreinte_decision = _empreinte if _faits_lisibles else _empreinte_precedente
+            _recalcul = doit_recalculer_note(_payload_precedent, moment, _empreinte_decision)
 
             # Historique prix pour le sas variation
             _ph = {}
@@ -458,23 +856,6 @@ def compute_live_ranking(trigger="manual", force=False):
                 _ph = _load_ph()
             except Exception:
                 pass
-
-            # Conseil précédent pour l'hystérésis
-            _prev_conseil = {}
-            try:
-                with open(RANKING_PATH, encoding="utf-8") as _f:
-                    for _r in json.load(_f).get("ranking", []):
-                        if _r.get("ticker") and _r.get("conseil"):
-                            _prev_conseil[_r["ticker"]] = _r["conseil"]
-            except Exception:
-                pass
-
-            # Charger le cache african-markets (3e source, lecture seule — refresh dans job BOC)
-            try:
-                from external_source import get_cached_dividends as _get_am
-                am_cache = _get_am()
-            except Exception:
-                am_cache = {}
 
             # Charger les prix live (depuis cache, pas de re-fetch)
             live_cache  = get_live_data(force_refresh=False)
@@ -495,72 +876,40 @@ def compute_live_ranking(trigger="manual", force=False):
                         changed_tickers.append(ticker)
                         _last_prices[ticker] = new_price
 
-                    # Construire le row enrichi
-                    row = _build_enriched_row(ticker, base_row, live_price_data, pdf_analysis)
-
-                    # ── Validation multi-source du dividende ──────────────
-                    _boc_e    = boc_data.get(ticker, {})
-                    _boc_div  = _boc_e.get("div_net") if _boc_e else None
-                    _pdf_kpis = ((pdf_analysis or {}).get("kpis") or {}) if pdf_analysis else {}
-                    _pdf_raw   = (_pdf_kpis.get("dividende_par_action") or {}).get("valeur")
-                    _pdf_unite = (_pdf_kpis.get("dividende_par_action") or {}).get("unite")
-                    _pdf_raw   = _convert_pdf_div(ticker, _pdf_raw, _pdf_unite)
-                    _pdf_div  = float(_pdf_raw) if (_pdf_raw is not None and _pdf_raw > 0) else None
-                    _hist_div = base_row.get("div_hist")
-                    _price    = row.get("price") or 0
-
-                    _boc_date = _boc_e.get("div_date") if _boc_e else None
-                    _am_entry = am_cache.get(ticker, {})
-                    _am_div   = _am_entry.get("amount")
-                    _am_date  = _am_entry.get("paid_date")
-
-                    _dv = validate_dividend(
-                        ticker, _hist_div, _pdf_div, _boc_div, _price,
-                        am_div=_am_div, am_date=_am_date, boc_date=_boc_date,
+                    # Cours et variation du jour (affichage). La note est plus bas.
+                    row = _completer_ligne(
+                        ticker, base_row, live_price_data, pdf_analysis,
+                        boc_data, am_cache, _ph, moment,
                     )
-                    row["div_per_share"]         = _dv["value"]
-                    row["div_yield"]             = _dv["yield_for_calc"]
-                    row["div_confidence"]        = _dv["confidence"]
-                    row["div_flag"]              = _dv["flag"]
-                    row["div_is_exceptional"]    = _dv["is_exceptional"]
-                    row["div_exceptional_value"] = _dv["raw_value"]
-                    row["div_source_used"]       = _dv["source_used"]
-                    row["div_source_detail"]     = _dv["source_detail"]
-                    row["div_ecart_boc_pdf"]     = _dv["ecart_boc_pdf"]
-                    row["div_am_value"]          = _dv["am_div_raw"]
-                    row["div_am_date"]           = _dv["am_paid_date"]
-                    row["div_am_split"]          = _dv["am_split_flag"]
-                    row["div_am_net_brut"]       = _dv["am_net_brut_flag"]
 
-                    # Sas variation : plafond BRVM ±7,5%
-                    _raw_chg = row.get("change_pct")
-                    if _raw_chg is not None and abs(_raw_chg) > 7.5:
-                        import datetime as _dt
-                        _today = _dt.date.today().isoformat()
-                        _hist = _ph.get(ticker, [])
-                        _ref = None
-                        if _hist:
-                            if len(_hist) >= 2 and _hist[-1].get("date") == _today:
-                                _ref = _hist[-2].get("price")
-                            else:
-                                _ref = _hist[-1].get("price")
-                        if _ref is None:
-                            _ref = _boc_e.get("cours_prev")
-                        _cur = row.get("price")
-                        if _ref and _ref > 0 and _cur:
-                            _chg2 = (_cur / _ref - 1) * 100
-                            row["change_pct"] = _chg2 if abs(_chg2) <= 7.5 else None
+                    ancienne = _precedent.get(ticker)
+                    if not _recalcul and _a_une_note(ancienne):
+                        scores = _extraire_note(ancienne)
+                    else:
+                        points = _ph.get(ticker, []) if isinstance(_ph, dict) else []
+                        prix_note = _prix_pour_la_note(row.get("price"), points, moment)
+                        if prix_note is None:
+                            scores = _note_sans_prix(moment)
                         else:
-                            row["change_pct"] = None
-
-                    # Calculer les 8 scores, puis le conseil (amortisseur sur le precedent)
-                    scores = _compute_scores(row)
-                    _poser_verdict(
-                        scores,
-                        scores.get("composite_adj", 0),
-                        _prev_conseil.get(ticker),
-                        row,
-                    )
+                            if prix_note != row.get("price"):
+                                row_note = _completer_ligne(
+                                    ticker, base_row,
+                                    _donnees_prix_note(live_price_data, prix_note),
+                                    pdf_analysis, boc_data, am_cache, _ph, moment,
+                                )
+                            else:
+                                row_note = dict(row)
+                            row_note["_moment"] = moment
+                            row_note["_inclure_cloture_du_jour"] = _cloture_du_jour_incluse(moment)
+                            row_note["historique_clotures"] = points
+                            scores = _compute_scores(row_note)
+                            _poser_verdict(
+                                scores,
+                                nombre_note(scores.get("composite_adj")),
+                                _prev_conseil.get(ticker),
+                                row_note,
+                            )
+                            scores["note_calculee_le"] = moment.isoformat()
 
                     result = {
                         "ticker":        ticker,
@@ -621,15 +970,21 @@ def compute_live_ranking(trigger="manual", force=False):
 
                 except Exception as e:
                     logger.warning(f"Erreur scoring {ticker}: {e}")
-                    results.append({
-                        "ticker": ticker,
-                        "name":   base_row.get("name", ""),
-                        "composite_adj": 0,
-                        "error": str(e),
-                    })
+                    ancienne = _precedent.get(ticker)
+                    if not _recalcul and _a_une_note(ancienne):
+                        conservee = dict(ancienne)
+                        conservee["error"] = str(e)
+                        results.append(conservee)
+                    else:
+                        results.append({
+                            "ticker": ticker,
+                            "name":   base_row.get("name", ""),
+                            "composite_adj": 0,
+                            "error": str(e),
+                        })
 
-            # Trier par score décroissant
-            results.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+            # Notes chiffrées d'abord. composite_adj None (non noté) en dernier.
+            results.sort(key=cle_tri_note, reverse=True)
 
             # Calculer les mouvements de rang
             old_ranks = {}
@@ -661,17 +1016,40 @@ def compute_live_ranking(trigger="manual", force=False):
                         f"(div_per_share={r.get('div_per_share')}, price={r.get('price')})"
                     )
 
-            # Un seul horodatage pour le fichier et chaque ligne notee.
-            _calcule_le = datetime.now(timezone.utc).isoformat()
-            for _ligne in results:
-                if "note10" in _ligne:
-                    _ligne["note_calculee_le"] = _calcule_le
+            # updated_at suit le prix. note_calculee_le ne bouge que si la note
+            # a vraiment été recalculée (les lignes déjà copiées gardent la leur).
+            _horodatage = moment.isoformat()
+            if _recalcul:
+                _note_le = _horodatage
+            else:
+                _note_le = None
+                if isinstance(_payload_precedent, dict):
+                    _note_le = _payload_precedent.get("note_calculee_le")
+                if not _note_le:
+                    for _ligne in results:
+                        if _ligne.get("note_calculee_le"):
+                            _note_le = _ligne["note_calculee_le"]
+                            break
+
+            # Fichier illisible : on ne stocke pas la nouvelle empreinte,
+            # même si le hash avait réussi avant une lecture ratée.
+            if not _faits_lisibles:
+                _empreinte_stockee = _empreinte_precedente
+            elif _recalcul or _empreinte_precedente is None:
+                _empreinte_stockee = _empreinte
+            else:
+                _empreinte_stockee = _empreinte_precedente
 
             # Payload final
             payload = {
-                "updated_at":       _calcule_le,
+                "updated_at":       _horodatage,
+                "note_calculee_le": _note_le,
+                "note_formule":     NOTE_FORMULE if (_recalcul or (isinstance(_payload_precedent, dict) and _payload_precedent.get("note_formule") == NOTE_FORMULE)) else (_payload_precedent or {}).get("note_formule"),
+                "note_recalculee":  _recalcul,
+                "faits_empreinte":  _empreinte_stockee,
+                "faits_illisibles": _illisibles,
                 "trigger":          trigger,
-                "market_open":      live_cache.get("market_open", False),
+                "market_open":      _seance_ouverte(moment),
                 "changed_tickers":  changed_tickers,
                 "total":            len(results),
                 "ranking":          results,
@@ -687,9 +1065,9 @@ def compute_live_ranking(trigger="manual", force=False):
             with _cache_lock:
                 _memo_cache(payload, _stamp_fichier(RANKING_PATH))
             logger.info(
-                f"Ranking recalculé — trigger={trigger} "
-                f"changements={len(changed_tickers)} "
-                f"top1={results[0]['ticker'] if results else '?'}"
+                "Ranking mis a jour — trigger=%s note_recalculee=%s changements=%s top1=%s",
+                trigger, _recalcul, len(changed_tickers),
+                results[0]["ticker"] if results else "?",
             )
             return payload
 
@@ -876,7 +1254,7 @@ if __name__ == "__main__":
             roe = f"{r.get('roe',0):.0f}%" if r.get("roe") else "—"
             print(
                 f"{r['rank']:3d} {r['ticker']:8s} "
-                f"{r.get('composite_adj',0):5.1f}  "
+                f"{nombre_note(r.get('composite_adj')):5.1f}  "
                 f"{pe:6s} {roe:6s} {pdf:8s} {delta_str:4s}"
             )
 

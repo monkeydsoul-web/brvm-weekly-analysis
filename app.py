@@ -389,7 +389,7 @@ def api_top_performers():
                         "sector": s.get("sector",""),
                         "perf_1y": perf,
                         "price": last,
-                        "composite_adj": s.get("composite_adj", 0)
+                        "composite_adj": live_ranker.nombre_note(s.get("composite_adj"))
                     })
         performers.sort(key=lambda x: x.get("perf_1y", 0), reverse=True)
         return jsonify(performers[:10])
@@ -425,7 +425,7 @@ def api_sector(sector):
 @app.route("/api/top/<int:n>")
 def api_top(n):
     scores = load_latest_scores()
-    sorted_scores = sorted(scores, key=lambda x: x.get("composite_adj", 0), reverse=True)
+    sorted_scores = sorted(scores, key=live_ranker.cle_tri_note, reverse=True)
     return jsonify(sorted_scores[:n])
 
 
@@ -910,7 +910,7 @@ def api_sector_analysis():
         
         # Sociétés du secteur
         sector_stocks = [s for s in scores if s.get("sector") == sector]
-        sector_stocks.sort(key=lambda x: x.get("composite_adj", 0), reverse=True)
+        sector_stocks.sort(key=live_ranker.cle_tri_note, reverse=True)
         
         if not sector_stocks:
             return jsonify({"error": f"Secteur {sector} non trouvé"}), 404
@@ -924,7 +924,7 @@ def api_sector_analysis():
             a = analyses.get(s["ticker"], {})
             kpis = a.get("kpis", {})
             def kv(k): return (kpis.get(k) or {}).get("valeur")
-            ctx = f"• {s['ticker']} ({s.get('country','')}) — Score {s.get('composite_adj',0):.0f}/80 | P/E {s.get('pe_ref','?')} | ROE {s.get('roe','?')}% | Div {s.get('div_yield',0):.1f}% | Verdict: {a.get('verdict_investisseur','N/D')} | CA: {kv('chiffre_affaires')} MFCFA | RN: {kv('resultat_net')} MFCFA"
+            ctx = f"• {s['ticker']} ({s.get('country','')}) — Score {live_ranker.nombre_note(s.get('composite_adj')):.0f}/80 | P/E {s.get('pe_ref','?')} | ROE {s.get('roe','?')}% | Div {s.get('div_yield',0):.1f}% | Verdict: {a.get('verdict_investisseur','N/D')} | CA: {kv('chiffre_affaires')} MFCFA | RN: {kv('resultat_net')} MFCFA"
             companies_ctx.append(ctx)
         
         idx_ctx = f"Indice BRVM {sector}: {idx_data.get('current','N/D')} ({idx_data.get('change',0):+.2f}% jour, YTD {idx_data.get('ytd',0):+.2f}%)" if idx_data else ""
@@ -1000,12 +1000,12 @@ def api_compare_analysis():
             
             ctx = f"""
 === {ticker} — {stock.get("name", "")} ({stock.get("sector", "")} · {stock.get("country", "")}) ===
-Score global: {stock.get("composite_adj", 0):.1f}/80 | Rang: #{stock.get("rank", "?")}
+Score global: {live_ranker.nombre_note(stock.get("composite_adj")):.1f}/80 | Rang: #{stock.get("rank", "?")}
 Cours: {stock.get("price", 0):,} XOF | Var annuelle: {boc_data.get("var_annee", "?")}%
 P/E: {stock.get("pe_ref", "?")} | P/B: {stock.get("pb_ref", "?")} | ROE: {stock.get("roe", "?")}%
 BNA: {stock.get("eps", "?")} XOF | BVPA: {stock.get("bvpa", "?")} XOF
 Dividende: {stock.get("div_per_share", 0)} XOF ({stock.get("div_yield", 0):.1f}%) | Ex-div: {stock.get("ex_div_date", "N/D")}
-Scores modèles: Graham={stock.get("score_graham", 0):.0f} DCF={stock.get("score_dcf", 0):.0f} DDM={stock.get("score_ddm", 0):.0f} EPV={stock.get("score_epv", 0):.0f} Buffett={stock.get("score_buffett", 0):.0f} RevDCF={stock.get("score_rev_dcf", 0):.0f} Relatif={stock.get("score_relatif", 0):.0f} Tech={stock.get("score_technique", 0):.0f}
+Scores modèles: Graham={live_ranker.nombre_note(stock.get("score_graham")):.0f} DCF={live_ranker.nombre_note(stock.get("score_dcf")):.0f} DDM={live_ranker.nombre_note(stock.get("score_ddm")):.0f} EPV={live_ranker.nombre_note(stock.get("score_epv")):.0f} Buffett={live_ranker.nombre_note(stock.get("score_buffett")):.0f} RevDCF={live_ranker.nombre_note(stock.get("score_rev_dcf")):.0f} Relatif={live_ranker.nombre_note(stock.get("score_relatif")):.0f} Tech={live_ranker.nombre_note(stock.get("score_technique")):.0f}
 CA: {kv("chiffre_affaires")} MFCFA | RN: {kv("resultat_net")} MFCFA | EBITDA: {kv("ebitda")} MFCFA
 Capitaux propres: {kv("capitaux_propres")} MFCFA | Dette nette: {kv("dette_nette")} MFCFA
 Verdict IA: {analysis.get("verdict_investisseur", "N/D")}
@@ -1568,7 +1568,7 @@ def api_rapport_pdf(ticker):
         small = ParagraphStyle("small", parent=styles["Normal"], fontSize=8, textColor=colors.HexColor("#64748B"))
         green = colors.HexColor("#16A34A"); red = colors.HexColor("#DC2626"); amber = colors.HexColor("#D97706")
 
-        sc = row.get("composite_adj", 0)
+        sc = live_ranker.nombre_note(row.get("composite_adj"))
         sc_color = green if sc >= 60 else (amber if sc >= 40 else red)
         verdict = row.get("pdf_verdict", "—")
 

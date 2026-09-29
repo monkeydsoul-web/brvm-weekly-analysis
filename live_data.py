@@ -13,13 +13,39 @@ CACHE_PATH = os.path.join(DATA_DIR, "live_cache.json")
 _FETCH_LOCK = threading.Lock()
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-def is_market_open():
-    now = datetime.now(timezone.utc)
-    if now.weekday() >= 5: return False
-    if now.hour < 9: return False
-    if now.hour > 15: return False
-    if now.hour == 15 and now.minute >= 30: return False
+# Clôture BRVM retenue par le code : 15h30 UTC (la cote ferme vers 15h00).
+# Ouverture : 09h00 UTC. Week-end : fermé. Pas de calendrier de jours fériés.
+CLOTURE_HEURE = 15
+CLOTURE_MINUTE = 30
+OUVERTURE_HEURE = 9
+
+
+def _en_utc(moment):
+    if moment is None:
+        moment = datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    else:
+        moment = moment.astimezone(timezone.utc)
+    return moment
+
+
+def is_market_open_at(moment):
+    """Même règle que is_market_open, sur un instant donné (tests, gel de note)."""
+    moment = _en_utc(moment)
+    if moment.weekday() >= 5:
+        return False
+    if moment.hour < OUVERTURE_HEURE:
+        return False
+    if moment.hour > CLOTURE_HEURE:
+        return False
+    if moment.hour == CLOTURE_HEURE and moment.minute >= CLOTURE_MINUTE:
+        return False
     return True
+
+
+def is_market_open():
+    return is_market_open_at(datetime.now(timezone.utc))
 
 def fetch_brvm_org():
     results = {}
