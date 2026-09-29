@@ -19,6 +19,39 @@ def _note(ligne):
     return valeur
 
 
+def _lignes_cotes(scores):
+    """Garde les sociétés cotées. Un statut absent (ancien fichier) reste inclus.
+
+    suspendu et non_note sortent des portefeuilles, des signaux et du top PDF.
+    """
+    gardes = []
+    for ligne in scores or []:
+        if not isinstance(ligne, dict):
+            continue
+        statut = ligne.get("statut")
+        if statut not in (None, "") and statut != "cote":
+            continue
+        gardes.append(ligne)
+    return gardes
+
+
+def _historique_cote(scores, price_history):
+    """Retire de l'historique les tickers explicitement non cotés."""
+    if not isinstance(price_history, dict):
+        return price_history
+    exclus = set()
+    for ligne in scores or []:
+        if not isinstance(ligne, dict):
+            continue
+        statut = ligne.get("statut")
+        ticker = ligne.get("ticker")
+        if ticker and statut not in (None, "", "cote"):
+            exclus.add(ticker)
+    if not exclus:
+        return price_history
+    return dict((cle, valeur) for cle, valeur in price_history.items() if cle not in exclus)
+
+
 # ── Loaders ───────────────────────────────────────────────────────────────────
 
 def _load_price_history():
@@ -218,6 +251,7 @@ def _backtest_yearly(price_history, score_map, boc_data):
 def generate_portfolios(scores=None, price_history=None):
     if scores is None:
         scores = _load_scores()
+    scores = _lignes_cotes(scores)
     if price_history is None:
         price_history = _load_price_history()
 
@@ -304,6 +338,7 @@ def generate_portfolios(scores=None, price_history=None):
 def compute_signals(scores=None, price_history=None):
     if scores is None:
         scores = _load_scores()
+    scores = _lignes_cotes(scores)
     if price_history is None:
         price_history = _load_price_history()
     boc_data = _load_boc_data()
@@ -369,6 +404,8 @@ def compute_backtest_previsionnel(scores=None, price_history=None):
         scores = _load_scores()
     if price_history is None:
         price_history = _load_price_history()
+    price_history = _historique_cote(scores, price_history)
+    scores = _lignes_cotes(scores)
     boc_data  = _load_boc_data()
 
     score_map = {s["ticker"]: s for s in scores}
@@ -475,6 +512,7 @@ def generate_rapport_pdf(scores=None, price_history=None):
 
     if scores is None:
         scores = _load_scores()
+    scores = _lignes_cotes(scores)
     if price_history is None:
         price_history = _load_price_history()
 

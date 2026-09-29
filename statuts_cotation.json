@@ -1,0 +1,16 @@
+{
+  "SICC": {
+    "statut": "suspendu",
+    "depuis": "2026-09-17",
+    "fin": null,
+    "source": "Agence Ecofin, 17/09/2026 — Sucrivoire, SONOCO et SICOR suspendues de cotation à la BRVM — https://www.agenceecofin.com/actualites-finance/1709-141635-sucrivoire-sonoco-et-sicor-suspendues-de-cotation-a-la-brvm",
+    "note": "SICOR, ticker SICC. Les avis BRVM cités par la presse prennent effet le 16/09/2026 ; la date retenue ici est celle de l'article du 17/09/2026. Le propriétaire confirme ou corrige depuis. SONOCO Metal Packaging (ex-EVIOSYS) n'est pas dans les 47 sociétés du site : pas de ligne."
+  },
+  "SCRC": {
+    "statut": "suspendu",
+    "depuis": "2026-09-17",
+    "fin": null,
+    "source": "Agence Ecofin, 17/09/2026 — Sucrivoire, SONOCO et SICOR suspendues de cotation à la BRVM — https://www.agenceecofin.com/actualites-finance/1709-141635-sucrivoire-sonoco-et-sicor-suspendues-de-cotation-a-la-brvm",
+    "note": "Sucrivoire, ticker SCRC. Des sources publiques (avis BRVM n°276-2026, reprise annoncée le 22/09/2026) indiquent que la suspension aurait été levée. Tant que le propriétaire n'a pas confirmé, la ligne reste active. Pour lever : mettre fin à 2026-09-21 (une fin déjà passée est ignorée) puis retirer la ligne au prochain passage."
+  }
+}

@@ -4,6 +4,32 @@ let _perfData = {};
 let _perfSelected = [];
 let _perfPeriod = '1an';
 let _perfZoom = null; // {startDate, endDate}
+let _perfSuspendus = new Set();
+
+// Statut deja present sur le classement (window.scores). Sinon un seul
+// appel a /api/scores. Echec : on n'exclut personne, la page reste la.
+async function _chargerSuspendus(all) {
+  const connus = new Set();
+  let vu = false;
+  (all || []).forEach(function (s) {
+    if (!s || typeof s.statut !== 'string') return;
+    vu = true;
+    if (s.statut === 'suspendu' && s.ticker) connus.add(s.ticker);
+  });
+  if (vu) return connus;
+  try {
+    const res = await fetch('/api/scores?v=' + Date.now());
+    if (!res.ok) return connus;
+    const data = await res.json();
+    const lignes = Array.isArray(data) ? data : ((data && data.ranking) || []);
+    lignes.forEach(function (s) {
+      if (s && s.statut === 'suspendu' && s.ticker) connus.add(s.ticker);
+    });
+  } catch (e) {
+    return connus;
+  }
+  return connus;
+}
 const PERF_COLORS = ['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB923C','#A78BFA'];
 const _perfChartStates = {};
 const _perfVisible = {}; // containerId -> Set of visible tickers
@@ -46,6 +72,7 @@ async function renderPerfPage() {
 
   const all = window.scores || (typeof scores !== 'undefined' ? scores : []);
   if (!all.length) return;
+  _perfSuspendus = await _chargerSuspendus(all);
 
   try {
     const res = await fetch('/api/price-history?v=' + Date.now());
@@ -60,6 +87,7 @@ async function renderPerfPage() {
 
   const performers = [];
   for (const [ticker, pts] of Object.entries(_perfData)) {
+    if (_perfSuspendus.has(ticker)) continue;
     if (!pts || pts.length < 2) continue;
     const sorted = [...pts].sort((a,b) => a.date.localeCompare(b.date));
     const first = sorted[0].price, last = sorted[sorted.length-1].price;
@@ -247,7 +275,7 @@ function togglePerfTicker(ticker) {
     _perfSelected.push(ticker);
   }
   const all = window.scores || scores || [];
-  const performers = Object.keys(_perfData).map(t => {
+  const performers = Object.keys(_perfData).filter(t => !_perfSuspendus.has(t)).map(t => {
     const pts = (_perfData[t]||[]).sort((a,b)=>a.date.localeCompare(b.date));
     const first = pts[0]?.price||0, last = pts[pts.length-1]?.price||0;
     return {ticker:t, perf: first>0?((last-first)/first*100):0};
@@ -268,6 +296,7 @@ function setPerfPeriod(period) {
 
   // Recompute top 5 performers for this period
   const top5ForPeriod = Object.entries(_perfData)
+    .filter(([ticker]) => !_perfSuspendus.has(ticker))
     .map(([ticker, rawPts]) => {
       const pts = _filterByPeriod([...rawPts].sort((a,b)=>a.date.localeCompare(b.date)));
       if (pts.length < 2) return null;

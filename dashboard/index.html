@@ -2406,6 +2406,13 @@ function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.set
 function fmtVerdict(v){return v==='POSITIF'?'✅ Acheter':v==='NEGATIF'?'⚠️ Éviter':v==='NEUTRE'?'⏳ Attendre':v||'—';}
 function conseilAffiche(row){
   var src=(row&&typeof row==='object')?row:{conseil:row};
+  if(src.statut==='suspendu'){
+    var dep=src.statut_depuis||'';
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(dep);
+    var aff=m?(m[3]+'/'+m[2]+'/'+m[1]):'';
+    var texte=aff?('Cotation suspendue depuis le '+aff):'Cotation suspendue';
+    return {libelle:texte,css:'var(--t2)',texte:texte,suspendu:true};
+  }
   var lib=src.conseil_libelle;
   var c=src.conseil;
   if(lib!=='Intéressant'&&lib!=='À surveiller'&&lib!=='Prudence'){
@@ -2426,6 +2433,7 @@ function conseilAffiche(row){
 function fmtConseil(row){
   var a=conseilAffiche(row);
   if(!a) return '<span style="color:var(--t2)" title="Donnee en quarantaine - prix non confirme">—</span>';
+  if(a.suspendu) return '<span style="color:var(--t2);background:rgba(148,163,184,.22);border-radius:10px;padding:2px 8px;font-weight:600">'+a.texte+'</span>';
   return '<span style="color:'+a.css+'">'+a.texte+'</span>';
 }
 
@@ -3591,13 +3599,26 @@ function buildKpiCards(s){
 
 function _genVerdict(s){
   const v=s.composite_adj||0;
-  const col=v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
-  const bg=v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)';
-  const label=v>=65?'ACHETER':v>=55?'ACCUMULER':v>=45?'CONSERVER':v>=35?'SURVEILLER':'ALLÉGER';
   const avis=conseilAffiche(s);
+  const suspendu=!!(avis&&avis.suspendu);
+  const col=suspendu?'var(--t2)':(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
+  const bg=suspendu?'rgba(148,163,184,.12)':(v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)');
+  const label=v>=65?'ACHETER':v>=55?'ACCUMULER':v>=45?'CONSERVER':v>=35?'SURVEILLER':'ALLÉGER';
   const labelBeg=avis?avis.texte:'—';
-  const labelShow=document.documentElement.dataset.mode==='beginner'?labelBeg:label;
-  const badgeCol=document.documentElement.dataset.mode==='beginner'?(avis?avis.css:'var(--t2)'):col;
+  var labelShow=document.documentElement.dataset.mode==='beginner'?labelBeg:label;
+  var badgeCol=document.documentElement.dataset.mode==='beginner'?(avis?avis.css:'var(--t2)'):col;
+  if(suspendu){
+    labelShow=avis.texte;
+    badgeCol='var(--t2)';
+  }
+  const badgeCss=suspendu
+    ?'background:rgba(148,163,184,.22);color:var(--t2);font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px'
+    :('background:'+badgeCol+';color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px');
+  var noteGrise='';
+  if(suspendu){
+    var n10=(typeof v10fmt==='function')?v10fmt(v):(Math.round(v/8*10)/10).toFixed(1);
+    noteGrise='<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:8px">Note '+n10+'/10</div>';
+  }
 
   // Points forts
   const forts=[];
@@ -3622,7 +3643,8 @@ function _genVerdict(s){
   if(v<45) vigil.push('Score composite faible — données limitées ou fondamentaux dégradés');
 
   // Conclusion
-  const concl=v>=65?`${s.ticker} présente un profil fondamental solide. Tous les principaux ratios sont favorables.`
+  const concl=suspendu?`${s.ticker} : cotation suspendue. La note reste affichee en gris, a titre indicatif.`
+    :v>=65?`${s.ticker} présente un profil fondamental solide. Tous les principaux ratios sont favorables.`
     :v>=55?`${s.ticker} est une opportunité intéressante avec des fondamentaux globalement positifs.`
     :v>=45?`${s.ticker} est une position de conviction modérée. À suivre avant de renforcer.`
     :v>=35?`${s.ticker} demande une surveillance accrue. Les fondamentaux sont fragiles.`
@@ -3632,9 +3654,10 @@ function _genVerdict(s){
   return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col};border-radius:8px;padding:12px 16px;margin-bottom:14px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
       <strong style="color:${col};font-size:13px">📋 Verdict analyste — ${s.ticker}</strong>
-      <span style="background:${badgeCol};color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">${labelShow}</span>
+      <span style="${badgeCss}">${labelShow}</span>
     </div>
     <div style="text-align:right;font-size:11px;color:var(--text-3);margin-bottom:8px">Pas un conseil en investissement</div>
+    ${noteGrise}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div style="background:${secBg};border-radius:6px;padding:8px 10px">
         <div style="font-size:9px;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:5px">✅ Points forts</div>
