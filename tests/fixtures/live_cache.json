@@ -1,0 +1,52 @@
+{
+  "updated_at": "2026-01-15T16:00:00+00:00",
+  "market_open": false,
+  "prices": {
+    "ALPH": {
+      "price": 10000,
+      "open": 9900,
+      "change_pct": 1.2,
+      "volume": 4200,
+      "source": "fixture",
+      "fetched_at": "2026-01-15T16:00:00+00:00"
+    },
+    "BRAV": {
+      "price": 5000,
+      "open": 5100,
+      "change_pct": -1.0,
+      "volume": 800,
+      "source": "fixture",
+      "fetched_at": "2026-01-15T16:00:00+00:00"
+    },
+    "CHER": {
+      "price": 20000,
+      "open": 19800,
+      "change_pct": 0.4,
+      "volume": 150,
+      "source": "fixture",
+      "fetched_at": "2026-01-15T16:00:00+00:00"
+    },
+    "EXCP": {
+      "price": null,
+      "open": null,
+      "change_pct": 0.0,
+      "volume": 0,
+      "source": "fixture",
+      "fetched_at": "2026-01-15T16:00:00+00:00"
+    },
+    "SANS": {
+      "price": null,
+      "open": null,
+      "change_pct": 0.0,
+      "volume": 0,
+      "source": "unavailable",
+      "fetched_at": null
+    }
+  },
+  "stats": {
+    "total": 5,
+    "with_price": 3,
+    "sources": {"fixture": 4, "unavailable": 1},
+    "unknown_tickers": []
+  }
+}

@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Dependances
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: pytest
+        run: pytest -q
+        env:
+          BRVM_DATA_DIR: ${{ runner.temp }}/brvm-tests
+          ANTHROPIC_API_KEY: ""

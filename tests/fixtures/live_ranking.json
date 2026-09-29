@@ -1,0 +1,74 @@
+{
+  "updated_at": "2026-01-15T18:00:00+00:00",
+  "trigger": "fixture",
+  "market_open": false,
+  "changed_tickers": [],
+  "total": 5,
+  "ranking": [
+    {
+      "ticker": "ALPH",
+      "name": "Emetteur Alpha",
+      "sector": "Banque",
+      "country": "CI",
+      "price": 10000,
+      "eps": 1000,
+      "bna": 1000,
+      "bvpa": 8000,
+      "roe": 15,
+      "composite_adj": 55.0,
+      "div_is_exceptional": false
+    },
+    {
+      "ticker": "BRAV",
+      "name": "Emetteur Bravo",
+      "sector": "Industrie",
+      "country": "CI",
+      "price": 5000,
+      "eps": 1000,
+      "bna": 1000,
+      "bvpa": 8000,
+      "roe": 20,
+      "composite_adj": 70.0,
+      "div_is_exceptional": false
+    },
+    {
+      "ticker": "CHER",
+      "name": "Emetteur Cher",
+      "sector": "Distribution",
+      "country": "SN",
+      "price": 20000,
+      "eps": 500,
+      "bna": 500,
+      "bvpa": 4000,
+      "roe": 8,
+      "composite_adj": 30.0,
+      "div_is_exceptional": false
+    },
+    {
+      "ticker": "EXCP",
+      "name": "Emetteur Dividende",
+      "sector": "Agro",
+      "country": "CI",
+      "price": 8000,
+      "eps": 400,
+      "bna": 400,
+      "bvpa": 3000,
+      "roe": 12,
+      "composite_adj": 48.0,
+      "div_is_exceptional": true,
+      "div_flag": "exceptionnel_non_recurrent"
+    },
+    {
+      "ticker": "SANS",
+      "name": "Emetteur Sans Cours",
+      "sector": "Banque",
+      "country": "CI",
+      "price": null,
+      "eps": 100,
+      "bna": 100,
+      "bvpa": 1000,
+      "roe": 10,
+      "composite_adj": 10.0
+    }
+  ]
+}
