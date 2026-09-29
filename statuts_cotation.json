@@ -1,0 +1,23 @@
+{
+  "SICC": {
+    "statut": "suspendu",
+    "depuis": "2026-09-16",
+    "fin": null,
+    "source": "BRVM, avis n°268-2026/BRVM/DG, effet le 16/09/2026 — suspension de SICOR (SICC). Le 17/09/2026 est la date de presse, pas la date d'effet. Article : Agence Ecofin, https://www.agenceecofin.com/actualites-finance/1709-141635-sucrivoire-sonoco-et-sicor-suspendues-de-cotation-a-la-brvm",
+    "note": "SICOR. Suspension en vigueur tant que la société n'a pas régularisé ses publications."
+  },
+  "SEMC": {
+    "statut": "suspendu",
+    "depuis": "2026-09-16",
+    "fin": null,
+    "source": "BRVM, avis n°270-2026/BRVM/DG, effet le 16/09/2026 — SONOCO Metal Packaging SIEM (ex-Crown SIEM / Eviosys), ticker SEMC, ISIN CI0000000345. Le site le nomme Crown Siem CI. Article du 17/09/2026 : https://www.agenceecofin.com/actualites-finance/1709-141635-sucrivoire-sonoco-et-sicor-suspendues-de-cotation-a-la-brvm",
+    "note": "Cours observé figé à 1 495 XOF depuis le 15/09/2026. Ce n'est pas une alerte : la suspension est dans cette liste."
+  },
+  "SCRC": {
+    "statut": "suspendu",
+    "depuis": "2026-09-16",
+    "fin": "2026-09-21",
+    "source": "Suspension : BRVM, avis n°269-2026/BRVM/DG, effet le 16/09/2026 — SUCRIVOIRE (SCRC). Levée : avis n°276-2026, reprise de cotation le 22/09/2026. fin = dernier jour suspendu.",
+    "note": "Sucrivoire cote de nouveau depuis le 22/09/2026. La fin 2026-09-21 est déjà passée : la ligne est ignorée, le titre reste coté."
+  }
+}

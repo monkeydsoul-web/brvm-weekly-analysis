@@ -39,6 +39,9 @@ def test_fixtures_anonymes(fixtures_dir):
         "live_cache.json",
         "live_ranking.json",
         "ratings_emetteurs.json",
+        "susp_actif.json",
+        "susp_fin_passee.json",
+        "susp_malforme.json",
     ]
     boc = json.loads((fixtures_dir / "boc_lignes.json").read_text(encoding="utf-8"))
     assert len(boc) == 5
