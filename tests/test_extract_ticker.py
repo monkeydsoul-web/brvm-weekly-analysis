@@ -301,6 +301,15 @@ def test_alias_ajoutes():
     assert _extract_ticker("SOACII") == "SMBC"
 
 
+def test_date_manquante_lue_dans_le_nom_du_pdf():
+    nom = "20260303_-_notation_financiere_-_safca_ci.pdf"
+    assert _scraper._date_depuis_nom_pdf(nom) == "2026-03-03"
+    assert _scraper._date_annonce(None, nom) == "2026-03-03"
+    assert _scraper._date_annonce("2024-05-01", nom) == "2024-05-01"
+    assert _scraper._date_annonce(None, "fiche_de_notation_-_oragroup_sa_-_2025.pdf") is None
+    assert _scraper._date_depuis_nom_pdf("20260231_-_notation.pdf") is None
+
+
 def test_notation_retiree_nest_pas_un_d():
     texte = (
         "GCR retire les notations d'émetteur de long et court terme de la "

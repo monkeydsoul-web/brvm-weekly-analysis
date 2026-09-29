@@ -834,6 +834,33 @@ def _ticker_connu(value: Any) -> Optional[str]:
     return None
 
 
+def _date_depuis_nom_pdf(nom: str) -> Optional[str]:
+    """20260303_-_notation_….pdf -> 2026-03-03. None si le nom n'a pas ce préfixe."""
+    if not nom:
+        return None
+    base = Path(str(nom).split("?")[0]).name
+    m = re.match(r"(20\d{2})(\d{2})(\d{2})", base)
+    if not m:
+        return None
+    annee, mois, jour = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not (1 <= mois <= 12):
+        return None
+    if jour < 1 or jour > calendar.monthrange(annee, mois)[1]:
+        return None
+    return _iso_date(jour, mois, annee)
+
+
+def _date_annonce(date: Any, *noms: str) -> Optional[str]:
+    """Date de l'annonce, sinon le préfixe AAAAMMJJ du nom de PDF."""
+    if date is not None and str(date).strip():
+        return str(date).strip()
+    for nom in noms:
+        trouve = _date_depuis_nom_pdf(nom or "")
+        if trouve:
+            return trouve
+    return None
+
+
 def _document_hors_emetteur(texte: str, titre: str = "") -> bool:
     """Titrisation, FCTC, RMBS ou emprunt obligataire : pas la note de la société cotée.
 
@@ -948,7 +975,9 @@ def scrape_ratings() -> List[Dict]:
             if not ticker:
                 continue
             ratings[key] = _fiche_notation(
-                text, contexte, ticker, item.get("date"), url, item.get("notation"),
+                text, contexte, ticker,
+                _date_annonce(item.get("date"), pdf, url),
+                url, item.get("notation"),
             )
 
     # 2. Scraper nouvelles notations depuis brvm.org
@@ -985,7 +1014,9 @@ def scrape_ratings() -> List[Dict]:
             ticker = _choisir_ticker(text, None)
             if not ticker:
                 continue
-            ratings[pdf_url] = _fiche_notation(text, text, ticker, None, pdf_url, None)
+            ratings[pdf_url] = _fiche_notation(
+                text, text, ticker, _date_annonce(None, fname, pdf_url), pdf_url, None,
+            )
         # Vérifier pagination
         next_links = [a for a in soup.find_all("a", href=True)
                       if f"page={page+1}" in a.get("href","")]
