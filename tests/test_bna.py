@@ -363,7 +363,8 @@ def test_exercice_trop_ancien_apres_le_1er_juillet(caplog):
         assert row["bna_source"] == "boc", ticker
         assert row["bna"] == 1000.0
         assert row["bna_exercice"] is None
-        assert row["bvpa_source"] != "rapport"
+        assert row["bvpa_source"] == "estime"
+        assert row["bvpa"] == 4000.0
         assert ticker in caplog.text
         assert str(annee) in caplog.text
 
@@ -374,6 +375,33 @@ def test_exercice_trop_ancien_apres_le_1er_juillet(caplog):
     )
     assert garde["bna_source"] == "rapport"
     assert garde["bna_exercice"] == 2025
+
+
+def test_vieux_rapport_garde_le_bvpa_estime():
+    """Un état trop ancien ne donne plus de BNA, mais ses capitaux restent un BVPA estimé.
+
+    Le chiffre statique ne passe qu'après. Une note sans exercice fiscal, dont
+    `year` est une année de publication ancienne, n'est pas jetée non plus.
+    """
+    base = _base_exercice()
+    base["bvpa"] = 2100
+    boc = {"date": "2026-09-25", "cours_clot": 10000.0, "per_boc": 10.0}
+    jour = datetime(2026, 9, 29, 12, 0, tzinfo=timezone.utc)
+    vieux = _rapport("Etats financiers", 1000.0, 4000.0, annee=2023, year=2024)
+    row = _ligne(base, 12000, vieux, boc, ticker="UNLC", moment=jour)
+    assert row["bna_source"] == "boc"
+    assert row["bna_exercice"] is None
+    assert row["bvpa_source"] == "estime"
+    assert row["bvpa"] == 4000.0
+    assert row["bvpa"] != 2100
+    assert _proche(row["pb_ref"] * row["bvpa"], 12000)
+
+    note = _rapport("Données financières enrichies", 500.0, 3500.0, annee=2023, year=2023)
+    note.pop("annee")
+    autre = _ligne(base, 12000, note, boc, ticker="SAFC", moment=jour)
+    assert autre["bna_source"] == "boc"
+    assert autre["bvpa_source"] == "estime"
+    assert autre["bvpa"] == 3500.0
 
 
 def test_grace_avant_le_1er_juillet():

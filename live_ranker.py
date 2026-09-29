@@ -238,10 +238,15 @@ def _plancher_exercice(moment):
 
 
 def _rapport_perime(pdf_analysis, ticker="", moment=None):
-    """Vrai si l'exercice est trop ancien pour la date du classement.
+    """Vrai si l'exercice comptable est trop ancien pour servir de BNA.
 
-    On n'utilise alors ni le BNA ni le BVPA de ce document.
+    Seul un état financier ou un rapport annuel est concerné. Une note
+    enrichie n'a souvent pas d'`annee` : son `year` est une année de
+    publication, et s'en servir ici écartait le BVPA de la plupart des
+    sociétés. Le BVPA, lui, reste lu plus bas.
     """
+    if not _doc_comptable(pdf_analysis):
+        return False
     annee = _annee_du_rapport(pdf_analysis)
     if annee is None:
         return False
@@ -249,7 +254,7 @@ def _rapport_perime(pdf_analysis, ticker="", moment=None):
     if annee >= plancher:
         return False
     logger.warning(
-        "BNA %s : exercice %s antérieur à %s — rapport ignoré",
+        "BNA %s : exercice %s antérieur à %s — BNA du rapport ignoré",
         ticker, annee, plancher,
     )
     return True
@@ -366,16 +371,9 @@ def _bvpa_statique(base_row):
     return _flottant_positif(base_row.get("bvpa"))
 
 
-def _bvpa_estime(pdf_analysis, nb_actions):
-    """BVPA tiré des capitaux propres d'un document qui n'est pas un état financier.
-
-    Même unité MFCFA. On ne s'en sert que s'il n'y a pas de BVPA comptable :
-    le BOC ne publie pas de valeur comptable, et sans ce repli le P/B des
-    modèles tombe. Source affichée : « estime ».
-    """
+def _bvpa_depuis_capitaux(pdf_analysis, nb_actions):
+    """Capitaux propres en MFCFA / actions, sans regarder le type de document."""
     if not isinstance(pdf_analysis, dict) or pdf_analysis.get("status") != "ok":
-        return None
-    if _doc_comptable(pdf_analysis):
         return None
     bloc = _bloc_kpi(pdf_analysis, "capitaux_propres")
     unite = bloc.get("unite")
@@ -390,12 +388,24 @@ def _bvpa_estime(pdf_analysis, nb_actions):
     return valeur
 
 
+def _bvpa_estime(pdf_analysis, nb_actions):
+    """BVPA d'un document qui n'est pas un état financier à jour.
+
+    Unité MFCFA. On ne s'en sert que s'il n'y a pas de BVPA comptable
+    encore valable : note enrichie, ou état financier trop ancien.
+    Source affichée : « estime ».
+    """
+    if _doc_comptable(pdf_analysis):
+        return None
+    return _bvpa_depuis_capitaux(pdf_analysis, nb_actions)
+
+
 def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_estime, bvpa_statique):
-    """Rapport comptable, puis BOC s'il existe, puis estimation, puis statique.
+    """Rapport comptable à jour, puis BOC s'il existe, puis estimation, puis statique.
 
     La bande rapport/BOC ne s'applique que lorsqu'un BVPA BOC existe.
-    Sans document comptable, les capitaux propres d'une autre pièce (MFCFA)
-    donnent un BVPA « estime », avant le chiffre statique.
+    Un document non comptable, ou un état financier trop ancien, donne un
+    BVPA « estime » à partir des capitaux propres en MFCFA, avant le statique.
     Retourne (bvpa, source, alerter).
     """
     ecart_brut = _ratio(bvpa_rapport, bvpa_boc)
@@ -413,8 +423,10 @@ def _choisir_bvpa(bvpa_rapport, bvpa_boc, bvpa_estime, bvpa_statique):
 def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker="", moment=None):
     """Fige BNA et BVPA, puis P/E et P/B = cours actuel / ces chiffres."""
     nb = _nb_actions(row)
-    pdf_utile = None if _rapport_perime(pdf_analysis, ticker, moment) else pdf_analysis
-    bna_rapport, annee = _bna_depuis_rapport(pdf_utile, nb)
+    # L'exercice trop ancien retire le BNA du rapport, pas les capitaux propres.
+    perime = _rapport_perime(pdf_analysis, ticker, moment)
+    pdf_bna = None if perime else pdf_analysis
+    bna_rapport, annee = _bna_depuis_rapport(pdf_bna, nb)
     bna_boc = _bna_depuis_boc(row.get("_boc_cours"), row.get("_boc_per"))
     bna, source, exercice, date_boc, ecart, alerter_bna = _choisir_bna(
         bna_rapport,
@@ -438,10 +450,16 @@ def _appliquer_bna_bvpa(row, base_row, pdf_analysis, ticker="", moment=None):
     bvpa_boc = _bvpa_depuis_boc(
         row.get("_boc_cours"), row.get("_boc_pb"), row.get("_boc_bvpa"),
     )
+    if perime:
+        bvpa_rapport = None
+        bvpa_estime = _bvpa_depuis_capitaux(pdf_analysis, nb)
+    else:
+        bvpa_rapport = _bvpa_depuis_rapport(pdf_analysis, nb)
+        bvpa_estime = _bvpa_estime(pdf_analysis, nb)
     bvpa, bvpa_source, alerter_bvpa = _choisir_bvpa(
-        _bvpa_depuis_rapport(pdf_utile, nb),
+        bvpa_rapport,
         bvpa_boc,
-        _bvpa_estime(pdf_utile, nb),
+        bvpa_estime,
         _bvpa_statique(base_row),
     )
     if alerter_bvpa:
