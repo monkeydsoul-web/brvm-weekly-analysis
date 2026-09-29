@@ -130,6 +130,16 @@
     try { loaders[page](); } catch (e2) {}
   }
 
+  function repriseInit(file) {
+    if (document.readyState === "loading") return;
+    try {
+      if (file === "badges.js" && typeof initRankHistory === "function") initRankHistory();
+      if (file === "screener_lazy.js" && typeof window._brvmScreenerLazyArm === "function") {
+        window._brvmScreenerLazyArm();
+      }
+    } catch (e) {}
+  }
+
   function loadAttempt(file, attempt) {
     var s = document.createElement("script");
     var token = window.BRVM_ASSET_V || "1";
@@ -139,6 +149,7 @@
     s.onload = function () {
       window.BRVM_MODULES[file] = "ok";
       replay(file);
+      repriseInit(file);
     };
     s.onerror = function () {
       if (attempt < RETRIES) {
