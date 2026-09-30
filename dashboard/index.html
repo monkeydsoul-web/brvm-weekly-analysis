@@ -132,14 +132,60 @@
     <button class="btn btn-g" onclick="location.reload()">Réessayer</button>
   </div>
   <div class="accueil" id="accueil">
-    <h1 class="accueil-titre">Accueil</h1>
-    <section class="accueil-marche" id="accueil-marche" aria-label="En-tête de marché">
-      <div class="accueil-marche-tete">
-        <p class="accueil-statut" id="accueil-statut">Marché —</p>
-        <p class="accueil-seance" id="accueil-seance">Dernière séance : —</p>
-        <button type="button" class="accueil-lien" onclick="nav('marche')">Marché détaillé</button>
+    <section class="accueil-haut" aria-label="Présentation">
+      <div class="accueil-hero">
+        <p class="accueil-surtitre">BOURSE RÉGIONALE UEMOA</p>
+        <h1 class="accueil-titre">Comprendre la BRVM, une note sur 10 à la fois.</h1>
+        <p class="accueil-chapo" id="accueil-chapo">— sociétés notées avec 8 modèles de valorisation publics. Une méthode transparente pour les investisseurs débutants — pas un conseil en investissement.</p>
+        <div class="accueil-actions">
+          <button type="button" class="accueil-btn accueil-btn-primaire" onclick="nav('rank')">Voir le classement →</button>
+          <button type="button" class="accueil-btn accueil-btn-secondaire" onclick="allerCommentInvestir()">Comment investir ?</button>
+        </div>
       </div>
-      <div class="accueil-indices" id="accueil-indices" aria-label="Indices BRVM"></div>
+      <article class="accueil-composite" aria-labelledby="accueil-composite-titre">
+        <h2 id="accueil-composite-titre">BRVM Composite</h2>
+        <p class="accueil-composite-ligne">
+          <span class="accueil-composite-val" id="accueil-composite-val">—</span>
+          <span class="accueil-badge is-flat" id="accueil-composite-badge">—</span>
+        </p>
+        <p class="accueil-composite-seance" id="accueil-composite-seance">—</p>
+        <div class="accueil-courbe-zone" id="accueil-courbe">
+          <svg class="accueil-courbe is-exemple" viewBox="0 0 320 72" role="img" aria-labelledby="accueil-courbe-legende" preserveAspectRatio="none">
+            <title>Courbe illustrative, exemple</title>
+            <path id="accueil-courbe-trait" d="M0 50 C28 48 42 54 68 42 S118 18 152 28 S206 58 246 36 S286 16 320 22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 5"/>
+          </svg>
+          <p class="accueil-courbe-legende" id="accueil-courbe-legende">Courbe illustrative · EXEMPLE · valeur et variation réelles</p>
+        </div>
+        <div class="accueil-periodes" id="accueil-periodes" role="group" aria-label="Période de la courbe" data-accroche="index-history">
+          <button type="button" data-periode="1S" disabled aria-disabled="true" title="Historique de l'indice indisponible">1S</button>
+          <button type="button" data-periode="1M" disabled aria-disabled="true" title="Historique de l'indice indisponible">1M</button>
+          <button type="button" data-periode="YTD" disabled aria-disabled="true" title="Historique de l'indice indisponible">YTD</button>
+          <button type="button" data-periode="1A" disabled aria-disabled="true" title="Historique de l'indice indisponible">1A</button>
+        </div>
+      </article>
+    </section>
+    <section class="accueil-chiffres" id="accueil-chiffres" aria-label="Chiffres du marché">
+      <article class="accueil-chiffre">
+        <p class="accueil-chiffre-l">BRVM-30</p>
+        <p class="accueil-chiffre-ligne">
+          <span class="accueil-chiffre-v" id="accueil-brvm30-val">—</span>
+          <span class="accueil-badge is-flat" id="accueil-brvm30-badge">—</span>
+        </p>
+      </article>
+      <article class="accueil-chiffre">
+        <p class="accueil-chiffre-l">Hausses / Baisses</p>
+        <p class="accueil-chiffre-v" id="accueil-largeur-n">—</p>
+        <div class="accueil-barre" id="accueil-largeur-barre" hidden></div>
+        <p class="accueil-chiffre-s" id="accueil-largeur-s"></p>
+      </article>
+      <article class="accueil-chiffre">
+        <p class="accueil-chiffre-l">Valeur échangée</p>
+        <p class="accueil-chiffre-v" id="accueil-echange">—</p>
+      </article>
+      <article class="accueil-chiffre">
+        <p class="accueil-chiffre-l">Capitalisation actions</p>
+        <p class="accueil-chiffre-v" id="accueil-cap">—</p>
+      </article>
     </section>
     <section class="accueil-cartes" id="accueil-cartes" aria-label="Répartition des conseils"></section>
     <section class="accueil-bloc" aria-labelledby="accueil-top-titre">
@@ -1030,7 +1076,7 @@
           <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">La BRVM est la bourse commune aux <strong>8 pays de l'UEMOA</strong> (Afrique de l'Ouest), avec son siège à Abidjan. Créée en <strong>1998</strong>, elle réunit <strong>une cinquantaine de sociétés cotées</strong>. Sa performance se suit via deux indices : le <strong>BRVM Composite</strong> (tout le marché) et le <strong>BRVM 30</strong> (les 30 valeurs les plus actives).</p>
         </div>
 
-        <div style="margin-bottom:18px">
+        <div id="glossaire-investir" style="margin-bottom:18px">
           <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">Comment investir concrètement ?</div>
           <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 12px">Pour passer un ordre à la BRVM, on passe <strong>obligatoirement par une SGI</strong> (Société de Gestion et d'Intermédiation) — un courtier agréé par l'<strong>AMF-UMOA</strong>. Le marché étant régional, tu peux choisir une SGI dans <strong>n'importe quel pays de l'UEMOA</strong>, où que tu vives.</p>
 
