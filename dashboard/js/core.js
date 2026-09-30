@@ -193,7 +193,12 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
 
 function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
 function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
-function bcls10(v){return v>=7.5?'bg':v>=5?'ba':'br'}
+function bcls10(v){return classeNote(v)}
+/* Seuils nommés de la note /10 : 7,5 = Intéressant, 5 = À surveiller. */
+var SEUIL_NOTE_FORT = 7.5;
+var SEUIL_NOTE_MODERE = 5;
+function classeNote(v){return v>=SEUIL_NOTE_FORT?'bg':v>=SEUIL_NOTE_MODERE?'ba':'br'}
+function couleurNote(v){return v>=SEUIL_NOTE_FORT?'var(--green)':v>=SEUIL_NOTE_MODERE?'var(--amber)':'var(--red)'}
 function v10fmt(v){return (Math.round(v/8*10)/10).toFixed(1)}
 function note10num(row){
   if(row && row.note10!=null && row.note10!=='' && isFinite(Number(row.note10))){
@@ -1151,7 +1156,7 @@ function loadMarketWidget(){
 function loadSidebar(){
   const s=[...scores].sort(triCommeClassement);
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
+    const n=note10num(x),tc=couleurNote(n);
     const isFav=favorites.includes(x.ticker);
     const checked=_cmpSelected&&_cmpSelected.has(x.ticker)?'checked':'';
     return`<div class="tb" style="display:flex;align-items:center;gap:3px">
@@ -1167,7 +1172,7 @@ function filterSidebar(q){
   const s=[...scores].sort(triCommeClassement)
     .filter(x=>!q||x.ticker.includes(q)||((x.name||'').toUpperCase().includes(q)));
   document.getElementById('tlItems').innerHTML=s.map(x=>{
-    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
+    const n=note10num(x),tc=couleurNote(n);
     return`<button class="tb" onclick="_openStock('${x.ticker}')">
       <span style="font-weight:600;font-size:11px">${x.ticker}</span>
       <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${note10txt(x)}</span>
