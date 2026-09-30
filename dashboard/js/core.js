@@ -294,6 +294,7 @@ function setCurrency(c) {
   // Re-rendu de la page active
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
   if (active === 'rank') renderRankLive();
+  else if (active === 'welcome' && typeof renderAccueil === 'function') renderAccueil();
   else if (active === 'income') renderDiv();
   else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
@@ -344,6 +345,7 @@ let _gsIdx = -1;
 
 const _PAGES = [
   {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
+  {id:'marche',   icon:'📊', label:'Marché',              desc:'Indices, commodités, macro et dividendes'},
   {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
   {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
   {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
@@ -523,7 +525,7 @@ function toggleTheme() {
 }
 _applyTheme();
 
-var _PAGES_PLUS = {news:1, glossaire:1, methodo:1, settings:1};
+var _PAGES_PLUS = {news:1, glossaire:1, methodo:1, settings:1, marche:1};
 function syncChromeNav(id) {
   document.querySelectorAll('[data-nav]').forEach(function(el) {
     var cle = el.getAttribute('data-nav');
@@ -1020,6 +1022,7 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
+    if (document.getElementById('page-welcome')?.classList.contains('on') && typeof renderAccueil === 'function') renderAccueil();
     renderMacro(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
@@ -1531,6 +1534,14 @@ function filtreTendance(rows, verd){
   var cible=tendanceCle(verd);
   return liste.filter(function(x){ return tendanceCle(x&&x.pdf_verdict)===cible; });
 }
+function filtreConseil(rows){
+  var lib=document.getElementById('fConseil')?.value||'';
+  if(!lib) return rows||[];
+  return (rows||[]).filter(function(x){
+    var a=conseilAffiche(x);
+    return !!(a && !a.suspendu && a.libelle===lib);
+  });
+}
 function renderRank(){
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
@@ -1538,6 +1549,7 @@ function renderRank(){
   let d=[...scores];
   if(sec)d=d.filter(x=>x.sector===sec);
   if(verd)d=filtreTendance(d, verd);
+  d=filtreConseil(d);
   if(window._favOnly)d=d.filter(x=>favorites.includes(x.ticker));
   if(srt==='composite_adj') d.sort(triCommeClassement);
   else d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
@@ -2116,17 +2128,22 @@ function renderMacro(m){
   const ageH = (Date.now() - d.getTime()) / 3600000;
   if(ageH > 48) return;
   let any = false;
+  var fxVal = document.getElementById('macroFxVal');
+  var fx = document.getElementById('macroFx');
+  var meta = document.getElementById('macroMeta');
+  var card = document.getElementById('macroCard');
+  if(!fxVal || !fx || !meta || !card) return;
   if(typeof m.FCFA_per_USD === 'number'){
-    document.getElementById('macroFxVal').textContent = Math.round(m.FCFA_per_USD) + ' FCFA';
-    document.getElementById('macroFx').style.display = '';
+    fxVal.textContent = Math.round(m.FCFA_per_USD) + ' FCFA';
+    fx.style.display = '';
     any = true;
   }
   if(!any) return;
   const dd = String(d.getDate()).padStart(2,'0');
   const mm = String(d.getMonth()+1).padStart(2,'0');
   const yyyy = d.getFullYear();
-  document.getElementById('macroMeta').textContent = 'Données du ' + dd + '/' + mm + '/' + yyyy;
-  document.getElementById('macroCard').style.display = '';
+  meta.textContent = 'Données du ' + dd + '/' + mm + '/' + yyyy;
+  card.style.display = '';
 }
 function renderComm(){
   document.getElementById('commPrices').innerHTML=Object.entries(comms).map(([n,d])=>`
@@ -2823,19 +2840,25 @@ function initWelcome() { /* page statique — rien à charger */ }
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
   rank:      function(){ if(typeof loadRankDash==='function') loadRankDash(); },
-  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
+  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); },
   alerts:    ()=>{nav('signals');},
   valuation: ()=>{nav('signals');},
   signals:   function(){ if(typeof loadSignauxValoAlertes==='function') loadSignauxValoAlertes(); },
   optim:     ()=>nav('screener'),
   screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
   macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
-  marche:    ()=>{ nav('welcome'); },
+  marche:    ()=>{ if(typeof _renderMarketPage==='function') _renderMarketPage(); },
   news:      ()=>{if(typeof renderNewsV2!=='undefined')renderNewsV2();},
   settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
-  market:    ()=>{ nav('welcome'); },
+  market:    ()=>{ if(typeof _renderMarketPage==='function') _renderMarketPage(); },
   glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
 };
+pageLoaders.rank = (function(charger){
+  return function(){
+    charger();
+    if (typeof initTop3Podium === 'function') initTop3Podium();
+  };
+})(pageLoaders.rank);
 
 function _paintIndexCards() {
   if (!window._marketData || !window._marketData.composite) return;
@@ -3888,6 +3911,15 @@ const _helpContent = {
       { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus échangées). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
       { tip: '💡 Que faire ? Cliquez sur n\'importe quel carré de la heatmap ou sur une société dans les podiums pour voir sa fiche détaillée complète.' },
       { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 8.5/10, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
+    ]
+  },
+  welcome: {
+    title: 'Accueil',
+    sections: [
+      { h: 'En-tête de marché', p: 'Le statut ouvert ou fermé, la date de la dernière séance notée, et les trois indices du bandeau (Composite, BRVM 30, Prestige) avec leur variation.' },
+      { h: 'Les trois conseils', p: 'Le nombre de sociétés Intéressant, À surveiller et Prudence. Chaque carte ouvre le classement filtré sur ce conseil. Les comptes sont les mêmes que dans le classement.' },
+      { h: 'Top du moment', p: 'Les sociétés Intéressant, puis les meilleures À surveiller, jusqu\'à 8 lignes. La colonne Var. jour est la variation du cours déjà enregistrée. La couleur de la note suit le conseil.' },
+      { tip: 'Les notes et les écarts au prix cible sont ceux du classement. Ce n\'est pas un conseil en investissement.' }
     ]
   },
   rank: {

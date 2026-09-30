@@ -30,6 +30,7 @@ function renderRankCards() {
   let d = [...(window.scores || scores || [])];
   if (sec)     d = d.filter(x => x.sector === sec);
   if (verdict) d = filtreTendance(d, verdict);
+  if (typeof filtreConseil === 'function') d = filtreConseil(d);
   if (window._favOnly) d = d.filter(x => (window.favorites || favorites || []).includes(x.ticker));
   if (srt === 'composite_adj' && typeof triCommeClassement === 'function') d.sort(triCommeClassement);
   else d.sort((a, b) => srt === 'pe_ref'
