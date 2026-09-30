@@ -13,11 +13,14 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-HTML = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+_PAGE = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+_JS = (ROOT / "dashboard" / "js" / "core.js").read_text(encoding="utf-8")
+HTML = _PAGE + "\n" + _JS
 APP = (ROOT / "app.py").read_text(encoding="utf-8")
 
 FICHIERS_FRONT = (
     "dashboard/index.html",
+    "dashboard/js/core.js",
     "dashboard/compare_analysis.js",
     "dashboard/backtest.js",
     "dashboard/markowitz.js",

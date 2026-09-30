@@ -1,0 +1,4199 @@
+
+window.onerror = (msg, src, line, col, err) => {
+  console.error('[BRVM ERROR]', msg, '—', src, 'line', line, err || '');
+};
+window.onunhandledrejection = (e) => {
+  console.error('[BRVM UNHANDLED]', e.reason);
+};
+
+// ── Table scroll wrapper (mobile) ─────────────────────────────────────────
+function _wrapTables(){
+  document.querySelectorAll('table').forEach(t=>{
+    if(t.parentElement.classList.contains('table-scroll')) return;
+    const wrap=document.createElement('div');
+    wrap.className='table-scroll';
+    t.parentNode.insertBefore(wrap,t);
+    wrap.appendChild(t);
+  });
+}
+let _wrapTimer=null;
+const _tableObs=new MutationObserver(()=>{
+  clearTimeout(_wrapTimer);
+  _wrapTimer=setTimeout(_wrapTables,250);
+});
+// Démarrer l'observation après le premier rendu
+window.addEventListener('load',()=>{
+  _wrapTables();
+  const main=document.querySelector('.main');
+  if(main) _tableObs.observe(main,{childList:true,subtree:true});
+});
+let scores=[],comms={},charts={},favorites=[],portfolio={},topPerf=[];
+window._favOnly = false;
+
+// ── Dictionnaire termes financiers ─────────────────────────────────────────
+window.TERMS = {
+  'P/E': {short:'Cours / Bénéfice',long:'Combien tu paies pour 1 FCFA de bénéfice annuel. Sous 10 = bon marché, sur 20 = cher.'},
+  'P/B': {short:'Cours / Valeur comptable',long:'Cours en bourse divisé par la valeur des actifs. Sous 1 = sous-évalué.'},
+  'ROE': {short:'Rentabilité fonds propres',long:'Combien la société rapporte par rapport à ses fonds propres. Au-dessus de 15% = très rentable.'},
+  'ROA': {short:'Rentabilité des actifs',long:'Combien la société gagne par rapport à tous ses actifs. Au-dessus de 5% = bon.'},
+  'BNA': {short:'Bénéfice par action',long:'Bénéfice annuel de la société divisé par le nombre d\'actions.'},
+  'BVPA': {short:'Valeur comptable par action',long:'Actifs nets de la société divisés par le nombre d\'actions.'},
+  'EPS': {short:'Bénéfice par action',long:'Idem BNA mais en anglais (Earnings Per Share).'},
+  'EBITDA': {short:'Bénéfice avant amortissements',long:'Profit opérationnel avant intérêts, impôts et amortissements. Mesure la performance pure.'},
+  'DCF': {short:'Modèle de valorisation',long:'Discounted Cash Flow : estime la "vraie valeur" en additionnant les flux de trésorerie futurs.'},
+  'DDM': {short:'Modèle de dividendes',long:'Dividend Discount Model : estime la valeur d\'une action selon ses dividendes futurs.'},
+  'EPV': {short:'Valeur du pouvoir bénéficiaire',long:'Earning Power Value : estime ce que la société vaut si ses bénéfices restent stables.'},
+  'Graham': {short:'Méthode de Benjamin Graham',long:'Le modèle du père de l\'investissement value, calcule un cours "défensif" basé sur BNA et BVPA.'},
+  'Buffett': {short:'Méthode de Warren Buffett',long:'Modèle inspiré de Buffett : recherche des sociétés avec ROE élevé et marge sur le long terme.'},
+  'BRVM-C': {short:'Indice composite',long:'Moyenne pondérée de toutes les actions cotées à la BRVM.'},
+  'BRVM-30': {short:'Top 30',long:'Indice des 30 valeurs les plus échangées à la BRVM, revu chaque trimestre.'},
+  'Backtest': {short:'Test historique',long:'Simulation : "qu\'aurait gagné cette stratégie si on l\'avait suivie ces 3 dernières années ?".'},
+  'Sharpe': {short:'Ratio de Sharpe',long:'Mesure le rendement par rapport au risque pris. Au-dessus de 1 = bon.'},
+  'Markowitz': {short:'Optimisation portefeuille',long:'Méthode pour répartir son argent entre plusieurs actions afin de maximiser le rendement et minimiser le risque.'},
+  'Corrélation': {short:'Lien entre deux actions',long:'Mesure si deux actions montent et descendent ensemble (proche de 1) ou indépendamment (proche de 0).'},
+  'Volume': {short:'Quantité d\'actions échangées',long:'Nombre total d\'actions vendues et achetées sur la journée.'},
+  'Capitalisation': {short:'Valeur totale de la société en bourse',long:'Cours × nombre d\'actions. Indique la taille de la société.'},
+  'Dividende': {short:'Part des bénéfices distribuée',long:'Argent versé par la société à ses actionnaires, généralement une fois par an.'},
+  'Rendement': {short:'Dividende en % du cours',long:'Dividende annuel divisé par le cours. 4% = 4 FCFA reçus pour 100 FCFA investis.'},
+  'XOF': {short:'Franc CFA Ouest',long:'Devise officielle de l\'UEMOA (Sénégal, Côte d\'Ivoire, etc.). 1 EUR ≈ 656 XOF.'},
+  'UEMOA': {short:'Union économique',long:'Union Économique et Monétaire Ouest-Africaine : 8 pays qui partagent le franc CFA.'},
+  'BCEAO': {short:'Banque centrale',long:'Banque Centrale des États de l\'Afrique de l\'Ouest. Émet le franc CFA et fixe les taux.'},
+  'AGO': {short:'Assemblée Générale Ordinaire',long:'AG annuelle de routine (résultats, dividendes, etc.).'},
+  'AGE': {short:'Assemblée Générale Extraordinaire',long:'AG exceptionnelle pour décisions importantes (fusion, etc.).'},
+  'OPV': {short:'Offre Publique de Vente',long:'Mise en vente publique d\'actions, généralement pour une introduction en bourse.'},
+  'OPF': {short:'Offre Publique de Retrait',long:'La société reprend ses titres pour les retirer de la cote.'},
+  'PDG': {short:'Président-Directeur Général',long:'Plus haut dirigeant de la société. Il préside le conseil d\'administration ET dirige la société.'},
+  'AG':  {short:'Assemblée Générale',long:'Réunion annuelle des actionnaires où sont votés les dividendes, les comptes et les grandes décisions.'},
+  'Haussier': {short:'Marché qui monte',long:'La majorité des actions progressent aujourd\'hui. Bon climat général pour investir.'},
+  'Baissier': {short:'Marché qui baisse',long:'La majorité des actions reculent aujourd\'hui. Climat de prudence recommandé.'},
+  'Neutre': {short:'Marché stable',long:'Pas de tendance claire à la hausse ou à la baisse. Le marché est indécis.'},
+  'Trim.': {short:'Trimestriel',long:'Période de 3 mois (T1 = jan-mars, T2 = avr-juin, T3 = juil-sept, T4 = oct-déc).'},
+  'Sem.': {short:'Semestriel',long:'Période de 6 mois. S1 = 1er semestre (jan-juin), S2 = 2e semestre (juil-déc).'},
+  'T1': {short:'1er trimestre (jan–mars)',long:'Résultats de janvier à mars. Publiés généralement en avril-mai.'},
+  'T2': {short:'2e trimestre (avr–juin)',long:'Résultats d\'avril à juin. Publiés généralement en juillet-août.'},
+  'T3': {short:'3e trimestre (juil–sept)',long:'Résultats de juillet à septembre. Publiés généralement en octobre-novembre.'},
+  'T4': {short:'4e trimestre (oct–déc)',long:'Résultats d\'octobre à décembre. Inclus dans les résultats annuels.'},
+  'S1': {short:'1er semestre (jan–juin)',long:'Résultats des 6 premiers mois de l\'année.'},
+  'S2': {short:'2e semestre (juil–déc)',long:'Résultats des 6 derniers mois de l\'année.'},
+  'Sous-évaluée': {short:'Prix en bourse < valeur estimée',long:'Le cours actuel est en dessous de la valeur estimée par les modèles.'},
+  'Verdict': {short:'Conseil lié à la note sur 10',long:'7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.'},
+};
+
+window.MODE_LABELS = {
+  'POSITIF':        {beginner:'Tendance positive', expert:'✅ POSITIF'},
+  'NEUTRE':         {beginner:'Tendance neutre',   expert:'⏳ NEUTRE'},
+  'NEGATIF':        {beginner:'Tendance négative', expert:'⚠️ NÉGATIF'},
+  'Sous-évaluée':   {beginner:'💎 Prix attractif', expert:'Sous-évaluée'},
+  'Haussier':       {beginner:'🟢 Marché qui monte',expert:'🟢 Haussier'},
+  'Baissier':       {beginner:'🔴 Marché qui baisse',expert:'🔴 Baissier'},
+  'Marché Haussier':{beginner:'🟢 Le marché monte', expert:'Marché Haussier'},
+  'Marché Baissier':{beginner:'🔴 Le marché baisse', expert:'Marché Baissier'},
+  'Marché Neutre':  {beginner:'🟡 Marché stable',  expert:'Marché Neutre'},
+};
+
+function _toast(msg, duration) {
+  duration = duration || 3000;
+  var el = document.getElementById('_toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_toast';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text-1,#1a1f2e);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:99999;opacity:0;transition:all .3s;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:90vw;text-align:center;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = String(msg);
+  requestAnimationFrame(function() {
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(100px)';
+  }, duration);
+}
+window._toast = _toast;
+
+function _label(key) {
+  const mode = document.documentElement.getAttribute('data-mode') || 'expert';
+  const entry = window.MODE_LABELS[key];
+  return entry ? entry[mode] || key : key;
+}
+
+function _term(key) {
+  const t = window.TERMS[key];
+  if (!t) return key;
+  return `<span class="t" data-help="${t.long}" tabindex="0">${key}</span>`;
+}
+
+function _md(text) {
+  if (!text) return '';
+  return text
+    .replace(/^### (.*$)/gm, '<h5>$1</h5>')
+    .replace(/^## (.*$)/gm,  '<h4>$1</h4>')
+    .replace(/^# (.*$)/gm,   '<h3>$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,     '<em>$1</em>')
+    .replace(/^- (.*$)/gm,    '<li>$1</li>')
+    .replace(/(<li>.*?<\/li>\s*)+/gs, '<ul>$&</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^([^<\n].+)$/gm, (m) => '<p>' + m + '</p>')
+    .replace(/<p><\/p>/g, '');
+}
+
+function _autoTooltips() {
+  const keys = Object.keys(window.TERMS).sort((a,b) => b.length - a.length);
+  const escaped = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'g');
+  const walk = (node) => {
+    if (node.nodeType === 3 && node.parentElement &&
+        !node.parentElement.closest('.t,script,style,[data-help],input,textarea,svg')) {
+      const txt = node.nodeValue;
+      if (re.test(txt)) {
+        re.lastIndex = 0;
+        const span = document.createElement('span');
+        span.innerHTML = txt.replace(re, (m) => {
+          const t = window.TERMS[m];
+          return t ? `<span class="t" data-help="${t.long}" tabindex="0">${m}</span>` : m;
+        });
+        node.parentNode.replaceChild(span, node);
+      }
+    } else if (node.nodeType === 1 &&
+               !['SCRIPT','STYLE','INPUT','TEXTAREA','CODE'].includes(node.tagName) &&
+               node.tagName !== 'svg') {
+      [...node.childNodes].forEach(walk);
+    }
+  };
+  const main = document.querySelector('.main') || document.body;
+  walk(main);
+}
+const COMM_PROD={"PALC":{prod:"Huile de palme",com:["Huile de palme"],exp:"Forte",col:"#FF8C00",desc:"Prix de vente = cours mondial huile de palme."},"SPHC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Revenus liés au cours mondial caoutchouc."},"SOGC":{prod:"Caoutchouc",com:["Caoutchouc"],exp:"Forte",col:"#2E8B57",desc:"Idem SAPH."},"SCRC":{prod:"Sucre",com:["Sucre"],exp:"Forte",col:"#F9A8D4",desc:"Prix vente = sucre mondial."},"SMBC":{prod:"Bitume",com:["Pétrole/Bitume"],exp:"Forte",col:"#60A5FA",desc:"Coût = bitume dérivé pétrole."},"TTLC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Marges distribution affectées par le brut."},"TTLS":{prod:"Carburants SN",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Idem Total CI."},"SHEC":{prod:"Carburants CI",com:["Pétrole brut"],exp:"Modérée",col:"#93C5FD",desc:"Vivo Energy."},"CIEC":{prod:"Électricité",com:["Gaz naturel"],exp:"Modérée",col:"#86EFAC",desc:"Centrales thermiques."},"NTLC":{prod:"Produits Nestlé",com:["Cacao","Café"],exp:"Modérée",col:"#5D3A1A",desc:"Achète cacao/café comme matières."},"SLBC":{prod:"Bière SOLIBRA",com:["Orge"],exp:"Faible",col:"#DEB887",desc:"Orge importée = input principal."}};
+const HIST_PRICES={SGBC:[3500,3800,5200,5670,7760,9120,11090,19435,33000,34995],SIBC:[843,900,1100,1350,2000,2500,2700,3300,4800,6950],SNTS:[14000,15000,17000,18500,15000,16000,18000,19000,25000,28500],CBIBF:[8000,8500,9000,9800,9900,9885,9900,10000,13500,16490],NSBC:[5000,5200,5350,5400,5350,5350,5500,7500,9000,13900]};
+const HIST_DIV={SGBC:[202,270,527,261,297,331,904,1107,1398,2293],SIBC:[120,140,162,175,180,180,202,247,338,425],SNTS:[1107,1188,1214,1260,1134,1225,1400,1500,1740,1740],CBIBF:[360,380,430,450,430,450,540,630,810,900],NSBC:[0,0,0,0,0,0,0,404,505,759]};
+const YEARS=[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB923C','#A78BFA'];
+
+// ── Fallbacks pour fonctions définies dans les fichiers JS externes ────────
+// (au cas où un fichier externe échoue à charger ou contient une erreur)
+['loadAlertsLocal','updateAlertBadge','renderAlertsPanel','renderSmartAlertsPanel',
+ 'initRankHistory','startAutoRefresh','renderPerfPage',
+ 'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
+ 'simBuildSliders','simCalc',
+ 'loadRankDash','loadSignauxValoAlertes','loadWelcomeHero','initTop3Podium','renderNewsV2',
+ 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerExportCSV','screenerAnalyseAI',
+ 'renderPrevisionsPage','loadPriceChart','fetchLiveScore','loadLiveRank','renderLiveRankBadge','renderRankCards',
+ 'openMarkowitz','launchMarkowitz','initCompanyTabs','getDivConfidenceBadge','getDivYieldHtml',
+ 'openCompare','renderCompare',
+ 'setAlert','showAlertModal','checkAlertsWithPrices'].forEach(fn=>{
+  if(typeof window[fn]==='undefined'){
+    var stub=function(){ if(typeof brvmMissing==='function') brvmMissing(fn); return ''; };
+    stub._brvmStub=true;
+    window[fn]=stub;
+  }
+});
+
+function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
+function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
+function bcls10(v){return v>=7.5?'bg':v>=5?'ba':'br'}
+function v10fmt(v){return (Math.round(v/8*10)/10).toFixed(1)}
+function note10num(row){
+  if(row && row.note10!=null && row.note10!=='' && isFinite(Number(row.note10))){
+    return Math.round(Number(row.note10)*10)/10;
+  }
+  var brut=0;
+  if(row && row.composite_adj!=null && row.composite_adj!=='' && isFinite(Number(row.composite_adj))){
+    brut=Number(row.composite_adj);
+  } else if(row && row.score!=null && row.score!=='' && isFinite(Number(row.score))){
+    brut=Number(row.score);
+  }
+  return Math.round(brut/8*10)/10;
+}
+function note10txt(row){
+  return note10num(row).toFixed(1).replace('.',',');
+}
+function triCommeClassement(a, b){
+  function rang(x){
+    if(x && x.rank!=null && x.rank!=='' && isFinite(Number(x.rank))) return Number(x.rank);
+    return null;
+  }
+  var ra=rang(a), rb=rang(b);
+  if(ra!=null && rb!=null && ra!==rb) return ra-rb;
+  if(ra!=null && rb==null) return -1;
+  if(rb!=null && ra==null) return 1;
+  var sa=a && a.statut==='suspendu' ? 1 : 0;
+  var sb=b && b.statut==='suspendu' ? 1 : 0;
+  if(sa!==sb) return sa-sb;
+  var na=note10num(a), nb=note10num(b);
+  if(na!==nb) return nb-na;
+  return String((a&&a.ticker)||'').localeCompare(String((b&&b.ticker)||''), 'fr');
+}
+function rapportAnnuelTxt(row){
+  var u=String((row&&row.pdf_verdict)||'').toUpperCase();
+  if(u==='POSITIF') return 'positif';
+  if(u==='NEUTRE') return 'neutre';
+  if(u==='NEGATIF'||u==='N\u00c9GATIF') return 'n\u00e9gatif';
+  return '\u2014';
+}
+function fmt(n){return n!=null?Number(n).toLocaleString('fr-FR'):'—'}
+
+// ── Convertisseur de devises ───────────────────────────────────────────────
+window._currency = 'XOF';
+window._rates = { EUR: null, USD: null };
+
+function fetchExchangeRates() {
+  fetch('https://api.exchangerate-api.com/v4/latest/XOF')
+    .then(r => r.json())
+    .then(d => {
+      window._rates.EUR = d.rates.EUR;
+      window._rates.USD = d.rates.USD;
+      _updateCurrencyUI();
+    })
+    .catch(() => {
+      // Taux de secours BCEAO (1 EUR ≈ 655.96 XOF)
+      window._rates.EUR = 1 / 655.96;
+      window._rates.USD = 1 / 600;
+      _updateCurrencyUI();
+    });
+  // Rafraîchir toutes les heures
+  setTimeout(fetchExchangeRates, 3600000);
+}
+
+function _updateCurrencyUI() {
+  const el = document.getElementById('curr-rate');
+  if (el && window._rates.EUR) {
+    const eur = (1000 * window._rates.EUR).toFixed(2);
+    const usd = window._rates.USD ? (1000 * window._rates.USD).toFixed(2) : '?';
+    el.textContent = `1 000 XOF = ${eur}€ / $${usd}`;
+  }
+}
+
+function setCurrency(c) {
+  window._currency = c;
+  ['xof','eur','usd'].forEach(id => {
+    const btn = document.getElementById('cb-' + id);
+    if (btn) btn.classList.toggle('on', id === c.toLowerCase());
+  });
+  // Re-rendu de la page active
+  const active = document.querySelector('.page.on')?.id?.replace('page-','');
+  if (active === 'rank') renderRankLive();
+  else if (active === 'income') renderDiv();
+  else if (active === 'valuation') renderTargets();
+  else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
+}
+
+function convertXOF(n) {
+  const num = Number(n);
+  if (!num || isNaN(num)) return num;
+  if (window._currency === 'EUR' && window._rates.EUR) return num * window._rates.EUR;
+  if (window._currency === 'USD' && window._rates.USD) return num * window._rates.USD;
+  return num;
+}
+
+function currencySymbol() {
+  if (window._currency === 'EUR') return '€';
+  if (window._currency === 'USD') return '$';
+  return 'XOF';
+}
+
+// Formate un montant XOF dans la devise active
+function fmtXOF(n) {
+  if (n == null) return '—';
+  const raw = Number(n);
+  const sym = currencySymbol();
+  if (sym === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
+  const val = convertXOF(raw);
+  const str = val >= 100
+    ? val.toLocaleString('fr-FR', {maximumFractionDigits: 0})
+    : val.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  return sym === '€' ? str + ' €' : '$ ' + str;
+}
+
+// ── Mobile menu ────────────────────────────────────────────────────────────
+function toggleMobMenu() {
+  document.querySelector('.sb').classList.toggle('mob-open');
+  document.getElementById('mob-overlay').classList.toggle('show');
+}
+// Close sidebar when a nav item is tapped (drawer mode — all screen sizes)
+document.querySelectorAll('.ni').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelector('.sb').classList.remove('mob-open');
+    document.getElementById('mob-overlay').classList.remove('show');
+  });
+});
+
+// ── Recherche globale Cmd+K ────────────────────────────────────────────────
+let _gsIdx = -1;
+
+const _PAGES = [
+  {id:'rank',     icon:'🏆', label:'Classement',          desc:'Scores /10 toutes les actions'},
+  {id:'screener', icon:'🔍', label:'Screener',            desc:'Filtres avancés P/E, score, dividende'},
+  {id:'valuation',icon:'📊', label:'Valorisation',         desc:'Prix cibles Graham · EPV · Performances'},
+  {id:'signals',  icon:'📡', label:'Signaux',              desc:'Prévisions IA · Score personnalisé'},
+  {id:'alerts',   icon:'🔔', label:'Alertes',              desc:'Alertes prix et score'},
+  {id:'glossaire',icon:'📚', label:'Glossaire',            desc:'Termes financiers expliqués'},
+  {id:'comm',     icon:'🌍', label:'Commodités',           desc:'Matières premières et expositions'},
+  {id:'settings', icon:'⚙️', label:'Paramètres',           desc:'Tâches automatiques · statistiques · version'},
+];
+
+function openGSearch(){
+  const ov=document.getElementById('g-search-overlay');
+  const inp=document.getElementById('g-search-input');
+  ov.classList.add('open');
+  setTimeout(()=>inp?.focus(),50);
+  _gsIdx=-1;
+  runGSearch('');
+}
+function closeGSearch(){
+  document.getElementById('g-search-overlay')?.classList.remove('open');
+}
+
+function runGSearch(q){
+  _gsIdx=-1;
+  const res=document.getElementById('g-search-results');
+  if(!res) return;
+  q=(q||'').toLowerCase().trim();
+
+  const sc=window.scores||[];
+  const gl=typeof _glossTerms!=='undefined'?_glossTerms:[];
+
+  let html='';
+
+  // ── Actions
+  const matchStocks=sc.filter(x=>
+    (x.ticker||'').toLowerCase().includes(q)||
+    (x.name||'').toLowerCase().includes(q)||
+    (x.sector||'').toLowerCase().includes(q)
+  ).slice(0,8);
+  if(matchStocks.length){
+    html+=`<div class="gsr-section">Actions (${matchStocks.length})</div>`;
+    html+=matchStocks.map(x=>{
+      const v=x.composite_adj||0;
+      const chg=x.change_pct||0;
+      const chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+      const verdict=x.pdf_verdict||'—';
+      const verdC=verdict==='POSITIF'?'var(--green)':verdict==='NEGATIF'?'var(--red)':'var(--amber)';
+      return`<div class="gsr-item" data-action="stock" data-val="${x.ticker}">
+        <div class="gsr-icon" style="background:rgba(74,222,128,.1)">📈</div>
+        <div style="flex:1">
+          <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
+          <div class="gsr-sub">${x.sector||'—'} · ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="b ${bcls10(note10num(x))}" style="display:block;margin-bottom:2px">${note10txt(x)}/10</span>
+          <span style="font-size:9px;color:${verdC}">${verdict}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Pages
+  const matchPages=_PAGES.filter(p=>
+    !q||p.label.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)
+  ).slice(0,5);
+  if(matchPages.length){
+    html+=`<div class="gsr-section">Pages</div>`;
+    html+=matchPages.map(p=>`<div class="gsr-item" data-action="page" data-val="${p.id}">
+      <div class="gsr-icon" style="background:rgba(96,165,250,.1);font-size:16px">${p.icon}</div>
+      <div>
+        <div class="gsr-title">${p.label}</div>
+        <div class="gsr-sub">${p.desc}</div>
+      </div>
+    </div>`).join('');
+  }
+
+  // ── Glossaire
+  const matchGloss=gl.filter(t=>
+    !q||t.term.toLowerCase().includes(q)||t.def.toLowerCase().includes(q)
+  ).slice(0,4);
+  if(matchGloss.length){
+    html+=`<div class="gsr-section">Glossaire</div>`;
+    html+=matchGloss.map(t=>`<div class="gsr-item" data-action="gloss" data-val="${t.term}">
+      <div class="gsr-icon" style="background:rgba(192,132,252,.1)">📚</div>
+      <div>
+        <div class="gsr-title">${t.term}</div>
+        <div class="gsr-sub" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.def.substring(0,60)}…</div>
+      </div>
+    </div>`).join('');
+  }
+
+  // ── Récents (uniquement si pas de query)
+  if(!q){
+    const recent=JSON.parse(localStorage.getItem('brvm_recent_tickers')||'[]').slice(0,5);
+    const recStocks=recent.map(tk=>(window.scores||[]).find(x=>x.ticker===tk)).filter(Boolean);
+    if(recStocks.length){
+      html=`<div class="gsr-section">⏱ Consultés récemment</div>`+recStocks.map(x=>{
+        const v=x.composite_adj||0;
+        const chg=x.change_pct||0;const chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+        return`<div class="gsr-item" data-action="stock" data-val="${x.ticker}">
+          <div class="gsr-icon" style="background:rgba(251,191,36,.12)">⏱</div>
+          <div style="flex:1">
+            <div class="gsr-title">${x.ticker} <span style="font-size:10px;color:var(--t2);font-weight:400">· ${(x.name||'').substring(0,22)}</span></div>
+            <div class="gsr-sub">${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'} · <span style="color:${chgC}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>
+          </div>
+          <span class="b ${bcls10(note10num(x))}">${note10txt(x)}/10</span>
+        </div>`;
+      }).join('')+html;
+    }
+  }
+
+  if(!html) html='<div style="padding:20px;text-align:center;color:var(--t2);font-size:12px">Aucun résultat pour "'+q+'"</div>';
+  res.innerHTML=html;
+}
+
+function _trackRecentTicker(ticker){
+  const key='brvm_recent_tickers';
+  let arr=JSON.parse(localStorage.getItem(key)||'[]');
+  arr=arr.filter(t=>t!==ticker);
+  arr.unshift(ticker);
+  localStorage.setItem(key,JSON.stringify(arr.slice(0,10)));
+}
+
+function gsKeyNav(e){
+  const items=[...document.querySelectorAll('#g-search-results .gsr-item')];
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();_gsIdx=(_gsIdx+1)%items.length;_gsHighlight(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();_gsIdx=(_gsIdx-1+items.length)%items.length;_gsHighlight(items);}
+  else if(e.key==='Enter'){e.preventDefault();if(_gsIdx>=0)gsActivate(items[_gsIdx]);else if(items[0])gsActivate(items[0]);}
+  else if(e.key==='Escape'){closeGSearch();}
+}
+function _gsHighlight(items){
+  items.forEach((el,i)=>el.classList.toggle('active',i===_gsIdx));
+  if(_gsIdx>=0) items[_gsIdx].scrollIntoView({block:'nearest'});
+}
+function gsActivate(el){
+  const action=el.getAttribute('data-action');
+  const val=el.getAttribute('data-val');
+  closeGSearch();
+  if(action==='stock'){ _openStock(val); }
+  else if(action==='page'){
+    nav(val);
+    if(typeof pageLoaders!=='undefined'&&pageLoaders[val]) pageLoaders[val]();
+  } else if(action==='gloss'){
+    nav('glossaire'); initGlossaire();
+    setTimeout(()=>{ const si=document.getElementById('gloss-search');if(si){si.value=val;filterGlossaire(val);}},200);
+  }
+}
+// Délégation de clic sur les résultats
+document.addEventListener('click',e=>{
+  const item=e.target.closest('.gsr-item');
+  if(item) gsActivate(item);
+});
+// Cmd+K / Ctrl+K + "G TICKER" shortcut
+let _gBuffer='',_gBufTimer=null;
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();return;}
+  if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();return;}
+  // "G TICKER" shortcut: type G then a ticker (ignores input fields)
+  if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA') return;
+  if(e.key==='g'||e.key==='G'){_gBuffer='';clearTimeout(_gBufTimer);openGSearch();return;}
+});
+
+// ── Theme dark/light — toujours light au démarrage, pas de persistance ─────
+let dark = false;
+function _applyTheme() {
+  document.documentElement.classList.toggle('light', !dark);
+  const btn = document.querySelector('button[onclick="toggleTheme()"]');
+  if (btn) btn.textContent = dark ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  dark = !dark;
+  _applyTheme();
+}
+_applyTheme();
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function nav(id){
+  if(id==='optim')id='screener';
+  const pg = document.getElementById('page-'+id);
+  if (!pg) {
+    console.warn('nav: cible inconnue', id);
+    if (id === 'rank') return;
+    nav('rank');
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  pg.classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('on')});
+  document.querySelector('.main').scrollTop=0;
+  if(typeof _currentPage!=='undefined') _currentPage=id;
+  if(_helpOpen) openHelpDrawer(id);
+  try{history.replaceState(null,'','#'+id);}catch(e){}
+}
+// Support navigation par hash URL + hashchange
+(function(){
+  var h=(location.hash||'').replace('#','');
+  var stockMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(h);
+  if(stockMatch){ window._pendingStockTicker = stockMatch[1].toUpperCase(); }
+  window.addEventListener('load',function(){
+    if(stockMatch){
+      if(window._pendingStockTicker && typeof nav==='function') nav('rank');
+    } else if(h && document.getElementById('page-'+h)){
+      setTimeout(function(){if(typeof nav==='function')nav(h);},800);
+    } else if(typeof nav==='function'){ nav('welcome'); }
+  });
+})();
+window.addEventListener('hashchange', function() {
+  var page = (location.hash || '#welcome').slice(1);
+  var hcMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(page);
+  if (hcMatch) { _openStock(hcMatch[1].toUpperCase()); return; }
+  if (typeof nav === 'function' && document.getElementById('page-' + page)) nav(page);
+});
+
+// ── Mode débutant / expert — init ─────────────────────────────────────────
+(function(){
+  var m = 'beginner';
+  document.documentElement.setAttribute('data-mode', m);
+  // Mettre à jour les boutons mode toggle une fois le DOM prêt
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-mode-btn]').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.modeBtn === m);
+    });
+  });
+})();
+
+// ── Sidebar compact mode ────────────────────────────────────────────────────
+function toggleSidebarCompact(){
+  const sb = document.querySelector('.sb');
+  const btn = document.getElementById('sb-compact-btn');
+  if (!sb) return;
+  const compact = sb.classList.toggle('compact');
+  localStorage.setItem('brvm_sb_compact', compact ? '1' : '');
+  if (btn) btn.textContent = compact ? '⟩ Agrandir' : '⟨ Réduire la sidebar';
+}
+(function(){
+  const sb = document.querySelector('.sb');
+  if (sb && localStorage.getItem('brvm_sb_compact')) {
+    sb.classList.add('compact');
+    const btn = document.getElementById('sb-compact-btn');
+    if (btn) btn.textContent = '⟩ Agrandir';
+  }
+})();
+
+// ── Accordion sidebar groups ────────────────────────────────────────────────
+function sbToggle(id){
+  const sub = document.getElementById(id);
+  if (!sub) return;
+  const hdr = sub.previousElementSibling;
+  const collapsed = sub.classList.toggle('collapsed');
+  if (hdr) hdr.classList.toggle('collapsed', collapsed);
+  // Persist state
+  try{
+    const state = JSON.parse(localStorage.getItem('brvm_sb_groups')||'{}');
+    state[id] = collapsed ? '1' : '';
+    localStorage.setItem('brvm_sb_groups', JSON.stringify(state));
+  }catch(e){}
+}
+(function(){
+  // Restore collapsed state — default: all groups open
+  try{
+    const state = JSON.parse(localStorage.getItem('brvm_sb_groups')||'{}');
+    Object.entries(state).forEach(([id, v])=>{
+      if(v){
+        const sub = document.getElementById(id);
+        const hdr = sub?.previousElementSibling;
+        if(sub){ sub.classList.add('collapsed'); }
+        if(hdr){ hdr.classList.add('collapsed'); }
+      }
+    });
+  }catch(e){}
+})();
+
+// ── Skeleton loader helper ──────────────────────────────────────────────────
+function skeletonRows(n=5){
+  return Array.from({length:n}, (_,i)=>`<div class="sk-row" style="opacity:${1-i*0.12}">
+    <div class="skeleton"></div><div class="skeleton"></div>
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>`).join('');
+}
+
+// ── SVG Charts ─────────────────────────────────────────────────────────────
+function svgBar(el,labels,values,colors,height=170,horizontal=false,valueSuffix=''){
+  if(!el)return;
+  if(!values.length){el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:${height}px;gap:6px;color:var(--t2);font-size:12px"><span style="font-size:22px">📊</span><span>Aucune donnée disponible</span></div>`;return;}
+  function barTxt(v){
+    var txt=horizontal&&typeof v==='number'&&v<10?v.toFixed(1):String(Math.round(v));
+    if(valueSuffix==='/10'&&typeof v==='number'&&v<10) txt=v.toFixed(1).replace('.',',');
+    return txt+valueSuffix;
+  }
+  if(horizontal){
+    const max=Math.max(...values)||1;
+    const bh=Math.min(22,Math.floor((height-20)/values.length));
+    const w=460;
+    let s=`<svg width="100%" height="${height}" viewBox="0 0 550 ${height}" xmlns="http://www.w3.org/2000/svg">`;
+    values.forEach((v,i)=>{
+      const y=10+i*(bh+4);
+      const bw=Math.max(4,Math.round(v/max*(w-100)));
+      const c=Array.isArray(colors)?colors[i%colors.length]:colors;
+      s+=`<text x="85" y="${y+bh/2+4}" text-anchor="end" fill="#64748B" font-size="10" font-family="sans-serif">${labels[i]}</text>`;
+      s+=`<rect x="90" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${c}" opacity="0.85"/>`;
+      s+=`<text x="${90+bw+5}" y="${y+bh/2+4}" fill="#94A3B8" font-size="10" font-family="sans-serif">${barTxt(v)}</text>`;
+    });
+    s+='</svg>';el.innerHTML=s;
+  } else {
+    const max=Math.max(...values)||1;
+    const w=500,bw=Math.floor((w-40)/values.length)-8;
+    let s=`<svg width="100%" height="${height}" viewBox="0 0 ${w} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+    values.forEach((v,i)=>{
+      const x=20+i*(bw+8);
+      const bh=Math.max(4,Math.round(v/max*(height-40)));
+      const y=height-30-bh;
+      const c=Array.isArray(colors)?colors[i%colors.length]:colors;
+      s+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="4" fill="${c}" opacity="0.85"/>`;
+      s+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" fill="#94A3B8" font-size="11">${barTxt(v)}</text>`;
+      s+=`<text x="${x+bw/2}" y="${height-8}" text-anchor="middle" fill="#64748B" font-size="9">${labels[i]}</text>`;
+    });
+    s+='</svg>';el.innerHTML=s;
+  }
+}
+
+function svgDonut(el,labels,values,height=170){
+  if(!el||!values.length)return;
+  const total=values.reduce((a,b)=>a+b,0)||1;
+  const cx=80,cy=height/2,r=60,ri=32;
+  let s=`<svg width="100%" height="${height}" viewBox="0 0 340 ${height}" xmlns="http://www.w3.org/2000/svg">`;
+  let angle=-Math.PI/2;
+  values.forEach((v,i)=>{
+    const sl=v/total*Math.PI*2;
+    if(sl<0.01){angle+=sl;return;}
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sl),y2=cy+r*Math.sin(angle+sl);
+    const xi1=cx+ri*Math.cos(angle),yi1=cy+ri*Math.sin(angle);
+    const xi2=cx+ri*Math.cos(angle+sl),yi2=cy+ri*Math.sin(angle+sl);
+    const lg=sl>Math.PI?1:0;
+    s+=`<path d="M${xi1},${yi1} L${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${ri},${ri} 0 ${lg} 0 ${xi1},${yi1}" fill="${COLORS[i%COLORS.length]}"/>`;
+    angle+=sl;
+  });
+  labels.forEach((l,i)=>{const ly=12+i*18;s+=`<rect x="160" y="${ly}" width="8" height="8" rx="2" fill="${COLORS[i%COLORS.length]}"/><text x="174" y="${ly+7}" fill="#94A3B8" font-size="10" font-family="sans-serif">${l} (${values[i]})</text>`;});
+  s+='</svg>';el.innerHTML=s;
+}
+
+function svgLine(el,years,datasets,height=260){
+  if(!el||!datasets.length)return;
+  const w=550,pad=50,top=20,bot=40;
+  const allVals=datasets.flatMap(d=>d.data);
+  const minV=0,maxV=Math.max(...allVals)*1.05||1;
+  const scX=(i)=>pad+(i/(years.length-1))*(w-pad*2);
+  const scY=(v)=>top+(1-(v-minV)/(maxV-minV))*(height-top-bot);
+  let s=`<svg width="100%" height="${height}" viewBox="0 0 ${w} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<line x1="${pad}" y1="${top}" x2="${pad}" y2="${height-bot}" stroke="#334155" stroke-width="1"/>`;
+  s+=`<line x1="${pad}" y1="${height-bot}" x2="${w-pad}" y2="${height-bot}" stroke="#334155" stroke-width="1"/>`;
+  years.forEach((y,i)=>{s+=`<text x="${scX(i)}" y="${height-bot+14}" text-anchor="middle" fill="#64748B" font-size="9">${y}</text>`;});
+  for(let g=0;g<=4;g++){const yv=minV+(maxV-minV)*g/4;const yp=scY(yv);s+=`<line x1="${pad}" y1="${yp}" x2="${w-pad}" y2="${yp}" stroke="#1E293B" stroke-width="0.5"/><text x="${pad-4}" y="${yp+4}" text-anchor="end" fill="#64748B" font-size="8">${yv>=1000?(yv/1000).toFixed(0)+'k':Math.round(yv)}</text>`;}
+  datasets.forEach((ds,di)=>{
+    const pts=ds.data.map((v,i)=>`${scX(i)},${scY(v)}`).join(' ');
+    s+=`<polyline points="${pts}" fill="none" stroke="${COLORS[di%COLORS.length]}" stroke-width="2" opacity="0.9"/>`;
+    ds.data.forEach((v,i)=>{s+=`<circle cx="${scX(i)}" cy="${scY(v)}" r="3" fill="${COLORS[di%COLORS.length]}"/>`;});
+  });
+  const legY=height-12;datasets.forEach((ds,i)=>{s+=`<rect x="${pad+i*90}" y="${legY-7}" width="10" height="4" rx="2" fill="${COLORS[i%COLORS.length]}"/><text x="${pad+i*90+14}" y="${legY}" fill="#94A3B8" font-size="9">${ds.label}</text>`;});
+  s+='</svg>';el.innerHTML=s;
+}
+
+
+// — Tooltip SVG —
+function showTooltip(evt,text){
+  var svg=evt.target.closest('svg');if(!svg)return;
+  var tt=svg.querySelector('[id^="tt-"]');
+  var bg=svg.querySelector('[id^="tt-bg-"]');
+  var tx=svg.querySelector('[id^="tt-txt-"]');
+  if(!tt||!bg||!tx)return;
+  tx.textContent=text;
+  tx.setAttribute('x',evt.offsetX+8);tx.setAttribute('y',evt.offsetY-4);
+  bg.setAttribute('x',evt.offsetX+4);bg.setAttribute('y',evt.offsetY-18);
+  bg.setAttribute('width',text.length*6+8);bg.setAttribute('height',16);
+  tt.setAttribute('opacity','1');
+}
+function hideTooltip(){document.querySelectorAll('[id^="tt-"]').forEach(t=>t.setAttribute('opacity','0'));}
+
+function fmtVerdict(v){return v==='POSITIF'?'Tendance positive':v==='NEGATIF'?'Tendance négative':v==='NEUTRE'?'Tendance neutre':v||'—';}
+function conseilAffiche(row){
+  var src=(row&&typeof row==='object')?row:{conseil:row};
+  if(src.statut==='suspendu'){
+    var dep=src.statut_depuis||'';
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(dep);
+    var aff=m?(m[3]+'/'+m[2]+'/'+m[1]):'';
+    var texte=aff?('Cotation suspendue depuis le '+aff):'Cotation suspendue';
+    return {libelle:texte,css:'var(--t2)',texte:texte,suspendu:true};
+  }
+  var lib=src.conseil_libelle;
+  var c=src.conseil;
+  if(lib!=='Intéressant'&&lib!=='À surveiller'&&lib!=='Prudence'){
+    if(c==='acheter'||c==='Intéressant') lib='Intéressant';
+    else if(c==='attendre'||c==='À surveiller') lib='À surveiller';
+    else if(c==='eviter'||c==='Prudence') lib='Prudence';
+    else lib='';
+  }
+  if(lib!=='Intéressant'&&lib!=='À surveiller'&&lib!=='Prudence') return null;
+  var col=src.conseil_couleur;
+  if(col!=='vert'&&col!=='orange'&&col!=='rouge'){
+    col=lib==='Intéressant'?'vert':lib==='À surveiller'?'orange':'rouge';
+  }
+  var css=col==='vert'?'var(--green)':col==='orange'?'var(--amber)':'var(--red)';
+  var ico=lib==='Intéressant'?'✅ ':lib==='À surveiller'?'⏳ ':'⚠️ ';
+  return {libelle:lib,css:css,texte:ico+lib};
+}
+function fmtConseil(row){
+  var a=conseilAffiche(row);
+  if(!a) return '<span style="color:var(--t2)" title="Donnee en quarantaine - prix non confirme">—</span>';
+  if(a.suspendu) return '<span style="color:var(--t2);background:rgba(148,163,184,.22);border-radius:10px;padding:2px 8px;font-weight:600">'+a.texte+'</span>';
+  return '<span style="color:'+a.css+'">'+a.texte+'</span>';
+}
+
+function showChangelog(){
+  var m=document.createElement('div');
+  m.style='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative"><button onclick="this.closest(\'div\').parentElement.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--t2);font-size:16px;cursor:pointer">✕</button><h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Changelog v9.0</h3><div style="font-size:12px;color:var(--t2);line-height:1.8"><strong style="color:var(--text)">Mai 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Refonte UX complète — footer, sidebar, typographie</li><li>Badges score /10 unifiés partout</li><li>Gauge signal du jour · barre statut marché</li><li>Score personnalisé : indicateur total poids</li><li>Toast notifications avec animation slideInRight</li><li>Skeleton loading · hover buttons</li></ul><strong style="color:var(--text)">Avril 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Tooltips flottants data-tip sur tout le dashboard</li><li>Boutons ← Retour sur toutes les pages secondaires</li><li>Portfolio : modal Pourquoi ce titre ?</li><li>Optimisation Markowitz intégrée</li></ul></div></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+  document.body.appendChild(m);
+}
+
+
+// showAlertModal gérée par alerts.js
+
+// compare gérée par compare.js
+
+// ── Cache sessionStorage (TTL 5min) ────────────────────────────────────────
+const _CACHE_TTL = 5 * 60 * 1000;
+const _LS_ECO = 'brvm_eco_mode_v1';
+let _ecoMode = localStorage.getItem(_LS_ECO) === '1';
+
+async function _cachedFetch(url, ttl = _CACHE_TTL) {
+  const key = 'brvm_ss_' + url;
+  let staleData = null, staleTs = null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (raw) {
+      const { ts, data } = JSON.parse(raw);
+      if (Date.now() - ts < ttl) {
+        _updateFreshness(ts);
+        return data;
+      }
+      staleData = data; staleTs = ts;
+    }
+  } catch {}
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const data = await fetch(url, { signal: controller.signal }).then(r => r.json());
+    try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+    _updateFreshness(Date.now());
+    return data;
+  } catch (e) {
+    if (staleData !== null) {
+      _updateFreshness(staleTs);
+      return staleData;
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function _updateFreshness(ts) {
+  const el = document.getElementById('freshness-badge');
+  if (!el) return;
+  const age = Math.round((Date.now() - ts) / 1000);
+  if (age < 10) { el.style.display = 'none'; return; }
+  const label = age < 60 ? `${age}s` : age < 3600 ? `${Math.floor(age/60)}min` : `${Math.floor(age/3600)}h`;
+  el.textContent = `⏱ données : ${label}`;
+  el.style.display = '';
+  el.style.color = age > 300 ? 'var(--amber)' : 'var(--t3)';
+}
+
+function toggleEcoMode() {
+  _ecoMode = !_ecoMode;
+  localStorage.setItem(_LS_ECO, _ecoMode ? '1' : '0');
+  const btn = document.getElementById('eco-mode-btn');
+  if (btn) btn.textContent = `🔋 Mode économie : ${_ecoMode ? 'ON' : 'OFF'}`;
+  if (_ecoMode) {
+    if (window._autoRefreshTimer) { clearInterval(window._autoRefreshTimer); window._autoRefreshTimer = null; }
+  } else {
+    startAutoRefresh();
+  }
+}
+
+function _initEcoModeUI() {
+  const btn = document.getElementById('eco-mode-btn');
+  if (btn) btn.textContent = `🔋 Mode économie : ${_ecoMode ? 'ON' : 'OFF'}`;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init(){
+  gSpinShow();
+  _initEcoModeUI();
+  document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.add('loading'));
+  try{
+    const[s,c,m,tp]=await Promise.all([
+      _cachedFetch('/api/scores'),
+      _cachedFetch('/api/commodities').catch(()=>({})),
+      _cachedFetch('/api/macro').catch(()=>({})),
+      _cachedFetch('/api/top_performers').catch(()=>[]),
+    ]);
+    scores=s;window.scores=s;comms=c;topPerf=tp;
+    renderMacro(m);
+    try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
+    if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
+    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
+    window._priceHistory={};
+    window._extSparklines={};
+    // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
+    fetch('/data/companies_stories.json').then(r=>r.json()).then(d=>{_companyStories=d.stories||{};}).catch(e=>{console.error('[BRVM] companies_stories:',e);});
+    // Charger historique prix PUIS rendu — .finally() garantit le rendu même si l'API échoue
+    fetch('/api/price-history').then(r=>r.json()).then(ph=>{
+      window._priceHistory=ph;
+    }).catch(e=>{
+      window._priceHistory={};
+      console.error('[BRVM] price-history error:',e);
+    }).finally(()=>{
+      try{
+        const _hash = (location.hash || '').replace('#','');
+        if (!localStorage.getItem('brvm_visited') && !_hash) {
+          nav('welcome');
+        } else {
+          initRanking();renderRankLive();renderDiv();renderComm();startAutoRefresh();
+        }
+      }catch(e2){console.error('[BRVM] init render error:',e2);}
+      if (window._pendingStockTicker) {
+        var _pt = window._pendingStockTicker;
+        if ((window.scores||scores||[]).some(function(x){return x.ticker===_pt;})) {
+          if(typeof nav==='function') nav('rank');
+          _openStock(_pt);
+        } else {
+          console.warn('LOT4-a: ticker inconnu dans le hash:', _pt);
+        }
+        window._pendingStockTicker = null;
+      }
+      document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+      gSpinHide();
+    });
+    // Sparklines BOC en parallèle
+    fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(e=>{console.error('[BRVM] sparklines:',e);});
+    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget,500);
+    populateSelects();
+    setTimeout(_autoTooltips, 1200);
+  }catch(e){
+    console.error('[BRVM] init fatal:',e);
+    gSpinHide();
+    document.querySelectorAll('#kpis .kpi').forEach(el=>el.classList.remove('loading'));
+    const be=document.getElementById('bootError');
+    if(be) be.style.display='';
+  }
+}
+
+function populateSelects(){
+  const sorted=[...scores].sort(triCommeClassement);
+  ['portTicker','alertTicker'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(sel&&sel.options&&sel.options.length<=1) sorted.forEach(s=>sel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
+  });
+  const nsel=document.getElementById('nFil');
+  if(nsel&&nsel.options.length<=1) sorted.forEach(s=>nsel.add(new Option(s.ticker+' — '+(s.name||''),s.ticker)));
+  const fSec=document.getElementById('fSec');
+  if(fSec&&fSec.options.length<=1)[...new Set(scores.map(x=>x.sector).filter(Boolean))].sort().forEach(s=>fSec.add(new Option(s,s)));
+}
+
+
+// ── Flux de capitaux ─────────────────────────────────────────────────────────
+async function renderFluxCapitaux(targetEl) {
+  const el = targetEl || document.getElementById('flux-content');
+  if (!el) return;
+  let prices;
+  try {
+    const res = await fetch('/api/live');
+    const data = await res.json();
+    prices = data.prices || {};
+  } catch(e) { el.innerHTML = '<p style="color:var(--t2);font-size:12px">Données live indisponibles.</p>'; return; }
+
+  // Compute flow = change_pct × volume × price (positive = inflow, negative = outflow)
+  const flows = Object.entries(prices).map(([ticker, d]) => {
+    const flow = (d.change_pct || 0) * (d.volume || 0) * (d.price || 0) / 1e6;
+    return { ticker, flow, chg: d.change_pct || 0, volume: d.volume || 0, price: d.price || 0 };
+  }).filter(x => x.volume > 0);
+
+  const sorted = [...flows].sort((a, b) => b.flow - a.flow);
+  const inflow  = sorted.filter(x => x.flow > 0).slice(0, 5);
+  const outflow = sorted.filter(x => x.flow < 0).reverse().slice(0, 5);
+
+  if (!inflow.length && !outflow.length) {
+    el.innerHTML = '<p style="color:var(--t2);font-size:12px">Aucun volume disponible pour calculer les flux.</p>';
+    return;
+  }
+
+  function flowBar(items, positive) {
+    const maxAbs = Math.max(...items.map(x => Math.abs(x.flow)), 0.001);
+    return items.map(x => {
+      const pct = Math.min(100, Math.abs(x.flow) / maxAbs * 100);
+      const col = positive ? 'var(--green)' : 'var(--red)';
+      const sign = positive ? '+' : '';
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="_openStock('${x.ticker}')">
+        <div style="width:48px;font-size:12px;font-weight:700;color:${col}">${x.ticker}</div>
+        <div style="flex:1;background:var(--bg3);border-radius:3px;height:14px;position:relative">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}22;border-radius:3px;transition:width .4s"></div>
+          <div style="position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:12px;color:var(--t2);white-space:nowrap">${sign}${x.chg.toFixed(2)}% · ${(x.volume||0).toLocaleString('fr-FR')} titres</div>
+        </div>
+        <div style="min-width:64px;text-align:right;font-size:12px;font-weight:600;color:${col};white-space:nowrap">${positive ? '+' : '−'}${Math.abs(x.flow).toFixed(1)} M</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Agrégation par secteur
+  const sectorFlows = {};
+  const all = window.scores || scores || [];
+  const _SECTBBGC1 = { BBGC: 'Banque' }; // SECTBBGC-1 : societes cotees non notees, a retirer quand BBGC sera notee
+  flows.forEach(f => {
+    const st = all.find(x => x.ticker === f.ticker);
+    const sec = (st && st.sector) || _SECTBBGC1[f.ticker] || 'Autre';
+    if (!sectorFlows[sec]) sectorFlows[sec] = 0;
+    sectorFlows[sec] += f.flow;
+  });
+  const secArr = Object.entries(sectorFlows).sort((a,b)=>b[1]-a[1]);
+  const maxSecFlow = Math.max(...secArr.map(([,v])=>Math.abs(v)), 0.001);
+  const secBars = secArr.map(([sec, flow]) => {
+    const col = flow > 0 ? 'var(--green)' : 'var(--red)';
+    const pct = Math.min(100, Math.abs(flow) / maxSecFlow * 100);
+    const sign = flow > 0 ? '+' : (flow < 0 ? '−' : '');
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="width:96px;font-size:12px;line-height:18px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sec}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:3px;height:18px;position:relative">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col}33;border-radius:3px"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 5px;font-size:12px;color:${col};font-weight:600">${sign}${Math.abs(flow).toFixed(1)}M XOF</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">📈 Afflux par action (entrées)</div>
+      ${inflow.length ? flowBar(inflow, true) : '<p style="color:var(--t2);font-size:12px">Aucun afflux</p>'}
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px;letter-spacing:.2px">📉 Argent qui sort, par action</div>
+      ${outflow.length ? flowBar(outflow, false) : '<p style="color:var(--t2);font-size:12px">Aucune sortie d’argent</p>'}
+    </div>
+  </div>
+  ${secArr.length ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🏭 Flux par secteur</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:6px;font-style:italic">Somme des flux (var% × volume × cours) par secteur — positif = pression acheteuse nette, négatif = pression vendeuse</div>
+    ${secBars}
+  </div>` : ''}`;
+}
+
+// ── Heatmap BRVM ───────────────────────────────────────────────────────────
+let _heatmapFilter='';
+function setHeatmapFilter(sector){
+  _heatmapFilter=sector;
+  document.querySelectorAll('.hf-btn').forEach(b=>{
+    const label=b.textContent.trim();
+    const match=sector===''?label==='Tous':b.getAttribute('onclick')?.includes(`'${sector}'`);
+    b.classList.toggle('hf-on',!!match);
+  });
+  renderHeatmap();
+}
+
+function renderHeatmap(containerId){
+  const grid=document.getElementById(containerId||'heatmap-grid');
+  if(!grid)return;
+  let all=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  if(_heatmapFilter) all=all.filter(x=>(x.sector||'').toLowerCase().includes(_heatmapFilter.toLowerCase()));
+  if(!all.length){grid.innerHTML='<p style="color:var(--t2);font-size:12px;padding:12px">Aucune société dans ce secteur.</p>';return;}
+
+  // Taille basée sur capitalisation boursière (price × shares), fallback score
+  const caps=all.map(x=>{
+    const cap=(x.price||0)*(x.shares||0);
+    return cap>0?cap:(x.composite_adj||1)*1e9; // fallback prop. au score
+  });
+  const minCap=Math.min(...caps), maxCap=Math.max(...caps);
+  const capRange=maxCap-minCap||1;
+
+  // Animation fade-in par vague
+  grid.style.opacity='0';
+  grid.innerHTML=all.map((x,i)=>{
+    const chg=x.change_pct||0;
+    const sc=x.composite_adj||0;
+    const cap=caps[i];
+    const sz=Math.round(44+(cap-minCap)/capRange*46); // 44-90px selon capitalisation (HEATMOB-1 : case tactile >= 44 px)
+
+    let bg,borderCol;
+    if(chg>=2){bg='rgba(34,197,94,0.88)';borderCol='#22c55e';}
+    else if(chg>0){bg='rgba(74,222,128,0.72)';borderCol='#4ade80';}
+    else if(chg===0){bg='rgba(100,116,139,0.4)';borderCol='#475569';}
+    else if(chg>-2){bg='rgba(248,113,113,0.65)';borderCol='#f87171';}
+    else{bg='rgba(239,68,68,0.88)';borderCol='#ef4444';}
+
+    const textColor=Math.abs(chg)>=1?'#fff':'var(--text)';
+    const sign=chg>0?'+':'';
+    const capFmt=cap>1e12?`${(cap/1e12).toFixed(1)}T`:cap>1e9?`${(cap/1e9).toFixed(1)}Md`:`${(cap/1e6).toFixed(0)}M`;
+    const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Note: ${note10txt(x)}/10`;
+    const delay=i*18; // vague d'animation
+    return `<div onclick="_openStock('${x.ticker}')"
+      data-tip="${tip}"
+      style="width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${borderCol};border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;box-sizing:border-box;opacity:0;transform:scale(0.7);transition:transform .15s,box-shadow .15s,opacity .3s ${delay}ms,transform .3s ${delay}ms ease-out"
+      onmouseenter="this.style.transform='scale(1.12)';this.style.zIndex='10';this.style.boxShadow='0 6px 20px rgba(0,0,0,.55)'"
+      onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
+      <span style="font-size:${Math.max(11,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
+      <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
+      ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${note10txt(x)}</span>`:''}
+    </div>`;
+  }).join('');
+  // Déclencher animation après inject DOM
+  requestAnimationFrame(()=>{
+    grid.style.transition='opacity .2s';
+    grid.style.opacity='1';
+    grid.querySelectorAll('div[onclick]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='scale(1)';
+    });
+  });
+}
+
+
+function sparkline(prices, w=80, h=28) {
+  if (!prices || prices.length < 2) return '<span style="color:var(--t3);font-size:9px">—</span>';
+  const vals = prices.map(p => p.price || p).filter(Boolean);
+  if (vals.length < 2) return '<span style="color:var(--t3);font-size:9px">—</span>';
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const range = mx - mn || 1;
+  const pts = vals.map((v,i) => {
+    const x = (i/(vals.length-1))*w;
+    const y = h - ((v-mn)/range)*(h-4) - 2;
+    return x+','+y;
+  }).join(' ');
+  const last = vals[vals.length-1], first = vals[0];
+  const perf = first > 0 ? ((last-first)/first*100) : 0;
+  const color = last >= first ? '#4ADE80' : '#F87171';
+  const sign = perf >= 0 ? '+' : '';
+  const tip = `Min: ${Math.round(mn).toLocaleString('fr-FR')} · Max: ${Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg width="${w}" height="${h}" style="display:block"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" opacity="0.9"/></svg></span>`;
+}
+
+function _renderMarketWeather(compChange, scores){
+  const wEl = document.getElementById('market-weather');
+  if(!wEl) return;
+  // Score moyen du jour pour pondérer
+  const allCh = (scores||[]).map(x=>x.change_pct||0).filter(v=>v!==0);
+  const avgCh = allCh.length ? allCh.reduce((a,b)=>a+b,0)/allCh.length : compChange;
+  const posCount = allCh.filter(v=>v>0).length;
+  const negCount = allCh.filter(v=>v<0).length;
+  let icon, label, bg, col;
+  if(avgCh>=1 || posCount > negCount*2){
+    icon='☀️'; label='Marché haussier'; bg='rgba(74,222,128,.12)'; col='var(--green)';
+  } else if(avgCh>=0){
+    icon='⛅'; label='Marché stable'; bg='rgba(251,191,36,.1)'; col='var(--amber)';
+  } else if(avgCh>=-1){
+    icon='🌥️'; label='Marché mitigé'; bg='rgba(96,165,250,.1)'; col='var(--blue)';
+  } else {
+    icon='🌧️'; label='Marché baissier'; bg='rgba(248,113,113,.12)'; col='var(--red)';
+  }
+  wEl.style.cssText = `display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid ${bg.replace('.12','.4').replace('.1','.3')};background:${bg};color:${col}`;
+  wEl.innerHTML = `${icon} ${label} <span style="font-weight:400;font-size:10px">(${avgCh>=0?'+':''}${avgCh.toFixed(1)}% moy.)</span>`;
+}
+
+function loadMarketWidget(){
+  var _mktErrEl = document.getElementById('mkt-idx-error');
+  if (_mktErrEl) _mktErrEl.style.display = 'none';
+  var _mktAc = new AbortController();
+  var _mktTo = setTimeout(function(){ _mktAc.abort(); }, 10000); // LOADERR-1 : delai max 10 s, pas de relance automatique
+  fetch('/api/market', {signal:_mktAc.signal}).then(r=>{clearTimeout(_mktTo);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>{
+    var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
+    var b30  = (d.indices||[]).find(i=>i.name&&i.name.includes('30'));
+    window._marketData = {composite: comp||{}, brvm30: b30||{}};
+    var cap  = (d.market_activity||{})['Capitalisation Actions']||(d.market_activity||{})['BRVM-C']||'—';
+    function fmt(v,chg){
+      var c=chg>=0?'var(--green)':'var(--red)';
+      var s=chg>=0?'+':'';
+      return `<span style="font-weight:700">${Number(v).toLocaleString('fr-FR')}</span> <span style="color:${c};font-size:10px">${s}${Number(chg).toFixed(2)}%</span>`;
+    }
+    var elComp=document.getElementById('idx-composite');
+    var elB30=document.getElementById('idx-brvm30');
+    var elCap=document.getElementById('idx-cap');
+    if(comp&&elComp) elComp.innerHTML=fmt(comp.current,comp.change);
+    if(b30&&elB30)   elB30.innerHTML=fmt(b30.current,b30.change);
+    if(elCap)        elCap.textContent=cap;
+    if(d.updated_at){
+      var dt=new Date(d.updated_at);
+      var timeStr=dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      var _mt=document.getElementById('market-time');
+      if(_mt) _mt.textContent='MàJ '+timeStr;
+      var msbTime=document.getElementById('msb-time');
+      if(msbTime) msbTime.textContent='MàJ '+timeStr;
+    }
+    // Market status bar — format mono compact
+    var msbBc=document.getElementById('msb-breadcrumb'), msbBoc=document.getElementById('msb-boc');
+    if(msbBc) msbBc.style.display='';
+    if(msbBoc) msbBoc.style.display='';
+    var msbComp=document.getElementById('msb-composite');
+    var msbB30=document.getElementById('msb-brvm30');
+    if(msbComp&&comp){var cv=comp.change>=0?'var(--bull)':'var(--bear)';var cs=comp.change>=0?'+':'';msbComp.innerHTML='<span style="color:var(--text-2)">BRVM-C</span> <span style="color:var(--text-1)">'+Number(comp.current).toFixed(2)+'</span> <span style="color:'+cv+'">'+cs+Number(comp.change).toFixed(2)+'%</span>';}
+    if(msbB30&&b30){var cv2=b30.change>=0?'var(--bull)':'var(--bear)';var cs2=b30.change>=0?'+':'';msbB30.innerHTML='<span style="color:var(--text-2)">BRVM-30</span> <span style="color:var(--text-1)">'+Number(b30.current).toFixed(2)+'</span> <span style="color:'+cv2+'">'+cs2+Number(b30.change).toFixed(2)+'%</span>';}
+    // Météo marché
+    _renderMarketWeather(comp?comp.change:0, window.scores||scores||[]);
+    var top5=document.getElementById('market-top5');
+    var flop5=document.getElementById('market-flop5');
+    if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
+    if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
+    _paintIndexCards();
+  }).catch(e=>{
+    clearTimeout(_mktTo);
+    console.error('[BRVM] loadMarketWidget:',e);
+    if (_mktErrEl) _mktErrEl.style.display = 'flex';
+    var msbComp2=document.getElementById('msb-composite');
+    var msbB302=document.getElementById('msb-brvm30');
+    var msbTime2=document.getElementById('msb-time');
+    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--bear)">Indices indispo.</span> <span role="button" tabindex="0" onclick="loadMarketWidget()" style="color:var(--text-1);text-decoration:underline;cursor:pointer">Réessayer</span>';
+    if(msbB302) msbB302.textContent='';
+    if(msbTime2) msbTime2.textContent='';
+    var msbBc2=document.getElementById('msb-breadcrumb'), msbBoc2=document.getElementById('msb-boc');
+    if(msbBc2) msbBc2.style.display='none'; // LOADERR-1 : libere de la place a 390px pour "Indices indisponibles · Reessayer"
+    if(msbBoc2) msbBoc2.style.display='none';
+  });
+}
+
+function loadSidebar(){
+  const s=[...scores].sort(triCommeClassement);
+  document.getElementById('tlItems').innerHTML=s.map(x=>{
+    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
+    const isFav=favorites.includes(x.ticker);
+    const checked=_cmpSelected&&_cmpSelected.has(x.ticker)?'checked':'';
+    return`<div class="tb" style="display:flex;align-items:center;gap:3px">
+      <input type="checkbox" class="cmp-cb" data-ticker="${x.ticker}" ${checked} title="Comparer" onchange="toggleCompare('${x.ticker}')" style="flex-shrink:0"/>
+      <button class="star ${isFav?'fav':''}" onclick="toggleFav('${x.ticker}')" style="padding:0 3px 0 0">★</button>
+      <span onclick="_openStock('${x.ticker}')" style="flex:1;cursor:pointer;font-size:11px">${x.ticker}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${note10txt(x)}</span>
+    </div>`;}).join('');
+}
+
+function filterSidebar(q){
+  q=q.toUpperCase();
+  const s=[...scores].sort(triCommeClassement)
+    .filter(x=>!q||x.ticker.includes(q)||((x.name||'').toUpperCase().includes(q)));
+  document.getElementById('tlItems').innerHTML=s.map(x=>{
+    const n=note10num(x),tc=n>=7.5?'var(--green)':n>=5?'var(--amber)':'var(--red)';
+    return`<button class="tb" onclick="_openStock('${x.ticker}')">
+      <span style="font-weight:600;font-size:11px">${x.ticker}</span>
+      <span style="font-size:10px;padding:1px 5px;border-radius:10px;background:rgba(255,255,255,.05);color:${tc}">${note10txt(x)}</span>
+    </button>`;}).join('');
+}
+
+// ── Favorites ──────────────────────────────────────────────────────────────
+function toggleFav(ticker){
+  if(favorites.includes(ticker)) favorites=favorites.filter(t=>t!==ticker);
+  else favorites=[...favorites,ticker];
+  try{localStorage.setItem('brvm_favorites',JSON.stringify(favorites));}catch{}
+  loadSidebar();
+  document.querySelectorAll('.star').forEach(b=>{
+    if(b.textContent==='★') b.classList.toggle('fav',favorites.includes(b.closest('[onclick]')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||''));
+  });
+  if(window._favOnly) renderRankLive();
+}
+function toggleFavFilter(){
+  window._favOnly = !window._favOnly;
+  const btn = document.getElementById('fFav');
+  if (btn) {
+    btn.style.borderColor = window._favOnly ? 'var(--accent)' : '';
+    btn.style.color = window._favOnly ? 'var(--accent)' : '';
+  }
+  renderRankLive();
+}
+
+// ── Signaux par société ────────────────────────────────────────────────────
+function renderSignauxParSociete(){
+  const tab = document.getElementById('signals-tab-parsociete');
+  if (!tab) return;
+  const all = [...(window.scores || scores || [])].sort(triCommeClassement);
+  const body = document.getElementById('signaux-parsociete-body');
+  if (!body) return;
+  if (!all.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--t2)">Chargement...</td></tr>'; return; }
+  body.innerHTML = all.map(x => {
+    const v = x.composite_adj || 0;
+    return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
+      <td><strong>${x.ticker}</strong></td>
+      <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      <td style="font-size:11px">${fmtConseil(x)}</td>
+      <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Classement ─────────────────────────────────────────────────────────────
+let _rankAdvMode = false;
+function toggleRankAdv(){
+  _rankAdvMode = !_rankAdvMode;
+  const wrap = document.getElementById('rank-table-wrap');
+  const btn  = document.getElementById('rank-adv-tog');
+  if(wrap) wrap.classList.toggle('rank-adv-hidden', !_rankAdvMode);
+  if(btn){ btn.textContent = _rankAdvMode ? '← Masquer l\'analyse détaillée' : 'Voir l\'analyse détaillée →'; btn.classList.toggle('on', _rankAdvMode); }
+}
+
+function _capFmt(x){
+  const cap=(x.price||0)*(x.shares||0);
+  if(!cap) return '—';
+  if(cap>=1e12) return (cap/1e12).toFixed(1)+'T';
+  if(cap>=1e9)  return (cap/1e9).toFixed(1)+'Md';
+  if(cap>=1e6)  return (cap/1e6).toFixed(0)+'M';
+  return cap.toLocaleString('fr-FR');
+}
+
+function _sparklineDots(hist30, w, h){
+  if(hist30.length<2) return '';
+  const vals=hist30.map(p=>p.price||0).filter(Boolean);
+  if(vals.length<2) return '';
+  // D.14b : plus de label de prix incrusté (redondant avec la colonne PRIX) -- la courbe utilise toute la largeur
+  const PAD_Y=3, PAD_X=3;
+  const W=w-2*PAD_X;
+  const H_inner=h-2*PAD_Y; // déclaré AVANT toY, sinon TDZ ReferenceError
+  const mn=Math.min(...vals), mx=Math.max(...vals), range=mx-mn||1;
+  const toX=i=>+(PAD_X+i/(vals.length-1)*W).toFixed(1);
+  const toY=v=>+(H_inner-(v-mn)/range*H_inner).toFixed(1);
+  const pts=vals.map((v,i)=>`${toX(i)},${PAD_Y+toY(v)}`);
+  const col=vals[vals.length-1]>=vals[0]?'#10b981':'#ef4444';
+  const line=`<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  // Dernier point
+  const lx=toX(vals.length-1);
+  const ly=PAD_Y+toY(vals[vals.length-1]);
+  const dot=`<circle cx="${lx}" cy="${ly}" r="1.8" fill="${col}"/>`;
+  const perf=vals[0]>0?((vals[vals.length-1]-vals[0])/vals[0]*100):0;
+  const sign=perf>=0?'+':'';
+  const tip=`Min: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mn)):Math.round(mn).toLocaleString('fr-FR')} · Max: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mx)):Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}</svg></span>`;
+}
+
+function tendanceCle(v){
+  return String(v||'').toUpperCase().replace(/É/g,'E');
+}
+function filtreTendance(rows, verd){
+  var liste=rows||[];
+  if(!verd) return liste.slice();
+  var cible=tendanceCle(verd);
+  return liste.filter(function(x){ return tendanceCle(x&&x.pdf_verdict)===cible; });
+}
+function renderRank(){
+  const sec=document.getElementById('fSec')?.value||'';
+  const srt=document.getElementById('fSort')?.value||'composite_adj';
+  const verd=document.getElementById('fVerdict')?.value||'';
+  let d=[...scores];
+  if(sec)d=d.filter(x=>x.sector===sec);
+  if(verd)d=filtreTendance(d, verd);
+  if(window._favOnly)d=d.filter(x=>favorites.includes(x.ticker));
+  if(srt==='composite_adj') d.sort(triCommeClassement);
+  else d.sort((a,b)=>srt==='pe_ref'?(a[srt]||999)-(b[srt]||999):(b[srt]||0)-(a[srt]||0));
+
+  // Contre
+  const ctr=document.getElementById('rank-counter');
+  if(ctr) ctr.textContent=`Affichage : ${d.length} / ${scores.length} sociétés`;
+
+  const ph=window._priceHistory||{};
+  const extSp=window._extSparklines||{};
+  const _dow = new Date().getDay(); // 0=dim, 6=sam
+  const _isWeekend = _dow === 0 || _dow === 6;
+  const _staleLbl = `<span style="color:var(--t3);font-size:9px">(ven.)</span>`;
+  if(window._favOnly && d.length===0){
+    document.getElementById('rankBody').innerHTML = '<tr><td colspan="19" style="text-align:center;color:var(--t2);padding:20px;font-size:12px">Aucun favori pour le moment — désactivez le filtre et cliquez sur ★ pour en ajouter</td></tr>';
+  } else {
+  document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
+    const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+    const isFav=favorites.includes(x.ticker);
+    // Préférer sparklines étendu (BOC quotidien) si disponible
+    const _extPts=extSp[x.ticker];
+    const hist30=_extPts&&_extPts.length>=3
+      ?_extPts.map(p=>({price:p.close}))
+      :(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+    const spk=hist30.length>=3?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
+    let var30='';
+    if(hist30.length>=2){const first=hist30[0].price,last=hist30[hist30.length-1].price;if(first>0){const p=((last-first)/first*100);var30=`<span style="font-size:10px;color:${p>=0?'var(--green)':'var(--red)'};font-family:var(--font-mono);margin-left:4px">${p>=0?'+':''}${p.toFixed(1)}%</span>`;}}
+
+    // Momentum badge (5j vs 20j) — utiliser extended si dispo
+    const _boc20src=_extPts&&_extPts.length>=6?_extPts.map(p=>({price:p.close})):(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date));
+    const boc20=_boc20src.slice(-20);
+    let momBadge='';
+    if(boc20.length>=6){
+      const p5=boc20.slice(-5).map(p=>p.price); const p20=boc20.map(p=>p.price);
+      const avg5=p5.reduce((s,v)=>s+v,0)/p5.length;
+      const avg20=p20.reduce((s,v)=>s+v,0)/p20.length;
+      momBadge=avg5>avg20*1.01?'<span class="mom-up">🚀</span>':avg5<avg20*0.99?'<span class="mom-dn">📉</span>':'';
+    }
+    const verdC=x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)';
+    return`<tr id="rank-row-${x.ticker}" onclick="_openStock('${x.ticker}')">
+      <td style="color:var(--t2)">${i+1}</td>
+      <td onclick="event.stopPropagation();toggleFav('${x.ticker}')"><span class="star ${isFav?'fav':''}">★</span></td>
+      <td><strong>${x.ticker}</strong>${momBadge}</td>
+      <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
+      <td>${x.price?(typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')):'N/D'}</td>
+      <td style="padding:2px 4px">${spk}${var30}</td>
+      <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
+      <td class="col-pe">${x.pe_ref||'—'}×</td>
+      <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+      <td style="font-size:10px">${fmtConseil(x)}</td>
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
+    </tr>`;}).join('');
+  }
+  // Masquer par défaut les colonnes avancées
+  if(!_rankAdvMode) document.getElementById('rank-table-wrap')?.classList.add('rank-adv-hidden');
+}
+
+function renderRankLive(){ renderRank(); if(typeof renderRankCards==='function') renderRankCards(); }
+function initRanking(){
+  const all=window.scores||scores||[];
+  const sec=document.getElementById('fSec');
+  if(sec&&sec.options.length<=1){
+    const sects=[...new Set(all.map(x=>x.sector).filter(Boolean))].sort();
+    sects.forEach(s=>sec.add(new Option(s,s)));
+    // Backup listener in case onchange attr is lost
+    sec.addEventListener('change', renderRankLive);
+  }
+  renderRank();
+}
+
+function navToRank(ticker){
+  nav('rank');
+  setTimeout(()=>{
+    renderRankLive&&renderRankLive();
+    setTimeout(()=>{
+      const row=document.getElementById('rank-row-'+ticker);
+      if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.style.outline='2px solid var(--blue)';setTimeout(()=>row.style.outline='',2000);}
+    },300);
+  },50);
+}
+
+
+// ── Dividendes ─────────────────────────────────────────────────────────────
+let _divData = [];
+
+function divSimCalc(){
+  const ticker = document.getElementById('divSimTicker')?.value;
+  const amount = parseFloat(document.getElementById('divSimAmount')?.value)||0;
+  const outEl = document.getElementById('divSimOut');
+  const detEl = document.getElementById('divSimDetail');
+  if(!ticker||!amount){ if(outEl) outEl.textContent='—'; return; }
+  const stock = _divData.find(x=>x.ticker===ticker);
+  if(!stock){ if(outEl) outEl.textContent='—'; return; }
+  let dy = stock.div_yield||0;
+  const realDy = dy;
+  const warnCap = dy > 50;
+  if (warnCap) dy = 50;
+  const annRev = amount * (dy / 100);
+  const monthRev = annRev / 12;
+  if(outEl) outEl.textContent = fmtXOF(Math.round(annRev));
+  if(detEl) detEl.innerHTML = `${amount.toLocaleString('fr-FR')} XOF × ${dy.toFixed(1)}% de rendement annuel`
+    + `<br>≈ ${fmtXOF(Math.round(monthRev))}/mois`
+    + (warnCap ? `<br><span style="color:var(--amber)">⚠️ Rendement plafonné à 50% · Le rendement réel de ${ticker} (${realDy.toFixed(1)}%) semble anormalement élevé (données à vérifier). Calcul effectué avec 50% par prudence.</span>` : '');
+}
+
+async function renderDiv(){
+  let wd = [], wdate = [];
+  try {
+    const data = await fetch('/api/dividends').then(r=>r.json());
+    wd = data;
+    wdate = data.filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
+      .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
+  } catch(e) {
+    const all = window.scores || scores || [];
+    wd = [...all].filter(x=>(x.div_yield||0)>0).sort((a,b)=>(b.div_yield||0)-(a.div_yield||0));
+    wdate = [...all].filter(x=>x.ex_div_date&&x.ex_div_date!=='N/D')
+      .sort((a,b)=>a.ex_div_date.localeCompare(b.ex_div_date));
+  }
+
+  // Séparer récurrents vs exceptionnels AVANT tout calcul
+  const wdRecurring = (typeof getRecurringDivStocks==='function')
+    ? getRecurringDivStocks(wd)
+    : wd.filter(x=>!x.div_is_exceptional);
+  const wdExceptional = wd.filter(x=>x.div_is_exceptional);
+  _divData = wdRecurring;
+
+  // Peupler select simulateur (récurrents uniquement)
+  const sel = document.getElementById('divSimTicker');
+  if(sel && sel.options.length <= 1){
+    wdRecurring.forEach(x=>sel.add(new Option(`${x.ticker} — ${(x.div_yield||0).toFixed(1)}%`, x.ticker)));
+    if(wdRecurring.length) { sel.value = wdRecurring[0].ticker; divSimCalc(); }
+  }
+
+  // Calendrier 12 mois visuel
+  const MONTHS_FR = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  // Résout mois depuis format DD-MMM.-YY (ex: "30-sept.-25") ou ISO YYYY-MM-DD
+  const _FR_MON = {jan:0,janv:0,'fév':1,févr:1,fev:1,fevr:1,mar:2,mars:2,avr:3,mai:4,juin:5,juil:6,'aoû':7,aou:7,'août':7,sep:8,sept:8,oct:9,nov:10,'déc':11,dec:11};
+  function _exDivMonth(d) {
+    if (!d || d==='N/D') return -1;
+    const iso = d.match(/^(\d{4})-(\d{2})/);
+    if (iso) return parseInt(iso[2]) - 1;
+    const parts = d.split('-');
+    if (parts.length >= 2) { const k = parts[1].replace(/\./g,'').toLowerCase(); return _FR_MON[k]??-1; }
+    return -1;
+  }
+  const byMonth = {};
+  wdate.forEach(x=>{
+    const m = _exDivMonth(x.ex_div_date);
+    if(m>=0){ if(!byMonth[m]) byMonth[m]=[]; byMonth[m].push(x); }
+  });
+  const calMonthsEl = document.getElementById('divCalMonths');
+  if(calMonthsEl){
+    calMonthsEl.innerHTML = MONTHS_FR.map((mo,i)=>{
+      const stocks = byMonth[i]||[];
+      const hasDiv = stocks.length>0;
+      const maxDy = stocks.reduce((mx,x)=>Math.max(mx,x.div_yield||0),0);
+      const bg = hasDiv?(maxDy>=10?'rgba(74,222,128,.18)':maxDy>=5?'rgba(251,191,36,.15)':'rgba(96,165,250,.12)'):'var(--bg3)';
+      const border = hasDiv?(maxDy>=10?'rgba(74,222,128,.5)':maxDy>=5?'rgba(251,191,36,.4)':'rgba(96,165,250,.3)'):'var(--border)';
+      const tickers = stocks.slice(0,3).map(x=>`<div style="font-size:8px;color:var(--t1)">${x.ticker}</div>`).join('');
+      return `<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:6px;text-align:center;min-height:60px">
+        <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:4px">${mo}</div>
+        ${hasDiv?`${tickers}${stocks.length>3?`<div style="font-size:8px;color:var(--t3)">+${stocks.length-3}</div>`:''}
+        <div style="font-size:9px;color:var(--amber);margin-top:2px">${maxDy.toFixed(1)}%</div>`
+        :'<div style="font-size:9px;color:var(--t3);margin-top:8px">—</div>'}
+      </div>`;
+    }).join('');
+  }
+
+  // Calendrier ex-div liste — derniers détachements connus, tri date desc (plus récent en premier)
+  const wdateDesc = [...wdate].sort((a,b)=>b.ex_div_date.localeCompare(a.ex_div_date));
+  document.getElementById('divCal').innerHTML = wdateDesc.length ? wdateDesc.map(x=>{
+    const isExc = x.div_is_exceptional || x.div_flag==='exceptionnel_non_recurrent';
+    const dy    = isExc ? 0 : (x.div_yield||0);
+    const dyC   = isExc ? 'var(--amber)' : dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
+    const dyBg  = isExc ? 'rgba(251,191,36,.06)' : dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const dyLabel = isExc
+      ? `<span style="font-size:11px;color:var(--amber)">🔶 Exceptionnel</span>`
+      : `<span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>`;
+    const divAmt = isExc ? (x.div_exceptional_value||0) : (x.div_per_share||0);
+    const badge  = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(x,{short:true,hideHaute:true}) : '';
+    return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="_openStock('${x.ticker}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <strong style="font-size:12px">${x.ticker}</strong>
+          <span style="font-size:10px;color:var(--t2);margin-left:6px">${x.name||''}</span>
+          ${badge}
+        </div>
+        ${dyLabel}
+      </div>
+      <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap">
+        <span>📅 Ex-div: <strong style="color:var(--t1)">${x.ex_div_date}</strong></span>
+        <span>💰 ${fmtXOF(divAmt)}/action</span>
+        ${x.eps?`<span>BNA: ${Math.round(x.eps).toLocaleString('fr-FR')} XOF</span>`:''}
+      </div>
+    </div>`;
+  }).join('') : '<p style="font-size:12px;color:var(--t2)">Dates à paraître.</p>';
+
+  // Table Top 15 rendements récurrents (exceptionnels exclus)
+  const _confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge : ()=>'';
+  document.getElementById('divTable').innerHTML = wdRecurring.slice(0,15).map(x=>{
+    const dy = x.div_yield||0;
+    const dyC = dy>=10?'#22c55e':dy>=5?'var(--amber)':'var(--t2)';
+    const dyBg = dy>=10?'rgba(34,197,94,.15)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
+    const badge = _confBadge(x, {short:true, hideHaute:true});
+    return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
+      <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
+      <td style="font-weight:600">${fmtXOF(x.div_per_share)}${badge}</td>
+      <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span></td>
+      <td style="font-size:10px;color:var(--t2)">${x.ex_div_date||'N/D'}</td>
+      <td style="font-size:10px;color:var(--t2)">${pe}</td>
+      <td><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)'}">${x.pdf_verdict||'—'}</span></td>
+    </tr>`;
+  }).join('')
+  + (wdExceptional.length ? `<tr><td colspan="6" style="padding:6px 4px;font-size:10px;color:var(--t3);border-top:2px dashed var(--border)">
+    🔶 Dividendes exceptionnels (hors calculs récurrents) :
+    ${wdExceptional.map(x=>`<span onclick="_openStock('${x.ticker}')" style="cursor:pointer;margin:0 4px;color:var(--amber)">${x.ticker} ${fmtXOF(x.div_exceptional_value||x.div_per_share)}/action</span>`).join('·')}
+    <span style="color:var(--t3)"> — cessions d'actifs ou HAO, non récurrents</span>
+  </td></tr>` : '');
+
+  // Graphique barres rendements (récurrents uniquement)
+  const top = wdRecurring.slice(0,15);
+  svgBar(document.getElementById('cDivDiv'),
+    top.map(x=>x.ticker),
+    top.map(x=>(x.div_yield||0)),
+    top.map(x=>(x.div_yield||0)>=10?'#FBBF24':(x.div_yield||0)>=5?'#4ADE80':'#60A5FA'),
+    250, true);
+}
+
+// ── Prix cibles ────────────────────────────────────────────────────────────
+function fmtLibelleValeur(v){
+  if(v==='Forte décote'||v==='Décote modérée'||v==='Proche du prix cible'||v==='Au-dessus du prix cible') return v;
+  if(v==='exceptional_div') return 'Div. exceptionnel';
+  if(v==='incertain') return 'Cible à vérifier';
+  return '—';
+}
+async function renderTargets(){
+  const [targets, ratings] = await Promise.all([
+    fetch('/api/targets').then(r=>r.json()),
+    _ensureRatingsForTargets(),
+  ]);
+  const filterRated = document.getElementById('filter-rated-only')?.checked;
+
+  // Bloc résumé notations
+  const ratedTickers = Object.keys(ratings).filter(t => (ratings[t]||[]).some(r=>r.note));
+  const agences = [...new Set(
+    Object.values(ratings).flat().filter(r=>r.note&&r.agence).map(r=>r.agence)
+  )];
+  const sumEl = document.getElementById('ratings-summary-block');
+  if (sumEl && ratedTickers.length) {
+    sumEl.style.display = '';
+    sumEl.innerHTML = `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <span>⭐ <strong>${ratedTickers.length}</strong> sociétés notées</span>
+      <span style="color:var(--t2)">Agences : ${agences.join(' · ') || '—'}</span>
+      <span style="color:var(--t2)">${ratedTickers.map(t=>`<span onclick="_openStock('${t}')" style="cursor:pointer;color:var(--accent)">${t}</span>`).join(' ')}</span>
+    </div>`;
+  }
+
+  let rows = targets;
+  if (filterRated) rows = rows.filter(t => ratedTickers.includes(t.ticker));
+
+  document.getElementById('targetsTable').innerHTML=rows.map(t=>{
+    const isUncertain = t.verdict==='incertain';
+    const up = (t.upside_pct==null) ? null : t.upside_pct;
+    const cls=isUncertain?'':(up!=null&&up>=30)?'target-up':(up!=null&&up<0)?'target-dn':'';
+    const vc=isUncertain?'var(--t3)':(up!=null&&up>=30)?'var(--green)':(up!=null&&up<0)?'var(--red)':'var(--amber)';
+    const fmtOpp=up==null?'—':(isUncertain?`<span style="color:var(--t3)">${up>=0?'+':''}${up.toFixed(1)}%</span>`:up>=30?`🟢 +${up.toFixed(1)}% de potentiel`:up>=10?`🟡 +${up.toFixed(1)}% de potentiel`:up<0?`🔴 ${up.toFixed(1)}%`:`+${up.toFixed(1)}%`);
+    const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
+    const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
+    const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
+    const confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(t,{short:true,hideHaute:true}) : '';
+    const uncTip = isUncertain?` data-tip="Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours. Le chiffre reste affiché."`:'';
+    return`<tr onclick="_openStock('${t.ticker}')">
+      <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
+      <td>${fmtXOF(t.current_price)}</td>
+      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
+      <td class="${cls}" style="font-size:11px">${fmtOpp}</td>
+      <td><span class="b ${bcls10(note10num((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+      ${ratingCell}
+      <td style="font-size:11px"${uncTip}>${fmtLibelleValeur(t.verdict)}${confBadge}</td>
+    </tr>`;}).join('');
+}
+
+// ── Score personnalisé ─────────────────────────────────────────────────────
+let customWeights={graham:1,dcf:1,ddm:1,epv:1,buffett:1,rev_dcf:1,relatif:1,technique:1};
+async function loadCustomScores(){
+  const profiles=await fetch('/api/profiles').then(r=>r.json());
+  document.getElementById('profileBtns').innerHTML=Object.keys(profiles).map(p=>`
+    <button class="profile-btn ${p==='balanced'?'on':''}" onclick="setProfile('${p}')">${p}</button>`).join('');
+  renderWeightSliders();
+}
+function setProfile(name){
+  fetch('/api/profiles').then(r=>r.json()).then(profiles=>{
+    customWeights={...profiles[name]};
+    renderWeightSliders();
+    document.querySelectorAll('.profile-btn').forEach(b=>b.classList.toggle('on',b.textContent===name));
+    applyCustomScores();
+  });
+}
+function _updateWeightTotalBadge(){
+  const keys=['graham','dcf','ddm','epv','buffett','rev_dcf','relatif','technique'];
+  const total=keys.reduce((s,k)=>s+(customWeights[k]||1),0);
+  const badge=document.getElementById('weight-total-badge');
+  if(!badge)return;
+  const isEven=Math.abs(total-8)<0.01;
+  badge.textContent='Total : '+total.toFixed(1);
+  badge.style.background=isEven?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)';
+  badge.style.color=isEven?'var(--green)':'var(--amber)';
+}
+function renderWeightSliders(){
+  const keys=['graham','dcf','ddm','epv','buffett','rev_dcf','relatif','technique'];
+  const labels={graham:'Graham',dcf:'DCF',ddm:'DDM',epv:'EPV',buffett:'Buffett',rev_dcf:'Rev.DCF',relatif:'Relatif',technique:'Technique'};
+  document.getElementById('weightSliders').innerHTML=keys.map(k=>`
+    <div class="weight-row">
+      <span class="weight-label">${labels[k]||k}</span>
+      <input type="range" min="0" max="3" step="0.5" value="${customWeights[k]||1}" style="flex:1"
+        oninput="customWeights['${k}']=parseFloat(this.value);document.getElementById('wv_${k}').textContent=this.value;_updateWeightTotalBadge()">
+      <span class="weight-val" id="wv_${k}">${customWeights[k]||1}</span>
+    </div>`).join('');
+  _updateWeightTotalBadge();
+}
+async function applyCustomScores(){
+  const result=await fetch('/api/scores/custom',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(customWeights)}).then(r=>r.json());
+  document.getElementById('customRankBody').innerHTML=result.map((x,i)=>{
+    const diff=x.composite_custom-(x.composite_adj||0);
+    const dc=diff>0?'var(--green)':diff<0?'var(--red)':'var(--t2)';
+    return`<tr onclick="_openStock('${x.ticker}')">
+      <td>${i+1}</td><td><strong>${x.ticker}</strong></td>
+      <td style="color:var(--t2);font-size:11px">${x.name||''}</td>
+      <td style="color:var(--t2)">${note10txt(x)}/10</td>
+      <td style="font-weight:600;color:${col(x.composite_custom)}">${v10fmt(x.composite_custom).replace('.',',')}/10</td>
+      <td style="color:${dc}">${diff>=0?'+':''}${(diff/80*10).toFixed(2)}</td>
+    </tr>`;}).join('');
+}
+
+// ── Simulateur dividendes v2 ───────────────────────────────────────────────
+let _simWeights = {}; // ticker → poids [0..100]
+let _simCur = 'XOF';
+
+function updateSim(){ simCalc(); } // legacy alias
+
+function simSetCur(c){
+  _simCur = c;
+  ['XOF','EUR','USD'].forEach(x=>{
+    const el=document.getElementById('simCur'+x);
+    if(el)el.classList.toggle('on',x===c);
+  });
+  simCalc();
+}
+
+function simReset2(){
+  _simWeights={};
+  document.getElementById('simInv2').value='1000000';
+  document.getElementById('simYears').value='5';
+  document.getElementById('simYearsVal').textContent='5';
+  document.getElementById('simReinvest2').checked=true;
+  document.getElementById('simGrowth').value='3';
+  _simCur='XOF';
+  simSetCur('XOF');
+  simBuildSliders();
+  simCalc();
+}
+
+// Répartition optimale : Max Sharpe heuristique = pondérer par score×divYield
+function simMarkowitz(){
+  const divStocks=(window.scores||[]).filter(x=>(x.div_yield||0)>0).slice(0,15);
+  if(!divStocks.length){return;}
+  const raw=divStocks.map(x=>{
+    const sc=x.composite_adj||1;
+    const dy=x.div_yield||0;
+    return{ticker:x.ticker,w:sc*dy};
+  });
+  const total=raw.reduce((s,x)=>s+x.w,0);
+  _simWeights={};
+  raw.forEach(x=>{ _simWeights[x.ticker]=Math.round(x.w/total*100); });
+  // Ajuster pour sommer à 100
+  let sum=Object.values(_simWeights).reduce((s,v)=>s+v,0);
+  const keys=Object.keys(_simWeights);
+  if(keys.length&&sum!==100) _simWeights[keys[0]]+=100-sum;
+  simBuildSliders();
+  simCalc();
+}
+
+
+function simBuildSliders(){
+  const sc=window.scores||[];
+  const all=Object.keys(_simWeights).length
+    ? sc.filter(x=>_simWeights[x.ticker]>0)
+    : sc.filter(x=>(x.div_yield||0)>0).slice(0,10);
+  const el=document.getElementById('simSliders2');
+  if(!el) return;
+  el.innerHTML=all.map(x=>{
+    const w=_simWeights[x.ticker]||0;
+    return`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div | note ${note10txt(x)}/10</span>
+        <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
+      </div>
+      <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
+    </div>`;
+  }).join('');
+}
+
+function simSlide(ticker, val){
+  _simWeights[ticker]=val;
+  const sp=document.getElementById('sw-'+ticker);
+  if(sp) sp.textContent=val+'%';
+  simCalc();
+}
+
+function simCalc(){
+  const el2=document.getElementById('simInv2');
+  const invXOF = (parseFloat(el2?.value)||1000000) / (window._rates&&_simCur==='EUR'?window._rates.EUR:_simCur==='USD'?window._rates.USD:1) * (_simCur==='XOF'?1:1/(_simCur==='EUR'?window._rates?.EUR||1:window._rates?.USD||1));
+  const invBase=parseFloat(el2?.value)||1000000;
+  const years=parseInt(document.getElementById('simYears')?.value)||5;
+  const reinvest=document.getElementById('simReinvest2')?.checked??true;
+  const growthPct=(parseFloat(document.getElementById('simGrowth')?.value)||3)/100;
+
+  const sc=window.scores||[];
+  const weights=_simWeights;
+  const hasWeights=Object.values(weights).some(v=>v>0);
+
+  let positions=[];
+  if(hasWeights){
+    positions=sc.filter(x=>weights[x.ticker]>0).map(x=>({...x,w:weights[x.ticker]/100}));
+  } else {
+    const divStocks=sc.filter(x=>(x.div_yield||0)>0).slice(0,10);
+    const n=divStocks.length||1;
+    positions=divStocks.map(x=>({...x,w:1/n}));
+  }
+
+  const total=positions.reduce((s,p)=>s+p.w,0)||1;
+  let simW=document.getElementById('simTotalW');
+  if(simW)simW.textContent=Math.round(total*100)+'%';
+
+  // Calcul par position
+  let divAn1=0, divTotal=0;
+  const byYear=Array.from({length:years},()=>0);
+  const details=positions.map(p=>{
+    const alloc=invBase*(p.w/total);
+    const dy=(p.div_yield||0)/100;
+    let cumValue=alloc;
+    let cumDiv=0;
+    const yearly=[];
+    for(let y=0;y<years;y++){
+      const effectiveDy=dy*Math.pow(1+growthPct,y);
+      const d=cumValue*effectiveDy;
+      if(reinvest) cumValue+=d;
+      cumDiv+=d;
+      yearly.push(d);
+      byYear[y]+=d;
+    }
+    if(years>0)divAn1+=yearly[0];
+    divTotal+=cumDiv;
+    return{ticker:p.ticker,sector:p.sector,alloc,dy_pct:(p.div_yield||0),div_yr1:yearly[0]||0,div_total:cumDiv,ex_div:p.ex_div_date||'—',score:p.composite_adj||0,note10:p.note10,w:p.w/total};
+  });
+
+  // KPIs
+  const kpiEl=document.getElementById('simKPIs');
+  if(kpiEl){
+    const cur=_simCur;
+    const r=window._rates||{EUR:1/655,USD:1/615};
+    const toDisp=v=>_simCur==='XOF'?fmtXOF(v):_simCur==='EUR'?'€'+Math.round(v*(r.EUR||1/655)).toLocaleString('fr-FR'):'$'+Math.round(v*(r.USD||1/615)).toLocaleString('fr-FR');
+    kpiEl.innerHTML=[
+      ['Dividendes annuels', toDisp(divAn1), 'var(--amber)'],
+      ['Par mois (an 1)',     toDisp(divAn1/12), 'var(--amber)'],
+      ['Par trimestre',       toDisp(divAn1/4), 'var(--amber)'],
+      ['Total sur '+years+' ans', toDisp(divTotal), 'var(--green)'],
+    ].map(([l,v,c])=>`<div class="kpi"><div class="kl">${l}</div><div class="kv" style="color:${c};font-size:16px">${v}</div></div>`).join('');
+  }
+
+  // Chart projection
+  const chartEl=document.getElementById('cSimDiv');
+  if(chartEl&&byYear.length)
+    svgBar(chartEl,byYear.map((_,i)=>`An ${i+1}`),byYear.map(v=>Math.round(v)),'#FBBF24',260);
+
+  // Tableau détail
+  const tbody=document.getElementById('simTable2');
+  if(tbody){
+    tbody.innerHTML=details.sort((a,b)=>b.div_yr1-a.div_yr1).map(p=>`<tr onclick="_openStock('${p.ticker}')" style="cursor:pointer">
+      <td><strong>${p.ticker}</strong></td>
+      <td style="color:var(--t2);font-size:11px">${p.sector||'—'}</td>
+      <td>${fmtXOF(Math.round(p.alloc))}</td>
+      <td style="color:var(--amber);font-weight:600">${p.dy_pct.toFixed(2)}%</td>
+      <td style="color:var(--green);font-weight:700">${fmtXOF(Math.round(p.div_yr1))}</td>
+      <td style="color:var(--t3);font-size:10px">${p.ex_div}</td>
+      <td><span class="b ${bcls10(note10num(p))}">${note10txt(p)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
+    </tr>`).join('');
+  }
+
+  if(Object.keys(_simWeights).length===0) simBuildSliders();
+}
+
+// ── Alertes ────────────────────────────────────────────────────────────────
+function showAddAlert(){document.getElementById('addAlertForm').style.display='block';}
+
+function _alertTickerChanged(){
+  const ticker = document.getElementById('alertTicker')?.value;
+  const type   = document.getElementById('alertType')?.value || 'price';
+  const helper = document.getElementById('alertPriceHelper');
+  if(!helper) return;
+  if(!ticker){ helper.textContent = ''; return; }
+  const stock = (window.scores||scores||[]).find(x=>x.ticker===ticker);
+  if(!stock){ helper.textContent = ''; return; }
+  const fieldMap = { price:'price', score:'composite_adj', div_yield:'div_yield', change_pct:'change_pct' };
+  const labelMap = { price:'cours actuel', score:'note actuelle', div_yield:'rendement actuel', change_pct:'variation actuelle' };
+  const field = fieldMap[type]||'price';
+  const val = stock[field];
+  if(val == null){ helper.textContent = ''; return; }
+  const fmtVal = type==='price' ? (Math.round(val).toLocaleString('fr-FR')+' XOF') : (type==='score' ? (note10txt(stock)+'/10') : (val.toFixed(2)+'%'));
+  helper.textContent = `${ticker} — ${labelMap[type]||'valeur'} : ${fmtVal}`;
+}
+
+function testAlertNow(){
+  const ticker = document.getElementById('alertTicker')?.value;
+  const type   = 'price'; // ALERT-1 : seules les alertes de prix fonctionnent
+  const threshold = parseFloat(document.getElementById('alertThreshold')?.value);
+  const direction = document.getElementById('alertDir')?.value;
+  const resEl = document.getElementById('alertTestResult');
+  if(!ticker||!threshold){ if(resEl){resEl.style.display='block';resEl.innerHTML='<span style="color:var(--red)">⚠ Remplissez l\'action et le seuil.</span>';} return; }
+  const stock = (window.scores||scores||[]).find(x=>x.ticker===ticker);
+  if(!stock){ if(resEl){resEl.style.display='block';resEl.innerHTML='<span style="color:var(--red)">Action introuvable dans les données actuelles.</span>';} return; }
+  const fieldMap = { price:'price', score:'composite_adj', div_yield:'div_yield', change_pct:'change_pct' };
+  const field = fieldMap[type]||'price';
+  const current = stock[field]||0;
+  const triggered = direction==='above' ? current>=threshold : current<=threshold;
+  const col = triggered?'var(--green)':'var(--amber)';
+  const symbol = { price:'XOF', score:'/10', div_yield:'%', change_pct:'%' }[type]||'';
+  if(resEl){
+    resEl.style.display='block';
+    resEl.innerHTML=`<span style="color:${col}">${triggered?'✅ Alerte déclenchée':'⏳ Pas encore déclenchée'}</span>
+      — Valeur actuelle : <strong>${current.toLocaleString('fr-FR')} ${symbol}</strong>
+      (seuil : ${threshold.toLocaleString('fr-FR')} ${symbol} ${direction==='above'?'≥':'≤'})`;
+  }
+}
+
+function createAlert(){
+  const ticker=document.getElementById('alertTicker').value;
+  const threshold=parseFloat(document.getElementById('alertThreshold').value);
+  const direction=document.getElementById('alertDir').value;
+  if(!ticker||!threshold)return;
+  setAlert(ticker,threshold,direction);
+  renderAlertsPanel();
+  document.getElementById('addAlertForm').style.display='none';
+}
+
+async function verifierAlertesMaintenant(){
+  try{
+    const data=await fetch('/api/live').then(r=>r.json());
+    checkAlertsWithPrices(data.prices);
+  }catch(e){}
+  renderAlertsPanel();
+}
+
+
+// ── Commodités ─────────────────────────────────────────────────────────────
+function timeAgo(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  const s=Math.floor((Date.now()-d.getTime())/1000);
+  if(s<60) return 'il y a quelques secondes';
+  const min=Math.floor(s/60);
+  if(min<60) return `il y a ${min} min`;
+  const h=Math.floor(min/60);
+  if(h<24) return `il y a ${h} h`;
+  const j=Math.floor(h/24);
+  return `il y a ${j} j`;
+}
+function renderMacro(m){
+  if(!m || !m.date) return;
+  const d = new Date(m.date);
+  if(isNaN(d.getTime())) return;
+  const ageH = (Date.now() - d.getTime()) / 3600000;
+  if(ageH > 48) return;
+  let any = false;
+  if(typeof m.FCFA_per_USD === 'number'){
+    document.getElementById('macroFxVal').textContent = Math.round(m.FCFA_per_USD) + ' FCFA';
+    document.getElementById('macroFx').style.display = '';
+    any = true;
+  }
+  if(!any) return;
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  document.getElementById('macroMeta').textContent = 'Données du ' + dd + '/' + mm + '/' + yyyy;
+  document.getElementById('macroCard').style.display = '';
+}
+function renderComm(){
+  document.getElementById('commPrices').innerHTML=Object.entries(comms).map(([n,d])=>`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px;text-align:center">
+      <div style="font-size:10px;color:var(--t2);margin-bottom:2px">${n}</div>
+      <div style="font-size:14px;font-weight:700">${typeof d.price==='number'?d.price.toLocaleString('fr-FR'):d.price}</div>
+      <div style="font-size:10px;color:${(d.change_pct||0)===0?'var(--t3)':(d.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(d.change_pct||0)===0?'—':`${(d.change_pct||0)>=0?'+':''}${(d.change_pct||0).toFixed(1)}%`}</div>
+      <div style="font-size:9px;color:var(--t3)">${d.unit||''}</div>
+      ${timeAgo(d.fetched_at)?`<div style="font-size:9px;color:var(--t3)">MàJ ${timeAgo(d.fetched_at)}</div>`:''}
+    </div>`).join('');
+  const exp=scores.filter(x=>COMM_PROD[x.ticker]).sort(triCommeClassement);
+  svgBar(document.getElementById('cCommDiv'),exp.map(x=>x.ticker),exp.map(function(x){
+    return note10num(x);
+  }),exp.map(x=>COMM_PROD[x.ticker]?.col||'#94A3B8'),260,true,'/10');
+  document.getElementById('commTable').innerHTML=exp.map(x=>{
+    const ci=COMM_PROD[x.ticker],v=x.composite_adj||0;
+    const ec=ci.exp==='Forte'?'var(--red)':ci.exp==='Modérée'?'var(--amber)':'var(--green)';
+    return`<tr onclick="_openStock('${x.ticker}')"><td><strong>${x.ticker}</strong></td>
+      <td style="font-size:11px;color:var(--t2)">${ci.prod}</td>
+      <td><span class="ctag"><span class="cdot" style="background:${ci.col}"></span>${ci.com[0]}</span></td>
+      <td style="color:${ec};font-weight:600">${ci.exp}</td>
+      <td><span class="b ${bcls10(note10num(x))}" data-tip="Note /10">${note10txt(x)}/10</span></td></tr>`;}).join('');
+}
+
+
+
+// ── Fiche action ────────────────────────────────────────────────────────────
+function _stockTab(id){
+  document.querySelectorAll('.stock-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+  document.querySelectorAll('.stock-tab-panel').forEach(p=>p.classList.toggle('active',p.id==='stab-'+id));
+}
+
+function buildKpiCards(s){
+  const pe=s.pe_ref||s.pe_hist;
+  const pb=s.pb_ref||s.pb_hist;
+  const bna=s.eps||s.bna;
+  const roe=s.roe;
+  const cards=[
+    pe?{l:'P/E',v:pe.toFixed(1)+'×',vc:pe<15?'var(--green)':pe<25?'var(--amber)':'var(--red)',tip:'Cours ÷ Bénéfice par action. Seuil Graham : ≤15×'}:null,
+    pb?{l:'P/B',v:pb.toFixed(2)+'×',vc:pb<1?'var(--green)':pb<2?'var(--amber)':'var(--red)',tip:'Cours ÷ Valeur comptable. < 1 = décote sur actif net'}:null,
+    bna?{l:'BNA',v:typeof fmtXOF==='function'?fmtXOF(Math.round(bna)):Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.'}:null,
+    roe?{l:'ROE',v:roe.toFixed(1)+'%',vc:roe>=15?'var(--green)':roe>=8?'var(--amber)':'var(--red)',tip:'Return on Equity = Bénéfice net / Capitaux propres. ≥15% = excellence Buffett.'}:null,
+  ].filter(Boolean);
+  if(!cards.length) return '';
+  return `<div class="expert-only" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:12px">${
+    cards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="text-align:center;padding:10px 8px">
+      <div style="font-size:10px;color:var(--t2);margin-bottom:4px">${k.l}</div>
+      <div style="font-size:15px;font-weight:700;color:${k.vc};font-family:var(--mono,'monospace')">${k.v}</div>
+    </div>`).join('')
+  }</div>`;
+}
+
+function _genVerdict(s){
+  const v=s.composite_adj||0;
+  const avis=conseilAffiche(s);
+  const suspendu=!!(avis&&avis.suspendu);
+  const col=suspendu?'var(--t2)':(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
+  const bg=suspendu?'rgba(148,163,184,.12)':(v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)');
+  var labelShow=avis?avis.texte:'—';
+  var badgeCol=avis?avis.css:'var(--t2)';
+  if(suspendu){
+    labelShow=avis.texte;
+    badgeCol='var(--t2)';
+  }
+  const badgeCss=suspendu
+    ?'background:rgba(148,163,184,.22);color:var(--t2);font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px'
+    :('background:'+badgeCol+';color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px');
+  var noteGrise='';
+  if(suspendu){
+    var n10=(typeof note10txt==='function')?note10txt(s):String((typeof v10fmt==='function')?v10fmt(v):(Math.round(v/8*10)/10).toFixed(1)).replace('.',',');
+    noteGrise='<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:8px">Note '+n10+'/10</div>';
+  }
+
+  // Points forts
+  const forts=[];
+  if(s.pe_ref&&s.pe_ref<15) forts.push(`P/E attractif (${s.pe_ref.toFixed(1)}× &lt; seuil Graham 15×)`);
+  else if(s.pe_ref&&s.pe_ref<22) forts.push(`P/E raisonnable (${s.pe_ref.toFixed(1)}×)`);
+  if((s.div_yield||0)>=5) forts.push(`Dividende élevé (${s.div_yield.toFixed(1)}% — revenu passif solide)`);
+  else if((s.div_yield||0)>=2) forts.push(`Dividende présent (${s.div_yield.toFixed(1)}%)`);
+  if((s.roe||0)>=15) forts.push(`ROE excellent (${s.roe}% — rentabilité supérieure à la moyenne)`);
+  else if((s.roe||0)>=10) forts.push(`ROE correct (${s.roe}%)`);
+  if((s.pb_ref||99)<1.2) forts.push(`Décote sur actif net (P/B ${s.pb_ref.toFixed(2)}× &lt; 1.2)`);
+  if(s.pdf_verdict==='POSITIF') forts.push('Rapport annuel jugé positif par l\'analyse IA');
+  if((s.score_graham||0)>=7) forts.push(`Critères Graham validés (${s.score_graham}/10)`);
+  if((s.score_technique||0)>=7) forts.push(`Signal technique favorable (${s.score_technique}/10)`);
+
+  // Points de vigilance
+  const vigil=[];
+  if(s.pe_ref&&s.pe_ref>25) vigil.push(`P/E élevé (${s.pe_ref.toFixed(1)}× — valorisation chère)`);
+  if(!(s.div_yield>0)) vigil.push('Pas de dividende versé');
+  if((s.roe||0)<8) vigil.push(`ROE faible (${(s.roe||0).toFixed(1)}% — rentabilité insuffisante)`);
+  if((s.pb_ref||99)>2.5) vigil.push(`P/B élevé (${(s.pb_ref||0).toFixed(2)}× — prime sur actif net)`);
+  if(s.pdf_verdict==='NÉGATIF'||s.pdf_verdict==='NEGATIF') vigil.push('Rapport annuel avec signaux négatifs (IA)');
+  if(v<45) vigil.push('Score composite faible — données limitées ou fondamentaux dégradés');
+
+  // Conclusion
+  const concl=suspendu?`${s.ticker} : cotation suspendue. La note reste affichee en gris, a titre indicatif.`
+    :v>=65?`${s.ticker} présente un profil fondamental solide. Tous les principaux ratios sont favorables.`
+    :v>=55?`${s.ticker} est une opportunité intéressante avec des fondamentaux globalement positifs.`
+    :v>=45?`${s.ticker} est une position de conviction modérée. À suivre avant de renforcer.`
+    :v>=35?`${s.ticker} demande une surveillance accrue. Les fondamentaux sont fragiles.`
+    :`${s.ticker} présente des risques significatifs. Une position légère ou absence de position est conseillée.`;
+
+  const secBg='rgba(255,255,255,0.04)';
+  return `<div class="analyst-verdict" style="background:${bg};border-left:3px solid ${col};border-radius:8px;padding:12px 16px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+      <strong style="color:${col};font-size:13px">📋 Verdict analyste — ${s.ticker}</strong>
+      <span style="${badgeCss}">${labelShow}</span>
+    </div>
+    <div style="text-align:right;font-size:11px;color:var(--text-3);margin-bottom:8px">Pas un conseil en investissement</div>
+    ${noteGrise}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+        <div style="font-size:9px;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:5px">✅ Points forts</div>
+        ${forts.length
+          ? forts.map(f=>`<div style="font-size:10px;color:var(--t1);line-height:1.6;padding:1px 0">• ${f}</div>`).join('')
+          : '<div style="font-size:10px;color:var(--t3)">Aucun point fort significatif identifié.</div>'}
+      </div>
+      <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+        <div style="font-size:9px;color:var(--amber);text-transform:uppercase;font-weight:700;margin-bottom:5px">⚠️ Points de vigilance</div>
+        ${vigil.length
+          ? vigil.map(f=>`<div style="font-size:10px;color:var(--t1);line-height:1.6;padding:1px 0">• ${f}</div>`).join('')
+          : '<div style="font-size:10px;color:var(--t3)">Aucun risque majeur identifié.</div>'}
+      </div>
+    </div>
+    <div style="background:${secBg};border-radius:6px;padding:8px 10px">
+      <div style="font-size:9px;color:var(--blue);text-transform:uppercase;font-weight:700;margin-bottom:4px">📌 Conclusion</div>
+      <div style="font-size:11px;color:var(--t1);line-height:1.6">${concl}</div>
+    </div>
+  </div>`;
+}
+
+function _shareStockText(ticker){
+  const s=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
+  if(!s.ticker){console.warn('_shareStockText: ticker introuvable',ticker);return '';}
+  const avis=(typeof conseilAffiche==='function')?conseilAffiche(s):null;
+  const conseil=avis?avis.libelle:'Pas de conseil';
+  const annuel=(typeof rapportAnnuelTxt==='function')?rapportAnnuelTxt(s):'\u2014';
+  const note=(typeof note10txt==='function')?note10txt(s):v10fmt(s.composite_adj||0);
+  const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
+    `Note : ${note}/10\n`+
+    `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
+    `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× | ':''}`+
+    `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% | ':''}`+
+    `${s.roe?'ROE : '+s.roe+'%':''}\n`+
+    `Conseil : ${conseil}\n`+
+    `Rapport annuel : ${annuel}\n`+
+    `📈 Analysé sur BRVM Analyzer`;
+  const copier=function(){_shareConfirme();};
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(copier).catch(function(){prompt('Copiez ce texte :',text);});
+    }else{
+      prompt('Copiez ce texte :',text);
+    }
+  }catch(e){
+    prompt('Copiez ce texte :',text);
+  }
+  return text;
+}
+function _shareConfirme(){
+  var el=document.getElementById('share-copie-banner');
+  if(!el){
+    el=document.createElement('div');
+    el.id='share-copie-banner';
+    el.setAttribute('role','status');
+    el.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#166534;color:#fff;font-weight:700;font-size:14px;padding:10px 16px;border-radius:8px';
+    document.body.appendChild(el);
+  }
+  el.textContent='Copié !';
+  el.style.display='block';
+  clearTimeout(window._shareCopieTimer);
+  window._shareCopieTimer=setTimeout(function(){el.style.display='none';},2500);
+}
+
+// ── Slide-over (fiche société desktop) ───────────────────────────────────────
+let _ssoHistory = [], _ssoIdx = -1, _stockRenderTarget = 'stockDetail';
+
+function _addToSSOHistory(ticker){
+  if (_ssoHistory[_ssoIdx] === ticker) return;
+  _ssoHistory = _ssoHistory.slice(0, _ssoIdx + 1);
+  _ssoHistory.push(ticker);
+  _ssoIdx = _ssoHistory.length - 1;
+  _ssoUpdateNav();
+}
+function _ssoUpdateNav(){
+  const prev = document.getElementById('sso-prev');
+  const next = document.getElementById('sso-next');
+  const hist = document.getElementById('sso-hist-label');
+  if (prev) prev.disabled = _ssoIdx <= 0;
+  if (next) next.disabled = _ssoIdx >= _ssoHistory.length - 1;
+  if (hist && _ssoHistory.length > 1) hist.textContent = `${_ssoIdx+1}/${_ssoHistory.length}`;
+  else if (hist) hist.textContent = '';
+}
+function ssoNavPrev(){ if(_ssoIdx>0){_ssoIdx--;_ssoUpdateNav();_loadInSlideover(_ssoHistory[_ssoIdx]);} }
+function ssoNavNext(){ if(_ssoIdx<_ssoHistory.length-1){_ssoIdx++;_ssoUpdateNav();_loadInSlideover(_ssoHistory[_ssoIdx]);} }
+function ssoOpenFullPage(){
+  const ticker = _ssoHistory[_ssoIdx];
+  closeStockSlideover();
+  if (ticker) { nav('stock'); _stockRenderTarget='stockDetail'; showStock(ticker); }
+}
+function openStockSlideover(ticker){
+  const sso = document.getElementById('stock-slideover');
+  const ov  = document.getElementById('sso-overlay');
+  if (!sso || window.innerWidth < 800) { nav('stock'); showStock(ticker); return; }
+  sso.classList.add('open');
+  ov.classList.add('open');
+  document.getElementById('sso-ticker-label').textContent = ticker;
+  _addToSSOHistory(ticker);
+  _trackRecentTicker(ticker);
+  _loadInSlideover(ticker);
+  document.addEventListener('keydown', _ssoEscHandler);
+}
+function _loadInSlideover(ticker){
+  _stockRenderTarget = 'sso-body';
+  document.getElementById('sso-ticker-label').textContent = ticker;
+  window._openTicker = ticker;
+  showStock(ticker);
+}
+function closeStockSlideover(){
+  document.getElementById('stock-slideover')?.classList.remove('open');
+  document.getElementById('sso-overlay')?.classList.remove('open');
+  document.removeEventListener('keydown', _ssoEscHandler);
+  if((location.hash||'').indexOf('#stock/')===0){ try{history.replaceState(null,'','#'+(_currentPage||'rank'))}catch(e){} }
+}
+function _ssoEscHandler(e){ if(e.key==='Escape') closeStockSlideover(); }
+
+// Route stock clicks: slide-over on desktop ≥800px, full page on mobile
+function _openStock(ticker){
+  if (window.innerWidth >= 800) openStockSlideover(ticker);
+  else showStock(ticker);
+}
+
+// ── Sprint 9B — Stories storytelling ──────────────────────────────────────
+let _companyStories = {};
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStockStory(ticker) {
+  const container = document.getElementById('stockStory');
+  if (!container) return;
+  const story = _companyStories[ticker];
+  if (!story) { container.innerHTML = ''; container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  const sec = (emoji, title, content) =>
+    `<section><h3>${emoji} ${escapeHtml(title)}</h3>${content}</section>`;
+  const list = items =>
+    `<ul>${items.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`;
+  const inline = items =>
+    `<div class="story-inline">${items.map(p => escapeHtml(p)).join(' · ')}</div>`;
+  container.innerHTML = [
+    story.en_bref
+      ? sec('📖', 'En bref', `<p>${escapeHtml(story.en_bref)}</p>`) : '',
+    story.points_forts?.length
+      ? sec('💪', 'Points forts', list(story.points_forts)) : '',
+    story.points_attention?.length
+      ? sec('⚠️', "Points d'attention", list(story.points_attention)) : '',
+    story.activites?.length
+      ? sec('🏢', 'Activités', inline(story.activites)) : '',
+    story.presence?.length
+      ? sec('🌍', 'Présence', inline(story.presence)) : '',
+    story.sources?.length
+      ? sec('📎', 'Sources', list(story.sources)) : '',
+  ].join('');
+}
+
+async function showStock(ticker){
+  _trackRecentTicker(ticker);
+  const useSlide = _stockRenderTarget === 'sso-body' && document.getElementById('stock-slideover')?.classList.contains('open');
+  if (!useSlide) {
+    nav('stock');
+    _stockRenderTarget = 'stockDetail';
+  }
+  if (!useSlide) document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.textContent.trim().startsWith(ticker)));
+  if (useSlide) {
+    const lbl = document.getElementById('sso-ticker-label');
+    if (lbl) lbl.textContent = ticker;
+    _addToSSOHistory(ticker);
+  }
+  try{history.replaceState(null,'','#stock/'+ticker)}catch(e){}
+  // Phase 1: render static header immediately from cached ranking data
+  const _staticEntry = (window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
+  const _v0 = _staticEntry.composite_adj||0;
+  const _sc0 = _v0>=60?'var(--green)':_v0>=40?'var(--amber)':'var(--red)';
+  const isFav0 = favorites.includes(ticker);
+  document.getElementById(_stockRenderTarget).innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+      <div>
+        <h2 style="font-size:20px;font-weight:700">${ticker}
+          <button class="star ${isFav0?'fav':''}" onclick="toggleFav('${ticker}')" style="font-size:16px">★</button>
+          <span style="font-size:11px;color:var(--t2);font-weight:400">· ${_staticEntry.sector||'…'} · ${_staticEntry.country||'…'}</span></h2>
+        <p style="color:var(--t2);font-size:12px;margin-top:2px">${_staticEntry.name||'Chargement…'}</p>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
+        <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
+        ${_staticEntry.statut==='suspendu'
+          ? '<span style="margin-top:4px;display:inline-block;color:var(--t2);font-weight:700">Cotation suspendue</span>'
+          : (_v0>0?`<span class="b ${bcls10(note10num(_staticEntry))}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
+      </div>
+    </div>
+    <div id="_skel-body" class="stock-skeleton">
+      <div class="sk-row" style="height:40px;width:60%;margin-bottom:16px"></div>
+      <div class="sk-grid">
+        <div class="sk-box"></div>
+        <div class="sk-box"></div>
+        <div class="sk-box"></div>
+      </div>
+      <div class="sk-row" style="height:24px;margin:24px 0 12px"></div>
+      <div class="sk-row" style="height:16px;margin-bottom:8px"></div>
+      <div class="sk-row" style="height:16px;margin-bottom:8px;width:85%"></div>
+      <div class="sk-row" style="height:16px;margin-bottom:8px;width:70%"></div>
+      <div class="sk-row" style="height:200px;margin-top:24px"></div>
+    </div>`;
+  try{
+    const[d,cd]=await Promise.all([fetch('/api/stock/'+ticker).then(r=>r.json()),fetch('/api/company/'+ticker).then(r=>r.json()).catch(()=>({}))]);
+    if(d.error){document.getElementById(_stockRenderTarget).innerHTML=`<p>${d.error}</p>`;return;}
+    const s=d.stock,v=s.composite_adj||0;
+    const fi=cd.financials||{},ai=cd.ai_analysis||'';
+    const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
+    const ci=COMM_PROD[ticker];
+    const co=(cd&&cd.company)||{};const aiSummary=(cd&&cd.ai_summary)||'';
+    const aiGeneratedAt=(cd&&cd.ai_generated_at)||null;
+    const hasCompany=co&&co.description&&co.description.length>10;
+    const isFav=favorites.includes(ticker);
+    const _noteFiche=(typeof note10txt==='function'?note10txt(s):v10fmt(v)).replace('.',',');
+    const _avisFiche=(typeof conseilAffiche==='function')?conseilAffiche(s):null;
+    const _suiteFiche=_avisFiche?('Conseil : '+_avisFiche.libelle+'.'):'Pas de conseil pour le moment.';
+    const _colFiche=_avisFiche?_avisFiche.css:'var(--text-1)';
+    document.getElementById(_stockRenderTarget).innerHTML=`
+      <div style="margin-bottom:12px">
+        <div class="stock-main-col">
+          <h2 style="font-size:20px;font-weight:700">${s.ticker}
+            <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
+            <span style="font-size:11px;color:var(--t2);font-weight:400">· ${s.sector||''} · ${s.country||''}</span></h2>
+          <p style="color:var(--t2);font-size:12px;margin-top:2px">${s.name||''}</p>
+          <div id="live-rank-badge" style="margin-top:4px"></div>
+          ${fi.description?`<p style="font-size:11px;color:var(--t3);margin-top:3px;max-width:550px;line-height:1.5">${fi.description}</p>`:''}
+          ${(()=>{
+            // Badge qualité des données
+            const hasPE = !!(s.pe_ref||s.pe_hist);
+            const hasDiv = !!(s.div_yield||s.div_per_share);
+            const hasBNA = !!(s.eps||s.bna);
+            const hasBOC = !!(s._boc_per||hasPE);
+            const hasPDF = !!(s.pdf_ca_mfcfa||s.pdf_rn_mfcfa||aiSummary);
+            const srcCount = [hasPE,hasDiv,hasBNA].filter(Boolean).length;
+            const [badge,bg,tip] = srcCount===3
+              ? ['✅ Données complètes','rgba(74,222,128,.15)','P/E, dividende et BNA tous disponibles depuis les sources BOC officiel et/ou rapports PDF.']
+              : srcCount>=2
+              ? ['⚠️ Données partielles','rgba(251,191,36,.15)',`Certaines données sont issues d'estimations PDF. P/E: ${hasPE?'✓':'✗'} | Dividende: ${hasDiv?'✓':'✗'} | BNA: ${hasBNA?'✓':'✗'}`]
+              : ['❌ Données limitées','rgba(248,113,113,.15)',`Moins de 3 sources disponibles. P/E: ${hasPE?'✓':'✗'} | Dividende: ${hasDiv?'✓':'✗'} | BNA: ${hasBNA?'✓':'✗'}. Utilisez ces données avec prudence.`];
+            const sources = [hasBOC?'BOC officiel':'',hasPDF?'Rapport PDF annuel':''].filter(Boolean).join(', ')||'Données statiques';
+            return `<div class="tt" data-tt="${tip} Sources : ${sources}" style="display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:10px;padding:3px 9px;border-radius:12px;background:${bg};border:1px solid ${bg.replace('.15','0.4')}">${badge} <span style="color:var(--t3);font-size:9px">— ${sources}</span></div>`;
+          })()}
+          <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <a href="/api/rapport/${ticker}" download class="btn btn-o" style="text-decoration:none;padding:5px 12px;font-size:11px">📄 Rapport PDF</a>
+            <button onclick="_quickCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
+            <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
+          </div>
+        </div>
+      </div>
+      <div class="ctab-action-strip">
+        <button class="btn btn-g ctab-act-btn" onclick="showAlertModal('${ticker}')">🔔 Alerte prix</button>
+        <button class="btn btn-o ctab-act-btn" onclick="openBacktest(['${ticker}'])">📊 Backtest</button>
+        <button class="btn btn-o ctab-act-btn" onclick="navToRank('${ticker}')">📊 Voir classement</button>
+      </div>
+      <!-- Sprint 11 — 3 onglets fiche société -->
+      <div class="ctab-bar">
+        <button class="ctab-btn active" data-ctab="comprendre">📖 Comprendre</button>
+        <button class="ctab-btn" data-ctab="chiffres">📊 Chiffres</button>
+        <button class="ctab-btn" data-ctab="documents">📄 Documents</button>
+      </div>
+      <div class="ctab-panel active" data-ctab="comprendre">
+        <div id="stockStory"></div>
+    ${hasCompany?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
+      <div class="ct">🏢 Activité</div>
+      <p style="font-size:11px;color:var(--t2);margin:4px 0 8px;line-height:1.6">${co.description||''}</p>
+      ${co.products&&co.products.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${co.products.map(p=>`<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.07);color:var(--t2)">${p}</span>`).join('')}
+      </div>`:''}
+      <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);margin-top:4px;flex-wrap:wrap">
+        ${co.founded?`<span>📅 Fondée ${co.founded}</span>`:''}
+        ${co.employees_approx?`<span>👥 ~${co.employees_approx.toLocaleString('fr-FR')} employés</span>`:''}
+        ${co.markets&&co.markets.length?`<span>🌍 ${co.markets.join(' · ')}</span>`:''}
+      </div>
+          ${co.website?`<a href="${co.website}" target="_blank" style="font-size:10px;color:var(--blue);margin-top:6px;display:inline-block">🔗 Site web</a>`:''}
+      ${co.reports_url?` &nbsp;<a href="${co.reports_url}" target="_blank" style="font-size:10px;color:var(--amber);margin-top:6px;display:inline-block">📄 Rapports annuels</a>`:''}
+    </div>`:''}
+    ${aiSummary?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--green);background:var(--bg3)">
+      <div class="ct">🤖 Analyse IA — Positionnement stratégique</div>
+      <div class="ai-analysis" style="margin-top:4px">${_md(aiSummary.trim())}</div>
+      ${timeAgo(aiGeneratedAt)?`<div style="font-size:10px;color:var(--t3);margin-top:6px">Résumé généré ${timeAgo(aiGeneratedAt)}</div>`:''}
+    </div>`:'' }
+      </div><!-- /ctab-comprendre -->
+      <div class="ctab-panel" data-ctab="chiffres">
+        <div class="ctab-score-block">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <div>
+              <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
+              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+            </div>
+            ${s.statut==='suspendu'
+              ? '<span style="color:var(--t2);font-weight:700" data-tip="Cotation suspendue">'+note10txt(s)+'/10</span>'
+              : '<span class="b '+bcls10(note10num(s))+'" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">'+note10txt(s)+'/10</span>'}
+          </div>
+          <div id="live-score-container"></div>
+          <div id="stock-spark-mini" style="margin:6px 0"></div>
+        </div>
+        ${_genVerdict(s)}
+      <!-- Onglets fiche société -->
+      <div class="stock-tabs">
+        <div class="stock-tab active" data-tab="general" onclick="_stockTab('general')">📊 Général</div>
+        <div class="stock-tab" data-tab="history" onclick="_stockTab('history');_loadStockHistory('${ticker}')">📅 Historique 30j</div>
+        <div class="stock-tab" data-tab="aianalysis" onclick="_stockTab('aianalysis');_loadStockAI('${ticker}')">🤖 Analyse IA complète</div>
+        <div class="stock-tab" data-tab="news" onclick="_stockTab('news');loadStockNews('${ticker}')">📰 Actualités</div>
+      </div>
+      <div id="stab-general" class="stock-tab-panel active">
+      ${buildKpiCards(s)}
+      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${s.ecart_pct>0?'+':''}${s.ecart_pct}%)</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div></div>`:''}
+      ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
+            const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
+            const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
+            const _dy = _isExc ? (s.price>0?(s.div_exceptional_value||0)/s.price*100:0) : (s.div_yield||entry?.div_yield||0);
+            const _badge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(s,{hideHaute:true}) : '';
+            const _yieldCell = _isExc
+              ? `<span style="text-decoration:line-through;font-size:12px;color:var(--t3)">${_dy.toFixed(1)}%</span><br><span style="font-size:10px;color:var(--amber)">🔶 Non récurrent</span>`
+              : `${_dy.toFixed(2)}%${_badge}`;
+            const _amtCell = fmtXOF(_rawAmt)+(_isExc?'<br><span style="font-size:9px;color:var(--amber)">non récurrent</span>':'');
+            return `<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          ${[
+            ['Par action',_amtCell,'var(--amber)'],
+            ['Rendement',_yieldCell,'var(--amber)'],
+            ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
+            ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
+          ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
+        </div></div>`;
+          })():''}
+      <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
+        <div class="ct">📊 Résumé rapide</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.7">Selon nos 8 modèles d'analyse, cette société obtient <strong style="color:${_colFiche}">${_noteFiche}/10</strong>. ${_suiteFiche}</div>
+      </div>
+      ${fi.strengths||fi.risks?`<div class="g2 expert-only" style="margin-bottom:12px">
+        <div class="card" style="margin-bottom:0"><div class="ct">✅ Points forts</div>${(fi.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--green);margin:3px 0">✓ ${s}</div>`).join('')}</div>
+        <div class="card" style="margin-bottom:0"><div class="ct">⚠️ Risques</div>${(fi.risks||[]).map(r=>`<div style="font-size:11px;color:var(--red);margin:3px 0">✗ ${r}</div>`).join('')}</div>
+      </div>`:''}
+      ${ai?`<div class="card expert-only" style="margin-bottom:12px;border-left:3px solid var(--blue)"><div class="ct">🧠 Analyse Claude</div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">${ai}</div>
+        ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong> <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fi.upside_pct>=0?'+':''}${fi.upside_pct}%)</span></div>`:''}</div>`:''}
+      ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
+      <div id="stock-ratings-fundamentals-section"></div>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="card" style="margin-bottom:0;border-left:3px solid var(--blue)">
+          <div class="ct">🔗 Sociétés similaires</div>
+          ${(()=>{
+            const sect=s.sector||'';const sc0=s.composite_adj||0;
+            const peers=(window.scores||[]).filter(x=>x.ticker!==ticker&&x.sector===sect).sort((a,b)=>Math.abs((a.composite_adj||0)-sc0)-Math.abs((b.composite_adj||0)-sc0)).slice(0,3);
+            if(!peers.length) return '<p style="font-size:11px;color:var(--t2)">Aucun pair dans ce secteur.</p>';
+            return peers.map(p=>{const chg=p.change_pct||0;return`<div onclick="_openStock('${p.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--row-border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><div><strong style="font-size:12px">${p.ticker}</strong><div style="font-size:10px;color:var(--t2)">${(p.name||'').substring(0,20)}</div></div><div style="text-align:right"><span class="b ${bcls10(note10num(p))}">${note10txt(p)}/10</span><div style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div></div>`;}).join('');
+          })()}
+        </div>
+      </div>
+      <div class="g2">
+        <div>
+          ${ci?`<div class="card" style="margin-bottom:12px"><div class="ct">🌍 Commodités — Exposition ${ci.exp}</div>
+            <span class="ctag"><span class="cdot" style="background:${ci.col}"></span>${ci.com[0]}</span>
+            <div style="font-size:11px;color:var(--t2);margin-top:7px;line-height:1.5">${ci.desc}</div></div>`:
+            '<div class="card" style="margin-bottom:12px"><div class="ct">🌍 Commodités</div><p style="font-size:11px;color:var(--t2)">Pas d\'exposition directe.</p></div>'}
+          ${fi.net_profit_bn?`<div class="card" style="margin-bottom:12px"><div class="ct">Bénéfice net historique (Md FCFA)</div>
+            <div id="stockProfitDiv" style="width:100%;height:140px"></div></div>`:''}
+          <div class="card" style="margin-bottom:0"><div class="ct">📈 Cours historique</div>
+            <div id="stockChartDiv" style="width:100%;min-height:220px"></div></div>
+        </div>
+      </div>
+      </div><!-- /stab-general -->
+
+      <!-- Onglet Historique 30j -->
+      <div id="stab-history" class="stock-tab-panel">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div class="ct">📅 Cours BOC — 30 derniers jours</div>
+            <span style="font-size:10px;color:var(--t2)">Source : BRVM BOC</span>
+          </div>
+          <div id="stock-hist-table"><p style="color:var(--t2)">Chargement...</p></div>
+        </div>
+      </div>
+
+      <!-- Onglet Analyse IA complète -->
+      <div id="stab-aianalysis" class="stock-tab-panel">
+        <div id="stock-ai-full"><div style="padding:30px;text-align:center;color:var(--t2)">Chargement de l'analyse IA...</div></div>
+      </div>
+
+      <!-- Onglet Actualités -->
+      <div id="stab-news" class="stock-tab-panel">
+        <div class="card">
+          <div class="ct" style="margin-bottom:10px">📰 Annonces &amp; Presse financière</div>
+          <div id="stock-news-section"><p style="font-size:12px;color:var(--t2)">Chargement...</p></div>
+        </div>
+      </div>
+      </div><!-- /ctab-chiffres -->
+      <div class="ctab-panel" data-ctab="documents">
+        <div id="stock-reports-section">
+          <p style="font-size:12px;color:var(--t2);padding:12px 0">Chargement des rapports...</p>
+        </div>
+      </div><!-- /ctab-documents -->
+      <div class="sso-disclaimer">⚠️ Les notes et conseils sont générés automatiquement par des modèles de valorisation à partir de données publiques. Ils sont fournis à titre pédagogique et informatif et ne constituent pas un conseil en investissement. Investir en bourse comporte un risque de perte en capital. Faites vos propres recherches ou consultez un conseiller agréé. <a href="#" onclick="closeStockSlideover();nav('methodo');return false" style="color:var(--accent);text-decoration:none;white-space:nowrap">Voir notre méthodologie →</a></div>`;
+    renderStockStory(ticker);
+    if (typeof initCompanyTabs === 'function') initCompanyTabs(ticker);
+    // Charts dans la fiche
+    if(fi.net_profit_bn&&fi.years) svgBar(document.getElementById('stockProfitDiv'),fi.years.map(String),fi.net_profit_bn,'#4ADE80',140);
+    if(typeof loadPriceChart==='function') loadPriceChart(ticker, 'stockChartDiv');
+    loadStockRatingsFundamentals(ticker);
+    if(typeof fetchLiveScore==='function') fetchLiveScore(ticker);
+    window._openTicker = ticker;
+    if(typeof renderLiveRankBadge==='function') renderLiveRankBadge(ticker);
+    // Mini sparkline 30j dans l'en-tête (préférer données BOC étendues)
+    const _miniSpkEl = document.getElementById('stock-spark-mini');
+    if(_miniSpkEl){
+      const _extSp=window._extSparklines||{};
+      if(_extSp[ticker]&&_extSp[ticker].length>=3){
+        _miniSpkEl.innerHTML=sparkline(_extSp[ticker].map(p=>({price:p.close})),120,40);
+      } else {
+        const _ph=window._priceHistory||{};
+        const _hist30=(_ph[ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+        if(_hist30.length>=3){_miniSpkEl.innerHTML=sparkline(_hist30,120,40);}
+        else{
+          fetch('/api/price-history-extended/'+ticker+'?period=6m').then(r=>r.json()).then(data=>{
+            if(data&&data.points&&data.points.length>=3){
+              const svg=sparkline(data.points.slice(-30).map(p=>({price:p.close})),120,40);
+              if(_miniSpkEl)_miniSpkEl.innerHTML=svg;
+            }
+          }).catch(e=>{console.error('[BRVM] mini-sparkline:',e);});
+        }
+      }
+    }
+  }catch(e){document.getElementById(_stockRenderTarget).innerHTML='<p style="color:var(--t2)">Erreur</p>';}
+}
+
+function _loadStockHistory(ticker){
+  const el=document.getElementById('stock-hist-table');
+  if(!el||el.dataset.loaded===ticker) return;
+  el.dataset.loaded=ticker;
+  const ph=window._priceHistory||{};
+  const hist=(ph[ticker]||[]).filter(p=>p.price).slice(-30).reverse();
+  if(hist.length>=2){
+    _renderHistTable(el,hist,ticker);
+  } else {
+    fetch('/api/price-history').then(r=>r.json()).then(data=>{
+      const h=(data[ticker]||[]).filter(p=>p.price).slice(-30).reverse();
+      _renderHistTable(el,h,ticker);
+    }).catch(()=>{el.innerHTML='<p style="color:var(--t2)">Données indisponibles.</p>';});
+  }
+}
+
+function _renderHistTable(el,hist,ticker){
+  if(!hist.length){el.innerHTML='<p style="color:var(--t2)">Aucun historique disponible.</p>';return;}
+  const rows=hist.map((p,i)=>{
+    const prev=hist[i+1];
+    const chg=prev&&prev.price?(p.price/prev.price-1)*100:null;
+    const chgC=chg===null?'var(--t2)':chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+    const chgS=chg===null?'—':(chg>=0?'+':'')+chg.toFixed(2)+'%';
+    const srcBadge=p.source==='boc'?'<span style="font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.15);color:var(--blue)">BOC</span>':'<span style="font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(251,191,36,.15);color:var(--amber)">Live</span>';
+    return`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 8px;font-size:11px;color:var(--t2)">${p.date}</td>
+      <td style="padding:6px 8px;font-size:12px;font-weight:600">${Math.round(p.price).toLocaleString('fr-FR')} XOF</td>
+      <td style="padding:6px 8px;font-size:11px;color:${chgC};font-weight:600">${chgS}</td>
+      <td style="padding:6px 8px">${srcBadge}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Date</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Cours</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Variation</th>
+      <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t2)">Source</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function _loadStockAI(ticker){
+  const el=document.getElementById('stock-ai-full');
+  if(!el||el.dataset.loaded===ticker) return;
+  el.dataset.loaded=ticker;
+  fetch('/api/analyses/'+ticker).then(r=>r.json()).then(data=>{
+    if(data.error){el.innerHTML=`<div class="card"><p style="color:var(--t2);font-size:12px">Aucune analyse IA disponible pour ${ticker}.</p></div>`;return;}
+    const vC=data.verdict_investisseur==='POSITIF'?'var(--green)':data.verdict_investisseur==='NEGATIF'?'var(--red)':'var(--amber)';
+    const kpis=data.kpis||{};
+    const _KPI_FULL=[
+      {key:'chiffre_affaires',     label:"Chiffre d'affaires"},
+      {key:'resultat_exploitation',label:"Resultat d'exploitation"},
+      {key:'resultat_net',         label:'Resultat net'},
+      {key:'ebitda',               label:'EBITDA'},
+      {key:'marge_nette',          label:'Marge nette'},
+      {key:'roe',                  label:'ROE'},
+      {key:'total_bilan',          label:'Total bilan'},
+      {key:'capitaux_propres',     label:'Capitaux propres'},
+      {key:'dette_nette',          label:'Dette nette'},
+      {key:'dividende_par_action', label:'Dividende par action'}
+    ];
+    const kpiHtml=_KPI_FULL.map(({key,label})=>{
+      const v=kpis[key];
+      let val='—';
+      if(v&&v.valeur!=null){
+        const num=(typeof v.valeur==='number')?v.valeur.toLocaleString('fr-FR'):String(v.valeur);
+        const uni=v.unite?` <span style="font-size:9px;color:var(--t2)">${v.unite}</span>`:'';
+        const varc=String(v.variation||'').startsWith('+')?'var(--green)':'var(--red)';
+        const vari=v.variation?` <span style="font-size:9px;color:${varc}">${v.variation}</span>`:'';
+        val=`${num}${uni}${vari}`;
+      }
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--t2)">${label}</span><strong>${val}</strong></div>`;
+    }).join('');
+    const pts=(data.points_cles||[]).map(p=>`<li style="color:var(--green);font-size:11px;margin-bottom:4px">✓ ${p}</li>`).join('');
+    const risques=(data.risques||[]).map(r=>`<li style="color:var(--red);font-size:11px;margin-bottom:4px">✗ ${r}</li>`).join('');
+    const _pArr=Array.isArray(data.perspectives)?data.perspectives:(data.perspectives?[data.perspectives]:[]);
+    const persp=_pArr.map(p=>`<li style="color:var(--blue);font-size:11px;margin-bottom:4px">→ ${p}</li>`).join('');
+    el.innerHTML=`
+      <div class="card" style="margin-bottom:10px;border-left:3px solid ${vC}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="ct">🤖 Analyse IA — ${ticker} ${data.annee||''}</div>
+          <span style="font-size:11px;font-weight:700;color:${vC};padding:3px 10px;border-radius:10px;background:${vC==='var(--green)'?'rgba(74,222,128,.15)':vC==='var(--red)'?'rgba(248,113,113,.15)':'rgba(251,191,36,.15)'}">Verdict : ${data.verdict_investisseur||'—'}</span>
+        </div>
+        ${data.resume?`<p style="font-size:12px;color:var(--t1);line-height:1.7;margin-bottom:12px">${data.resume}</p>`:''}
+        ${kpiHtml?`<div style="margin-bottom:12px">${kpiHtml}</div>`:''}
+      </div>
+      ${pts||risques?`<div class="g2" style="margin-bottom:10px">
+        ${pts?`<div class="card" style="margin-bottom:0;border-left:3px solid var(--green)"><div class="ct">✅ Points clés</div><ul style="padding-left:14px;margin:0">${pts}</ul></div>`:''}
+        ${risques?`<div class="card" style="margin-bottom:0;border-left:3px solid var(--red)"><div class="ct">⚠️ Risques</div><ul style="padding-left:14px;margin:0">${risques}</ul></div>`:''}
+      </div>`:''}
+      ${persp?`<div class="card"><div class="ct">🔭 Perspectives</div><ul style="padding-left:14px;margin:0">${persp}</ul></div>`:''}
+      <div style="font-size:10px;color:var(--t3);margin-top:8px">Analysé le : ${(data.analyzed_at||'').slice(0,10)} · Source : ${data.url||'rapport PDF'}</div>`;
+  }).catch(()=>{el.innerHTML='<div class="card"><p style="color:var(--t2)">Erreur chargement analyse.</p></div>';});
+}
+
+// ── Refresh ─────────────────────────────────────────────────────────────────
+function gSpinShow(){ const el=document.getElementById('g-spin'); if(el)el.style.display='block'; }
+function gSpinHide(){ const el=document.getElementById('g-spin'); if(el)el.style.display='none'; }
+
+async function loadStatus(){
+  // Footer info
+  try{
+    const fd=document.getElementById('footer-date');
+    if(fd&&!fd.textContent) fd.textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+    const lv=await fetch('/api/live').then(r=>r.json());
+    window._livePrices = lv.prices || {};
+    const n=Object.keys(lv.prices||{}).length;
+    const fb=document.getElementById('footer-boc');
+    if(fb) fb.textContent=`BOC : ${n} tickers live`;
+    // Footer stats enrichi
+    const fsEl=document.getElementById('footer-stats');
+    if(fsEl){
+      const nReports=(await fetch('/api/reports-count').then(r=>r.json()).catch(()=>({})));
+      const rCount=nReports.total;
+      const nAnnc=(await fetch('/api/announcements?limit=1').then(r=>r.json()).catch(()=>({})));
+      const aCount=nAnnc.total;
+      const _BBGCI1=[];
+      if(rCount) _BBGCI1.push(`${rCount} rapports analysés`);
+      if(aCount) _BBGCI1.push(`${aCount} annonces collectées`);
+      _BBGCI1.push(`<a href="#" onclick="nav('methodo');return false" style="color:inherit;text-decoration:none;cursor:pointer">📖 Méthodologie</a>`);
+      fsEl.innerHTML=_BBGCI1.join(' · ');
+      const _notees=(window.scores||[]).length;
+      const _cotees=n;
+      const _fc=document.getElementById('footer-count');
+      if(_fc) _fc.textContent=_cotees&&_cotees!==_notees?`${_notees} sociétés notées / ${_cotees} cotées`:`${_notees} sociétés`;
+      const _rb=document.getElementById('rank-badge');
+      if(_rb&&_notees) _rb.textContent=_notees;
+      const _st=document.getElementById('settings-tickers');
+      if(_st&&_notees) _st.textContent=_cotees&&_cotees!==_notees?`${_notees} notées / ${_cotees} cotées`:_notees;
+    }
+    const msbBoc=document.getElementById('msb-boc');
+    if(msbBoc) msbBoc.textContent=`${n} cours live`;
+    const fl=document.getElementById('footer-live');
+    if(fl){
+      // updated_at est une ISO string ; fetched_at (dans prices) aussi
+      const rawAt = lv.updated_at || lv.fetched_at
+        || Object.values(lv.prices||{})[0]?.fetched_at;
+      const at = rawAt
+        ? new Date(rawAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+        : '—';
+      fl.textContent='MàJ live : '+at;
+    }
+  }catch(e){}
+}
+
+// ── Sprint 8 — Welcome 3 portes ────────────────────────────────────────────
+function _welcomeDoor(door) {
+  localStorage.setItem('brvm_visited', '1');
+  if (door === 'decouvrir') { _setMode('beginner'); nav('glossaire'); }
+  else if (door === 'investir') { _setMode('beginner'); nav('rank'); }
+  else { _setMode('beginner'); nav('rank'); }
+}
+function initWelcome() { /* page statique — rien à charger */ }
+
+// ── Page-specific loaders ──────────────────────────────────────────────────
+const pageLoaders={
+  rank:      function(){ if(typeof loadRankDash==='function') loadRankDash(); },
+  welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); if(typeof initTop3Podium!=='undefined') initTop3Podium(); },
+  alerts:    ()=>{nav('signals');},
+  valuation: ()=>{nav('signals');},
+  signals:   function(){ if(typeof loadSignauxValoAlertes==='function') loadSignauxValoAlertes(); },
+  optim:     ()=>nav('screener'),
+  screener:  ()=>{if(typeof initScreener!=='undefined')initScreener();},
+  macro:     ()=>{if(typeof renderMacroPage!=='undefined')renderMacroPage();setTimeout(()=>{if(typeof renderMacroRatings!=='undefined')renderMacroRatings();},300);},
+  marche:    ()=>{ nav('welcome'); },
+  news:      ()=>{if(typeof renderNewsV2!=='undefined')renderNewsV2();},
+  settings:  ()=>{if(typeof loadSettingsPage!=='undefined')loadSettingsPage();},
+  market:    ()=>{ nav('welcome'); },
+  glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
+};
+
+function _paintIndexCards() {
+  if (!window._marketData || !window._marketData.composite) return;
+  var _comp = window._marketData.composite, _b30 = window._marketData.brvm30 || {};
+  var _cEl = document.getElementById('mkt-brvm-c'),  _cChg = document.getElementById('mkt-brvm-c-chg');
+  var _bEl = document.getElementById('mkt-brvm-30'), _bChg = document.getElementById('mkt-brvm-30-chg');
+  if (_cEl) _cEl.textContent = Number(_comp.current).toFixed(2);
+  if (_cChg) { var _cs=_comp.change>=0?'+':''; _cChg.textContent=_cs+Number(_comp.change).toFixed(2)+'%'; _cChg.style.color=_comp.change>=0?'var(--bull)':'var(--bear)'; }
+  if (_bEl && _b30.current != null) _bEl.textContent = Number(_b30.current).toFixed(2);
+  if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
+}
+
+function _renderMarketPage() {
+  _paintIndexCards();
+  var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
+  var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
+  if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
+  if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
+
+  // Heatmap — re-render directement dans mkt-heatmap-grid
+  _renderHeatmapFilters();
+  renderHeatmap('mkt-heatmap-grid');
+
+  // Distribution + sectoriel — re-render via svgBar/svgDonut
+  var distDst = document.getElementById('mkt-dist');
+  var sectDst = document.getElementById('mkt-sect');
+  var _sc = window.scores || [];
+  if (distDst && _sc.length) {
+    var bkts={'0–2,5':0,'2,5–5':0,'5–6,25':0,'6,25–7,5':0,'7,5–10':0};
+    _sc.forEach(function(x){var v=note10num(x);bkts[v<2.5?'0–2,5':v<5?'2,5–5':v<6.25?'5–6,25':v<7.5?'6,25–7,5':'7,5–10']++;});
+    svgBar(distDst,Object.keys(bkts),Object.values(bkts),['#F87171','#FB923C','#FBBF24','#FBBF24','#4ADE80'],170);
+  }
+  if (sectDst && _sc.length) {
+    var secs={};_sc.forEach(function(x){if(x.sector)secs[x.sector]=(secs[x.sector]||0)+1;});
+    svgDonut(sectDst,Object.keys(secs),Object.values(secs),170);
+  }
+
+  // Flux — re-render directement dans mkt-flux
+  var fluxDst = document.getElementById('mkt-flux');
+  if (fluxDst) renderFluxCapitaux(fluxDst);
+
+  // Insights (LOADSTUCK-1 : ancre source #insights supprimee du DOM, calcul direct)
+  var insDst = document.getElementById('mkt-insights-full');
+  if (insDst) {
+    if (window.scores && window.scores.length) {
+      var sorted = [...window.scores].sort(triCommeClassement);
+      var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+note10txt(s)+'/10'; }).join(' · ');
+      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
+    }
+  }
+}
+
+function _syncMktHeatmap() {
+  renderHeatmap('mkt-heatmap-grid');
+}
+
+function _renderHeatmapFilters(){ // SECTFILT-1 : boutons generes depuis les secteurs presents dans les donnees
+  const box=document.getElementById('mkt-heatmap-filters'); if(!box) return;
+  const cnt={}; (window.scores||[]).forEach(x=>{ if(x.sector) cnt[x.sector]=(cnt[x.sector]||0)+1; });
+  const secs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b));
+  box.innerHTML=`<button class="hf-btn${_heatmapFilter===''?' hf-on':''}" onclick="setHeatmapFilter('');_syncMktHeatmap()">Tous</button>`+secs.map(s=>`<button class="hf-btn${_heatmapFilter===s?' hf-on':''}" onclick="setHeatmapFilter('${s}');_syncMktHeatmap()">${s} (${cnt[s]})</button>`).join('');
+}
+
+function switchTab(pageId, tabId, btn) {
+  const page = document.getElementById('page-' + pageId);
+  if (!page) return;
+  page.querySelectorAll('.tab-content').forEach(t => {
+    if (t.closest('[id^="page-"]') === page) t.classList.remove('on');
+  });
+  page.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.closest('[id^="page-"]') === page) b.classList.remove('on');
+  });
+  const tabEl = document.getElementById(pageId + '-tab-' + tabId);
+  if (tabEl) tabEl.classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+// ── Matrice de corrélation ─────────────────────────────────────────────────
+function renderCorrelMatrix() {
+  const el = document.getElementById('corr-matrix');
+  if (!el) return;
+  const ph = window._priceHistory || {};
+  const all = window.scores || scores || [];
+  if (!all.length || !Object.keys(ph).length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:12px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">Données historiques indisponibles</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto">Les données BOC se chargent au fil des séances de marché. Revenez lors d'un jour de bourse.</div>
+      <button class="btn btn-o" onclick="nav('classement')" style="font-size:12px">Voir le classement →</button>
+    </div>`;
+    return;
+  }
+
+  const n = parseInt(document.getElementById('corr-n')?.value || '15');
+  const top = all.slice(0, n).map(x => x.ticker);
+
+  // Extraire les rendements journaliers BOC (30 derniers points)
+  const returns = {};
+  top.forEach(t => {
+    const pts = (ph[t] || []).filter(p => p.price).slice(-31);
+    if (pts.length < 3) return;
+    const r = [];
+    for (let i = 1; i < pts.length; i++) {
+      const prev = pts[i-1].price, curr = pts[i].price;
+      if (prev > 0) r.push((curr - prev) / prev);
+    }
+    if (r.length >= 3) returns[t] = r;
+  });
+
+  const tickers = Object.keys(returns);
+  if (tickers.length < 2) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:12px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">Pas encore assez de données</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto">La matrice de corrélation nécessite au moins 3 séances de cours par action. Les données s'accumuleront automatiquement.</div>
+      <button class="btn btn-o" onclick="nav('classement')" style="font-size:12px">Voir le classement par secteur →</button>
+    </div>`;
+    return;
+  }
+
+  // Pearson entre deux séries (longueur min commune)
+  function pearson(a, b) {
+    const len = Math.min(a.length, b.length);
+    if (len < 2) return 0;
+    const ax = a.slice(-len), bx = b.slice(-len);
+    const ma = ax.reduce((s,v)=>s+v,0)/len, mb = bx.reduce((s,v)=>s+v,0)/len;
+    let num=0, da=0, db=0;
+    for(let i=0;i<len;i++){const ai=ax[i]-ma,bi=bx[i]-mb;num+=ai*bi;da+=ai*ai;db+=bi*bi;}
+    return (da*db===0) ? 0 : num/Math.sqrt(da*db);
+  }
+
+  // Matrice
+  const matrix = tickers.map(ti => tickers.map(tj => pearson(returns[ti], returns[tj])));
+
+  // Couleur corrélation
+  function corrColor(v) {
+    if (v >= 0.7)  return '#15803d';  // vert foncé
+    if (v >= 0.4)  return '#4ade80';  // vert
+    if (v >= 0.1)  return '#86efac';  // vert clair
+    if (v >= -0.1) return '#475569';  // gris
+    if (v >= -0.3) return '#f87171';  // rouge clair
+    return '#dc2626';                  // rouge
+  }
+  function textColor(v) { return (v >= 0.4 || v <= -0.3) ? '#fff' : 'var(--text)'; }
+
+  const cellW = Math.max(36, Math.min(60, Math.floor(520/tickers.length)));
+  const cellH = 28;
+  const hdrW = 52;
+
+  let html = `<table style="border-collapse:collapse;font-size:${Math.max(8,Math.min(11,cellW/5))}px">
+    <thead><tr>
+      <th style="width:${hdrW}px;padding:4px;color:var(--t3)"></th>
+      ${tickers.map(t => `<th style="width:${cellW}px;height:${cellH}px;padding:2px;text-align:center;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${cellW}px" title="${t}">${t}</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  matrix.forEach((row, i) => {
+    html += `<tr>
+      <td style="padding:2px 4px;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;font-size:${Math.max(8,Math.min(11,cellW/5))}px;max-width:${hdrW}px;text-overflow:ellipsis" title="${tickers[i]}">${tickers[i]}</td>
+      ${row.map((v, j) => {
+        const isDiag = i === j;
+        const bg = isDiag ? 'var(--bg3)' : corrColor(v);
+        const tc = isDiag ? 'var(--t2)' : textColor(v);
+        const label = isDiag ? '—' : v.toFixed(2);
+        const tip = isDiag ? tickers[i] : `${tickers[i]} / ${tickers[j]} : ${v.toFixed(3)}`;
+        return `<td title="${tip}" style="width:${cellW}px;height:${cellH}px;text-align:center;background:${bg};color:${tc};font-weight:${Math.abs(v)>=0.5?'700':'400'};border:1px solid var(--border);border-radius:3px;padding:0">${label}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  html += `<div style="margin-top:6px;font-size:10px;color:var(--t3)">${tickers.length} actions analysées · ${Object.values(returns)[0]?.length||'?'} rendements journaliers BOC</div>`;
+  el.innerHTML = html;
+}
+// ── Macro UEMOA ──────────────────────────────────────────────────────────────
+function renderMacroPage() {
+  const el = document.getElementById('macro-brvm-ytd');
+  if (!el) return;
+  const all = (window.scores || scores || []);
+  if (!all.length) return;
+  const avgChg = all.reduce((s, x) => s + (x.change_pct || 0), 0) / all.length;
+  const sign = avgChg >= 0 ? '+' : '';
+  el.textContent = sign + avgChg.toFixed(2) + '%';
+  el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// ── Actualités BRVM + Google News ────────────────────────────────────────────
+let _anncCurrentTab = 'convocations_ag';
+
+const _ANNC_LABELS = {
+  dividendes:'💰 Dividendes', convocations_ag:'📋 AG', notations:'⭐ Notations',
+  communiques:'📣 Communiqués', dirigeants:'👔 Dirigeants',
+  franchissements:'📊 Franchissements', avis:'ℹ️ Avis', rapports:'📄 Rapports'
+};
+const _ANNC_SHORT = {
+  dividendes:'DIV', convocations_ag:'AG', notations:'NOT', communiques:'COM',
+  dirigeants:'DIR', franchissements:'FRS', avis:'AVI', rapports:'RAP'
+};
+
+function _sentimentBadge(text) {
+  const t = (text||'').toLowerCase();
+  const pos = ['hausse','bénéfice','dividende','croissance','profit','accord','partenariat','acquisition','résultat positif','augmentation'];
+  const neg = ['baisse','perte','litige','plainte','déficit','faillite','insolvable','chute','recul'];
+  if (pos.some(k=>t.includes(k))) return '<span style="color:#4ADE80;font-size:10px">🟢 Positif</span>';
+  if (neg.some(k=>t.includes(k))) return '<span style="color:#F87171;font-size:10px">🔴 Négatif</span>';
+  return '<span style="color:#FBBF24;font-size:10px">🟡 Neutre</span>';
+}
+
+function _isNew(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr), now = new Date();
+  return (now - d) < 7 * 86400 * 1000;
+}
+
+const _ANNC_TYPE_LABEL = {
+  dividendes:'Dividende', convocations_ag:'Assemblée Générale', notations:'Notation',
+  communiques:'Communiqué', dirigeants:'Changement de dirigeants',
+  franchissements:'Franchissement de seuil', avis:'Avis BRVM', rapports:'Rapport'
+};
+
+function _anncTitle(item, type) {
+  const t = (item.titre || '').trim();
+  // Strip é encoding variants: compare normalized to catch encoding edge cases
+  const isTelecharger = t === 'Télécharger' || t === 'Télécharger' || t.toLowerCase() === 'télécharger';
+  if (t && !isTelecharger && t.length > 3) return t;
+  // Extract from filename (pdf_path or source_url)
+  const path = item.pdf_path || item.source_url || '';
+  const filename = path.split('/').pop().replace(/\.pdf$/i, '');
+  if (filename && filename.length > 5) {
+    const stripped = filename
+      .replace(/^\d{8}-?_-?_?/, '')   // strip leading date prefix
+      .replace(/_-_/g, ' — ')
+      .replace(/-_/g, ' — ')
+      .replace(/_/g, ' ')
+      .replace(/-/g, ' ')
+      .replace(/\bndeg\s*\d+\b/gi, '')   // "ndeg137" → ""
+      .replace(/\bbrvmdg\b/gi, '')        // "brvmdg" → ""
+      .replace(/\bbrvm\b/gi, '')          // "brvm" seul → ""
+      .replace(/ — \s*— /g, ' — ')       // doubles séparateurs
+      .replace(/\s{2,}/g, ' ')            // doubles espaces
+      .replace(/^ — | — $/g, '')          // séparateurs en début/fin
+      .trim();
+    // Title case : majuscule sur chaque mot sauf petits mots de liaison
+    const SMALL = new Set(['de','du','des','le','la','les','et','en','à','au','aux','par','sur','sous','dans','un','une','pour','d','l']);
+    // Abréviations à garder en majuscules (codes pays UEMOA, sigles courants)
+    const UPPER = new Set(['bf','ci','sn','ng','bj','ml','tg','gn','sa','ag','oa','pme','fcfa','dg','pdg','nv']);
+    const cap = stripped.split(' — ').map(part =>
+      part.split(' ').map((w, i) => {
+        const low = w.toLowerCase();
+        if (UPPER.has(low)) return w.toUpperCase();
+        return (i === 0 || !SMALL.has(low)) ? low.charAt(0).toUpperCase() + low.slice(1) : low;
+      }).join(' ')
+    ).join(' — ').trim();
+    if (cap.length > 5 && !/^\d/.test(cap) && !cap.includes('?')) return cap.slice(0, 110);
+  }
+  // First meaningful line of contenu
+  if (item.contenu) {
+    const line = item.contenu.split('\n').map(l => l.trim()).find(l => l.length > 15 && !/^\d+$/.test(l) && !/^[A-Z]{1,4}$/.test(l));
+    if (line) return line.slice(0, 100);
+  }
+  // source_url keyword fallback
+  const url = (item.source_url || item.pdf_path || '').toLowerCase();
+  const _urlMap = [
+    ['paiement_de_dividende','paiement-de-dividende','dividende','dividendes'],
+    ['convocation','convocations_ag','convocations'],
+    ['notation','notations'],
+    ['communique','communiques'],
+    ['direction','dirigeant','dirigeants'],
+    ['franchissement','franchissements'],
+    ['calendrier','premier_avis','avis'],
+    ['rapport','rapports'],
+  ];
+  const _urlLabels = ['Paiement de dividendes','Convocation Assemblée Générale','Notation financière','Communiqué','Changement de dirigeant','Franchissement de seuil','Avis de marché','Rapport annuel'];
+  for (let i = 0; i < _urlMap.length; i++) {
+    if (_urlMap[i].some(kw => url.includes(kw))) {
+      const ticker = item.ticker && item.ticker !== 'None' ? ' — ' + item.ticker : '';
+      return _urlLabels[i] + ticker;
+    }
+  }
+  // _type-based final fallback
+  const resolvedType = type || item._type || '';
+  const label = _ANNC_TYPE_LABEL[resolvedType];
+  const ticker = item.ticker && item.ticker !== 'None' ? item.ticker : '';
+  const parts = [label || 'Annonce BRVM'];
+  if (ticker) parts.push(ticker);
+  if (item.date) parts.push(item.date);
+  return parts.join(' · ');
+}
+
+function _sentimentBorderColor(s) {
+  if (s === 'bonne')    return 'var(--bull,#10b981)';
+  if (s === 'mauvaise') return 'var(--bear,#ef4444)';
+  if (s === 'neutre')   return 'var(--gold,#fbbf24)';
+  return 'var(--border)';
+}
+function _sentimentBg(s) {
+  if (s === 'bonne')    return 'rgba(16,185,129,0.04)';
+  if (s === 'mauvaise') return 'rgba(239,68,68,0.04)';
+  if (s === 'neutre')   return 'rgba(251,191,36,0.04)';
+  return '';
+}
+function _sentimentBadge(s, reason) {
+  if (!s) return '';
+  const icons = {bonne:'🟢',neutre:'🟡',mauvaise:'🔴'};
+  const colors = {
+    bonne:    'background:rgba(16,185,129,0.15);color:#047857',
+    neutre:   'background:rgba(251,191,36,0.15);color:#92400e',
+    mauvaise: 'background:rgba(239,68,68,0.15);color:#b91c1c',
+  };
+  const st = colors[s] || '';
+  const label = {bonne:'Bonne nouvelle',neutre:'Neutre',mauvaise:'Mauvaise nouvelle'}[s] || s;
+  const tip = reason ? ` title="${reason}"` : '';
+  return `<span style="font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500;${st}"${tip}>${icons[s]||'⚪'} ${label}</span>`;
+}
+
+function _anncCard(item, type) {
+  const isNew = _isNew(item.date);
+  const badge = `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;margin-right:6px">${_ANNC_SHORT[type]||'ANN'}</span>`;
+  const newBadge = isNew ? '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:#F59E0B;color:#000;margin-right:6px">NOUVEAU</span>' : '';
+  const ticker = item.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent);margin-right:6px">${item.ticker}</span>` : '';
+  const itemWithType = {...item, _type: type};
+  const title = _anncTitle(item, type);
+  const sent = item.sentiment;
+  const borderCol = _sentimentBorderColor(sent);
+  const bgCol = sent ? _sentimentBg(sent) : '';
+  const sentBadge = _sentimentBadge(sent, item.sentiment_reason);
+  // Préférer summary IA si disponible, sinon extrait de contenu
+  const previewText = item.summary
+    || (item.contenu ? item.contenu.split('\n').map(l=>l.trim()).find(l=>l.length>20&&l!==title) : '');
+  const preview = previewText
+    ? `<div style="font-size:12px;color:var(--t2);line-height:1.6;margin-top:6px">${String(previewText).slice(0,200)}</div>`
+    : '';
+  return `<div class="annc-card" style="border-left-color:${borderCol};background:var(--bg-card)${bgCol?';'+bgCol:''}"
+    onclick="openAnncModal(${JSON.stringify(JSON.stringify(itemWithType)).slice(1,-1)})">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+      ${badge}${newBadge}${ticker}${sentBadge}
+      <span style="font-size:10px;color:var(--t3);margin-left:auto">${item.date||'—'}</span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4">${title}</div>
+    ${preview}
+  </div>`;
+}
+
+function openAnncModal(itemJson) {
+  let item;
+  try { item = JSON.parse(itemJson); } catch { return; }
+  const modal = document.getElementById('annc-modal');
+  const body  = document.getElementById('annc-modal-body');
+  if (!modal || !body) return;
+  body.innerHTML = `
+    <div style="margin-bottom:12px">
+      ${item.ticker ? `<span style="font-size:13px;font-weight:700;color:var(--accent);margin-right:8px">${item.ticker}</span>` : ''}
+      <span style="font-size:11px;color:var(--t3)">${item.date||''}</span>
+    </div>
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4">${_anncTitle(item, item._type||'')}</h3>
+    ${item.montant_xof ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Montant :</strong> ${Number(item.montant_xof).toLocaleString('fr-FR')} XOF</div>` : ''}
+    ${item.date_paiement ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Date de paiement :</strong> ${item.date_paiement}</div>` : ''}
+    ${item.notation ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Notation :</strong> ${item.notation}</div>` : ''}
+    ${item.seuil_pct ? `<div style="background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:12px"><strong>Seuil :</strong> ${item.seuil_pct}%</div>` : ''}
+    ${item.contenu ? `<div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:12px;white-space:pre-wrap">${item.contenu}</div>` : ''}
+    ${item.source_url ? `<a href="${item.source_url}" target="_blank" style="font-size:11px;color:var(--accent)">🔗 Voir la source</a>` : ''}
+    ${item.pdf_path ? `<div style="margin-top:8px;font-size:11px;color:var(--t3)">📄 PDF : ${item.pdf_path}</div>` : ''}`;
+  modal.style.display = 'flex';
+}
+
+async function switchAnncTab(type, btn) {
+  _anncCurrentTab = type;
+  document.querySelectorAll('.annc-tab').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  await _loadAnncList();
+}
+
+let _anncSentimentFilter = 'all';
+function _filterSentiment(filter, btn) {
+  _anncSentimentFilter = filter;
+  document.querySelectorAll('#annc-sentiment-filters .news-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b === btn);
+  });
+  _renderAnncFiltered();
+}
+
+function _renderAnncFiltered() {
+  const el = document.getElementById('annc-list');
+  if (!el || !window._anncItems) return;
+  const items = _anncSentimentFilter === 'all'
+    ? window._anncItems
+    : window._anncItems.filter(function(item) {
+        const s = (item.sentiment||'').toLowerCase();
+        if (_anncSentimentFilter === 'bonne')    return s.includes('bonne')    || s === 'positif';
+        if (_anncSentimentFilter === 'mauvaise') return s.includes('mauvaise') || s === 'negatif';
+        if (_anncSentimentFilter === 'neutre')   return s.includes('neutre')   || !s;
+        return true;
+      });
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Aucune annonce pour ce filtre.</div>';
+    return;
+  }
+  el.innerHTML = items.map(function(item) { return _anncCard(item, _anncCurrentTab); }).join('');
+  // Update counts in filter buttons
+  var all = window._anncItems.length;
+  var bonne = window._anncItems.filter(function(i){const s=(i.sentiment||'').toLowerCase();return s.includes('bonne')||s==='positif';}).length;
+  var mauvaise = window._anncItems.filter(function(i){const s=(i.sentiment||'').toLowerCase();return s.includes('mauvaise')||s==='negatif';}).length;
+  var neutre = all - bonne - mauvaise;
+  var btns = document.querySelectorAll('#annc-sentiment-filters .news-filter-btn');
+  if (btns[0]) btns[0].textContent = 'Toutes (' + all + ')';
+  if (btns[1]) btns[1].textContent = '🟢 Bonnes nouvelles (' + bonne + ')';
+  if (btns[2]) btns[2].textContent = '🟡 Neutres (' + neutre + ')';
+  if (btns[3]) btns[3].textContent = '🔴 Mauvaises (' + mauvaise + ')';
+}
+
+async function _loadAnncList() {
+  const el = document.getElementById('annc-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Chargement...</div>';
+  const ticker = (document.getElementById('news-ticker-filter')||{}).value || '';
+  const url = `/api/announcements?type=${_anncCurrentTab}&limit=30${ticker ? '&ticker='+ticker : ''}`;
+  try {
+    const d = await fetch(url).then(r=>r.json());
+    if (d.status === 'scraping_in_progress') {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);font-size:12px">⏳ Collecte des annonces en cours...<br><span style="font-size:10px;margin-top:6px;display:block">Lancez <code>python3 scripts/brvm_news_scraper.py</code></span></div>';
+      return;
+    }
+    const items = d.data || [];
+    window._anncItems = items;
+    if (!items.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Aucune annonce disponible pour cette catégorie.</div>';
+      return;
+    }
+    _renderAnncFiltered();
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
+  }
+}
+
+// Badges de pertinence
+function _relevanceBadge(rel) {
+  if (!rel) return '';
+  const score = rel.score ?? 0;
+  if (score >= 80) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.3)">🎯 Très pertinent</span>`;
+  if (score >= 50) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.3)">✓ Pertinent</span>`;
+  if (score >= 30) return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(107,114,128,.1);color:var(--t2);border:1px solid var(--border)">À vérifier</span>`;
+  return '';
+}
+
+function _categoryBadge(cat) {
+  const map = {
+    dividende:  '💰 Dividende',
+    resultats:  '📊 Résultats',
+    ag:         '🏛 AG',
+    nomination: '👤 Nomination',
+    cours:      '📈 Cours',
+  };
+  if (!cat || cat === 'generique' || !map[cat]) return '';
+  return `<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--t2);border:1px solid var(--border)">${map[cat]}</span>`;
+}
+
+async function _loadGNews() {
+  const el = document.getElementById('gnews-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Chargement...</div>';
+
+  const ticker   = (document.getElementById('news-ticker-filter')||{}).value || '';
+  const highOnly = (document.getElementById('gnews-filter-high')||{}).checked ?? true;
+  const cat      = (document.getElementById('gnews-filter-cat')||{}).value || '';
+
+  const params = new URLSearchParams({ limit: 60 });
+  if (ticker)   params.set('ticker', ticker);
+  if (highOnly) params.set('min_score', '80');
+  if (cat)      params.set('category', cat);
+
+  try {
+    const d = await fetch(`/api/news?${params}`).then(r=>r.json());
+    if (d.status === 'scraping_in_progress') {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);font-size:12px">⏳ Collecte des actualités en cours...<br><span style="font-size:10px;margin-top:6px;display:block">Lancez <code>python3 scripts/google_news_scraper.py</code></span></div>';
+      return;
+    }
+    let items = d.data || [];
+    // Articles sans relevance : inclure si filtre high non coché
+    if (!highOnly) {
+      items = (d.data || []);
+    }
+    if (!items.length) {
+      el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">
+        Aucun article${highOnly?' très pertinent':''} disponible.
+        ${highOnly?'<br><span style="font-size:10px;cursor:pointer;color:var(--accent)" onclick="document.getElementById(\'gnews-filter-high\').checked=false;_loadGNews()">Afficher tous les articles →</span>':''}
+      </div>`;
+      return;
+    }
+    el.innerHTML = items.map(a => {
+      const rel = a.relevance || {};
+      const relBadge = _relevanceBadge(rel);
+      const catBadge = _categoryBadge(rel.category);
+      return `
+      <div class="gnews-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+          ${a.ticker ? `<span style="font-size:10px;font-weight:700;color:var(--accent)">${a.ticker}</span>` : ''}
+          ${relBadge}
+          ${catBadge}
+          ${_sentimentBadge(a.titre + ' ' + (a.resume||''))}
+          <span style="font-size:10px;color:var(--t3);margin-left:auto">${a.date||''}</span>
+          ${a.source ? `<span style="font-size:10px;color:var(--t3)">${a.source}</span>` : ''}
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4">
+          ${a.lien ? `<a href="${a.lien}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${(a.titre||'').slice(0,110)}</a>` : (a.titre||'').slice(0,110)}
+        </div>
+        ${a.resume ? `<div style="font-size:11px;color:var(--t2);line-height:1.5">${a.resume.slice(0,140)}</div>` : ''}
+        ${rel.matched_alias?`<div style="font-size:10px;color:var(--t3);margin-top:3px">Alias confirmé : <em>${rel.matched_alias}</em></div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:12px">Erreur de chargement.</div>';
+  }
+}
+
+async function renderNewsPage() {
+  // Peupler le filtre ticker si vide
+  const sel = document.getElementById('news-ticker-filter');
+  if (sel && sel.options.length <= 1) {
+    const tickers = [...new Set((window.scores||scores||[]).map(x=>x.ticker).filter(Boolean))].sort();
+    tickers.forEach(t => sel.add(new Option(t, t)));
+  }
+  await Promise.all([_loadAnncList(), _loadGNews()]);
+}
+
+async function _loadAnncWidget() {
+  const el = document.getElementById('annc-widget-content');
+  if (!el) return;
+  try {
+    const d = await fetch('/api/announcements?limit=3').then(r=>r.json());
+    if (d.status === 'scraping_in_progress' || !d.data || !d.data.length) {
+      el.innerHTML = '<span style="color:var(--t3);font-size:11px">Aucune annonce disponible — lancez le scraper</span>';
+      return;
+    }
+    el.innerHTML = d.data.map(item => {
+      const short = _ANNC_SHORT[item._type||'dividendes'] || 'ANN';
+      return `<div onclick="nav('news');renderNewsPage()" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0">${short}</span>
+        ${item.ticker ? `<span style="font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">${item.ticker}</span>` : ''}
+        <span style="font-size:11px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_anncTitle(item, item._type||'').slice(0,60)}</span>
+        <span style="font-size:10px;color:var(--t3);flex-shrink:0">${(item.date||'').slice(0,10)}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--t3);font-size:11px">Indisponible</span>';
+  }
+}
+
+async function loadStockNews(ticker) {
+  const el = document.getElementById('stock-news-section');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--t2);font-size:11px;padding:8px 0">Chargement...</div>';
+  try {
+    const [annc, gnews] = await Promise.all([
+      fetch(`/api/announcements?ticker=${ticker}&limit=5`).then(r=>r.json()).catch(()=>({data:[]})),
+      fetch(`/api/news?ticker=${ticker}&limit=5`).then(r=>r.json()).catch(()=>({data:[]})),
+    ]);
+    const anncItems = (annc.data||[]);
+    const newsItems = (gnews.data||[]);
+    if (!anncItems.length && !newsItems.length) {
+      el.innerHTML = '<div style="color:var(--t3);font-size:11px;padding:6px 0">Aucune actualité disponible.</div>';
+      return;
+    }
+    let html = '';
+    if (anncItems.length) {
+      html += anncItems.map(a => `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:#fff;flex-shrink:0;margin-top:1px">${_ANNC_SHORT[a._type||'']||'ANN'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.4">${_anncTitle(a, a._type||'').slice(0,80)}</div>
+          <div style="font-size:10px;color:var(--t3)">${a.date||''}</div>
+        </div>
+      </div>`).join('');
+    }
+    if (newsItems.length) {
+      html += newsItems.map(a => `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--t2);flex-shrink:0;margin-top:1px">NEWS</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;line-height:1.4">${a.lien ? `<a href="${a.lien}" target="_blank" style="color:var(--text);text-decoration:none">${(a.titre||'').slice(0,80)}</a>` : (a.titre||'').slice(0,80)}</div>
+          <div style="font-size:10px;color:var(--t3)">${a.date||''} ${a.source ? '· '+a.source : ''}</div>
+        </div>
+      </div>`).join('');
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:11px">Erreur de chargement.</div>';
+  }
+}
+
+// ── Onglet Rapports fiche société ──────────────────────────────────────────
+// Stockage des rapports chargés pour le toggle analyse — keyed by ticker
+window._stockReportsCache = window._stockReportsCache || {};
+
+async function loadStockReports(ticker) {
+  const el = document.getElementById('stock-reports-section');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--t2);font-size:11px;padding:12px 0">Chargement des rapports...</div>';
+  try {
+    const d = await fetch(`/api/reports/${ticker}`).then(r => r.json());
+    const reports = d.reports || [];
+
+    // Stocker par ticker+index pour toggleStockAnalyse()
+    window._stockReportsCache[ticker] = reports;
+
+    if (!reports.length) {
+      el.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--t2)">
+        <div style="font-size:28px;margin-bottom:10px">📑</div>
+        <div style="font-weight:600;margin-bottom:6px">Aucun rapport disponible</div>
+        <div style="font-size:11px;color:var(--t3)">Les rapports apparaîtront ici après le prochain scrape (dimanche 23h).</div>
+      </div>`;
+      return;
+    }
+
+    const typeColor = {
+      'Rapport annuel':     '#22c55e',
+      'Etats financiers':   'var(--amber)',
+      'Rapport semestriel': 'var(--blue)',
+      'Rapport trimestriel':'#a78bfa',
+      'Rapport BRVM':       '#94a3b8',
+      'Document':           'var(--t3)',
+    };
+
+    const rows = reports.map((r, idx) => {
+      const pdfUrl  = r.pdf_url || '';
+      const annee   = r.annee   || '?';
+      const titre   = (r.titre  || r.type  || 'Document').replace(/^\d{8}\s*-\s*/, '').replace(/Dactivites/g, "D'activités").slice(0, 90);
+      const col     = typeColor[r.type] || 'var(--t3)';
+      const hasAI   = !!(r.analyse && r.analyse.verdict_investisseur);
+      const safeT   = ticker.replace(/[^A-Za-z0-9]/g,'');
+
+      return `<div style="border:1px solid var(--border-1);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${col}22;color:${col};border:1px solid ${col}22;white-space:nowrap;flex-shrink:0">${r.type||'Document'}</span>
+          <span style="font-size:10px;font-weight:700;color:var(--text-2);flex-shrink:0">${annee}</span>
+          <span style="font-size:11px;flex:1;font-weight:600;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis">${titre}</span>
+          ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" style="font-size:10px;font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0;text-decoration:none">📥 PDF</a>` : ''}
+          ${hasAI ? `<button onclick="toggleStockAnalyse('${safeT}',${idx})" style="font-size:10px;padding:2px 10px;border-radius:20px;border:1px solid var(--border-1);background:transparent;color:var(--accent);cursor:pointer;white-space:nowrap;flex-shrink:0">Voir l'analyse IA</button>` : ''}
+        </div>
+        ${r.date ? `<div style="font-size:10px;color:var(--text-3);margin-top:4px">${r.date}</div>` : ''}
+        <div class="analyse-detail" id="stock-analyse-${safeT}-${idx}"></div>
+      </div>`;
+    }).join('');
+
+    const total  = reports.length;
+    const withAI = reports.filter(r => r.analyse && r.analyse.verdict_investisseur).length;
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:11px;color:var(--text-2)">${total} rapport${total>1?'s':''} · ${withAI} analysé${withAI>1?'s':''} par IA</div>
+        ${withAI < total ? `<div style="font-size:10px;color:var(--text-3)">Analyses générées automatiquement chaque lundi 2h</div>` : ''}
+      </div>
+      ${rows}`;
+    // Auto-déplier le 1er rapport annuel avec analyse IA
+    const safeT = ticker.replace(/[^A-Za-z0-9]/g,'');
+    const firstAnnualIdx = reports.findIndex(r => (r.type === 'Rapport annuel' || r.type === 'Etats financiers') && r.analyse && r.analyse.verdict_investisseur);
+    if (firstAnnualIdx >= 0) {
+      setTimeout(function() { toggleStockAnalyse(safeT, firstAnnualIdx); }, 100);
+    }
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="color:var(--red);font-size:11px">Erreur de chargement des rapports.</div>';
+  }
+}
+
+function toggleStockAnalyse(ticker, idx) {
+  const reports = window._stockReportsCache[ticker] || [];
+  const r = reports[idx];
+  const el = document.getElementById(`stock-analyse-${ticker}-${idx}`);
+  if (!el) return;
+
+  // Toggle close if already open
+  if (el.classList.contains('open')) { el.classList.remove('open'); return; }
+
+  const an = r && r.analyse;
+  if (!an || !an.verdict_investisseur) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-2);padding:4px 0">⏳ Analyse en cours — revenez après le prochain batch (lundi 2h).</div>';
+    el.classList.add('open');
+    return;
+  }
+
+  const vrd   = an.verdict_investisseur.toLowerCase();
+  const vIcon = vrd === 'positif' ? '✅' : vrd === 'neutre' ? '⏳' : '⚠️';
+  const kpis  = an.kpis || {};
+  const _KPI  = [
+    {key:'chiffre_affaires',     label:"💼 Chiffre d'affaires"},
+    {key:'ebitda',               label:'📊 EBITDA'},
+    {key:'dette_nette',          label:'🏦 Dette nette'},
+    {key:'dividende_par_action', label:'💰 Div / action'},
+    {key:'capitaux_propres',     label:'🏛 Capitaux propres'},
+  ];
+
+  const kpiHtml = _KPI.map(({key, label}) => {
+    const v = kpis[key];
+    const val = v && v.valeur != null
+      ? `${v.valeur} <span style="font-size:9px;color:var(--text-3)">${v.unite||''}</span>${v.variation ? ` <span style="font-size:9px;color:${v.variation.startsWith('+')?'var(--green)':'var(--red)'}">${v.variation}</span>` : ''}`
+      : '—';
+    return `<div><span>${label}</span><strong>${val}</strong></div>`;
+  }).join('');
+
+  const pts  = (an.points_cles || []).map(p => `<li>${p}</li>`).join('');
+  const risks= (an.risques     || []).map(p => `<li>${p}</li>`).join('');
+  const _perspArr = Array.isArray(an.perspectives) ? an.perspectives : (an.perspectives ? [an.perspectives] : []);
+  const persp= _perspArr.map(p => `<li>${p}</li>`).join('');
+
+  el.innerHTML = `
+    <span class="verdict-badge ${vrd}">${vIcon} ${an.verdict_investisseur}</span>
+    ${an.resume ? `<p style="font-size:12px;color:var(--text-2);line-height:1.6;margin:6px 0 10px">${an.resume}</p>` : ''}
+    <h5>📊 Indicateurs financiers</h5>
+    <div class="kpis-grid">${kpiHtml}</div>
+    ${pts  ? `<h5>🎯 Points clés</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:var(--text-2);line-height:1.8">${pts}</ul>` : ''}
+    ${risks ? `<h5>⚠️ Risques</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:#f97316;line-height:1.8">${risks}</ul>` : ''}
+    ${persp ? `<h5>🔮 Perspectives</h5><ul style="margin:0;padding-left:16px;font-size:12px;color:var(--text-2);line-height:1.8">${persp}</ul>` : ''}`;
+  el.classList.add('open');
+}
+
+// ── Ratings + Fundamentals ─────────────────────────────────────────────────
+
+// Badge coloré selon la note de crédit
+function _ratingBadge(note) {
+  if (!note) return '';
+  const grade = note.toUpperCase();
+  const color = /^AA/.test(grade) ? 'var(--green)'
+              : /^A/.test(grade)  ? 'var(--blue)'
+              : /^BBB/.test(grade)? 'var(--amber)'
+              : /^BB/.test(grade) ? '#F97316'
+              : 'var(--red)';
+  return `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:${color}22;color:${color};border:1px solid ${color}">${grade}</span>`;
+}
+
+// Cache des ratings + fundamentals pour la session
+let _ratingsCache = null;
+let _fundamentalsCache = null;
+
+async function _loadRatingsCache() {
+  if (_ratingsCache) return _ratingsCache;
+  try {
+    const d = await fetch('/api/ratings').then(r=>r.json());
+    _ratingsCache = {};
+    (d.data || []).forEach(item => {
+      const t = (item.ticker || '').toUpperCase();
+      if (t) {
+        if (!_ratingsCache[t]) _ratingsCache[t] = [];
+        _ratingsCache[t].push(item);
+      }
+    });
+  } catch(e) { _ratingsCache = {}; }
+  return _ratingsCache;
+}
+
+async function _loadFundamentalsCache() {
+  if (_fundamentalsCache) return _fundamentalsCache;
+  try {
+    const d = await fetch('/api/fundamentals').then(r=>r.json());
+    _fundamentalsCache = d.data || {};
+  } catch(e) { _fundamentalsCache = {}; }
+  return _fundamentalsCache;
+}
+
+async function loadStockRatingsFundamentals(ticker) {
+  const el = document.getElementById('stock-ratings-fundamentals-section');
+  if (!el) return;
+  try {
+    const [ratings, funds] = await Promise.all([
+      _loadRatingsCache(),
+      _loadFundamentalsCache(),
+    ]);
+    const rList = (ratings[ticker.toUpperCase()] || []).filter(r => r.note);
+    const fund  = (funds[ticker.toUpperCase()]) || {};
+    let html = '';
+
+    if (rList.length) {
+      html += `<div class="card" style="margin-bottom:12px;border-left:3px solid var(--blue)">
+        <div class="ct" style="margin-bottom:8px">⭐ Notations financières</div>
+        ${rList.map(r => `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+          ${_ratingBadge(r.note)}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:600">${r.agence || 'Agence inconnue'}</div>
+            <div style="font-size:10px;color:var(--t3)">${r.perspective ? r.perspective : ''} ${r.date ? '· ' + r.date : ''}</div>
+          </div>
+          ${r.source_url ? `<a href="${r.source_url}" target="_blank" style="font-size:10px;color:var(--accent);flex-shrink:0">PDF ↗</a>` : ''}
+        </div>`).join('')}
+      </div>`;
+    }
+
+    const hasFund = fund.capital_social_fcfa || fund.nb_actions || fund.date_introduction || fund.flottant_pct;
+    if (hasFund) {
+      const fmtCap = v => v ? (v/1e9).toFixed(1) + ' Md FCFA' : '—';
+      const fmtNb  = v => v ? Number(v).toLocaleString('fr-FR') : '—';
+      html += `<div class="card" style="margin-bottom:12px">
+        <div class="ct" style="margin-bottom:8px">📋 Données fondamentales</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          ${fund.capital_social_fcfa ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Capital social</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fmtCap(fund.capital_social_fcfa)}</div></div>` : ''}
+          ${fund.nb_actions ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Nombre d'actions</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fmtNb(fund.nb_actions)}</div></div>` : ''}
+          ${fund.flottant_pct ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Flottant</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fund.flottant_pct}%</div></div>` : ''}
+          ${fund.date_introduction ? `<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--t3)">Intro BRVM</div><div style="font-size:13px;font-weight:700;margin-top:2px">${fund.date_introduction}</div></div>` : ''}
+        </div>
+      </div>`;
+    }
+
+    if (html) el.innerHTML = html;
+  } catch(e) {
+    console.warn('[BRVM] loadStockRatingsFundamentals:', e);
+  }
+}
+
+// Enrichit renderTargets() avec colonne Notation
+let _ratingsForTargets = null;
+async function _ensureRatingsForTargets() {
+  if (_ratingsForTargets) return _ratingsForTargets;
+  _ratingsForTargets = await _loadRatingsCache();
+  return _ratingsForTargets;
+}
+
+// Affiche sociétés notées dans la page Macro
+async function renderMacroRatings() {
+  const el = document.getElementById('rated-companies-block');
+  if (!el) return;
+  const ratings = await _loadRatingsCache();
+  const tickers = Object.keys(ratings).filter(t => ratings[t].some(r=>r.note));
+  if (!tickers.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `
+    <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:8px">
+        📊 Sociétés BRVM notées (${tickers.length})
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${tickers.map(t => {
+          const best = ratings[t].filter(r=>r.note).sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
+          return `<div onclick="_openStock('${t}')" style="cursor:pointer;background:var(--bg3);border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:6px" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+            <strong style="font-size:11px">${t}</strong>
+            ${_ratingBadge(best.note)}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+
+init();
+
+// ── Live status & auto-refresh ─────────────────────────────────────────────
+function updateLiveStatus() {
+  fetch('/api/status')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var open = d.market_open;
+      var dot   = document.getElementById('live-dot');
+      var label = document.getElementById('live-label');
+      var pill  = document.getElementById('live-pill');
+      var time  = document.getElementById('live-time');
+      var src   = document.getElementById('live-src');
+      if (dot) {
+        dot.style.background = open ? '#22c55e' : '#f59e0b';
+        dot.style.animation  = open ? 'pulse 2s infinite' : 'none';
+      }
+      if (pill) {
+        pill.style.background = open ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)';
+        pill.style.color = open ? '#22c55e' : '#f59e0b';
+      }
+      if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
+      if (time && d.updated_at) {
+        var dt = new Date(d.updated_at);
+        time.textContent = 'MàJ : ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+      }
+      if (src) {
+        var sources = d.sources || {};
+        var parts = [];
+        if (sources['brvm.org']) parts.push('brvm.org:' + sources['brvm.org']);
+        if (sources['kwayisi'])  parts.push('kwayisi:'  + sources['kwayisi']);
+        src.textContent = parts.length ? parts.join(' · ') : 'Source : —';
+      }
+      // Mettre a jour les prix dans la sidebar si disponible
+      fetch('/api/live')
+        .then(function(r){ return r.json(); })
+        .then(function(live) {
+          var prices = live.prices || {};
+          // Mettre a jour les items de la sidebar tlItems si present
+          var items = document.querySelectorAll('[data-ticker]');
+          items.forEach(function(el) {
+            var t = el.getAttribute('data-ticker');
+            if (prices[t] && prices[t].price) {
+              var priceEl = el.querySelector('.ti-score');
+              if (priceEl) priceEl.textContent = Math.round(prices[t].price).toLocaleString('fr-FR');
+              var chg = prices[t].change_pct || 0;
+              el.style.borderLeft = chg > 0 ? '2px solid #22c55e' : chg < 0 ? '2px solid #ef4444' : '';
+            }
+          });
+        }).catch(function(){});
+    })
+    .catch(function(e){ console.warn('live status:', e); });
+}
+
+// ── Service Worker — Notifications Push ────────────────────────────────────
+let _swReg = null;
+
+async function initServiceWorker() {
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  // Afficher le bouton d'activation
+  document.getElementById('push-notif-bar').style.display = 'block';
+  // Vérifier si déjà accordé
+  if (Notification.permission === 'granted') {
+    _updatePushUI('granted');
+    try {
+      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      _setupSWMessaging();
+    } catch(e) { console.warn('SW register:', e); }
+  } else if (Notification.permission !== 'denied') {
+    _updatePushUI('default');
+  } else {
+    _updatePushUI('denied');
+  }
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  _updatePushUI(perm);
+  if (perm === 'granted') {
+    try {
+      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      _setupSWMessaging();
+    } catch(e) { console.warn('SW register:', e); }
+  }
+}
+
+function _updatePushUI(perm) {
+  const btn = document.getElementById('push-btn');
+  const st = document.getElementById('push-status');
+  if (perm === 'granted') {
+    if (btn) { btn.textContent = '🔔 Notifications actives'; btn.disabled = true; btn.style.color = 'var(--green)'; }
+    if (st) st.textContent = 'Alertes prix en arrière-plan activées';
+  } else if (perm === 'denied') {
+    if (btn) { btn.textContent = '🔕 Notifications bloquées'; btn.disabled = true; btn.style.color = 'var(--red)'; }
+    if (st) st.textContent = 'Autoriser dans les réglages navigateur';
+  } else {
+    if (btn) { btn.textContent = '🔔 Activer notifications push'; btn.disabled = false; }
+  }
+}
+
+function _setupSWMessaging() {
+  if (!_swReg) return;
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SW_TRIGGER_CHECK') triggerSWAlertCheck();
+    if (e.data?.type === 'OPEN_TICKER') showStock(e.data.ticker);
+  });
+  // Démarrer la vérification périodique dans le SW (toutes les 5min)
+  _swReg.active?.postMessage({ type: 'SCHEDULE_CHECK', intervalMs: 300000 });
+  console.log('[SW] Messaging set up — periodic check every 5min');
+}
+
+function triggerSWAlertCheck() {
+  if (!_swReg?.active) return;
+  const alerts = (window._priceAlerts || []).filter(a => a.active !== false);
+  if (!alerts.length) return;
+  fetch('/api/live').then(r => r.json()).then(d => {
+    _swReg.active.postMessage({ type: 'CHECK_ALERTS', alerts, prices: d.prices || {} });
+  }).catch(() => {});
+}
+
+// Tester une notification push (debug)
+function testPushNotification() {
+  if (Notification.permission === 'granted') {
+    new Notification('📈 BRVM Test', { body: 'Les notifications push fonctionnent !', icon: '/favicon.ico' });
+  }
+}
+
+// Lancement statut live + auto-refresh toutes les 5 min
+updateLiveStatus();
+setInterval(updateLiveStatus, 300000);
+
+// ── Glossaire financier ────────────────────────────────────────────────────
+const _glossTerms = [
+  { term:'BNA (Bénéfice Net par Action)', def:'Le profit annuel total de la société divisé par le nombre d\'actions. Mesure combien chaque action "rapporte" en bénéfices. Plus le BNA est élevé, plus la société est profitable par action.', ex:'SIBC : BNA estimé ~5 562 XOF. Avec un cours de 7 300 XOF → P/E = 7300/5562 = 1.3×. L\'action est très bon marché par rapport à ses bénéfices.' },
+  { term:'BRVM-30', def:'Indice des 30 valeurs les plus échangées de la BRVM, revu chaque trimestre selon la liquidité. C\'est l\'équivalent du CAC 40 français ou du Dow Jones américain pour l\'Afrique de l\'Ouest.', ex:'Si le BRVM-30 gagne +2.5% en un mois, les 30 valeurs les plus échangées de la BRVM valent globalement 2.5% de plus qu\'un mois avant.' },
+  { term:'BRVM-COMPOSITE', def:'Indice qui inclut TOUTES les sociétés cotées à la BRVM. Plus large que le BRVM-30, il reflète la santé globale du marché boursier de l\'Afrique de l\'Ouest.', ex:'BRVM-COMPOSITE à 200 points et il y a 5 ans il était à 150 → croissance de 33% de l\'ensemble du marché.' },
+  { term:'Buffett Score', def:'Critères d\'investissement de Warren Buffett : ROE ≥ 15%, croissance du BNA, avantage concurrentiel durable ("moat"), dette faible, gestion honnête. Score /10 dans notre dashboard.', ex:'SNTS (Sonatel) obtient souvent un bon score Buffett car elle a un quasi-monopole des télécoms au Sénégal = avantage concurrentiel fort.' },
+  { term:'Capitalisation boursière', def:'La valeur totale de toutes les actions d\'une société sur le marché. Formule : cours × nombre d\'actions. Permet de classer les sociétés par taille.', ex:'SGBC : cours 12 000 XOF × 10 millions d\'actions = capitalisation de 120 milliards XOF (~183 millions €).' },
+  { term:'DCF (Discounted Cash Flows)', def:'Valeur actualisée des flux de trésorerie futurs. Principe : 1 000 XOF dans 5 ans vaut moins que 1 000 XOF aujourd\'hui (inflation, risque). Le DCF calcule ce que vaut l\'entreprise basé sur ses bénéfices futurs projetés.', ex:'Si le DCF calcule une valeur de 10 000 XOF pour une action qui cote 7 000 XOF → potentiel de hausse de +43%.' },
+  { term:'DDM (Dividend Discount Model)', def:'Modèle Gordon-Shapiro : valeur d\'une action = dividende futur ÷ (taux de rendement requis − taux de croissance). Pertinent pour les sociétés versant des dividendes réguliers et croissants.', ex:'SIBC verse 330 XOF/an. Avec un taux requis de 10% et une croissance de 3% → valeur DDM = 330 ÷ (10%−3%) = 4 714 XOF.' },
+  { term:'Dividende', def:'Part des bénéfices annuels qu\'une société distribue à ses actionnaires. Versé généralement une fois par an. Le rendement = dividende ÷ cours actuel. Un dividende stable et croissant est signe de bonne santé financière.', ex:'Vous possédez 100 actions SIBC à 7 300 XOF. Dividende = 330 XOF/action → vous recevez 33 000 XOF cette année sans céder les actions.' },
+  { term:'EPV (Earnings Power Value)', def:'Méthode Greenwald : valeur de la société si elle ne croît plus jamais. C\'est le scénario pessimiste. Si le cours est encore sous l\'EPV, l\'action est très bon marché même sans croissance future.', ex:'Si EPV = 5 000 XOF et cours = 4 000 XOF → même sans croissance future, l\'action semble sous-évaluée de 20%.' },
+  { term:'Ex-date (Ex-dividende)', def:'Date à partir de laquelle un nouvel ordre ne donne plus droit au prochain dividende. Pour toucher le dividende, il faut posséder l\'action AVANT cette date.', ex:'Ex-date CABC : 15 juin. Si vous achetez le 14 juin → vous touchez le dividende. Si vous achetez le 16 juin → vous le ratez pour cette année.' },
+  { term:'Frontière efficiente', def:'Concept de Markowitz : ensemble des portefeuilles offrant le meilleur rendement possible pour chaque niveau de risque. Aucun portefeuille ne peut offrir plus de rendement pour le même risque.', ex:'Un portefeuille sur la frontière avec 12% de rendement et 8% de volatilité est "efficient" — impossible de faire mieux à risque égal.' },
+  { term:'Graham (Score)', def:'Critères de Benjamin Graham, le père de l\'analyse fondamentale : P/E ≤ 15, P/B ≤ 1.5, dividende ≥ 4%, dette faible, stabilité des bénéfices. La "formule de Graham" = √(22.5 × BNA × BVPA).', ex:'Graham score SIBC = 10/10 car BNA élevé, P/E très faible (1.3×), P/B < 1.5 → tous les critères sont respectés.' },
+  { term:'P/B (Price-to-Book)', def:'Cours ÷ Valeur comptable par action (BVPA). Mesure si l\'action est chère par rapport à ce que possède réellement la société (actifs nets). Graham recommande P/B ≤ 1.5.', ex:'P/B = 0.8 signifie que vous achetez 1 XOF d\'actifs nets pour 0.80 XOF. Vous payez moins que la valeur des actifs → opportunité potentielle.' },
+  { term:'P/E (Price-to-Earnings)', def:'Cours ÷ Bénéfice Net par Action. Mesure combien le marché paye pour 1 XOF de bénéfice. P/E = 10 signifie que vous payez 10 fois les bénéfices annuels. Benjamin Graham recommande P/E ≤ 15.', ex:'P/E = 5 : pour 50 000 XOF investis, la société génère 10 000 XOF de bénéfice annuel = rendement bénéficiaire de 20%. C\'est très attractif.' },
+  { term:'Ratio de Sharpe', def:'Rendement excédentaire ÷ volatilité. Mesure la qualité d\'un investissement. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = mauvais rapport risque/rendement. Inventé par William Sharpe (Prix Nobel 1990).', ex:'Portefeuille A : +15% rendement, 10% volatilité → Sharpe = 1.5. Portefeuille B : +20% rendement, 20% volatilité → Sharpe = 1.0. Le portefeuille A est "meilleur" malgré le rendement inférieur.' },
+  { term:'ROE (Return On Equity)', def:'Résultat net ÷ Capitaux propres. Mesure l\'efficacité avec laquelle la direction utilise l\'argent des actionnaires pour générer des profits. ROE ≥ 15% = excellent, ≥ 8% = correct, < 8% = médiocre.', ex:'ROE SNTS = 62% : pour 100 XOF de capitaux propres, la société génère 62 XOF de profit. C\'est exceptionnel. La moyenne mondiale est ~12%.' },
+  { term:'Score /10 (composite)', def:'Note sur 10 issue des 8 modèles. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'Exemple fictif, pas une société cotée : « EXEMPLE » à 8,5/10, avec Graham 10, DCF 8, DDM 7, EPV 9, Buffett 8, RevDCF 8, Relatif 9 et Technique 9. Ce n\'est pas une note réelle.' },
+  { term:'BVPA (Book Value Per Action)', def:'Valeur comptable par action = (actifs totaux − dettes totales) ÷ nombre d\'actions. Ce que vaut une action si la société liquidait tous ses actifs et remboursait toutes ses dettes aujourd\'hui.', ex:'BVPA SIBC ~20 476 XOF. Cours = 7 300 XOF. P/B = 7300/20476 = 0.36 → vous achetez 1 XOF d\'actifs pour 36 centimes. Très sous-évalué.' },
+  { term:'Verdict', def:'Conseil lié à la note sur 10. 7,5 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.', ex:'Note 8,5 : conseil Intéressant. Note 6,0 : conseil À surveiller. Note 4,0 : conseil Prudence.' },
+  { term:'Volatilité', def:'Mesure des fluctuations du prix d\'une action. Une volatilité élevée = prix qui bouge beaucoup (plus risqué mais plus de potentiel). Faible volatilité = prix stable (moins risqué). Exprimée en % (écart-type annualisé).', ex:'Volatilité 5% : l\'action varie en moyenne de ±5% autour de sa tendance. Volatilité 25% : variations beaucoup plus importantes, risque plus élevé.' },
+  { term:'YTD (Year-to-Date)', def:'Performance depuis le 1er janvier de l\'année en cours. Permet de comparer les performances sur la même période pour tous les acteurs du marché.', ex:'BRVM-COMPOSITE YTD +8.3% au 13 mai signifie que l\'indice a gagné 8.3% depuis le 1er janvier de cette année.' },
+];
+
+let _glossFiltered = [..._glossTerms];
+
+// ── Paramètres / Scheduler ────────────────────────────────────────────────
+async function loadSettingsPage() {
+  // Stats données
+  try {
+    const r = await fetch('/api/announcements/summary');
+    const d = await r.json();
+    const el = document.getElementById('settings-total-anns');
+    if (el) el.textContent = d.total ?? '—';
+  } catch(e){}
+  try {
+    const r2 = await fetch('/api/reports-count');
+    const d2 = await r2.json();
+    const elR = document.getElementById('settings-total-reports');
+    if (elR) elR.textContent = d2.total ?? '—';
+  } catch(e){}
+}
+
+function initGlossaire() {
+  _glossFiltered = [..._glossTerms].sort((a,b)=>a.term.localeCompare(b.term));
+  renderGlossaire();
+}
+
+function filterGlossaire(q) {
+  q = q.toLowerCase();
+  _glossFiltered = _glossTerms
+    .filter(t => !q || t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q))
+    .sort((a,b)=>a.term.localeCompare(b.term));
+  renderGlossaire();
+}
+
+function renderGlossaire() {
+  const el = document.getElementById('gloss-list');
+  if (!el) return;
+  if (!_glossFiltered.length) {
+    el.innerHTML = '<p style="color:var(--t2);padding:20px">Aucun terme trouvé.</p>';
+    return;
+  }
+  el.innerHTML = _glossFiltered.map(t => `
+    <div class="gloss-card">
+      <div class="gloss-term">${t.term}</div>
+      <div class="gloss-def">${t.def}</div>
+      ${t.ex ? `<div class="gloss-ex">📌 ${t.ex}</div>` : ''}
+    </div>`).join('');
+}
+
+// ── Aide contextuelle — contenu par page ───────────────────────────────────
+const _helpContent = {
+  _default: {
+    title: 'Tableau de bord',
+    sections: [
+      { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
+      { h: '🥇 Les 3 podiums', p: 'Les meilleures sociétés du moment selon notre note sur 10. Plus le score est élevé, plus la société est financièrement attractive.' },
+      { h: '💎 Opportunités du moment', p: 'Sociétés sélectionnées car elles cumulent : Score ≥ 6.9/10 + Dividende ≥ 5% + P/E < 10. Ce sont les "pépites" potentielles.' },
+      { h: '🌡️ Heatmap BRVM', p: 'Chaque carré = une société. La taille = la capitalisation boursière. La couleur = la performance du jour. Vert vif = forte hausse. Rouge vif = forte baisse.' },
+      { h: '📊 Marché du jour', p: 'Indices BRVM-COMPOSITE (toutes les actions) et BRVM-30 (les 30 plus échangées). Le Top 5 = les meilleures hausses du jour, le Flop 5 = les plus fortes baisses.' },
+      { tip: '💡 Que faire ? Cliquez sur n\'importe quel carré de la heatmap ou sur une société dans les podiums pour voir sa fiche détaillée complète.' },
+      { ex: '📌 Exemple : Si SIBC est en vert vif (+3.2%) avec un score de 8.5/10, c\'est un signal d\'intérêt. Cliquez dessus pour analyser.' },
+    ]
+  },
+  rank: {
+    title: 'Classement',
+    sections: [
+      { h: '🏆 Classement des 47 sociétés BRVM', p: 'Notre score /10 combine 8 modèles financiers reconnus. Plus il est élevé, meilleure est la société selon nos critères. 7,5/10 ou plus = Intéressant. De 5 à moins de 7,5 = À surveiller. En dessous de 5 = Prudence.' },
+      { h: '📊 Les 8 modèles (colonnes G à Tech)', p: '• G = Graham : valeur intrinsèque classique\n• DCF = flux trésorerie actualisés\n• DDM = valorisation par les dividendes\n• EPV = pouvoir de gain normalisé\n• BUF = critères Warren Buffett\n• Rev = taux de croissance implicite\n• Rel = comparaison sectorielle\n• Tech = tendance technique' },
+      { h: '📈 Sparklines 30 jours', p: 'Le mini-graphique dans la colonne "30j" montre l\'évolution du cours sur les 30 derniers jours. Ligne verte = hausse globale sur la période, rouge = baisse.' },
+      { h: '🔍 Filtres en haut', p: 'Filtrez par secteur (Banque, Industrie…), par critère de tri (Score, Dividende, ROE, P/E), ou par tendance du rapport annuel (positive / neutre / négative).' },
+      { tip: '💡 Que faire ? Cliquez sur une ligne pour voir la fiche complète. Cochez les cases à gauche du ticker pour comparer plusieurs sociétés côte-à-côte (bouton "⚖️ Comparer" en bas de la barre).' },
+      { ex: '📌 Exemple : Filtrez "Tendance positive" + tri "Score /10" → les sociétés au rapport annuel positif arrivent en haut.' },
+    ]
+  },
+  div: {
+    title: 'Dividendes',
+    sections: [
+      { h: '💰 Le dividende, c\'est quoi ?', p: 'Le dividende = la part des bénéfices qu\'une société vous verse chaque année si vous possédez ses actions. C\'est un revenu passif régulier, comme un loyer.' },
+      { h: '📅 Ex-date (date de détachement)', p: 'Pour recevoir le dividende, vous devez posséder l\'action AVANT cette date. Si vous achetez après l\'ex-date, vous ne touchez pas le dividende de l\'année.' },
+      { h: '📐 Rendement %', p: 'Rendement = dividende annuel ÷ cours de l\'action × 100. Ex : dividende 5 000 XOF + cours 100 000 XOF = rendement 5%. Cela signifie que vous gagnez 5% de votre investissement chaque année.' },
+      { h: '📊 BNA (Bénéfice Net par Action)', p: 'Les profits totaux de la société divisés par le nombre d\'actions. Plus le BNA est élevé par rapport au cours (P/E faible), plus l\'action est "bon marché".' },
+      { tip: '💡 Que faire ? Triez par colonne "Rendement%" pour voir les actions qui rapportent le plus. Vérifiez que l\'ex-date n\'est pas dépassée.' },
+      { ex: '📌 Exemple : SIBC, dividende 330 XOF, cours 7 300 XOF → rendement = 330/7300 = 4.5%. Pour 1 million XOF investis, vous recevez 45 000 XOF/an.' },
+    ]
+  },
+  perf: {
+    title: 'Performances',
+    sections: [
+      { h: '📈 Historique des cours — base 100', p: 'Tous les cours sont ramenés à 100 au départ pour pouvoir les comparer équitablement. Si une action est à 250 sur le graphique, elle a multiplié sa valeur par 2.5 depuis le début de la période.' },
+      { h: '📊 Comment lire le graphique', p: 'Chaque ligne de couleur = une action. La ligne qui monte le plus = la meilleure performance. Lignes qui se croisent = changement de leadership entre les actions.' },
+      { h: '🗓️ Périodes disponibles', p: '1 mois, 3 mois, 6 mois, 1 an, 3 ans, 5 ans. Attention : les performances passées ne garantissent pas les performances futures.' },
+      { tip: '💡 Que faire ? Sélectionnez 3-4 actions à comparer. Choisissez une période de 1 an pour avoir une vue représentative. Cherchez les actions avec une tendance régulièrement ascendante.' },
+      { ex: '📌 Exemple : SGBC base 100 → 999 sur 5 ans = +899%. 1 000 000 XOF investis en 2019 valent aujourd\'hui ~9 990 000 XOF.' },
+    ]
+  },
+  targets: {
+    title: 'Prix cibles',
+    sections: [
+      { h: '🎯 À quoi sert un prix cible ?', p: 'Chaque modèle calcule ce que DEVRAIT valoir l\'action si elle était justement évaluée par le marché. Comparer ce prix cible au cours réel révèle si l\'action est bon marché ou chère.' },
+      { h: '📐 Graham : la formule classique', p: 'Formule de Benjamin Graham : √(22.5 × BNA × BVPA). Si le cours est sous ce prix cible → l\'action est potentiellement sous-évaluée. C\'est le seuil "marge de sécurité".' },
+      { h: '🔋 EPV : cas pessimiste', p: 'EPV = Earnings Power Value. Valorisation si la société ne croît PLUS jamais. Si le cours est encore sous l\'EPV, l\'action est très bon marché même dans le pire scénario.' },
+      { h: '📚 P/B : valeur comptable', p: 'P/B = cours ÷ valeur comptable par action. Si P/B < 1, vous achetez l\'action en dessous de la valeur de ses actifs nets. C\'est rare et potentiellement intéressant.' },
+      { tip: '💡 Que faire ? Filtrez les actions dont le cours actuel est significativement en dessous du prix cible Graham (colonne "Marge"). Plus la marge est grande, plus l\'opportunité est importante.' },
+      { ex: '📌 Exemple : Si CABC a un prix cible Graham de 8 000 XOF et un cours de 5 200 XOF → marge de sécurité de 35% (opportunité potentielle).' },
+    ]
+  },
+  screener: {
+    title: 'Screener',
+    sections: [
+      { h: '🔍 Le screener, c\'est quoi ?', p: 'Un screener est un outil de filtrage. Vous définissez vos critères et il vous liste instantanément toutes les sociétés qui correspondent à votre profil d\'investisseur.' },
+      { h: '⚙️ Les filtres disponibles', p: '• Score min : 55 pour les meilleures sociétés seulement\n• P/E max : 10 pour les actions pas chères par rapport aux bénéfices\n• Dividende min% : 5 pour un rendement attrayant\n• ROE min% : 15 pour les sociétés très rentables\n• Secteur : filtrer par domaine d\'activité' },
+      { tip: '💡 Recette "pépites BRVM" : Score ≥ 55 + Dividende ≥ 5% + P/E ≤ 10 → les meilleures opportunités selon nos modèles.' },
+      { ex: '📌 Exemple : Score ≥ 60 + ROE ≥ 15% → vous obtenez les sociétés à la fois excellentes et très rentables. Exportez en CSV pour analyser dans Excel.' },
+      { h: '⚖️ Étape 2 — Composer son portefeuille', p: 'Une fois vos actions repérées, l\'Étape 2 vous aide à les combiner intelligemment pour réduire le risque sans sacrifier le rendement.' },
+      { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
+      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = médiocre.' },
+      { h: '🛡️ Min Volatilité (pour les prudents)', p: 'Trouve le portefeuille avec les fluctuations les plus faibles. Idéal si vous êtes nerveux face aux variations de prix.' },
+      { h: '🔗 Matrice de corrélation', p: 'Montre à quel point les actions bougent ensemble. Vert = très corrélées (bougent pareil), Rouge = inversement corrélées (se compensent). Pour diversifier, cherchez des corrélations faibles (gris).' },
+      { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
+    ]
+  },
+  analyse: {
+    title: 'Analyse & Optimisation',
+    sections: [
+      { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
+      { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = médiocre.' },
+      { h: '🛡️ Min Volatilité (pour les prudents)', p: 'Trouve le portefeuille avec les fluctuations les plus faibles. Idéal si vous êtes nerveux face aux variations de prix.' },
+      { h: '🔗 Matrice de corrélation', p: 'Montre à quel point les actions bougent ensemble. Vert = très corrélées (bougent pareil), Rouge = inversement corrélées (se compensent). Pour diversifier, cherchez des corrélations faibles (gris).' },
+      { tip: '💡 Étapes : Cliquez "Top 8" → sélectionnez vos actions → "Calculer" → sur le portefeuille "Max Sharpe", cliquez "Tester →" pour simuler ses performances passées.' },
+    ]
+  },
+  glossaire: {
+    title: 'Glossaire',
+    sections: [
+      { h: '📚 Dictionnaire financier BRVM', p: 'Tous les termes financiers utilisés dans ce dashboard sont définis ici, avec des exemples concrets basés sur les sociétés BRVM réelles.' },
+      { h: '🔍 Comment utiliser le glossaire', p: 'Tapez un mot dans la barre de recherche (ex: "dividende", "P/E", "ROE") pour trouver instantanément la définition. Les termes sont classés par ordre alphabétique.' },
+      { tip: '💡 Revenez ici dès qu\'un terme vous échappe dans le dashboard. La compréhension des concepts clés est la base d\'un investissement réussi.' },
+    ]
+  },
+  port: {
+    title: 'Portefeuille',
+    sections: [
+      { h: '💼 Suivez vos investissements', p: 'Entrez vos actions avec le prix payé pour suivre votre performance en temps réel. Les données de cours sont mises à jour automatiquement depuis la BRVM.' },
+      { h: '📊 P&L (Profit & Loss)', p: 'P&L = gain ou perte sur chaque position. Vert = vous êtes en gain par rapport à votre prix payé. Rouge = vous êtes en perte actuellement.' },
+      { tip: '💡 Que faire ? Ajoutez vos actions avec le prix et la quantité achetés. Le tableau calcule automatiquement votre performance et votre poids sectoriel.' },
+    ]
+  },
+  alerts: {
+    title: 'Alertes',
+    sections: [
+      { h: '🔔 Alertes prix automatiques', p: 'Définissez un prix cible pour recevoir une notification quand une action atteint votre seuil. Exemple : "Alerter si SIBC dépasse 8 000 XOF".' },
+      { h: '🧠 Alertes intelligentes (Smart)', p: 'Alertes automatiques basées sur nos modèles : ex-dividende dans 7 jours, action entrant dans la zone de sous-évaluation Graham, etc.' },
+      { tip: '💡 Activez d\'abord les notifications push (bouton en bas de la barre latérale) pour recevoir les alertes même quand l\'onglet est fermé.' },
+    ]
+  },
+  comm: {
+    title: 'Commodités',
+    sections: [
+      { h: '🌍 Matières premières mondiales', p: 'Les commodités (cacao, café, pétrole, or…) impactent directement les sociétés BRVM. Le cacao et le café sont très importants pour les économies de l\'Afrique de l\'Ouest.' },
+      { tip: '💡 Surveiller le cours du cacao aide à anticiper les résultats des sociétés agricoles cotées à la BRVM.' },
+    ]
+  },
+};
+
+let _helpOpen = false;
+let _currentPage = 'welcome';
+
+function openHelpDrawer(page) {
+  page = page || _currentPage;
+  const content = _helpContent[page] || _helpContent['_default'];
+  document.getElementById('help-page-title').textContent = content.title;
+  const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
+    <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🚀 Pour commencer</div>
+    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--gold);font-weight:700">≥ 7,5/10</span> = Intéressant · <span style="color:var(--amber);font-weight:700">≥ 5 et &lt; 7,5</span> = À surveiller · <span style="color:var(--red);font-weight:700">&lt; 5</span> = Prudence · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+    <div style="font-weight:700;color:var(--accent);margin-bottom:4px">📖 Mini-lexique</div>
+    <div style="color:var(--t2);line-height:2.1">
+      <strong>Note /10</strong> — qualité globale de l'action selon 8 critères financiers<br>
+      <strong>P/E</strong> — prix divisé par le bénéfice · bas = action moins chère<br>
+      <strong>Dividende</strong> — revenu versé chaque année par la société à ses actionnaires<br>
+      <strong>Prix juste estimé</strong> — valeur calculée à partir des bénéfices réels de la société<br>
+      <strong>Opportunité</strong> — écart entre le prix actuel et le prix juste (positif = potentiel de hausse)<br>
+      <strong>Intéressant / À surveiller / Prudence</strong> — conseil lié à la note sur 10
+    </div>
+  </div>`;
+  document.getElementById('help-drawer-body').innerHTML = _universalHelp + content.sections.map(s => {
+    if (s.h) return `<h3>${s.h}</h3>${s.p ? `<p>${s.p.replace(/\n/g,'<br>')}</p>` : ''}`;
+    if (s.tip) return `<div class="help-tip">${s.tip}</div>`;
+    if (s.ex) return `<div class="help-example">${s.ex}</div>`;
+    return '';
+  }).join('');
+  document.getElementById('help-drawer').classList.add('open');
+  document.getElementById('help-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  _helpOpen = true;
+}
+
+function closeHelpDrawer() {
+  document.getElementById('help-drawer').classList.remove('open');
+  document.getElementById('help-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  _helpOpen = false;
+}
+
+function toggleHelpDrawer() {
+  _helpOpen ? closeHelpDrawer() : openHelpDrawer(_currentPage);
+}
+
+// ── Comparaison rapide sidebar ──────────────────────────────────────────────
+let _cmpSelected = new Set();
+
+function toggleCompare(ticker) {
+  if (_cmpSelected.has(ticker)) {
+    _cmpSelected.delete(ticker);
+  } else {
+    if (_cmpSelected.size >= 3) {
+      const first = _cmpSelected.values().next().value;
+      _cmpSelected.delete(first);
+    }
+    _cmpSelected.add(ticker);
+  }
+  _updateCmpBar();
+  _refreshCmpCheckboxes();
+}
+
+function _updateCmpBar() {
+  const n = _cmpSelected.size;
+  const bar = document.getElementById('cmp-bar');
+  const cnt = document.getElementById('cmp-count');
+  if (bar) bar.classList.toggle('show', n >= 2);
+  if (cnt) cnt.textContent = n;
+}
+
+function _refreshCmpCheckboxes() {
+  document.querySelectorAll('.cmp-cb').forEach(cb => {
+    cb.checked = _cmpSelected.has(cb.dataset.ticker);
+  });
+}
+
+function openCompareModal() {
+  const tickers = [..._cmpSelected];
+  if (tickers.length < 2) return;
+  const all = window.scores || scores || [];
+  const rows = tickers.map(t => all.find(x => x.ticker === t)).filter(Boolean);
+  if (!rows.length) return;
+  rows.sort(triCommeClassement);
+
+  const kpis = [
+    ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
+    ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
+    ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
+    ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
+    ['P/B', x => (x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—', x => -(x.pb_ref||x.pb_hist||999), true],
+    ['ROE', x => x.roe ? x.roe.toFixed(1)+'%' : '—', x => x.roe||0, true],
+    ['Div%', x => x.div_yield && x.div_yield > 0 ? x.div_yield.toFixed(1)+'%' : '—', x => x.div_yield||0, true],
+    ['Graham /10', x => (x.score_graham||0).toFixed(1), x => x.score_graham||0, true],
+    ['DCF /10', x => (x.score_dcf||0).toFixed(1), x => x.score_dcf||0, true],
+    ['DDM /10', x => (x.score_ddm||0).toFixed(1), x => x.score_ddm||0, true],
+    ['EPV /10', x => (x.score_epv||0).toFixed(1), x => x.score_epv||0, true],
+    ['Buffett /10', x => (x.score_buffett||0).toFixed(1), x => x.score_buffett||0, true],
+    ['Technique /10', x => (x.score_technique||0).toFixed(1), x => x.score_technique||0, true],
+    ['Rapport annuel', x => (typeof rapportAnnuelTxt==='function'?rapportAnnuelTxt(x):(x.pdf_verdict||'—')), () => null, false],
+  ];
+
+  const cols = rows.length;
+  let html = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr>
+      <th style="text-align:left;padding:8px;color:var(--t2);font-weight:500;border-bottom:1px solid var(--border)">Indicateur</th>
+      ${rows.map(r=>`<th style="padding:8px;text-align:center;border-bottom:1px solid var(--border)">
+        <div style="font-size:14px;font-weight:700">${r.ticker}</div>
+        <div style="font-size:10px;color:var(--t2)">${r.name||''}</div>
+      </th>`).join('')}
+    </tr></thead><tbody>`;
+
+  kpis.forEach(([label, fmt, rank, higherBetter]) => {
+    const vals = rows.map(r => rank(r));
+    const allNum = vals.every(v => v !== null && !isNaN(v));
+    const best = allNum ? (higherBetter ? Math.max(...vals) : Math.min(...vals.filter(v=>v!=null&&v>-900))) : null;
+
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 8px;color:var(--t2)">${label}</td>
+      ${rows.map((r,i) => {
+        const v = fmt(r);
+        const rv = vals[i];
+        const isBest = allNum && rv !== null && rv === best;
+        const c = isBest ? 'var(--green)' : 'var(--text)';
+        const fw = isBest ? '700' : '400';
+        return `<td style="padding:7px 8px;text-align:center;color:${c};font-weight:${fw}">${v}${isBest?'  ★':''}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  html += `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    ${rows.map(r=>`<button class="btn btn-o" style="font-size:11px;padding:5px 12px" onclick="closeCompareModal();showStock('${r.ticker}')">→ Fiche ${r.ticker}</button>`).join('')}
+    <button class="btn btn-o" style="font-size:11px;padding:5px 12px;margin-left:auto;color:var(--red)" onclick="_cmpSelected.clear();_updateCmpBar();_refreshCmpCheckboxes();closeCompareModal()">Effacer sélection</button>
+  </div>`;
+
+  document.getElementById('cmp-modal-content').innerHTML = html;
+  document.getElementById('cmp-modal').classList.add('show');
+}
+
+function closeCompareModal() {
+  document.getElementById('cmp-modal').classList.remove('show');
+}
+document.getElementById('cmp-modal').addEventListener('click', function(e){
+  if(e.target===this) closeCompareModal();
+});
+
+// ── Raccourcis clavier ────────────────────────────────────────────────────
+const _kbdMap = {
+  'g': {fn: ()=>{nav('rank');}, label: 'G → Classement'},
+  'r': {fn: ()=>{nav('rank');}, label: 'R → Classement'},
+  's': {fn: ()=>{nav('screener');initScreener();}, label: 'S → Screener'},
+  '?': {fn: ()=>{document.getElementById('changelog-modal').style.display='flex';}, label: '? → Changelog'},
+};
+
+const _bcLabels = {
+  rank:'Classement', comm:'Commodités',
+  macro:'Macro UEMOA', screener:'Screener',
+  signals:'Signaux',
+  glossaire:'Glossaire', settings:'Paramètres',
+  news:'Actualités BRVM', market:'Vue Marché', marche:'Marché',
+  welcome:'Accueil', stock:'Fiche société',
+  valuation:'Valorisation', alerts:'Alertes', methodo:'Méthodologie',
+};
+
+function _updateBackLabels() {
+  const t = navHistory[navHistory.length - 2] || 'welcome';
+  const label = _bcLabels[t] || 'Retour';
+  document.querySelectorAll('.brvm-back-btn').forEach(function(btn) {
+    btn.textContent = '← ' + label;
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  // Ignorer si focus sur input/textarea/select
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const key = e.key.toLowerCase();
+  if (_kbdMap[key]) {
+    e.preventDefault();
+    _kbdMap[key].fn();
+    _showKbdHint(_kbdMap[key].label);
+  }
+});
+
+function _showKbdHint(label) {
+  const el = document.getElementById('kbd-hint');
+  if (!el) return;
+  el.textContent = label;
+  el.style.display = '';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.style.display = 'none'; }, 1500);
+}
+
+// Breadcrumb + pageLoaders déclenchés par nav()
+const navHistory = [];
+const _origNav = nav;
+nav = function(id, pushHistory) {
+  // Redirect market/comm/macro vers la page unifiée Marché
+  var _MARCHE_TAB = { market: 'indices', comm: 'comm', macro: 'macro' };
+  if (_MARCHE_TAB[id]) {
+    var tab = _MARCHE_TAB[id];
+    if (pushHistory !== false) navHistory.push('marche');
+    _origNav('marche');
+    var pg = document.getElementById('page-marche');
+    if (pg) {
+      pg.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('on'); });
+      pg.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('on'); });
+      var tabEl = document.getElementById('marche-tab-' + tab);
+      if (tabEl) tabEl.classList.add('on');
+      var btns = pg.querySelectorAll('.tab-btn');
+      var idx = ['indices','comm','macro'].indexOf(tab);
+      if (idx >= 0 && btns[idx]) btns[idx].classList.add('on');
+    }
+    let bcEl = document.getElementById('bc-page');
+    var _tabLabels = { market: 'Indices BRVM', comm: 'Commodités', macro: 'Macro UEMOA' };
+    if (bcEl) bcEl.textContent = _tabLabels[id] || 'Marché';
+    if (id === 'market' && typeof _renderMarketPage !== 'undefined') _renderMarketPage();
+    if (id === 'macro') {
+      if (typeof renderMacroPage !== 'undefined') renderMacroPage();
+      setTimeout(function(){ if(typeof renderMacroRatings!=='undefined') renderMacroRatings(); }, 300);
+    }
+    _updateBackLabels();
+    return;
+  }
+  if (pushHistory !== false) navHistory.push(id);
+  _origNav(id);
+  const bcEl = document.getElementById('bc-page');
+  if (bcEl) bcEl.textContent = _bcLabels[id] || id;
+  if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
+  _updateBackLabels();
+};
+function navBack() {
+  navHistory.pop();
+  const prev = navHistory[navHistory.length - 1] || 'welcome';
+  nav(prev, false);
+}
+
+
+document.getElementById('changelog-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// ── Floating tooltip (data-tip) ──────────────────────────────────────────────
+(function() {
+  const tip = document.getElementById('floating-tooltip');
+  if (!tip) return;
+  function show(e) {
+    const el = e.currentTarget;
+    tip.innerHTML = el.dataset.tip || '';
+    tip.style.opacity = '1';
+    position(e);
+  }
+  function position(e) {
+    const w = 260, margin = 14;
+    let x = e.clientX + margin;
+    let y = e.clientY + margin;
+    if (x + w > window.innerWidth - 8) x = e.clientX - w - margin;
+    if (y + 100 > window.innerHeight - 8) y = e.clientY - 60;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hide() { tip.style.opacity = '0'; }
+  function attach() {
+    document.querySelectorAll('[data-tip]').forEach(el => {
+      if (el.dataset._tipAttached) return;
+      el.dataset._tipAttached = '1';
+      el.addEventListener('mouseenter', show);
+      el.addEventListener('mousemove', position);
+      el.addEventListener('mouseleave', hide);
+    });
+  }
+  attach();
+  // Re-attach on DOM mutations (for dynamically rendered content)
+  new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
+})();
+
+// ── Mode débutant / expert ─────────────────────────────────────────────────
+function _setMode(m) { m = 'beginner';
+  localStorage.setItem('brvm_mode', m);
+  document.documentElement.setAttribute('data-mode', m);
+  document.querySelectorAll('[data-mode-btn]').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.modeBtn === m);
+  });
+  _toast(m === 'beginner' ? '🌱 Mode débutant activé · explications simplifiées' : '🎯 Mode expert activé · données complètes');
+  // Re-render page courante
+  var page = (location.hash || '#welcome').slice(1);
+  if (typeof nav === 'function') nav(page);
+}
+window._setMode = _setMode;
+
+// Init data-mode au chargement
+(function(){
+  var m = 'beginner';
+  document.querySelectorAll('[data-mode-btn]').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.modeBtn === m);
+  });
+  // Masquer les bannières déjà ignorées
+  ['rank','screener','news'].forEach(function(p) {
+    if (localStorage.getItem('bb_'+p+'_ok')) {
+      var el = document.getElementById('beginner-banner-'+p);
+      if (el) el.style.display = 'none';
+    }
+  });
+})();
+
+// ── Cmd+K : recherche globale ──────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag !== 'input' && tag !== 'textarea') {
+      e.preventDefault();
+      openCmdK();
+    }
+  }
+  if (e.key === 'Escape') closeCmdK();
+});
+
+function openCmdK() {
+  var modal = document.getElementById('cmdk-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+  var inp = document.getElementById('cmdk-input');
+  if (inp) { inp.value = ''; inp.focus(); _renderCmdK(''); }
+}
+function closeCmdK() {
+  var modal = document.getElementById('cmdk-modal');
+  if (modal) modal.classList.remove('open');
+}
+window.openCmdK = openCmdK;
+window.closeCmdK = closeCmdK;
+
+function _renderCmdK(q) {
+  var res = document.getElementById('cmdk-results');
+  if (!res) return;
+  const lq = q.toLowerCase();
+  // Sociétés
+  const tickers = (window.scores || []).filter(s => !lq || s.ticker.toLowerCase().includes(lq) || (s.name||'').toLowerCase().includes(lq)).slice(0,6);
+  // Pages
+  const pages = [
+    {id:'rank',label:'Classement',icon:'🏆'},
+    {id:'screener',label:'Screener',icon:'🔍'},{id:'news',label:'Actualités',icon:'📢'},
+    {id:'signals',label:'Signaux',icon:'📡'},
+    {id:'valuation',label:'Valorisation',icon:'💰'},
+    {id:'marche',label:'Marché',icon:'📊'},{id:'macro',label:'Macro UEMOA',icon:'🌍'},{id:'comm',label:'Commodités',icon:'🛢'},
+    {id:'alerts',label:'Alertes',icon:'🔔'},
+    {id:'glossaire',label:'Glossaire',icon:'📚'},{id:'settings',label:'Paramètres',icon:'⚙️'}
+  ].filter(p => !lq || p.label.toLowerCase().includes(lq) || p.id.toLowerCase().includes(lq)).slice(0,5);
+  // Termes
+  const terms = Object.entries(window.TERMS).filter(([k]) => !lq || k.toLowerCase().includes(lq)).slice(0,4);
+
+  let html = '';
+  if (tickers.length) {
+    html += '<div class="cmdk-section"><h5>🏢 Sociétés</h5>';
+    tickers.forEach(s => {
+      html += `<div class="cmdk-item" onclick="closeCmdK();openStockDetail('${s.ticker}')">
+        <span style="font-family:var(--font-mono);font-weight:700">${s.ticker}</span>
+        <span style="font-size:11px;color:var(--text-3)">${s.name||''}</span>
+        <span class="cmdk-item-sub">${s.price?fmtXOF(s.price):''}</span></div>`;
+    });
+    html += '</div>';
+  }
+  if (pages.length) {
+    html += '<div class="cmdk-section"><h5>📄 Pages</h5>';
+    pages.forEach(p => {
+      html += `<div class="cmdk-item" onclick="closeCmdK();nav('${p.id}')">${p.icon} ${p.label}</div>`;
+    });
+    html += '</div>';
+  }
+  if (terms.length) {
+    html += '<div class="cmdk-section"><h5>💡 Glossaire</h5>';
+    terms.forEach(([k,v]) => {
+      html += `<div class="cmdk-item" onclick="closeCmdK();nav('glossaire');initGlossaire()">
+        <strong>${k}</strong><span class="cmdk-item-sub" style="font-size:10px;white-space:normal;max-width:320px">${v.short}</span></div>`;
+    });
+    html += '</div>';
+  }
+  if (!html) html = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">Aucun résultat pour "'+q+'"</div>';
+  res.innerHTML = html;
+}
+
+// ── Modal "Pourquoi ?" ─────────────────────────────────────────────────────
+function openWhyModal(ticker) {
+  var modal = document.getElementById('why-modal');
+  if (!modal) return;
+  var s = (window.scores || []).find(function(x){ return x.ticker === ticker; }) || {};
+  var title = document.getElementById('why-title');
+  var cours = document.getElementById('why-cours');
+  var body = document.getElementById('why-body');
+  var actions = document.getElementById('why-actions');
+  if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
+  if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + note10txt(s) + '/10';
+  var decote = '';
+  var ciblePourquoi = s.prix_cible || s.target_price;
+  if (ciblePourquoi && s.price && ciblePourquoi > s.price) {
+    decote = Math.round((ciblePourquoi/s.price - 1)*100);
+  }
+  var divYield = s.div_yield ? (s.div_yield*100).toFixed(1) + '%' : (s.rendement_pct ? s.rendement_pct.toFixed(1) + '%' : '—');
+  if (body) body.innerHTML =
+    '<h3>🏦 L\'entreprise</h3><p>' + (s.sector||'') + (s.country?' · '+s.country:'') + '</p>' +
+    (decote ? '<h3>📊 Pourquoi elle est attractive</h3><p>Son cours (' + (s.price?fmtXOF(s.price):'—') + ') est inférieur à sa valeur estimée (' + (ciblePourquoi?fmtXOF(ciblePourquoi):'—') + '). Vous l\'achetez environ <strong>' + decote + '%</strong> moins cher. ' + (typeof fmtLibelleValeur==='function'?fmtLibelleValeur(s.libelle_valeur):'') + '</p>' : '') +
+    '<h3>💰 Ce que ça veut dire pour vous</h3><p>En attendant une revalorisation, vous recevez un dividende de <strong>' + divYield + '</strong> par an.</p>';
+  if (actions) actions.innerHTML =
+    '<button class="btn btn-primary" onclick="closeWhyModal();openStockDetail(\''+ticker+'\')" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px">📋 Voir la fiche complète</button>';
+  modal.classList.add('open');
+}
+function closeWhyModal() {
+  var modal = document.getElementById('why-modal');
+  if (modal) modal.classList.remove('open');
+}
+window.openWhyModal = openWhyModal; window.closeWhyModal = closeWhyModal;
+
+// ── Comparaison rapide depuis fiche société ────────────────────────────────
+function _quickCompare(ticker) {
+  // Si déjà 2+ tickers, ouvrir directement la modale
+  if (_cmpSelected.size >= 1 && !_cmpSelected.has(ticker)) {
+    toggleCompare(ticker);
+    if (_cmpSelected.size >= 2) { openCompareModal(); return; }
+  }
+  toggleCompare(ticker);
+  // Proposer un 2e ticker via mini-popup
+  var tickers = (window.scores||[]).map(function(s){return s.ticker;}).filter(function(t){return t!==ticker;}).slice(0,20);
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:5800;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = '<div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:20px;max-width:400px;width:90vw;max-height:60vh;overflow-y:auto">'
+    +'<div style="font-size:14px;font-weight:700;margin-bottom:12px">⚖️ Comparer <strong>'+ticker+'</strong> avec...</div>'
+    +'<input id="_qcmp-inp" placeholder="Filtrer..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:10px;background:var(--bg3);color:var(--text)" oninput="_filterQCmp(this.value)" autocomplete="off">'
+    +'<div id="_qcmp-list" style="display:flex;flex-direction:column;gap:4px">'
+    + tickers.map(function(t){
+        var s=(window.scores||[]).find(function(x){return x.ticker===t;})||{};
+        return '<button onclick="_pickQCmp(\''+ticker+'\',\''+t+'\')" style="text-align:left;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:12px;color:var(--text-1)">'
+          +'<strong>'+t+'</strong> <span style="color:var(--t2);font-size:11px">'+( s.name||'').slice(0,30)+'</span>'
+          +'<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">'+note10txt(s)+'/10</span></button>';
+      }).join('')
+    +'</div>'
+    +'<button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top:12px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px">Annuler</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+  var inp = document.getElementById('_qcmp-inp');
+  if (inp) setTimeout(function(){ inp.focus(); }, 50);
+}
+function _filterQCmp(q) {
+  document.querySelectorAll('#_qcmp-list button').forEach(function(btn) {
+    btn.style.display = btn.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+function _pickQCmp(t1, t2) {
+  document.querySelector('[onclick*="_qcmp"]')?.closest('div')?.parentElement?.remove();
+  document.querySelectorAll('[style*="position:fixed"][style*="5800"]').forEach(function(el){ el.remove(); });
+  _cmpSelected.clear();
+  _cmpSelected.add(t1);
+  _cmpSelected.add(t2);
+  _updateCmpBar();
+  openCompareModal();
+}
+window._quickCompare = _quickCompare; window._filterQCmp = _filterQCmp; window._pickQCmp = _pickQCmp;
+
+// ── g-spin safety: auto-hide after 12s ───────────────────────────────────────
+const _origGSpinShow = gSpinShow;
+gSpinShow = function() {
+  _origGSpinShow();
+  clearTimeout(window._gSpinSafety);
+  window._gSpinSafety = setTimeout(gSpinHide, 12000);
+};
+
+(function(){
+  if (localStorage.getItem('beginner_mode') === '1') {
+    const lbl = document.getElementById('beginner-label');
+    if (lbl) lbl.textContent = 'Mode débutant : ON 🌱';
+    document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
+  }
+})();

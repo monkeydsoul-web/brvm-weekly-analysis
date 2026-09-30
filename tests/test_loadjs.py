@@ -29,6 +29,7 @@ MODULES = (
     "welcome_v2.js",
     "top3_podium.js",
     "screener_lazy.js",
+    "js/core.js",
 )
 
 MESSAGE = "Cette partie n'a pas pu se charger. Rechargez la page."
@@ -78,8 +79,9 @@ def test_page_reference_le_chargeur(client):
         vus.append(nom)
     assert tuple(vus) == MODULES
     assert MESSAGE not in html
-    assert "function(){ if(typeof loadRankDash==='function') loadRankDash(); }" in html
-    assert "function(){ if(typeof loadSignauxValoAlertes==='function') loadSignauxValoAlertes(); }" in html
+    assert 'id="methodo-prix-cible"' in html
+    assert "<script>" in html
+    assert html.count("<script>") == 1
 
 
 def test_chargeur_servi_avec_retry_et_message(client):
