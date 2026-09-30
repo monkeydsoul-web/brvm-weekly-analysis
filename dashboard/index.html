@@ -56,48 +56,50 @@
 </div>
 
 <div class="app">
+<header class="topnav" id="topnav">
+  <div class="topnav-bar">
+    <button type="button" class="topnav-logo" onclick="navTo('welcome')">
+      <span class="topnav-mark" aria-hidden="true">📈</span>
+      <span class="topnav-brand">BRVM</span>
+    </button>
+    <span id="live-pill" class="topnav-live">
+      <span id="live-dot"></span>
+      <span id="live-label">LIVE</span>
+    </span>
+    <nav class="topnav-links" id="topnav-links" aria-label="Ecrans">
+      <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser">Accueil</button>
+      <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil">Classement<span id="rank-badge" class="nav-count" title="Nombre de sociétés analysées"></span></button>
+      <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités">Screener</button>
+      <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles">Signaux</button>
+      <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
+      <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
+      <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
+      <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
+    </nav>
+    <div class="topnav-more" id="topnav-more" hidden>
+      <button type="button" class="topnav-more-btn" id="topnav-more-btn" onclick="toggleTopnavMore()" aria-expanded="false" aria-controls="topnav-more-menu">Plus ▾</button>
+      <div id="topnav-more-menu" class="topnav-more-menu" hidden></div>
+    </div>
+    <div class="topnav-tools">
+      <div class="topnav-curr" role="group" aria-label="Devise">
+        <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>
+        <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>
+        <button type="button" class="curr-btn" data-curr="usd" onclick="setCurrency('USD')">USD</button>
+      </div>
+      <button type="button" class="topnav-icon" data-theme-btn onclick="toggleTheme()" title="Thème">🌙</button>
+      <button type="button" class="topnav-icon" onclick="navCompare()" title="Comparer">⚖️ <span id="nav-cmp-count"></span></button>
+      <button type="button" class="topnav-search" onclick="openCmdK()" title="Recherche (Ctrl+K)"><span class="topnav-search-ico" aria-hidden="true">🔍</span><span class="topnav-search-label">Rechercher</span> <kbd>Ctrl+K</kbd></button>
+    </div>
+  </div>
+  <div id="curr-rate"></div>
+  <div id="index-ticker" class="index-ticker" hidden></div>
+</header>
+<div class="app-body">
 <button id="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">
   <span></span><span></span><span></span>
 </button>
 <div id="mob-overlay" onclick="toggleMobMenu()"></div>
 <aside class="sb">
-  <div class="logo">
-    <!-- Ligne 1 : logo + titre + bouton lune -->
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 8px">
-      <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:700;color:var(--text-1);line-height:1.2">BRVM</div>
-        <div style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
-          <span>Analyzer</span>
-          <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--bull-wash);color:var(--color-live);padding:1px 6px;border-radius:10px;font-weight:600">
-            <span id="live-dot" style="width:5px;height:5px;background:var(--color-live);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
-            <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
-          </span>
-        </div>
-      </div>
-      <button onclick="toggleTheme()" class="compact-hide" style="margin-left:auto;flex-shrink:0;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm);color:var(--text-2);padding:3px 7px;font-size:13px;cursor:pointer;line-height:1" title="Thème">🌙</button>
-    </div>
-    <!-- Ligne 2 : boutons devises -->
-    <div style="display:flex;gap:4px;padding:0 14px 10px" class="compact-hide">
-      <button id="cb-xof" class="curr-btn on" onclick="setCurrency('XOF')">XOF</button>
-      <button id="cb-eur" class="curr-btn" onclick="setCurrency('EUR')">EUR</button>
-      <button id="cb-usd" class="curr-btn" onclick="setCurrency('USD')">USD</button>
-    </div>
-    <!-- Ligne 3 : taux de change -->
-    <div id="curr-rate" style="padding:0 14px 10px;font-size:10px;color:var(--text-3)" class="compact-hide"></div>
-  </div>
-  <nav class="nav">
-    <div class="sb-grp-label">Naviguer</div>
-    <div class="ni" onclick="nav('welcome')" data-tip="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span>👋</span> <span class="ni-label">Accueil</span></div>
-    <div class="ni" onclick="nav('rank')" data-tip="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span>🏆</span> <span class="ni-label">Classement</span><span id="rank-badge" class="sb-badge" title="Nombre de sociétés analysées">47</span></div>
-    <div class="ni" onclick="nav('screener')" data-tip="Filtrez les 47 sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span>🔍</span> <span class="ni-label">Screener</span></div>
-<div class="sb-grp-label">Découvrir</div>
-    <div class="ni" onclick="nav('news');renderNewsPage()" data-tip="Annonces officielles BRVM + Google News par société"><span>📰</span> <span class="ni-label">Actualités</span><span id="news-badge" class="sb-badge" style="display:none"></span></div>
-
-    <div class="ni" onclick="nav('signals');if(typeof renderPrevisionsPage!=='undefined')renderPrevisionsPage()" data-tip="Prévisions IA et score personnalisé · signaux des modèles"><span>📡</span> <span class="ni-label">Signaux</span></div>
-    <div class="ni" onclick="nav('glossaire');initGlossaire()" data-tip="Termes financiers expliqués en français simple"><span>📚</span> <span class="ni-label">Glossaire</span></div>
-    <div class="sb-grp-label expert-only">Analyse</div>
-  </nav>
   <div class="tl">
     <div class="tl-h"><span>Actions</span>
       <input id="searchInp" placeholder="⌘K Rechercher..." style="width:110px;padding:3px 7px;font-size:10px;cursor:pointer" readonly onclick="openGSearch()" title="Recherche globale (⌘K)"/>
@@ -106,10 +108,6 @@
   </div>
   <div id="cmp-bar">
     <button class="btn" style="width:100%;font-size:11px;padding:7px" onclick="openCompareModal()">⚖️ Comparer (<span id="cmp-count">0</span>)</button>
-  </div>
-  <div id="sb-bottom" style="padding:8px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:4px">
-    
-    <div class="ni" onclick="nav('settings');loadSettingsPage()" data-tip="Tâches automatiques · préférences · statistiques" style="margin:0"><span>⚙️</span> <span class="ni-label">Paramètres</span></div>
   </div>
 </aside>
 <main class="main">
@@ -1165,7 +1163,27 @@
     <button onclick="showChangelog()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:10px;padding:0" title="Historique des versions">Changelog v14.3</button>
   </span>
 </footer>
-</main></div>
+</main></div></div>
+<nav class="tabbar" id="tabbar" aria-label="Navigation">
+  <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span aria-hidden="true">👋</span>Accueil</button>
+  <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span aria-hidden="true">🏆</span>Classement</button>
+  <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span aria-hidden="true">🔍</span>Screener</button>
+  <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles"><span aria-hidden="true">📡</span>Signaux</button>
+  <button type="button" data-nav="plus" onclick="toggleTabPlus()" title="Actualités, glossaire, méthodologie, paramètres, devise et thème"><span aria-hidden="true">☰</span>Plus</button>
+</nav>
+<div id="tab-plus" class="tab-plus">
+  <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
+  <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
+  <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
+  <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
+  <div class="tab-plus-row" role="group" aria-label="Devise">
+    <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>
+    <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>
+    <button type="button" class="curr-btn" data-curr="usd" onclick="setCurrency('USD')">USD</button>
+  </div>
+  <button type="button" onclick="toggleTheme()"><span data-theme-btn>🌙</span> Thème</button>
+  <button type="button" onclick="navCompare()">Comparer</button>
+</div>
 <!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
 <script>
 window.BRVM_ASSET_V="{{ASSET_V}}";

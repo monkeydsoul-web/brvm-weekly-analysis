@@ -262,20 +262,27 @@ function fetchExchangeRates() {
   setTimeout(fetchExchangeRates, 3600000);
 }
 
+function _fmtTaux(n) {
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
 function _updateCurrencyUI() {
   const el = document.getElementById('curr-rate');
   if (el && window._rates.EUR) {
-    const eur = (1000 * window._rates.EUR).toFixed(2);
-    const usd = window._rates.USD ? (1000 * window._rates.USD).toFixed(2) : '?';
-    el.textContent = `1 000 XOF = ${eur}€ / $${usd}`;
+    const eur = _fmtTaux(1000 * window._rates.EUR);
+    const usd = window._rates.USD ? _fmtTaux(1000 * window._rates.USD) : '?';
+    el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
   }
 }
 
 function setCurrency(c) {
   window._currency = c;
+  var code = String(c || '').toLowerCase();
   ['xof','eur','usd'].forEach(id => {
     const btn = document.getElementById('cb-' + id);
-    if (btn) btn.classList.toggle('on', id === c.toLowerCase());
+    if (btn) btn.classList.toggle('on', id === code);
+  });
+  document.querySelectorAll('[data-curr]').forEach(function(btn) {
+    btn.classList.toggle('on', btn.getAttribute('data-curr') === code);
   });
   // Re-rendu de la page active
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
@@ -496,14 +503,185 @@ document.addEventListener('keydown',e=>{
 let dark = false;
 function _applyTheme() {
   document.documentElement.classList.toggle('light', !dark);
-  const btn = document.querySelector('button[onclick="toggleTheme()"]');
-  if (btn) btn.textContent = dark ? '🌙' : '☀️';
+  var emoji = dark ? '🌙' : '☀️';
+  document.querySelectorAll('[data-theme-btn]').forEach(function(el) { el.textContent = emoji; });
+  document.querySelectorAll('button[onclick="toggleTheme()"]').forEach(function(btn) {
+    if (btn.querySelector('[data-theme-btn]')) return;
+    btn.textContent = emoji;
+  });
 }
 function toggleTheme() {
   dark = !dark;
   _applyTheme();
 }
 _applyTheme();
+
+var _PAGES_PLUS = {news:1, glossaire:1, methodo:1, settings:1};
+function syncChromeNav(id) {
+  document.querySelectorAll('[data-nav]').forEach(function(el) {
+    var cle = el.getAttribute('data-nav');
+    var actif = cle === id || (cle === 'plus' && _PAGES_PLUS[id]);
+    el.classList.toggle('on', !!actif);
+  });
+  if (!_PAGES_PLUS[id]) {
+    var plus = document.getElementById('tab-plus');
+    if (plus) plus.classList.remove('open');
+  }
+  if (typeof _marquerPlusDebordement === 'function') _marquerPlusDebordement();
+}
+function navTo(id) {
+  nav(id);
+  if (id === 'news' && typeof renderNewsPage === 'function') renderNewsPage();
+  if (id === 'signals' && typeof renderPrevisionsPage === 'function') renderPrevisionsPage();
+  if (id === 'glossaire' && typeof initGlossaire === 'function') initGlossaire();
+  if (id === 'settings' && typeof loadSettingsPage === 'function') loadSettingsPage();
+  var plus = document.getElementById('tab-plus');
+  if (plus) plus.classList.remove('open');
+  _fermerPlusHaut();
+}
+function toggleTabPlus() {
+  var plus = document.getElementById('tab-plus');
+  if (plus) plus.classList.toggle('open');
+}
+function _fermerPlusHaut() {
+  var menu = document.getElementById('topnav-more-menu');
+  var btn = document.getElementById('topnav-more-btn');
+  if (menu) menu.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+function _marquerPlusDebordement() {
+  var menu = document.getElementById('topnav-more-menu');
+  var btn = document.getElementById('topnav-more-btn');
+  if (!menu || !btn) return;
+  btn.classList.toggle('on', !!menu.querySelector('button.on'));
+}
+function toggleTopnavMore() {
+  var menu = document.getElementById('topnav-more-menu');
+  var btn = document.getElementById('topnav-more-btn');
+  if (!menu || !btn) return;
+  var ouvrir = menu.hidden;
+  menu.hidden = !ouvrir;
+  btn.setAttribute('aria-expanded', ouvrir ? 'true' : 'false');
+}
+function _lienRogne(nav) {
+  var zone = nav.getBoundingClientRect();
+  var boutons = nav.querySelectorAll('button[data-nav]');
+  for (var i = 0; i < boutons.length; i++) {
+    var r = boutons[i].getBoundingClientRect();
+    if (r.width < 1) continue;
+    if (r.right > zone.right + 0.5 || r.left < zone.left - 0.5) return true;
+  }
+  return false;
+}
+var _fitEnCours = false;
+function fitTopnav() {
+  if (_fitEnCours) return;
+  var nav = document.getElementById('topnav-links');
+  var more = document.getElementById('topnav-more');
+  var menu = document.getElementById('topnav-more-menu');
+  if (!nav || !more || !menu) return;
+  _fitEnCours = true;
+  var ranges = Array.prototype.slice.call(menu.querySelectorAll('button[data-nav]'));
+  ranges.forEach(function(btn) { nav.appendChild(btn); });
+  _fermerPlusHaut();
+  more.hidden = true;
+  if (getComputedStyle(nav).display === 'none') {
+    _fitEnCours = false;
+    return;
+  }
+  if (_lienRogne(nav)) {
+    more.hidden = false;
+    var garde = 12;
+    while (garde-- > 0 && _lienRogne(nav)) {
+      var boutons = nav.querySelectorAll('button[data-nav]');
+      if (!boutons.length) break;
+      menu.insertBefore(boutons[boutons.length - 1], menu.firstChild);
+    }
+  }
+  _marquerPlusDebordement();
+  requestAnimationFrame(function() { _fitEnCours = false; });
+}
+function _planFitTopnav() {
+  requestAnimationFrame(function() { requestAnimationFrame(fitTopnav); });
+}
+window.addEventListener('resize', _planFitTopnav);
+_planFitTopnav();
+if (window.ResizeObserver) {
+  var _barreNav = document.querySelector('.topnav-bar');
+  if (_barreNav) new ResizeObserver(function() { if (!_fitEnCours) _planFitTopnav(); }).observe(_barreNav);
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { fitTopnav(); });
+window.addEventListener('load', function() { fitTopnav(); });
+function navCompare() {
+  var plus = document.getElementById('tab-plus');
+  if (plus) plus.classList.remove('open');
+  _fermerPlusHaut();
+  if (typeof _cmpSelected !== 'undefined' && _cmpSelected.size >= 2) {
+    openCompareModal();
+    return;
+  }
+  _openComparePicker();
+}
+function _openComparePicker() {
+  var existant = document.getElementById('nav-cmp-overlay');
+  if (existant) existant.remove();
+  var ancre = (typeof _cmpSelected !== 'undefined' && _cmpSelected.size === 1)
+    ? _cmpSelected.values().next().value
+    : null;
+  var overlay = document.createElement('div');
+  overlay.id = 'nav-cmp-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:5800;background:var(--overlay-45);display:flex;align-items:center;justify-content:center';
+  document.body.appendChild(overlay);
+  function dessiner() {
+    var all = window.scores || [];
+    var titre = ancre ? ('Comparer ' + ancre + ' avec…') : 'Choisir une société à comparer';
+    var liste = all.filter(function(s) { return s && s.ticker && s.ticker !== ancre; });
+    overlay.innerHTML = '<div style="background:var(--bg-surface);border:1px solid var(--border-1);border-radius:var(--radius-lg);padding:20px;max-width:400px;width:90vw;max-height:70vh;overflow-y:auto">'
+      + '<div style="font-size:14px;font-weight:700;margin-bottom:12px">⚖️ ' + titre + '</div>'
+      + '<input id="_qcmp-inp" placeholder="Filtrer..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:10px;background:var(--bg3);color:var(--text)" oninput="_filterQCmp(this.value)" autocomplete="off">'
+      + '<div id="_qcmp-list" style="display:flex;flex-direction:column;gap:4px">'
+      + liste.map(function(s) {
+          var nom = _escIndice((s.name || '').slice(0, 30));
+          return '<button type="button" data-cmp="' + s.ticker + '" style="text-align:left;padding:8px 12px;min-height:44px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:12px;color:var(--text-1)">'
+            + '<strong>' + s.ticker + '</strong> <span style="color:var(--t2);font-size:11px">' + nom + '</span>'
+            + '<span style="margin-left:auto;float:right;font-family:var(--font-mono);font-size:11px;color:var(--accent)">' + note10txt(s) + '/10</span></button>';
+        }).join('')
+      + '</div>'
+      + '<button type="button" data-cmp-cancel style="margin-top:12px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px">Annuler</button>'
+      + '</div>';
+    var inp = document.getElementById('_qcmp-inp');
+    if (inp) setTimeout(function() { inp.focus(); }, 50);
+  }
+  dessiner();
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay || e.target.closest('[data-cmp-cancel]')) {
+      overlay.remove();
+      return;
+    }
+    var choix = e.target.closest('[data-cmp]');
+    if (!choix || !overlay.contains(choix)) return;
+    var ticker = choix.getAttribute('data-cmp');
+    if (!ancre) {
+      ancre = ticker;
+      dessiner();
+      return;
+    }
+    overlay.remove();
+    _pickQCmp(ancre, ticker);
+    if (typeof _refreshCmpCheckboxes === 'function') _refreshCmpCheckboxes();
+  });
+}
+document.addEventListener('click', function(e) {
+  var plus = document.getElementById('tab-plus');
+  if (plus && plus.classList.contains('open')) {
+    if (!plus.contains(e.target) && !(e.target.closest && e.target.closest('[data-nav="plus"]'))) {
+      plus.classList.remove('open');
+    }
+  }
+  var more = document.getElementById('topnav-more');
+  var menu = document.getElementById('topnav-more-menu');
+  if (more && menu && !menu.hidden && !more.contains(e.target)) _fermerPlusHaut();
+});
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 function nav(id){
@@ -523,6 +701,7 @@ function nav(id){
   if(typeof _currentPage!=='undefined') _currentPage=id;
   if(_helpOpen) openHelpDrawer(id);
   try{history.replaceState(null,'','#'+id);}catch(e){}
+  if (typeof syncChromeNav === 'function') syncChromeNav(id);
 }
 // Support navigation par hash URL + hashchange
 (function(){
@@ -1093,6 +1272,77 @@ function _renderMarketWeather(compChange, scores){
   wEl.innerHTML = `${icon} ${label} <span style="font-weight:400;font-size:10px">(${avgCh>=0?'+':''}${avgCh.toFixed(1)}% moy.)</span>`;
 }
 
+function _escIndice(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function _nombreIndice(v) {
+  if (v == null || v === '') return null;
+  var n = Number(v);
+  return isFinite(n) ? n : null;
+}
+function _texteActivite(v) {
+  if (v == null) return '';
+  var s = String(v).trim();
+  if (!s || s === '—' || s === '-') return '';
+  return s;
+}
+function _puceIndice(label, item, activite) {
+  var courant = item ? _nombreIndice(item.current) : null;
+  if (courant != null) {
+    var valeur = courant.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    var variation = '';
+    var libelleVar = '';
+    var chg = _nombreIndice(item.change);
+    if (chg != null) {
+      var couleur = chg >= 0 ? 'var(--bull)' : 'var(--bear)';
+      var signe = chg >= 0 ? '+' : '';
+      var chiffre = chg.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      variation = '<span class="ix-chg" style="color:' + couleur + '">' + signe + chiffre + '%</span>';
+      libelleVar = ' ' + signe + chiffre + '%';
+    }
+    return {
+      html: '<span class="index-chip"><span class="ix-name">' + label + '</span><span class="ix-val">' + valeur + '</span>' + variation + '</span>',
+      libelle: label + ' ' + valeur + libelleVar
+    };
+  }
+  var texte = _texteActivite(activite);
+  if (!texte) return null;
+  return {
+    html: '<span class="index-chip"><span class="ix-name">' + label + '</span><span class="ix-val">' + _escIndice(texte) + '</span></span>',
+    libelle: label + ' ' + texte
+  };
+}
+function renderIndexTicker(d) {
+  var el = document.getElementById('index-ticker');
+  if (!el) return;
+  var indices = (d && d.indices) || [];
+  var act = (d && d.market_activity) || {};
+  function trouver(pred) {
+    for (var i = 0; i < indices.length; i++) {
+      var nom = indices[i] && indices[i].name ? String(indices[i].name).toUpperCase() : '';
+      if (nom && pred(nom)) return indices[i];
+    }
+    return null;
+  }
+  var puces = [
+    _puceIndice('Composite', trouver(function(n){ return n.indexOf('COMPOSITE') >= 0; }), act['BRVM-C']),
+    _puceIndice('BRVM 30', trouver(function(n){ return n.indexOf('30') >= 0 && n.indexOf('COMPOSITE') < 0; }), act['BRVM-30']),
+    _puceIndice('Prestige', trouver(function(n){ return n.indexOf('PRESTIGE') >= 0; }), act['BRVM-PRES'] || act['BRVM-PRESTIGE'])
+  ].filter(Boolean);
+  if (!puces.length) {
+    el.hidden = true;
+    el.innerHTML = '';
+    el.removeAttribute('aria-label');
+    document.documentElement.classList.remove('has-indices');
+    return;
+  }
+  var html = puces.map(function(p){ return p.html; }).join('');
+  var ligne = html + html + html;
+  el.setAttribute('aria-label', puces.map(function(p){ return p.libelle; }).join(', '));
+  el.innerHTML = '<div class="index-ticker-track" aria-hidden="true"><div class="index-ticker-group">' + ligne + '</div><div class="index-ticker-group">' + ligne + '</div></div>';
+  el.hidden = false;
+  document.documentElement.classList.add('has-indices');
+}
 function loadMarketWidget(){
   var _mktErrEl = document.getElementById('mkt-idx-error');
   if (_mktErrEl) _mktErrEl.style.display = 'none';
@@ -1137,9 +1387,11 @@ function loadMarketWidget(){
     if(top5) top5.innerHTML=(d.top5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--green)">+${x.change.toFixed(2)}%</span></div>`).join('');
     if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
     _paintIndexCards();
+    renderIndexTicker(d);
   }).catch(e=>{
     clearTimeout(_mktTo);
     console.error('[BRVM] loadMarketWidget:',e);
+    renderIndexTicker(null);
     if (_mktErrEl) _mktErrEl.style.display = 'flex';
     var msbComp2=document.getElementById('msb-composite');
     var msbB302=document.getElementById('msb-brvm30');
@@ -2533,7 +2785,7 @@ async function loadStatus(){
       const _fc=document.getElementById('footer-count');
       if(_fc) _fc.textContent=_cotees&&_cotees!==_notees?`${_notees} sociétés notées / ${_cotees} cotées`:`${_notees} sociétés`;
       const _rb=document.getElementById('rank-badge');
-      if(_rb&&_notees) _rb.textContent=_notees;
+      if(_rb&&_notees) { _rb.textContent=_notees; if (typeof fitTopnav==='function') fitTopnav(); }
       const _st=document.getElementById('settings-tickers');
       if(_st&&_notees) _st.textContent=_cotees&&_cotees!==_notees?`${_notees} notées / ${_cotees} cotées`:_notees;
     }
@@ -3426,12 +3678,13 @@ function updateLiveStatus() {
       var time  = document.getElementById('live-time');
       var src   = document.getElementById('live-src');
       if (dot) {
-        dot.style.background = open ? '#22c55e' : '#f59e0b';
-        dot.style.animation  = open ? 'pulse 2s infinite' : 'none';
+        dot.style.background = '';
+        dot.style.animation  = open ? '' : 'none';
       }
       if (pill) {
-        pill.style.background = open ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)';
-        pill.style.color = open ? '#22c55e' : '#f59e0b';
+        pill.style.background = '';
+        pill.style.color = '';
+        pill.classList.toggle('is-closed', !open);
       }
       if (label) label.textContent = open ? 'LIVE' : 'FERMÉ';
       if (time && d.updated_at) {
@@ -3797,6 +4050,8 @@ function _updateCmpBar() {
   const cnt = document.getElementById('cmp-count');
   if (bar) bar.classList.toggle('show', n >= 2);
   if (cnt) cnt.textContent = n;
+  var navCnt = document.getElementById('nav-cmp-count');
+  if (navCnt) navCnt.textContent = n ? String(n) : '';
 }
 
 function _refreshCmpCheckboxes() {
@@ -3952,6 +4207,7 @@ nav = function(id, pushHistory) {
       setTimeout(function(){ if(typeof renderMacroRatings!=='undefined') renderMacroRatings(); }, 300);
     }
     _updateBackLabels();
+    if (typeof syncChromeNav === 'function') syncChromeNav('marche');
     return;
   }
   if (pushHistory !== false) navHistory.push(id);
@@ -3960,6 +4216,7 @@ nav = function(id, pushHistory) {
   if (bcEl) bcEl.textContent = _bcLabels[id] || id;
   if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
   _updateBackLabels();
+  if (typeof syncChromeNav === 'function') syncChromeNav(id);
 };
 function navBack() {
   navHistory.pop();
