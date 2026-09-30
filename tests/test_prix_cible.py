@@ -299,8 +299,14 @@ def test_methodo_explique_le_calcul_actuel():
         "Cible à vérifier",
         "0,10",
         "22,5",
+        "Sans bénéfice ni ROE exploitables, il n'y a pas de prix cible.",
+        "Sans bénéfice, seul le calcul actif net × ROE ÷ 10 reste possible.",
+        "Le bénéfice par action et l'actif net par action viennent du dernier rapport ou du bulletin de la cote.",
+        "Le ROE vient du rapport annuel quand il est disponible, sinon d'une valeur enregistrée dans le programme.",
     ):
         assert phrase in carte
+    assert "Sans bénéfice exploitable" not in carte
+    assert "et le ROE viennent du dernier rapport" not in carte
     assert "80 %" not in carte
     assert "médiane" not in carte.lower()
     assert "0,5" not in carte
