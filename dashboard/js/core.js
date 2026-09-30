@@ -926,7 +926,7 @@ function conseilAffiche(row){
     var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(dep);
     var aff=m?(m[3]+'/'+m[2]+'/'+m[1]):'';
     var texte=aff?('Cotation suspendue depuis le '+aff):'Cotation suspendue';
-    return {libelle:texte,css:'var(--t2)',texte:texte,suspendu:true};
+    return {libelle:texte,css:'var(--note-muted)',texte:texte,suspendu:true};
   }
   var lib=src.conseil_libelle;
   var c=src.conseil;
@@ -941,14 +941,14 @@ function conseilAffiche(row){
   if(col!=='vert'&&col!=='orange'&&col!=='rouge'){
     col=lib==='Intéressant'?'vert':lib==='À surveiller'?'orange':'rouge';
   }
-  var css=col==='vert'?'var(--green)':col==='orange'?'var(--amber)':'var(--red)';
+  var css=col==='vert'?'var(--note-green)':col==='orange'?'var(--note-amber)':'var(--note-red)';
   var ico=lib==='Intéressant'?'✅ ':lib==='À surveiller'?'⏳ ':'⚠️ ';
   return {libelle:lib,css:css,texte:ico+lib};
 }
 function fmtConseil(row){
   var a=conseilAffiche(row);
   if(!a) return '<span style="color:var(--t2)" title="Donnee en quarantaine - prix non confirme">—</span>';
-  if(a.suspendu) return '<span style="color:var(--t2);background:rgba(148,163,184,.22);border-radius:10px;padding:2px 8px;font-weight:600">'+a.texte+'</span>';
+  if(a.suspendu) return '<span style="color:'+a.css+';background:rgba(148,163,184,.22);border-radius:10px;padding:2px 8px;font-weight:600">'+a.texte+'</span>';
   return '<span style="color:'+a.css+'">'+a.texte+'</span>';
 }
 /* Note principale : la couleur suit le conseil du serveur, pas la note brute. */
@@ -2230,11 +2230,13 @@ function _genVerdict(s){
   var badgeCol=avis?avis.css:'var(--t2)';
   if(suspendu){
     labelShow=avis.texte;
-    badgeCol='var(--t2)';
+    badgeCol='var(--note-muted)';
   }
-  const badgeCss=suspendu
-    ?'background:rgba(148,163,184,.22);color:var(--t2);font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px'
-    :('background:'+badgeCol+';color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px');
+  var badgeFond=badgeCol.indexOf('green')!==-1?'var(--note-green-wash)'
+    :badgeCol.indexOf('amber')!==-1?'var(--note-amber-wash)'
+    :badgeCol.indexOf('red')!==-1?'var(--note-red-wash)'
+    :'rgba(148,163,184,.22)';
+  const badgeCss='background:'+badgeFond+';color:'+badgeCol+';font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px';
   var noteGrise='';
   if(suspendu){
     var n10=(typeof note10txt==='function')?note10txt(s):String((typeof v10fmt==='function')?v10fmt(v):(Math.round(v/8*10)/10).toFixed(1)).replace('.',',');
@@ -2467,7 +2469,7 @@ async function showStock(ticker){
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
         <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
         ${_staticEntry.statut==='suspendu'
-          ? '<span style="margin-top:4px;display:inline-block;color:var(--t2);font-weight:700">Cotation suspendue</span>'
+          ? '<span style="margin-top:4px;display:inline-block;color:var(--note-muted);font-weight:700">Cotation suspendue</span>'
           : (_v0>0?`<span class="b ${classePrincipale(_staticEntry)}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
       </div>
     </div>
@@ -2601,7 +2603,7 @@ async function showStock(ticker){
             return `<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[
-            ['Par action',_amtCell,'var(--amber)'],
+            ['Par action',_amtCell,'var(--note-amber)'],
             ['Rendement',_yieldCell,_isExc?'var(--amber)':couleurDividende(_dy)],
             ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
@@ -4041,7 +4043,7 @@ function openHelpDrawer(page) {
   document.getElementById('help-page-title').textContent = content.title;
   const _universalHelp = `<div style="background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7">
     <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🚀 Pour commencer</div>
-    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--gold);font-weight:700">≥ 7,5/10</span> = Intéressant · <span style="color:var(--amber);font-weight:700">≥ 5 et &lt; 7,5</span> = À surveiller · <span style="color:var(--red);font-weight:700">&lt; 5</span> = Prudence · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
+    <div style="color:var(--t2);margin-bottom:10px">Note <span style="color:var(--note-green);font-weight:700">≥ 7,5/10</span> = Intéressant · <span style="color:var(--note-amber);font-weight:700">≥ 5 et &lt; 7,5</span> = À surveiller · <span style="color:var(--note-red);font-weight:700">&lt; 5</span> = Prudence · Cliquez sur n'importe quelle action pour sa fiche complète.</div>
     <div style="font-weight:700;color:var(--accent);margin-bottom:4px">📖 Mini-lexique</div>
     <div style="color:var(--t2);line-height:2.1">
       <strong>Note /10</strong> — qualité globale de l'action selon 8 critères financiers<br>

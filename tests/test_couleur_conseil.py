@@ -64,6 +64,8 @@ def test_sources_separent_note_principale_et_scores_propres():
     assert "if((s.div_yield||0)>=6)" in CORE
     assert "else if((s.div_yield||0)>=3)" in CORE
     assert "Math.round(Number(v)/8*10)/10" in CORE
+    assert "['Par action',_amtCell,'var(--note-amber)']" in CORE
+    assert "col: 'var(--note-muted)'" in LIVE
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
@@ -203,7 +205,7 @@ renderLiveRankBadge('ORAC');
 attend(nodes['live-rank-badge'].innerHTML.indexOf('color:var(--note-red)">5,1/10') !== -1, 'fiche ORAC');
 renderLiveRankBadge('SICC');
 const ficheSicc = nodes['live-rank-badge'].innerHTML;
-attend(ficheSicc.indexOf('Cotation suspendue') !== -1 && ficheSicc.indexOf('var(--t2)') !== -1, 'fiche SICC grise');
+attend(ficheSicc.indexOf('Cotation suspendue') !== -1 && ficheSicc.indexOf('var(--note-muted)') !== -1, 'fiche SICC grise');
 attend(ficheSicc.indexOf('note-green') === -1 && ficheSicc.indexOf('note-amber') === -1, 'fiche SICC sans couleur de note');
 
 function resume(s) {
@@ -234,6 +236,11 @@ const palier = _palierScoreLive(7.3);
 attend(palier.tier === 'Modéré' && palier.col.indexOf('amber') !== -1, 'score live 7,3 reste sur la note');
 attend(_palierScoreLive(5.1).tier === 'Modéré', 'score live 5,1');
 attend(_palierScoreLive(4.9).tier === 'Très faible', 'score live 4,9');
-attend(_palierScoreLive(6.8, 'suspendu').col.indexOf('--t2') !== -1, 'score live suspendu gris');
+attend(_palierScoreLive(6.8, 'suspendu').col.indexOf('--note-muted') !== -1, 'score live suspendu gris');
+attend(etit.indexOf('color:var(--note-green)') !== -1 && etit.indexOf('Intéressant') !== -1, 'mot ETIT');
+attend(sogc.indexOf('color:var(--note-amber)') !== -1 && sogc.indexOf('À surveiller') !== -1, 'mot SOGC');
+attend(ttls.indexOf('color:var(--note-red)') !== -1 && ttls.indexOf('Prudence') !== -1, 'mot TTLS');
+attend(orac.indexOf('color:var(--note-red)') !== -1 && orac.indexOf('Prudence') !== -1, 'mot ORAC');
+attend(sicc.indexOf('color:var(--note-muted)') !== -1 && sicc.indexOf('Cotation suspendue') !== -1, 'mot SICC');
 """
     _node(script)

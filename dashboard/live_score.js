@@ -43,7 +43,7 @@ async function fetchLiveScore(ticker){
 }
 
 function _palierScoreLive(n10, statut){
-  if (statut === 'suspendu') return { tier: 'Cotation suspendue', col: 'var(--t2)' };
+  if (statut === 'suspendu') return { tier: 'Cotation suspendue', col: 'var(--note-muted)' };
   var haut = Number(window.SEUIL_NOTE_HAUT);
   var bas = Number(window.SEUIL_NOTE_BAS);
   if (n10 >= haut) return { tier: 'Fort', col: 'var(--note-green)' };

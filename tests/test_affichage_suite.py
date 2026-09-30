@@ -135,7 +135,7 @@ attend(mot(4.9) === 'Très faible' && couleur(4.9).indexOf('red') !== -1, '4,9')
 attend(mot(2.9) === 'Très faible', '2,9');
 attend(mot(2.8) === 'Très faible', '2,8');
 attend(mot(8, 'suspendu') === 'Cotation suspendue', 'suspendu');
-attend(couleur(6.8, 'suspendu').indexOf('--t2') !== -1, 'gris');
+attend(couleur(6.8, 'suspendu').indexOf('--note-muted') !== -1, 'gris');
 attend(mot(6.8, 'suspendu') !== 'Très faible', 'pas tres faible');
 global.window.SEUIL_NOTE_HAUT = 8;
 attend(mot(7.5) === 'Modéré', 'le seuil vient de la constante');

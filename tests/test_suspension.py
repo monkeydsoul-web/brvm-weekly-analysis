@@ -615,11 +615,11 @@ const row = {
 };
 const avis = conseilAffiche(row);
 attend(avis.texte === 'Cotation suspendue depuis le 16/09/2026', avis.texte);
-attend(avis.css === 'var(--t2)', 'badge gris');
+attend(avis.css === 'var(--note-muted)', 'badge gris');
 attend(avis.suspendu === true, 'marque suspendu');
 const htmlConseil = fmtConseil(row);
 attend(htmlConseil.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'fmt');
-attend(htmlConseil.indexOf('var(--t2)') !== -1, 'fmt gris');
+attend(htmlConseil.indexOf('var(--note-muted)') !== -1, 'fmt gris');
 attend(htmlConseil.indexOf('Intéressant') === -1, 'fmt sans conseil');
 const fiche = _genVerdict(row);
 attend(fiche.indexOf('Cotation suspendue depuis le 16/09/2026') !== -1, 'fiche badge');
