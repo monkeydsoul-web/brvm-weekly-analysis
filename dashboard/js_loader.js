@@ -37,7 +37,7 @@
     "signaux_v2.js": "page-signals",
     "rank_v2.js": "page-rank",
     "welcome_v2.js": "page-welcome",
-    "top3_podium.js": "page-welcome",
+    "top3_podium.js": "page-rank",
     "screener_lazy.js": "page-screener"
   };
 
@@ -91,7 +91,7 @@
   var REPLAY = {
     "rank_v2.js": "rank",
     "welcome_v2.js": "welcome",
-    "top3_podium.js": "welcome",
+    "top3_podium.js": "rank",
     "signaux_v2.js": "signals",
     "news_v2.js": "news",
     "screener.js": "screener",

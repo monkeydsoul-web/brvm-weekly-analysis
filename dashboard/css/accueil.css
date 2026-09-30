@@ -1,0 +1,280 @@
+/* Accueil — mise en page seulement. Les couleurs viennent des variables et de couleurNote. */
+
+.accueil{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-2);
+  padding:var(--space-2);
+  padding-bottom:var(--space-4);
+}
+
+.accueil-marche,
+.accueil-bloc,
+.accueil-carte{
+  background:var(--bg-card);
+  border:1px solid var(--border-1);
+  border-radius:var(--radius-md);
+}
+
+.accueil-marche{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-12px);
+  padding:var(--space-2);
+}
+
+.accueil-statut{
+  margin:0;
+  font-size:var(--text-h3);
+  font-weight:700;
+  color:var(--text-1);
+}
+
+.accueil-statut.is-open{color:var(--bull)}
+.accueil-statut.is-closed{color:var(--text-2)}
+
+.accueil-seance{
+  margin:var(--space-4px) 0 0;
+  font-size:12px;
+  color:var(--text-2);
+}
+
+.accueil-indices{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--space-1);
+}
+
+.accueil-indices .index-chip{
+  background:var(--bg-elevated);
+  border-radius:var(--radius-sm);
+  padding:var(--space-6px) var(--space-10px);
+}
+
+.accueil-lien{
+  align-self:flex-start;
+  background:none;
+  border:none;
+  color:var(--accent);
+  cursor:pointer;
+  font-family:var(--font-ui);
+  font-size:13px;
+  font-weight:600;
+  min-height:44px;
+  padding:var(--space-1) 0;
+}
+
+.accueil-lien:hover{text-decoration:underline}
+
+.accueil-cartes{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--space-1);
+}
+
+.accueil-carte{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:var(--space-4px);
+  width:100%;
+  min-height:44px;
+  padding:var(--space-2);
+  text-align:left;
+  cursor:pointer;
+  font-family:var(--font-ui);
+  color:var(--text-1);
+}
+
+.accueil-carte:hover{background:var(--bg-elevated)}
+
+.accueil-carte-n{
+  font-size:var(--text-h1);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+
+.accueil-carte-l{font-size:var(--text-body);font-weight:600}
+.accueil-carte-s{font-size:12px;color:var(--text-2)}
+
+.accueil-bloc{padding:var(--space-12px) var(--space-2) var(--space-1)}
+
+.accueil-bloc-tete{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--space-1);
+  margin-bottom:var(--space-1);
+}
+
+.accueil-bloc-tete h2{
+  margin:0;
+  font-size:var(--text-h3);
+  font-weight:700;
+  color:var(--text-1);
+}
+
+.accueil-entete,
+.accueil-ligne{
+  display:grid;
+  grid-template-columns:minmax(0,1.4fr) auto;
+  gap:var(--space-4px) var(--space-1);
+  align-items:center;
+}
+
+.accueil-entete{display:none}
+
+.accueil-ligne{
+  width:100%;
+  min-height:44px;
+  padding:var(--space-10px) 0;
+  border:none;
+  border-top:1px solid var(--border-1);
+  background:transparent;
+  color:var(--text-1);
+  font-family:var(--font-ui);
+  text-align:left;
+  cursor:pointer;
+}
+
+.accueil-ligne:hover{background:var(--bg-elevated)}
+
+.accueil-id{min-width:0}
+.accueil-ticker{display:block;font-weight:700}
+.accueil-nom{
+  display:block;
+  font-size:12px;
+  color:var(--text-2);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.accueil-note{
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  justify-self:end;
+}
+
+.accueil-note span{font-size:11px;font-weight:600;opacity:.7}
+
+.accueil-conseil{font-size:13px;font-weight:600}
+.accueil-tendance{font-size:16px;font-weight:700;justify-self:end}
+.accueil-tendance.is-up{color:var(--green)}
+.accueil-tendance.is-flat{color:var(--text-2)}
+.accueil-tendance.is-down{color:var(--red)}
+.accueil-tendance.is-none{color:var(--text-3);font-weight:500}
+
+.accueil-cours,
+.accueil-ecart{
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+  color:var(--text-1);
+}
+
+.accueil-ecart{justify-self:end;color:var(--text-2)}
+
+.accueil-vide{margin:0 0 var(--space-1);font-size:13px;color:var(--text-2)}
+
+.accueil-mvt-grille{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--space-2);
+  padding-bottom:var(--space-1);
+}
+
+.accueil-mvt h3{
+  margin:0 0 var(--space-6px);
+  font-size:13px;
+  font-weight:700;
+  color:var(--text-2);
+}
+
+.accueil-mvt-ligne{
+  display:flex;
+  align-items:center;
+  gap:var(--space-1);
+  width:100%;
+  min-height:44px;
+  padding:var(--space-6px) 0;
+  border:none;
+  border-top:1px solid var(--border-1);
+  background:transparent;
+  color:var(--text-1);
+  font-family:var(--font-ui);
+  text-align:left;
+  cursor:pointer;
+}
+
+.accueil-mvt-ligne:hover{background:var(--bg-elevated)}
+.accueil-mvt-nom{flex:1;min-width:0;font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accueil-mvt-var{font-weight:700;font-variant-numeric:tabular-nums}
+.accueil-mvt-var.is-up{color:var(--bull)}
+.accueil-mvt-var.is-down{color:var(--bear)}
+
+.accueil-actu{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-2px);
+  width:100%;
+  min-height:44px;
+  padding:var(--space-10px) 0;
+  border:none;
+  border-top:1px solid var(--border-1);
+  background:transparent;
+  color:var(--text-1);
+  font-family:var(--font-ui);
+  text-align:left;
+  cursor:pointer;
+}
+
+.accueil-actu:hover{background:var(--bg-elevated)}
+
+.accueil-actu-meta{font-size:11px;color:var(--text-3)}
+
+.accueil-actu-titre{
+  font-size:13px;
+  font-weight:600;
+  line-height:1.4;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.accueil-avertissement{
+  margin:0;
+  font-size:12px;
+  line-height:1.5;
+  color:var(--text-2);
+}
+
+.accueil-carte:focus-visible,
+.accueil-ligne:focus-visible,
+.accueil-lien:focus-visible,
+.accueil-mvt-ligne:focus-visible,
+.accueil-actu:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+@media(min-width:768px){
+  .accueil-cartes{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .accueil-mvt-grille{grid-template-columns:1fr 1fr}
+  .accueil-entete{
+    display:grid;
+    grid-template-columns:minmax(0,1.5fr) 4.2rem minmax(7rem,1fr) 4.5rem minmax(6rem,.9fr) minmax(5rem,.8fr);
+    gap:var(--space-1);
+    padding-bottom:var(--space-6px);
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-3);
+  }
+  .accueil-ligne{
+    grid-template-columns:minmax(0,1.5fr) 4.2rem minmax(7rem,1fr) 4.5rem minmax(6rem,.9fr) minmax(5rem,.8fr);
+  }
+  .accueil-note,
+  .accueil-tendance,
+  .accueil-ecart{justify-self:start}
+}
