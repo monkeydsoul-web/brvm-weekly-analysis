@@ -2832,7 +2832,7 @@ function initWelcome() { /* page statique — rien à charger */ }
 
 // ── Page-specific loaders ──────────────────────────────────────────────────
 const pageLoaders={
-  rank:      function(){ if(typeof loadRankDash==='function') loadRankDash(); if(typeof initTop3Podium==='function') initTop3Podium(); },
+  rank:      function(){ if(typeof loadRankDash==='function') loadRankDash(); },
   welcome:   ()=>{ if(typeof loadWelcomeHero!=='undefined') loadWelcomeHero(); },
   alerts:    ()=>{nav('signals');},
   valuation: ()=>{nav('signals');},
@@ -2846,6 +2846,12 @@ const pageLoaders={
   market:    ()=>{ if(typeof _renderMarketPage==='function') _renderMarketPage(); },
   glossaire: ()=>{ if(typeof initGlossaire!=='undefined') initGlossaire(); },
 };
+pageLoaders.rank = (function(charger){
+  return function(){
+    charger();
+    if (typeof initTop3Podium === 'function') initTop3Podium();
+  };
+})(pageLoaders.rank);
 
 function _paintIndexCards() {
   if (!window._marketData || !window._marketData.composite) return;
