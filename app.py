@@ -733,6 +733,29 @@ def api_market():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/index-history")
+def api_index_history():
+    """Clôtures enregistrées d'un indice. Ne recalcule ni note ni conseil."""
+    try:
+        from index_history import reponse_index_history
+        status, body, cacheable = reponse_index_history(
+            request.args.get("index"),
+            request.args.get("range"),
+        )
+    except Exception as e:
+        logger.error("index-history: %s", e)
+        resp = jsonify({"error": "historique indisponible"})
+        resp.status_code = 500
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+    resp = jsonify(body)
+    resp.status_code = status
+    if cacheable:
+        resp.headers["Cache-Control"] = "public, max-age=300"
+    else:
+        resp.headers["Cache-Control"] = "no-store"
+    return resp
+
 @app.route("/api/live")
 def api_live():
     """Cours live BRVM depuis brvm.org — cache 5 min"""
