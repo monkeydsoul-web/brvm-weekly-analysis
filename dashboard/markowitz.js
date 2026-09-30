@@ -87,7 +87,7 @@ function _refreshMrkSelector() {
     selEl.innerHTML = _mrkTickers.map(t => {
       const s = all.find(x=>x.ticker===t);
       const v = s?.composite_adj||0;
-      const c = (typeof couleurNote==='function')?couleurNote(note10num(s||{composite_adj:v})):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
+      const c = (typeof couleurPrincipale==='function')?couleurPrincipale(s||{composite_adj:v}):((typeof couleurNote==='function')?couleurNote(note10num(s||{composite_adj:v})):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'));
       return `<span style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid ${c};border-radius:6px;padding:3px 8px;font-size:11px">
         <strong style="color:${c}">${t}</strong>
         <button onclick="mrkRemove('${t}')" style="background:none;border:none;color:var(--red);cursor:pointer;padding:0 2px">✕</button>
@@ -99,7 +99,7 @@ function _refreshMrkSelector() {
     picker.innerHTML = sorted.map(x => {
       const sel = _mrkTickers.includes(x.ticker);
       const v = x.composite_adj||0;
-      const c = (typeof couleurNote==='function')?couleurNote(note10num(x)):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
+      const c = (typeof couleurPrincipale==='function')?couleurPrincipale(x):((typeof couleurNote==='function')?couleurNote(note10num(x)):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'));
       return `<button onclick="mrkToggle('${x.ticker}')"
         style="font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid ${sel?c:'var(--border)'};background:${sel?c+'22':'var(--bg3)'};color:${sel?c:'var(--t2)'};cursor:pointer">
         ${x.ticker} <span style="opacity:0.6">${(typeof note10txt==='function'?note10txt(x):v10fmt(v))}/10</span></button>`;

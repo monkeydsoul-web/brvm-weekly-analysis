@@ -46,7 +46,7 @@ function renderRankCards() {
       const v      = x.composite_adj || 0;
       const v10    = (typeof note10txt==='function') ? note10txt(x) : v10fmt(v).replace('.',',');
       const n10    = (typeof note10num==='function') ? note10num(x) : (Math.round(v/8*10)/10);
-      const scoreC = couleurNote(n10);
+      const scoreC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
       const chg    = x.change_pct || 0;
       const chgC   = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
       const chgStr = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';

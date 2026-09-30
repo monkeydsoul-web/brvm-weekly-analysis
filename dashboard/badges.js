@@ -64,7 +64,7 @@ function renderLiveRankBadge(ticker) {
     </div>`;
     return;
   }
-  const scoreC = couleurNote(n10);
+  const scoreC = (typeof couleurPrincipale==='function') ? couleurPrincipale(entry) : couleurNote(n10);
   el.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
@@ -95,7 +95,7 @@ function renderSidebarScores(ranking) {
   sidebar.innerHTML = sorted.map(x => {
     const n10 = (typeof note10num==='function') ? note10num(x) : 0;
     const noteTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
-    const c = couleurNote(n10);
+    const c = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
     const badge = getRankBadge(x.ticker, x.rank || 0);
     return `<div class="si" onclick="showStock('${x.ticker}')">
       <span style="flex:1;cursor:pointer;font-size:12px">${x.ticker}</span>
@@ -125,7 +125,7 @@ function buildKpiCards(s) {
       'Price/Book (cours ÷ valeur comptable). Seuil Graham : ≤ 1.5. P/B < 1 = l\'action se traite sous sa valeur comptable.'],
     ['ROE', roe ? roe.toFixed(1)+'%' : '—', roe && roe > 15 ? 'var(--green)' : roe && roe > 8 ? 'var(--amber)' : 'var(--red)',
       'Return On Equity = Résultat net ÷ Capitaux propres. Mesure la rentabilité. ≥ 15% = excellent, ≥ 8% = correct.'],
-    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', (div && div > 0 && typeof couleurDividende==='function') ? couleurDividende(div) : 'var(--t2)',
+    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', div && div > 5 ? 'var(--green)' : div && div > 2 ? 'var(--amber)' : 'var(--t2)',
       'Rendement du dividende = dividende annuel ÷ cours actuel. Un rendement élevé peut signaler une sous-évaluation ou un risque de coupe.'],
     ['BNA', eps ? _fmtXOF(Math.round(eps)) : '—', 'var(--blue)',
       'Bénéfice Net par Action (EPS) — BNA issu des données BOC ou PDF. Utilisé pour calculer P/E, Graham et EPV.'],
