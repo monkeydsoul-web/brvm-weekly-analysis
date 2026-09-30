@@ -171,12 +171,48 @@ function _remplirMouvements(d, rows) {
   });
 }
 
+// Une seule requête /api/market pour le bandeau et l'accueil.
+// Conservée 60 s (même ordre que le cache serveur en séance) : les appels
+// du chargement de page partagent la promesse, y compris son délai.
+var DELAI_MARCHE_MS = 20000;
+var _PROMESSE_MARCHE_MS = 60000;
+var _promesseMarche = null;
+var _promesseMarcheDepuis = 0;
+
+function demanderMarche(forcer) {
+  if (!forcer && _promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
+    return _promesseMarche;
+  }
+  _promesseMarcheDepuis = Date.now();
+  _promesseMarche = _telechargerMarche(0);
+  return _promesseMarche;
+}
+
+function _telechargerMarche(essai) {
+  return new Promise(function(resolve, reject) {
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var timer = setTimeout(function() { if (ctrl) ctrl.abort(); }, DELAI_MARCHE_MS);
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    fetch('/api/market', opts).then(function(r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(resolve).catch(function(e) {
+      clearTimeout(timer);
+      if (essai < 1) {
+        setTimeout(function() {
+          _telechargerMarche(essai + 1).then(resolve, reject);
+        }, 700);
+        return;
+      }
+      reject(e);
+    });
+  });
+}
+
 function _remplirIndices() {
   var box = document.getElementById('accueil-indices');
-  fetch('/api/market').then(function(r) {
-    if (!r.ok) throw new Error('marche');
-    return r.json();
-  }).then(function(d) {
+  demanderMarche(false).then(function(d) {
     if (box && box.isConnected) box.innerHTML = _htmlTroisIndices(d);
     _remplirMouvements(d, window.scores || (typeof scores !== 'undefined' ? scores : []));
   }).catch(function() {

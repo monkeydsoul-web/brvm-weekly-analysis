@@ -396,7 +396,7 @@ def fetch_macro_context() -> dict:
     # Indices BRVM officiels (via market_data.py, scrapé depuis brvm.org/fr/resume)
     try:
         from market_data import get_market_data
-        for entry in get_market_data().get("indices", []):
+        for entry in get_market_data(synchroniser=True).get("indices", []):
             name = entry.get("name", "")
             value = entry.get("current")
             if not isinstance(value, (int, float)) or isinstance(value, bool):
