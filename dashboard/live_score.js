@@ -43,13 +43,12 @@ async function fetchLiveScore(ticker){
 }
 
 function _palierScoreLive(n10, statut){
-  if (statut === 'suspendu') return { tier: 'Cotation suspendue', col: 'var(--t2)' };
+  if (statut === 'suspendu') return { tier: 'Cotation suspendue', col: 'var(--note-muted)' };
   var haut = Number(window.SEUIL_NOTE_HAUT);
   var bas = Number(window.SEUIL_NOTE_BAS);
-  if (n10 >= haut) return { tier: 'Fort', col: 'var(--green)' };
-  if (n10 >= bas) return { tier: 'Modéré', col: 'var(--amber)' };
-  if (n10 >= 2.9) return { tier: 'Faible', col: 'var(--orange,#f97316)' };
-  return { tier: 'Très faible', col: 'var(--red)' };
+  if (n10 >= haut) return { tier: 'Fort', col: 'var(--note-green)' };
+  if (n10 >= bas) return { tier: 'Modéré', col: 'var(--note-amber)' };
+  return { tier: 'Très faible', col: 'var(--note-red)' };
 }
 
 function _renderLiveScore(ticker, d){
@@ -69,7 +68,8 @@ function _renderLiveScore(ticker, d){
   const models=[['Graham',d.score_graham],['DCF',d.score_dcf],['DDM',d.score_ddm],['EPV',d.score_epv],['Buffett',d.score_buffett],['RevDCF',d.score_rev_dcf],['Relatif',d.score_relatif],['Tech.',d.score_technique]];
   const bars=models.map(function(m){
     var l=m[0],v=m[1],sv=v||0;
-    var bc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';var det=d['detail_'+l.toLowerCase().replace('.','').replace('/','_')]||'';
+    var hautBar=Number(window.SEUIL_NOTE_HAUT), basBar=Number(window.SEUIL_NOTE_BAS);
+    var bc=(typeof couleurNote==='function')?couleurNote(sv):(sv>=hautBar?'var(--note-green)':sv>=basBar?'var(--note-amber)':'var(--note-red)');var det=d['detail_'+l.toLowerCase().replace('.','').replace('/','_')]||'';
     return '<div title="'+det+'" style="display:grid;grid-template-columns:52px 1fr 26px;align-items:center;gap:5px;font-size:11px"><span style="color:var(--t2)">'+l+'</span><div style="background:var(--border);border-radius:3px;height:4px"><div style="width:'+sv*10+'%;height:4px;border-radius:3px;background:'+bc+'"></div></div><span style="color:'+bc+';font-weight:600;text-align:right">'+sv.toFixed(1)+'</span></div>';
   }).join('');
   el.innerHTML='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px">'+

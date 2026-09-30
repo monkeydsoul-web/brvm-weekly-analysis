@@ -45,27 +45,27 @@ const nouveau = conseilAffiche({
   conseil: 'Intéressant', conseil_libelle: 'Intéressant', conseil_couleur: 'vert'
 });
 attend(nouveau.texte === '✅ Intéressant', 'libelle serveur');
-attend(nouveau.css === 'var(--green)', 'couleur vert');
+attend(nouveau.css === 'var(--note-green)', 'couleur vert');
 
 const orange = conseilAffiche({
   conseil_libelle: 'Intéressant', conseil_couleur: 'orange'
 });
-attend(orange.texte === '✅ Intéressant' && orange.css === 'var(--amber)', 'couleur orange du serveur');
+attend(orange.texte === '✅ Intéressant' && orange.css === 'var(--note-amber)', 'couleur orange du serveur');
 
 const prudence = conseilAffiche({
   conseil_libelle: 'Prudence', conseil_couleur: 'rouge'
 });
-attend(prudence.texte === '⚠️ Prudence' && prudence.css === 'var(--red)', 'prudence');
+attend(prudence.texte === '⚠️ Prudence' && prudence.css === 'var(--note-red)', 'prudence');
 
 const milieu = conseilAffiche({
   conseil_libelle: 'À surveiller', conseil_couleur: 'orange'
 });
-attend(milieu.texte === '⏳ À surveiller' && milieu.css === 'var(--amber)', 'a surveiller');
+attend(milieu.texte === '⏳ À surveiller' && milieu.css === 'var(--note-amber)', 'a surveiller');
 
 attend(conseilAffiche({conseil:'acheter'}).texte === '✅ Intéressant', 'repli acheter');
-attend(conseilAffiche('acheter').css === 'var(--green)', 'repli acheter couleur');
+attend(conseilAffiche('acheter').css === 'var(--note-green)', 'repli acheter couleur');
 attend(conseilAffiche({conseil:'attendre'}).texte === '⏳ À surveiller', 'repli attendre');
-attend(conseilAffiche({conseil:'eviter'}).css === 'var(--red)', 'repli eviter');
+attend(conseilAffiche({conseil:'eviter'}).css === 'var(--note-red)', 'repli eviter');
 
 attend(conseilAffiche({conseil:null, conseil_libelle:null}) === null, 'sans conseil');
 attend(conseilAffiche({}) === null, 'ligne vide');
@@ -75,7 +75,7 @@ attend(htmlVide.indexOf('Acheter') === -1, 'pas d ancien mot');
 
 const html = fmtConseil({conseil:'acheter'});
 attend(html.indexOf('Intéressant') !== -1, 'fmtConseil repli');
-attend(html.indexOf('var(--green)') !== -1, 'fmtConseil couleur');
+attend(html.indexOf('var(--note-green)') !== -1, 'fmtConseil couleur');
 attend(html.indexOf('Acheter') === -1, 'fmtConseil sans Acheter');
 
 const fiche = _genVerdict({ticker:'ALPH', composite_adj:70, conseil:'eviter'});
@@ -87,7 +87,7 @@ const ficheServeur = _genVerdict({
   conseil_libelle:'À surveiller', conseil_couleur:'orange'
 });
 attend(ficheServeur.indexOf('⏳ À surveiller') !== -1, 'fiche libelle serveur');
-attend(ficheServeur.indexOf('var(--amber)') !== -1, 'fiche couleur serveur');
+attend(ficheServeur.indexOf('var(--note-amber)') !== -1, 'fiche couleur serveur');
 
 const ficheVide = _genVerdict({ticker:'ALPH', composite_adj:70});
 attend(ficheVide.indexOf('>—</span>') !== -1 || ficheVide.indexOf('>—<') !== -1, 'fiche sans conseil');

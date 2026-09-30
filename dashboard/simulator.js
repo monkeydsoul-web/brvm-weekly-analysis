@@ -118,7 +118,7 @@ function simRecalc() {
   var sEl = document.getElementById('sim-sharpe');
   var dEl = document.getElementById('sim-div');
   if (vEl) vEl.textContent = invest.toLocaleString('fr-FR') + ' XOF';
-  if (yEl) { yEl.textContent = simYield.toFixed(2) + '%'; yEl.style.color = simYield>5?'var(--green)':'var(--amber)'; }
+  if (yEl) { yEl.textContent = simYield.toFixed(2) + '%'; yEl.style.color = (typeof couleurDividende==='function') ? couleurDividende(simYield) : 'var(--note-amber)'; }
   if (sEl) { sEl.textContent = sharpe; sEl.style.color = parseFloat(sharpe)>1?'var(--green)':'var(--amber)'; }
   if (dEl) dEl.textContent = Math.round(simDiv).toLocaleString('fr-FR') + ' XOF';
   simDrawPie();

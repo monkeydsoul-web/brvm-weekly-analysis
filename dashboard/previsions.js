@@ -111,7 +111,7 @@ function _prevDrawPortfolios(el) {
                 </div>
                 <span style="font-size:10px;font-weight:600;min-width:34px;text-align:right">${s.weight}%</span>
                 <span style="font-size:9px;color:var(--t2);min-width:52px;text-align:right">score ${(typeof note10txt==='function'?note10txt(s):v10fmt(s.score))}/10</span>
-                <span style="font-size:9px;color:var(--amber);min-width:36px;text-align:right">${(s.div_yield||0).toFixed(1)}%</span>
+                <span style="font-size:9px;color:${(s.div_yield||0)>0&&typeof couleurDividende==='function'?couleurDividende(s.div_yield):'var(--t2)'};min-width:36px;text-align:right">${(s.div_yield||0).toFixed(1)}%</span>
               </div>`).join('')}
           </div>
           <div style="display:flex;gap:8px">

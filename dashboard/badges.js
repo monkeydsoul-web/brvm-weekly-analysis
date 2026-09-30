@@ -58,13 +58,13 @@ function renderLiveRankBadge(ticker) {
     const mention = aff ? ('Cotation suspendue depuis le ' + aff) : 'Cotation suspendue';
     el.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
-      <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(148,163,184,.22);color:var(--t2);font-weight:700">${mention}</span>
+      <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(148,163,184,.22);color:var(--note-muted);font-weight:700">${mention}</span>
       ${entry.eps ? `<span class="tt" data-tt="Bénéfice Net par Action · bénéfice annuel divisé par le nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BNA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.eps)):Math.round(entry.eps).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
       ${entry.bvpa ? `<span class="tt" data-tt="Book Value Per Action · valeur comptable par action — actif net / nombre d'actions" style="font-size:10px;color:var(--t2);padding:2px 8px;border-radius:4px;background:var(--bg3);cursor:help">BVPA <strong>${typeof fmtXOF==='function'?fmtXOF(Math.round(entry.bvpa)):Math.round(entry.bvpa).toLocaleString('fr-FR')+' XOF'}</strong></span>` : ''}
     </div>`;
     return;
   }
-  const scoreC = couleurNote(n10);
+  const scoreC = (typeof couleurPrincipale==='function') ? couleurPrincipale(entry) : couleurNote(n10);
   el.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
@@ -95,7 +95,7 @@ function renderSidebarScores(ranking) {
   sidebar.innerHTML = sorted.map(x => {
     const n10 = (typeof note10num==='function') ? note10num(x) : 0;
     const noteTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
-    const c = couleurNote(n10);
+    const c = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
     const badge = getRankBadge(x.ticker, x.rank || 0);
     return `<div class="si" onclick="showStock('${x.ticker}')">
       <span style="flex:1;cursor:pointer;font-size:12px">${x.ticker}</span>

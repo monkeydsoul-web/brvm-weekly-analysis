@@ -28,7 +28,7 @@ function getDivConfidenceBadge(sc, opts) {
 
   if (flag === 'exceptionnel_non_recurrent') {
     icon  = '🔶';
-    color = 'var(--amber)';
+    color = 'var(--exc-ink)';
     label = opts.short ? '' : ' Exceptionnel';
     title = `Dividende exceptionnel non récurrent (${excV.toLocaleString('fr-FR')} XOF brut) · issu d'une opération ponctuelle (cession d'actifs, HAO) · exclu du rendement courant et du simulateur`;
   } else if (conf === 'haute') {
