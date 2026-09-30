@@ -62,19 +62,19 @@
       <span class="topnav-mark" aria-hidden="true">📈</span>
       <span class="topnav-brand">BRVM</span>
     </button>
-    <span id="live-pill" class="topnav-live" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--bull-wash);color:var(--color-live);padding:1px 6px;border-radius:10px;font-weight:600">
-      <span id="live-dot" style="width:5px;height:5px;background:var(--color-live);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
-      <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
+    <span id="live-pill" class="topnav-live">
+      <span id="live-dot"></span>
+      <span id="live-label">LIVE</span>
     </span>
     <nav class="topnav-links" id="topnav-links" aria-label="Ecrans">
-      <button type="button" data-nav="welcome" onclick="navTo('welcome')">Accueil</button>
-      <button type="button" data-nav="rank" onclick="navTo('rank')">Classement</button>
-      <button type="button" data-nav="screener" onclick="navTo('screener')">Screener</button>
-      <button type="button" data-nav="signals" onclick="navTo('signals')">Signaux</button>
-      <button type="button" data-nav="news" onclick="navTo('news')">Actualités</button>
-      <button type="button" data-nav="glossaire" onclick="navTo('glossaire')">Glossaire</button>
-      <button type="button" data-nav="methodo" onclick="navTo('methodo')">Méthodologie</button>
-      <button type="button" data-nav="settings" onclick="navTo('settings')">Paramètres</button>
+      <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser">Accueil</button>
+      <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil">Classement<span id="rank-badge" class="nav-count" title="Nombre de sociétés analysées"></span></button>
+      <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités">Screener</button>
+      <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles">Signaux</button>
+      <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
+      <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
+      <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
+      <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
     </nav>
     <div class="topnav-more" id="topnav-more" hidden>
       <button type="button" class="topnav-more-btn" id="topnav-more-btn" onclick="toggleTopnavMore()" aria-expanded="false" aria-controls="topnav-more-menu">Plus ▾</button>
@@ -91,6 +91,7 @@
       <button type="button" class="topnav-search" onclick="openCmdK()" title="Recherche (Ctrl+K)"><span class="topnav-search-ico" aria-hidden="true">🔍</span><span class="topnav-search-label">Rechercher</span> <kbd>Ctrl+K</kbd></button>
     </div>
   </div>
+  <div id="curr-rate"></div>
   <div id="index-ticker" class="index-ticker" hidden></div>
 </header>
 <div class="app-body">
@@ -1164,17 +1165,17 @@
 </footer>
 </main></div></div>
 <nav class="tabbar" id="tabbar" aria-label="Navigation">
-  <button type="button" data-nav="welcome" onclick="navTo('welcome')"><span aria-hidden="true">👋</span>Accueil</button>
-  <button type="button" data-nav="rank" onclick="navTo('rank')"><span aria-hidden="true">🏆</span>Classement</button>
-  <button type="button" data-nav="screener" onclick="navTo('screener')"><span aria-hidden="true">🔍</span>Screener</button>
-  <button type="button" data-nav="signals" onclick="navTo('signals')"><span aria-hidden="true">📡</span>Signaux</button>
-  <button type="button" data-nav="plus" onclick="toggleTabPlus()"><span aria-hidden="true">☰</span>Plus</button>
+  <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span aria-hidden="true">👋</span>Accueil</button>
+  <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span aria-hidden="true">🏆</span>Classement</button>
+  <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span aria-hidden="true">🔍</span>Screener</button>
+  <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles"><span aria-hidden="true">📡</span>Signaux</button>
+  <button type="button" data-nav="plus" onclick="toggleTabPlus()" title="Actualités, glossaire, méthodologie, paramètres, devise et thème"><span aria-hidden="true">☰</span>Plus</button>
 </nav>
 <div id="tab-plus" class="tab-plus">
-  <button type="button" data-nav="news" onclick="navTo('news')">Actualités</button>
-  <button type="button" data-nav="glossaire" onclick="navTo('glossaire')">Glossaire</button>
-  <button type="button" data-nav="methodo" onclick="navTo('methodo')">Méthodologie</button>
-  <button type="button" data-nav="settings" onclick="navTo('settings')">Paramètres</button>
+  <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
+  <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
+  <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
+  <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
   <div class="tab-plus-row" role="group" aria-label="Devise">
     <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>
     <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>

@@ -105,6 +105,9 @@
   --color-violet-soft:#a78bfa;
   --violet-wash:rgba(139,92,246,0.06);
   --color-amber-fixed:#f59e0b;
+  /* Pastille marché fermé : encre lisible sur le lavis (sombre) */
+  --closed-ink:#fbbf24;
+  --closed-wash:rgba(251,191,36,0.18);
   --verdict-pos:#10b981;
   --verdict-pos-bg:rgba(16,185,129,0.15);
   --verdict-pos-wash:rgba(16,185,129,0.08);
@@ -146,6 +149,9 @@
 
   --shimmer-kpi:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.05) 50%,transparent 100%);
   --row-zebra:rgba(0,0,0,.012);
+  /* Pastille marché fermé : encre foncée, le jaune vif tombe sous 4,5:1 en clair */
+  --closed-ink:#6b4200;
+  --closed-wash:rgba(107,66,0,0.10);
 }
 /* ══ Reset + base ═══════════════════════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -613,7 +619,15 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .topnav-logo{display:flex;align-items:center;gap:var(--space-1);background:none;border:none;cursor:pointer;color:var(--text-1);padding:var(--space-1) var(--space-4px);flex-shrink:0;font-family:var(--font-ui)}
 .topnav-mark{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px}
 .topnav-brand{font-size:var(--text-body);font-weight:700}
-.topnav-live{flex-shrink:0}
+.topnav-live{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--bull-wash);color:var(--color-live)}
+.topnav-live.is-closed{background:var(--closed-wash);color:var(--closed-ink)}
+#live-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;animation:pulse 2s infinite}
+.topnav-live.is-closed #live-dot{animation:none}
+#live-label{font-size:9px;font-weight:600}
+.nav-count{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;margin-left:var(--space-4px);padding:0 var(--space-4px);border-radius:var(--radius-pill);background:var(--bg-overlay);color:var(--text-2);font-size:10px;font-weight:600;vertical-align:1px}
+.nav-count:empty{display:none}
+#curr-rate:empty{display:none}
+#curr-rate:not(:empty){display:block;font-size:10px;line-height:1.4;color:var(--text-2);padding:0 var(--space-2) var(--space-4px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topnav-links{display:flex;align-items:center;gap:var(--space-2px);flex:1;min-width:0;overflow:hidden}
 .topnav-links button,.topnav-more-btn{background:none;border:none;cursor:pointer;color:var(--text-2);font-family:var(--font-ui);font-size:13px;padding:var(--space-6px) var(--space-10px);border-radius:var(--radius-sm);white-space:nowrap}
 .topnav-links button:hover,.topnav-more-btn:hover{background:var(--bg-overlay);color:var(--text-1)}
@@ -631,7 +645,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .topnav-icon:hover{background:var(--bg-elevated);color:var(--text-1)}
 .topnav-search{display:flex;align-items:center;gap:var(--space-1);background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-sm);color:var(--text-2);cursor:pointer;font-family:var(--font-ui);font-size:12px;padding:var(--space-4px) var(--space-10px);white-space:nowrap}
 .topnav-search-ico{display:none}
-.topnav-search kbd{font-family:var(--font-mono);font-size:10px;color:var(--text-3);border:1px solid var(--border-1);border-radius:var(--radius-xs);padding:0 var(--space-4px)}
+.topnav-search kbd{font-family:var(--font-mono);font-size:10px;color:var(--text-2);background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-xs);padding:0 var(--space-4px)}
 #nav-cmp-count:empty{display:none}
 .index-ticker{overflow:hidden;border-top:1px solid var(--border-1);background:var(--bg-elevated);height:28px;display:flex;align-items:center}
 .index-ticker[hidden]{display:none!important}
