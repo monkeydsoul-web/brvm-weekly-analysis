@@ -8,6 +8,7 @@ function _lierDepartAccueil() {
     if (id !== 'welcome') {
       window._accueilIndicesParti = 0;
       window._accueilLargeurParti = 0;
+      window._accueilActusParti = 0;
     }
     return orig.apply(this, arguments);
   };
@@ -634,34 +635,19 @@ function _telechargerMarche(essai) {
 }
 
 
-function _jourDerniereNote(rows) {
-  var iso = '';
-  (rows || []).some(function(x) {
-    if (x && x.note_calculee_le) { iso = x.note_calculee_le; return true; }
-    return false;
-  });
-  return _jourSeance(iso);
-}
-
 function _texteEtatComposite() {
-  var marche = window._accueilMarche;
   var statut = window._accueilStatut;
-  var ouvert = '';
-  if (statut && typeof statut.market_open === 'boolean') {
-    ouvert = statut.market_open ? 'Marché ouvert' : 'Marché fermé';
-  }
-  var jour = _jourSeance(marche && marche.session_date)
-    || _jourSeance(statut && statut.session_date)
-    || _jourDerniereNote(_scoresConnus());
-  var date = jour ? ('Dernière séance : ' + jour) : '';
-  if (ouvert && date) return ouvert + ' · ' + date;
-  return ouvert || date || '—';
+  if (statut && statut.market_open === true) return 'Marché ouvert · Séance en cours';
+  var jour = _jourSeance(window._accueilMarche && window._accueilMarche.session_date);
+  return jour ? ('Dernière séance : ' + jour) : '';
 }
 
 function _poserEtatComposite() {
   var el = document.getElementById('accueil-composite-etat');
   if (!el || !el.isConnected) return;
-  el.textContent = _texteEtatComposite();
+  var txt = _texteEtatComposite();
+  el.textContent = txt;
+  el.hidden = !txt;
 }
 
 function _noterStatutLive(d) {
@@ -761,8 +747,10 @@ function _titreActu(item) {
 }
 
 function _remplirActus() {
+  if (window._accueilActusParti) return;
   var el = document.getElementById('accueil-actus');
   if (!el) return;
+  window._accueilActusParti = 1;
   el.innerHTML = '<p class="accueil-vide">Chargement…</p>';
   Promise.all([
     fetch('/api/announcements?limit=8').then(function(r) { return r.ok ? r.json() : { data: [] }; }).catch(function() { return { data: [] }; }),

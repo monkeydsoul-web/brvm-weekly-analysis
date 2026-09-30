@@ -585,7 +585,6 @@ body:has(#page-welcome.on) .sb{display:none!important}
 }
 @media(min-width:768px){
   .accueil{gap:var(--space-2);padding-top:0}
-  .accueil-marche{padding:var(--space-12px) var(--space-2)}
   .accueil-cartes{gap:var(--space-1)}
   .accueil-carte{align-items:flex-start;text-align:left;padding:var(--space-2);min-height:0}
   .accueil-carte-n{font-size:var(--text-h1)}
