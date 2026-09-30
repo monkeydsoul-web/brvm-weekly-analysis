@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Clôture des indices : une séance, pas de week-end, plages de lecture."""
 import json
+import logging
 import os
 from datetime import date, datetime, timezone
 
@@ -188,10 +189,30 @@ def test_cache_marche_avant_la_cloture_nest_pas_enregistre(historique):
     assert not historique.exists()
 
 
-def test_fichier_illisible_n_est_pas_ecrase(historique):
+def test_fichier_illisible_n_est_pas_ecrase(historique, caplog):
     historique.write_text("{", encoding="utf-8")
-    assert _enregistrer()["statut"] == "fichier_illisible"
+    with caplog.at_level(logging.ERROR, logger="index_history"):
+        assert _enregistrer()["statut"] == "fichier_illisible"
     assert historique.read_text(encoding="utf-8") == "{"
+    assert any(
+        rec.levelno == logging.ERROR and str(historique) in rec.getMessage()
+        for rec in caplog.records
+    )
+
+
+def test_fichier_temporaire_porte_le_prefixe(historique, monkeypatch):
+    vu = {}
+    vrai = index_history.tempfile.NamedTemporaryFile
+
+    def espion(*args, **kwargs):
+        vu.update(kwargs)
+        return vrai(*args, **kwargs)
+
+    monkeypatch.setattr(index_history.tempfile, "NamedTemporaryFile", espion)
+    assert _enregistrer()["statut"] == "enregistre"
+    assert vu["prefix"] == "index_history."
+    assert vu["suffix"] == ".tmp"
+    assert vu["dir"] == str(historique.parent)
 
 
 def test_remplacement_rate_garde_l_ancien_fichier(historique, monkeypatch):
@@ -487,6 +508,20 @@ def test_session_date_prime_sur_la_date_du_jour(historique):
     assert meme_veille["statut"] == "reprise_veille"
     assert [s["date"] for s in _lire(historique)["seances"]] == ["2026-09-28"]
     assert _lire(historique)["seances"][0]["indices"]["BRVM-C"] == 245.2
+
+
+def test_session_date_none_n_utilise_pas_la_date_du_jour(historique):
+    marche = _marche()
+    marche["session_date"] = None
+    assert _enregistrer(marche=marche)["statut"] == "date_incoherente"
+    assert not historique.exists()
+
+
+def test_session_date_vide_n_utilise_pas_la_date_du_jour(historique):
+    marche = _marche()
+    marche["session_date"] = ""
+    assert _enregistrer(marche=marche)["statut"] == "date_incoherente"
+    assert not historique.exists()
 
 
 def test_session_date_illisible_ou_future(historique):

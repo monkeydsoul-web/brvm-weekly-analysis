@@ -14,6 +14,8 @@ Jour sans séance : cours et volumes identiques à la séance précédente,
 ou les quatre indices identiques à la dernière clôture enregistrée,
 ou current == prev pour les quatre. La date écrite est session_date
 du cache (horloge publiée par brvm.org) quand elle est lisible.
+Une clé absente (vieux cache) retombe sur le jour de l'appel.
+Une clé présente mais nulle, vide ou illisible refuse l'écriture.
 Jamais la valeur de la veille sous la date du jour.
 Week-end et appel avant 15h30 UTC : rien n'est écrit.
 """
@@ -294,16 +296,17 @@ def _date_cible(marche, moment):
     """Date de séance publiée, sinon le jour de l'appel.
 
     ``session_date`` vient de l'en-tête brvm.org (« 30 septembre 2026 »).
-    La page ne publie pas d'autre date de séance. Une valeur illisible
-    n'est pas remplacée par aujourd'hui : on refuse d'écrire.
+    Seule une clé vraiment absente (vieux cache, avant ce champ) retombe
+    sur le jour de l'appel. Le scraper pose ``None`` quand l'en-tête est
+    illisible : cette clé présente, vide ou invalide refuse l'écriture.
     """
-    if not isinstance(marche, dict) or marche.get("session_date") in (None, ""):
+    if not isinstance(marche, dict) or "session_date" not in marche:
         return moment.date()
     brut = marche.get("session_date")
-    if not isinstance(brut, str):
+    if not isinstance(brut, str) or not brut.strip():
         return None
     try:
-        return datetime.strptime(brut[:10], "%Y-%m-%d").date()
+        return datetime.strptime(brut.strip()[:10], "%Y-%m-%d").date()
     except ValueError:
         return None
 
@@ -349,10 +352,10 @@ def charger():
         with open(HISTORY_PATH, encoding="utf-8") as f:
             data = json.load(f)
     except Exception as exc:
-        logger.warning("index history illisible, serie vide: %s", exc)
+        logger.error("index history illisible, serie vide (%s): %s", HISTORY_PATH, exc)
         return {"seances": []}
     if not isinstance(data, dict) or not isinstance(data.get("seances"), list):
-        logger.warning("index history: format inattendu, serie vide")
+        logger.error("index history: format inattendu, serie vide (%s)", HISTORY_PATH)
         return {"seances": []}
     with _CACHE_LOCK:
         _CACHE["stamp"] = stamp
@@ -376,7 +379,12 @@ def _ecrire(data):
     tmp_path = None
     try:
         tmp = tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", dir=dossier, delete=False,
+            mode="w",
+            encoding="utf-8",
+            dir=dossier,
+            prefix="index_history.",
+            suffix=".tmp",
+            delete=False,
         )
         tmp_path = tmp.name
         with tmp:
@@ -508,7 +516,11 @@ def _appliquer(iso, indices, societes):
     try:
         data = _charger_strict()
     except Exception as exc:
-        logger.error("index history illisible, ecriture annulee: %s", exc)
+        logger.error(
+            "index history illisible, ecriture annulee (%s): %s",
+            HISTORY_PATH,
+            exc,
+        )
         return _statut("fichier_illisible", iso)
     seances = data["seances"]
     precedente = _seance_avant(seances, iso)

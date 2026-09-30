@@ -1,6 +1,6 @@
 # Vérification en production — historique des indices
 
-Branche `feature/refonte-nav-v2`. À contrôler après déploiement, sans fusionner cette PR tant que les points ci-dessous ne sont pas vus sur le service Render.
+Branche `feature/refonte-nav-v2`. À contrôler après le déploiement.
 
 Le fichier n'est pas dans git (`data/` est ignoré). Il vit sur le disque persistant, dans le répertoire `BRVM_DATA_DIR` (sur Render, le disque monté, en pratique `/var/data`).
 
@@ -23,7 +23,7 @@ Rien n'est écrit le week-end, avant 15h30 UTC, ni un jour sans séance. Trois c
 - les quatre indices qu'on s'apprête à écrire sont identiques à la dernière séance déjà dans le fichier (on n'ouvre pas une date neuve avec la valeur de la veille) ;
 - `current == prev` pour les quatre indices du cache.
 
-La date de la ligne est `session_date` du cache quand elle est lisible. brvm.org/fr/resume ne publie pas de date de séance à part l'horloge de l'en-tête (« 30 septembre 2026 ») : le scraper la recopie dans `session_date`. Sans cette clé, la date est celle de l'appel. Une date illisible ou future n'est pas remplacée par aujourd'hui. Si le serveur n'a pas tourné ce jour-là, le jour manque : il n'est pas reconstitué.
+La date de la ligne est `session_date` du cache quand elle est lisible. brvm.org/fr/resume ne publie pas de date de séance à part l'horloge de l'en-tête (« 30 septembre 2026 ») : le scraper la recopie dans `session_date`. Seule l'absence de cette clé (vieux cache) retombe sur la date de l'appel. Une clé présente mais nulle, vide ou illisible, ou une date future, n'est pas remplacée par aujourd'hui : rien n'est écrit. Si le serveur n'a pas tourné ce jour-là, le jour manque : il n'est pas reconstitué.
 
 Un indice absent, ou à plus de 15 % de sa dernière clôture enregistrée, n'est pas écrit. Un passage suivant le même jour peut l'ajouter. Il ne modifie pas un niveau déjà posé.
 
@@ -124,6 +124,6 @@ Plages, jour de référence = aujourd'hui UTC, bornes incluses :
 | `indice hors ecart ignore` | Un indice bouge de plus de 15 % par rapport à sa dernière clôture. Les autres peuvent être écrits. Un passage suivant peut compléter celui-là. |
 | `verrou occupe` | Un autre worker tenait le fichier. Rien n'est écrasé. Le job de 18h10 ou le passage suivant réessaie. |
 | `aucun indice reconnu` | La table `indices` du cache ne contient aucun des quatre noms. |
-| `ecriture annulee` | Le JSON est illisible. Le fichier n'est pas écrasé. À regarder avant de le supprimer. |
+| `ecriture annulee` | Le JSON est illisible. Le log est au niveau ERROR et cite le chemin du fichier. Le fichier n'est pas écrasé. À regarder avant de le supprimer. Un temporaire orphelin se reconnaît au préfixe `index_history.` et au suffixe `.tmp`, dans le même dossier. |
 
 Le site continue de servir les cours et les notes même si ce fichier est absent : `GET /api/index-history` renvoie alors `points: []`.
