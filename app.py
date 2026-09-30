@@ -2428,15 +2428,10 @@ def _init_app():
         return
     _INIT_DONE = True
 
-    # Tests : ne pas lancer le planificateur, le rechauffement (ecrit le classement)
-    # ni les threads reseau. Inactif en production tant que la variable n'est pas posee.
-    if os.environ.get("BRVM_DISABLE_SCHEDULER") == "1":
-        logger.info("BRVM_DISABLE_SCHEDULER=1 — planificateur et rechauffement non demarres")
-        return
-
-    # Fiche SICC : le disque peut encore décrire un câblier (génération du
-    # 30 mai 2026). On recopie stories/sicc.json dans cette seule entrée.
-    # La route continue d'écraser SICC tant que le fichier n'est pas relu.
+    # Fiche SICC : correction disque, indépendante du planificateur.
+    # Accès local et idempotent, sans thread ni réseau. Elle tourne aussi
+    # quand le planificateur est coupé. La route continue d'écraser SICC
+    # tant que le fichier n'est pas relu.
     try:
         from migrer_fiche_sicc import migrer_fiche_sicc
         resultat = migrer_fiche_sicc()
@@ -2447,6 +2442,12 @@ def _init_app():
         )
     except Exception as exc:
         logger.warning("Migration fiche SICC non appliquée : %s", exc)
+
+    # Tests : ne pas lancer le planificateur, le rechauffement (ecrit le classement)
+    # ni les threads reseau. Inactif en production tant que la variable n'est pas posee.
+    if os.environ.get("BRVM_DISABLE_SCHEDULER") == "1":
+        logger.info("BRVM_DISABLE_SCHEDULER=1 — planificateur et rechauffement non demarres")
+        return
 
     try:
         from dotenv import load_dotenv as _ldenv

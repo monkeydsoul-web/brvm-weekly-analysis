@@ -13,6 +13,10 @@ entier, puis remplacement atomique (fichier temporaire dans le même
 dossier, fsync, ``os.replace``).
 
 Au démarrage de l'application (gunicorn importe ``app``), voir ``_init_app``.
+L'appel est avant le court-circuit ``BRVM_DISABLE_SCHEDULER`` : ce drapeau
+coupe le planificateur, pas cette correction disque. Le verrou est pris
+en ``LOCK_NB`` ; au bout de 10 s la migration s'arrête, logue, et le
+process continue.
 À la main, depuis la racine du dépôt, une fois ou après un échec :
 
     python3 migrer_fiche_sicc.py --data-dir /var/data
@@ -27,16 +31,28 @@ pas de câbles.
 import argparse
 import fcntl
 import json
+import logging
 import os
 import sys
 import tempfile
+import time
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FICHE_SICC = os.path.join(ROOT, "stories", "sicc.json")
 NOM_FICHIER = "companies_stories.json"
+DELAI_VERROU_S = 10.0
+_PAUSE_VERROU_S = 0.05
 
-_RAISONS_ECHEC = ("json_illisible", "structure_inattendue", "fiche_absente", "fiche_illisible")
+_RAISONS_ECHEC = (
+    "json_illisible",
+    "structure_inattendue",
+    "fiche_absente",
+    "fiche_illisible",
+    "verrou_occupe",
+)
 
 
 def _resultat(modifie, raison, sauvegarde, chemin):
@@ -131,11 +147,27 @@ def _appliquer(chemin, fiche):
     return _resultat(True, "migre", sauvegarde, chemin)
 
 
-def migrer_fiche_sicc(data_dir=None):
+def _acquerir_verrou(verrou, delai_s):
+    """LOCK_EX non bloquant, réessayé jusqu'à ``delai_s`` secondes."""
+    echeance = time.monotonic() + delai_s
+    while True:
+        try:
+            fcntl.flock(verrou.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return True
+        except BlockingIOError:
+            reste = echeance - time.monotonic()
+            if reste <= 0:
+                return False
+            time.sleep(min(_PAUSE_VERROU_S, reste))
+
+
+def migrer_fiche_sicc(data_dir=None, delai_verrou_s=DELAI_VERROU_S):
     """Recopie la fiche SICOR dans SICC, ou ne fait rien si c'est déjà le cas.
 
     ``data_dir`` est le dossier du disque (``BRVM_DATA_DIR`` en production,
     souvent ``/var/data`` ou ``/data``). Sans argument, ``paths.DATA_DIR``.
+    Si le verrou reste pris pendant ``delai_verrou_s`` secondes, la fonction
+    logue un avertissement et retourne sans écrire.
     """
     dossier = data_dir if data_dir else _data_dir()
     chemin = os.path.join(dossier, NOM_FICHIER)
@@ -146,13 +178,20 @@ def migrer_fiche_sicc(data_dir=None):
         return _resultat(False, erreur, None, chemin)
     verrou_path = chemin + ".lock"
     verrou = open(verrou_path, "a")
+    acquis = False
     try:
-        fcntl.flock(verrou.fileno(), fcntl.LOCK_EX)
-        try:
-            return _appliquer(chemin, fiche)
-        finally:
-            fcntl.flock(verrou.fileno(), fcntl.LOCK_UN)
+        acquis = _acquerir_verrou(verrou, delai_verrou_s)
+        if not acquis:
+            logger.warning(
+                "Migration fiche SICC abandonnée : verrou occupé après %.0f s (%s)",
+                delai_verrou_s,
+                verrou_path,
+            )
+            return _resultat(False, "verrou_occupe", None, chemin)
+        return _appliquer(chemin, fiche)
     finally:
+        if acquis:
+            fcntl.flock(verrou.fileno(), fcntl.LOCK_UN)
         verrou.close()
 
 

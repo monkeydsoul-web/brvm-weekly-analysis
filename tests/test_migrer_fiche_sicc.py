@@ -3,7 +3,9 @@
 
 Aucune note, aucun conseil, aucun prix cible n'est recalculé.
 """
+import fcntl
 import json
+import logging
 import os
 import re
 import threading
@@ -66,7 +68,7 @@ def test_migration_idempotente_sauvegarde_et_laisse_les_autres(tmp_path):
     avant = _histoires()
     chemin = _ecrire(tmp_path, avant)
     original = chemin.read_bytes()
-    horodatage = chemin.stat().st_mtime_ns
+    inode = chemin.stat().st_ino
 
     resultat = migrer_fiche_sicc.migrer_fiche_sicc(str(tmp_path))
 
@@ -94,15 +96,16 @@ def test_migration_idempotente_sauvegarde_et_laisse_les_autres(tmp_path):
     assert apres["stories"]["CABC"]["prix_cible"] == 1234
     assert apres["stories"]["CABC"]["note10"] == 5.3
 
+    assert chemin.read_bytes() != original
+    assert chemin.stat().st_ino != inode
     octets = chemin.read_bytes()
-    mtime = chemin.stat().st_mtime_ns
-    assert mtime != horodatage
+    inode_migre = chemin.stat().st_ino
     second = migrer_fiche_sicc.migrer_fiche_sicc(str(tmp_path))
     assert second["modifie"] is False
     assert second["raison"] == "deja_a_jour"
     assert second["sauvegarde"] is None
     assert chemin.read_bytes() == octets
-    assert chemin.stat().st_mtime_ns == mtime
+    assert chemin.stat().st_ino == inode_migre
     assert len(_sauvegardes(tmp_path)) == 1
     assert not list(tmp_path.glob("*.json.tmp"))
     assert not list(tmp_path.glob("*.bak.tmp"))
@@ -189,13 +192,32 @@ def test_deux_appels_paralleles_une_seule_sauvegarde(tmp_path):
     assert apres["stories"]["ABJC"]["en_bref"].startswith("Erium")
 
 
+def test_verrou_occupe_abandonne_sans_ecrire(tmp_path, caplog):
+    chemin = _ecrire(tmp_path, _histoires())
+    original = chemin.read_bytes()
+    verrou = open(str(chemin) + ".lock", "a")
+    fcntl.flock(verrou.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    try:
+        with caplog.at_level(logging.WARNING, logger="migrer_fiche_sicc"):
+            resultat = migrer_fiche_sicc.migrer_fiche_sicc(str(tmp_path), delai_verrou_s=0.2)
+    finally:
+        fcntl.flock(verrou.fileno(), fcntl.LOCK_UN)
+        verrou.close()
+    assert resultat["modifie"] is False
+    assert resultat["raison"] == "verrou_occupe"
+    assert resultat["sauvegarde"] is None
+    assert chemin.read_bytes() == original
+    assert _sauvegardes(tmp_path) == []
+    assert any("verrou occupé" in r.message for r in caplog.records)
+
+
 def test_demarrage_appelle_la_migration_et_la_route_ecrase_encore():
     import inspect
     import app
 
     corps = inspect.getsource(app._init_app)
     assert "migrer_fiche_sicc" in corps
-    assert corps.index("BRVM_DISABLE_SCHEDULER") < corps.index("migrer_fiche_sicc")
+    assert corps.index("migrer_fiche_sicc") < corps.index("BRVM_DISABLE_SCHEDULER")
     route = inspect.getsource(app.serve_companies_stories)
     assert 'stories["SICC"] = _histoire_sicc()' in route
 
