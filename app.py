@@ -7,8 +7,10 @@ Ouvre: http://localhost:5000
 
 import os
 import json
+import html
 import hmac
 import logging
+import re
 import threading
 from datetime import datetime, timedelta, timezone
 from flask import Flask, jsonify, redirect, request, send_from_directory
@@ -379,6 +381,132 @@ def _js_version_mismatch():
 @app.route("/")
 def index():
     reponse = app.response_class(_corps_index(), mimetype="text/html; charset=utf-8")
+    reponse.headers["Cache-Control"] = "no-cache"
+    return reponse
+
+
+_TICKER_URL = re.compile(r"^[A-Z0-9]{2,12}$")
+_ORIGINE_PUBLIQUE = "https://brvm-weekly-analysis.onrender.com"
+
+
+def _tickers_connus():
+    """Liste blanche : societes documentees, plus les tickers du classement."""
+    from company_data import COMPANIES
+    connus = set(COMPANIES)
+    try:
+        for row in load_latest_scores() or []:
+            if not isinstance(row, dict):
+                continue
+            ticker = row.get("ticker")
+            if isinstance(ticker, str) and _TICKER_URL.match(ticker):
+                connus.add(ticker)
+    except Exception:
+        pass
+    return connus
+
+
+def _ticker_autorise(brut):
+    """Ticker canonique, ou None. Le texte brut de l'URL n'est jamais renvoye."""
+    if not isinstance(brut, str):
+        return None
+    candidat = brut.strip().upper()
+    if not _TICKER_URL.match(candidat):
+        return None
+    if candidat not in _tickers_connus():
+        return None
+    return candidat
+
+
+def _nom_societe(ticker, row=None):
+    """Meme nom que la fiche : celui du classement, sinon la fiche documentee."""
+    if isinstance(row, dict):
+        nom_ligne = row.get("name")
+        if isinstance(nom_ligne, str) and nom_ligne.strip():
+            return nom_ligne.strip()
+    from company_data import COMPANIES
+    nom = (COMPANIES.get(ticker) or {}).get("name")
+    if isinstance(nom, str) and nom.strip():
+        return nom.strip()
+    return ticker
+
+
+def _textes_societe(ticker):
+    """Titre et description. La note vient du classement deja calcule."""
+    row = None
+    note = None
+    try:
+        for candidat in load_latest_scores() or []:
+            if isinstance(candidat, dict) and candidat.get("ticker") == ticker:
+                row = candidat
+                note = _note10_fr(candidat)
+                break
+    except Exception:
+        row = None
+        note = None
+    nom = _nom_societe(ticker, row)
+    if note:
+        titre = "%s (%s) – note %s/10 – BRVM Analyzer" % (nom, ticker, note)
+        description = (
+            "%s (%s), note %s/10. Fiche de la société cotée à la BRVM. "
+            "Données publiques, pédagogie. Pas un conseil en investissement."
+            % (nom, ticker, note)
+        )
+    else:
+        titre = "%s (%s) – BRVM Analyzer" % (nom, ticker)
+        description = (
+            "%s (%s). Fiche de la société cotée à la BRVM. "
+            "Données publiques, pédagogie. Pas un conseil en investissement."
+            % (nom, ticker)
+        )
+    return titre, description
+
+
+def _corps_societe(ticker):
+    """Meme page que /, avec le titre, la description et le canonical de la societe."""
+    corps = _corps_index()
+    titre, description = _textes_societe(ticker)
+    titre_html = html.escape(titre, quote=False)
+    titre_attr = html.escape(titre, quote=True)
+    desc_attr = html.escape(description, quote=True)
+    corps = re.sub(r"<title>.*?</title>", "<title>%s</title>" % titre_html, corps, count=1)
+    corps = re.sub(
+        r'<meta name="description" content="[^"]*">',
+        '<meta name="description" content="%s">' % desc_attr,
+        corps,
+        count=1,
+    )
+    corps = re.sub(
+        r'<meta property="og:title" content="[^"]*">',
+        '<meta property="og:title" content="%s">' % titre_attr,
+        corps,
+        count=1,
+    )
+    corps = re.sub(
+        r'<meta property="og:description" content="[^"]*">',
+        '<meta property="og:description" content="%s">' % desc_attr,
+        corps,
+        count=1,
+    )
+    canon = "%s/societe/%s" % (_ORIGINE_PUBLIQUE, ticker)
+    lien = '<link rel="canonical" href="%s">' % html.escape(canon, quote=True)
+    amorce = (
+        '<script>if(/^\\/societe\\/[A-Za-z0-9]{2,12}$/.test(location.pathname))'
+        'document.documentElement.classList.add("fiche-directe")</script>'
+    )
+    corps = corps.replace("</head>", lien + amorce + "</head>", 1)
+    return corps
+
+
+@app.route("/societe/<ticker>")
+def page_societe(ticker):
+    propre = _ticker_autorise(ticker)
+    if not propre:
+        return not_found(None)
+    # La forme canonique est en majuscules. Un 200 sur /societe/snts
+    # poussait ensuite une entree d'historique et bouclait au retour.
+    if ticker != propre:
+        return redirect("/societe/" + propre, code=301)
+    reponse = app.response_class(_corps_societe(propre), mimetype="text/html; charset=utf-8")
     reponse.headers["Cache-Control"] = "no-cache"
     return reponse
 
