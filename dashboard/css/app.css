@@ -290,7 +290,9 @@ tr:nth-child(even) td{background:var(--row-zebra)}
 #rank-cards{display:none}
 /* ══ Footer ══════════════════════════════════════════════════════════════════ */
 #app-footer{position:static;left:auto;right:auto;z-index:1;background:var(--bg-surface);border-top:1px solid var(--border-1);padding:var(--space-2) var(--space-3);height:auto;min-height:32px;font-size:13px;line-height:1.4;color:var(--text-2);display:flex;justify-content:center;align-items:center;text-align:center;flex:none}
-.app-footer-avert{margin:0;width:100%}
+.app-footer-avert{margin:0;width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 10px}
+.app-footer-log{margin:0;padding:4px 2px;min-height:32px;border:none;background:transparent;color:var(--text-2);font-family:inherit;font-size:12px;line-height:1.4;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.app-footer-log:hover,.app-footer-log:focus-visible{color:var(--text-1)}
 .app-footer-meta{display:none!important}
 /* ══ Misc ════════════════════════════════════════════════════════════════════ */
 #alert-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 var(--space-4px);border-radius:var(--radius-8);font-size:9px;font-weight:700;margin-left:var(--space-4px);vertical-align:middle}

@@ -180,7 +180,7 @@
           <span class="accueil-lecon-n" aria-hidden="true">2</span>
           <h3>Ouvrir un compte via une SGI</h3>
           <p>Pour passer un ordre, il faut une SGI : une société de gestion et d'intermédiation agréée. On peut en choisir une dans n'importe quel pays de l'UEMOA.</p>
-          <button type="button" class="accueil-lien" onclick="nav('glossaire')">Glossaire →</button>
+          <button type="button" class="accueil-lien" onclick="if(typeof allerCommentInvestir==='function'){allerCommentInvestir();}else{nav('glossaire');}">Glossaire →</button>
         </article>
         <article class="accueil-lecon">
           <span class="accueil-lecon-n" aria-hidden="true">3</span>
@@ -1196,7 +1196,7 @@
 </div>
 
 <footer id="app-footer">
-  <p class="app-footer-avert">Pas un conseil en investissement</p>
+  <p class="app-footer-avert">Pas un conseil en investissement <button type="button" class="app-footer-log" onclick="showChangelog()">Changelog</button></p>
   <div class="app-footer-meta" hidden>
     <span id="footer-date"></span>
     <span id="footer-count"></span>

@@ -294,6 +294,8 @@
   cursor:pointer;
 }
 .accueil-seance-ligne:hover{background:var(--bg-elevated)}
+.accueil-seance-ligne.is-inerte{cursor:default}
+.accueil-seance-ligne.is-inerte:hover{background:transparent}
 .accueil-seance-ticker{font-weight:800}
 .accueil-seance-cours{
   flex:1;

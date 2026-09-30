@@ -103,6 +103,8 @@ function _remplirStatut(rows) {
     if (!r.ok) throw new Error('statut');
     return r.json();
   }).then(function(d) {
+    window._accueilStatut = d || null;
+    _poserSousTitreSeance();
     if (!statut.isConnected) return;
     if (!d || typeof d.market_open !== 'boolean') {
       statut.textContent = 'Marché —';
@@ -150,10 +152,8 @@ function _nomCourt(row) {
 
 function _fmtCours(n) {
   if (n == null || n === '' || !isFinite(Number(n))) return '—';
-  if ((window._currency === 'EUR' || window._currency === 'USD') && typeof fmtXOF === 'function') return fmtXOF(n);
-  var num = Number(n);
-  var dec = Math.abs(num - Math.round(num)) < 1e-6 ? 0 : 2;
-  return num.toLocaleString('fr-FR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + '\u00a0FCFA';
+  if (typeof fmtXOF === 'function') return fmtXOF(n);
+  return '—';
 }
 
 function _libelleBadge(row) {
@@ -172,6 +172,7 @@ function _mieuxNotees(rows) {
     var na = (typeof note10num === 'function') ? note10num(a) : 0;
     var nb = (typeof note10num === 'function') ? note10num(b) : 0;
     if (na !== nb) return nb - na;
+    if (typeof triCommeClassement === 'function') return triCommeClassement(a, b);
     return String(a.ticker || '').localeCompare(String(b.ticker || ''), 'fr');
   });
   return liste.slice(0, 4);
@@ -219,25 +220,48 @@ function _htmlCarteNote(x) {
 }
 
 function _jourSeance(iso) {
-  if (!iso) return '';
-  var d = new Date(iso);
+  if (iso == null || iso === '') return '';
+  var s = String(iso).trim();
+  if (!/^\d{4}-\d{2}-\d{2}(?:[T\s].*)?$/.test(s)) return '';
+  var d = new Date(s);
   if (isNaN(d.getTime())) return '';
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Abidjan' });
 }
 
-function _sousTitreSeance(d) {
-  var jour = _jourSeance(d && d.updated_at);
+function _sousTitreSeance(marche, statut) {
+  var jour = _jourSeance(marche && marche.session_date) || _jourSeance(statut && statut.session_date);
   return jour ? ('Plus fortes variations · ' + jour) : 'Plus fortes variations';
+}
+
+function _poserSousTitreSeance() {
+  var sous = document.getElementById('accueil-seance-sous');
+  if (sous && sous.isConnected) sous.textContent = _sousTitreSeance(window._accueilMarche, window._accueilStatut);
+}
+
+function _classementAccueil() {
+  if (window.scores && window.scores.length) return window.scores;
+  if (typeof scores !== 'undefined' && scores && scores.length) return scores;
+  return [];
+}
+
+function _tickerDansClassement(ticker) {
+  var t = String(ticker || '').toUpperCase();
+  if (!t) return false;
+  return _classementAccueil().some(function(x) {
+    return x && String(x.ticker || '').toUpperCase() === t;
+  });
 }
 
 function _htmlLigneSeance(x) {
   var ticker = String((x && x.ticker) || '').toUpperCase();
   if (!ticker) return '';
-  return '<button type="button" class="accueil-seance-ligne" data-ticker="' + _echapAccueil(ticker) + '">'
-    + '<strong class="accueil-seance-ticker">' + _echapAccueil(ticker) + '</strong>'
+  var corps = '<strong class="accueil-seance-ticker">' + _echapAccueil(ticker) + '</strong>'
     + '<span class="accueil-seance-cours">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
-    + '<span class="accueil-var-pill ' + _sensVariation(x.change) + '">' + _echapAccueil(_fmtVariation(x.change)) + '</span>'
-    + '</button>';
+    + '<span class="accueil-var-pill ' + _sensVariation(x.change) + '">' + _echapAccueil(_fmtVariation(x.change)) + '</span>';
+  if (_tickerDansClassement(ticker)) {
+    return '<button type="button" class="accueil-seance-ligne" data-ticker="' + _echapAccueil(ticker) + '">' + corps + '</button>';
+  }
+  return '<div class="accueil-seance-ligne is-inerte">' + corps + '</div>';
 }
 
 function _htmlColonneSeance(titre, cls, lignes) {
@@ -250,8 +274,8 @@ function _htmlColonneSeance(titre, cls, lignes) {
 function _remplirMouvements(d) {
   var bloc = document.getElementById('accueil-mouvements');
   var grille = document.getElementById('accueil-mvt-grille');
-  var sous = document.getElementById('accueil-seance-sous');
-  if (sous && sous.isConnected) sous.textContent = _sousTitreSeance(d);
+  window._accueilMarche = d || null;
+  _poserSousTitreSeance();
   if (!bloc || !grille) return;
   var hausses = ((d && d.top5) || []).filter(function(x) { return x && x.ticker; }).slice(0, 5);
   var baisses = ((d && d.flop5) || []).filter(function(x) { return x && x.ticker; }).slice(0, 5);
@@ -263,7 +287,7 @@ function _remplirMouvements(d) {
   grille.innerHTML = _htmlColonneSeance('▲ Hausses', 'is-up', hausses)
     + _htmlColonneSeance('▼ Baisses', 'is-down', baisses);
   bloc.hidden = false;
-  grille.querySelectorAll('.accueil-seance-ligne').forEach(function(btn) {
+  grille.querySelectorAll('.accueil-seance-ligne[data-ticker]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var t = btn.getAttribute('data-ticker');
       if (t && typeof _openStock === 'function') _openStock(t);
