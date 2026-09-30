@@ -2,7 +2,7 @@
 external_source.py — 3e source externe : african-markets.com
 Scrape dividende/action + date de paiement pour les 47 tickers BRVM.
 
-Cache disque : data/external_dividends.json  (refresh 1x/jour, groupé avec BOC 18h30)
+Cache disque : data/external_dividends.json  (refresh 1x/jour, groupé avec BOC 19h)
 Dégradation gracieuse : si le site est down ou change de structure,
 le système continue avec BOC+PDF sans jamais planter.
 """

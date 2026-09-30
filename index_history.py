@@ -6,19 +6,25 @@ champ indices[].current. Aucune série passée fiable n'existe dans le dépôt :
 le fichier part vide, rien n'est inventé.
 
 Écrit data/index_history.json (BRVM_DATA_DIR, disque persistant sur Render).
-Une date = une séance. Réécriture atomique. Le second passage le même jour
-ne change pas les niveaux déjà enregistrés.
+Une date = une séance. Réécriture atomique, sous verrou fcntl. Le second
+passage le même jour peut compléter un indice ou une société manquants.
+Il ne remplace jamais une valeur déjà écrite.
 
-Jour sans séance : même heuristique que price_history_builder (cours et
-volumes identiques à la séance précédente). Pas de calendrier de fériés.
+Jour sans séance : cours et volumes identiques à la séance précédente,
+ou les quatre indices identiques à la dernière clôture enregistrée,
+ou current == prev pour les quatre. La date écrite est session_date
+du cache (horloge publiée par brvm.org) quand elle est lisible.
+Jamais la valeur de la veille sous la date du jour.
 Week-end et appel avant 15h30 UTC : rien n'est écrit.
 """
 import calendar
+import fcntl
 import json
 import logging
 import os
 import tempfile
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 
 from live_data import CLOTURE_HEURE, CLOTURE_MINUTE, _en_utc
@@ -36,6 +42,11 @@ PLAGES = ("1S", "1M", "YTD", "1A")
 # écarte une capitalisation lue par erreur à la place d'un indice.
 _MIN_INDICE = 50
 _MAX_INDICE = 5000
+# Au-delà, le niveau n'est pas une clôture plausible face à la séance d'avant.
+_ECART_MAX = 0.15
+
+DELAI_VERROU_S = 10.0
+_PAUSE_VERROU_S = 0.05
 
 _ALIAS = {
     "BRVM-C": "BRVM-C",
@@ -112,16 +123,18 @@ def valeur_indice(valeur):
     return round(float(valeur), 2)
 
 
-def extraire_indices(marche):
+def _lignes_indices(marche):
     if not isinstance(marche, dict):
-        return {}
+        return []
     brut = marche.get("indices")
     if not isinstance(brut, list):
-        return {}
+        return []
+    return [entree for entree in brut if isinstance(entree, dict)]
+
+
+def extraire_indices(marche):
     trouves = {}
-    for entree in brut:
-        if not isinstance(entree, dict):
-            continue
+    for entree in _lignes_indices(marche):
         code = code_indice(entree.get("name"))
         if code is None or code in trouves:
             continue
@@ -130,6 +143,65 @@ def extraire_indices(marche):
             continue
         trouves[code] = valeur
     return trouves
+
+
+def tous_current_egal_prev(marche):
+    """Vrai si les quatre indices publiés ont current == prev.
+
+    Un seul tableau plat : la page republie la clôture précédente.
+    """
+    vus = {}
+    for entree in _lignes_indices(marche):
+        code = code_indice(entree.get("name"))
+        if code is None or code in vus:
+            continue
+        courant = valeur_indice(entree.get("current"))
+        precedent = valeur_indice(entree.get("prev"))
+        if courant is None or precedent is None:
+            return False
+        vus[code] = courant == precedent
+    if not all(code in vus for code in INDICES):
+        return False
+    return all(vus.values())
+
+
+def filtrer_ecart(indices, seance_ref):
+    """Retire un indice trop loin de sa dernière clôture enregistrée.
+
+    Sans référence (première séance de cet indice), la borne absolue
+    de ``valeur_indice`` suffit. Une valeur déjà absente n'est pas inventée.
+    """
+    anciens = {}
+    if isinstance(seance_ref, dict) and isinstance(seance_ref.get("indices"), dict):
+        anciens = seance_ref["indices"]
+    gardes = {}
+    ecartes = []
+    for code, valeur in indices.items():
+        ref = anciens.get(code)
+        if isinstance(ref, bool) or not isinstance(ref, (int, float)) or ref == 0:
+            gardes[code] = valeur
+            continue
+        if abs(float(valeur) - float(ref)) / abs(float(ref)) > _ECART_MAX:
+            ecartes.append(code)
+            continue
+        gardes[code] = valeur
+    return gardes, ecartes
+
+
+def reprise_de_la_veille(indices, seance_ref):
+    """Vrai si chaque niveau qu'on écrirait recopie la dernière séance.
+
+    Ouvrir une date neuve dans ce cas collerait la veille sur le jour.
+    """
+    if not indices or not isinstance(seance_ref, dict):
+        return False
+    anciens = seance_ref.get("indices")
+    if not isinstance(anciens, dict) or not anciens:
+        return False
+    for code, valeur in indices.items():
+        if code not in anciens or anciens[code] != valeur:
+            return False
+    return True
 
 
 def extraire_societes(classement):
@@ -186,10 +258,54 @@ def _cache_du_jour(payload, jour):
 
 
 def _marche_est_la_cloture(payload, jour):
+    """Cache du jour, rafraîchi à ou après 15h30 UTC."""
     moment = _horodatage(payload.get("updated_at") if isinstance(payload, dict) else None)
     if moment is None or moment.date() != jour:
         return False
     return (moment.hour, moment.minute) >= (CLOTURE_HEURE, CLOTURE_MINUTE)
+
+
+def cache_marche_utilisable(moment=None, marche=None):
+    """Le rattrapage au démarrage ne scrape pas : ce cache, ou rien."""
+    moment = _en_utc(moment)
+    if not pret_pour_cloture(moment):
+        return False
+    if marche is None:
+        from market_data import load_market_cache
+        marche = load_market_cache()
+    return _marche_est_la_cloture(marche, moment.date())
+
+
+def _instant_cloture(jour):
+    return datetime(
+        jour.year, jour.month, jour.day,
+        CLOTURE_HEURE, CLOTURE_MINUTE, tzinfo=timezone.utc,
+    )
+
+
+def _cache_couvre_la_seance(marche, jour):
+    moment = _horodatage(marche.get("updated_at") if isinstance(marche, dict) else None)
+    if moment is None:
+        return False
+    return moment >= _instant_cloture(jour)
+
+
+def _date_cible(marche, moment):
+    """Date de séance publiée, sinon le jour de l'appel.
+
+    ``session_date`` vient de l'en-tête brvm.org (« 30 septembre 2026 »).
+    La page ne publie pas d'autre date de séance. Une valeur illisible
+    n'est pas remplacée par aujourd'hui : on refuse d'écrire.
+    """
+    if not isinstance(marche, dict) or marche.get("session_date") in (None, ""):
+        return moment.date()
+    brut = marche.get("session_date")
+    if not isinstance(brut, str):
+        return None
+    try:
+        return datetime.strptime(brut[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
 
 def _seance_confirmee(cours, historique, jour_iso):
@@ -320,34 +436,183 @@ def _seance_existante(seances, jour):
     return None
 
 
+def _seance_avant(seances, jour):
+    avant = [
+        seance for seance in seances
+        if isinstance(seance, dict) and isinstance(seance.get("date"), str) and seance["date"] < jour
+    ]
+    if not avant:
+        return None
+    return max(avant, key=lambda seance: seance["date"])
+
+
+def _acquerir_verrou(verrou, delai_s):
+    """LOCK_EX non bloquant, réessayé jusqu'à ``delai_s`` secondes."""
+    echeance = time.monotonic() + delai_s
+    while True:
+        try:
+            fcntl.flock(verrou.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return True
+        except BlockingIOError:
+            reste = echeance - time.monotonic()
+            if reste <= 0:
+                return False
+            time.sleep(min(_PAUSE_VERROU_S, reste))
+
+
+def _fusionner_indices(existante, indices):
+    dest = existante.get("indices")
+    if not isinstance(dest, dict):
+        dest = {}
+        existante["indices"] = dest
+    ajoute = False
+    for code, valeur in indices.items():
+        if code in dest:
+            continue
+        dest[code] = valeur
+        ajoute = True
+    return ajoute
+
+
+def _fusionner_societes(existante, nouvelles):
+    """Ajoute les tickers absents. Ne remplace pas une ligne déjà écrite."""
+    deja = existante.get("societes")
+    if not isinstance(deja, list):
+        deja = []
+    par = {}
+    ordre = []
+    for row in deja:
+        if not isinstance(row, dict) or not isinstance(row.get("ticker"), str):
+            continue
+        ticker = row["ticker"]
+        if ticker in par:
+            continue
+        par[ticker] = row
+        ordre.append(ticker)
+    ajoute = False
+    for row in nouvelles:
+        ticker = row["ticker"]
+        if ticker in par:
+            continue
+        par[ticker] = row
+        ordre.append(ticker)
+        ajoute = True
+    if ajoute:
+        fusion = [par[ticker] for ticker in ordre]
+        fusion.sort(key=lambda row: (row.get("rang") if isinstance(row.get("rang"), int) else 9999, row["ticker"]))
+        existante["societes"] = fusion
+    return ajoute
+
+
+def _appliquer(iso, indices, societes):
+    try:
+        data = _charger_strict()
+    except Exception as exc:
+        logger.error("index history illisible, ecriture annulee: %s", exc)
+        return _statut("fichier_illisible", iso)
+    seances = data["seances"]
+    precedente = _seance_avant(seances, iso)
+    gardes, ecartes = filtrer_ecart(indices, precedente)
+    if ecartes:
+        logger.info("index history: indice hors ecart ignore (%s)", ",".join(ecartes))
+    existante = _seance_existante(seances, iso)
+    if existante is None and reprise_de_la_veille(gardes, precedente):
+        logger.info("index history: reprise de la veille, %s non ouvert", iso)
+        return _statut("reprise_veille", iso)
+    if not gardes and existante is None:
+        logger.info("index history: aucun indice plausible")
+        return _statut("indices_aberrants", iso)
+
+    if existante is None:
+        seances.append({
+            "date": iso,
+            "indices": gardes,
+            "societes": list(societes),
+        })
+        seances.sort(key=lambda seance: seance.get("date") or "")
+        _ecrire(data)
+        logger.info("index history: %s enregistre (%s)", iso, ",".join(sorted(gardes)))
+        return _statut("enregistre", iso)
+
+    indices_ajoutes = _fusionner_indices(existante, gardes)
+    societes_ajoutees = _fusionner_societes(existante, societes)
+    if indices_ajoutes or societes_ajoutees:
+        _ecrire(data)
+        if indices_ajoutes:
+            logger.info("index history: indices completes pour %s", iso)
+            return _statut("indices_completes", iso)
+        logger.info("index history: societes completees pour %s", iso)
+        return _statut("societes_completees", iso)
+    logger.info("index history: %s deja enregistre", iso)
+    return _statut("deja_enregistre", iso)
+
+
+def _sous_verrou(action, delai_s):
+    dossier = os.path.dirname(HISTORY_PATH) or "."
+    os.makedirs(dossier, exist_ok=True)
+    verrou_path = HISTORY_PATH + ".lock"
+    verrou = open(verrou_path, "a")
+    acquis = False
+    try:
+        acquis = _acquerir_verrou(verrou, delai_s)
+        if not acquis:
+            logger.warning(
+                "index history abandonne : verrou occupe apres %.0f s (%s)",
+                delai_s, verrou_path,
+            )
+            return None
+        return action()
+    finally:
+        if acquis:
+            fcntl.flock(verrou.fileno(), fcntl.LOCK_UN)
+        verrou.close()
+
+
 def enregistrer_cloture(moment=None, marche=None, cours=None,
-                        historique_prix=None, classement=None):
-    """Enregistre la séance du jour, ou ne touche pas au fichier.
+                        historique_prix=None, classement=None,
+                        delai_verrou_s=DELAI_VERROU_S):
+    """Enregistre la séance, ou ne touche pas au fichier.
 
     Les arguments optionnels servent aux tests. En production ils sont lus
     sur le disque : cache marché, cache de cours, historique de prix,
-    classement déjà calculé.
+    classement déjà calculé. Un seul process écrit à la fois.
     """
     moment = _en_utc(moment)
-    jour = moment.date()
-    iso = jour.isoformat()
+    jour_appel = moment.date()
+    iso_appel = jour_appel.isoformat()
     if moment.weekday() >= 5:
         logger.info("index history: week-end, rien ecrit")
-        return _statut("week-end", iso)
+        return _statut("week-end", iso_appel)
     if not pret_pour_cloture(moment):
         logger.info("index history: avant la cloture, rien ecrit")
-        return _statut("avant_cloture", iso)
+        return _statut("avant_cloture", iso_appel)
 
     cours = _lire_cours(cours)
     historique_prix = _lire_historique_prix(historique_prix)
-    if not _seance_confirmee(cours, historique_prix, iso):
-        logger.info("index history: pas de seance le %s", iso)
-        return _statut("sans_seance", iso)
+    if not _seance_confirmee(cours, historique_prix, iso_appel):
+        logger.info("index history: pas de seance le %s", iso_appel)
+        return _statut("sans_seance", iso_appel)
 
     marche = _lire_marche(marche)
-    if not _marche_est_la_cloture(marche, jour):
+    if tous_current_egal_prev(marche):
+        logger.info("index history: current == prev pour les quatre indices")
+        return _statut("reprise_veille", iso_appel)
+
+    jour = _date_cible(marche, moment)
+    if jour is None:
+        logger.info("index history: session_date illisible")
+        return _statut("date_incoherente", iso_appel)
+    iso = jour.isoformat()
+    if jour.weekday() >= 5:
+        logger.info("index history: session_date tombe un week-end")
+        return _statut("week-end", iso)
+    if jour > jour_appel:
+        logger.info("index history: session_date dans le futur")
+        return _statut("date_incoherente", iso)
+    if not _cache_couvre_la_seance(marche, jour):
         logger.info("index history: cache marche anterieur a la cloture")
         return _statut("marche_perime", iso)
+
     indices = extraire_indices(marche)
     if not indices:
         logger.info("index history: aucun indice reconnu")
@@ -355,32 +620,13 @@ def enregistrer_cloture(moment=None, marche=None, cours=None,
 
     societes = extraire_societes(_lire_classement(classement))
 
-    try:
-        data = _charger_strict()
-    except Exception as exc:
-        logger.error("index history illisible, ecriture annulee: %s", exc)
-        return _statut("fichier_illisible", iso)
-
-    seances = data["seances"]
-    existante = _seance_existante(seances, iso)
-    if existante is not None:
-        if not existante.get("societes") and societes:
-            existante["societes"] = societes
-            _ecrire(data)
-            logger.info("index history: societes completees pour %s", iso)
-            return _statut("societes_completees", iso)
-        logger.info("index history: %s deja enregistre", iso)
-        return _statut("deja_enregistre", iso)
-
-    seances.append({
-        "date": iso,
-        "indices": indices,
-        "societes": societes,
-    })
-    seances.sort(key=lambda s: s.get("date") or "")
-    _ecrire(data)
-    logger.info("index history: %s enregistre (%s)", iso, ",".join(sorted(indices)))
-    return _statut("enregistre", iso)
+    resultat = _sous_verrou(
+        lambda: _appliquer(iso, indices, societes),
+        delai_verrou_s,
+    )
+    if resultat is None:
+        return _statut("verrou_occupe", iso)
+    return resultat
 
 
 def _decaler_mois(jour, delta):

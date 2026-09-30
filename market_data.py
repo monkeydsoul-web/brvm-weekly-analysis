@@ -3,7 +3,7 @@ market_data.py — Données marché BRVM depuis brvm.org/fr/resume
 Indices, capitalisations, top/flop, secteurs
 Refresh automatique intégré au scheduler live_data
 """
-import json, logging, os, time
+import json, logging, os, re, time
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
@@ -15,6 +15,33 @@ HEADERS    = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebK
 
 def clean(s):
     return s.replace("\u202f","").replace("\xa0","").replace(" ","").replace(",",".").strip()
+
+_MOIS_FR = {
+    "janvier": 1, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5,
+    "juin": 6, "juillet": 7, "aout": 8, "septembre": 9,
+    "octobre": 10, "novembre": 11, "decembre": 12,
+}
+_ACCENTS = str.maketrans("éèêëàâäîïôöùûüç", "eeeeaaaiioouuuc")
+
+
+def date_entete_brvm(texte):
+    """Date de l'en-tête brvm.org (« Mercredi, 30 septembre, 2026 - 11:02 »).
+
+    La page résumé ne publie pas de date de séance distincte de cette
+    horloge. On la retient telle quelle, au format AAAA-MM-JJ.
+    """
+    if not isinstance(texte, str):
+        return None
+    motif = re.search(r"(\d{1,2})\s+([A-Za-z\u00C0-\u017F]+)\s*,?\s*(\d{4})", texte)
+    if not motif:
+        return None
+    mois = _MOIS_FR.get(motif.group(2).translate(_ACCENTS).lower())
+    if not mois:
+        return None
+    try:
+        return datetime(int(motif.group(3)), mois, int(motif.group(1))).date().isoformat()
+    except ValueError:
+        return None
 
 def fetch_market_data():
     """Scrape brvm.org/fr/resume — 6 tables de données marché"""
@@ -31,6 +58,7 @@ def fetch_market_data():
         r = requests.get("https://www.brvm.org/fr/resume", headers=HEADERS, timeout=15)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "html.parser")
+        result["session_date"] = date_entete_brvm(soup.get_text(" ", strip=True))
         tables = soup.find_all("table")
 
         # Table 0 : Activités du marché

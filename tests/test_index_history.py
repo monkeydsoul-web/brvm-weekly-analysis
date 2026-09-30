@@ -202,12 +202,21 @@ def test_remplacement_rate_garde_l_ancien_fichier(historique, monkeypatch):
         raise OSError("disque plein")
 
     monkeypatch.setattr(index_history.os, "replace", casse)
+    marche = _marche(updated="2026-09-30T18:05:00+00:00", courant=250)
+    marche["indices"][1]["current"] = 142
+    marche["indices"][2]["current"] = 156
+    marche["indices"][3]["current"] = 130
     with pytest.raises(OSError):
-        _enregistrer(moment=datetime(2026, 9, 30, 18, 10, tzinfo=timezone.utc),
-                     marche=_marche(updated="2026-09-30T18:05:00+00:00"),
-                     cours=_cours(updated="2026-09-30T15:25:00+00:00"))
+        _enregistrer(
+            moment=datetime(2026, 9, 30, 18, 10, tzinfo=timezone.utc),
+            marche=marche,
+            cours=_cours(updated="2026-09-30T15:25:00+00:00", prix=1600),
+        )
     assert historique.read_text(encoding="utf-8") == avant
-    assert [p.name for p in historique.parent.iterdir()] == ["index_history.json"]
+    assert sorted(p.name for p in historique.parent.iterdir()) == [
+        "index_history.json",
+        "index_history.json.lock",
+    ]
 
 
 def test_lit_le_cache_qui_alimente_api_market(historique, tmp_path, monkeypatch):
@@ -439,3 +448,239 @@ def test_cron_18h10_lun_ven():
     assert "index_history" in source
     assert "day_of_week='mon-fri'" in source
     assert "hour=18, minute=10" in source
+    assert "hour=19, minute=0" in source
+    rattrapage = inspect.getsource(auto_scheduler._rattrapage_index_history)
+    assert "rafraichir=False" in rattrapage
+    assert "force_refresh" not in rattrapage
+    assert "get_market_data" not in rattrapage
+    assert "18h30" not in inspect.getsource(auto_scheduler)
+
+
+def _mercredi(prix=1600):
+    return dict(
+        moment=datetime(2026, 9, 30, 18, 10, tzinfo=timezone.utc),
+        cours=_cours(updated="2026-09-30T15:40:00+00:00", prix=prix),
+    )
+
+
+def test_quatre_indices_identiques_a_la_veille(historique):
+    assert _enregistrer()["statut"] == "enregistre"
+    marche = _marche(updated="2026-09-30T18:05:00+00:00")
+    resultat = _enregistrer(marche=marche, **_mercredi())
+    assert resultat == {"statut": "reprise_veille", "date": "2026-09-30"}
+    assert [s["date"] for s in _lire(historique)["seances"]] == ["2026-09-29"]
+
+
+def test_current_egal_prev_pour_les_quatre(historique):
+    marche = _marche(courant=260)
+    for entree in marche["indices"]:
+        entree["prev"] = entree["current"]
+    assert _enregistrer(marche=marche) == {"statut": "reprise_veille", "date": "2026-09-29"}
+    assert not historique.exists()
+
+
+def test_session_date_prime_sur_la_date_du_jour(historique):
+    marche = _marche()
+    marche["session_date"] = "2026-09-28"
+    assert _enregistrer(marche=marche) == {"statut": "enregistre", "date": "2026-09-28"}
+    meme_veille = _enregistrer()
+    assert meme_veille["statut"] == "reprise_veille"
+    assert [s["date"] for s in _lire(historique)["seances"]] == ["2026-09-28"]
+    assert _lire(historique)["seances"][0]["indices"]["BRVM-C"] == 245.2
+
+
+def test_session_date_illisible_ou_future(historique):
+    illisible = _marche()
+    illisible["session_date"] = "demain"
+    assert _enregistrer(marche=illisible)["statut"] == "date_incoherente"
+    futur = _marche()
+    futur["session_date"] = "2026-09-30"
+    assert _enregistrer(marche=futur)["statut"] == "date_incoherente"
+    samedi = _marche()
+    samedi["session_date"] = "2026-09-26"
+    assert _enregistrer(marche=samedi)["statut"] == "week-end"
+    assert not historique.exists()
+
+
+def test_date_entete_brvm():
+    from market_data import date_entete_brvm
+    assert date_entete_brvm("Mercredi, 30 septembre, 2026 - 11:02") == "2026-09-30"
+    assert date_entete_brvm("Séance du 1 février 2024") == "2024-02-01"
+    assert date_entete_brvm("Séance Ouverte") is None
+    assert date_entete_brvm("31 avril 2026") is None
+
+
+def test_ecart_borne_a_15_pourcent_puis_completion(historique):
+    assert _enregistrer()["statut"] == "enregistre"
+    marche = _marche(updated="2026-09-30T18:05:00+00:00", courant=400)
+    marche["indices"][1]["current"] = 142.0
+    marche["indices"][2]["current"] = 156.0
+    marche["indices"][3]["current"] = 129.0
+    assert _enregistrer(marche=marche, **_mercredi())["statut"] == "enregistre"
+    jour = _lire(historique)["seances"][-1]["indices"]
+    assert "BRVM-C" not in jour
+    assert jour["BRVM-30"] == 142.0
+
+    suite = _marche(updated="2026-09-30T18:20:00+00:00", courant=250)
+    suite["indices"][1]["current"] = 145.0
+    suite["indices"][2]["current"] = 156.0
+    suite["indices"][3]["current"] = 129.0
+    assert _enregistrer(marche=suite, **_mercredi(prix=1610))["statut"] == "indices_completes"
+    jour = _lire(historique)["seances"][-1]["indices"]
+    assert jour["BRVM-C"] == 250
+    assert jour["BRVM-30"] == 142.0
+    assert len(_lire(historique)["seances"]) == 2
+
+
+def test_ecart_de_15_pourcent_inclus_juste_au_dela_exclu(historique):
+    base = _marche(courant=200)
+    base["indices"][1]["current"] = 100.5
+    base["indices"][2]["current"] = 151
+    base["indices"][3]["current"] = 121
+    assert _enregistrer(marche=base)["statut"] == "enregistre"
+    jeudi = datetime(2026, 10, 1, 18, 10, tzinfo=timezone.utc)
+    cours = _cours(updated="2026-10-01T15:40:00+00:00", prix=1700)
+    exclu = _marche(updated="2026-10-01T18:05:00+00:00", courant=231)
+    exclu["indices"][1]["current"] = 102
+    exclu["indices"][2]["current"] = 153
+    exclu["indices"][3]["current"] = 123
+    assert _enregistrer(moment=jeudi, marche=exclu, cours=cours)["statut"] == "enregistre"
+    dernier = _lire(historique)["seances"][-1]["indices"]
+    assert "BRVM-C" not in dernier
+    assert dernier["BRVM-30"] == 102
+
+    inclus = _marche(updated="2026-10-01T18:20:00+00:00", courant=230)
+    inclus["indices"][1]["current"] = 110
+    inclus["indices"][2]["current"] = 153
+    inclus["indices"][3]["current"] = 123
+    assert _enregistrer(moment=jeudi, marche=inclus, cours=cours)["statut"] == "indices_completes"
+    dernier = _lire(historique)["seances"][-1]["indices"]
+    assert dernier["BRVM-C"] == 230
+    assert dernier["BRVM-30"] == 102
+
+
+def test_indice_manquant_complete_sans_remplacer(historique):
+    partiel = _marche()
+    partiel["indices"] = [i for i in partiel["indices"] if "PRINCIPAL" not in i["name"].upper()]
+    assert _enregistrer(marche=partiel)["statut"] == "enregistre"
+    suite = _marche(courant=250)
+    assert _enregistrer(marche=suite)["statut"] == "indices_completes"
+    indices = _lire(historique)["seances"][0]["indices"]
+    assert indices["BRVM-C"] == 245.2
+    assert indices["Principal"] == 128.5
+
+
+def test_fusion_societes_ne_remplace_pas(historique):
+    assert _enregistrer(classement={
+        "ranking": [{"ticker": "SNTS", "rank": 1, "note10": 7.3}],
+    })["statut"] == "enregistre"
+    assert _enregistrer(classement={
+        "ranking": [
+            {"ticker": "SNTS", "rank": 9, "note10": 1.0},
+            {"ticker": "BETA", "rank": 2, "note10": 5.5},
+        ],
+    })["statut"] == "societes_completees"
+    lignes = {s["ticker"]: s for s in _lire(historique)["seances"][0]["societes"]}
+    assert lignes["SNTS"] == {"ticker": "SNTS", "rang": 1, "note": 7.3}
+    assert lignes["BETA"] == {"ticker": "BETA", "rang": 2, "note": 5.5}
+
+
+def test_verrou_occupe_n_ecrit_pas(historique):
+    import fcntl
+    verrou = open(str(historique) + ".lock", "a")
+    try:
+        fcntl.flock(verrou.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        resultat = _enregistrer(delai_verrou_s=0.2)
+        assert resultat == {"statut": "verrou_occupe", "date": "2026-09-29"}
+        assert not historique.exists()
+    finally:
+        fcntl.flock(verrou.fileno(), fcntl.LOCK_UN)
+        verrou.close()
+
+
+def test_deux_workers_fusionnent(historique):
+    import threading
+    erreurs = []
+
+    def tour(classement):
+        try:
+            _enregistrer(classement=classement)
+        except Exception as exc:
+            erreurs.append(exc)
+
+    fils = [
+        threading.Thread(target=tour, args=({
+            "ranking": [{"ticker": "SNTS", "rank": 1, "note10": 7.3}],
+        },)),
+        threading.Thread(target=tour, args=({
+            "ranking": [{"ticker": "BETA", "rank": 2, "note10": 5.5}],
+        },)),
+    ]
+    for fil in fils:
+        fil.start()
+    for fil in fils:
+        fil.join(timeout=15)
+    assert erreurs == []
+    assert not any(fil.is_alive() for fil in fils)
+    seances = _lire(historique)["seances"]
+    assert len(seances) == 1
+    assert {s["ticker"] for s in seances[0]["societes"]} == {"SNTS", "BETA"}
+
+
+def test_cache_utilisable_le_jour_apres_15h30():
+    frais = _marche(updated="2026-09-29T18:05:00+00:00")
+    assert index_history.cache_marche_utilisable(moment=MARDI_18H, marche=frais) is True
+    trop_tot = _marche(updated="2026-09-29T15:29:00+00:00")
+    assert index_history.cache_marche_utilisable(moment=MARDI_15H29, marche=trop_tot) is False
+    veille = _marche(updated="2026-09-28T18:05:00+00:00")
+    assert index_history.cache_marche_utilisable(moment=MARDI_18H, marche=veille) is False
+
+
+def test_job_sans_rafraichir_laisse_le_cache_perime(monkeypatch):
+    import auto_scheduler
+    monkeypatch.setattr(index_history, "pret_pour_cloture", lambda moment=None: True)
+    monkeypatch.setattr(
+        index_history, "cache_marche_utilisable",
+        lambda moment=None, marche=None: False,
+    )
+
+    def interdit(*_a, **_k):
+        raise AssertionError("scrape ou ecriture")
+
+    monkeypatch.setattr("market_data.get_market_data", interdit)
+    monkeypatch.setattr(index_history, "enregistrer_cloture", interdit)
+    auto_scheduler.job_index_history(rafraichir=False)
+
+
+def test_job_sans_rafraichir_lit_le_cache_frais(monkeypatch):
+    import auto_scheduler
+    monkeypatch.setattr(index_history, "pret_pour_cloture", lambda moment=None: True)
+    monkeypatch.setattr(
+        index_history, "cache_marche_utilisable",
+        lambda moment=None, marche=None: True,
+    )
+
+    def interdit(*_a, **_k):
+        raise AssertionError("scrape")
+
+    monkeypatch.setattr("market_data.get_market_data", interdit)
+    vus = []
+    monkeypatch.setattr(
+        index_history, "enregistrer_cloture",
+        lambda: vus.append("ok") or {"statut": "enregistre", "date": "2026-09-29"},
+    )
+    auto_scheduler.job_index_history(rafraichir=False)
+    assert vus == ["ok"]
+
+
+def test_rattrapage_n_appelle_pas_le_scraping(monkeypatch):
+    import auto_scheduler
+    monkeypatch.setattr(auto_scheduler.time, "sleep", lambda _s: None)
+    vus = []
+
+    def job(rafraichir=True):
+        vus.append(rafraichir)
+
+    monkeypatch.setattr(auto_scheduler, "job_index_history", job)
+    auto_scheduler._rattrapage_index_history()
+    assert vus == [False]
