@@ -54,8 +54,8 @@ def test_libelle_colle_a_lecart_affiche():
         ({"price": 1000, "eps": 180, "bvpa": 700, "roe": 18}, LIBELLE_FORT),
         ({"price": 10000, "eps": 1000, "bvpa": 8000, "roe": 15}, LIBELLE_MODERE),
         ({"price": 11805, "eps": 1000, "bvpa": 8000, "roe": 15}, LIBELLE_PROCHE),
-        ({"price": 20000, "eps": 500, "bvpa": 4000, "roe": 8}, LIBELLE_CHER),
-        ({"price": 5000, "eps": 1000, "bvpa": 8000, "roe": 20}, "incertain"),
+        ({"price": 20000, "eps": 500, "bvpa": 4000, "roe": 8}, "incertain"),
+        ({"price": 5000, "eps": 1000, "bvpa": 8000, "roe": 20}, LIBELLE_FORT),
         ({"price": 8000}, None),
     ]
     for ligne, attendu in cas:
@@ -83,13 +83,73 @@ def test_cible_tres_au_dessus_n_est_pas_proche():
     assert estimation["libelle"] != LIBELLE_PROCHE
 
 
-def test_cible_tres_en_dessous_dit_trop_cher():
+def test_cible_sous_le_tiers_est_a_verifier_sans_changer_le_chiffre():
+    """4 969 pour un cours de 20 000 est sous le tiers.
+
+    Le prix et l'écart restent ceux du calcul actuel (−75,2 %).
+    Seul le libellé passe à « incertain ».
+    """
     estimation = estimer_prix_cible({
         "price": 20000, "eps": 500, "bvpa": 4000, "roe": 8,
     })
     assert estimation["prix_cible"] == 4969
     assert estimation["ecart_pct"] == -75.2
-    assert estimation["libelle"] == LIBELLE_CHER
+    assert estimation["epv"] == 5000
+    assert estimation["graham"] == 6708
+    assert estimation["pb"] == 3200
+    assert estimation["libelle"] == "incertain"
+    assert estimation["incertain"] is True
+
+
+def test_grand_ecart_sous_trois_fois_garde_son_libelle():
+    """13 139 pour un cours de 5 000 (+162,8 %) reste sous 3 fois.
+
+    L'ancienne règle « écart > 80 % » disait « incertain ».
+    Le prix et l'écart ne bougent pas : le libellé redevient Forte décote.
+    """
+    estimation = estimer_prix_cible({
+        "price": 5000, "eps": 1000, "bvpa": 8000, "roe": 20,
+    })
+    assert estimation["prix_cible"] == 13139
+    assert estimation["ecart_pct"] == 162.8
+    assert estimation["epv"] == 10000
+    assert estimation["graham"] == 13416
+    assert estimation["pb"] == 16000
+    assert estimation["libelle"] == LIBELLE_FORT
+    assert estimation["incertain"] is False
+
+
+def test_un_seul_modele_a_plus_de_50_pourcent_n_est_pas_incertain():
+    """L'ancienne règle « un seul modèle et écart > 50 % » est retirée."""
+    estimation = estimer_prix_cible({"price": 1000, "eps": 200})
+    assert estimation["prix_cible"] == 2000
+    assert estimation["ecart_pct"] == 100.0
+    assert estimation["n_modeles"] == 1
+    assert estimation["libelle"] == LIBELLE_FORT
+    assert estimation["incertain"] is False
+
+
+def test_bornes_tiers_et_trois_fois_sont_strictes():
+    """Pile un tiers, ou pile 3 fois, garde un libellé normal."""
+    pile_tiers = estimer_prix_cible({"price": 3000, "eps": 100})
+    assert pile_tiers["prix_cible"] == 1000
+    assert pile_tiers["incertain"] is False
+    assert pile_tiers["libelle"] == LIBELLE_CHER
+
+    juste_sous = estimer_prix_cible({"price": 3001, "eps": 100})
+    assert juste_sous["prix_cible"] == 1000
+    assert juste_sous["incertain"] is True
+    assert juste_sous["libelle"] == "incertain"
+
+    pile_trois = estimer_prix_cible({"price": 1000, "eps": 300})
+    assert pile_trois["prix_cible"] == 3000
+    assert pile_trois["incertain"] is False
+    assert pile_trois["libelle"] == LIBELLE_FORT
+
+    juste_au_dessus = estimer_prix_cible({"price": 1000, "eps": 300.1})
+    assert juste_au_dessus["prix_cible"] == 3001
+    assert juste_au_dessus["incertain"] is True
+    assert juste_au_dessus["libelle"] == "incertain"
 
 
 def test_sans_donnees_ne_dit_pas_proche():
@@ -221,3 +281,26 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "function fmtLibelleValeur" in page
     assert "fmtLibelleValeur(t.verdict)" in page
     assert "fmtLibelleValeur(s.libelle_valeur)" in page
+
+
+def test_methodo_explique_le_calcul_actuel():
+    """La carte dit le calcul en place : 0,10 et 22,5, pas une médiane de secteur."""
+    page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+    debut = page.index('id="methodo-prix-cible"')
+    fin = page.index("Fréquences de mise à jour", debut)
+    carte = page[debut:fin]
+    for phrase in (
+        "n'entre pas dans la note",
+        "ne change pas le conseil",
+        "Données du jour",
+        "Repères enregistrés",
+        "moins du tiers",
+        "3 fois le cours",
+        "Cible à vérifier",
+        "0,10",
+        "22,5",
+    ):
+        assert phrase in carte
+    assert "80 %" not in carte
+    assert "médiane" not in carte.lower()
+    assert "0,5" not in carte

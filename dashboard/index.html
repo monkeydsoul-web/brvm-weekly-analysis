@@ -235,6 +235,19 @@
       <div class="ct">Comment naît la note et le conseil</div>
       <p style="font-size:13px;color:var(--text-2);line-height:1.7">Les 8 modèles produisent une note sur 10. Le repère en découle : 7,5/10 ou plus → Intéressant ; de 5/10 à moins de 7,5/10 → À surveiller ; en dessous de 5/10 → Prudence. Pour qu'une société ne change pas de repère à chaque petite variation, un amortisseur (« hystérésis ») exige un mouvement franc avant de basculer. Si le prix d'une société est en quarantaine, aucun conseil n'est affiché.</p>
     </div>
+    <div class="card" id="methodo-prix-cible">
+      <div class="ct">Le prix cible</div>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">Le prix cible <strong>n'entre pas dans la note</strong> sur 10. Il <strong>ne change pas le conseil</strong> (Intéressant, À surveiller, Prudence). C'est une indication : elle compare le cours du jour à un prix estimé, rien de plus.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px">Ce prix estimé est la moyenne de trois calculs, quand les chiffres existent. La règle est la même pour toutes les sociétés. Elle n'utilise pas un P/E ni un P/B différent selon le secteur.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>1. Graham.</strong> On calcule √(22,5 × bénéfice par action × actif net par action). Le 22,5 est la constante classique de Benjamin Graham, enregistrée dans le programme. Elle est la même pour tout le monde. Ce n'est pas un chiffre lu sur le marché du jour.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>2. Bénéfice × 10.</strong> On divise le bénéfice par action par 0,10. Ce 10 est une règle fixe, enregistrée elle aussi. Une banque et une société agricole ont le même multiple. Ce n'est pas le P/E du cours du jour, et ce n'est pas un P/E saisi à la main par secteur.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>3. Actif net × ROE ÷ 10.</strong> On multiplie l'actif net par action par le ROE, puis on divise par 10. Le 10 est encore la même règle fixe.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>Données du jour.</strong> Le cours sert seulement à mesurer l'écart : (prix cible ÷ cours − 1). Le prix cible ne recopie pas ce cours. S'il le faisait, l'écart serait toujours nul.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>Chiffres de la société déjà rassemblés.</strong> Le bénéfice par action, l'actif net par action et le ROE viennent du dernier rapport ou du bulletin de la cote, ceux qui servent déjà au classement. Si l'un manque, on laisse tomber le calcul qui en a besoin et on fait la moyenne des autres.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px"><strong>Repères enregistrés, les mêmes pour tous.</strong> Le 10 et le 22,5. Ils ne changent pas d'un jour à l'autre, et ils ne sont pas recalculés sur les cours de la séance.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:12px">Plus de 30 % → Forte décote. De 10 % à 30 % → Décote modérée. De −10 % à +10 % → Proche du prix cible. En dessous de −10 % → Au-dessus du prix cible. L'écran dit « Cible à vérifier » seulement si le prix cible vaut moins du tiers du cours, ou plus de 3 fois le cours. Le prix et l'écart restent affichés. Un grand écart, à lui seul, ne retire pas le libellé.</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-top:10px">Sans bénéfice exploitable, il n'y a pas de prix cible, et on ne dit pas que le prix est correct. Un dividende exceptionnel (vente d'actif, élément non récurrent) retire aussi le prix cible.</p>
+    </div>
     <div class="card">
       <div class="ct">Fréquences de mise à jour</div>
       <p style="font-size:13px;color:var(--text-2);line-height:1.7">Prix et classement : toutes les 5 minutes en séance. Actualités : toutes les heures. Historique du Top 3 : chaque jour de bourse à 18h05. Rapports annuels et indicateurs : analysés automatiquement chaque semaine.</p>
@@ -328,7 +341,7 @@
         <div style="padding:10px 14px 12px;font-size:12px;color:var(--text-2);line-height:1.8;border-top:1px solid var(--border-2)">
           · Le "Prix juste estimé" est calculé automatiquement à partir des bénéfices réels de chaque société<br>
           · Si le prix actuel est inférieur → l'action est peut-être sous-évaluée<br>
-          · Plus de +30 % : Forte décote · de +10 % à +30 % : Décote modérée · de −10 % à +10 % : Proche du prix cible · en dessous de −10 % : Au-dessus du prix cible · écart trop grand : Cible à vérifier
+          · Plus de +30 % : Forte décote · de +10 % à +30 % : Décote modérée · de −10 % à +10 % : Proche du prix cible · en dessous de −10 % : Au-dessus du prix cible · cible sous le tiers du cours ou au-dessus de 3 fois le cours : Cible à vérifier. Le détail est dans la <a href="#" onclick="nav('methodo');return false" style="color:var(--accent)">Méthodologie</a>. Ce prix ne change ni la note ni le conseil.
         </div>
       </details>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap">
@@ -2750,7 +2763,7 @@ async function renderTargets(){
     const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
     const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
     const confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(t,{short:true,hideHaute:true}) : '';
-    const uncTip = isUncertain?` data-tip="Cible calculée mais écart >80% vs cours (${t.n_models||1} modèle(s)) — modèles calibrés marchés développés, P/E BRVM structurellement plus bas"`:'';
+    const uncTip = isUncertain?` data-tip="Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours. Le chiffre reste affiché."`:'';
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>

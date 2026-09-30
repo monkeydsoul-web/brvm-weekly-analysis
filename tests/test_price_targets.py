@@ -45,18 +45,18 @@ def test_cibles_depuis_fixture(monkeypatch, tmp_path, fixtures_dir):
     assert brav["avg_target"] == 13139
     assert brav["upside_pct"] == 162.8
     assert brav["n_models"] == 3
-    assert brav["target_unreliable"] is True
-    assert brav["verdict"] == "incertain"
+    assert brav["target_unreliable"] is False
+    assert brav["verdict"] == "Forte décote"
 
-    # Cible loin sous le cours : le libellé suit l'écart, il ne dit pas « proche ».
+    # 4 969 pour 20 000 est sous le tiers : le chiffre reste, le libellé change.
     cher = par_ticker["CHER"]
     assert cher["epv_target"] == 5000
     assert cher["graham_target"] == 6708
     assert cher["pb_target"] == 3200
     assert cher["avg_target"] == 4969
     assert cher["upside_pct"] == -75.2
-    assert cher["target_unreliable"] is False
-    assert cher["verdict"] == "Au-dessus du prix cible"
+    assert cher["target_unreliable"] is True
+    assert cher["verdict"] == "incertain"
     assert cher["prix_cible"] == cher["avg_target"]
     assert cher["ecart_pct"] == cher["upside_pct"]
     assert cher["libelle_valeur"] == cher["verdict"]
