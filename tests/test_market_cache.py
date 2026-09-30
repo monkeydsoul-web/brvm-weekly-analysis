@@ -466,9 +466,53 @@ def test_indices_implausibles_ne_sont_pas_ecrits(md, monkeypatch):
 
     monkeypatch.setattr(md, "fetch_market_data", mauvais)
     recu = md.get_market_data(synchroniser=True)
-    assert recu["indices"][0]["current"] == 1.0
+    assert recu["indices"] == []
+    assert md._memoire["indices"][0]["current"] == 1.0
     assert not os.path.exists(md.CACHE_PATH)
     assert not md._scrape_utile(recu)
+
+
+def test_memoire_ne_sert_pas_un_indice_implausible(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    payload = _payload(maintenant)
+    payload["indices"].append({
+        "name": "BRVM - 30",
+        "prev": 1.0,
+        "current": 1.0,
+        "change": 0.0,
+        "ytd": 0.0,
+    })
+    md._memoire = payload
+    recu = md.get_market_data()
+    assert [item["name"] for item in recu["indices"]] == ["BRVM - COMPOSITE"]
+    assert md._memoire["indices"][1]["current"] == 1.0
+
+
+def test_fusion_recopie_la_session_date(md, monkeypatch):
+    jour29 = datetime(2026, 9, 29, 18, 5, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: jour29)
+    ancien = _payload(jour29)
+    ancien["session_date"] = "2026-09-29"
+    md._ecrire(ancien)
+    md._memoire = None
+    md._dernier_essai = 0.0
+
+    jour30 = datetime(2026, 9, 30, 18, 5, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: jour30)
+
+    def scrape():
+        data = _payload(jour30, ticker="NEUF")
+        data["indices"][0]["current"] = 210.0
+        data["session_date"] = "2026-09-30"
+        return data
+
+    monkeypatch.setattr(md, "fetch_market_data", scrape)
+    recu = md.get_market_data(force_refresh=True, synchroniser=True)
+    assert recu["session_date"] == "2026-09-30"
+    with open(md.CACHE_PATH, encoding="utf-8") as f:
+        disque = json.load(f)
+    assert disque["session_date"] == "2026-09-30"
 
 
 def test_indices_implausibles_gardent_le_cache_utile(md, monkeypatch):

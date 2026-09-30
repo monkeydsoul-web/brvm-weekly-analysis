@@ -8,7 +8,8 @@ Jobs:
   - Tous les jours 8h  : annonces BRVM officielles
   - Tous les jours 18h : price_history
   - Tous les jours 18h05: rank_history (snapshot top3)
-  - Tous les jours 18h30: BOC scrape
+  - Lun-ven 18h10      : clôture indices + rang/note (index_history)
+  - Tous les jours 19h : BOC scrape
   - Tous les jours 22h : rapports PDF scrape (legacy)
   - Dimanches 23h      : analyse IA PDF batch (legacy)
   - Dimanches 23h30    : scrape exhaustif rapports BRVM (nouveau pipeline)
@@ -118,8 +119,43 @@ def job_rank_history():
     except Exception as e:
         logger.error(f"job_rank_history: {e}")
 
+def job_index_history(rafraichir=True):
+    """Clôture BRVM-C, BRVM-30, Prestige, Principal + rang/note (18h10).
+
+    ``rafraichir=False`` : rattrapage au démarrage. Pas de scraping.
+    Le cache marché doit déjà être du jour et postérieur à 15h30,
+    sinon on laisse le job de 18h10.
+    """
+    from index_history import pret_pour_cloture, cache_marche_utilisable, enregistrer_cloture
+    if not pret_pour_cloture():
+        logger.info("index history: week-end ou avant la cloture, rien a ecrire")
+        return
+    if rafraichir:
+        try:
+            from market_data import get_market_data
+            get_market_data(force_refresh=True, synchroniser=True)
+        except Exception as e:
+            logger.warning(f"index history: rafraichissement du marche impossible ({e})")
+    elif not cache_marche_utilisable():
+        logger.info("index history: cache marche pas du jour apres 15h30, laisse au job 18h10")
+        return
+    resultat = enregistrer_cloture()
+    logger.info(f"index history: {resultat.get('statut')} {resultat.get('date')}")
+
+def _rattrapage_index_history():
+    """Un redémarrage après 18h10 rate le cron (grâce 60 s).
+
+    30 s : laisse le recalcul de classement du démarrage finir, sans
+    recalculer la note ici. N'appelle pas brvm.org.
+    """
+    time.sleep(30)
+    try:
+        job_index_history(rafraichir=False)
+    except Exception as e:
+        logger.error(f"index history rattrapage: {e}")
+
 def job_boc():
-    """Scrape BOC (18h30) puis rafraîchit la 3e source externe (african-markets)."""
+    """Scrape BOC (19h) puis rafraîchit la 3e source externe (african-markets)."""
     try:
         from boc_scraper import update_from_boc
         data = update_from_boc()
@@ -296,6 +332,12 @@ def start_scheduler():
                   id='rank_history', replace_existing=True,
                   name='Rank history top3 18h05')
 
+    # Clôture des indices, lun-ven 18h10 (après la clôture 15h30 UTC)
+    sched.add_job(wrap_job('index_history', job_index_history),
+                  CronTrigger(day_of_week='mon-fri', hour=18, minute=10),
+                  id='index_history', replace_existing=True,
+                  name='Index history 18h10')
+
     # BOC quotidien à 19h00
     sched.add_job(wrap_job('boc_scrape', job_boc), CronTrigger(hour=19, minute=0),
                   id='boc_scrape', replace_existing=True,
@@ -352,6 +394,11 @@ def start_scheduler():
                   name='Résumés annonces lun 4h')
 
     sched.start()
+    threading.Thread(
+        target=_rattrapage_index_history,
+        daemon=True,
+        name="index-history-rattrapage",
+    ).start()
     logger.info("Scheduler démarré — jobs actifs:")
     for job in sched.get_jobs():
         logger.info(f"  • {job.name} — prochain: {job.next_run_time}")

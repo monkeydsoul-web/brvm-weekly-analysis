@@ -3,7 +3,7 @@ market_data.py — Données marché BRVM depuis brvm.org/fr/resume
 Indices, capitalisations, top/flop, secteurs
 Refresh automatique intégré au scheduler live_data
 """
-import json, logging, os, tempfile, threading, time
+import json, logging, os, re, tempfile, threading, time
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
@@ -36,6 +36,33 @@ _dernier_fil = None
 def clean(s):
     return s.replace("\u202f","").replace("\xa0","").replace(" ","").replace(",",".").strip()
 
+_MOIS_FR = {
+    "janvier": 1, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5,
+    "juin": 6, "juillet": 7, "aout": 8, "septembre": 9,
+    "octobre": 10, "novembre": 11, "decembre": 12,
+}
+_ACCENTS = str.maketrans("éèêëàâäîïôöùûüç", "eeeeaaaiioouuuc")
+
+
+def date_entete_brvm(texte):
+    """Date de l'en-tête brvm.org (« Mercredi, 30 septembre, 2026 - 11:02 »).
+
+    La page résumé ne publie pas de date de séance distincte de cette
+    horloge. On la retient telle quelle, au format AAAA-MM-JJ.
+    """
+    if not isinstance(texte, str):
+        return None
+    motif = re.search(r"(\d{1,2})\s+([A-Za-z\u00C0-\u017F]+)\s*,?\s*(\d{4})", texte)
+    if not motif:
+        return None
+    mois = _MOIS_FR.get(motif.group(2).translate(_ACCENTS).lower())
+    if not mois:
+        return None
+    try:
+        return datetime(int(motif.group(3)), mois, int(motif.group(1))).date().isoformat()
+    except ValueError:
+        return None
+
 def fetch_market_data():
     """Scrape brvm.org/fr/resume — 6 tables de données marché"""
     result = {
@@ -51,6 +78,7 @@ def fetch_market_data():
         r = requests.get("https://www.brvm.org/fr/resume", headers=HEADERS, timeout=15)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "html.parser")
+        result["session_date"] = date_entete_brvm(soup.get_text(" ", strip=True))
         tables = soup.find_all("table")
 
         # Table 0 : Activités du marché
@@ -289,6 +317,9 @@ def _fusionner(actuel, nouveau):
         fusion["total_return"] = retour
     if _scrape_utile(nouveau) and nouveau.get("updated_at"):
         fusion["updated_at"] = nouveau["updated_at"]
+    # Sans cette recopie, la date du premier cache reste collée aux scrapes suivants.
+    if _scrape_utile(nouveau) and "session_date" in nouveau:
+        fusion["session_date"] = nouveau.get("session_date")
     return fusion
 
 def _retirer_cache_inutile():
@@ -409,6 +440,21 @@ def _lancer(bloquant, ignorer_cooldown=False):
             _cond.notify_all()
     return True
 
+def _publier(data):
+    """Retire les indices hors bornes de la réponse. La mémoire brute reste intacte."""
+    if not isinstance(data, dict):
+        return data
+    indices = data.get("indices")
+    if not isinstance(indices, list):
+        return data
+    gardes = [item for item in indices if _indice_plausible(item)]
+    if len(gardes) == len(indices):
+        return data
+    copie = dict(data)
+    copie["indices"] = gardes
+    return copie
+
+
 def get_market_data(force_refresh=False, synchroniser=False):
     """Donnees marche. Le JSON renvoye est celui du scrape (ou du cache), sans champ ajoute.
 
@@ -419,15 +465,15 @@ def get_market_data(force_refresh=False, synchroniser=False):
     """
     data = _lire()
     if data and _est_frais(data) and not force_refresh:
-        return data
+        return _publier(data)
     if data and not synchroniser:
         _lancer(bloquant=False, ignorer_cooldown=False)
-        return data
+        return _publier(data)
     _lancer(bloquant=True, ignorer_cooldown=True)
     frais = _lire()
     if frais is not None:
-        return frais
-    return data or {
+        return _publier(frais)
+    return _publier(data) or {
         "updated_at": _maintenant().isoformat(),
         "market_activity": {},
         "top5": [],
