@@ -424,8 +424,6 @@ function _texteActiviteAccueil(v) {
   return s;
 }
 
-var _accueilHistEtat = 'attente';
-
 function _appliquerCourbe(points, reel) {
   var trait = document.getElementById('accueil-courbe-trait');
   var svg = document.querySelector('#accueil-courbe .accueil-courbe');
@@ -495,26 +493,14 @@ function _brancherPeriodes() {
 
 function _chargerCourbeComposite() {
   _brancherPeriodes();
-  if (_accueilHistEtat === 'chargement') return;
-  if (_accueilHistEtat === 'absent') {
-    _appliquerCourbe(null, false);
-    return;
-  }
-  if (_accueilHistEtat === 'reel') return;
-  _accueilHistEtat = 'chargement';
-  _accueilHistoriqueIndice('composite', '', function(d) {
-    var points = _pointsHistorique(d);
-    if (!document.getElementById('accueil-courbe')) return;
-    if (points) {
-      _accueilHistEtat = 'reel';
+  if (window.BRVM_INDEX_HISTORY) {
+    _accueilHistoriqueIndice('composite', '', function(d) {
+      var points = _pointsHistorique(d);
+      if (!points || !document.getElementById('accueil-courbe')) return;
       _appliquerCourbe(points, true);
       _activerPeriodes(d && Array.isArray(d.periodes) ? d.periodes : null);
-    } else {
-      _accueilHistEtat = 'absent';
-      _appliquerCourbe(null, false);
-      _activerPeriodes(null);
-    }
-  });
+    });
+  }
 }
 
 function _remplirMontants(act) {
@@ -564,11 +550,18 @@ function _remplirIndices() {
   _remplirLargeurLive();
 }
 
+function _scoresConnus() {
+  var brut = window.scores;
+  if (!Array.isArray(brut) && typeof scores !== 'undefined') brut = scores;
+  return Array.isArray(brut) ? brut : null;
+}
+
 function _remplirChapo(rows) {
   var el = document.getElementById('accueil-chapo');
   if (!el) return;
+  var liste = Array.isArray(rows) ? rows : [];
   var n = 0;
-  (rows || []).forEach(function(x) {
+  liste.forEach(function(x) {
     if (x && x.ticker) n += 1;
   });
   var nombre = n > 0 ? n.toLocaleString('fr-FR') : '—';
@@ -711,11 +704,12 @@ function _remplirActus() {
 function renderAccueil() {
   var page = document.getElementById('page-welcome');
   if (!page || !page.classList.contains('on')) return;
-  var rows = window.scores || (typeof scores !== 'undefined' ? scores : []) || [];
+  var connus = _scoresConnus();
+  var rows = connus || [];
   _remplirChapo(rows);
   _remplirIndices();
   _remplirActus();
-  if (!rows.length && !window._accueilRetente) {
+  if (!connus && !window._accueilRetente) {
     window._accueilRetente = 1;
     var cartes = document.getElementById('accueil-cartes');
     var top = document.getElementById('accueil-top');
