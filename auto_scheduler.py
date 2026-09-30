@@ -242,7 +242,7 @@ def job_market_data():
     """Met à jour les données de marché (indices BRVM)."""
     try:
         from market_data import get_market_data
-        get_market_data(force_refresh=True)
+        get_market_data(force_refresh=True, synchroniser=True)
         logger.debug("Market data mis à jour")
     except Exception as e:
         logger.error(f"job_market_data: {e}")

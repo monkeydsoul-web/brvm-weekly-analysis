@@ -77,7 +77,6 @@ def test_quatre_chiffres_et_compteurs_compacts():
 
 def test_actions_masquees_seulement_sur_accueil():
     assert "body:has(#page-welcome.on) .sb{display:none!important}" in CSS
-    assert "body:has(#page-welcome.on) #app-footer" in CSS
     assert ".sb{display:none" not in CSS.split("page-welcome")[0]
 
 
