@@ -147,10 +147,19 @@
 
 .accueil-bloc-tete{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
-  gap:var(--space-1);
+  flex-wrap:wrap;
+  gap:var(--space-4px) var(--space-1);
   margin-bottom:var(--space-1);
+}
+.accueil-bloc-intro{min-width:0;flex:1}
+.accueil-sous{
+  margin:2px 0 0;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+  color:var(--text-2);
 }
 
 .accueil-bloc-tete h2{
@@ -160,81 +169,116 @@
   color:var(--text-1);
 }
 
-.accueil-entete,
-.accueil-ligne{
-  display:grid;
-  grid-template-columns:minmax(0,1.3fr) auto auto;
-  grid-template-areas:
-    "id note conseil"
-    "var cours ecart";
-  gap:2px var(--space-1);
-  align-items:center;
+.accueil-vide{margin:0 0 var(--space-1);font-size:13px;color:var(--text-2)}
+
+.accueil-mieux{
+  display:flex;
+  gap:var(--space-1);
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:var(--space-4px);
 }
-
-.accueil-entete{display:none}
-
-.accueil-ligne{
-  width:100%;
-  min-height:56px;
-  max-height:64px;
-  padding:var(--space-6px) 0;
-  overflow:hidden;
-  border:none;
-  border-top:1px solid var(--border-1);
-  background:transparent;
+.accueil-mieux-carte{
+  flex:0 0 min(280px,82%);
+  scroll-snap-align:start;
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-1);
+  min-width:0;
+  padding:var(--space-12px);
+  border:1px solid var(--border-1);
+  border-radius:var(--radius-md);
+  background:var(--bg-elevated);
   color:var(--text-1);
   font-family:var(--font-ui);
   text-align:left;
   cursor:pointer;
 }
-
-.accueil-ligne:hover{background:var(--bg-elevated)}
-
-.accueil-id{grid-area:id;min-width:0;display:flex;align-items:baseline;gap:var(--space-6px)}
-.accueil-ticker{font-weight:700}
-.accueil-nom{
+.accueil-mieux-carte:hover{background:var(--bg-overlay)}
+.accueil-mieux-haut{display:flex;align-items:flex-start;gap:var(--space-1);min-width:0}
+.accueil-pastille{
+  flex:none;
+  width:36px;
+  height:36px;
+  border-radius:var(--radius-full);
+  display:flex;
+  align-items:center;
+  justify-content:center;
   font-size:12px;
+  font-weight:700;
+  letter-spacing:.02em;
+  color:#fff;
+}
+.accueil-pastille.mn-0{background:#0f5132}
+.accueil-pastille.mn-1{background:#0b3d91}
+.accueil-pastille.mn-2{background:#6b4200}
+.accueil-pastille.mn-3{background:#842029}
+.accueil-pastille.mn-4{background:#055160}
+.accueil-pastille.mn-5{background:#3c1361}
+.accueil-mieux-id{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.accueil-mieux-ticker{font-size:14px;font-weight:800}
+.accueil-mieux-nom{
+  font-size:12px;
+  font-weight:600;
   color:var(--text-2);
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-
-.accueil-note{grid-area:note;font-weight:800;font-variant-numeric:tabular-nums;justify-self:end}
-.accueil-note span{font-size:11px;font-weight:600;color:var(--text-2)}
-
-.accueil-conseil{grid-area:conseil;font-size:12px;font-weight:600;justify-self:end;white-space:nowrap}
-.accueil-var{grid-area:var;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
-.accueil-var.is-up{color:var(--bull)}
-.accueil-var.is-flat{color:var(--text-2)}
-.accueil-var.is-down{color:var(--bear)}
-
-.accueil-cours,
-.accueil-ecart{
-  font-size:12px;
-  font-variant-numeric:tabular-nums;
-  color:var(--text-1);
+.accueil-anneau{
+  position:relative;
+  width:44px;
+  height:44px;
+  flex:none;
+  color:var(--text-2);
 }
-.accueil-cours{grid-area:cours;justify-self:end}
-.accueil-ecart{grid-area:ecart;justify-self:end;color:var(--text-2)}
+.accueil .accueil-anneau.is-interessant{color:var(--note-green)}
+.accueil .accueil-anneau.is-surveiller{color:var(--note-amber)}
+.accueil .accueil-anneau.is-prudence{color:var(--note-red)}
+.accueil-anneau svg{display:block;width:44px;height:44px;transform:rotate(-90deg)}
+.accueil-anneau-piste{fill:none;stroke:var(--border-1);stroke-width:3}
+.accueil-anneau-arc{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round}
+.accueil-anneau-note{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  color:currentColor;
+}
+.accueil-mieux-cours{display:flex;align-items:center;justify-content:space-between;gap:var(--space-1)}
+.accueil-mieux-prix{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-1)}
+.accueil-var-pill{
+  flex:none;
+  padding:2px 8px;
+  border-radius:var(--radius-pill);
+  font-size:12px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  color:var(--text-2);
+  background:var(--bg-overlay);
+}
+.accueil-var-pill.is-up{color:var(--note-green);background:var(--note-green-wash)}
+.accueil-var-pill.is-down{color:var(--note-red);background:var(--note-red-wash)}
+.accueil-badge{align-self:flex-start;display:inline-flex;padding:2px 8px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;line-height:1.3}
 
-.accueil-vide{margin:0 0 var(--space-1);font-size:13px;color:var(--text-2)}
-
-.accueil-mvt-grille{
+.accueil-seance-grille{
   display:grid;
   grid-template-columns:1fr;
   gap:var(--space-2);
-  padding-bottom:var(--space-1);
 }
-
-.accueil-mvt h3{
+.accueil-seance-h{
   margin:0 0 var(--space-6px);
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
-  color:var(--text-2);
 }
-
-.accueil-mvt-ligne{
+.accueil-seance-h.is-up{color:var(--note-green)}
+.accueil-seance-h.is-down{color:var(--note-red)}
+.accueil-seance-ligne{
   display:flex;
   align-items:center;
   gap:var(--space-1);
@@ -249,13 +293,51 @@
   text-align:left;
   cursor:pointer;
 }
+.accueil-seance-ligne:hover{background:var(--bg-elevated)}
+.accueil-seance-ligne.is-inerte{cursor:default}
+.accueil-seance-ligne.is-inerte:hover{background:transparent}
+.accueil-seance-ticker{font-weight:800}
+.accueil-seance-cours{
+  flex:1;
+  min-width:0;
+  font-size:13px;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  color:var(--text-1);
+}
 
-.accueil-mvt-ligne:hover{background:var(--bg-elevated)}
-.accueil-mvt-nom{flex:1;min-width:0;font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.accueil-mvt-var{margin-left:auto}
-.accueil-mvt-var{font-weight:700;font-variant-numeric:tabular-nums}
-.accueil-mvt-var.is-up{color:var(--bull)}
-.accueil-mvt-var.is-down{color:var(--bear)}
+.accueil-lecons{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--space-1);
+}
+.accueil-lecon{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:var(--space-6px);
+  min-width:0;
+  padding:var(--space-12px);
+  background:var(--bg-elevated);
+  border:1px solid var(--border-1);
+  border-radius:var(--radius-md);
+}
+.accueil-lecon-n{
+  width:28px;
+  height:28px;
+  border-radius:var(--radius-full);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--accent);
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+}
+:root:not(.light) .accueil-lecon-n{color:var(--color-ink)}
+.accueil-lecon h3{margin:0;font-size:15px;font-weight:700;color:var(--text-1);line-height:1.3}
+.accueil-lecon p{margin:0;flex:1;font-size:13px;line-height:1.5;color:var(--text-2)}
+.accueil-lecon .accueil-lien{margin-left:0}
 
 .accueil-actu{
   display:flex;
@@ -295,9 +377,9 @@
 }
 
 .accueil-carte:focus-visible,
-.accueil-ligne:focus-visible,
 .accueil-lien:focus-visible,
-.accueil-mvt-ligne:focus-visible,
+.accueil-mieux-carte:focus-visible,
+.accueil-seance-ligne:focus-visible,
 .accueil-actu:focus-visible{
   outline:2px solid var(--accent);
   outline-offset:2px;
@@ -311,27 +393,15 @@
   .accueil-carte-n{font-size:var(--text-h1)}
   .accueil-carte-l{font-size:var(--text-body)}
   .accueil-carte-s{display:block}
-  .accueil-mvt-grille{grid-template-columns:1fr 1fr}
-  .accueil-entete,
-  .accueil-ligne{
-    grid-template-columns:minmax(0,1.5fr) 4.2rem minmax(7rem,1fr) 5.2rem minmax(6rem,.9fr) minmax(5.5rem,.8fr);
-    grid-template-areas:none;
-  }
-  .accueil-entete{
+  .accueil-mieux{
     display:grid;
-    gap:var(--space-1);
-    padding-bottom:var(--space-6px);
-    font-size:12px;
-    font-weight:700;
-    color:var(--text-2);
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    overflow:visible;
   }
-  .accueil-ligne{max-height:none;min-height:44px;padding:var(--space-10px) 0}
-  .accueil-id{display:block;grid-area:auto}
-  .accueil-ticker{display:block}
-  .accueil-nom{display:block}
-  .accueil-note,
-  .accueil-conseil,
-  .accueil-var,
-  .accueil-cours,
-  .accueil-ecart{grid-area:auto;justify-self:start}
+  .accueil-mieux-carte{flex:none}
+  .accueil-seance-grille{grid-template-columns:1fr 1fr}
+  .accueil-lecons{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(min-width:1100px){
+  .accueil-mieux{grid-template-columns:repeat(4,minmax(0,1fr))}
 }

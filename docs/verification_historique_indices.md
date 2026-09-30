@@ -13,7 +13,7 @@ Une fois par séance, après la clôture (15h30 UTC) :
 - la valeur `current` de BRVM-C, BRVM-30, Prestige et Principal, lue dans le cache qui alimente `GET /api/market` ;
 - le rang et la note `/10` déjà calculés de chaque société du classement (`rank`, `note10`). La note n'est pas recalculée. Les conseils et les prix cibles ne sont ni lus pour être réécrits, ni modifiés.
 
-Le job du planificateur s'appelle `Index history 18h10` (lundi–vendredi, 18h10, heure d'Abidjan, identique à UTC). Il rafraîchit alors le cache marché, puis écrit. Un seul worker prend le verrou (`fcntl` `LOCK_NB`, réessayé 10 s). Les autres n'écrasent pas le fichier : ils fusionnent. Une société ou un indice déjà écrits ne sont jamais remplacés.
+Le job du planificateur s'appelle `Index history 18h10` (lundi–vendredi, 18h10, heure d'Abidjan, identique à UTC). Il rafraîchit alors le cache marché et attend la fin du scrape (`synchroniser=True`), puis écrit. La fusion du cache recopie `session_date` : un cache du 29 suivi d'un scrape du 30 porte la date du 30. Un seul worker prend le verrou (`fcntl` `LOCK_NB`, réessayé 10 s). Les autres n'écrasent pas le fichier : ils fusionnent. Une société ou un indice déjà écrits ne sont jamais remplacés.
 
 Un redémarrage après 18h10 retente 30 secondes plus tard, **sans** rappeler brvm.org. Il utilise `market_cache.json` seulement si `updated_at` est le jour même et à ou après 15h30 UTC. Sinon il ne fait rien et laisse le job de 18h10.
 
@@ -92,7 +92,7 @@ Relancer la commande une heure plus tard, ou redémarrer le service : la même d
 curl -sS "https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1S"
 ```
 
-Le corps ne contient que `index`, `range` et `points`. `points` est une liste de paires `["AAAA-MM-JJ", niveau]`, triée, sans les rangs des sociétés.
+Le corps ne contient que `index`, `range` et `points`. `points` est une liste de paires `["AAAA-MM-JJ", niveau]`, triée, sans les rangs des sociétés. `indice` et `periode` sont acceptés à la place de `index` et `range`. Le corps ne change pas.
 
 Plages, jour de référence = aujourd'hui UTC, bornes incluses :
 

@@ -142,17 +142,53 @@
       <div class="accueil-indices" id="accueil-indices" aria-label="Indices BRVM"></div>
     </section>
     <section class="accueil-cartes" id="accueil-cartes" aria-label="Répartition des conseils"></section>
-    <section class="accueil-bloc" aria-labelledby="accueil-top-titre">
+    <section class="accueil-bloc" aria-labelledby="accueil-mieux-titre">
       <div class="accueil-bloc-tete">
-        <h2 id="accueil-top-titre">Top du moment</h2>
+        <div class="accueil-bloc-intro">
+          <h2 id="accueil-mieux-titre">Les mieux notées</h2>
+          <p class="accueil-sous">Note /10 · méthode publiée · mise à jour après chaque séance</p>
+        </div>
+        <button type="button" class="accueil-lien" onclick="nav('rank')">Tout le classement →</button>
       </div>
-      <div id="accueil-top"></div>
+      <div class="accueil-mieux" id="accueil-top"></div>
     </section>
-    <section class="accueil-bloc" id="accueil-mouvements" hidden aria-labelledby="accueil-mvt-titre">
+    <section class="accueil-bloc" id="accueil-mouvements" aria-labelledby="accueil-seance-titre">
       <div class="accueil-bloc-tete">
-        <h2 id="accueil-mvt-titre">Variations du jour</h2>
+        <div class="accueil-bloc-intro">
+          <h2 id="accueil-seance-titre">Séance du jour</h2>
+          <p class="accueil-sous" id="accueil-seance-sous">Plus fortes variations</p>
+        </div>
+        <button type="button" class="accueil-lien" onclick="nav('marche')">Heatmap complète →</button>
       </div>
-      <div class="accueil-mvt-grille" id="accueil-mvt-grille"></div>
+      <div class="accueil-seance-grille" id="accueil-mvt-grille"></div>
+    </section>
+    <section class="accueil-bloc" aria-labelledby="accueil-debuter-titre">
+      <div class="accueil-bloc-tete">
+        <div class="accueil-bloc-intro">
+          <h2 id="accueil-debuter-titre">Débuter à la BRVM</h2>
+          <p class="accueil-sous">3 minutes pour comprendre l'essentiel</p>
+        </div>
+      </div>
+      <div class="accueil-lecons">
+        <article class="accueil-lecon">
+          <span class="accueil-lecon-n" aria-hidden="true">1</span>
+          <h3>La BRVM c'est quoi ?</h3>
+          <p>La BRVM est la bourse commune aux huit pays de l'UEMOA, avec son siège à Abidjan. Le Composite suit l'ensemble du marché, le BRVM 30 les trente valeurs les plus actives.</p>
+          <button type="button" class="accueil-lien" onclick="nav('glossaire')">Glossaire →</button>
+        </article>
+        <article class="accueil-lecon">
+          <span class="accueil-lecon-n" aria-hidden="true">2</span>
+          <h3>Ouvrir un compte via une SGI</h3>
+          <p>Pour passer un ordre, il faut une SGI : une société de gestion et d'intermédiation agréée. On peut en choisir une dans n'importe quel pays de l'UEMOA.</p>
+          <button type="button" class="accueil-lien" onclick="if(typeof allerCommentInvestir==='function'){allerCommentInvestir();}else{nav('glossaire');}">Glossaire →</button>
+        </article>
+        <article class="accueil-lecon">
+          <span class="accueil-lecon-n" aria-hidden="true">3</span>
+          <h3>Lire une note sur 10</h3>
+          <p>Chaque société reçoit une note sur 10, selon la méthode publiée. Le conseil affiché est Intéressant, À surveiller ou Prudence.</p>
+          <button type="button" class="accueil-lien" onclick="nav('methodo')">Méthode →</button>
+        </article>
+      </div>
     </section>
     <section class="accueil-bloc" aria-labelledby="accueil-actus-titre">
       <div class="accueil-bloc-tete">
@@ -161,7 +197,6 @@
       </div>
       <div id="accueil-actus"></div>
     </section>
-    <p class="accueil-avertissement">Ce n'est pas un conseil en investissement.</p>
   </div>
 
 </div>
@@ -405,7 +440,7 @@
   <div class="beginner-banner">📊 Indices, tendances et température du marché BRVM, mis à jour en continu.</div>
   <div id="mkt-idx-error" style="display:none;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:8px;padding:12px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:12px">
     <span style="font-size:12px;color:var(--t2)">Données momentanément indisponibles</span>
-    <button onclick="loadMarketWidget()" class="btn btn-o" style="font-size:11px;padding:5px 14px">Réessayer</button>
+    <button onclick="loadMarketWidget(true)" class="btn btn-o" style="font-size:11px;padding:5px 14px">Réessayer</button>
   </div>
   <div class="g4" id="market-indices-kpis" style="margin-bottom:20px">
     <div class="kpi"><div class="kl">BRVM-C</div><div class="kv" id="mkt-brvm-c">—</div><div id="mkt-brvm-c-chg" style="font-size:11px;color:var(--t2)">—</div></div>
@@ -1161,11 +1196,13 @@
 </div>
 
 <footer id="app-footer">
-  <span>📅 <span id="footer-date"></span> · 📊 <span id="footer-count">—</span> · <span id="footer-stats">—</span> · ⚠️ Cours indicatifs — aucun conseil en investissement</span>
-  <span style="display:flex;align-items:center;gap:10px">
-    <span id="footer-live" style="font-size:10px">MàJ : —</span>
-    <button onclick="showChangelog()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:10px;padding:0" title="Historique des versions">Changelog v14.3</button>
-  </span>
+  <p class="app-footer-avert">Pas un conseil en investissement <button type="button" class="app-footer-log" onclick="showChangelog()">Changelog</button></p>
+  <div class="app-footer-meta" hidden>
+    <span id="footer-date"></span>
+    <span id="footer-count"></span>
+    <span id="footer-stats"></span>
+    <span id="footer-live"></span>
+  </div>
 </footer>
 </main></div></div>
 <nav class="tabbar" id="tabbar" aria-label="Navigation">

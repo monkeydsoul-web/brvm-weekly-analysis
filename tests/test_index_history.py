@@ -368,6 +368,11 @@ def test_plage_vide_et_alias(client, monkeypatch):
     alias = client.get("/api/index-history?index=brvm-composite&range=1S")
     assert alias.get_json()["index"] == "BRVM-C"
     assert alias.get_json()["points"][0] == ["2026-09-24", 107]
+    parametres = client.get("/api/index-history?indice=BRVM-C&periode=1S")
+    assert parametres.status_code == 200
+    assert parametres.get_json()["index"] == "BRVM-C"
+    assert parametres.get_json()["range"] == "1S"
+    assert parametres.get_json()["points"][0] == ["2026-09-24", 107]
 
 
 def test_index_ou_range_inconnu(client):
@@ -448,8 +453,8 @@ def test_job_rafraichit_puis_enregistre(monkeypatch):
     ordre = []
     monkeypatch.setattr(index_history, "pret_pour_cloture", lambda moment=None: True)
 
-    def marche(force_refresh=False):
-        ordre.append(("marche", force_refresh))
+    def marche(force_refresh=False, synchroniser=False):
+        ordre.append(("marche", force_refresh, synchroniser))
         return {}
 
     def enregistre():
@@ -459,7 +464,7 @@ def test_job_rafraichit_puis_enregistre(monkeypatch):
     monkeypatch.setattr("market_data.get_market_data", marche)
     monkeypatch.setattr(index_history, "enregistrer_cloture", enregistre)
     auto_scheduler.job_index_history()
-    assert ordre == [("marche", True), "enregistre"]
+    assert ordre == [("marche", True, True), "enregistre"]
 
 
 def test_cron_18h10_lun_ven():
