@@ -233,6 +233,7 @@ def test_bbgc_sans_url_societe(page):
           canon: (document.querySelector('link[rel="canonical"]') || {getAttribute: function(){return '';}}).getAttribute('href') || ''
         })"""
     )
+    assert etat["url"] == "/"
     assert "/societe/BBGC" not in etat["url"]
     assert "BBGC" not in etat["titre"]
     assert "Sonatel" not in etat["titre"]

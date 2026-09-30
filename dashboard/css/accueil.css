@@ -80,11 +80,35 @@
   color:var(--text-2);
 }
 
+.accueil-indices-cadre{
+  position:relative;
+  min-width:0;
+}
+.accueil-indices-cadre:has(.accueil-indices:focus-visible){
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
 .accueil-indices{
   display:flex;
   flex-wrap:nowrap;
   gap:var(--space-1);
   overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+}
+.accueil-indices:focus-visible{outline:none}
+.accueil-indices-cadre.fondu-droite:not(.fondu-gauche) .accueil-indices{
+  -webkit-mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 64px),transparent);
+  mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 64px),transparent);
+}
+.accueil-indices-cadre.fondu-gauche:not(.fondu-droite) .accueil-indices{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 64px);
+  mask-image:linear-gradient(to right,transparent,#000 64px);
+}
+.accueil-indices-cadre.fondu-gauche.fondu-droite .accueil-indices{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 64px,#000 calc(100% - 64px),transparent);
+  mask-image:linear-gradient(to right,transparent,#000 64px,#000 calc(100% - 64px),transparent);
 }
 
 .accueil-indices .index-chip{

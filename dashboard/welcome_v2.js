@@ -171,16 +171,50 @@ function _remplirMouvements(d, rows) {
   });
 }
 
+function _majFonduIndices() {
+  var box = document.getElementById('accueil-indices');
+  var cadre = document.getElementById('accueil-indices-cadre');
+  if (!box || !cadre) return;
+  var largeur = box.clientWidth;
+  var total = box.scrollWidth;
+  var debord = total - largeur > 2;
+  var gauche = debord && box.scrollLeft > 2;
+  var droite = debord && box.scrollLeft + largeur < total - 2;
+  cadre.classList.toggle('fondu-gauche', gauche);
+  cadre.classList.toggle('fondu-droite', droite);
+  if (debord) box.tabIndex = 0;
+  else box.removeAttribute('tabindex');
+  box.setAttribute('aria-label', debord
+    ? 'Indices BRVM. Faites défiler horizontalement pour voir tous les indices.'
+    : 'Indices BRVM');
+}
+
+function _brancherFonduIndices() {
+  var box = document.getElementById('accueil-indices');
+  if (!box || box.getAttribute('data-fondu') === '1') return;
+  box.setAttribute('data-fondu', '1');
+  box.addEventListener('scroll', _majFonduIndices, { passive: true });
+  window.addEventListener('resize', _majFonduIndices);
+  if (window.ResizeObserver) {
+    var obs = new ResizeObserver(function() { _majFonduIndices(); });
+    obs.observe(box);
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(_majFonduIndices);
+}
+
 function _remplirIndices() {
   var box = document.getElementById('accueil-indices');
+  _brancherFonduIndices();
   fetch('/api/market').then(function(r) {
     if (!r.ok) throw new Error('marche');
     return r.json();
   }).then(function(d) {
     if (box && box.isConnected) box.innerHTML = _htmlTroisIndices(d);
+    _majFonduIndices();
     _remplirMouvements(d, window.scores || (typeof scores !== 'undefined' ? scores : []));
   }).catch(function() {
     if (box && box.isConnected) box.innerHTML = _htmlTroisIndices(null);
+    _majFonduIndices();
   });
 }
 

@@ -139,7 +139,9 @@
         <p class="accueil-seance" id="accueil-seance">Dernière séance : —</p>
         <button type="button" class="accueil-lien" onclick="nav('marche')">Marché détaillé</button>
       </div>
-      <div class="accueil-indices" id="accueil-indices" aria-label="Indices BRVM"></div>
+      <div class="accueil-indices-cadre" id="accueil-indices-cadre">
+        <div class="accueil-indices" id="accueil-indices" role="region" aria-label="Indices BRVM"></div>
+      </div>
     </section>
     <section class="accueil-cartes" id="accueil-cartes" aria-label="Répartition des conseils"></section>
     <section class="accueil-bloc" aria-labelledby="accueil-top-titre">
@@ -1179,7 +1181,7 @@
   <button type="button" data-nav="marche" onclick="navTo('marche')" title="Indices, commodités, macro UEMOA et dividendes">Marché</button>
   <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
   <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
-  <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
+  <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthode</button>
   <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
   <div class="tab-plus-row" role="group" aria-label="Devise">
     <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>

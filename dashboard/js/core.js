@@ -526,6 +526,7 @@ let _gBuffer='',_gBufTimer=null;
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();return;}
   if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();return;}
+  if(e.key==='Escape' && _fermerPlusEchap(e)) return;
   // "G TICKER" shortcut: type G then a ticker (ignores input fields)
   if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA') return;
   if(e.key==='g'||e.key==='G'){_gBuffer='';clearTimeout(_gBufTimer);openGSearch();return;}
@@ -580,6 +581,32 @@ function _fermerPlusHaut() {
   var btn = document.getElementById('topnav-more-btn');
   if (menu) menu.hidden = true;
   if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+function _elementVisible(el) {
+  return !!(el && el.getClientRects && el.getClientRects().length);
+}
+function _fermerPlusEchap(e) {
+  var cmdk = document.getElementById('cmdk-modal');
+  if (cmdk && cmdk.classList.contains('open')) return false;
+  var sso = document.getElementById('stock-slideover');
+  if (sso && sso.classList.contains('open')) return false;
+  var menu = document.getElementById('topnav-more-menu');
+  var btn = document.getElementById('topnav-more-btn');
+  if (menu && !menu.hidden && _elementVisible(menu)) {
+    _fermerPlusHaut();
+    if (btn) btn.focus();
+    if (e) e.preventDefault();
+    return true;
+  }
+  var plus = document.getElementById('tab-plus');
+  if (plus && plus.classList.contains('open') && _elementVisible(plus)) {
+    plus.classList.remove('open');
+    var declencheur = document.querySelector('#tabbar [data-nav="plus"]');
+    if (declencheur) declencheur.focus();
+    if (e) e.preventDefault();
+    return true;
+  }
+  return false;
 }
 function _marquerPlusDebordement() {
   var menu = document.getElementById('topnav-more-menu');
@@ -2629,6 +2656,13 @@ function renderStockStory(ticker) {
 
 function _poserUrlSociete(ticker) {
   if (!/^[A-Z0-9]{2,12}$/.test(ticker)) return;
+  if (!_ligneSociete(ticker)) {
+    // Rester sur /societe/AUTRE ferait rouvrir cette fiche au rechargement.
+    if (_cheminSocieteActuel()) {
+      try { history.pushState({page: 'welcome'}, '', '/'); } catch (e) {}
+    }
+    return;
+  }
   var cible = '/societe/' + ticker;
   if (location.pathname === cible) return;
   var actuel = _cheminSocieteActuel();
@@ -2636,7 +2670,6 @@ function _poserUrlSociete(ticker) {
     try { history.replaceState({societe: ticker}, '', cible); } catch (e) {}
     return;
   }
-  if (!_ligneSociete(ticker)) return;
   try { history.pushState({societe: ticker}, '', cible); } catch (e) {}
 }
 
