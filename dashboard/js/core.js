@@ -3918,7 +3918,7 @@ const _helpContent = {
     sections: [
       { h: 'En-tête de marché', p: 'Le statut ouvert ou fermé, la date de la dernière séance notée, et les trois indices du bandeau (Composite, BRVM 30, Prestige) avec leur variation.' },
       { h: 'Les trois conseils', p: 'Le nombre de sociétés Intéressant, À surveiller et Prudence. Chaque carte ouvre le classement filtré sur ce conseil. Les comptes sont les mêmes que dans le classement.' },
-      { h: 'Top du moment', p: 'Les sociétés Intéressant, puis les meilleures À surveiller, jusqu\'à 8 lignes. La colonne Tendance lit l\'historique de rang déjà enregistré : ↑ en hausse, → inchangé, ↓ en baisse. S\'il n\'y a pas d\'historique, un tiret.' },
+      { h: 'Top du moment', p: 'Les sociétés Intéressant, puis les meilleures À surveiller, jusqu\'à 8 lignes. La colonne Var. jour est la variation du cours déjà enregistrée. La couleur de la note suit le conseil.' },
       { tip: 'Les notes et les écarts au prix cible sont ceux du classement. Ce n\'est pas un conseil en investissement.' }
     ]
   },

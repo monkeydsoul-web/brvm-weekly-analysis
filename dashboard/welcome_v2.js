@@ -25,15 +25,24 @@ function _fmtVariation(v) {
   var n = Number(v);
   var txt = _frFixe(n, 2);
   if (n > 0) txt = '+' + txt;
-  return txt + ' %';
+  return txt + '\u00a0%';
 }
 
-function _fmtEcartCible(v) {
-  if (v == null || v === '' || !isFinite(Number(v))) return '—';
+function _classeConseil(row) {
+  var a = (typeof conseilAffiche === 'function') ? conseilAffiche(row) : null;
+  if (!a || a.suspendu) return '';
+  if (a.libelle === 'Intéressant') return 'is-interessant';
+  if (a.libelle === 'À surveiller') return 'is-surveiller';
+  if (a.libelle === 'Prudence') return 'is-prudence';
+  return '';
+}
+
+function _sensVariation(v) {
+  if (v == null || v === '' || !isFinite(Number(v))) return 'is-flat';
   var n = Number(v);
-  var txt = _frFixe(n, 1);
-  if (n > 0) txt = '+' + txt;
-  return txt + ' %';
+  if (n > 0) return 'is-up';
+  if (n < 0) return 'is-down';
+  return 'is-flat';
 }
 
 function _comptesConseil(rows) {
@@ -122,9 +131,10 @@ function _ligneMouvement(x, rows, sens) {
   var nom = _nomSociete(ticker, rows);
   var variation = _fmtVariation(x.change);
   var cls = (Number(x.change) < 0 || sens === 'bas') ? 'is-down' : 'is-up';
+  var nomHtml = nom ? '<span class="accueil-mvt-nom">' + _echapAccueil(nom) + '</span>' : '';
   return '<button type="button" class="accueil-mvt-ligne" data-ticker="' + _echapAccueil(ticker) + '">'
     + '<strong>' + _echapAccueil(ticker) + '</strong>'
-    + '<span class="accueil-mvt-nom">' + _echapAccueil(nom) + '</span>'
+    + nomHtml
     + '<span class="accueil-mvt-var ' + cls + '">' + _echapAccueil(variation) + '</span>'
     + '</button>';
 }
@@ -174,27 +184,6 @@ function _remplirIndices() {
   });
 }
 
-function _tendanceLigne(row) {
-  if (!row || row.rank_delta == null || row.rank_delta === '' || !isFinite(Number(row.rank_delta))) {
-    var hist = (typeof _rankHistory !== 'undefined' && row) ? _rankHistory[row.ticker] : null;
-    if (hist && hist.length >= 2) {
-      var prev = Number(hist[hist.length - 2].rank);
-      var cur = Number(hist[hist.length - 1].rank);
-      if (isFinite(prev) && isFinite(cur) && prev !== cur) {
-        return prev > cur
-          ? { fleche: '↑', titre: 'Rang en hausse', cls: 'is-up' }
-          : { fleche: '↓', titre: 'Rang en baisse', cls: 'is-down' };
-      }
-      if (isFinite(prev) && isFinite(cur)) return { fleche: '→', titre: 'Rang inchangé', cls: 'is-flat' };
-    }
-    return { fleche: '—', titre: 'Pas d\'historique de rang', cls: 'is-none' };
-  }
-  var delta = Number(row.rank_delta);
-  if (delta > 0) return { fleche: '↑', titre: 'Rang en hausse', cls: 'is-up' };
-  if (delta < 0) return { fleche: '↓', titre: 'Rang en baisse', cls: 'is-down' };
-  return { fleche: '→', titre: 'Rang inchangé', cls: 'is-flat' };
-}
-
 function _lignesTop(rows) {
   var tries = (rows || []).slice().sort(typeof triCommeClassement === 'function' ? triCommeClassement : function() { return 0; });
   var interessant = [];
@@ -215,15 +204,15 @@ function _remplirCartes(rows) {
   if (!el) return;
   var c = _comptesConseil(rows);
   var specs = [
-    ['Intéressant', 'var(--green)'],
-    ['À surveiller', 'var(--amber)'],
-    ['Prudence', 'var(--red)']
+    ['Intéressant', 'is-interessant'],
+    ['À surveiller', 'is-surveiller'],
+    ['Prudence', 'is-prudence']
   ];
   el.innerHTML = specs.map(function(spec) {
     var lib = spec[0];
     var n = c[lib];
-    return '<button type="button" class="accueil-carte" data-conseil="' + _echapAccueil(lib) + '">'
-      + '<span class="accueil-carte-n" style="color:' + spec[1] + '">' + n.toLocaleString('fr-FR') + '</span>'
+    return '<button type="button" class="accueil-carte" data-conseil="' + _echapAccueil(lib) + '" title="Voir dans le classement">'
+      + '<span class="accueil-carte-n ' + spec[1] + '">' + n.toLocaleString('fr-FR') + '</span>'
       + '<span class="accueil-carte-l">' + _echapAccueil(lib) + '</span>'
       + '<span class="accueil-carte-s">Voir dans le classement</span>'
       + '</button>';
@@ -244,22 +233,21 @@ function _remplirTop(rows) {
     return;
   }
   var entete = '<div class="accueil-entete" aria-hidden="true">'
-    + '<span>Société</span><span>Note</span><span>Conseil</span><span>Tendance</span><span>Cours</span><span>Écart cible</span>'
+    + '<span>Société</span><span>Note</span><span>Conseil</span><span>Var. jour</span><span>Cours</span><span>Écart cible</span>'
     + '</div>';
   var corps = lignes.map(function(x) {
     var n = (typeof note10num === 'function') ? note10num(x) : 0;
     var note = (typeof note10txt === 'function') ? note10txt(x) : _frFixe(n, 1);
-    var couleur = (typeof couleurNote === 'function') ? couleurNote(n) : 'var(--text-1)';
     var conseil = (typeof fmtConseil === 'function') ? fmtConseil(x) : '—';
-    var tend = _tendanceLigne(x);
     var cours = (x.price != null && typeof fmtXOF === 'function') ? fmtXOF(x.price) : '—';
-    var ecart = _fmtEcartCible(x.ecart_pct);
+    var ecart = (typeof fmtEcartPct === 'function') ? fmtEcartPct(x.ecart_pct) : '—';
+    var variation = _fmtVariation(x.change_pct);
     return '<button type="button" class="accueil-ligne" data-ticker="' + _echapAccueil(x.ticker) + '">'
       + '<span class="accueil-id"><strong class="accueil-ticker">' + _echapAccueil(x.ticker) + '</strong>'
       + '<span class="accueil-nom">' + _echapAccueil(x.name || '') + '</span></span>'
-      + '<span class="accueil-note" style="color:' + couleur + '">' + note + '<span>/10</span></span>'
+      + '<span class="accueil-note ' + _classeConseil(x) + '">' + note + '<span>/10</span></span>'
       + '<span class="accueil-conseil">' + conseil + '</span>'
-      + '<span class="accueil-tendance ' + tend.cls + '" title="' + _echapAccueil(tend.titre) + '">' + tend.fleche + '</span>'
+      + '<span class="accueil-var ' + _sensVariation(x.change_pct) + '">' + _echapAccueil(variation) + '</span>'
       + '<span class="accueil-cours">' + _echapAccueil(cours) + '</span>'
       + '<span class="accueil-ecart">' + _echapAccueil(ecart) + '</span>'
       + '</button>';
