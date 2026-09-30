@@ -56,6 +56,36 @@
 </div>
 
 <div class="app">
+<header class="topnav" id="topnav">
+  <div class="topnav-bar">
+    <button type="button" class="topnav-logo" onclick="navTo('welcome')">
+      <span class="topnav-mark" aria-hidden="true">📈</span>
+      <span class="topnav-brand">BRVM</span>
+    </button>
+    <nav class="topnav-links" aria-label="Ecrans">
+      <button type="button" data-nav="welcome" onclick="navTo('welcome')">Accueil</button>
+      <button type="button" data-nav="rank" onclick="navTo('rank')">Classement</button>
+      <button type="button" data-nav="screener" onclick="navTo('screener')">Screener</button>
+      <button type="button" data-nav="signals" onclick="navTo('signals')">Signaux</button>
+      <button type="button" data-nav="news" onclick="navTo('news')">Actualités</button>
+      <button type="button" data-nav="glossaire" onclick="navTo('glossaire')">Glossaire</button>
+      <button type="button" data-nav="methodo" onclick="navTo('methodo')">Méthodologie</button>
+      <button type="button" data-nav="settings" onclick="navTo('settings')">Paramètres</button>
+    </nav>
+    <div class="topnav-tools">
+      <div class="topnav-curr" role="group" aria-label="Devise">
+        <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>
+        <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>
+        <button type="button" class="curr-btn" data-curr="usd" onclick="setCurrency('USD')">USD</button>
+      </div>
+      <button type="button" class="topnav-icon" data-theme-btn onclick="toggleTheme()" title="Thème">🌙</button>
+      <button type="button" class="topnav-icon" onclick="navCompare()" title="Comparer">⚖️ <span id="nav-cmp-count"></span></button>
+      <button type="button" class="topnav-search" onclick="openCmdK()" title="Recherche (Ctrl+K)">Rechercher <kbd>Ctrl+K</kbd></button>
+    </div>
+  </div>
+  <div id="index-ticker" class="index-ticker" hidden></div>
+</header>
+<div class="app-body">
 <button id="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">
   <span></span><span></span><span></span>
 </button>
@@ -1165,7 +1195,27 @@
     <button onclick="showChangelog()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:10px;padding:0" title="Historique des versions">Changelog v14.3</button>
   </span>
 </footer>
-</main></div>
+</main></div></div>
+<nav class="tabbar" id="tabbar" aria-label="Navigation">
+  <button type="button" data-nav="welcome" onclick="navTo('welcome')"><span aria-hidden="true">👋</span>Accueil</button>
+  <button type="button" data-nav="rank" onclick="navTo('rank')"><span aria-hidden="true">🏆</span>Classement</button>
+  <button type="button" data-nav="screener" onclick="navTo('screener')"><span aria-hidden="true">🔍</span>Screener</button>
+  <button type="button" data-nav="signals" onclick="navTo('signals')"><span aria-hidden="true">📡</span>Signaux</button>
+  <button type="button" data-nav="plus" onclick="toggleTabPlus()"><span aria-hidden="true">☰</span>Plus</button>
+</nav>
+<div id="tab-plus" class="tab-plus">
+  <button type="button" data-nav="news" onclick="navTo('news')">Actualités</button>
+  <button type="button" data-nav="glossaire" onclick="navTo('glossaire')">Glossaire</button>
+  <button type="button" data-nav="methodo" onclick="navTo('methodo')">Méthodologie</button>
+  <button type="button" data-nav="settings" onclick="navTo('settings')">Paramètres</button>
+  <div class="tab-plus-row" role="group" aria-label="Devise">
+    <button type="button" class="curr-btn on" data-curr="xof" onclick="setCurrency('XOF')">XOF</button>
+    <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>
+    <button type="button" class="curr-btn" data-curr="usd" onclick="setCurrency('USD')">USD</button>
+  </div>
+  <button type="button" onclick="toggleTheme()"><span data-theme-btn>🌙</span> Thème</button>
+  <button type="button" onclick="navCompare()">Comparer</button>
+</div>
 <!-- LOADJS-1 : le serveur remplace {{ASSET_V}} à chaque requête (commit Render, sinon empreinte des JS). -->
 <script>
 window.BRVM_ASSET_V="{{ASSET_V}}";
