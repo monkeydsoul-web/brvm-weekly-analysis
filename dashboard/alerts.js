@@ -105,7 +105,7 @@ function checkSmartAlerts() {
     if (price > 0 && s.prix_cible > 0 && s.libelle_valeur === 'Au-dessus du prix cible') {
       const key = `cible-${ticker}-${Math.round(price/100)}`;
       if (!existingKeys.has(key)) {
-        const ecartTxt = (typeof s.ecart_pct === 'number') ? ` (${s.ecart_pct} %)` : '';
+        const ecartTxt = (typeof s.ecart_pct === 'number') ? ` (${fmtEcartPct(s.ecart_pct)})` : '';
         newAlerts.push({
           key, ticker, type: 'cible_au_dessus', seen: false,
           msg: `${ticker} (${price.toLocaleString('fr-FR')} XOF) : Au-dessus du prix cible (${s.prix_cible.toLocaleString('fr-FR')} XOF)${ecartTxt}`,
