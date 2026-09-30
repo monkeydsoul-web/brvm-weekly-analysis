@@ -86,7 +86,7 @@ function _renderScreenerTable() {
     const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
     const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
-    const dyC = (x.div_yield || 0) >= 6 ? 'var(--green)' : (x.div_yield || 0) >= 3 ? 'var(--amber)' : 'var(--t2)';
+    const dyC = (x.div_yield || 0) > 0 && typeof couleurDividende === 'function' ? couleurDividende(x.div_yield) : 'var(--t2)';
     const chg = x.change_pct != null ? x.change_pct : null;
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
     const chgS = chg != null ? (chg > 0 ? '+' : '') + chg.toFixed(2) + '%' : '—';

@@ -38,9 +38,8 @@ function renderCompare() {
     ['Rang',        x => '#'+(x.rank||'?'),                          x => -(x.rank||99),        true],
   ];
 
-  // Couleur score
-  const scoreC = v => v >= 7.5 ? '#4ADE80' : v >= 5 ? '#FBBF24' : '#F87171';
-  const verdC  = v => v === 'POSITIF' ? '#4ADE80' : v === 'NEGATIF' ? '#F87171' : '#FBBF24';
+  const scoreC = v => (typeof couleurNote==='function') ? couleurNote(v) : (v >= 7.5 ? 'var(--green)' : v >= 5 ? 'var(--amber)' : 'var(--red)');
+  const verdC  = v => v === 'POSITIF' ? 'var(--green)' : v === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
 
   const cols = items.map(x => `
     <th style="text-align:center;padding:8px 12px;min-width:110px">
@@ -57,7 +56,10 @@ function renderCompare() {
       const isBest = compare && vals[i] === best && vals.filter(v => v === best).length < items.length;
       const txt = fmt(x);
       const isVerdict = label === 'Verdict PDF';
-      const color = isVerdict ? verdC(x.pdf_verdict||'') : isBest ? '#4ADE80' : 'var(--t1)';
+      const color = isVerdict ? verdC(x.pdf_verdict||'')
+        : label === 'Score /10' ? scoreC(typeof note10num==='function'?note10num(x):0)
+        : label === 'Div %' ? ((x.div_yield||0)>0 && typeof couleurDividende==='function' ? couleurDividende(x.div_yield) : 'var(--t2)')
+        : isBest ? 'var(--green)' : 'var(--t1)';
       return `<td style="text-align:center;padding:6px 12px;font-size:12px;color:${color};font-weight:${isBest?'700':'400'};border-bottom:1px solid var(--border)">${txt}${isBest?' ✓':''}</td>`;
     }).join('');
     return `<tr><td style="padding:6px 12px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--border);white-space:nowrap">${label}</td>${cells}</tr>`;
@@ -75,7 +77,7 @@ function renderCompare() {
     const by = H - bh - 4;
     const nTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
     return `<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" rx="3" fill="${scoreC(n10)}"/>
-            <text x="${bx + barW/2}" y="${H}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.5)">${x.ticker}</text>
+            <text x="${bx + barW/2}" y="${H}" text-anchor="middle" font-size="9" fill="var(--t2)">${x.ticker}</text>
             <text x="${bx + barW/2}" y="${by - 3}" text-anchor="middle" font-size="10" font-weight="700" fill="${scoreC(n10)}">${nTxt}</text>`;
   }).join('');
   const chart = `<svg width="${W}" height="${H}" style="margin:8px auto;display:block">${bars}</svg>`;

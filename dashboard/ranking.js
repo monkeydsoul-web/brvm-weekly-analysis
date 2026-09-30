@@ -73,7 +73,7 @@ function renderRankCards() {
         <div style="border-top:1px solid var(--border-1);padding-top:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:12px;font-weight:600;color:var(--t1)">${priceStr}</span>
           <span style="font-size:12px;font-weight:600;color:${chgC}">${chgStr}</span>
-          <span style="font-size:12px;color:var(--amber)">${divStr}</span>
+          <span style="font-size:12px;color:${(x.div_yield||0)>0&&typeof couleurDividende==='function'?couleurDividende(x.div_yield):'var(--t2)'}">${divStr}</span>
         </div>
         <div style="border-top:1px solid var(--border-1);padding-top:8px">
           <span style="font-size:12px;font-weight:600;color:${verdClr}">${verdLabel}</span>

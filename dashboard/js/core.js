@@ -191,14 +191,37 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
   }
 });
 
-function col(v){return v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'}
-function bcls(v){return v>=60?'bg':v>=40?'ba':'br'}
+function col(v){return couleurNote(Number(v)/8)}
+function bcls(v){return classeNote(Number(v)/8)}
 function bcls10(v){return classeNote(v)}
-/* Seuils nommés de la note /10 : 7,5 = Intéressant, 5 = À surveiller. */
+/* Repli si le serveur n'a pas injecté window.SEUIL_NOTE_HAUT / BAS (7,5 et 5). */
+function _seuilAffiche(cle, repli){
+  var source=(typeof window!=='undefined'&&window)?window[cle]:null;
+  var n=Number(source);
+  return (source!=null&&source!==''&&isFinite(n))?n:repli;
+}
 var SEUIL_NOTE_FORT = 7.5;
 var SEUIL_NOTE_MODERE = 5;
-function classeNote(v){return v>=SEUIL_NOTE_FORT?'bg':v>=SEUIL_NOTE_MODERE?'ba':'br'}
-function couleurNote(v){return v>=SEUIL_NOTE_FORT?'var(--green)':v>=SEUIL_NOTE_MODERE?'var(--amber)':'var(--red)'}
+function classeNote(v){
+  return v>=_seuilAffiche('SEUIL_NOTE_HAUT', SEUIL_NOTE_FORT)?'bg':v>=_seuilAffiche('SEUIL_NOTE_BAS', SEUIL_NOTE_MODERE)?'ba':'br';
+}
+function couleurNote(v){
+  return v>=_seuilAffiche('SEUIL_NOTE_HAUT', SEUIL_NOTE_FORT)?'var(--note-green)':v>=_seuilAffiche('SEUIL_NOTE_BAS', SEUIL_NOTE_MODERE)?'var(--note-amber)':'var(--note-red)';
+}
+/* Un seul barème de rendement : vert dès 6 %, ambre dès 3 %, rouge en dessous. */
+function couleurDividende(dy){
+  var p=Number(dy);
+  if(!isFinite(p)) p=0;
+  if(p>=6) return 'var(--note-green)';
+  if(p>=3) return 'var(--note-amber)';
+  return 'var(--note-red)';
+}
+function lavisDividende(dy){
+  var c=couleurDividende(dy);
+  if(c==='var(--note-green)') return 'var(--note-green-wash)';
+  if(c==='var(--note-amber)') return 'var(--note-amber-wash)';
+  return 'var(--note-red-wash)';
+}
 function v10fmt(v){return (Math.round(v/8*10)/10).toFixed(1)}
 function note10num(row){
   if(row && row.note10!=null && row.note10!=='' && isFinite(Number(row.note10))){
@@ -1467,7 +1490,7 @@ function renderSignauxParSociete(){
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
       <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
-      <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -1579,10 +1602,10 @@ function renderRank(){
       <td style="padding:2px 4px">${spk}${var30}</td>
       <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
       <td class="col-pe">${x.pe_ref||'—'}×</td>
-      <td style="color:var(--amber)">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
       <td><span class="b ${bcls10(note10num(x))}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
-      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=sv>=7?'var(--green)':sv>=4?'var(--amber)':'var(--red)';return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
+      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=couleurNote(sv);return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
     </tr>`;}).join('');
   }
   // Masquer par défaut les colonnes avancées
@@ -1688,13 +1711,14 @@ async function renderDiv(){
       const stocks = byMonth[i]||[];
       const hasDiv = stocks.length>0;
       const maxDy = stocks.reduce((mx,x)=>Math.max(mx,x.div_yield||0),0);
-      const bg = hasDiv?(maxDy>=10?'rgba(74,222,128,.18)':maxDy>=5?'rgba(251,191,36,.15)':'rgba(96,165,250,.12)'):'var(--bg3)';
-      const border = hasDiv?(maxDy>=10?'rgba(74,222,128,.5)':maxDy>=5?'rgba(251,191,36,.4)':'rgba(96,165,250,.3)'):'var(--border)';
+      const dyCmois = hasDiv ? couleurDividende(maxDy) : 'var(--t3)';
+      const bg = hasDiv ? lavisDividende(maxDy) : 'var(--bg3)';
+      const border = hasDiv?dyCmois:'var(--border)';
       const tickers = stocks.slice(0,3).map(x=>`<div style="font-size:8px;color:var(--t1)">${x.ticker}</div>`).join('');
       return `<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:6px;text-align:center;min-height:60px">
         <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:4px">${mo}</div>
         ${hasDiv?`${tickers}${stocks.length>3?`<div style="font-size:8px;color:var(--t3)">+${stocks.length-3}</div>`:''}
-        <div style="font-size:9px;color:var(--amber);margin-top:2px">${maxDy.toFixed(1)}%</div>`
+        <div style="font-size:9px;color:${dyCmois};margin-top:2px">${maxDy.toFixed(1)}%</div>`
         :'<div style="font-size:9px;color:var(--t3);margin-top:8px">—</div>'}
       </div>`;
     }).join('');
@@ -1705,8 +1729,8 @@ async function renderDiv(){
   document.getElementById('divCal').innerHTML = wdateDesc.length ? wdateDesc.map(x=>{
     const isExc = x.div_is_exceptional || x.div_flag==='exceptionnel_non_recurrent';
     const dy    = isExc ? 0 : (x.div_yield||0);
-    const dyC   = isExc ? 'var(--amber)' : dy>=10?'var(--green)':dy>=5?'var(--amber)':'var(--t2)';
-    const dyBg  = isExc ? 'rgba(251,191,36,.06)' : dy>=10?'rgba(74,222,128,.12)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const dyC   = isExc ? 'var(--amber)' : couleurDividende(dy);
+    const dyBg  = isExc ? 'var(--gold-dim)' : lavisDividende(dy);
     const dyLabel = isExc
       ? `<span style="font-size:11px;color:var(--amber)">🔶 Exceptionnel</span>`
       : `<span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span>`;
@@ -1733,8 +1757,8 @@ async function renderDiv(){
   const _confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge : ()=>'';
   document.getElementById('divTable').innerHTML = wdRecurring.slice(0,15).map(x=>{
     const dy = x.div_yield||0;
-    const dyC = dy>=10?'#22c55e':dy>=5?'var(--amber)':'var(--t2)';
-    const dyBg = dy>=10?'rgba(34,197,94,.15)':dy>=5?'rgba(251,191,36,.1)':'transparent';
+    const dyC = couleurDividende(dy);
+    const dyBg = lavisDividende(dy);
     const pe = x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—';
     const badge = _confBadge(x, {short:true, hideHaute:true});
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
@@ -1757,7 +1781,7 @@ async function renderDiv(){
   svgBar(document.getElementById('cDivDiv'),
     top.map(x=>x.ticker),
     top.map(x=>(x.div_yield||0)),
-    top.map(x=>(x.div_yield||0)>=10?'#FBBF24':(x.div_yield||0)>=5?'#4ADE80':'#60A5FA'),
+    top.map(x=>couleurDividende(x.div_yield||0)),
     250, true);
 }
 
@@ -2176,8 +2200,9 @@ function _genVerdict(s){
   const v=s.composite_adj||0;
   const avis=conseilAffiche(s);
   const suspendu=!!(avis&&avis.suspendu);
-  const col=suspendu?'var(--t2)':(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
-  const bg=suspendu?'rgba(148,163,184,.12)':(v>=60?'rgba(74,222,128,.08)':v>=40?'rgba(251,191,36,.06)':'rgba(248,113,113,.06)');
+  const _nVerdict=(typeof note10num==='function')?note10num(s):(Math.round((v/8)*10)/10);
+  const col=suspendu?'var(--t2)':((typeof couleurNote==='function')?couleurNote(_nVerdict):(_nVerdict>=7.5?'var(--note-green)':_nVerdict>=5?'var(--note-amber)':'var(--note-red)'));
+  const bg=suspendu?'var(--bg3)':(col.indexOf('green')!==-1?'var(--note-green-wash)':col.indexOf('amber')!==-1?'var(--note-amber-wash)':'var(--note-red-wash)');
   var labelShow=avis?avis.texte:'—';
   var badgeCol=avis?avis.css:'var(--t2)';
   if(suspendu){
@@ -2203,8 +2228,9 @@ function _genVerdict(s){
   else if((s.roe||0)>=10) forts.push(`ROE correct (${s.roe}%)`);
   if((s.pb_ref||99)<1.2) forts.push(`Décote sur actif net (P/B ${s.pb_ref.toFixed(2)}× &lt; 1.2)`);
   if(s.pdf_verdict==='POSITIF') forts.push('Rapport annuel jugé positif par l\'analyse IA');
-  if((s.score_graham||0)>=7) forts.push(`Critères Graham validés (${s.score_graham}/10)`);
-  if((s.score_technique||0)>=7) forts.push(`Signal technique favorable (${s.score_technique}/10)`);
+  var _seuilFort=(typeof _seuilAffiche==='function')?_seuilAffiche('SEUIL_NOTE_HAUT', 7.5):7.5;
+  if((s.score_graham||0)>=_seuilFort) forts.push(`Critères Graham validés (${s.score_graham}/10)`);
+  if((s.score_technique||0)>=_seuilFort) forts.push(`Signal technique favorable (${s.score_technique}/10)`);
 
   // Points de vigilance
   const vigil=[];
@@ -2405,7 +2431,6 @@ async function showStock(ticker){
   // Phase 1: render static header immediately from cached ranking data
   const _staticEntry = (window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
   const _v0 = _staticEntry.composite_adj||0;
-  const _sc0 = _v0>=60?'var(--green)':_v0>=40?'var(--amber)':'var(--red)';
   const isFav0 = favorites.includes(ticker);
   document.getElementById(_stockRenderTarget).innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px">
@@ -2450,7 +2475,7 @@ async function showStock(ticker){
     const _noteFiche=(typeof note10txt==='function'?note10txt(s):v10fmt(v)).replace('.',',');
     const _avisFiche=(typeof conseilAffiche==='function')?conseilAffiche(s):null;
     const _suiteFiche=_avisFiche?('Conseil : '+_avisFiche.libelle+'.'):'Pas de conseil pour le moment.';
-    const _colFiche=_avisFiche?_avisFiche.css:'var(--text-1)';
+    const _colFiche=(s.statut==='suspendu')?'var(--t2)':couleurNote(note10num(s));
     document.getElementById(_stockRenderTarget).innerHTML=`
       <div style="margin-bottom:12px">
         <div class="stock-main-col">
@@ -2554,7 +2579,7 @@ async function showStock(ticker){
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[
             ['Par action',_amtCell,'var(--amber)'],
-            ['Rendement',_yieldCell,'var(--amber)'],
+            ['Rendement',_yieldCell,_isExc?'var(--amber)':couleurDividende(_dy)],
             ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
           ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div></div>`).join('')}
@@ -4106,7 +4131,11 @@ function openCompareModal() {
         const v = fmt(r);
         const rv = vals[i];
         const isBest = allNum && rv !== null && rv === best;
-        const c = isBest ? 'var(--green)' : 'var(--text)';
+        const estNote = /\/10$/.test(label);
+        const c = label === 'Div%'
+          ? ((r.div_yield||0) > 0 ? couleurDividende(r.div_yield) : 'var(--t2)')
+          : estNote ? couleurNote(label === 'Score /10' ? note10num(r) : rv)
+          : (isBest ? 'var(--green)' : 'var(--text)');
         const fw = isBest ? '700' : '400';
         return `<td style="padding:7px 8px;text-align:center;color:${c};font-weight:${fw}">${v}${isBest?'  ★':''}</td>`;
       }).join('')}

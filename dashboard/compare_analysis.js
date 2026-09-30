@@ -93,7 +93,7 @@ function refreshCASelector() {
     selEl.innerHTML = _compareAnalysisTickers.map(t => {
       const s = all.find(x=>x.ticker===t);
       const v = s?.composite_adj||0;
-      const c = v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+      const c = (typeof couleurNote==='function')?couleurNote(note10num(s||{composite_adj:v})):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
       return `<span style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid ${c};border-radius:6px;padding:3px 8px;font-size:11px">
         <strong style="color:${c}">${t}</strong>
         <span style="color:var(--t2);font-size:10px">${(typeof note10txt==='function'?note10txt(s||{}):v10fmt(v))}/10</span>
@@ -108,7 +108,7 @@ function refreshCASelector() {
     picker.innerHTML = sorted.map(x => {
       const selected = _compareAnalysisTickers.includes(x.ticker);
       const v = x.composite_adj||0;
-      const c = v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+      const c = (typeof couleurNote==='function')?couleurNote(note10num(x)):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)');
       return `<button onclick="caToggleTicker('${x.ticker}')"
         style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid ${selected?c:'var(--border)'};background:${selected?c+'22':'var(--bg3)'};color:${selected?c:'var(--t2)'};cursor:pointer;font-weight:${selected?'700':'400'}">
         ${x.ticker} <span style="opacity:0.7">${(typeof note10txt==='function'?note10txt(x):v10fmt(v))}/10</span></button>`;

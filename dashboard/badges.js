@@ -117,7 +117,7 @@ function buildKpiCards(s) {
       'Price/Book (cours ÷ valeur comptable). Seuil Graham : ≤ 1.5. P/B < 1 = l\'action se traite sous sa valeur comptable.'],
     ['ROE', roe ? roe.toFixed(1)+'%' : '—', roe && roe > 15 ? 'var(--green)' : roe && roe > 8 ? 'var(--amber)' : 'var(--red)',
       'Return On Equity = Résultat net ÷ Capitaux propres. Mesure la rentabilité. ≥ 15% = excellent, ≥ 8% = correct.'],
-    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', div && div > 5 ? 'var(--green)' : div && div > 2 ? 'var(--amber)' : 'var(--t2)',
+    ['Div%', div && div > 0 ? div.toFixed(1)+'%' : '—', (div && div > 0 && typeof couleurDividende==='function') ? couleurDividende(div) : 'var(--t2)',
       'Rendement du dividende = dividende annuel ÷ cours actuel. Un rendement élevé peut signaler une sous-évaluation ou un risque de coupe.'],
     ['BNA', eps ? _fmtXOF(Math.round(eps)) : '—', 'var(--blue)',
       'Bénéfice Net par Action (EPS) — BNA issu des données BOC ou PDF. Utilisé pour calculer P/E, Graham et EPV.'],
