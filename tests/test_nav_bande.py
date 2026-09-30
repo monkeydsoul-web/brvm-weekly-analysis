@@ -43,6 +43,8 @@ def test_bande_mobile_ne_comprime_pas_les_pastilles():
     css = (ROOT / "dashboard" / "css" / "app.css").read_text(encoding="utf-8")
     bloc = css[css.index("@media(max-width:768px)"):]
     assert ".index-chips,#index-fx{flex-shrink:0;min-width:auto}" in bloc
+    assert "padding-inline:24px;scroll-padding-inline:24px;scroll-snap-type:x proximity" in bloc
+    assert "scroll-snap-align:start" in bloc
     assert "width:24px" in bloc
     assert ".index-band.fondu-gauche::before" in bloc
     assert ".index-band.fondu-droite::after" in bloc

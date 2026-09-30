@@ -729,7 +729,8 @@ html.has-indices #msb-composite,html.has-indices #msb-brvm30{display:none}
 #help-fab{bottom:calc(var(--space-56px) + var(--space-20px))}
 .index-band{position:relative}
 .index-chips,#index-fx{flex-shrink:0;min-width:auto}
-.index-band-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-left:16px;padding-right:16px}
+.index-band-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-inline:24px;scroll-padding-inline:24px;scroll-snap-type:x proximity}
+.index-session,.index-chips .index-chip,#index-fx{scroll-snap-align:start}
 .index-band-scroll::-webkit-scrollbar{display:none}
 .index-band::before,.index-band::after{content:'';position:absolute;top:0;bottom:0;width:24px;pointer-events:none;z-index:1;opacity:0}
 .index-band.fondu-gauche::before{left:0;opacity:1;background:linear-gradient(90deg,var(--bg-surface),transparent)}
