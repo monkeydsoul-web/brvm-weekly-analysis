@@ -99,7 +99,7 @@ function _renderScreenerTable() {
     const targetStr = target > 0 ? target.toLocaleString('fr-FR') + ' XOF' : '—';
     const mots = (typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—');
     const targetC = ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
-    const ecartStr = ecart == null ? '' : ((ecart > 0 ? '+' : '') + ecart + '%');
+    const ecartStr = ecart == null ? '' : fmtEcartPct(ecart);
 
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td style="padding:8px 12px">

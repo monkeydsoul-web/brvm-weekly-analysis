@@ -80,7 +80,15 @@ function renderLiveRankBadge(ticker) {
 
 // ── Harmonisation sidebar scores ──────────────────────────────────────────
 function renderSidebarScores(ranking) {
-  const sidebar = document.getElementById('sidebarList');
+  if (ranking) {
+    window.scores = ranking;
+    if (typeof scores !== 'undefined') scores = ranking;
+  }
+  if (typeof loadSidebar === 'function') {
+    loadSidebar();
+    return;
+  }
+  const sidebar = document.getElementById('tlItems');
   if (!sidebar) return;
   const arr = ranking || window.scores || scores || [];
   const sorted = [...arr].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(a.rank||999)-(b.rank||999));
