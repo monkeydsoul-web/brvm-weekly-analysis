@@ -943,7 +943,11 @@ def serve_ranking_js():
     return send_from_directory("dashboard", "ranking.js", mimetype="application/javascript")
 
 def _histoire_sicc():
-    """Fiche d'affichage SICOR. Écrase un texte qui décrivait Sicable."""
+    """Fiche d'affichage SICOR. Écrase un texte qui décrivait Sicable.
+
+    La migration de démarrage recopie cette même fiche dans le fichier disque.
+    L'écrasement reste tant que ce fichier n'a pas été relu en production.
+    """
     chemin = os.path.join(os.path.dirname(__file__), "stories", "sicc.json")
     with open(chemin, encoding="utf-8") as f:
         return json.load(f)
@@ -951,7 +955,7 @@ def _histoire_sicc():
 
 @app.route("/data/companies_stories.json")
 def serve_companies_stories():
-    """Sert les fiches, avec la fiche SICC corrigée (coco, pas les câbles)."""
+    """Sert les fiches. SICC vient de stories/sicc.json (coco, pas les câbles)."""
     payload = {"stories": {}}
     chemin = os.path.join(DATA_DIR, "companies_stories.json")
     if os.path.isfile(chemin):
@@ -2426,6 +2430,21 @@ def _init_app():
     if _INIT_DONE:
         return
     _INIT_DONE = True
+
+    # Fiche SICC : correction disque, indépendante du planificateur.
+    # Accès local et idempotent, sans thread ni réseau. Elle tourne aussi
+    # quand le planificateur est coupé. La route continue d'écraser SICC
+    # tant que le fichier n'est pas relu.
+    try:
+        from migrer_fiche_sicc import migrer_fiche_sicc
+        resultat = migrer_fiche_sicc()
+        logger.info(
+            "Migration fiche SICC : %s%s",
+            resultat.get("raison"),
+            (" — sauvegarde " + resultat["sauvegarde"]) if resultat.get("sauvegarde") else "",
+        )
+    except Exception as exc:
+        logger.warning("Migration fiche SICC non appliquée : %s", exc)
 
     # Tests : ne pas lancer le planificateur, le rechauffement (ecrit le classement)
     # ni les threads reseau. Inactif en production tant que la variable n'est pas posee.
