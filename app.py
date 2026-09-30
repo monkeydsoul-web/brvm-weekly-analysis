@@ -593,14 +593,17 @@ def api_backtesting_summary():
 
 @app.route("/api/market")
 def api_market():
-    """Donnees marche BRVM — indices, top5, flop5, secteurs"""
+    """Donnees marche BRVM — indices, top5, flop5, secteurs.
+
+    Le scrape brvm.org reste hors de la requete : cache 60 s en seance,
+    reponse immediate si une valeur (meme perimee) existe deja.
+    ``force=true`` relance la revalidation sans faire attendre le client
+    des qu'un cache est la. Le corps JSON n'ajoute aucun champ.
+    """
     try:
         from market_data import get_market_data
-        force = request.args.get("force","false").lower() == "true"
+        force = request.args.get("force", "false").lower() == "true"
         data = get_market_data(force_refresh=force)
-        # Si top5 vide, forcer refresh
-        if not data.get("top5") and not force:
-            data = get_market_data(force_refresh=True)
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -2334,6 +2337,12 @@ def _init_app():
 
     # Cache commodités : charge le disque puis rafraîchit en boucle (15 min, backoff sur échec/429)
     threading.Thread(target=_refresh_commodities_loop, daemon=True).start()
+
+    try:
+        from market_data import preparer_cache_marche
+        preparer_cache_marche()
+    except Exception as e:
+        logger.warning(f"Cache marche non prechauffe: {e}")
 
 
 _init_app()

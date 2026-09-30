@@ -1392,12 +1392,27 @@ function renderIndexTicker(d) {
   el.hidden = false;
   document.documentElement.classList.add('has-indices');
 }
+var _mktGeneration = 0;
+var _mktControle = null;
+var DELAI_MARCHE_MS = 20000; // plus tolerant que 10 s, surtout sur mobile
+
 function loadMarketWidget(){
+  _mktGeneration += 1;
+  if (_mktControle) {
+    try { _mktControle.abort(); } catch (err) {}
+    _mktControle = null;
+  }
+  _chargerMarche(0, _mktGeneration);
+}
+function _chargerMarche(essai, generation){
+  if (generation !== _mktGeneration) return;
   var _mktErrEl = document.getElementById('mkt-idx-error');
   if (_mktErrEl) _mktErrEl.style.display = 'none';
   var _mktAc = new AbortController();
-  var _mktTo = setTimeout(function(){ _mktAc.abort(); }, 10000); // LOADERR-1 : delai max 10 s, pas de relance automatique
+  _mktControle = _mktAc;
+  var _mktTo = setTimeout(function(){ _mktAc.abort(); }, DELAI_MARCHE_MS);
   fetch('/api/market', {signal:_mktAc.signal}).then(r=>{clearTimeout(_mktTo);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>{
+    if (generation !== _mktGeneration) return;
     var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
     var b30  = (d.indices||[]).find(i=>i.name&&i.name.includes('30'));
     window._marketData = {composite: comp||{}, brvm30: b30||{}};
@@ -1439,17 +1454,24 @@ function loadMarketWidget(){
     renderIndexTicker(d);
   }).catch(e=>{
     clearTimeout(_mktTo);
-    console.error('[BRVM] loadMarketWidget:',e);
+    if (generation !== _mktGeneration) return;
+    var abandon = !!(e && e.name === 'AbortError');
+    // Un seul nouvel essai. L'abandon (delai) ne laisse pas d'erreur console.
+    if (essai < 1) {
+      setTimeout(function(){ _chargerMarche(essai + 1, generation); }, 700);
+      return;
+    }
+    if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
     renderIndexTicker(null);
     if (_mktErrEl) _mktErrEl.style.display = 'flex';
     var msbComp2=document.getElementById('msb-composite');
     var msbB302=document.getElementById('msb-brvm30');
     var msbTime2=document.getElementById('msb-time');
-    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--bear)">Indices indispo.</span> <span role="button" tabindex="0" onclick="loadMarketWidget()" style="color:var(--text-1);text-decoration:underline;cursor:pointer">Réessayer</span>';
+    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--text-3)">Indices en attente</span> <span role="button" tabindex="0" onclick="loadMarketWidget()" style="color:var(--text-2);text-decoration:underline;cursor:pointer">Réessayer</span>';
     if(msbB302) msbB302.textContent='';
     if(msbTime2) msbTime2.textContent='';
     var msbBc2=document.getElementById('msb-breadcrumb'), msbBoc2=document.getElementById('msb-boc');
-    if(msbBc2) msbBc2.style.display='none'; // LOADERR-1 : libere de la place a 390px pour "Indices indisponibles · Reessayer"
+    if(msbBc2) msbBc2.style.display='none'; // libere de la place a 390px pour le message court
     if(msbBoc2) msbBoc2.style.display='none';
   });
 }
