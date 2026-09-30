@@ -17,5 +17,5 @@
 
 ## Code
 - JS contenant des apostrophes françaises → fichier `.js` séparé sous `dashboard/`, jamais inline dans index.html.
-- Ne JAMAIS réindenter ou reformater le gros bloc inline de `dashboard/index.html` : éditions chirurgicales uniquement.
+- Ne JAMAIS réindenter ou reformater le gros bloc inline de `dashboard/index.html` : éditions chirurgicales uniquement. Exception D-6, validée par Souleymane : uniquement dans les PR de refonte de l'interface, le découpage de `dashboard/index.html` vers `dashboard/css/*.css`, `dashboard/js/core.js` et `dashboard/js/pages/*.js` est autorisé, à condition que l'écran reste identique (preuves par captures avant/après) et que 0 erreur console soit constatée. En dehors de ces PR, la règle des éditions chirurgicales reste entière.
 - Modules VIVANTS, interdiction de les supprimer : scraper.py, backtesting.py, portfolio_optimizer.py, price_history.py. (candlestick.py retire le 27/09/2026 sur decision de Souleymane : il servait des OHLC synthetiques sur la route publique /api/candlestick, appelee par aucune page.)
