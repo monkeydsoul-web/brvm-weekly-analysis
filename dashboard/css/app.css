@@ -728,11 +728,12 @@ html.has-indices #msb-composite,html.has-indices #msb-brvm30{display:none}
 #app-footer{left:0;position:static}
 #help-fab{bottom:calc(var(--space-56px) + var(--space-20px))}
 .index-band{position:relative}
+.index-chips,#index-fx{flex-shrink:0;min-width:auto}
 .index-band-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-left:16px;padding-right:16px}
 .index-band-scroll::-webkit-scrollbar{display:none}
-.index-band::before,.index-band::after{content:'';position:absolute;top:0;bottom:0;width:28px;pointer-events:none;z-index:1}
-.index-band::before{left:0;background:linear-gradient(90deg,var(--bg-surface),transparent)}
-.index-band::after{right:0;background:linear-gradient(270deg,var(--bg-surface),transparent)}
+.index-band::before,.index-band::after{content:'';position:absolute;top:0;bottom:0;width:24px;pointer-events:none;z-index:1;opacity:0}
+.index-band.fondu-gauche::before{left:0;opacity:1;background:linear-gradient(90deg,var(--bg-surface),transparent)}
+.index-band.fondu-droite::after{right:0;opacity:1;background:linear-gradient(270deg,var(--bg-surface),transparent)}
 .tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:400;height:calc(var(--space-56px) + var(--space-1));padding-bottom:env(safe-area-inset-bottom, 0px);background:var(--bg-surface);border-top:1px solid var(--border-1)}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text-2);font-family:var(--font-ui);font-size:11px;font-weight:600;cursor:pointer;min-height:44px;padding:4px 2px}
 .tabbar button svg{flex-shrink:0}

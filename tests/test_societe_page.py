@@ -88,7 +88,8 @@ def test_depart_fiche_vers_la_racine():
     src = Path(__file__).resolve().parents[1].joinpath("dashboard", "js", "core.js").read_text(encoding="utf-8")
     assert "history.pushState({page: id}, '', '/#' + id)" in src
     assert "history.pushState({societe: ticker}, '', cible)" in src
-    assert "if (!_ligneSociete(ticker)) return;" in src
+    assert "if (!_ligneSociete(ticker))" in src
+    assert "history.pushState({page: 'welcome'}, '', '/')" in src
     assert "history.pushState({page: id}, '', '#' + id)" not in src
 
 

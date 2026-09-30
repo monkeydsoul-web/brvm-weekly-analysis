@@ -536,6 +536,7 @@ let _gBuffer='',_gBufTimer=null;
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openGSearch();return;}
   if(e.key==='Escape'&&document.getElementById('g-search-overlay')?.classList.contains('open')){closeGSearch();return;}
+  if(e.key==='Escape' && _fermerMenusEchap(e)) return;
   var actif=document.activeElement;
   var balise=actif&&actif.tagName;
   if(balise==='INPUT'||balise==='TEXTAREA'||balise==='SELECT'||(actif&&actif.isContentEditable)) return;
@@ -619,6 +620,43 @@ function _fermerApprendre() {
 function _fermerMenusHaut() {
   _fermerPlusHaut();
   _fermerApprendre();
+}
+function _elementVisible(el) {
+  return !!(el && el.getClientRects && el.getClientRects().length);
+}
+function _fermerMenusEchap(e) {
+  var cmdk = document.getElementById('cmdk-modal');
+  if (cmdk && cmdk.classList.contains('open')) return false;
+  var sso = document.getElementById('stock-slideover');
+  if (sso && sso.classList.contains('open')) return false;
+  var menu = document.getElementById('topnav-more-menu');
+  var btn = document.getElementById('topnav-more-btn');
+  if (menu && !menu.hidden && _elementVisible(menu)) {
+    _fermerPlusHaut();
+    if (btn) btn.focus();
+    if (e) e.preventDefault();
+    return true;
+  }
+  var apprendreMenu = document.getElementById('topnav-apprendre-menu');
+  var apprendreBtn = document.getElementById('topnav-apprendre-btn');
+  if (apprendreMenu && !apprendreMenu.hidden && _elementVisible(apprendreMenu)) {
+    _fermerApprendre();
+    if (apprendreBtn) apprendreBtn.focus();
+    if (e) e.preventDefault();
+    return true;
+  }
+  var plus = document.getElementById('tab-plus');
+  if (plus && plus.classList.contains('open') && _elementVisible(plus)) {
+    plus.classList.remove('open');
+    var declencheur = document.querySelector('#tabbar [data-nav="apprendre"]');
+    if (declencheur) {
+      declencheur.setAttribute('aria-expanded', 'false');
+      declencheur.focus();
+    }
+    if (e) e.preventDefault();
+    return true;
+  }
+  return false;
 }
 function toggleApprendre() {
   var menu = document.getElementById('topnav-apprendre-menu');
@@ -1620,16 +1658,37 @@ function renderIndexTicker(d) {
   if (region) region.setAttribute('aria-label', puces.map(function(p){ return p.libelle; }).join(', '));
   var aUneValeur = puces.some(function(p){ return p.libelle.indexOf('—') < 0; });
   document.documentElement.classList.toggle('has-indices', aUneValeur);
+  _syncFonduBande();
 }
+function _syncFonduBande() {
+  var bande = document.getElementById('index-ticker');
+  if (!bande) return;
+  var sc = bande.querySelector('.index-band-scroll');
+  if (!sc) return;
+  var reste = sc.scrollWidth - sc.clientWidth;
+  bande.classList.toggle('fondu-gauche', sc.scrollLeft > 1);
+  bande.classList.toggle('fondu-droite', reste > 1 && sc.scrollLeft < reste - 1);
+}
+(function() {
+  function brancher() {
+    var bande = document.getElementById('index-ticker');
+    var sc = bande && bande.querySelector('.index-band-scroll');
+    if (!sc || sc.dataset.fondu) return;
+    sc.dataset.fondu = '1';
+    sc.addEventListener('scroll', _syncFonduBande, {passive: true});
+    window.addEventListener('resize', _syncFonduBande);
+    _syncFonduBande();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', brancher);
+  else brancher();
+})();
 function renderIndexFx(m) {
   var el = document.getElementById('index-fx-val');
   if (!el) return;
   var n = m && typeof m.FCFA_per_USD === 'number' ? m.FCFA_per_USD : null;
-  if (n == null || !isFinite(n)) {
-    el.textContent = '—';
-    return;
-  }
-  el.textContent = n.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  if (n == null || !isFinite(n)) el.textContent = '—';
+  else el.textContent = n.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  _syncFonduBande();
 }
 function loadMarketWidget(){
   var _mktErrEl = document.getElementById('mkt-idx-error');
@@ -2700,6 +2759,13 @@ function renderStockStory(ticker) {
 
 function _poserUrlSociete(ticker) {
   if (!/^[A-Z0-9]{2,12}$/.test(ticker)) return;
+  if (!_ligneSociete(ticker)) {
+    // Rester sur /societe/AUTRE ferait rouvrir cette fiche au rechargement.
+    if (_cheminSocieteActuel()) {
+      try { history.pushState({page: 'welcome'}, '', '/'); } catch (e) {}
+    }
+    return;
+  }
   var cible = '/societe/' + ticker;
   if (location.pathname === cible) return;
   var actuel = _cheminSocieteActuel();
@@ -2707,7 +2773,6 @@ function _poserUrlSociete(ticker) {
     try { history.replaceState({societe: ticker}, '', cible); } catch (e) {}
     return;
   }
-  if (!_ligneSociete(ticker)) return;
   try { history.pushState({societe: ticker}, '', cible); } catch (e) {}
 }
 
@@ -4049,12 +4114,12 @@ function _ecrireStatutSeance(d) {
   var ouvert = !!d.market_open;
   session.classList.toggle('is-open', ouvert);
   session.classList.toggle('is-closed', !ouvert);
-  if (ouvert) {
-    session.textContent = 'Marché ouvert';
-    return;
+  if (ouvert) session.textContent = 'Marché ouvert';
+  else {
+    var jour = _seanceDepuisStatut(d.updated_at);
+    session.textContent = jour ? ('Marché fermé · séance du ' + jour) : 'Marché fermé';
   }
-  var jour = _seanceDepuisStatut(d.updated_at);
-  session.textContent = jour ? ('Marché fermé · séance du ' + jour) : 'Marché fermé';
+  _syncFonduBande();
 }
 function updateLiveStatus() {
   fetch('/api/status')
