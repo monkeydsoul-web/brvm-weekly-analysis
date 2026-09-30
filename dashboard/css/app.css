@@ -239,6 +239,13 @@ tr:hover td{background:var(--bg-overlay);cursor:pointer}
 .ba{background:var(--note-amber-wash);color:var(--note-amber)}
 .br{background:var(--note-red-wash);color:var(--note-red)}
 .bx{background:rgba(148,163,184,.18);color:var(--note-muted)}
+/* Plus spécifique que accueil.css : la note du Top suit le conseil avec les encres de notes. */
+.accueil .accueil-note.is-interessant,
+.accueil .accueil-carte-n.is-interessant{color:var(--note-green)}
+.accueil .accueil-note.is-surveiller,
+.accueil .accueil-carte-n.is-surveiller{color:var(--note-amber)}
+.accueil .accueil-note.is-prudence,
+.accueil .accueil-carte-n.is-prudence{color:var(--note-red)}
 .bb{background:var(--blue-dim);color:var(--blue)}
 .bp{background:var(--purple-dim);color:var(--purple)}
 /* ══ Buttons ════════════════════════════════════════════════════════════════ */

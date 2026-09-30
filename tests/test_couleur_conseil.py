@@ -73,6 +73,8 @@ def test_amortisseur_colore_la_note_principale_selon_le_conseil():
     source = _entre(CORE, "function col(v)", "function triCommeClassement")
     source += _entre(CORE, "function triCommeClassement", "function rapportAnnuelTxt")
     source += _entre(CORE, "function conseilAffiche", "function showChangelog")
+    if "function filtreConseil" in CORE:
+        source += _entre(CORE, "function filtreConseil", "function renderRank()")
     source += _entre(CORE, "function renderRank()", "function renderRankLive")
     source += _entre(CORE, "function loadSidebar()", "function filterSidebar")
     source += _entre(BADGES, "function renderLiveRankBadge", "function renderSidebarScores")
@@ -157,6 +159,9 @@ attend(classePrincipale(lignes[3]) === 'br', 'ORAC classe');
 attend(couleurPrincipale(lignes[4]) === 'var(--t2)' && classePrincipale(lignes[4]) === 'bx', 'SICC gris');
 attend(couleurPrincipale(lignes[5]) === 'var(--t2)' && classePrincipale(lignes[5]) === 'bx', 'SEMC gris');
 
+if (typeof filtreConseil !== 'function') {
+  filtreConseil = function (rows) { return rows || []; };
+}
 renderRank();
 const etit = ligne('ETIT');
 const sogc = ligne('SOGC');
