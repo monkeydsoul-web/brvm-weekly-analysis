@@ -318,6 +318,13 @@ def _calcul_asset_v():
     for nom in noms:
         with open(os.path.join(dossier, nom), "rb") as f:
             empreinte.update(f.read())
+    dossier_js = os.path.join(dossier, "js")
+    if os.path.isdir(dossier_js):
+        for nom in sorted(os.listdir(dossier_js)):
+            chemin = os.path.join(dossier_js, nom)
+            if nom.endswith(".js") and os.path.isfile(chemin):
+                with open(chemin, "rb") as f:
+                    empreinte.update(f.read())
     dossier_css = os.path.join(dossier, "css")
     if os.path.isdir(dossier_css):
         for nom in sorted(os.listdir(dossier_css)):

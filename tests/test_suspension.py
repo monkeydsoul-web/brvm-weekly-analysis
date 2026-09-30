@@ -596,7 +596,7 @@ def test_performances_ignorent_les_suspendus():
 
 
 def test_badge_suspendu_dans_le_front():
-    html = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+    html = (ROOT / "dashboard" / "js" / "core.js").read_text(encoding="utf-8")
     debut = html.index("function conseilAffiche")
     fin = html.index("function showChangelog", debut)
     source = html[debut:fin]

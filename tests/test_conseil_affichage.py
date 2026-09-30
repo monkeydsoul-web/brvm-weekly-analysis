@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-HTML = (Path(__file__).resolve().parents[1] / "dashboard" / "index.html").read_text(
+HTML = (Path(__file__).resolve().parents[1] / "dashboard" / "js" / "core.js").read_text(
     encoding="utf-8"
 )
 
