@@ -30,6 +30,7 @@ function renderRankCards() {
   let d = [...(window.scores || scores || [])];
   if (sec)     d = d.filter(x => x.sector === sec);
   if (verdict) d = filtreTendance(d, verdict);
+  if (typeof filtreConseil === 'function') d = filtreConseil(d);
   if (window._favOnly) d = d.filter(x => (window.favorites || favorites || []).includes(x.ticker));
   if (srt === 'composite_adj' && typeof triCommeClassement === 'function') d.sort(triCommeClassement);
   else d.sort((a, b) => srt === 'pe_ref'
@@ -46,7 +47,7 @@ function renderRankCards() {
       const v      = x.composite_adj || 0;
       const v10    = (typeof note10txt==='function') ? note10txt(x) : v10fmt(v).replace('.',',');
       const n10    = (typeof note10num==='function') ? note10num(x) : (Math.round(v/8*10)/10);
-      const scoreC = couleurNote(n10);
+      const scoreC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
       const chg    = x.change_pct || 0;
       const chgC   = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
       const chgStr = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
@@ -73,7 +74,7 @@ function renderRankCards() {
         <div style="border-top:1px solid var(--border-1);padding-top:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:12px;font-weight:600;color:var(--t1)">${priceStr}</span>
           <span style="font-size:12px;font-weight:600;color:${chgC}">${chgStr}</span>
-          <span style="font-size:12px;color:var(--amber)">${divStr}</span>
+          <span style="font-size:12px;color:${(x.div_yield||0)>0&&typeof couleurDividende==='function'?couleurDividende(x.div_yield):'var(--t2)'}">${divStr}</span>
         </div>
         <div style="border-top:1px solid var(--border-1);padding-top:8px">
           <span style="font-size:12px;font-weight:600;color:${verdClr}">${verdLabel}</span>

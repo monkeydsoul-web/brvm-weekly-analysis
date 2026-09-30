@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="fr" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BRVM Analyzer — Notation des sociétés de la BRVM</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="description" content="Notes sur 10 et analyses transparentes des sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:title" content="BRVM Analyzer — Notation des sociétés de la BRVM"><meta property="og:description" content="Notes sur 10 et analyses transparentes des sociétés cotées à la BRVM (UEMOA). 8 modèles de valorisation, données publiques, pédagogie pour investisseurs débutants. Pas un conseil en investissement."><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="BRVM Analyzer">
-<link rel="stylesheet" href="/css/app.css?v={{ASSET_V}}"></head>
+<link rel="stylesheet" href="/css/app.css?v={{ASSET_V}}"><link rel="stylesheet" href="/css/accueil.css?v={{ASSET_V}}"></head>
 <body>
 <div id="g-spin"></div>
 <div id="floating-tooltip"></div>
@@ -67,14 +67,14 @@
       <span id="live-label">LIVE</span>
     </span>
     <nav class="topnav-links" id="topnav-links" aria-label="Ecrans">
-      <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser">Accueil</button>
+      <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · résumé du marché, des conseils et des actualités">Accueil</button>
       <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil">Classement<span id="rank-badge" class="nav-count" title="Nombre de sociétés analysées"></span></button>
       <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités">Screener</button>
       <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles">Signaux</button>
       <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
       <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
-      <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>
-      <button type="button" data-nav="settings" onclick="navTo('settings')" title="Tâches automatiques · préférences · statistiques">Paramètres</button>
+      <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthode</button>
+      <button type="button" data-nav="marche" onclick="navTo('marche')" title="Indices, commodités, macro UEMOA et dividendes">Marché</button>
     </nav>
     <div class="topnav-more" id="topnav-more" hidden>
       <button type="button" class="topnav-more-btn" id="topnav-more-btn" onclick="toggleTopnavMore()" aria-expanded="false" aria-controls="topnav-more-menu">Plus ▾</button>
@@ -86,6 +86,7 @@
         <button type="button" class="curr-btn" data-curr="eur" onclick="setCurrency('EUR')">EUR</button>
         <button type="button" class="curr-btn" data-curr="usd" onclick="setCurrency('USD')">USD</button>
       </div>
+      <button type="button" class="topnav-icon" data-nav="settings" onclick="navTo('settings')" title="Paramètres" aria-label="Paramètres">⚙</button>
       <button type="button" class="topnav-icon" data-theme-btn onclick="toggleTheme()" title="Thème">🌙</button>
       <button type="button" class="topnav-icon" onclick="navCompare()" title="Comparer">⚖️ <span id="nav-cmp-count"></span></button>
       <button type="button" class="topnav-search" onclick="openCmdK()" title="Recherche (Ctrl+K)"><span class="topnav-search-ico" aria-hidden="true">🔍</span><span class="topnav-search-label">Rechercher</span> <kbd>Ctrl+K</kbd></button>
@@ -123,90 +124,46 @@
   <button onclick="openCmdK()" style="background:var(--bg-elevated);border:1px solid var(--border-1);color:var(--text-3);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:var(--font-ui)" title="Recherche globale (⌘K)">🔍 <span class="compact-hide">Rechercher</span> <kbd style="font-size:9px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:3px;padding:1px 4px">⌘K</kbd></button>
 </div>
 
-<!-- WELCOME 3 PORTES -->
+<!-- ACCUEIL -->
 <div class="page on" id="page-welcome">
   <div class="card" id="bootError" style="display:none">
     <div class="ct">Données temporairement indisponibles</div>
     <p style="color:var(--t2)">Le serveur ne répond pas. Cela arrive pendant les mises à jour du site.</p>
     <button class="btn btn-g" onclick="location.reload()">Réessayer</button>
   </div>
-  <div id="top3-podium" hidden></div>
-  <div class="welcome-hero">
-    <div style="font-size:48px;margin-bottom:12px">📈</div>
-    <h1>Bienvenue sur BRVM Analyse</h1>
-    <p>Suivez, analysez et investissez sur la Bourse Régionale des Valeurs Mobilières d'Afrique de l'Ouest.</p>
-  </div>
-  <div class="welcome-cards">
-    <div class="welcome-card" onclick="_welcomeDoor('decouvrir')">
-      <div class="wc-icon">🌱</div>
-      <div class="wc-title">Je découvre</div>
-      <div class="wc-desc">Nouveau sur la BRVM ? Commencez par les bases : comprendre les actions, les dividendes, les scores.</div>
-      <span class="wc-btn">Commencer →</span>
-    </div>
-    <div class="welcome-card" onclick="_welcomeDoor('investir')">
-      <div class="wc-icon">💼</div>
-      <div class="wc-title">J'investis</div>
-      <div class="wc-desc">Trouvez les meilleures opportunités, filtrez par secteur, dividende ou valorisation.</div>
-      <span class="wc-btn">Voir le classement →</span>
-    </div>
-    <div class="welcome-card" onclick="_welcomeDoor('analyser')">
-      <div class="wc-icon">🎯</div>
-      <div class="wc-title">J'analyse</div>
-      <div class="wc-desc">Mode expert : tableaux de bord complets, signaux IA, corrélations et optimisation de portefeuille.</div>
-      <span class="wc-btn">Dashboard →</span>
-    </div>
-  </div>
-
-  <!-- LOT1: Découvrir la BRVM (section pédagogique débutant) -->
-      <div class="card" style="margin-top:4px">
-        <div class="ct">📚 Découvrir la BRVM</div>
-
-        <div style="margin-bottom:18px">
-          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">La BRVM, c'est quoi ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">La BRVM est la bourse commune aux <strong>8 pays de l'UEMOA</strong> (Afrique de l'Ouest), avec son siège à Abidjan. Créée en <strong>1998</strong>, elle réunit <strong>une cinquantaine de sociétés cotées</strong>. Sa performance se suit via deux indices : le <strong>BRVM Composite</strong> (tout le marché) et le <strong>BRVM 30</strong> (les 30 valeurs les plus actives).</p>
-        </div>
-
-        <div style="margin-bottom:18px">
-          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">Comment investir concrètement ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 12px">Pour passer un ordre à la BRVM, on passe <strong>obligatoirement par une SGI</strong> (Société de Gestion et d'Intermédiation) — un courtier agréé par l'<strong>AMF-UMOA</strong>. Le marché étant régional, tu peux choisir une SGI dans <strong>n'importe quel pays de l'UEMOA</strong>, où que tu vives.</p>
-
-          <details style="margin:0;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-1)">🏦 Voir les SGI par pays (courtiers agréés)</summary><div style="padding:8px 10px 4px">
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇨🇮 Côte d'Ivoire <span style="color:var(--text-3);font-size:11px">· principales</span></summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Atlantique Finance · Attijari Securities West Africa · BOA Capital Securities · Bridge Securities</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇸🇳 Sénégal</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">ABCO Bourse · Everest Finance · Finance Gestion Intermédiation · Invictus Capital &amp; Finance · SGI CGF Bourse · SGI Impaxis Securities</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇧🇯 Bénin <span style="color:var(--text-3);font-size:11px">· principales</span></summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Africaine de Gestion et d'Intermédiation (AGI) · SGI Africabourse · SGI Bénin · SGI BIIC Financial Services (BFS)</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇧🇫 Burkina Faso</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Image Finances Internationales · SGI Coris Bourse · SGI SBIF · SA2IF (Société Africaine d'Ingénierie et d'Intermédiation Financières)</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇲🇱 Mali</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Compagnie d'Ingénierie Financière et d'Assistance en Bourse · Global Capital · SGI Mali</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇳🇪 Niger</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">SGI Niger</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇹🇬 Togo</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">SGI Togo</div></details>
-
-          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇬🇼 Guinée-Bissau</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Aucune SGI locale — tu peux passer par une SGI d'un autre pays de l'UEMOA.</div></details>
-
-          <div style="margin-top:10px;font-size:11px;color:var(--text-3)">Liste au juillet 2026. <a href="https://www.brvm.org/fr/intervenants/sgi/tous" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Voir toutes les SGI agréées — liste officielle BRVM →</a></div>
-          </div></details>
-        </div>
-
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">À quoi sert ce site ?</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">Ce site attribue une <strong>note sur 10 transparente</strong> à chacune des sociétés suivies, pour aider les débutants à s'y retrouver — avec une <strong>méthodologie publiée</strong> et consultable. Les notes sont un <strong>outil d'aide à la décision, pas un conseil en investissement</strong> : à toi de te faire ton opinion.</p>
-        </div>
+  <div class="accueil" id="accueil">
+    <h1 class="accueil-titre">Accueil</h1>
+    <section class="accueil-marche" id="accueil-marche" aria-label="En-tête de marché">
+      <div class="accueil-marche-tete">
+        <p class="accueil-statut" id="accueil-statut">Marché —</p>
+        <p class="accueil-seance" id="accueil-seance">Dernière séance : —</p>
+        <button type="button" class="accueil-lien" onclick="nav('marche')">Marché détaillé</button>
       </div>
-
-  <div class="card" id="macroCard" style="display:none;margin-top:12px">
-    <div class="ct">Taux de change</div>
-    <div style="display:flex;gap:20px;flex-wrap:wrap">
-      <div id="macroFx" style="display:none">
-        <div style="font-size:10px;color:var(--text-3)">1 USD</div>
-        <div style="font-size:16px;font-weight:700;color:var(--text-1)" id="macroFxVal"></div>
+      <div class="accueil-indices" id="accueil-indices" aria-label="Indices BRVM"></div>
+    </section>
+    <section class="accueil-cartes" id="accueil-cartes" aria-label="Répartition des conseils"></section>
+    <section class="accueil-bloc" aria-labelledby="accueil-top-titre">
+      <div class="accueil-bloc-tete">
+        <h2 id="accueil-top-titre">Top du moment</h2>
       </div>
-    </div>
-    <div style="font-size:9px;color:var(--t3);margin-top:8px" id="macroMeta"></div>
+      <div id="accueil-top"></div>
+    </section>
+    <section class="accueil-bloc" id="accueil-mouvements" hidden aria-labelledby="accueil-mvt-titre">
+      <div class="accueil-bloc-tete">
+        <h2 id="accueil-mvt-titre">Variations du jour</h2>
+      </div>
+      <div class="accueil-mvt-grille" id="accueil-mvt-grille"></div>
+    </section>
+    <section class="accueil-bloc" aria-labelledby="accueil-actus-titre">
+      <div class="accueil-bloc-tete">
+        <h2 id="accueil-actus-titre">Dernières actualités</h2>
+        <button type="button" class="accueil-lien" onclick="nav('news')">Toutes les actualités</button>
+      </div>
+      <div id="accueil-actus"></div>
+    </section>
+    <p class="accueil-avertissement">Ce n'est pas un conseil en investissement.</p>
   </div>
+
 </div>
 
 <!-- METHODOLOGIE -->
@@ -263,7 +220,7 @@
   <div class="beginner-banner" id="beginner-banner-rank">🏆 <strong>Comment lire cette page :</strong> Chaque société classée reçoit une note de 1 à 10. Une note ≥ 7,5 = Intéressant, de 5 à moins de 7,5 = À surveiller, en dessous de 5 = Prudence. Cliquez sur une société pour voir ses détails. <button onclick="document.getElementById('beginner-banner-rank').style.display='none';localStorage.setItem('bb_rank_ok','1')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;margin-left:6px">OK, ne plus afficher</button></div>
   <div class="ph">
     <div><h2>Classement complet</h2><p class="page-sub" id="rank-subtitle">Sociétés classées par score composite sur 8 modèles de valorisation</p></div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
       <select id="fSec" onchange="renderRankLive()"><option value="">Tous secteurs</option></select>
       <select id="fSort" onchange="renderRankLive()" title="Trier par...">
         <option value="composite_adj">Trier : Score</option><option value="div_yield">Trier : Dividende</option>
@@ -274,6 +231,12 @@
         <option value="positif">Tendance positive</option>
         <option value="neutre">Tendance neutre</option>
         <option value="negatif">Tendance négative</option>
+      </select>
+      <select id="fConseil" onchange="renderRankLive()" title="Filtrer par conseil">
+        <option value="">Tous les conseils</option>
+        <option value="Intéressant">Intéressant</option>
+        <option value="À surveiller">À surveiller</option>
+        <option value="Prudence">Prudence</option>
       </select>
       <button id="fFav" onclick="toggleFavFilter()" style="height:auto;padding:6px 13px;border-radius:var(--r,6px);border:1px solid var(--border-1,var(--border));background:var(--bg2,var(--bg-elevated));color:var(--t2);font-size:13px;cursor:pointer">★ Mes favoris</button>
       <span id="rankTimestamp" style="font-size:10px;color:var(--t2);align-self:center"></span>
@@ -295,7 +258,7 @@
     <button class="rank-tog-btn" id="rank-adv-tog" onclick="toggleRankAdv()">Voir l'analyse détaillée →</button>
   </div>
   <div style="font-size:11px;color:var(--t2);margin-bottom:8px">
-    <span style="color:var(--green)">✅ Note ≥ 7,5 = Intéressant</span> · <span style="color:var(--amber)">⏳ Note ≥ 5 et &lt; 7,5 = À surveiller</span> · <span style="color:var(--red)">⚠️ Note &lt; 5 = Prudence</span>
+    <span style="color:var(--note-green)">✅ Note ≥ 7,5 = Intéressant</span> · <span style="color:var(--note-amber)">⏳ Note ≥ 5 et &lt; 7,5 = À surveiller</span> · <span style="color:var(--note-red)">⚠️ Note &lt; 5 = Prudence</span>
   </div>
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
@@ -319,6 +282,7 @@
     <tbody id="rankBody"></tbody></table>
   </div>
   <div id="rank-cards"></div>
+  <div id="top3-podium" hidden></div>
 </div>
 
 <!-- SECTEURS -->
@@ -1057,6 +1021,46 @@
       style="padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);width:240px">
   </div>
   <div id="gloss-list" style="max-width:800px"></div>
+  <!-- LOT1: Découvrir la BRVM (section pédagogique débutant) -->
+      <div class="card" style="margin-top:4px">
+        <div class="ct">📚 Découvrir la BRVM</div>
+
+        <div style="margin-bottom:18px">
+          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">La BRVM, c'est quoi ?</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">La BRVM est la bourse commune aux <strong>8 pays de l'UEMOA</strong> (Afrique de l'Ouest), avec son siège à Abidjan. Créée en <strong>1998</strong>, elle réunit <strong>une cinquantaine de sociétés cotées</strong>. Sa performance se suit via deux indices : le <strong>BRVM Composite</strong> (tout le marché) et le <strong>BRVM 30</strong> (les 30 valeurs les plus actives).</p>
+        </div>
+
+        <div style="margin-bottom:18px">
+          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">Comment investir concrètement ?</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 12px">Pour passer un ordre à la BRVM, on passe <strong>obligatoirement par une SGI</strong> (Société de Gestion et d'Intermédiation) — un courtier agréé par l'<strong>AMF-UMOA</strong>. Le marché étant régional, tu peux choisir une SGI dans <strong>n'importe quel pays de l'UEMOA</strong>, où que tu vives.</p>
+
+          <details style="margin:0;background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-1)">🏦 Voir les SGI par pays (courtiers agréés)</summary><div style="padding:8px 10px 4px">
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇨🇮 Côte d'Ivoire <span style="color:var(--text-3);font-size:11px">· principales</span></summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Atlantique Finance · Attijari Securities West Africa · BOA Capital Securities · Bridge Securities</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇸🇳 Sénégal</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">ABCO Bourse · Everest Finance · Finance Gestion Intermédiation · Invictus Capital &amp; Finance · SGI CGF Bourse · SGI Impaxis Securities</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇧🇯 Bénin <span style="color:var(--text-3);font-size:11px">· principales</span></summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Africaine de Gestion et d'Intermédiation (AGI) · SGI Africabourse · SGI Bénin · SGI BIIC Financial Services (BFS)</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇧🇫 Burkina Faso</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Image Finances Internationales · SGI Coris Bourse · SGI SBIF · SA2IF (Société Africaine d'Ingénierie et d'Intermédiation Financières)</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇲🇱 Mali</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Compagnie d'Ingénierie Financière et d'Assistance en Bourse · Global Capital · SGI Mali</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇳🇪 Niger</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">SGI Niger</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇹🇬 Togo</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">SGI Togo</div></details>
+
+          <details style="margin:0 0 6px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:var(--radius-sm)"><summary style="padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-1)">🇬🇼 Guinée-Bissau</summary><div style="padding:0 12px 10px;font-size:12px;color:var(--text-2);line-height:1.6">Aucune SGI locale — tu peux passer par une SGI d'un autre pays de l'UEMOA.</div></details>
+
+          <div style="margin-top:10px;font-size:11px;color:var(--text-3)">Liste au juillet 2026. <a href="https://www.brvm.org/fr/intervenants/sgi/tous" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Voir toutes les SGI agréées — liste officielle BRVM →</a></div>
+          </div></details>
+        </div>
+
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px">À quoi sert ce site ?</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0">Ce site attribue une <strong>note sur 10 transparente</strong> à chacune des sociétés suivies, pour aider les débutants à s'y retrouver — avec une <strong>méthodologie publiée</strong> et consultable. Les notes sont un <strong>outil d'aide à la décision, pas un conseil en investissement</strong> : à toi de te faire ton opinion.</p>
+        </div>
+      </div>
+
 </div>
 <!-- ── Paramètres ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-settings">
@@ -1165,13 +1169,14 @@
 </footer>
 </main></div></div>
 <nav class="tabbar" id="tabbar" aria-label="Navigation">
-  <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · choisissez votre profil : découvrir, investir ou analyser"><span aria-hidden="true">👋</span>Accueil</button>
+  <button type="button" data-nav="welcome" onclick="navTo('welcome')" title="Page d'accueil · résumé du marché, des conseils et des actualités"><span aria-hidden="true">👋</span>Accueil</button>
   <button type="button" data-nav="rank" onclick="navTo('rank')" title="Toutes les sociétés BRVM classées du meilleur au moins bon score · idéal pour comparer d'un coup d'œil"><span aria-hidden="true">🏆</span>Classement</button>
   <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités"><span aria-hidden="true">🔍</span>Screener</button>
   <button type="button" data-nav="signals" onclick="navTo('signals')" title="Prévisions IA et score personnalisé · signaux des modèles"><span aria-hidden="true">📡</span>Signaux</button>
   <button type="button" data-nav="plus" onclick="toggleTabPlus()" title="Actualités, glossaire, méthodologie, paramètres, devise et thème"><span aria-hidden="true">☰</span>Plus</button>
 </nav>
 <div id="tab-plus" class="tab-plus">
+  <button type="button" data-nav="marche" onclick="navTo('marche')" title="Indices, commodités, macro UEMOA et dividendes">Marché</button>
   <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
   <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
   <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthodologie</button>

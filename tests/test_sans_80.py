@@ -368,7 +368,7 @@ def test_prompts_parlent_en_note_dix():
 def test_navigateur_note10_partage_et_commodites():
     source = _entre(HTML, "function bcls10", "function fmt(")
     source += _entre(HTML, "function svgBar", "function svgDonut")
-    source += _entre(HTML, "function conseilAffiche", "function fmtConseil")
+    source += _entre(HTML, "function conseilAffiche", "function showChangelog")
     source += _entre(HTML, "function renderComm", "function _stockTab")
     source += _entre(HTML, "function _shareStockText", "function _addToSSOHistory")
     script = source + r"""

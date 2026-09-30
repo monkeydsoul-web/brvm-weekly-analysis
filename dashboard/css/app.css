@@ -105,6 +105,16 @@
   --color-violet-soft:#a78bfa;
   --violet-wash:rgba(139,92,246,0.06);
   --color-amber-fixed:#f59e0b;
+  /* Encres de note et de dividende : lisibles à 4,5:1 sur le lavis et sur la carte */
+  --note-green:#22c55e;
+  --note-amber:#fbbf24;
+  --note-red:#ff8294;
+  --note-green-wash:rgba(34,197,94,0.12);
+  --note-amber-wash:rgba(251,191,36,0.12);
+  --note-red-wash:rgba(251,113,133,0.12);
+  --exc-ink:#fbbf24;
+  /* Pastille grise (suspendu) : --t2 passe sous 4,5:1 sur le lavis sombre */
+  --note-muted:#b1bac4;
   /* Pastilles marché : encre lisible sur le lavis (sombre) */
   --live-ink:#22c55e;
   --closed-ink:#fbbf24;
@@ -150,6 +160,15 @@
 
   --shimmer-kpi:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.05) 50%,transparent 100%);
   --row-zebra:rgba(0,0,0,.012);
+  /* Même rôle en clair : le vert et l'ambre vifs passent sous 4,5:1 sur la carte */
+  --note-green:#116329;
+  --note-amber:#6b4200;
+  --note-red:#a40e26;
+  --note-green-wash:rgba(17,99,41,0.10);
+  --note-amber-wash:rgba(107,66,0,0.10);
+  --note-red-wash:rgba(164,14,38,0.10);
+  --exc-ink:#6b4200;
+  --note-muted:#57606a;
   /* Pastilles marché : encre foncée, le vert et le jaune vifs tombent sous 4,5:1 en clair */
   --live-ink:#0e5c2c;
   --closed-ink:#6b4200;
@@ -216,9 +235,17 @@ td{padding:var(--space-10px) var(--space-12px);border-bottom:1px solid var(--bor
 tr:hover td{background:var(--bg-overlay);cursor:pointer}
 /* ══ Badges ═════════════════════════════════════════════════════════════════ */
 .b{display:inline-block;padding:var(--space-2px) var(--space-1);border-radius:var(--radius-pill);font-size:11px;font-weight:600}
-.bg{background:var(--gold-dim);color:var(--gold)}
-.ba{background:var(--accent-dim);color:var(--accent)}
-.br{background:var(--bear-dim);color:var(--bear)}
+.bg{background:var(--note-green-wash);color:var(--note-green)}
+.ba{background:var(--note-amber-wash);color:var(--note-amber)}
+.br{background:var(--note-red-wash);color:var(--note-red)}
+.bx{background:rgba(148,163,184,.18);color:var(--note-muted)}
+/* Plus spécifique que accueil.css : la note du Top suit le conseil avec les encres de notes. */
+.accueil .accueil-note.is-interessant,
+.accueil .accueil-carte-n.is-interessant{color:var(--note-green)}
+.accueil .accueil-note.is-surveiller,
+.accueil .accueil-carte-n.is-surveiller{color:var(--note-amber)}
+.accueil .accueil-note.is-prudence,
+.accueil .accueil-carte-n.is-prudence{color:var(--note-red)}
 .bb{background:var(--blue-dim);color:var(--blue)}
 .bp{background:var(--purple-dim);color:var(--purple)}
 /* ══ Buttons ════════════════════════════════════════════════════════════════ */
@@ -631,7 +658,10 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 #curr-rate:empty{display:none}
 #curr-rate:not(:empty){display:block;font-size:10px;line-height:1.4;color:var(--text-2);padding:0 var(--space-2) var(--space-4px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topnav-links{display:flex;align-items:center;gap:var(--space-2px);flex:1;min-width:0;overflow:hidden}
-.topnav-links button,.topnav-more-btn{background:none;border:none;cursor:pointer;color:var(--text-2);font-family:var(--font-ui);font-size:13px;padding:var(--space-6px) var(--space-10px);border-radius:var(--radius-sm);white-space:nowrap}
+.topnav-links button,.topnav-more-btn{background:none;border:none;cursor:pointer;color:var(--text-2);font-family:var(--font-ui);font-size:13px;padding:var(--space-6px) var(--space-6px);border-radius:var(--radius-sm);white-space:nowrap}
+@media(min-width:1440px){
+  .topnav-links button,.topnav-more-btn{padding:var(--space-6px) var(--space-10px)}
+}
 .topnav-links button:hover,.topnav-more-btn:hover{background:var(--bg-overlay);color:var(--text-1)}
 .topnav-links button.on,.topnav-more-btn.on,.tabbar button.on{background:var(--accent-dim);color:var(--accent);font-weight:600}
 .topnav-more{position:relative;flex-shrink:0}
@@ -646,7 +676,12 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .topnav-icon{background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-sm);color:var(--text-2);cursor:pointer;font-family:var(--font-ui);font-size:13px;padding:var(--space-4px) var(--space-1);white-space:nowrap}
 .topnav-icon:hover{background:var(--bg-elevated);color:var(--text-1)}
 .topnav-search{display:flex;align-items:center;gap:var(--space-1);background:var(--bg-elevated);border:1px solid var(--border-1);border-radius:var(--radius-sm);color:var(--text-2);cursor:pointer;font-family:var(--font-ui);font-size:12px;padding:var(--space-4px) var(--space-10px);white-space:nowrap}
-.topnav-search-ico{display:none}
+.topnav-search-ico{display:inline}
+.topnav-search-label{display:none}
+@media(min-width:1440px){
+  .topnav-search-ico{display:none}
+  .topnav-search-label{display:inline}
+}
 .topnav-search kbd{font-family:var(--font-mono);font-size:10px;color:var(--text-2);background:transparent;border:1px solid var(--border-1);border-radius:var(--radius-xs);padding:0 var(--space-4px)}
 #nav-cmp-count:empty{display:none}
 .index-ticker{overflow:hidden;border-top:1px solid var(--border-1);background:var(--bg-elevated);height:28px;display:flex;align-items:center}
