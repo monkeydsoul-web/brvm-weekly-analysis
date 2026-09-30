@@ -1561,25 +1561,24 @@ function renderIndexTicker(d) {
   document.documentElement.classList.add('has-indices');
 }
 var _mktGeneration = 0;
-var _mktControle = null;
-var DELAI_MARCHE_MS = 20000; // plus tolerant que 10 s, surtout sur mobile
 
-function loadMarketWidget(){
-  _mktGeneration += 1;
-  if (_mktControle) {
-    try { _mktControle.abort(); } catch (err) {}
-    _mktControle = null;
-  }
-  _chargerMarche(0, _mktGeneration);
+function _libelleMajMarche(iso) {
+  var dt = new Date(iso);
+  if (isNaN(dt.getTime())) return 'MàJ —';
+  var heure = dt.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  var now = new Date();
+  var memeJour = dt.getFullYear() === now.getFullYear() && dt.getMonth() === now.getMonth() && dt.getDate() === now.getDate();
+  if (memeJour) return 'MàJ ' + heure;
+  var jour = dt.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'});
+  return 'MàJ différé ' + jour + ' ' + heure;
 }
-function _chargerMarche(essai, generation){
-  if (generation !== _mktGeneration) return;
+function loadMarketWidget(forcer){
+  if (forcer) _mktGeneration += 1;
+  var generation = _mktGeneration;
   var _mktErrEl = document.getElementById('mkt-idx-error');
   if (_mktErrEl) _mktErrEl.style.display = 'none';
-  var _mktAc = new AbortController();
-  _mktControle = _mktAc;
-  var _mktTo = setTimeout(function(){ _mktAc.abort(); }, DELAI_MARCHE_MS);
-  fetch('/api/market', {signal:_mktAc.signal}).then(r=>{clearTimeout(_mktTo);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>{
+  if (typeof demanderMarche !== 'function') return;
+  demanderMarche(!!forcer).then(d=>{
     if (generation !== _mktGeneration) return;
     var comp = (d.indices||[]).find(i=>i.name&&i.name.includes('COMPOSITE'));
     var b30  = (d.indices||[]).find(i=>i.name&&i.name.includes('30'));
@@ -1597,12 +1596,11 @@ function _chargerMarche(essai, generation){
     if(b30&&elB30)   elB30.innerHTML=fmt(b30.current,b30.change);
     if(elCap)        elCap.textContent=cap;
     if(d.updated_at){
-      var dt=new Date(d.updated_at);
-      var timeStr=dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      var libelleMaj=_libelleMajMarche(d.updated_at);
       var _mt=document.getElementById('market-time');
-      if(_mt) _mt.textContent='MàJ '+timeStr;
+      if(_mt) _mt.textContent=libelleMaj;
       var msbTime=document.getElementById('msb-time');
-      if(msbTime) msbTime.textContent='MàJ '+timeStr;
+      if(msbTime) msbTime.textContent=libelleMaj;
     }
     // Market status bar — format mono compact
     var msbBc=document.getElementById('msb-breadcrumb'), msbBoc=document.getElementById('msb-boc');
@@ -1621,21 +1619,16 @@ function _chargerMarche(essai, generation){
     _paintIndexCards();
     renderIndexTicker(d);
   }).catch(e=>{
-    clearTimeout(_mktTo);
     if (generation !== _mktGeneration) return;
     var abandon = !!(e && e.name === 'AbortError');
-    // Un seul nouvel essai. L'abandon (delai) ne laisse pas d'erreur console.
-    if (essai < 1) {
-      setTimeout(function(){ _chargerMarche(essai + 1, generation); }, 700);
-      return;
-    }
+    // L'essai unique est dans demanderMarche. L'abandon ne laisse pas d'erreur console.
     if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
     renderIndexTicker(null);
     if (_mktErrEl) _mktErrEl.style.display = 'flex';
     var msbComp2=document.getElementById('msb-composite');
     var msbB302=document.getElementById('msb-brvm30');
     var msbTime2=document.getElementById('msb-time');
-    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--text-3)">Indices en attente</span> <span role="button" tabindex="0" onclick="loadMarketWidget()" style="color:var(--text-2);text-decoration:underline;cursor:pointer">Réessayer</span>';
+    if(msbComp2) msbComp2.innerHTML='<span style="color:var(--text-3)">Indices en attente</span> <span role="button" tabindex="0" onclick="loadMarketWidget(true)" style="color:var(--text-2);text-decoration:underline;cursor:pointer">Réessayer</span>';
     if(msbB302) msbB302.textContent='';
     if(msbTime2) msbTime2.textContent='';
     var msbBc2=document.getElementById('msb-breadcrumb'), msbBoc2=document.getElementById('msb-boc');

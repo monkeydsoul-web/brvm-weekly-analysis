@@ -18,7 +18,13 @@ HEADERS    = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebK
 # 60 s pendant la seance (les indices bougent), 15 min marche ferme.
 TTL_SEANCE_S = 60
 TTL_FERME_S = 15 * 60
+# Apres un scrape vide ou une exception : nouvel essai, sans ecrire le squelette.
+DELAI_NOUVEL_ESSAI_S = 30
 ATTENTE_SCRAPE_S = 20
+# Meme fourchette que le contexte macro : un indice BRVM hors de la plage
+# n'est pas une cotation utilisable.
+_INDICE_MIN = 50
+_INDICE_MAX = 5000
 
 _verrou = threading.Lock()
 _cond = threading.Condition(_verrou)
@@ -143,7 +149,44 @@ def fetch_market_data():
         logger.warning(f"market_data erreur: {e}")
     return result
 
+def _indice_plausible(item):
+    if not isinstance(item, dict):
+        return False
+    nom = item.get("name")
+    if not isinstance(nom, str) or not nom.strip():
+        return False
+    courant = item.get("current")
+    if isinstance(courant, bool) or not isinstance(courant, (int, float)):
+        return False
+    return _INDICE_MIN <= float(courant) <= _INDICE_MAX
+
+
+def _scrape_utile(data):
+    """Un scrape n'est gardable que s'il contient au moins un indice plausible."""
+    if not isinstance(data, dict):
+        return False
+    indices = data.get("indices")
+    if not isinstance(indices, list) or not indices:
+        return False
+    return any(_indice_plausible(item) for item in indices)
+
+
+def _squelette():
+    return {
+        "updated_at": _maintenant().isoformat(),
+        "market_activity": {},
+        "top5": [],
+        "flop5": [],
+        "indices": [],
+        "sector_indices": [],
+        "total_return": {},
+    }
+
+
 def save_market_cache(data):
+    if not _scrape_utile(data):
+        logger.warning("market_data: ecriture refusee, indices absents ou non plausibles")
+        return data
     dossier = os.path.dirname(CACHE_PATH)
     os.makedirs(dossier, exist_ok=True)
     tmp_path = None
@@ -197,42 +240,105 @@ def _age_secondes(data, moment=None):
     return (moment - horodatage).total_seconds()
 
 def _est_frais(data, moment=None):
+    if not _scrape_utile(data):
+        return False
     moment = moment or _maintenant()
     age = _age_secondes(data, moment)
     if age is None:
         return False
     return age < _ttl_secondes(moment)
 
-def _donnees_utiles(data):
-    if not isinstance(data, dict):
+def _plus_jeune(a, b):
+    """Vrai si a est au moins aussi recent que b."""
+    age_a = _age_secondes(a)
+    age_b = _age_secondes(b)
+    if age_a is None:
         return False
-    if data.get("indices") or data.get("top5") or data.get("flop5"):
+    if age_b is None:
         return True
-    return bool(data.get("market_activity"))
+    return age_a <= age_b
+
+def _liste_garde(ancienne, nouvelle, cle):
+    """Ne remplace jamais une liste non vide par une liste vide."""
+    if cle == "indices":
+        if isinstance(nouvelle, list) and any(_indice_plausible(item) for item in nouvelle):
+            return nouvelle
+        if isinstance(ancienne, list) and ancienne:
+            return ancienne
+        return nouvelle if isinstance(nouvelle, list) else []
+    if isinstance(nouvelle, list) and nouvelle:
+        return nouvelle
+    if isinstance(ancienne, list) and ancienne:
+        return ancienne
+    return nouvelle if isinstance(nouvelle, list) else (ancienne if isinstance(ancienne, list) else [])
+
+def _fusionner(actuel, nouveau):
+    """Reprend le cache utile et n'y pose que les champs non vides du scrape."""
+    fusion = dict(actuel)
+    for cle in ("top5", "flop5", "indices", "sector_indices"):
+        fusion[cle] = _liste_garde(actuel.get(cle), nouveau.get(cle), cle)
+    activite = nouveau.get("market_activity")
+    if isinstance(activite, dict) and activite:
+        base = dict(actuel.get("market_activity") or {})
+        for cle, valeur in activite.items():
+            if valeur not in (None, ""):
+                base[cle] = valeur
+        fusion["market_activity"] = base
+    retour = nouveau.get("total_return")
+    if isinstance(retour, dict) and retour:
+        fusion["total_return"] = retour
+    if _scrape_utile(nouveau) and nouveau.get("updated_at"):
+        fusion["updated_at"] = nouveau["updated_at"]
+    return fusion
+
+def _retirer_cache_inutile():
+    if not os.path.exists(CACHE_PATH):
+        return
+    try:
+        with open(CACHE_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return
+    if _scrape_utile(data):
+        return
+    try:
+        os.remove(CACHE_PATH)
+        logger.warning("market_data: cache disque sans indices retiré")
+    except OSError:
+        pass
 
 def _lire():
-    """Memoire si elle est fraiche, sinon le fichier (partage entre workers)."""
+    """Memoire fraiche et utile, sinon le fichier s'il a des indices."""
     global _memoire
     with _verrou:
         mem = _memoire
-    if mem is not None and _est_frais(mem):
+    if _scrape_utile(mem) and _est_frais(mem):
         return mem
+    _retirer_cache_inutile()
     disque = load_market_cache()
-    if not isinstance(disque, dict):
+    if not _scrape_utile(disque):
+        disque = None
+    if _scrape_utile(mem) and (disque is None or _plus_jeune(mem, disque)):
         return mem
-    age_disque = _age_secondes(disque)
-    age_mem = _age_secondes(mem) if mem is not None else None
-    if age_mem is None or (age_disque is not None and age_disque < age_mem):
+    if disque is not None:
         with _verrou:
             actuel = _memoire
-            age_actuel = _age_secondes(actuel) if actuel is not None else None
-            if age_actuel is None or (age_disque is not None and age_disque < age_actuel):
+            if not _scrape_utile(actuel) or _plus_jeune(disque, actuel):
                 _memoire = disque
-            return _memoire
-    return mem
+            return _memoire if _scrape_utile(_memoire) else disque
+    return mem if isinstance(mem, dict) else None
+
+def _memoriser(data):
+    """Squelette ou echec : memoire seule, jamais le disque."""
+    global _memoire
+    with _verrou:
+        _memoire = data
+    return data
 
 def _ecrire(data):
     global _memoire
+    if not _scrape_utile(data):
+        return _memoriser(data)
     sauve = save_market_cache(data)
     with _verrou:
         _memoire = sauve
@@ -245,13 +351,19 @@ def _faire():
         logger.warning("market_data: scrape interrompu: %s", e)
         nouveau = None
     actuel = _lire()
-    if not _donnees_utiles(nouveau):
-        if _donnees_utiles(actuel):
-            logger.warning("market_data: scrape sans donnees, cache precedent conserve")
+    if not isinstance(nouveau, dict) or not _scrape_utile(nouveau):
+        if _scrape_utile(actuel) and isinstance(nouveau, dict):
+            fusion = _fusionner(actuel, nouveau)
+            if fusion != actuel and _scrape_utile(fusion):
+                return _ecrire(fusion)
+            logger.warning("market_data: scrape sans indices, cache precedent conserve")
             return actuel
-        if isinstance(nouveau, dict):
-            return _ecrire(nouveau)
-        return actuel
+        if _scrape_utile(actuel):
+            logger.warning("market_data: scrape interrompu, cache precedent conserve")
+            return actuel
+        return _memoriser(nouveau if isinstance(nouveau, dict) else _squelette())
+    if _scrape_utile(actuel):
+        return _ecrire(_fusionner(actuel, nouveau))
     return _ecrire(nouveau)
 
 def _fil_rafraichissement():
@@ -277,7 +389,7 @@ def _lancer(bloquant, ignorer_cooldown=False):
         if (
             not ignorer_cooldown
             and _dernier_essai
-            and (time.monotonic() - _dernier_essai) < _ttl_secondes()
+            and (time.monotonic() - _dernier_essai) < DELAI_NOUVEL_ESSAI_S
         ):
             return False
         _en_cours = True

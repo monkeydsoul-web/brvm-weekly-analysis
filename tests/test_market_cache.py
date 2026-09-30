@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Cache de /api/market : reponse immediate, un seul scrape, memes champs."""
+import json
 import os
 import threading
 import time
@@ -324,15 +325,279 @@ def test_api_top5_vide_ne_relance_pas_un_scrape_synchrone(client, md, monkeypatc
     assert reponse.get_json()["indices"] == payload["indices"]
 
 
-def test_widget_delai_plus_long_un_seul_essai_sans_erreur_sur_abandon():
-    chemin = os.path.join(os.path.dirname(__file__), "..", "dashboard", "js", "core.js")
-    with open(chemin, encoding="utf-8") as f:
-        source = f.read()
-    assert "var DELAI_MARCHE_MS = 20000;" in source
-    assert "setTimeout(function(){ _mktAc.abort(); }, DELAI_MARCHE_MS);" in source
-    assert "setTimeout(function(){ _mktAc.abort(); }, 10000)" not in source
-    assert "if (essai < 1)" in source
-    assert "e.name === 'AbortError'" in source
-    assert "if (!abandon) console.error('[BRVM] loadMarketWidget:', e);" in source
-    assert "console.error('[BRVM] loadMarketWidget:',e);" not in source
-    assert "Indices en attente" in source
+def _ecrire_brut(md, data):
+    """Pose un fichier tel quel, y compris un squelette non utile."""
+    dossier = os.path.dirname(md.CACHE_PATH)
+    os.makedirs(dossier, exist_ok=True)
+    with open(md.CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f)
+
+
+def test_panne_sans_cache_necrit_pas_le_disque(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    appels = {"n": 0}
+
+    def panne():
+        appels["n"] += 1
+        raise RuntimeError("brvm.org en panne")
+
+    monkeypatch.setattr(md, "fetch_market_data", panne)
+    recu = md.get_market_data(synchroniser=True)
+    assert recu["indices"] == []
+    assert not os.path.exists(md.CACHE_PATH)
+    assert md._memoire["indices"] == []
+    assert appels["n"] == 1
+    encore = md.get_market_data()
+    assert encore["indices"] == []
+    assert appels["n"] == 1
+    md._dernier_essai = time.monotonic() - md.DELAI_NOUVEL_ESSAI_S - 1
+    md.get_market_data()
+    _joindre(md)
+    assert appels["n"] == 2
+    assert not os.path.exists(md.CACHE_PATH)
+
+
+def test_squelette_vide_reste_en_memoire_seulement(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+
+    def vide():
+        return _vide(maintenant)
+
+    monkeypatch.setattr(md, "fetch_market_data", vide)
+    recu = md.get_market_data(synchroniser=True)
+    assert recu["indices"] == []
+    assert not os.path.exists(md.CACHE_PATH)
+    assert not md._est_frais(recu)
+    assert md.get_market_data()["indices"] == []
+
+
+def test_fichier_indices_vides_est_retire(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    _ecrire_brut(md, _vide(maintenant))
+    assert os.path.exists(md.CACHE_PATH)
+
+    def panne():
+        raise RuntimeError("brvm.org en panne")
+
+    monkeypatch.setattr(md, "fetch_market_data", panne)
+    recu = md.get_market_data(synchroniser=True)
+    assert recu["indices"] == []
+    assert not os.path.exists(md.CACHE_PATH)
+
+
+def test_activite_seule_ne_remplace_pas_les_indices(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    ancien = _payload(maintenant - timedelta(minutes=5), ticker="VIEUX")
+    ancien["sector_indices"] = [{
+        "name": "Finance", "prev": 100.0, "current": 101.0, "change": 1.0, "ytd": 2.0,
+    }]
+    md._ecrire(ancien)
+    md._memoire = None
+    md._dernier_essai = 0.0
+
+    def partiel():
+        data = _vide(maintenant)
+        data["market_activity"] = {"Capitalisation Actions": "99 000"}
+        return data
+
+    monkeypatch.setattr(md, "fetch_market_data", partiel)
+    md.get_market_data()
+    _joindre(md)
+    with open(md.CACHE_PATH, encoding="utf-8") as f:
+        disque = json.load(f)
+    assert disque["indices"][0]["current"] == 201.0
+    assert disque["top5"][0]["ticker"] == "VIEUX"
+    assert disque["flop5"][0]["ticker"] == "ZZZZ"
+    assert disque["sector_indices"][0]["name"] == "Finance"
+    assert disque["market_activity"]["Capitalisation Actions"] == "99 000"
+
+
+def test_liste_vide_ne_remplace_pas_une_liste_pleine(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    ancien = _payload(maintenant - timedelta(minutes=5), ticker="VIEUX")
+    md._ecrire(ancien)
+    md._memoire = None
+    md._dernier_essai = 0.0
+
+    def partiel():
+        data = _payload(maintenant, ticker="NEUF")
+        data["indices"] = [{
+            "name": "BRVM - COMPOSITE",
+            "prev": 210.0,
+            "current": 211.0,
+            "change": 0.4,
+            "ytd": 1.0,
+        }]
+        data["top5"] = []
+        data["flop5"] = []
+        data["sector_indices"] = []
+        return data
+
+    monkeypatch.setattr(md, "fetch_market_data", partiel)
+    md.get_market_data(synchroniser=True)
+    with open(md.CACHE_PATH, encoding="utf-8") as f:
+        disque = json.load(f)
+    assert disque["top5"][0]["ticker"] == "VIEUX"
+    assert disque["flop5"][0]["ticker"] == "ZZZZ"
+    assert disque["indices"][0]["current"] == 211.0
+    assert set(disque) == CHAMPS
+
+
+def test_indices_implausibles_ne_sont_pas_ecrits(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+
+    def mauvais():
+        data = _vide(maintenant)
+        data["indices"] = [{
+            "name": "BRVM - COMPOSITE",
+            "prev": 1.0,
+            "current": 1.0,
+            "change": 0.0,
+            "ytd": 0.0,
+        }]
+        data["market_activity"] = {"BRVM-C": "1"}
+        return data
+
+    monkeypatch.setattr(md, "fetch_market_data", mauvais)
+    recu = md.get_market_data(synchroniser=True)
+    assert recu["indices"][0]["current"] == 1.0
+    assert not os.path.exists(md.CACHE_PATH)
+    assert not md._scrape_utile(recu)
+
+
+def test_indices_implausibles_gardent_le_cache_utile(md, monkeypatch):
+    maintenant = datetime(2026, 9, 29, 10, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(md, "_maintenant", lambda: maintenant)
+    ancien = _payload(maintenant - timedelta(minutes=5), ticker="VIEUX")
+    md._ecrire(ancien)
+    md._memoire = None
+    md._dernier_essai = 0.0
+
+    def mauvais():
+        data = _vide(maintenant)
+        data["indices"] = [{"name": "BRVM - COMPOSITE", "current": 3.0}]
+        data["top5"] = []
+        return data
+
+    monkeypatch.setattr(md, "fetch_market_data", mauvais)
+    md.get_market_data(synchroniser=True)
+    with open(md.CACHE_PATH, encoding="utf-8") as f:
+        disque = json.load(f)
+    assert disque["indices"][0]["current"] == 201.0
+    assert disque["top5"][0]["ticker"] == "VIEUX"
+
+
+def test_widget_une_promesse_delai_et_maj_differe():
+    racine = os.path.join(os.path.dirname(__file__), "..", "dashboard")
+    with open(os.path.join(racine, "js", "core.js"), encoding="utf-8") as f:
+        core = f.read()
+    with open(os.path.join(racine, "welcome_v2.js"), encoding="utf-8") as f:
+        accueil = f.read()
+    assert "function demanderMarche" in accueil
+    assert "var DELAI_MARCHE_MS = 20000;" in accueil
+    assert accueil.count("fetch('/api/market'") == 1
+    assert "if (essai < 1)" in accueil
+    assert "fetch('/api/market'" not in core
+    assert "demanderMarche(!!forcer)" in core
+    assert "if (!abandon) console.error('[BRVM] loadMarketWidget:', e);" in core
+    assert "console.error('[BRVM] loadMarketWidget:',e);" not in core
+    assert "function _libelleMajMarche" in core
+    assert "MàJ différé" in core
+    assert "loadMarketWidget(true)" in core
+    script = r"""
+const fs = require('fs');
+const vm = require('vm');
+const accueil = fs.readFileSync(process.argv[1], 'utf8');
+const core = fs.readFileSync(process.argv[2], 'utf8');
+let calls = 0;
+let errors = 0;
+const context = {
+  fetch: function() {
+    calls += 1;
+    return Promise.resolve({ ok: true, json: function() { return Promise.resolve({ indices: [] }); } });
+  },
+  setTimeout: setTimeout,
+  clearTimeout: clearTimeout,
+  AbortController: AbortController,
+  Promise: Promise,
+  Date: Date,
+  console: { error: function() { errors += 1; }, log: function() {} },
+};
+vm.createContext(context);
+vm.runInContext(accueil, context);
+Promise.all([
+  context.demanderMarche(false),
+  context.demanderMarche(false),
+  context.demanderMarche(false),
+  context.demanderMarche(false),
+  context.demanderMarche(false),
+]).then(function() {
+  if (calls !== 1) { console.error('appels ' + calls); process.exit(1); }
+  return context.demanderMarche(false);
+}).then(function() {
+  if (calls !== 1) { console.error('rejeu ' + calls); process.exit(1); }
+  return context.demanderMarche(true);
+}).then(function() {
+  if (calls !== 2) { console.error('force ' + calls); process.exit(1); }
+  context._promesseMarche = null;
+  context.DELAI_MARCHE_MS = 30;
+  context.fetch = function(url, opts) {
+    calls += 1;
+    return new Promise(function(resolve, reject) {
+      if (opts && opts.signal) {
+        opts.signal.addEventListener('abort', function() {
+          var e = new Error('aborted');
+          e.name = 'AbortError';
+          reject(e);
+        });
+      }
+    });
+  };
+  return context.demanderMarche(true);
+}).then(function() {
+  console.error('aurait du abandonner');
+  process.exit(1);
+}).catch(function(e) {
+  if (!e || e.name !== 'AbortError') { console.error('pas abort ' + (e && e.name)); process.exit(1); }
+  if (errors !== 0) { console.error('console ' + errors); process.exit(1); }
+  if (calls !== 4) { console.error('essais ' + calls); process.exit(1); }
+  var debut = core.indexOf('function _libelleMajMarche');
+  var fin = core.indexOf('function loadMarketWidget');
+  vm.runInContext(core.slice(debut, fin), context);
+  var now = new Date();
+  var heure = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  if (context._libelleMajMarche(now.toISOString()) !== 'MàJ ' + heure) {
+    console.error('jour ' + context._libelleMajMarche(now.toISOString()));
+    process.exit(1);
+  }
+  var hier = new Date(now.getTime() - 36 * 3600 * 1000);
+  var jour = hier.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'});
+  var h2 = hier.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  var lib = context._libelleMajMarche(hier.toISOString());
+  if (lib !== 'MàJ différé ' + jour + ' ' + h2) {
+    console.error('differe ' + lib);
+    process.exit(1);
+  }
+  process.exit(0);
+});
+"""
+    import subprocess
+    import sys
+    resultat = subprocess.run(
+        [sys.executable, "-c", "import shutil,sys; sys.exit(0 if shutil.which('node') else 1)"]
+    )
+    if resultat.returncode != 0:
+        pytest.skip("node absent")
+    chemin_accueil = os.path.join(racine, "welcome_v2.js")
+    chemin_core = os.path.join(racine, "js", "core.js")
+    fini = subprocess.run(
+        ["node", "-e", script, chemin_accueil, chemin_core],
+        capture_output=True, text=True, timeout=5,
+    )
+    assert fini.returncode == 0, fini.stderr or fini.stdout
