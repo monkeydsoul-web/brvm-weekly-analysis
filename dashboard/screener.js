@@ -81,7 +81,7 @@ function _renderScreenerTable() {
     const sc  = x.composite_adj || 0;
     const n10 = (typeof note10num==='function') ? note10num(x) : (Math.round(sc/8*10)/10);
     const sc10 = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
-    const scC = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
+    const scC = couleurNote(n10);
     const scBarW = Math.round(Math.min(10, Math.max(0, n10)) / 10 * 100);
     const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';

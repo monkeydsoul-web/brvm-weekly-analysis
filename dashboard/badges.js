@@ -51,7 +51,6 @@ function renderLiveRankBadge(ticker) {
   const badge = getRankBadge(ticker, rank);
   const n10 = (typeof note10num==='function') ? note10num(entry) : (Math.round((entry.composite_adj||0)/8*10)/10);
   const noteTxt = (typeof note10txt==='function') ? note10txt(entry) : n10.toFixed(1).replace('.',',');
-  const scoreC = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
   if (entry.statut === 'suspendu') {
     const dep = entry.statut_depuis || '';
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dep);
@@ -65,6 +64,7 @@ function renderLiveRankBadge(ticker) {
     </div>`;
     return;
   }
+  const scoreC = couleurNote(n10);
   el.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
       <span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px">
@@ -87,7 +87,7 @@ function renderSidebarScores(ranking) {
   sidebar.innerHTML = sorted.map(x => {
     const n10 = (typeof note10num==='function') ? note10num(x) : 0;
     const noteTxt = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
-    const c = n10 >= 7.5 ? 'var(--green)' : n10 >= 5 ? 'var(--amber)' : 'var(--red)';
+    const c = couleurNote(n10);
     const badge = getRankBadge(x.ticker, x.rank || 0);
     return `<div class="si" onclick="showStock('${x.ticker}')">
       <span style="flex:1;cursor:pointer;font-size:12px">${x.ticker}</span>

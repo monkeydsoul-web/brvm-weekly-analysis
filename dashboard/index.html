@@ -69,8 +69,8 @@
         <div style="font-size:14px;font-weight:700;color:var(--text-1);line-height:1.2">BRVM</div>
         <div style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
           <span>Analyzer</span>
-          <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:rgba(34,197,94,0.15);color:#22c55e;padding:1px 6px;border-radius:10px;font-weight:600">
-            <span id="live-dot" style="width:5px;height:5px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
+          <span id="live-pill" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--bull-wash);color:var(--color-live);padding:1px 6px;border-radius:10px;font-weight:600">
+            <span id="live-dot" style="width:5px;height:5px;background:var(--color-live);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></span>
             <span id="live-label" style="font-size:9px;font-weight:600">LIVE</span>
           </span>
         </div>
@@ -116,13 +116,13 @@
 <!-- Topbar marché + breadcrumb -->
 <div id="breadcrumb" style="background:var(--bg-surface);border-bottom:1px solid var(--border-1);padding:0 20px;height:36px;display:flex;align-items:center;gap:20px;font-size:12px;font-family:var(--font-mono);flex-shrink:0">
   <div id="market-status-bar" style="display:flex;align-items:center;gap:20px;flex:1;overflow:hidden">
-    <span id="msb-breadcrumb" style="color:var(--text-3);font-size:11px;font-family:-apple-system,sans-serif;white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:-apple-system,sans-serif">Accueil</span></span>
+    <span id="msb-breadcrumb" style="color:var(--text-3);font-size:11px;font-family:var(--font-ui);white-space:nowrap"><span onclick="nav('welcome')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')nav('welcome')" style="cursor:pointer">BRVM</span> <span style="color:var(--text-3)">›</span> <span id="bc-page" style="color:var(--text-1);font-weight:500;font-family:var(--font-ui)">Accueil</span></span>
     <span id="msb-composite" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-C</span> <span style="color:var(--text-1)">—</span></span>
     <span id="msb-brvm30" style="color:var(--text-2);white-space:nowrap" data-tip="Marché fermé · dernière valeur connue"><span style="color:var(--text-3)">BRVM-30</span> <span style="color:var(--text-1)">—</span></span>
-    <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:-apple-system,sans-serif">· 47 tickers</span>
+    <span id="msb-boc" style="color:var(--text-3);white-space:nowrap;font-size:11px;font-family:var(--font-ui)">· 47 tickers</span>
   </div>
-  <span id="msb-time" style="color:var(--text-3);font-size:11px;white-space:nowrap;font-family:-apple-system,sans-serif">MàJ —</span>
-  <button onclick="openCmdK()" style="background:var(--bg-elevated);border:1px solid var(--border-1);color:var(--text-3);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:-apple-system,sans-serif" title="Recherche globale (⌘K)">🔍 <span class="compact-hide">Rechercher</span> <kbd style="font-size:9px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:3px;padding:1px 4px">⌘K</kbd></button>
+  <span id="msb-time" style="color:var(--text-3);font-size:11px;white-space:nowrap;font-family:var(--font-ui)">MàJ —</span>
+  <button onclick="openCmdK()" style="background:var(--bg-elevated);border:1px solid var(--border-1);color:var(--text-3);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:var(--font-ui)" title="Recherche globale (⌘K)">🔍 <span class="compact-hide">Rechercher</span> <kbd style="font-size:9px;background:var(--bg-overlay);border:1px solid var(--border-1);border-radius:3px;padding:1px 4px">⌘K</kbd></button>
 </div>
 
 <!-- WELCOME 3 PORTES -->
@@ -467,10 +467,10 @@
     </div>
     <div id="mkt-heatmap-grid" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:80px"></div>
     <div style="display:flex;gap:16px;font-size:10px;color:var(--t3);flex-wrap:wrap;margin-top:8px">
-      <span><span style="width:12px;height:12px;border-radius:2px;background:#22c55e;display:inline-block;vertical-align:middle"></span> &gt;+2% Forte hausse</span>
-      <span><span style="width:12px;height:12px;border-radius:2px;background:#4ade80;display:inline-block;vertical-align:middle"></span> 0→+2% Hausse</span>
-      <span><span style="width:12px;height:12px;border-radius:2px;background:#64748b;display:inline-block;vertical-align:middle"></span> Stable</span>
-      <span><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block;vertical-align:middle"></span> Baisse</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:var(--color-live);display:inline-block;vertical-align:middle"></span> &gt;+2% Forte hausse</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:var(--mint);display:inline-block;vertical-align:middle"></span> 0→+2% Hausse</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:var(--color-slate);display:inline-block;vertical-align:middle"></span> Stable</span>
+      <span><span style="width:12px;height:12px;border-radius:2px;background:var(--verdict-neg);display:inline-block;vertical-align:middle"></span> Baisse</span>
     </div>
   </div>
   <div class="g2" style="margin-bottom:16px">
@@ -562,15 +562,15 @@
       <div class="card" style="margin-bottom:0">
         <div class="ct" style="margin-bottom:10px">📊 Impact taux BCEAO sur la BRVM</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="padding:10px;background:rgba(251,191,36,.1);border-left:3px solid var(--amber);border-radius:4px">
+          <div style="padding:10px;background:var(--gold-tint);border-left:3px solid var(--amber);border-radius:4px">
             <div style="font-size:12px;font-weight:600;color:var(--amber)">Taux directeur 3,00% → Impact P/E</div>
             <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Taux bas = coût du capital plus faible = P/E moins compressés. Un P/E de 10× reste "raisonnable" avec un taux sans-risque proche de 3%. Contexte plutôt favorable aux valorisations.</p>
           </div>
-          <div style="padding:10px;background:rgba(96,165,250,.1);border-left:3px solid var(--blue);border-radius:4px">
+          <div style="padding:10px;background:var(--blue-tint);border-left:3px solid var(--blue);border-radius:4px">
             <div style="font-size:12px;font-weight:600;color:var(--blue)">Zone FCFA = protection change</div>
             <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Le FCFA est arrimé à l'euro (655,96 FCFA/€). Pas de risque de change vs EUR. Exposition USD via commodités (cacao, coton, pétrole).</p>
           </div>
-          <div style="padding:10px;background:rgba(74,222,128,.1);border-left:3px solid var(--green);border-radius:4px">
+          <div style="padding:10px;background:var(--mint-tint);border-left:3px solid var(--green);border-radius:4px">
             <div style="font-size:12px;font-weight:600;color:var(--green)">Opportunité : banques et telecoms</div>
             <p style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.5">Secteur bancaire : marges d'intérêt sous pression avec la baisse des taux BCEAO, mais volumes de crédit soutenus par le financement moins cher. Telecoms = croissance mobile money régionale forte.</p>
           </div>
@@ -704,7 +704,7 @@
           <button class="btn btn-g" onclick="simMarkowitz()" title="Calcule automatiquement la meilleure allocation selon Markowitz · 💡 Maximise le rendement pour un risque donné">⚡ Répartition optimale</button>
           <button class="btn btn-o" onclick="simReset2()">↺ Réinitialiser</button>
         </div>
-        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
+        <div style="background:var(--verdict-pos-wash);border:1px solid var(--verdict-pos-line);padding:14px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;">
           <div style="font-weight:600;margin-bottom:6px;">📐 Comment fonctionne ce simulateur ?</div>
           <div>1️⃣ <strong>Mise initiale</strong> → capital que vous investissez aujourd'hui</div>
           <div>2️⃣ <strong>Allocation</strong> → répartition entre les titres sélectionnés</div>
@@ -791,7 +791,7 @@
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--border)">
-    <span style="background:var(--accent);color:#000;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 1</span>
+    <span style="background:var(--accent);color:var(--color-black);font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 1</span>
     <span style="font-weight:600;font-size:14px">Filtrer les actions</span>
   </div>
   <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -885,7 +885,7 @@
 
   <!-- ── Étape 2 : Composer son portefeuille ───────────────────────────────── -->
   <div id="etape2-anchor" style="display:flex;align-items:center;gap:10px;margin:28px 0 16px;padding-top:20px;border-top:2px solid var(--border)">
-    <span style="background:#8B5CF6;color:#fff;font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 2</span>
+    <span style="background:var(--color-violet);color:var(--color-on-solid);font-weight:700;font-size:11px;padding:3px 10px;border-radius:12px">ÉTAPE 2</span>
     <span style="font-weight:600;font-size:14px">⚖️ Composer son portefeuille</span>
   </div>
   <details style="margin:0 0 20px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -914,29 +914,29 @@
     </div>
     <div style="margin-top:8px;display:flex;gap:16px;font-size:10px;color:var(--t3);align-items:center;flex-wrap:wrap">
       <span>Couleur = corrélation Pearson sur rendements journaliers 30j BOC</span>
-      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#22c55e;display:inline-block;border-radius:2px"></span> ≥ 0.7 Forte+</span>
-      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#64748b;display:inline-block;border-radius:2px"></span> ≈ 0 Neutre</span>
-      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:#ef4444;display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:var(--color-live);display:inline-block;border-radius:2px"></span> ≥ 0.7 Forte+</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:var(--color-slate);display:inline-block;border-radius:2px"></span> ≈ 0 Neutre</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:10px;background:var(--verdict-neg);display:inline-block;border-radius:2px"></span> ≤ -0.3 Inverse</span>
     </div>
   </div>
-  <details style="margin:0 0 16px;background:rgba(139,92,246,0.06);border:1px solid var(--border-2);border-left:3px solid #8B5CF6;border-radius:var(--radius-sm);padding:0">
-    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:#a78bfa;font-weight:600;user-select:none;list-style:none">📐 Comprendre l'optimisation Markowitz</summary>
+  <details style="margin:0 0 16px;background:var(--violet-wash);border:1px solid var(--border-2);border-left:3px solid var(--color-violet);border-radius:var(--radius-sm);padding:0">
+    <summary style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--color-violet-soft);font-weight:600;user-select:none;list-style:none">📐 Comprendre l'optimisation Markowitz</summary>
     <div style="padding:10px 14px 14px;border-top:1px solid var(--border-2)">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-          <div style="font-size:10px;font-weight:700;color:#8B5CF6;margin-bottom:4px">Étape 1 — Lancer</div>
+        <div style="background:var(--wash-04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--color-violet);margin-bottom:4px">Étape 1 — Lancer</div>
           <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"📐 Optimisation Markowitz (Top 8)"</strong>. L'outil charge automatiquement les 8 meilleures actions du classement.</div>
         </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-          <div style="font-size:10px;font-weight:700;color:#60A5FA;margin-bottom:4px">Étape 2 — Choisir</div>
+        <div style="background:var(--wash-04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--color-blue-fixed);margin-bottom:4px">Étape 2 — Choisir</div>
           <div style="font-size:11px;color:var(--t2);line-height:1.6">Ajustez votre sélection (cochez/décochez) et cliquez <strong>"Calculer"</strong> — l'algorithme simule 3 000 portefeuilles.</div>
         </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-          <div style="font-size:10px;font-weight:700;color:#4ADE80;margin-bottom:4px">Étape 3 — Analyser</div>
-          <div style="font-size:11px;color:var(--t2);line-height:1.6">Repérez <strong style="color:#fbbf24">⭐ Max Sharpe</strong> (meilleur rendement/risque) et <strong style="color:#60A5FA">⬟ Min Risque</strong> (le plus stable).</div>
+        <div style="background:var(--wash-04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--mint);margin-bottom:4px">Étape 3 — Analyser</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Repérez <strong style="color:var(--color-star)">⭐ Max Sharpe</strong> (meilleur rendement/risque) et <strong style="color:var(--color-blue-fixed)">⬟ Min Risque</strong> (le plus stable).</div>
         </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px">
-          <div style="font-size:10px;font-weight:700;color:#f59e0b;margin-bottom:4px">Étape 4 — Backtester</div>
+        <div style="background:var(--wash-04);border-radius:8px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--color-amber-fixed);margin-bottom:4px">Étape 4 — Backtester</div>
           <div style="font-size:11px;color:var(--t2);line-height:1.6">Cliquez <strong>"Tester →"</strong> sur le portefeuille Max Sharpe pour simuler ses performances passées.</div>
         </div>
       </div>
@@ -1014,12 +1014,12 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="profileBtns"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="ct" style="margin:0" title="Ajustez l'importance de chaque modèle · Le score total reste sur 10">Ajuster les poids</div>
-          <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green)">Total : 8</span>
+          <span id="weight-total-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--verdict-pos-bg);color:var(--green)">Total : 8</span>
         </div>
         <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Ajustez les curseurs pour modifier l'importance de chaque modèle. Le score total reste toujours sur 10.</p>
         <div id="weightSliders"></div>
         <button class="btn btn-g" style="margin-top:12px;width:100%" onclick="applyCustomScores()">Appliquer</button>
-        <details style="margin:12px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;">
+        <details style="margin:12px 0;background:var(--wash-03);border:1px solid var(--wash-08);border-radius:8px;padding:12px;">
           <summary style="cursor:pointer;font-weight:600;font-size:13px;">📈 Analyse Technique — que mesure-t-elle ?</summary>
           <div style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--t2);">
             <strong><abbr data-tip="Relative Strength Index · mesure la force du mouvement de prix sur 14 jours" style="border-bottom:1px dotted var(--blue);cursor:help;text-decoration:none">RSI</abbr> (Relative Strength Index)</strong> — mesure la force du mouvement de prix. RSI &lt; 30 = survente (cours bas) · RSI &gt; 70 = zone haute (prudence).<br>
@@ -1151,7 +1151,7 @@
 </div>
 
 <!-- Modal détail annonce -->
-<div id="annc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center">
+<div id="annc-modal" style="display:none;position:fixed;inset:0;background:var(--overlay-60);z-index:9999;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:600px;width:92%;max-height:80vh;overflow-y:auto;position:relative">
     <button onclick="document.getElementById('annc-modal').style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--t2)">✕</button>
     <div id="annc-modal-body"></div>
@@ -1239,7 +1239,7 @@ window.brvmScriptError=function(el){
 <div id="kbd-hint" style="display:none"></div>
 
 <!-- Changelog modal -->
-<div id="changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center">
+<div id="changelog-modal" style="display:none;position:fixed;inset:0;background:var(--overlay-60);z-index:2000;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:480px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <h3 style="font-size:16px;font-weight:700">📋 Changelog BRVM Analyzer</h3>
