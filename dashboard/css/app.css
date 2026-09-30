@@ -180,7 +180,7 @@ body{font-family:var(--font-sans);background:var(--bg-base);color:var(--text-1);
 /* ══ Layout ═════════════════════════════════════════════════════════════════ */
 .app{display:flex;height:100vh}
 .sb{width:220px;background:var(--bg-surface);border-right:1px solid var(--border-1);display:flex;flex-direction:column;flex-shrink:0;transition:transform .25s ease;z-index:500}
-.main{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column;padding-bottom:calc(var(--space-4)*3)}
+.main{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column;padding-bottom:var(--space-2)}
 .main>:not(#app-footer):not(#breadcrumb){flex:1 0 auto}
 #breadcrumb{flex:none}
 /* ══ Sidebar ════════════════════════════════════════════════════════════════ */
@@ -241,10 +241,13 @@ tr:hover td{background:var(--bg-overlay);cursor:pointer}
 .bx{background:rgba(148,163,184,.18);color:var(--note-muted)}
 /* Plus spécifique que accueil.css : la note du Top suit le conseil avec les encres de notes. */
 .accueil .accueil-note.is-interessant,
+.accueil .accueil-anneau.is-interessant,
 .accueil .accueil-carte-n.is-interessant{color:var(--note-green)}
 .accueil .accueil-note.is-surveiller,
+.accueil .accueil-anneau.is-surveiller,
 .accueil .accueil-carte-n.is-surveiller{color:var(--note-amber)}
 .accueil .accueil-note.is-prudence,
+.accueil .accueil-anneau.is-prudence,
 .accueil .accueil-carte-n.is-prudence{color:var(--note-red)}
 .bb{background:var(--blue-dim);color:var(--blue)}
 .bp{background:var(--purple-dim);color:var(--purple)}
@@ -286,7 +289,9 @@ tr:nth-child(even) td{background:var(--row-zebra)}
 /* ══ Classement cartes mobile (caché par défaut — visible via media query) ══ */
 #rank-cards{display:none}
 /* ══ Footer ══════════════════════════════════════════════════════════════════ */
-#app-footer{position:fixed;bottom:0;left:220px;right:0;z-index:50;background:var(--bg-surface);border-top:1px solid var(--border-1);padding:0 var(--space-3);height:32px;font-size:11px;color:var(--text-3);display:flex;justify-content:space-between;align-items:center;gap:var(--space-6px)}
+#app-footer{position:static;left:auto;right:auto;z-index:1;background:var(--bg-surface);border-top:1px solid var(--border-1);padding:var(--space-2) var(--space-3);height:auto;min-height:32px;font-size:13px;line-height:1.4;color:var(--text-2);display:flex;justify-content:center;align-items:center;text-align:center;flex:none}
+.app-footer-avert{margin:0;width:100%}
+.app-footer-meta{display:none!important}
 /* ══ Misc ════════════════════════════════════════════════════════════════════ */
 #alert-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 var(--space-4px);border-radius:var(--radius-8);font-size:9px;font-weight:700;margin-left:var(--space-4px);vertical-align:middle}
 .mbar{background:var(--border);border-radius:var(--radius-xs);height:5px;overflow:hidden;margin:var(--space-4px) 0 var(--space-1px)}
@@ -733,4 +738,9 @@ html.fiche-directe #page-stock{display:block}
 #page-stock.fiche-pleine #stockDetail{width:100%}
 @media(max-width:768px){
   #page-stock.fiche-pleine{padding-bottom:calc(var(--space-56px) + var(--space-2))}
+  .main{padding-bottom:calc(var(--space-56px) + var(--space-3))!important}
+  #app-footer{position:static;left:auto;height:auto;flex-direction:row;align-items:center;justify-content:center;text-align:center}
+}
+@media(min-width:769px){
+  #app-footer,.sb.compact~.main #app-footer{position:static;left:auto}
 }

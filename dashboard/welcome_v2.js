@@ -116,54 +116,154 @@ function _remplirStatut(rows) {
   });
 }
 
-function _nomSociete(ticker, rows) {
-  var t = String(ticker || '').toUpperCase();
-  var i;
-  for (i = 0; i < (rows || []).length; i++) {
-    if (rows[i] && String(rows[i].ticker || '').toUpperCase() === t) return rows[i].name || '';
-  }
-  return '';
+function _motUtile(mot) {
+  if (!mot) return false;
+  if (/^d['’]/i.test(mot)) return false;
+  return !/^(de|du|des|la|le|les|et|d)$/i.test(mot);
 }
 
-function _ligneMouvement(x, rows, sens) {
+function _initialesSociete(nom, ticker) {
+  var mots = String(nom || '').replace(/[()]/g, ' ').split(/[\s·/]+/).filter(_motUtile);
+  var premier = mots[0] || '';
+  var lettres = '';
+  if (/^[A-ZÀ-Ÿ0-9]{2,4}$/.test(premier)) lettres = premier.slice(0, 2);
+  else if (mots.length >= 2) lettres = mots[0].charAt(0) + mots[1].charAt(0);
+  else if (mots.length === 1) lettres = mots[0].slice(0, 2);
+  else lettres = String(ticker || '').slice(0, 2);
+  return lettres.toLocaleUpperCase('fr-FR');
+}
+
+function _teintePastille(ticker) {
+  var s = String(ticker || '');
+  var h = 0;
+  var i;
+  for (i = 0; i < s.length; i++) h = (h + s.charCodeAt(i) * (i + 1)) % 6;
+  return 'mn-' + h;
+}
+
+function _nomCourt(row) {
+  var nom = row && row.name ? String(row.name) : '';
+  var sec = row && row.sector ? String(row.sector) : '';
+  if (nom && sec) return nom + ' · ' + sec;
+  return nom || sec || '';
+}
+
+function _fmtCours(n) {
+  if (n == null || n === '' || !isFinite(Number(n))) return '—';
+  if ((window._currency === 'EUR' || window._currency === 'USD') && typeof fmtXOF === 'function') return fmtXOF(n);
+  var num = Number(n);
+  var dec = Math.abs(num - Math.round(num)) < 1e-6 ? 0 : 2;
+  return num.toLocaleString('fr-FR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + '\u00a0FCFA';
+}
+
+function _libelleBadge(row) {
+  var a = (typeof conseilAffiche === 'function') ? conseilAffiche(row) : null;
+  if (!a) return '—';
+  if (a.suspendu) return a.libelle || '—';
+  if (a.libelle === 'Intéressant' || a.libelle === 'À surveiller' || a.libelle === 'Prudence') return a.libelle;
+  return '—';
+}
+
+function _mieuxNotees(rows) {
+  var liste = (rows || []).filter(function(x) {
+    return x && x.ticker && x.statut !== 'suspendu';
+  });
+  liste.sort(function(a, b) {
+    var na = (typeof note10num === 'function') ? note10num(a) : 0;
+    var nb = (typeof note10num === 'function') ? note10num(b) : 0;
+    if (na !== nb) return nb - na;
+    return String(a.ticker || '').localeCompare(String(b.ticker || ''), 'fr');
+  });
+  return liste.slice(0, 4);
+}
+
+function _htmlAnneau(row) {
+  var n = (typeof note10num === 'function') ? note10num(row) : 0;
+  var note = (typeof note10txt === 'function') ? note10txt(row) : _frFixe(n, 1);
+  var part = Math.max(0, Math.min(10, Number(n) || 0)) / 10;
+  var tour = 2 * Math.PI * 15.5;
+  var plein = (tour * part).toFixed(2);
+  var reste = (tour - tour * part).toFixed(2);
+  return '<span class="accueil-anneau ' + _classeConseil(row) + '">'
+    + '<svg viewBox="0 0 36 36" aria-hidden="true">'
+    + '<circle class="accueil-anneau-piste" cx="18" cy="18" r="15.5"></circle>'
+    + '<circle class="accueil-anneau-arc" cx="18" cy="18" r="15.5" stroke-dasharray="' + plein + ' ' + reste + '"></circle>'
+    + '</svg>'
+    + '<span class="accueil-anneau-note">' + _echapAccueil(note) + '</span>'
+    + '</span>';
+}
+
+function _htmlCarteNote(x) {
   var ticker = String(x.ticker || '').toUpperCase();
-  if (!ticker) return '';
-  var nom = _nomSociete(ticker, rows);
-  var variation = _fmtVariation(x.change);
-  var cls = (Number(x.change) < 0 || sens === 'bas') ? 'is-down' : 'is-up';
-  var nomHtml = nom ? '<span class="accueil-mvt-nom">' + _echapAccueil(nom) + '</span>' : '';
-  return '<button type="button" class="accueil-mvt-ligne" data-ticker="' + _echapAccueil(ticker) + '">'
-    + '<strong>' + _echapAccueil(ticker) + '</strong>'
-    + nomHtml
-    + '<span class="accueil-mvt-var ' + cls + '">' + _echapAccueil(variation) + '</span>'
+  var lib = _libelleBadge(x);
+  var clsBadge = (typeof classePrincipale === 'function') ? classePrincipale(x) : 'bx';
+  var note = (typeof note10txt === 'function') ? note10txt(x) : '';
+  var nom = _nomCourt(x);
+  var aria = ticker;
+  if (nom) aria += ', ' + nom;
+  if (note) aria += ', note ' + note + ' sur 10';
+  if (lib && lib !== '—') aria += ', ' + lib;
+  return '<button type="button" class="accueil-mieux-carte" data-ticker="' + _echapAccueil(ticker) + '" aria-label="' + _echapAccueil(aria) + '">'
+    + '<span class="accueil-mieux-haut">'
+    + '<span class="accueil-pastille ' + _teintePastille(ticker) + '" aria-hidden="true">' + _echapAccueil(_initialesSociete(x.name, ticker)) + '</span>'
+    + '<span class="accueil-mieux-id"><strong class="accueil-mieux-ticker">' + _echapAccueil(ticker) + '</strong>'
+    + '<span class="accueil-mieux-nom">' + _echapAccueil(nom) + '</span></span>'
+    + _htmlAnneau(x)
+    + '</span>'
+    + '<span class="accueil-mieux-cours">'
+    + '<span class="accueil-mieux-prix">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
+    + '<span class="accueil-var-pill ' + _sensVariation(x.change_pct) + '">' + _echapAccueil(_fmtVariation(x.change_pct)) + '</span>'
+    + '</span>'
+    + '<span class="accueil-badge ' + clsBadge + '">' + _echapAccueil(lib) + '</span>'
     + '</button>';
 }
 
-function _remplirMouvements(d, rows) {
+function _jourSeance(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Abidjan' });
+}
+
+function _sousTitreSeance(d) {
+  var jour = _jourSeance(d && d.updated_at);
+  return jour ? ('Plus fortes variations · ' + jour) : 'Plus fortes variations';
+}
+
+function _htmlLigneSeance(x) {
+  var ticker = String((x && x.ticker) || '').toUpperCase();
+  if (!ticker) return '';
+  return '<button type="button" class="accueil-seance-ligne" data-ticker="' + _echapAccueil(ticker) + '">'
+    + '<strong class="accueil-seance-ticker">' + _echapAccueil(ticker) + '</strong>'
+    + '<span class="accueil-seance-cours">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
+    + '<span class="accueil-var-pill ' + _sensVariation(x.change) + '">' + _echapAccueil(_fmtVariation(x.change)) + '</span>'
+    + '</button>';
+}
+
+function _htmlColonneSeance(titre, cls, lignes) {
+  var corps = (lignes || []).length
+    ? lignes.slice(0, 5).map(_htmlLigneSeance).join('')
+    : '<p class="accueil-vide">Aucune variation.</p>';
+  return '<div class="accueil-seance-col"><h3 class="accueil-seance-h ' + cls + '">' + titre + '</h3>' + corps + '</div>';
+}
+
+function _remplirMouvements(d) {
   var bloc = document.getElementById('accueil-mouvements');
   var grille = document.getElementById('accueil-mvt-grille');
+  var sous = document.getElementById('accueil-seance-sous');
+  if (sous && sous.isConnected) sous.textContent = _sousTitreSeance(d);
   if (!bloc || !grille) return;
-  var hausses = (d && d.top5) || [];
-  var baisses = (d && d.flop5) || [];
+  var hausses = ((d && d.top5) || []).filter(function(x) { return x && x.ticker; }).slice(0, 5);
+  var baisses = ((d && d.flop5) || []).filter(function(x) { return x && x.ticker; }).slice(0, 5);
   if (!hausses.length && !baisses.length) {
-    bloc.hidden = true;
-    grille.innerHTML = '';
+    grille.innerHTML = '<p class="accueil-vide">Variations de séance indisponibles.</p>';
+    bloc.hidden = false;
     return;
   }
-  var html = '';
-  if (hausses.length) {
-    html += '<div class="accueil-mvt"><h3>Plus fortes hausses</h3>'
-      + hausses.map(function(x) { return _ligneMouvement(x, rows, 'haut'); }).join('')
-      + '</div>';
-  }
-  if (baisses.length) {
-    html += '<div class="accueil-mvt"><h3>Plus fortes baisses</h3>'
-      + baisses.map(function(x) { return _ligneMouvement(x, rows, 'bas'); }).join('')
-      + '</div>';
-  }
-  grille.innerHTML = html;
+  grille.innerHTML = _htmlColonneSeance('▲ Hausses', 'is-up', hausses)
+    + _htmlColonneSeance('▼ Baisses', 'is-down', baisses);
   bloc.hidden = false;
-  grille.querySelectorAll('.accueil-mvt-ligne').forEach(function(btn) {
+  grille.querySelectorAll('.accueil-seance-ligne').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var t = btn.getAttribute('data-ticker');
       if (t && typeof _openStock === 'function') _openStock(t);
@@ -178,25 +278,11 @@ function _remplirIndices() {
     return r.json();
   }).then(function(d) {
     if (box && box.isConnected) box.innerHTML = _htmlTroisIndices(d);
-    _remplirMouvements(d, window.scores || (typeof scores !== 'undefined' ? scores : []));
+    _remplirMouvements(d);
   }).catch(function() {
     if (box && box.isConnected) box.innerHTML = _htmlTroisIndices(null);
+    _remplirMouvements(null);
   });
-}
-
-function _lignesTop(rows) {
-  var tries = (rows || []).slice().sort(typeof triCommeClassement === 'function' ? triCommeClassement : function() { return 0; });
-  var interessant = [];
-  var surveiller = [];
-  tries.forEach(function(x) {
-    var a = (typeof conseilAffiche === 'function') ? conseilAffiche(x) : null;
-    if (!a || a.suspendu) return;
-    if (a.libelle === 'Intéressant') interessant.push(x);
-    else if (a.libelle === 'À surveiller') surveiller.push(x);
-  });
-  var lignes = interessant.concat(surveiller);
-  if (lignes.length > 8) lignes = lignes.slice(0, 8);
-  return lignes;
 }
 
 function _remplirCartes(rows) {
@@ -227,33 +313,13 @@ function _remplirCartes(rows) {
 function _remplirTop(rows) {
   var el = document.getElementById('accueil-top');
   if (!el) return;
-  var lignes = _lignesTop(rows);
+  var lignes = _mieuxNotees(rows);
   if (!lignes.length) {
-    el.innerHTML = '<p class="accueil-vide">Aucune société Intéressant ou À surveiller pour le moment.</p>';
+    el.innerHTML = '<p class="accueil-vide">Aucune note disponible pour le moment.</p>';
     return;
   }
-  var entete = '<div class="accueil-entete" aria-hidden="true">'
-    + '<span>Société</span><span>Note</span><span>Conseil</span><span>Var. jour</span><span>Cours</span><span>Écart cible</span>'
-    + '</div>';
-  var corps = lignes.map(function(x) {
-    var n = (typeof note10num === 'function') ? note10num(x) : 0;
-    var note = (typeof note10txt === 'function') ? note10txt(x) : _frFixe(n, 1);
-    var conseil = (typeof fmtConseil === 'function') ? fmtConseil(x) : '—';
-    var cours = (x.price != null && typeof fmtXOF === 'function') ? fmtXOF(x.price) : '—';
-    var ecart = (typeof fmtEcartPct === 'function') ? fmtEcartPct(x.ecart_pct) : '—';
-    var variation = _fmtVariation(x.change_pct);
-    return '<button type="button" class="accueil-ligne" data-ticker="' + _echapAccueil(x.ticker) + '">'
-      + '<span class="accueil-id"><strong class="accueil-ticker">' + _echapAccueil(x.ticker) + '</strong>'
-      + '<span class="accueil-nom">' + _echapAccueil(x.name || '') + '</span></span>'
-      + '<span class="accueil-note ' + _classeConseil(x) + '">' + note + '<span>/10</span></span>'
-      + '<span class="accueil-conseil">' + conseil + '</span>'
-      + '<span class="accueil-var ' + _sensVariation(x.change_pct) + '">' + _echapAccueil(variation) + '</span>'
-      + '<span class="accueil-cours">' + _echapAccueil(cours) + '</span>'
-      + '<span class="accueil-ecart">' + _echapAccueil(ecart) + '</span>'
-      + '</button>';
-  }).join('');
-  el.innerHTML = entete + corps;
-  el.querySelectorAll('.accueil-ligne').forEach(function(btn) {
+  el.innerHTML = lignes.map(_htmlCarteNote).join('');
+  el.querySelectorAll('.accueil-mieux-carte').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var t = btn.getAttribute('data-ticker');
       if (t && typeof _openStock === 'function') _openStock(t);
