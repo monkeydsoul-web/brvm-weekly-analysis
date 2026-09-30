@@ -691,3 +691,11 @@ html.has-indices #msb-composite,html.has-indices #msb-brvm30{display:none}
 .tab-plus>button{background:none;border:none;color:var(--text-1);font-family:var(--font-ui);font-size:14px;text-align:left;padding:var(--space-10px) var(--space-12px);border-radius:var(--radius-sm);cursor:pointer;min-height:44px}
 .tab-plus>button.on,.tab-plus>button:hover{background:var(--accent-dim);color:var(--accent)}
 }
+/* D-10 : fiche société en page, au-dessus des onglets mobiles. */
+html.fiche-directe #page-welcome{display:none}
+html.fiche-directe #page-stock{display:block}
+#page-stock.fiche-pleine{position:relative;z-index:1}
+#page-stock.fiche-pleine #stockDetail{width:100%}
+@media(max-width:768px){
+  #page-stock.fiche-pleine{padding-bottom:calc(var(--space-56px) + var(--space-2))}
+}
