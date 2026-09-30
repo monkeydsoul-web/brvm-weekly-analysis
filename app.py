@@ -304,7 +304,7 @@ def serve_simulator():
                                mimetype="application/javascript")
 
 def _calcul_asset_v():
-    """Empreinte du deploiement : commit Render, sinon sha1 des JS du dashboard."""
+    """Empreinte du deploiement : commit Render, sinon sha1 des JS puis du CSS."""
     commit = (os.environ.get("RENDER_GIT_COMMIT") or "")[:12]
     if commit:
         return commit
@@ -318,6 +318,13 @@ def _calcul_asset_v():
     for nom in noms:
         with open(os.path.join(dossier, nom), "rb") as f:
             empreinte.update(f.read())
+    dossier_css = os.path.join(dossier, "css")
+    if os.path.isdir(dossier_css):
+        for nom in sorted(os.listdir(dossier_css)):
+            chemin = os.path.join(dossier_css, nom)
+            if nom.endswith(".css") and os.path.isfile(chemin):
+                with open(chemin, "rb") as f:
+                    empreinte.update(f.read())
     return empreinte.hexdigest()[:12]
 
 
@@ -390,6 +397,24 @@ def _envoi_statique_sans_gabarit(filename):
 
 
 app.send_static_file = _envoi_statique_sans_gabarit
+
+
+@app.route("/css/<path:nom>")
+def servir_css_dashboard(nom):
+    """CSS du dossier dashboard/css seulement. Le ?v= evite un vieux cache."""
+    if not nom or nom.endswith("/") or not nom.endswith(".css"):
+        return app.response_class(status=404)
+    if "\\" in nom or nom.startswith("/") or ".." in nom.split("/"):
+        return app.response_class(status=404)
+    dossier = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard", "css")
+    reponse = send_from_directory(dossier, nom, mimetype="text/css")
+    reponse.headers["Content-Type"] = "text/css; charset=utf-8"
+    reponse.headers["X-Content-Type-Options"] = "nosniff"
+    if request.args.get("v") == ASSET_V:
+        reponse.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        reponse.headers["Cache-Control"] = "no-store"
+    return reponse
 
 
 @app.route("/api/scores")
