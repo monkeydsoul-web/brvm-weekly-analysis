@@ -79,7 +79,7 @@ function _renderLiveScore(ticker, d){
     '<div style="text-align:right"><div style="font-size:28px;font-weight:700;color:'+col+'">'+((typeof note10txt==='function')?note10txt(d):v10fmt(sc).replace('.',','))+'<span style="font-size:13px;color:var(--t2)">/10</span></div>'+
     '<div style="font-size:11px;font-weight:600;color:'+col+'">'+tier+'</div></div></div>'+
     '<div style="background:var(--border);border-radius:4px;height:5px;margin-bottom:10px">'+
-    '<div style="width:'+(sc/80*100).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+
+    '<div style="width:'+(Math.max(0, Math.min(100, n10*10))).toFixed(0)+'%;height:5px;border-radius:4px;background:'+col+';transition:width 0.6s"></div></div>'+
     '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">'+bars+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--t2);border-top:1px solid var(--border);padding-top:6px;align-items:center">'+
     '<span>P/E: '+(d.pe_ref_live||d.pe_ref||0).toFixed(1)+'x</span><span>P/B: '+(d.pb_ref_live||d.pb_ref||0).toFixed(1)+'x</span>'+
