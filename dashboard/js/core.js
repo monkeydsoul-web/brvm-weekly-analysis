@@ -262,12 +262,15 @@ function fetchExchangeRates() {
   setTimeout(fetchExchangeRates, 3600000);
 }
 
+function _fmtTaux(n) {
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
 function _updateCurrencyUI() {
   const el = document.getElementById('curr-rate');
   if (el && window._rates.EUR) {
-    const eur = (1000 * window._rates.EUR).toFixed(2);
-    const usd = window._rates.USD ? (1000 * window._rates.USD).toFixed(2) : '?';
-    el.textContent = `1 000 XOF = ${eur}€ / $${usd}`;
+    const eur = _fmtTaux(1000 * window._rates.EUR);
+    const usd = window._rates.USD ? _fmtTaux(1000 * window._rates.USD) : '?';
+    el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
   }
 }
 

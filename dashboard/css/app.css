@@ -105,7 +105,8 @@
   --color-violet-soft:#a78bfa;
   --violet-wash:rgba(139,92,246,0.06);
   --color-amber-fixed:#f59e0b;
-  /* Pastille marché fermé : encre lisible sur le lavis (sombre) */
+  /* Pastilles marché : encre lisible sur le lavis (sombre) */
+  --live-ink:#22c55e;
   --closed-ink:#fbbf24;
   --closed-wash:rgba(251,191,36,0.18);
   --verdict-pos:#10b981;
@@ -149,7 +150,8 @@
 
   --shimmer-kpi:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.05) 50%,transparent 100%);
   --row-zebra:rgba(0,0,0,.012);
-  /* Pastille marché fermé : encre foncée, le jaune vif tombe sous 4,5:1 en clair */
+  /* Pastilles marché : encre foncée, le vert et le jaune vifs tombent sous 4,5:1 en clair */
+  --live-ink:#0e5c2c;
   --closed-ink:#6b4200;
   --closed-wash:rgba(107,66,0,0.10);
 }
@@ -619,7 +621,7 @@ abbr[data-tip]{border-bottom:1px dotted var(--blue);cursor:help;text-decoration:
 .topnav-logo{display:flex;align-items:center;gap:var(--space-1);background:none;border:none;cursor:pointer;color:var(--text-1);padding:var(--space-1) var(--space-4px);flex-shrink:0;font-family:var(--font-ui)}
 .topnav-mark{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px}
 .topnav-brand{font-size:var(--text-body);font-weight:700}
-.topnav-live{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--bull-wash);color:var(--color-live)}
+.topnav-live{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--bull-wash);color:var(--live-ink)}
 .topnav-live.is-closed{background:var(--closed-wash);color:var(--closed-ink)}
 #live-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;animation:pulse 2s infinite}
 .topnav-live.is-closed #live-dot{animation:none}
