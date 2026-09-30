@@ -33,12 +33,63 @@ def test_snts_renvoie_la_page_avec_le_jeton(client):
     assert "Sonatel (SNTS). Fiche de la société cotée à la BRVM." in html
 
 
-def test_minuscules_canonisees(client):
+def test_minuscules_redirige_301(client):
     reponse = client.get("/societe/snts")
-    assert reponse.status_code == 200
-    html = _html(reponse)
-    assert "/societe/SNTS" in html
-    assert "/societe/snts" not in html
+    assert reponse.status_code == 301
+    lieu = reponse.headers.get("Location") or ""
+    assert lieu.endswith("/societe/SNTS")
+    assert "snts" not in lieu
+    corps = _html(reponse)
+    assert "snts" not in corps
+    assert "<script>alert" not in corps
+    suivi = client.get("/societe/snts", follow_redirects=True)
+    assert suivi.status_code == 200
+    assert 'rel="canonical" href="https://brvm-weekly-analysis.onrender.com/societe/SNTS"' in _html(suivi)
+
+
+def test_casse_mixte_redirige_301(client):
+    reponse = client.get("/societe/SnTs")
+    assert reponse.status_code == 301
+    assert (reponse.headers.get("Location") or "").endswith("/societe/SNTS")
+    assert "SnTs" not in (reponse.headers.get("Location") or "")
+    assert "SnTs" not in _html(reponse)
+
+
+def test_inconnu_minuscule_reste_404(client):
+    reponse = client.get("/societe/xxxx")
+    assert reponse.status_code == 404
+    assert "xxxx" not in _html(reponse)
+
+
+def test_bbgc_hors_classement_404(client):
+    reponse = client.get("/societe/BBGC")
+    assert reponse.status_code == 404
+    corps = _html(reponse)
+    assert "BBGC" not in corps
+    assert "Location" not in reponse.headers or "/societe/" not in (reponse.headers.get("Location") or "")
+
+
+def test_nom_du_classement_dans_le_titre(client, monkeypatch):
+    """Le titre serveur reprend le nom affiché sur la fiche, pas un alias documentaire."""
+    import app as application
+    monkeypatch.setattr(
+        application,
+        "load_latest_scores",
+        lambda: [{"ticker": "SNTS", "name": "Sonatel Senegal", "note10": 7.3, "composite_adj": 58.4}],
+    )
+    html = _html(client.get("/societe/SNTS"))
+    assert "<title>Sonatel Senegal (SNTS) – note 7,3/10 – BRVM Analyzer</title>" in html
+    assert "<title>Sonatel (SNTS)" not in html
+    assert 'property="og:title" content="Sonatel Senegal (SNTS) – note 7,3/10 – BRVM Analyzer"' in html
+
+
+def test_depart_fiche_vers_la_racine():
+    from pathlib import Path
+    src = Path(__file__).resolve().parents[1].joinpath("dashboard", "js", "core.js").read_text(encoding="utf-8")
+    assert "history.pushState({page: id}, '', '/#' + id)" in src
+    assert "history.pushState({societe: ticker}, '', cible)" in src
+    assert "if (!_ligneSociete(ticker)) return;" in src
+    assert "history.pushState({page: id}, '', '#' + id)" not in src
 
 
 def test_note_dans_le_titre(client, monkeypatch):

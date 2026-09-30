@@ -719,7 +719,9 @@ function _ligneSociete(ticker) {
 
 function _texteSeoSociete(ticker) {
   var row = _ligneSociete(ticker);
-  if (!row || !row.name) return null;
+  if (!row) return null;
+  var nom = String(row.name || "").replace(/^\s+|\s+$/g, "");
+  if (!nom) return null;
   var note = "";
   if (typeof note10txt === "function") {
     var brut = row.note10;
@@ -727,10 +729,10 @@ function _texteSeoSociete(ticker) {
     if (!aUneNote && row.composite_adj != null && row.composite_adj !== "" && isFinite(Number(row.composite_adj))) aUneNote = true;
     if (aUneNote) note = note10txt(row);
   }
-  var titre = row.name + " (" + ticker + ")";
+  var titre = nom + " (" + ticker + ")";
   if (note) titre += " – note " + note + "/10";
   titre += " – BRVM Analyzer";
-  var description = row.name + " (" + ticker + ")";
+  var description = nom + " (" + ticker + ")";
   if (note) description += ", note " + note + "/10";
   description += ". Fiche de la société cotée à la BRVM. Données publiques, pédagogie. Pas un conseil en investissement.";
   return { titre: titre, description: description };
@@ -756,7 +758,7 @@ function _appliquerSeoSociete(ticker) {
   lien.href = location.origin + "/societe/" + ticker;
 }
 
-function _restaurerSeoSite() {
+function _restaurerSeoTextes() {
   var titre = (_seoMemoire && _seoMemoire.titre) || _SEO_TITRE_SITE;
   var description = (_seoMemoire && _seoMemoire.description) || _SEO_DESC_SITE;
   document.title = titre;
@@ -768,6 +770,10 @@ function _restaurerSeoSite() {
   if (ogd) ogd.setAttribute("content", description);
   var lien = document.querySelector('link[rel="canonical"]');
   if (lien && lien.parentNode) lien.parentNode.removeChild(lien);
+}
+
+function _restaurerSeoSite() {
+  _restaurerSeoTextes();
   document.documentElement.classList.remove("fiche-directe");
   var page = document.getElementById("page-stock");
   if (page) page.classList.remove("fiche-pleine");
@@ -795,20 +801,34 @@ function nav(id){
     if (_fichePage) _fichePage.classList.remove('fiche-pleine');
     if (typeof _restaurerSeoSite === 'function') _restaurerSeoSite();
   }
-  if (!window._navSansUrl) {
-    var _surSociete = !!_cheminSocieteActuel();
+  if (!window._navSansUrl && id !== 'stock') {
     try {
-      if (_surSociete && id !== 'stock') history.pushState({page: id}, '', '#' + id);
-      else history.replaceState(null, '', '#' + id);
+      // Chemin absolu : un fragment seul restait sous /societe/TICKER.
+      if (_cheminSocieteActuel()) history.pushState({page: id}, '', '/#' + id);
+      else history.replaceState({page: id}, '', '/#' + id);
     } catch (e) {}
   }
   if (typeof syncChromeNav === 'function') syncChromeNav(id);
 }
 // Support navigation par hash URL, /societe/TICKER, retour et avant
+function _hashPageHorsFiche(brut) {
+  var id = String(brut || '').split('/')[0];
+  if (!id || id === 'stock') return '';
+  if (!document.getElementById('page-' + id)) return '';
+  return id;
+}
+
 (function(){
   _memoSeoSite();
   var chemin = _cheminSocieteActuel();
   var h=(location.hash||'').replace('#','');
+  var pageHash = chemin ? _hashPageHorsFiche(h) : '';
+  if (pageHash) {
+    try { history.replaceState({page: pageHash}, '', '/#' + pageHash); } catch (e) {}
+    document.documentElement.classList.remove('fiche-directe');
+    chemin = null;
+    h = pageHash;
+  }
   var stockMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(h);
   if (chemin) {
     window._pendingStockTicker = chemin[1].toUpperCase();
@@ -828,7 +848,16 @@ function nav(id){
   });
 })();
 window.addEventListener('hashchange', function() {
-  if (_cheminSocieteActuel()) return;
+  if (_cheminSocieteActuel()) {
+    var horsFiche = _hashPageHorsFiche((location.hash || '').replace('#', ''));
+    if (!horsFiche) return;
+    try { history.replaceState({page: horsFiche}, '', '/#' + horsFiche); } catch (e) {}
+    document.documentElement.classList.remove('fiche-directe');
+    window._navSansUrl = true;
+    try { nav(horsFiche); }
+    finally { window._navSansUrl = false; }
+    return;
+  }
   var page = (location.hash || '#welcome').slice(1);
   var hcMatch = /^stock\/([A-Za-z0-9]{2,12})$/i.exec(page);
   if (hcMatch) { _openStock(hcMatch[1].toUpperCase()); return; }
@@ -837,6 +866,15 @@ window.addEventListener('hashchange', function() {
 window.addEventListener('popstate', function() {
   var chemin = _cheminSocieteActuel();
   if (chemin) {
+    var horsFiche = _hashPageHorsFiche((location.hash || '').replace('#', ''));
+    if (horsFiche) {
+      try { history.replaceState({page: horsFiche}, '', '/#' + horsFiche); } catch (e) {}
+      document.documentElement.classList.remove('fiche-directe');
+      window._navSansUrl = true;
+      try { nav(horsFiche); }
+      finally { window._navSansUrl = false; }
+      return;
+    }
     document.getElementById('stock-slideover')?.classList.remove('open');
     document.getElementById('sso-overlay')?.classList.remove('open');
     _stockRenderTarget = 'stockDetail';
@@ -2480,7 +2518,7 @@ function closeStockSlideover(){
   document.getElementById('stock-slideover')?.classList.remove('open');
   document.getElementById('sso-overlay')?.classList.remove('open');
   document.removeEventListener('keydown', _ssoEscHandler);
-  if((location.hash||'').indexOf('#stock/')===0){ try{history.replaceState(null,'','#'+(_currentPage||'rank'))}catch(e){} }
+  if((location.hash||'').indexOf('#stock/')===0){ try{history.replaceState(null,'','/#'+(_currentPage||'rank'))}catch(e){} }
 }
 function _ssoEscHandler(e){ if(e.key==='Escape') closeStockSlideover(); }
 
@@ -2528,8 +2566,23 @@ function renderStockStory(ticker) {
   ].join('');
 }
 
+function _poserUrlSociete(ticker) {
+  if (!/^[A-Z0-9]{2,12}$/.test(ticker)) return;
+  var cible = '/societe/' + ticker;
+  if (location.pathname === cible) return;
+  var actuel = _cheminSocieteActuel();
+  if (actuel && actuel[1].toUpperCase() === ticker) {
+    try { history.replaceState({societe: ticker}, '', cible); } catch (e) {}
+    return;
+  }
+  if (!_ligneSociete(ticker)) return;
+  try { history.pushState({societe: ticker}, '', cible); } catch (e) {}
+}
+
 async function showStock(ticker){
   ticker = String(ticker || '').toUpperCase();
+  window._ficheSeq = (window._ficheSeq || 0) + 1;
+  var ficheSeq = window._ficheSeq;
   _trackRecentTicker(ticker);
   const useSlide = _stockRenderTarget === 'sso-body' && document.getElementById('stock-slideover')?.classList.contains('open');
   if (!useSlide) {
@@ -2539,10 +2592,15 @@ async function showStock(ticker){
     _stockRenderTarget = 'stockDetail';
     var pageStock = document.getElementById('page-stock');
     if (pageStock) pageStock.classList.add('fiche-pleine');
-    if (/^[A-Z0-9]{2,12}$/.test(ticker) && location.pathname !== '/societe/' + ticker) {
-      try { history.pushState({societe: ticker}, '', '/societe/' + ticker); } catch (e) {}
-    }
-    _appliquerSeoSociete(ticker);
+    _poserUrlSociete(ticker);
+    if (_ligneSociete(ticker)) _appliquerSeoSociete(ticker);
+    else if (typeof _restaurerSeoTextes === 'function') _restaurerSeoTextes();
+  }
+  if (!_ligneSociete(ticker)) {
+    var _absent = document.getElementById(_stockRenderTarget);
+    if (_absent) _absent.innerHTML = '<p>Ticker non trouvé</p>';
+    if (typeof _restaurerSeoTextes === 'function') _restaurerSeoTextes();
+    return;
   }
   if (!useSlide) document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.textContent.trim().startsWith(ticker)));
   if (useSlide) {
@@ -2550,7 +2608,7 @@ async function showStock(ticker){
     if (lbl) lbl.textContent = ticker;
     _addToSSOHistory(ticker);
   }
-  if (useSlide) { try{history.replaceState(null,'','#stock/'+ticker)}catch(e){} }
+  if (useSlide) { try{history.replaceState(null,'','/#stock/'+ticker)}catch(e){} }
   // Phase 1: render static header immediately from cached ranking data
   const _staticEntry = (window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
   const _v0 = _staticEntry.composite_adj||0;
@@ -2587,7 +2645,13 @@ async function showStock(ticker){
     </div>`;
   try{
     const[d,cd]=await Promise.all([fetch('/api/stock/'+ticker).then(r=>r.json()),fetch('/api/company/'+ticker).then(r=>r.json()).catch(()=>({}))]);
-    if(d.error){document.getElementById(_stockRenderTarget).innerHTML=`<p>${d.error}</p>`;return;}
+    if (ficheSeq !== window._ficheSeq) return;
+    if(d.error){
+      var _errEl = document.getElementById(_stockRenderTarget);
+      if (_errEl) _errEl.innerHTML = '<p>' + escapeHtml(d.error) + '</p>';
+      if (location.pathname !== '/societe/' + ticker && typeof _restaurerSeoTextes === 'function') _restaurerSeoTextes();
+      return;
+    }
     const s=d.stock,v=s.composite_adj||0;
     const fi=cd.financials||{},ai=cd.ai_analysis||'';
     const entry=(window.scores||scores||[]).find(x=>x.ticker===ticker)||{};
@@ -4420,8 +4484,10 @@ function _setMode(m) { m = 'beginner';
     b.classList.toggle('active', b.dataset.modeBtn === m);
   });
   _toast(m === 'beginner' ? '🌱 Mode débutant activé · explications simplifiées' : '🎯 Mode expert activé · données complètes');
-  // Re-render page courante
-  var page = (location.hash || '#welcome').slice(1);
+  // Re-render page courante. Sans hash, une fiche /societe/… ne devient pas #welcome.
+  var brutHash = (location.hash || '').replace('#', '');
+  if (typeof _cheminSocieteActuel === 'function' && _cheminSocieteActuel() && !brutHash) return;
+  var page = brutHash || 'welcome';
   if (typeof nav === 'function') nav(page);
 }
 window._setMode = _setMode;

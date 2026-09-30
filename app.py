@@ -417,18 +417,33 @@ def _ticker_autorise(brut):
     return candidat
 
 
+def _nom_societe(ticker, row=None):
+    """Meme nom que la fiche : celui du classement, sinon la fiche documentee."""
+    if isinstance(row, dict):
+        nom_ligne = row.get("name")
+        if isinstance(nom_ligne, str) and nom_ligne.strip():
+            return nom_ligne.strip()
+    from company_data import COMPANIES
+    nom = (COMPANIES.get(ticker) or {}).get("name")
+    if isinstance(nom, str) and nom.strip():
+        return nom.strip()
+    return ticker
+
+
 def _textes_societe(ticker):
     """Titre et description. La note vient du classement deja calcule."""
-    from company_data import COMPANIES
-    nom = (COMPANIES.get(ticker) or {}).get("name") or ticker
+    row = None
     note = None
     try:
-        for row in load_latest_scores() or []:
-            if isinstance(row, dict) and row.get("ticker") == ticker:
-                note = _note10_fr(row)
+        for candidat in load_latest_scores() or []:
+            if isinstance(candidat, dict) and candidat.get("ticker") == ticker:
+                row = candidat
+                note = _note10_fr(candidat)
                 break
     except Exception:
+        row = None
         note = None
+    nom = _nom_societe(ticker, row)
     if note:
         titre = "%s (%s) – note %s/10 – BRVM Analyzer" % (nom, ticker, note)
         description = (
@@ -487,6 +502,10 @@ def page_societe(ticker):
     propre = _ticker_autorise(ticker)
     if not propre:
         return not_found(None)
+    # La forme canonique est en majuscules. Un 200 sur /societe/snts
+    # poussait ensuite une entree d'historique et bouclait au retour.
+    if ticker != propre:
+        return redirect("/societe/" + propre, code=301)
     reponse = app.response_class(_corps_societe(propre), mimetype="text/html; charset=utf-8")
     reponse.headers["Cache-Control"] = "no-cache"
     return reponse
