@@ -68,14 +68,14 @@
       <button type="button" data-nav="screener" onclick="navTo('screener')" title="Filtrez les sociétés selon vos critères : dividende, valorisation, rentabilité · trouvez vos opportunités">Screener</button>
       <button type="button" data-nav="marche" onclick="navTo('marche')" title="Indices, commodités, macro UEMOA et dividendes">Marché</button>
       <button type="button" data-nav="news" onclick="navTo('news')" title="Annonces officielles BRVM + Google News par société">Actualités</button>
-      <div class="topnav-drop" id="topnav-apprendre">
-        <button type="button" class="topnav-drop-btn" id="topnav-apprendre-btn" data-nav="apprendre" onclick="toggleApprendre()" aria-expanded="false" aria-controls="topnav-apprendre-menu" title="Glossaire et méthode">Apprendre</button>
-        <div id="topnav-apprendre-menu" class="topnav-drop-menu" hidden>
-          <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
-          <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthode</button>
-        </div>
-      </div>
     </nav>
+    <div class="topnav-drop" id="topnav-apprendre">
+      <button type="button" class="topnav-drop-btn" id="topnav-apprendre-btn" data-nav="apprendre" onclick="toggleApprendre()" aria-expanded="false" aria-controls="topnav-apprendre-menu" title="Glossaire et méthode">Apprendre</button>
+      <div id="topnav-apprendre-menu" class="topnav-drop-menu" hidden>
+        <button type="button" data-nav="glossaire" onclick="navTo('glossaire')" title="Termes financiers expliqués en français simple">Glossaire</button>
+        <button type="button" data-nav="methodo" onclick="navTo('methodo')" title="Comment la note sur 10 et le prix cible sont calculés">Méthode</button>
+      </div>
+    </div>
     <div class="topnav-more" id="topnav-more">
       <button type="button" class="topnav-more-btn" id="topnav-more-btn" onclick="toggleTopnavMore()" aria-expanded="false" aria-controls="topnav-more-menu">Plus</button>
       <div id="topnav-more-menu" class="topnav-more-menu" hidden>
