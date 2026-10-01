@@ -57,6 +57,43 @@ def test_le_front_ne_dessine_plus_les_portefeuilles():
     assert "_prevPortfolios" not in src
     assert "fetch('/api/previsions/signaux')" in src
     assert "function renderPrevisionsPage" in src
+    assert "stock-tab" not in src
+    assert "_prevSetTab" not in src
+    assert "_prevRenderBacktest" not in src
+    assert "_prevRenderRapport" not in src
+    assert "Les 3 portefeuilles prévisionnels" not in src
+    assert "taux sans risque 6.5%" not in src
+    assert ">Recommandations IA</div>" in src
+    assert "Prévision favorable, neutre ou défavorable. Distinct du conseil de la note." in src
+    assert "return 'Prévision faible'" in src
+    assert "return 'Prévision défavorable'" in src
+    assert "['ALLÉGER','🔴 Prévision faible'" in src
+    assert "['ÉVITER','⚫ Prévision défavorable'" in src
+    assert "Acheter" not in src
+    assert "Vendre" not in src
+    app = (ROOT / "app.py").read_text(encoding="utf-8")
+    assert '@app.route("/api/previsions/portfolios")' not in app
+    assert "def api_prevision_portfolios" not in app
+
+
+def test_pdf_mensuel_sans_section_portefeuilles():
+    pytest.importorskip("reportlab")
+    import io
+    import backtest_previsionnel as bp
+    from pypdf import PdfReader
+
+    scores = [{
+        "ticker": "HAUT", "name": "Haut", "sector": "Banque",
+        "composite_adj": 80, "div_yield": 6, "pe_ref": 8, "price": 1000,
+        "statut": "cote",
+    }]
+    pdf = bp.generate_rapport_pdf(scores, {})
+    texte = "\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(pdf)).pages)
+    assert "Portefeuilles prévisionnels" not in texte
+    assert "Objectif +" not in texte
+    assert "Adopter" not in texte
+    assert "Taux BCEAO" not in texte
+    assert "Prévisions favorables" in texte
 
 
 def test_phrase_de_signaux_nest_plus_tronquee():
@@ -248,6 +285,15 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                     assert chaine not in texte, chaine
                 assert "pour accéder à l'analyse complète" not in texte
                 assert PHRASE_ENTIERE in texte
+                assert "Recommandations IA" in texte
+                assert "Distinct du conseil de la note." in texte
+                assert "Prévision faible" in texte
+                assert "Prévision défavorable" in texte
+                assert "Les 3 portefeuilles" not in texte
+                assert "taux sans risque 6.5%" not in texte
+                assert "Acheter" not in texte
+                assert "Vendre" not in texte
+                assert page.locator("#page-previsions-content .stock-tab").count() == 0
                 page.screenshot(path=str(preuves / (nom + ".png")))
                 contexte.close()
         finally:

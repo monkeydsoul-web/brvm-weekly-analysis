@@ -544,7 +544,6 @@ def generate_rapport_pdf(scores=None, price_history=None):
     if price_history is None:
         price_history = _load_price_history()
 
-    portfolios = generate_portfolios(scores, price_history)
     signals    = compute_signals(scores, price_history)
     buy_signals = [s for s in signals if s["signal"] == "ACHETER"]
 
@@ -618,30 +617,6 @@ def generate_rapport_pdf(scores=None, price_history=None):
     ]))
     story.append(t2)
     story.append(Spacer(1, 0.3*cm))
-
-    story.append(Paragraph("Portefeuilles prévisionnels recommandés", h2))
-    for pf in portfolios:
-        story.append(Paragraph(
-            f"<b>{pf['name']}</b> — Risque {pf['risk']} — Objectif +{pf['target_min']}% à +{pf['target_max']}%",
-            body
-        ))
-        pf_data = [["Ticker", "Poids", "Note/10", "Div%", "Momentum"]]
-        for st in pf.get("stocks", []):
-            pf_data.append([
-                st["ticker"], f"{st['weight']:.1f}%",
-                "%s/10" % _note10_txt(st.get("score")), f"{st.get('div_yield', 0):.1f}%",
-                f"{st.get('momentum', 0):+.1f}%",
-            ])
-        tp = Table(pf_data, colWidths=[2.5*cm, 2*cm, 2.5*cm, 2*cm, 2.5*cm])
-        tp.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2563EB")),
-            ("TEXTCOLOR",  (0, 0), (-1, 0), colors.white),
-            ("FONTSIZE",   (0, 0), (-1, -1), 8),
-            ("GRID",       (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-            ("PADDING",    (0, 0), (-1, -1), 4),
-        ]))
-        story.append(tp)
-        story.append(Spacer(1, 0.2*cm))
 
     story.append(Paragraph("Prévisions favorables", h2))
     sig_data = [["Ticker", "Note/10", "Prévision", "Confiance", "Raison"]]

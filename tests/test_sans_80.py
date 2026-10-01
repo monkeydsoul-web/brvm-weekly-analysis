@@ -599,7 +599,8 @@ def test_pastilles_signaux_sont_une_prevision():
     assert "return 'Prudence'" not in prev
     assert "['ACHETER','🟢 Prévision favorable'" in prev
     assert "['CONSERVER','🟡 Prévision neutre'" in prev
-    assert "['ALLÉGER','🔴 Prévision défavorable'" in prev
+    assert "return 'Prévision faible'" in prev
+    assert "['ALLÉGER','🔴 Prévision faible'" in prev
     assert "['ÉVITER','⚫ Prévision défavorable'" in prev
     assert "s.signal === _sigFilter" in prev
     assert "Prévision favorable = les modèles détectent un signal haussier" in HTML
