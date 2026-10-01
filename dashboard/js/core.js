@@ -1366,7 +1366,7 @@ async function init(){
     });
     // Sparklines BOC en parallèle
     fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(e=>{console.error('[BRVM] sparklines:',e);});
-    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget,500);
+    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(function(){ loadMarketWidget(false); }, 500);
     populateSelects();
     setTimeout(_autoTooltips, 1200);
   }catch(e){

@@ -549,6 +549,8 @@ def test_widget_une_promesse_delai_et_maj_differe():
     assert "if (essai < 1)" in accueil
     assert "fetch('/api/market'" not in core
     assert "demanderMarche(!!forcer)" in core
+    assert "setTimeout(loadMarketWidget," not in core
+    assert "loadMarketWidget(false)" in core
     assert "if (!abandon) console.error('[BRVM] loadMarketWidget:', e);" in core
     assert "console.error('[BRVM] loadMarketWidget:',e);" not in core
     assert "function _libelleMajMarche" in core
