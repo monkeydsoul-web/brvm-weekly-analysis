@@ -575,16 +575,38 @@ function _brancherPeriodes() {
   });
 }
 
-function _chargerCourbeComposite() {
-  _brancherPeriodes();
-  if (window.BRVM_INDEX_HISTORY) {
-    _accueilHistoriqueIndice('composite', '', function(d) {
-      var points = _pointsHistorique(d);
-      if (!points || !document.getElementById('accueil-courbe')) return;
-      _appliquerCourbe(points, true);
-      _activerPeriodes(d && Array.isArray(d.periodes) ? d.periodes : null);
-    });
+// Sous ce seuil, la courbe illustrative et les onglets restent masqués.
+// window.BRVM_INDEX_HISTORY peut porter un décompte ou des points déjà connus.
+// Il n'est pas posé aujourd'hui : aucune séance n'est comptée ici, et aucun
+// appel à /api/index-history n'est fait. La courbe réelle n'est pas branchée.
+var SEUIL_SEANCES_COURBE = 20;
+
+function _seancesIndiceConnues() {
+  var src = window.BRVM_INDEX_HISTORY;
+  if (typeof src === 'number' && isFinite(src)) return src;
+  if (Array.isArray(src)) return src.length;
+  if (src && typeof src === 'object') {
+    if (typeof src.seances === 'number' && isFinite(src.seances)) return src.seances;
+    if (Array.isArray(src.points)) return src.points.length;
+    if (Array.isArray(src.series)) return src.series.length;
   }
+  return 0;
+}
+
+function _masquerCourbeComposite() {
+  var zone = document.getElementById('accueil-courbe');
+  var periodes = document.getElementById('accueil-periodes');
+  if (zone) zone.hidden = true;
+  if (periodes) periodes.hidden = true;
+}
+
+function _chargerCourbeComposite() {
+  if (_seancesIndiceConnues() < SEUIL_SEANCES_COURBE) {
+    _masquerCourbeComposite();
+    return;
+  }
+  // Le seuil serait atteint, mais la série réelle n'est pas dessinée ici.
+  _masquerCourbeComposite();
 }
 
 function _remplirMontants(act) {
