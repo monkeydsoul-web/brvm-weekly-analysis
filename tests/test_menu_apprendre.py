@@ -173,12 +173,15 @@ def _est_marche(url, base):
 
 
 @pytest.mark.skipif(_CI, reason="Playwright hors CI. Local : pytest tests/test_menu_apprendre.py -q -s")
-def test_menu_apprendre_glossaire_et_methode(base_url):
+def test_menu_apprendre_glossaire_et_methode(base_url, tmp_path):
     """1280 et 1100 : Glossaire, Methode, elementFromPoint, Echap, clic exterieur."""
     from playwright.sync_api import expect, sync_playwright
 
-    preuves = Path(os.environ.get("BRVM_PREUVE_DIR", "/opt/cursor/artifacts"))
-    preuves.mkdir(parents=True, exist_ok=True)
+    if os.environ.get("BRVM_PREUVE_DIR"):
+        preuves = Path(os.environ["BRVM_PREUVE_DIR"])
+        preuves.mkdir(parents=True, exist_ok=True)
+    else:
+        preuves = tmp_path
     erreurs = []
     marches = []
 
