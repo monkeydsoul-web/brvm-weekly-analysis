@@ -280,7 +280,7 @@ def test_api_market_sert_le_cache_sans_champ_en_plus(client, md, monkeypatch):
     reponse = client.get("/api/market")
     assert reponse.status_code == 200
     corps = reponse.get_json()
-    assert corps == payload
+    assert corps == md.appliquer_ytd_reference(payload)
     assert set(corps) == CHAMPS
 
 
@@ -302,7 +302,7 @@ def test_api_market_cache_perime_reste_sous_500ms(client, md, monkeypatch):
     duree = time.perf_counter() - debut
     assert duree < 0.5
     assert reponse.status_code == 200
-    assert reponse.get_json() == ancien
+    assert reponse.get_json() == md.appliquer_ytd_reference(ancien)
     bloque.set()
     _joindre(md)
 
@@ -322,7 +322,7 @@ def test_api_top5_vide_ne_relance_pas_un_scrape_synchrone(client, md, monkeypatc
     reponse = client.get("/api/market")
     assert reponse.status_code == 200
     assert reponse.get_json()["top5"] == []
-    assert reponse.get_json()["indices"] == payload["indices"]
+    assert reponse.get_json()["indices"] == md.appliquer_ytd_reference(payload)["indices"]
 
 
 def _ecrire_brut(md, data):

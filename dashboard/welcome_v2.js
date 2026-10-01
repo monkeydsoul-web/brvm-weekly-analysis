@@ -189,13 +189,35 @@ function _ecartPoints(item) {
   return courant - veille;
 }
 
+function _texteYtdIndice(ratio) {
+  var n = _nombreAccueil(ratio);
+  if (n == null) return '—';
+  return _avecSigne(n * 100, 2) + '\u00a0%';
+}
+
+function _compositeMarche(d) {
+  var indices = (d && d.indices) || [];
+  var i;
+  for (i = 0; i < indices.length; i++) {
+    var nom = indices[i] && indices[i].name ? String(indices[i].name).toUpperCase() : '';
+    if (nom.indexOf('COMPOSITE') >= 0 && nom.indexOf('TOTAL') < 0) return indices[i];
+  }
+  return null;
+}
+
+function _texteMacroYtd(d) {
+  var composite = _compositeMarche(d);
+  if (!composite) return '—';
+  return _texteYtdIndice(composite.ytd);
+}
+
 function _ligneSeanceIndice(item) {
   if (!item) return '—';
   var pts = _ecartPoints(item);
   var ytd = _nombreAccueil(item.ytd);
   if (pts == null && ytd == null) return '—';
   var gauche = pts == null ? '— pts sur la séance' : (_avecSigne(pts, 2) + ' pts sur la séance');
-  var droite = ytd == null ? 'YTD —' : ('YTD ' + _avecSigne(ytd, 2) + '\u00a0%');
+  var droite = ytd == null ? 'YTD —' : ('YTD ' + _texteYtdIndice(ytd));
   return gauche + ' · ' + droite;
 }
 
