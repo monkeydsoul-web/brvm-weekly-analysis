@@ -754,11 +754,12 @@ def api_market():
     reponse immediate si une valeur (meme perimee) existe deja.
     ``force=true`` relance la revalidation sans faire attendre le client
     des qu'un cache est la. Le corps JSON n'ajoute aucun champ.
+    ``ytd`` = cours / clôture du 31/12/2025 − 1. Sans clôture de référence, null.
     """
     try:
-        from market_data import get_market_data
+        from market_data import appliquer_ytd_reference, get_market_data
         force = request.args.get("force", "false").lower() == "true"
-        data = get_market_data(force_refresh=force)
+        data = appliquer_ytd_reference(get_market_data(force_refresh=force))
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -189,13 +189,35 @@ function _ecartPoints(item) {
   return courant - veille;
 }
 
+function _texteYtdIndice(ratio) {
+  var n = _nombreAccueil(ratio);
+  if (n == null) return '—';
+  return _avecSigne(n * 100, 2) + '\u00a0%';
+}
+
+function _compositeMarche(d) {
+  var indices = (d && d.indices) || [];
+  var i;
+  for (i = 0; i < indices.length; i++) {
+    var nom = indices[i] && indices[i].name ? String(indices[i].name).toUpperCase() : '';
+    if (nom.indexOf('COMPOSITE') >= 0 && nom.indexOf('TOTAL') < 0) return indices[i];
+  }
+  return null;
+}
+
+function _texteMacroYtd(d) {
+  var composite = _compositeMarche(d);
+  if (!composite) return '—';
+  return _texteYtdIndice(composite.ytd);
+}
+
 function _ligneSeanceIndice(item) {
   if (!item) return '—';
   var pts = _ecartPoints(item);
   var ytd = _nombreAccueil(item.ytd);
   if (pts == null && ytd == null) return '—';
   var gauche = pts == null ? '— pts sur la séance' : (_avecSigne(pts, 2) + ' pts sur la séance');
-  var droite = ytd == null ? 'YTD —' : ('YTD ' + _avecSigne(ytd, 2) + '\u00a0%');
+  var droite = ytd == null ? 'YTD —' : ('YTD ' + _texteYtdIndice(ytd));
   return gauche + ' · ' + droite;
 }
 
@@ -576,16 +598,38 @@ function _brancherPeriodes() {
   });
 }
 
-function _chargerCourbeComposite() {
-  _brancherPeriodes();
-  if (window.BRVM_INDEX_HISTORY) {
-    _accueilHistoriqueIndice('composite', '', function(d) {
-      var points = _pointsHistorique(d);
-      if (!points || !document.getElementById('accueil-courbe')) return;
-      _appliquerCourbe(points, true);
-      _activerPeriodes(d && Array.isArray(d.periodes) ? d.periodes : null);
-    });
+// Sous ce seuil, la courbe illustrative et les onglets restent masqués.
+// window.BRVM_INDEX_HISTORY peut porter un décompte ou des points déjà connus.
+// Il n'est pas posé aujourd'hui : aucune séance n'est comptée ici, et aucun
+// appel à /api/index-history n'est fait. La courbe réelle n'est pas branchée.
+var SEUIL_SEANCES_COURBE = 20;
+
+function _seancesIndiceConnues() {
+  var src = window.BRVM_INDEX_HISTORY;
+  if (typeof src === 'number' && isFinite(src)) return src;
+  if (Array.isArray(src)) return src.length;
+  if (src && typeof src === 'object') {
+    if (typeof src.seances === 'number' && isFinite(src.seances)) return src.seances;
+    if (Array.isArray(src.points)) return src.points.length;
+    if (Array.isArray(src.series)) return src.series.length;
   }
+  return 0;
+}
+
+function _masquerCourbeComposite() {
+  var zone = document.getElementById('accueil-courbe');
+  var periodes = document.getElementById('accueil-periodes');
+  if (zone) zone.hidden = true;
+  if (periodes) periodes.hidden = true;
+}
+
+function _chargerCourbeComposite() {
+  if (_seancesIndiceConnues() < SEUIL_SEANCES_COURBE) {
+    _masquerCourbeComposite();
+    return;
+  }
+  // Le seuil serait atteint, mais la série réelle n'est pas dessinée ici.
+  _masquerCourbeComposite();
 }
 
 function _remplirMontants(act) {

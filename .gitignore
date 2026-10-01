@@ -1,6 +1,7 @@
 
 .env
-data/
+data/*
+!data/indices_reference_2025.json
 reports/
 logs/
 *.log

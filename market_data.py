@@ -43,6 +43,105 @@ _MOIS_FR = {
 }
 _ACCENTS = str.maketrans("éèêëàâäîïôöùûüç", "eeeeaaaiioouuuc")
 
+# Clôtures du 31/12/2025 (BOC n° 249). Fichier du dépôt, pas le cache runtime :
+# BRVM_DATA_DIR ne doit pas le masquer.
+_REFERENCE_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data", "indices_reference_2025.json"
+)
+_references_2025 = None
+
+
+def _charger_references_2025():
+    global _references_2025
+    if _references_2025 is not None:
+        return _references_2025
+    try:
+        with open(_REFERENCE_PATH, encoding="utf-8") as f:
+            brut = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        logger.warning("market_data: clôtures du 31/12/2025 illisibles: %s", e)
+        _references_2025 = {}
+        return _references_2025
+    closes = brut.get("closes") if isinstance(brut, dict) else None
+    _references_2025 = closes if isinstance(closes, dict) else {}
+    return _references_2025
+
+
+def _contient_30(nom):
+    debut = 0
+    taille = len(nom)
+    while True:
+        i = nom.find("30", debut)
+        if i < 0:
+            return False
+        avant_ok = i == 0 or not nom[i - 1].isdigit()
+        apres = i + 2
+        apres_ok = apres >= taille or not nom[apres].isdigit()
+        if avant_ok and apres_ok:
+            return True
+        debut = i + 1
+
+
+def _nom_reference(nom):
+    """Nom publié par brvm.org → clé des clôtures, ou None."""
+    if not isinstance(nom, str):
+        return None
+    n = nom.upper().replace("–", " ").replace("—", " ").replace("-", " ")
+    n = " ".join(n.split())
+    if "TOTAL" in n:
+        return None
+    if "PRESTIGE" in n:
+        return "Prestige"
+    if "PRINCIPAL" in n:
+        return "Principal"
+    if "COMPOSITE" in n:
+        return "BRVM Composite"
+    if _contient_30(n):
+        return "BRVM 30"
+    return None
+
+
+def _nombre_cours(valeur):
+    if isinstance(valeur, bool) or not isinstance(valeur, (int, float)):
+        return None
+    return float(valeur)
+
+
+def cloture_31122025(nom):
+    cle = _nom_reference(nom)
+    if not cle:
+        return None
+    return _nombre_cours(_charger_references_2025().get(cle))
+
+
+def ytd_depuis_cloture(cours, cloture):
+    """ytd = cours / clôture du 31/12/2025 − 1. None si une donnée manque."""
+    niveau = _nombre_cours(cours)
+    base = _nombre_cours(cloture)
+    if niveau is None or base is None or base == 0:
+        return None
+    return niveau / base - 1
+
+
+def _indice_avec_ytd(item):
+    if not isinstance(item, dict):
+        return item
+    copie = dict(item)
+    copie["ytd"] = ytd_depuis_cloture(copie.get("current"), cloture_31122025(copie.get("name")))
+    return copie
+
+
+def appliquer_ytd_reference(data):
+    """Remplace le ytd de la colonne brvm.org. Ne modifie pas l'objet cache."""
+    if not isinstance(data, dict):
+        return data
+    copie = dict(data)
+    for cle in ("indices", "sector_indices"):
+        liste = data.get(cle)
+        if isinstance(liste, list):
+            copie[cle] = [_indice_avec_ytd(item) for item in liste]
+    return copie
+
 
 def date_entete_brvm(texte):
     """Date de l'en-tête brvm.org (« Mercredi, 30 septembre, 2026 - 11:02 »).
@@ -139,7 +238,7 @@ def fetch_market_data():
                             "prev":    float(clean(cols[1].get_text(strip=True))),
                             "current": float(clean(cols[2].get_text(strip=True))),
                             "change":  float(clean(cols[3].get_text(strip=True)).replace("%","")),
-                            "ytd":     float(clean(cols[4].get_text(strip=True)).replace("%","")) if len(cols)>4 else 0,
+                            "ytd":     None,
                         })
                     except: pass
 
@@ -154,7 +253,7 @@ def fetch_market_data():
                             "prev":    float(clean(cols[1].get_text(strip=True))),
                             "current": float(clean(cols[2].get_text(strip=True))),
                             "change":  float(clean(cols[3].get_text(strip=True)).replace("%","")),
-                            "ytd":     float(clean(cols[4].get_text(strip=True)).replace("%","")) if len(cols)>4 else 0,
+                            "ytd":     None,
                         })
                     except: pass
 
