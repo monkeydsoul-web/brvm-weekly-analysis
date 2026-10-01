@@ -3,6 +3,7 @@
 import re
 import shutil
 import subprocess
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -36,6 +37,47 @@ def _fonctions():
     return JS[debut:fin]
 
 
+class _TexteVisible(HTMLParser):
+    """Texte rendu : ignore les sous-arbres hidden, script et style."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self._pile = []
+        self._muet = 0
+        self.morceaux = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style"):
+            self._muet += 1
+        cache = any(nom == "hidden" for nom, _valeur in attrs)
+        parent = self._pile[-1] if self._pile else False
+        self._pile.append(parent or cache)
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style") and self._muet:
+            self._muet -= 1
+        if self._pile:
+            self._pile.pop()
+
+    def handle_data(self, data):
+        if self._muet or (self._pile and self._pile[-1]):
+            return
+        self.morceaux.append(data)
+
+
+def _texte_visible(html):
+    parseur = _TexteVisible()
+    parseur.feed(html)
+    return " ".join(" ".join(parseur.morceaux).split())
+
+
+def _balise(html, identifiant):
+    motif = r'<[^>]*\bid="%s"[^>]*>' % re.escape(identifiant)
+    trouve = re.search(motif, html)
+    assert trouve, identifiant
+    return trouve.group(0)
+
+
 def test_hero_textes_et_ancrage_glossaire():
     haut = _entre(PAGE, 'id="accueil"', 'id="accueil-cartes"')
     assert "BOURSE RÉGIONALE UEMOA" in haut
@@ -53,14 +95,87 @@ def test_hero_textes_et_ancrage_glossaire():
     assert re.search(r"\b47 sociétés notées", haut) is None
 
 
-def test_courbe_illustrative_et_onglets_desactives():
-    haut = _entre(PAGE, 'id="accueil-composite-titre"', 'id="accueil-chiffres"')
-    assert "Courbe illustrative · EXEMPLE · valeur et variation réelles" in haut
-    assert 'data-accroche="index-history"' in haut
-    assert haut.count("disabled") >= 4
-    assert "1S" in haut and "1M" in haut and "YTD" in haut and "1A" in haut
-    assert "function _accueilHistoriqueIndice" in JS
-    assert "/api/index-history" in JS
+def test_courbe_exemple_masquee_sous_vingt_seances():
+    carte = _entre(PAGE, '<article class="accueil-composite"', "</article>")
+    visible = _texte_visible(carte)
+    assert "BRVM Composite" in visible
+    assert "EXEMPLE" not in visible.upper()
+    assert "Courbe illustrative" not in visible
+    assert "exemple" not in visible.lower()
+    for onglet in ("1S", "1M", "YTD", "1A"):
+        assert onglet not in visible
+    assert "hidden" in _balise(carte, "accueil-courbe")
+    assert "hidden" in _balise(carte, "accueil-periodes")
+    assert "accueil-composite-val" in carte
+    assert "accueil-composite-badge" in carte
+    assert "accueil-composite-seance" in carte
+    assert "accueil-composite-etat" in carte
+    assert ".accueil-courbe-zone[hidden]" in CSS
+    assert ".accueil-periodes[hidden]{display:none!important}" in CSS
+    assert "align-self:start" in CSS.split(".accueil-composite{")[1].split("}")[0]
+    assert "var SEUIL_SEANCES_COURBE = 20;" in JS
+    chargeur = JS[JS.index("function _chargerCourbeComposite"):JS.index("function _remplirMontants")]
+    assert "/api/index-history" not in chargeur
+    assert "fetch(" not in chargeur
+    assert "_seancesIndiceConnues() < SEUIL_SEANCES_COURBE" in chargeur
+    assert "_masquerCourbeComposite()" in chargeur
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_seuil_vingt_seances_masque_sans_requete():
+    debut = JS.index("var SEUIL_SEANCES_COURBE")
+    fin = JS.index("function _remplirMontants")
+    _node(r"""
+function attend(cond, msg) {
+  if (!cond) { console.error(msg); process.exit(1); }
+}
+var window = {};
+var fetches = [];
+function fetch(url) {
+  fetches.push(String(url));
+  return Promise.reject(new Error('fetch interdit'));
+}
+function noeud(id) {
+  return { id: id, hidden: false };
+}
+var nodes = {
+  'accueil-courbe': noeud('accueil-courbe'),
+  'accueil-periodes': noeud('accueil-periodes')
+};
+var document = {
+  getElementById: function(id) { return nodes[id] || null; }
+};
+""" + JS[debut:fin] + r"""
+function repart() {
+  nodes['accueil-courbe'].hidden = false;
+  nodes['accueil-periodes'].hidden = false;
+  fetches.length = 0;
+}
+attend(SEUIL_SEANCES_COURBE === 20, 'seuil');
+attend(_seancesIndiceConnues() === 0, 'absent');
+window.BRVM_INDEX_HISTORY = true;
+attend(_seancesIndiceConnues() === 0, 'booleen');
+window.BRVM_INDEX_HISTORY = 19;
+attend(_seancesIndiceConnues() === 19, 'nombre 19');
+window.BRVM_INDEX_HISTORY = { points: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] };
+attend(_seancesIndiceConnues() === 19, 'points 19');
+repart();
+_chargerCourbeComposite();
+attend(nodes['accueil-courbe'].hidden === true, 'courbe 19');
+attend(nodes['accueil-periodes'].hidden === true, 'onglets 19');
+attend(fetches.length === 0, 'fetch 19');
+window.BRVM_INDEX_HISTORY = { series: new Array(20) };
+attend(_seancesIndiceConnues() === 20, 'series 20');
+repart();
+_chargerCourbeComposite();
+attend(nodes['accueil-courbe'].hidden === true, 'courbe 20 encore masquee');
+attend(nodes['accueil-periodes'].hidden === true, 'onglets 20');
+attend(fetches.length === 0, 'fetch 20');
+window.BRVM_INDEX_HISTORY = undefined;
+repart();
+_chargerCourbeComposite();
+attend(nodes['accueil-courbe'].hidden === true && fetches.length === 0, 'defaut');
+""")
 
 
 def test_quatre_chiffres_et_compteurs_compacts():
