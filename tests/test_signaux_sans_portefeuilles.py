@@ -112,6 +112,22 @@ def autoriser_local(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
 
 
+_TAUX_REEL = None
+
+
+def _telecharger_taux_reel():
+    """Corps réel de l'API de change, lu avant le filet qui bloque le réseau."""
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(
+            "https://api.exchangerate-api.com/v4/latest/XOF", timeout=8
+        ) as reponse:
+            return reponse.read()
+    except Exception:
+        return b""
+
+
 def _ecrire_caches(dossier):
     """Classement de test déjà versionné, historique de cours vide (aucun cours inventé)."""
     fixture = ROOT / "tests" / "fixtures" / "live_ranking.json"
@@ -132,6 +148,9 @@ def base_url():
     os.environ["BRVM_DISABLE_SCHEDULER"] = "1"
     dossier = os.environ["BRVM_DATA_DIR"]
     classement, historique = _ecrire_caches(dossier)
+    global _TAUX_REEL
+    if _TAUX_REEL is None:
+        _TAUX_REEL = _telecharger_taux_reel()
     import app as application
     from werkzeug.serving import make_server
 
@@ -172,6 +191,14 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                     color_scheme="dark" if theme == "sombre" else "light",
                 )
                 page = contexte.new_page()
+                if _TAUX_REEL:
+                    def _servir_taux(route):
+                        route.fulfill(
+                            status=200,
+                            content_type="application/json",
+                            body=_TAUX_REEL,
+                        )
+                    page.route("https://api.exchangerate-api.com/**", _servir_taux)
 
                 def _console(msg, _nom=nom):
                     if msg.type == "error":
@@ -205,7 +232,17 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                     page.evaluate("dark = true; _applyTheme();")
                 else:
                     page.evaluate("dark = false; _applyTheme();")
-                page.wait_for_timeout(1200)
+                if _TAUX_REEL:
+                    page.wait_for_function(
+                        """() => {
+                          var el = document.getElementById('curr-rate');
+                          if (!el) return true;
+                          var t = el.textContent || '';
+                          return t.indexOf('€') !== -1 && t.indexOf('1,67') === -1;
+                        }""",
+                        timeout=10000,
+                    )
+                page.wait_for_timeout(400)
                 texte = page.locator("#page-signals").inner_text()
                 for chaine in CHAINES_SECTION:
                     assert chaine not in texte, chaine
