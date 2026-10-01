@@ -309,6 +309,7 @@ function _updateCurrencyUI() {
 
 function setCurrency(c) {
   window._currency = c;
+  try { localStorage.setItem('brvm_currency', c); } catch (e) {}
   var code = String(c || '').toLowerCase();
   ['xof','eur','usd'].forEach(id => {
     const btn = document.getElementById('cb-' + id);
@@ -324,6 +325,20 @@ function setCurrency(c) {
   else if (active === 'income') renderDiv();
   else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
+  var cmpModal = document.getElementById('cmp-modal');
+  if (cmpModal && cmpModal.classList && typeof cmpModal.classList.contains === 'function' && cmpModal.classList.contains('show')) {
+    openCompareModal();
+  }
+  var cmpAlt = document.getElementById('compare-modal');
+  if (cmpAlt && cmpAlt.style && cmpAlt.style.display === 'flex' && typeof renderCompare === 'function') {
+    renderCompare();
+  }
+  var pageScr = document.getElementById('page-screener');
+  if (pageScr && pageScr.classList && typeof pageScr.classList.contains === 'function' && pageScr.classList.contains('on') && typeof runScreener === 'function') {
+    runScreener();
+  } else if (typeof _renderScreenerTable === 'function' && typeof _scrResults !== 'undefined' && _scrResults.length) {
+    _renderScreenerTable();
+  }
 }
 
 function _baseXof(devise) {
@@ -359,7 +374,7 @@ function fmtMontant(n, devise) {
     ? val.toLocaleString('fr-FR', {maximumFractionDigits: 0})
     : val.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   if (code === 'EUR') return str + ' €';
-  if (code === 'USD') return '$ ' + str;
+  if (code === 'USD') return str + ' $';
   return str;
 }
 
@@ -1342,6 +1357,10 @@ async function init(){
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
     appliquerTauxMacro(m);
+    try {
+      var _deviseSauvee = localStorage.getItem('brvm_currency');
+      if (_deviseSauvee === 'EUR' || _deviseSauvee === 'USD') setCurrency(_deviseSauvee);
+    } catch (e) {}
     if (document.getElementById('page-welcome')?.classList.contains('on') && typeof renderAccueil === 'function') renderAccueil();
     renderMacro(m);
     renderIndexFx(m);
@@ -4571,7 +4590,7 @@ function openCompareModal() {
 
   const kpis = [
     ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
-    ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
+    ['Cours', x => x.price ? fmtXOF(x.price) : '—', () => null, false],
     ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
     ['P/B', x => (x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—', x => -(x.pb_ref||x.pb_hist||999), true],

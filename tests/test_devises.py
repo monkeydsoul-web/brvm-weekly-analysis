@@ -10,6 +10,7 @@ import json
 import os
 import shutil
 import subprocess
+import tempfile
 import threading
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
@@ -35,12 +36,12 @@ XOF_PAR_USD = Decimal("580.49")
 # 1 000 / 655,957 = 1,5244… → 1,52 €
 # 1 000 / 580,49 = 1,7226… → 1,72 $
 PRIX = (
-    ("SMBC", 16500, "25,15 €", "$ 28,42"),
-    ("SNTS", 44995, "68,59 €", "$ 77,51"),
-    ("BICC", 32510, "49,56 €", "$ 56,00"),
+    ("SMBC", 16500, "25,15 €", "28,42 $"),
+    ("SNTS", 44995, "68,59 €", "77,51 $"),
+    ("BICC", 32510, "49,56 €", "56,00 $"),
 )
 ENTETE = "1 000 XOF = 1,52 € / 1,72 $"
-CAPTURES = Path("/opt/cursor/artifacts/screenshots")
+CAPTURES = Path(os.environ.get("BRVM_PREUVES", tempfile.gettempdir())) / "devises"
 
 
 def _fr(montant, taux):
@@ -60,7 +61,7 @@ def test_trois_prix_convertis_a_la_main():
     assert _fr(16500, Decimal("657.9")) == "25,08"
     for _ticker, montant, eur, usd in PRIX:
         assert eur == _fr(montant, XOF_PAR_EUR) + " €"
-        assert usd == "$ " + _fr(montant, XOF_PAR_USD)
+        assert usd == _fr(montant, XOF_PAR_USD) + " $"
     assert ENTETE == "1 000 XOF = %s € / %s $" % (_fr(1000, XOF_PAR_EUR), _fr(1000, XOF_PAR_USD))
 
 
@@ -112,10 +113,21 @@ appliquerTauxMacro({ FCFA_per_USD: 580.49, FCFA_per_EUR: 657.9 });
 attend(document.getElementById('curr-rate').textContent === %r, 'entete ' + document.getElementById('curr-rate').textContent);
 attend(document.getElementById('parite-xof-eur').textContent === '655,957', 'parite ' + document.getElementById('parite-xof-eur').textContent);
 %s
+var _mem = {};
+global.localStorage = {
+  setItem: function(k, v) { _mem[k] = String(v); },
+  getItem: function(k) { return Object.prototype.hasOwnProperty.call(_mem, k) ? _mem[k] : null; }
+};
+setCurrency('USD');
+attend(_mem.brvm_currency === 'USD', 'cle ' + _mem.brvm_currency);
+attend(fmtXOF(16500) === '28,42 $', 'fmt usd ' + fmtXOF(16500));
 window._xofParUsd = null;
 window._rates.USD = null;
 appliquerTauxMacro({});
 attend(fmtMontant(16500, 'USD') === '\\u2014', 'usd absent ' + fmtMontant(16500, 'USD'));
+setCurrency('USD');
+attend(fmtXOF(16500) === '\\u2014', 'setCurrency sans taux ' + fmtXOF(16500));
+attend(_mem.brvm_currency === 'USD', 'choix conserve');
 attend(document.getElementById('curr-rate').textContent.indexOf('1,73') === -1, 'pas 1,73');
 attend(fmtMontant(16500, 'EUR') === '25,15 €', 'eur reste la parite fixe');
 """ % (ENTETE, "\n".join(attendus))
@@ -250,6 +262,13 @@ def _norm(texte):
     return (texte or "").replace("\u202f", " ").replace("\u00a0", " ")
 
 
+def _lancer_chromium(pw):
+    return pw.chromium.launch(
+        headless=True,
+        args=["--no-sandbox", "--disable-dev-shm-usage"],
+    )
+
+
 def test_pages_affichent_les_trois_prix(base_url):
     from playwright.sync_api import sync_playwright
 
@@ -260,11 +279,7 @@ def test_pages_affichent_les_trois_prix(base_url):
     )
     CAPTURES.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as pw:
-        navigateur = pw.chromium.launch(
-            headless=True,
-            channel="chrome",
-            args=["--no-sandbox", "--disable-dev-shm-usage"],
-        )
+        navigateur = _lancer_chromium(pw)
         try:
             for nom, url, selecteur in pages:
                 for devise, code in (("eur", "EUR"), ("usd", "USD")):
@@ -342,3 +357,135 @@ def _captures(page, nom, devise):
             chemin = CAPTURES / ("%s-%s-%s-%s.png" % (nom, devise, largeur, theme))
             page.screenshot(path=str(chemin), full_page=True)
             assert chemin.stat().st_size > 1000
+
+
+def test_sources_memorisent_la_devise_et_convertissent_comparer():
+    compare = (DASHBOARD / "compare.js").read_text(encoding="utf-8")
+    screener = (DASHBOARD / "screener.js").read_text(encoding="utf-8")
+    assert "localStorage.setItem('brvm_currency', c)" in CORE
+    assert "localStorage.getItem('brvm_currency')" in CORE
+    assert "fmtXOF(x.price)" in CORE
+    assert "fmtXOF(x.price)" in compare
+    assert "Cours (XOF)" not in compare
+    assert "target.toLocaleString('fr-FR') + ' XOF'" in screener
+    assert "return str + ' $'" in CORE
+    assert "return '$ ' + str" not in CORE
+
+
+def _ecouter(page, base_url):
+    erreurs = []
+    marche = {"n": 0}
+    page.on("pageerror", lambda err: erreurs.append("pageerror: " + str(err)))
+    page.on("console", lambda msg: erreurs.append(msg.text) if msg.type == "error" else None)
+
+    def _compte(req):
+        if req.method == "GET" and urlparse(req.url).path == "/api/market":
+            marche["n"] += 1
+
+    page.on("request", _compte)
+
+    def _route(route):
+        if not route.request.url.startswith(base_url):
+            route.abort()
+            return
+        route.continue_()
+
+    page.route("**/*", _route)
+    return erreurs, marche
+
+
+def test_devise_memorisee_apres_rechargement(base_url):
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as pw:
+        navigateur = _lancer_chromium(pw)
+        try:
+            contexte = navigateur.new_context(viewport={"width": 1280, "height": 900}, locale="fr-FR")
+            page = contexte.new_page()
+            erreurs, marche = _ecouter(page, base_url)
+            page.goto(base_url + "/", wait_until="domcontentloaded", timeout=20000)
+            page.wait_for_function(
+                "() => { var p = document.getElementById('page-welcome'); var t = document.getElementById('accueil-top'); return !!(p && p.classList.contains('on') && t && t.innerText.indexOf('SMBC') !== -1); }",
+                timeout=20000,
+            )
+            page.locator('.topnav-curr [data-curr="usd"]').click()
+            page.wait_for_function(
+                "() => { var t = document.getElementById('accueil-top'); var b = document.querySelector('.topnav-curr [data-curr=\"usd\"]'); return !!(t && t.innerText.indexOf('28,42 $') !== -1 && b && b.classList.contains('on')); }",
+                timeout=20000,
+            )
+            assert page.evaluate("() => localStorage.getItem('brvm_currency')") == "USD"
+            marche["n"] = 0
+            page.reload(wait_until="domcontentloaded", timeout=20000)
+            page.wait_for_function(
+                "() => { var p = document.getElementById('page-welcome'); var t = document.getElementById('accueil-top'); var b = document.querySelector('.topnav-curr [data-curr=\"usd\"]'); var x = document.querySelector('.topnav-curr [data-curr=\"xof\"]'); return !!(p && p.classList.contains('on') && t && t.innerText.indexOf('28,42 $') !== -1 && b && b.classList.contains('on') && x && !x.classList.contains('on')); }",
+                timeout=20000,
+            )
+            assert _norm(page.locator("#curr-rate").inner_text()) == ENTETE
+            assert "28,42 $" in _norm(page.locator("#accueil-top").inner_text())
+            assert page.evaluate("() => localStorage.getItem('brvm_currency')") == "USD"
+            assert marche["n"] == 1, marche["n"]
+            assert erreurs == [], erreurs
+            contexte.close()
+        finally:
+            navigateur.close()
+
+
+def test_comparer_converti_en_eur(base_url):
+    from playwright.sync_api import sync_playwright
+
+    CAPTURES.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as pw:
+        navigateur = _lancer_chromium(pw)
+        try:
+            contexte = navigateur.new_context(viewport={"width": 1280, "height": 900}, locale="fr-FR")
+            page = contexte.new_page()
+            erreurs, marche = _ecouter(page, base_url)
+            page.goto(base_url + "/#rank", wait_until="domcontentloaded", timeout=20000)
+            page.wait_for_function(
+                "() => { var p = document.getElementById('page-rank'); return !!(p && p.classList.contains('on') && p.innerText.indexOf('SMBC') !== -1); }",
+                timeout=20000,
+            )
+            page.locator('.topnav-curr [data-curr="eur"]').click()
+            page.wait_for_function(
+                "() => { var p = document.getElementById('page-rank'); return !!(p && p.innerText.indexOf('25,15 €') !== -1); }",
+                timeout=20000,
+            )
+            page.locator('.cmp-cb[data-ticker="SMBC"]').click()
+            page.locator('.cmp-cb[data-ticker="SNTS"]').click()
+            page.evaluate("() => openCompareModal()")
+            page.wait_for_function(
+                "() => { var c = document.getElementById('cmp-modal-content'); var m = document.getElementById('cmp-modal'); return !!(m && m.classList.contains('show') && c && c.innerText.indexOf('25,15 €') !== -1 && c.innerText.indexOf('68,59 €') !== -1); }",
+                timeout=20000,
+            )
+            page.evaluate("() => setCurrency('USD')")
+            page.wait_for_function(
+                "() => { var c = document.getElementById('cmp-modal-content'); return !!(c && c.innerText.indexOf('28,42 $') !== -1 && c.innerText.indexOf('77,51 $') !== -1); }",
+                timeout=20000,
+            )
+            page.evaluate("() => { compareList = ['SMBC','SNTS']; renderCompare(); }")
+            page.wait_for_function(
+                "() => { var c = document.getElementById('compare-content'); return !!(c && c.innerText.indexOf('Cours (USD)') !== -1 && c.innerText.indexOf('28,42 $') !== -1); }",
+                timeout=10000,
+            )
+            page.evaluate("() => setCurrency('EUR')")
+            page.wait_for_function(
+                "() => { var a = document.getElementById('cmp-modal-content'); var b = document.getElementById('compare-content'); return !!(a && a.innerText.indexOf('25,15 €') !== -1 && b && b.innerText.indexOf('Cours (EUR)') !== -1 && b.innerText.indexOf('25,15 €') !== -1); }",
+                timeout=20000,
+            )
+            contenu = _norm(page.locator("#cmp-modal-content").inner_text())
+            assert "25,15 €" in contenu
+            assert "68,59 €" in contenu
+            assert "XOF" not in contenu
+            assert "25,08" not in contenu
+            autre = _norm(page.locator("#compare-content").inner_text())
+            assert "Cours (EUR)" in autre
+            assert "25,15 €" in autre
+            assert "XOF" not in autre
+            assert _norm(page.locator("#curr-rate").inner_text()) == ENTETE
+            assert marche["n"] == 1, marche["n"]
+            assert erreurs == [], erreurs
+            page.evaluate("() => closeCompare()")
+            _captures(page, "comparer", "eur")
+            contexte.close()
+        finally:
+            navigateur.close()
