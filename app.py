@@ -2158,22 +2158,6 @@ def _get_price_history_dict():
 
 # ── Prévisions & signaux ──────────────────────────────────────────────────────
 
-@app.route("/api/previsions/portfolios")
-def api_prevision_portfolios():
-    try:
-        from backtest_previsionnel import generate_portfolios
-        scores = _get_live_scores_list()
-        if scores is None:
-            logger.error("previsions/portfolios — %s", _LIVE_UNAVAIL_MSG)
-            return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
-        ph = _get_price_history_dict()
-        result = generate_portfolios(scores, ph)
-        return jsonify(result)
-    except Exception as e:
-        logger.error(f"previsions/portfolios: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/previsions/signaux")
 def api_prevision_signaux():
     try:

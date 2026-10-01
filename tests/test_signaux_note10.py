@@ -58,7 +58,8 @@ def test_raisons_note10_virgule_et_libelles():
     assert "Prévision neutre" in by["MID"]["raison"]
     assert "6,8/10" in by["MID"]["raison"]
     assert by["BAS"]["signal"] == "ALLÉGER"
-    assert "Prévision défavorable" in by["BAS"]["raison"]
+    assert "Prévision faible" in by["BAS"]["raison"]
+    assert "Prévision défavorable" not in by["BAS"]["raison"]
     assert "5,0/10" in by["BAS"]["raison"]
     assert by["FAIBLE"]["signal"] == "ÉVITER"
     assert "Prévision défavorable" in by["FAIBLE"]["raison"]
@@ -86,6 +87,7 @@ def test_pdf_mensuel_note10_et_trois_libelles():
     assert "Une société déjà Intéressante le reste dès 7,2/10." in texte
     assert "Prévisions favorables :" in texte
     assert "Prévisions neutres :" in texte
+    assert "Prévisions faibles :" in texte
     assert "Prévisions défavorables :" in texte
     assert "À surveiller" not in texte
     assert "Prudence" not in texte
