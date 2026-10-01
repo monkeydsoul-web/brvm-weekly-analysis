@@ -55,7 +55,7 @@ window.TERMS = {
   'Capitalisation': {short:'Valeur totale de la société en bourse',long:'Cours × nombre d\'actions. Indique la taille de la société.'},
   'Dividende': {short:'Part des bénéfices distribuée',long:'Argent versé par la société à ses actionnaires, généralement une fois par an.'},
   'Rendement': {short:'Dividende en % du cours',long:'Dividende annuel divisé par le cours. 4% = 4 FCFA reçus pour 100 FCFA investis.'},
-  'XOF': {short:'Franc CFA Ouest',long:'Devise officielle de l\'UEMOA (Sénégal, Côte d\'Ivoire, etc.). 1 EUR ≈ 656 XOF.'},
+  'XOF': {short:'Franc CFA Ouest',long:'Devise officielle de l\'UEMOA (Sénégal, Côte d\'Ivoire, etc.). Parité fixe avec l\'euro.'},
   'UEMOA': {short:'Union économique',long:'Union Économique et Monétaire Ouest-Africaine : 8 pays qui partagent le franc CFA.'},
   'BCEAO': {short:'Banque centrale',long:'Banque Centrale des États de l\'Afrique de l\'Ouest. Émet le franc CFA et fixe les taux.'},
   'AGO': {short:'Assemblée Générale Ordinaire',long:'AG annuelle de routine (résultats, dividendes, etc.).'},
@@ -271,25 +271,29 @@ function fmtEcartPct(n){
 }
 
 // ── Convertisseur de devises ───────────────────────────────────────────────
+// EUR : une seule parité fixe. USD : FCFA_per_USD de /api/macro, sans taux de repli.
+// L'en-tête divise 1 000 par ce taux (pas un cours externe arrondi à l'envers).
+var XOF_PAR_EUR = 655.957;
 window._currency = 'XOF';
-window._rates = { EUR: null, USD: null };
+window._rates = { EUR: 1 / XOF_PAR_EUR, USD: null };
+window._xofParUsd = null;
 
-function fetchExchangeRates() {
-  fetch('https://api.exchangerate-api.com/v4/latest/XOF')
-    .then(r => r.json())
-    .then(d => {
-      window._rates.EUR = d.rates.EUR;
-      window._rates.USD = d.rates.USD;
-      _updateCurrencyUI();
-    })
-    .catch(() => {
-      // Taux de secours BCEAO (1 EUR ≈ 655.96 XOF)
-      window._rates.EUR = 1 / 655.96;
-      window._rates.USD = 1 / 600;
-      _updateCurrencyUI();
-    });
-  // Rafraîchir toutes les heures
-  setTimeout(fetchExchangeRates, 3600000);
+function appliquerTauxMacro(m) {
+  var n = null;
+  if (m && typeof m.FCFA_per_USD === 'number' && isFinite(m.FCFA_per_USD) && m.FCFA_per_USD > 0) {
+    n = m.FCFA_per_USD;
+  }
+  window._xofParUsd = n;
+  window._rates.EUR = 1 / XOF_PAR_EUR;
+  window._rates.USD = n ? (1 / n) : null;
+  _ecrirePariteFixe();
+  _updateCurrencyUI();
+}
+
+function _ecrirePariteFixe() {
+  var el = document.getElementById('parite-xof-eur');
+  if (!el) return;
+  el.textContent = XOF_PAR_EUR.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3});
 }
 
 function _fmtTaux(n) {
@@ -297,11 +301,10 @@ function _fmtTaux(n) {
 }
 function _updateCurrencyUI() {
   const el = document.getElementById('curr-rate');
-  if (el && window._rates.EUR) {
-    const eur = _fmtTaux(1000 * window._rates.EUR);
-    const usd = window._rates.USD ? _fmtTaux(1000 * window._rates.USD) : '?';
-    el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
-  }
+  if (!el) return;
+  const eur = _fmtTaux(1000 / XOF_PAR_EUR);
+  const usd = window._xofParUsd ? _fmtTaux(1000 / window._xofParUsd) : '—';
+  el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
 }
 
 function setCurrency(c) {
@@ -323,12 +326,18 @@ function setCurrency(c) {
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
 }
 
+function _baseXof(devise) {
+  if (devise === 'EUR') return XOF_PAR_EUR;
+  if (devise === 'USD') return window._xofParUsd || null;
+  return null;
+}
+
 function convertXOF(n) {
   const num = Number(n);
   if (!num || isNaN(num)) return num;
-  if (window._currency === 'EUR' && window._rates.EUR) return num * window._rates.EUR;
-  if (window._currency === 'USD' && window._rates.USD) return num * window._rates.USD;
-  return num;
+  const base = _baseXof(window._currency);
+  if (!base) return num;
+  return num / base;
 }
 
 function currencySymbol() {
@@ -337,17 +346,26 @@ function currencySymbol() {
   return 'XOF';
 }
 
-// Formate un montant XOF dans la devise active
-function fmtXOF(n) {
+function fmtMontant(n, devise) {
   if (n == null) return '—';
   const raw = Number(n);
-  const sym = currencySymbol();
-  if (sym === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
-  const val = convertXOF(raw);
+  if (!isFinite(raw)) return '—';
+  const code = devise || 'XOF';
+  if (code === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
+  const base = _baseXof(code);
+  if (!base) return '—';
+  const val = raw / base;
   const str = val >= 100
     ? val.toLocaleString('fr-FR', {maximumFractionDigits: 0})
     : val.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  return sym === '€' ? str + ' €' : '$ ' + str;
+  if (code === 'EUR') return str + ' €';
+  if (code === 'USD') return '$ ' + str;
+  return str;
+}
+
+// Formate un montant XOF dans la devise active
+function fmtXOF(n) {
+  return fmtMontant(n, window._currency || 'XOF');
 }
 
 // ── Mobile menu ────────────────────────────────────────────────────────────
@@ -1323,12 +1341,13 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
+    appliquerTauxMacro(m);
     if (document.getElementById('page-welcome')?.classList.contains('on') && typeof renderAccueil === 'function') renderAccueil();
     renderMacro(m);
     renderIndexFx(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();initServiceWorker();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -2365,9 +2384,7 @@ function simCalc(){
   // KPIs
   const kpiEl=document.getElementById('simKPIs');
   if(kpiEl){
-    const cur=_simCur;
-    const r=window._rates||{EUR:1/655,USD:1/615};
-    const toDisp=v=>_simCur==='XOF'?fmtXOF(v):_simCur==='EUR'?'€'+Math.round(v*(r.EUR||1/655)).toLocaleString('fr-FR'):'$'+Math.round(v*(r.USD||1/615)).toLocaleString('fr-FR');
+    const toDisp=v=>fmtMontant(v,_simCur);
     kpiEl.innerHTML=[
       ['Dividendes annuels', toDisp(divAn1), 'var(--amber)'],
       ['Par mois (an 1)',     toDisp(divAn1/12), 'var(--amber)'],
@@ -2876,7 +2893,7 @@ async function showStock(ticker){
     const _suiteFiche=_avisFiche?('Conseil : '+_avisFiche.libelle+'.'):'Pas de conseil pour le moment.';
     const _colFiche=couleurPrincipale(s);
     document.getElementById(_stockRenderTarget).innerHTML=`
-      <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
         <div class="stock-main-col">
           <h2 style="font-size:20px;font-weight:700">${s.ticker}
             <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
@@ -2905,6 +2922,10 @@ async function showStock(ticker){
             <button onclick="_quickCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
             <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
+          <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
         </div>
       </div>
       <div class="ctab-action-strip">
