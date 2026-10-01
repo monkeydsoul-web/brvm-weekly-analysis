@@ -137,10 +137,12 @@
 .accueil-composite-seance,
 .accueil-composite-etat{
   margin:0;
+  max-width:100%;
   font-size:13px;
   font-weight:600;
   line-height:1.4;
   color:var(--text-2);
+  overflow-wrap:break-word;
 }
 .accueil-composite-etat{font-size:12px;margin-top:var(--space-4px)}
 
