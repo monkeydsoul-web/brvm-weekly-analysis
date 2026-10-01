@@ -179,8 +179,8 @@ def _ecrire_fixtures():
         json.dump({
             "updated_at": maintenant,
             "market_activity": {},
-            "top5": [],
-            "flop5": [],
+            "top5": [{"ticker": "SMBC", "price": 16500, "change": 1.25}],
+            "flop5": [{"ticker": "BICC", "price": 32510, "change": -0.58}],
             "indices": [{"name": "CACHE-TEST", "current": 100, "change": 0}],
             "sector_indices": [],
             "total_return": {},
@@ -338,6 +338,9 @@ def _verifier_page(navigateur, nom, url, selecteur, devise, code, base_url):
         assert morceau in corps, "%s manque dans %s (%s)" % (morceau, nom, devise)
     if code == "EUR":
         assert "25,08" not in corps
+    if nom == "fiche":
+        assert "0,00 %" in corps
+        assert "0.00%" not in corps
     assert "1,73" not in entete
     assert marche["n"] == 1, "%s %s : %d GET /api/market" % (nom, devise, marche["n"])
     assert erreurs == [], erreurs
@@ -367,7 +370,9 @@ def test_sources_memorisent_la_devise_et_convertissent_comparer():
     assert "fmtXOF(x.price)" in CORE
     assert "fmtXOF(x.price)" in compare
     assert "Cours (XOF)" not in compare
-    assert "target.toLocaleString('fr-FR') + ' XOF'" in screener
+    assert "fmtXOF(target)" in screener
+    assert "target.toLocaleString('fr-FR') + ' XOF'" not in screener
+    assert "_remplirMouvements(window._accueilMarche)" in CORE
     assert "return str + ' $'" in CORE
     assert "return '$ ' + str" not in CORE
 
@@ -486,6 +491,68 @@ def test_comparer_converti_en_eur(base_url):
             assert erreurs == [], erreurs
             page.evaluate("() => closeCompare()")
             _captures(page, "comparer", "eur")
+            contexte.close()
+        finally:
+            navigateur.close()
+
+
+def _seance(page):
+    return _norm(page.locator("#accueil-mvt-grille").inner_text())
+
+
+def test_seance_du_jour_suit_la_devise_sans_rechargement(base_url):
+    from playwright.sync_api import sync_playwright
+
+    etapes = (
+        ("xof", "16 500 XOF", "32 510 XOF", "XOF"),
+        ("eur", "25,15 €", "49,56 €", "€"),
+        ("usd", "28,42 $", "56,00 $", "$"),
+    )
+    with sync_playwright() as pw:
+        navigateur = _lancer_chromium(pw)
+        try:
+            contexte = navigateur.new_context(viewport={"width": 1280, "height": 900}, locale="fr-FR")
+            page = contexte.new_page()
+            erreurs, marche = _ecouter(page, base_url)
+            page.goto(base_url + "/", wait_until="domcontentloaded", timeout=20000)
+            page.wait_for_function(
+                """() => {
+                  var g = document.getElementById('accueil-mvt-grille');
+                  var t = document.getElementById('accueil-top');
+                  if (!g || !t) return false;
+                  var seance = g.innerText.replace(/\\u202f/g, ' ').replace(/\\u00a0/g, ' ');
+                  return seance.indexOf('16 500 XOF') !== -1 && seance.indexOf('32 510 XOF') !== -1
+                    && t.innerText.indexOf('SMBC') !== -1;
+                }""",
+                timeout=20000,
+            )
+            for devise, smbc, bicc, signe in etapes:
+                if devise != "xof":
+                    page.locator('.topnav-curr [data-curr="%s"]' % devise).click()
+                page.wait_for_function(
+                    """(attendu) => {
+                      var g = document.getElementById('accueil-mvt-grille');
+                      if (!g) return false;
+                      var seance = g.innerText.replace(/\\u202f/g, ' ').replace(/\\u00a0/g, ' ');
+                      return seance.indexOf(attendu[0]) !== -1 && seance.indexOf(attendu[1]) !== -1;
+                    }""",
+                    arg=[smbc, bicc],
+                    timeout=20000,
+                )
+                seance = _seance(page)
+                assert smbc in seance, seance
+                assert bicc in seance, seance
+                if devise == "eur":
+                    assert "XOF" not in seance
+                    assert "25,08" not in seance
+                if devise == "usd":
+                    assert "€" not in seance
+                    assert "XOF" not in seance
+                assert signe in seance
+            assert page.evaluate("() => performance.getEntriesByType('navigation').length") == 1
+            assert _norm(page.locator("#curr-rate").inner_text()) == ENTETE
+            assert marche["n"] == 1, marche["n"]
+            assert erreurs == [], erreurs
             contexte.close()
         finally:
             navigateur.close()

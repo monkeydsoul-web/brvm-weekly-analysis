@@ -269,6 +269,13 @@ function fmtEcartPct(n){
   var corps=v.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
   return (v>0?'+':'')+corps+'\u00a0%';
 }
+function fmtVariationFr(n){
+  if(n==null||n===''||!isFinite(Number(n))) return '—';
+  var v=Number(n);
+  if(v===0) v=0;
+  var corps=v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (v>0?'+':'')+corps+'\u00a0%';
+}
 
 // ── Convertisseur de devises ───────────────────────────────────────────────
 // EUR : une seule parité fixe. USD : FCFA_per_USD de /api/macro, sans taux de repli.
@@ -321,7 +328,10 @@ function setCurrency(c) {
   // Re-rendu de la page active
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
   if (active === 'rank') renderRankLive();
-  else if (active === 'welcome' && typeof renderAccueil === 'function') renderAccueil();
+  else if (active === 'welcome' && typeof renderAccueil === 'function') {
+    renderAccueil();
+    if (typeof _remplirMouvements === 'function') _remplirMouvements(window._accueilMarche);
+  }
   else if (active === 'income') renderDiv();
   else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
@@ -2871,7 +2881,7 @@ async function showStock(ticker){
       </div>
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
-        <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
+        <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${fmtVariationFr(_staticEntry.change_pct||0)}</div>
         ${_staticEntry.statut==='suspendu'
           ? '<span style="margin-top:4px;display:inline-block;color:var(--note-muted);font-weight:700">Cotation suspendue</span>'
           : (_v0>0?`<span class="b ${classePrincipale(_staticEntry)}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
@@ -2944,7 +2954,7 @@ async function showStock(ticker){
         </div>
         <div style="text-align:right">
           <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-          <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+          <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${fmtVariationFr(s.change_pct||0)}</div>
         </div>
       </div>
       <div class="ctab-action-strip">
@@ -2985,7 +2995,7 @@ async function showStock(ticker){
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
             <div>
               <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${fmtVariationFr(s.change_pct||0)}</div>
             </div>
             ${s.statut==='suspendu'
               ? '<span style="color:var(--t2);font-weight:700" data-tip="Cotation suspendue">'+note10txt(s)+'/10</span>'
