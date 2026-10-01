@@ -1,7 +1,6 @@
 // ── Page Prévisions IA — previsions.js ────────────────────────────────────
 
-let _prevTab = 'portfolios';
-let _prevPortfolios = null;
+let _prevTab = 'signaux';
 let _prevSignaux = null;
 let _prevBacktest = null;
 let _sigFilter = '';
@@ -17,18 +16,16 @@ function _sigAffiche(code){
 async function renderPrevisionsPage() {
   const container = document.getElementById('page-previsions-content');
   if (!container) return;
-  if (_prevTab === 'backtest' || _prevTab === 'rapport') _prevTab = 'portfolios';
+  if (_prevTab === 'backtest' || _prevTab === 'rapport') _prevTab = 'signaux';
 
   container.innerHTML = `
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto">
       ${[
-        ['portfolios','💼 Portefeuilles IA','Sélections IA selon 3 profils : prudent, équilibré, dynamique', false],
         ['signaux','🤖 Recommandations IA','Prévision favorable, neutre ou défavorable. Distinct du conseil de la note.', false],
         ['backtest','📊 Historique','Test de la stratégie sur données historiques réelles BOC', true],
         ['rapport','📄 Résumé','Synthèse complète des prévisions et signaux exportable', true],
       ].map(([id,lbl,tip,hidden])=>`<div class="stock-tab${_prevTab===id?' active':''}" onclick="_prevSetTab('${id}')" title="${tip}"${hidden?' style="display:none"':''}>${lbl}</div>`).join('')}
     </div>
-    <div id="prev-portfolios-panel"  class="stock-tab-panel${_prevTab==='portfolios'?' active':''}"></div>
     <div id="prev-signaux-panel"     class="stock-tab-panel${_prevTab==='signaux'?' active':''}"></div>
     <div id="prev-backtest-panel"    class="stock-tab-panel" style="display:none"></div>
     <div id="prev-rapport-panel"     class="stock-tab-panel" style="display:none"></div>`;
@@ -39,7 +36,7 @@ async function renderPrevisionsPage() {
 function _prevSetTab(id) {
   _prevTab = id;
   document.querySelectorAll('#page-previsions-content .stock-tab').forEach(t => {
-    t.classList.toggle('active', t.textContent.includes(id === 'portfolios' ? 'Porte' : id === 'signaux' ? 'Signal' : id === 'backtest' ? 'Back' : 'Rapport'));
+    t.classList.toggle('active', t.textContent.includes(id === 'signaux' ? 'Recommandations' : id === 'backtest' ? 'Back' : 'Rapport'));
   });
   document.querySelectorAll('#page-previsions-content .stock-tab-panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById(`prev-${id}-panel`);
@@ -48,108 +45,9 @@ function _prevSetTab(id) {
 }
 
 function _prevLoadTab(id) {
-  if (id === 'portfolios') _prevRenderPortfolios();
-  else if (id === 'signaux') _prevRenderSignaux();
+  if (id === 'signaux') _prevRenderSignaux();
   else if (id === 'backtest') _prevRenderBacktest();
   else if (id === 'rapport') _prevRenderRapport();
-}
-
-// ── Portfolios ────────────────────────────────────────────────────────────────
-
-async function _prevRenderPortfolios() {
-  const el = document.getElementById('prev-portfolios-panel');
-  if (!el) return;
-  if (_prevPortfolios) { _prevDrawPortfolios(el); return; }
-  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t2)">Calcul des portefeuilles en cours...</div>';
-  try {
-    const res = await fetch('/api/previsions/portfolios');
-    _prevPortfolios = await res.json();
-    if (_prevPortfolios.error) throw new Error(_prevPortfolios.error);
-    _prevDrawPortfolios(el);
-  } catch(e) {
-    el.innerHTML = `<p style="color:var(--red);padding:20px">Erreur: ${e.message}</p>`;
-  }
-}
-
-const _riskColor = { 'Faible': 'var(--green)', 'Modéré': 'var(--amber)', 'Élevé': 'var(--red)' };
-const _riskBg    = { 'Faible': 'rgba(74,222,128,.08)', 'Modéré': 'rgba(251,191,36,.08)', 'Élevé': 'rgba(248,113,113,.08)' };
-
-function _prevDrawPortfolios(el) {
-  if (!_prevPortfolios) return;
-  el.innerHTML = `
-    <div style="font-size:11px;color:var(--t2);margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:10px 14px;border-left:3px solid var(--blue)">
-      📌 <strong>Comment lire ces portefeuilles :</strong> Construits à partir des 47 sociétés cotées, des scores composites et des données historiques BOC 30 jours. Les rendements attendus combinent dividendes historiques + tendance de cours. <em>Ces prévisions sont indicatives et ne constituent pas un conseil en investissement.</em>
-    </div>
-    <div class="g3">
-      ${_prevPortfolios.map(pf => `
-        <div class="card" style="margin-bottom:0;border-top:3px solid ${_riskColor[pf.risk]||'var(--blue)'}">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-            <div>
-              <div style="font-size:15px;font-weight:700;color:var(--text)">${pf.name==='Conservateur'?'🛡️ Prudent':pf.name==='Équilibré'?'⚖️ Équilibré':pf.name==='Croissance'?'🚀 Dynamique':pf.name}</div>
-              <div style="font-size:10px;color:var(--t2);margin-top:2px">${pf.name==='Conservateur'?'Je veux protéger mon capital':pf.name==='Équilibré'?'Je veux croissance + sécurité':pf.name==='Croissance'?"J'accepte plus de risque":''}</div>
-              <div style="font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;background:${_riskBg[pf.risk]||''};color:${_riskColor[pf.risk]||'var(--t2)'};margin-top:3px">Risque ${pf.risk}</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:18px;font-weight:700;color:${_riskColor[pf.risk]||'var(--green)'}">+${pf.target_min}–${pf.target_max}%</div>
-              <div style="font-size:9px;color:var(--t3)">objectif 12 mois</div>
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--t2);margin-bottom:10px;line-height:1.5">${pf.rationale}</div>
-          <div style="font-size:12px;color:var(--t2);margin-bottom:10px;padding:6px 10px;background:var(--bg3);border-radius:6px">
-            📈 Rendement visé : <strong style="color:${_riskColor[pf.risk]||'var(--green)'}">+${pf.target_min}–${pf.target_max}%</strong> sur 12 mois estimés
-            <div style="font-size:10px;color:var(--t3);margin-top:2px">⚠️ Estimation indicative — les performances passées ne garantissent pas les performances futures.</div>
-          </div>
-          <div style="margin-bottom:10px">
-            ${(pf.stocks||[]).map(s => `
-              <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showStock('${s.ticker}')">
-                <div style="width:6px;height:6px;border-radius:50%;background:${_riskColor[pf.risk]||'var(--blue)'}"></div>
-                <strong style="font-size:11px;min-width:44px">${s.ticker}</strong>
-                <div style="flex:1">
-                  <div style="background:var(--bg3);border-radius:3px;height:10px;position:relative;overflow:hidden">
-                    <div style="position:absolute;left:0;top:0;height:100%;width:${s.weight}%;background:${_riskColor[pf.risk]||'var(--blue)'}33;transition:width .5s"></div>
-                  </div>
-                </div>
-                <span style="font-size:10px;font-weight:600;min-width:34px;text-align:right">${s.weight}%</span>
-                <span style="font-size:9px;color:var(--t2);min-width:52px;text-align:right">score ${(typeof note10txt==='function'?note10txt(s):v10fmt(s.score))}/10</span>
-                <span style="font-size:9px;color:${(s.div_yield||0)>0&&typeof couleurDividende==='function'?couleurDividende(s.div_yield):'var(--t2)'};min-width:36px;text-align:right">${(s.div_yield||0).toFixed(1)}%</span>
-              </div>`).join('')}
-          </div>
-          <div style="display:flex;gap:8px">
-            <button onclick="_prevAdopter(${JSON.stringify(pf).replace(/"/g,'&quot;')})" class="btn btn-g" style="flex:1;font-size:11px">✅ Adopter</button>
-            <button onclick="_prevBacktestPortfolio(${JSON.stringify((pf.stocks||[]).map(s=>s.ticker)).replace(/"/g,'&quot;')})" class="btn btn-o" style="flex:1;font-size:11px">📊 Backtest</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
-function _prevAdopter(pf) {
-  const total = parseInt(prompt(`Montant total à investir en XOF pour "${pf.name}" ?`, '1000000') || '0');
-  if (!total || total < 1000) { return; }
-  const existing = JSON.parse(localStorage.getItem('brvm_portfolio_v2') || '[]');
-  (pf.stocks || []).forEach(s => {
-    const alloc = total * (s.weight / 100);
-    const shares = s.price > 0 ? Math.floor(alloc / s.price) : 0;
-    if (shares <= 0) return;
-    const idx = existing.findIndex(p => p.ticker === s.ticker);
-    if (idx >= 0) {
-      const old = existing[idx];
-      const oldShares = +(old.shares || old.qty || 0);
-      const oldPrice  = +(old.avg_price || old.buy_price || old.buyPrice || s.price);
-      const newShares = oldShares + shares;
-      const newAvg    = (oldShares * oldPrice + shares * s.price) / newShares;
-      existing[idx]   = { ...old, shares: newShares, avg_price: +newAvg.toFixed(2) };
-    } else {
-      existing.push({ ticker: s.ticker, shares, avg_price: s.price, date: new Date().toISOString().slice(0, 10), note: `Portefeuille ${pf.name}` });
-    }
-  });
-  localStorage.setItem('brvm_portfolio_v2', JSON.stringify(existing));
-  setTimeout(() => { nav('port'); if (typeof loadPortfolio === 'function') loadPortfolio(); }, 1000);
-}
-
-function _prevBacktestPortfolio(tickers) {
-  if (typeof openBacktest === 'function') {
-    openBacktest(tickers);
-  }
 }
 
 // ── Signaux ───────────────────────────────────────────────────────────────────

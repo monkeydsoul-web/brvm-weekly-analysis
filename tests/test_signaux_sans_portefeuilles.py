@@ -112,12 +112,16 @@ def autoriser_local(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
 
 
-def _ecrire_classement(dossier):
+def _ecrire_caches(dossier):
+    """Classement de test déjà versionné, historique de cours vide (aucun cours inventé)."""
     fixture = ROOT / "tests" / "fixtures" / "live_ranking.json"
-    dest = os.path.join(dossier, "live_ranking.json")
-    with open(fixture, encoding="utf-8") as src, open(dest, "w", encoding="utf-8") as out:
+    classement = os.path.join(dossier, "live_ranking.json")
+    with open(fixture, encoding="utf-8") as src, open(classement, "w", encoding="utf-8") as out:
         out.write(src.read())
-    return dest
+    historique = os.path.join(dossier, "price_history.json")
+    with open(historique, "w", encoding="utf-8") as out:
+        out.write("{}")
+    return classement, historique
 
 
 @pytest.fixture(scope="module")
@@ -127,7 +131,7 @@ def base_url():
     pytest.importorskip("playwright.sync_api")
     os.environ["BRVM_DISABLE_SCHEDULER"] = "1"
     dossier = os.environ["BRVM_DATA_DIR"]
-    classement = _ecrire_classement(dossier)
+    classement, historique = _ecrire_caches(dossier)
     import app as application
     from werkzeug.serving import make_server
 
@@ -137,8 +141,9 @@ def base_url():
     url = "http://127.0.0.1:%d" % serveur.server_address[1]
     yield url
     serveur.shutdown()
-    if os.path.exists(classement):
-        os.remove(classement)
+    for chemin in (classement, historique):
+        if os.path.exists(chemin):
+            os.remove(chemin)
 
 
 @pytest.mark.skipif(_CI, reason="Playwright hors CI. Local : pytest tests/test_signaux_sans_portefeuilles.py -q -s")
@@ -191,9 +196,8 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                       var panneau = document.getElementById('prev-signaux-panel');
                       if (!page || !page.classList.contains('on') || !panneau) return false;
                       var texte = panneau.innerText || '';
-                      return texte.indexOf('Calcul des signaux') === -1
-                        && texte.indexOf('Cliquez sur Signaux') === -1
-                        && texte.length > 20;
+                      return texte.indexOf('Prévision favorable') !== -1
+                        && texte.indexOf('Calcul des signaux') === -1;
                     }""",
                     timeout=20000,
                 )
@@ -201,7 +205,7 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                     page.evaluate("dark = true; _applyTheme();")
                 else:
                     page.evaluate("dark = false; _applyTheme();")
-                page.wait_for_timeout(300)
+                page.wait_for_timeout(1200)
                 texte = page.locator("#page-signals").inner_text()
                 for chaine in CHAINES_SECTION:
                     assert chaine not in texte, chaine
