@@ -693,14 +693,16 @@ var SEUIL_FRAICHEUR_MARCHE_MS = 90 * 1000;
 var DELAI_RELECTURE_MARCHE_MS = 10 * 1000;
 var _relectureMarcheArmee = 0;
 
-function _noterFraicheurMarche(d) {
+function _noterFraicheurMarche(d, depuis) {
   if (!_seanceOuverteMaintenant()) {
     _relectureMarcheArmee = 0;
     return;
   }
   var brut = d && d.updated_at;
   var instant = brut ? new Date(brut).getTime() : NaN;
-  var age = Date.now() - instant;
+  // Âge au moment de l'appel réseau, pas à la reprise de la promesse :
+  // un retour sur l'accueil 2 min plus tard ne vieillit pas une réponse fraîche.
+  var age = depuis - instant;
   if (!(age > SEUIL_FRAICHEUR_MARCHE_MS)) {
     _relectureMarcheArmee = 0;
     return;
@@ -718,9 +720,11 @@ function demanderMarche(forcer) {
     return _promesseMarche;
   }
   _promesseMarcheDepuis = Date.now();
+  var depuis = _promesseMarcheDepuis;
   // Un échec ne reste pas en cache 5 min : la navigation suivante
   // et le prochain tour relisent, au lieu de rejouer la promesse rejetée.
   var promesse = _telechargerMarche(0).then(function(d) {
+    _noterFraicheurMarche(d, depuis);
     return d;
   }, function(e) {
     if (_promesseMarche === promesse) _promesseMarche = null;

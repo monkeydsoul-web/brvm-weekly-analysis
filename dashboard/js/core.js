@@ -1750,7 +1750,6 @@ function loadMarketWidget(forcer){
     renderIndexTicker(d);
     if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(d);
     window._dernierMarche = d;
-    if (typeof _noterFraicheurMarche === 'function') _noterFraicheurMarche(d);
   }).catch(e=>{
     if (generation !== _mktGeneration) return;
     // Une relecture ratée garde l'écran : « — » et l'erreur console
@@ -1762,7 +1761,11 @@ function loadMarketWidget(forcer){
     }
     var abandon = !!(e && e.name === 'AbortError');
     // L'essai unique est dans demanderMarche. L'abandon ne laisse pas d'erreur console.
-    if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
+    // La promesse est partagée : le même échec ne s'écrit qu'une fois.
+    if (!(e && e._journalMarche)) {
+      if (e && typeof e === 'object') e._journalMarche = 1;
+      if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
+    }
     renderIndexTicker(null);
     if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(null);
     if (_mktErrEl) _mktErrEl.style.display = 'flex';

@@ -29,7 +29,11 @@ def test_branchements_bandeau_et_accueil():
     assert "if (typeof loadMarketWidget === 'function') loadMarketWidget(false);" in accueil
     assert "if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(d);" in core
     assert "window._dernierMarche = d;" in core
-    assert "if (typeof _noterFraicheurMarche === 'function') _noterFraicheurMarche(d);" in core
+    assert "_noterFraicheurMarche" not in core
+    assert "var depuis = _promesseMarcheDepuis;" in accueil
+    assert "_noterFraicheurMarche(d, depuis);" in accueil
+    assert "var age = depuis - instant;" in accueil
+    assert "e._journalMarche" in core
     assert "if (!forcer && precedent && Array.isArray(precedent.indices) && precedent.indices.length)" in core
     assert "if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(null);" in core
     assert "function _noterFraicheurMarche" in accueil
@@ -534,6 +538,170 @@ async function laisserRetenter() {
   if (store['accueil-mvt-grille'].innerHTML.indexOf('indisponibles') < 0) echec('reessayer seance');
   if (context._promesseMarche !== null) echec('promesse apres reessayer');
 
+  context._dernierMarche = null;
+  context._promesseMarche = null;
+  context._promesseMarcheDepuis = 0;
+  mode = 'panne';
+  erreurs = 0;
+  const avantPremier = appels;
+  context.loadMarketWidget(false);
+  context.loadMarketWidget(false);
+  await laisserRetenter();
+  if (erreurs !== 1) echec('console premier echec ' + erreurs);
+  if (appels !== avantPremier + 2) echec('essais premier echec ' + (appels - avantPremier));
+  if (store['accueil-composite-val'].textContent !== '—') echec('premier echec carte ' + store['accueil-composite-val'].textContent);
+
+  process.exit(0);
+})().catch(function(e) {
+  console.error(e && e.stack ? e.stack : e);
+  process.exit(1);
+});
+"""
+    fini = subprocess.run(
+        ["node", "-e", script, ACCUEIL, CORE],
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert fini.returncode == 0, fini.stderr or fini.stdout
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_reponse_fraiche_retour_accueil_sans_second_get():
+    """Une réponse fraîche ne programme pas de GET quand on revient 2 min plus tard."""
+    script = r"""
+const fs = require('fs');
+const vm = require('vm');
+const accueil = fs.readFileSync(process.argv[1], 'utf8');
+const core = fs.readFileSync(process.argv[2], 'utf8');
+const debut = core.indexOf('function _escIndice');
+const fin = core.indexOf('\nfunction loadSidebar');
+if (debut < 0 || fin < 0) { console.error('decoupe core'); process.exit(1); }
+
+let horloge = Date.parse('2026-10-01T10:50:00.000Z');
+let appels = 0;
+let erreurs = 0;
+const timers = [];
+let seq = 1;
+
+function FakeDate(a, b, c, d, e, f, g) {
+  if (!(this instanceof FakeDate)) {
+    return arguments.length ? new Date(a, b, c, d || 0, e || 0, f || 0, g || 0) : new Date(horloge);
+  }
+  if (arguments.length === 0) return new Date(horloge);
+  if (arguments.length === 1) return new Date(a);
+  return new Date(a, b, c, d || 0, e || 0, f || 0, g || 0);
+}
+FakeDate.now = function() { return horloge; };
+FakeDate.parse = Date.parse;
+FakeDate.UTC = Date.UTC;
+FakeDate.prototype = Date.prototype;
+
+function element() {
+  const attrs = {};
+  return {
+    textContent: '',
+    innerHTML: '',
+    hidden: false,
+    className: '',
+    style: {},
+    isConnected: true,
+    classList: { toggle() {}, add() {}, remove() {}, contains() { return false; } },
+    setAttribute(k, v) { attrs[k] = String(v); },
+    getAttribute(k) { return Object.prototype.hasOwnProperty.call(attrs, k) ? attrs[k] : null; },
+    removeAttribute(k) { delete attrs[k]; },
+    addEventListener() {},
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+  };
+}
+const store = {};
+const document = {
+  readyState: 'complete',
+  documentElement: { classList: { toggle() {}, add() {}, remove() {} } },
+  getElementById(id) {
+    if (!store[id]) store[id] = element();
+    return store[id];
+  },
+  querySelector() { return null; },
+  querySelectorAll() { return []; },
+  addEventListener() {},
+};
+
+const context = {
+  fetch(url) {
+    const u = String(url);
+    if (u.indexOf('/api/market') >= 0) {
+      appels += 1;
+      const corps = {
+        updated_at: new Date(horloge).toISOString(),
+        market_activity: {},
+        top5: [{ ticker: 'SNTS', change: 1.2, price: 15000 }],
+        flop5: [],
+        indices: [
+          { name: 'BRVM - COMPOSITE', prev: 548.38, current: 545.31, change: -0.56, ytd: 1.2 },
+        ],
+      };
+      return Promise.resolve({ ok: true, json() { return Promise.resolve(corps); } });
+    }
+    return Promise.resolve({ ok: true, json() { return Promise.resolve({}); } });
+  },
+  setTimeout(fn, ms) {
+    const id = seq++;
+    timers.push({ id: id, fn: fn, ms: ms });
+    return id;
+  },
+  clearTimeout(id) {
+    const i = timers.findIndex(function(t) { return t.id === id; });
+    if (i >= 0) timers.splice(i, 1);
+  },
+  setInterval() { return 0; },
+  clearInterval() {},
+  AbortController,
+  Promise,
+  Date: FakeDate,
+  document,
+  scores: [],
+  console: { error() { erreurs += 1; }, log() {}, warn() {} },
+};
+context.window = context;
+vm.createContext(context);
+vm.runInContext(accueil, context);
+vm.runInContext(core.slice(debut, fin), context);
+context._renderMarketWeather = function() {};
+context._paintIndexCards = function() {};
+
+function echec(msg) {
+  console.error(msg);
+  process.exit(1);
+}
+function pompe() {
+  return Promise.resolve().then(function() { return Promise.resolve(); })
+    .then(function() { return Promise.resolve(); });
+}
+function nb(ms) {
+  return timers.filter(function(t) { return t.ms === ms; }).length;
+}
+
+(async function() {
+  context._remplirIndices();
+  context.loadMarketWidget(false);
+  await pompe();
+  if (appels !== 1) echec('chargement ' + appels);
+  if (erreurs !== 0) echec('console chargement ' + erreurs);
+  if (nb(context.DELAI_RELECTURE_MARCHE_MS) !== 0) echec('relecture au chargement frais');
+  const carte = store['accueil-composite-val'].textContent;
+  if (carte.indexOf('545,31') < 0) echec('carte ' + carte);
+
+  horloge += 2 * 60 * 1000;
+  context._accueilIndicesParti = 0;
+  context._remplirIndices();
+  context.loadMarketWidget(false);
+  await pompe();
+  if (appels !== 1) echec('retour accueil ' + appels);
+  if (nb(context.DELAI_RELECTURE_MARCHE_MS) !== 0) echec('relecture 10 s apres un retour');
+  if (store['accueil-composite-val'].textContent !== carte) echec('carte changee');
+  if (erreurs !== 0) echec('console retour ' + erreurs);
   process.exit(0);
 })().catch(function(e) {
   console.error(e && e.stack ? e.stack : e);
@@ -596,7 +764,7 @@ context.window = context;
 context.loadMarketWidget = function(forcer) {
   dernierForcer = forcer;
   appels += 1;
-  context._noterFraicheurMarche(context._reponse);
+  context._noterFraicheurMarche(context._reponse, horloge);
 };
 vm.createContext(context);
 vm.runInContext(accueil, context);
@@ -624,15 +792,15 @@ function charge(ageMs) {
 if (context.SEUIL_FRAICHEUR_MARCHE_MS !== 90000) echec('seuil');
 if (context.DELAI_RELECTURE_MARCHE_MS !== 10000) echec('delai');
 
-context._noterFraicheurMarche(charge(30 * 1000));
+context._noterFraicheurMarche(charge(30 * 1000), horloge);
 if (nb(10000) !== 0) echec('relecture sur cache frais');
 if (appels !== 0) echec('get immediat ' + appels);
 
 context._reponse = charge(120 * 1000);
-context._noterFraicheurMarche(context._reponse);
+context._noterFraicheurMarche(context._reponse, horloge);
 if (nb(10000) !== 1) echec('pas de relecture ' + nb(10000));
 if (appels !== 0) echec('get avant 10 s ' + appels);
-context._noterFraicheurMarche(context._reponse);
+context._noterFraicheurMarche(context._reponse, horloge);
 if (nb(10000) !== 1) echec('deuxieme programmation ' + nb(10000));
 
 if (tirer(10000) !== 1) echec('tir');
@@ -641,14 +809,14 @@ if (dernierForcer) echec('relecture forcee');
 if (nb(10000) !== 0) echec('boucle ' + nb(10000));
 
 context._reponse = charge(0);
-context._noterFraicheurMarche(context._reponse);
+context._noterFraicheurMarche(context._reponse, horloge);
 context._reponse = charge(120 * 1000);
-context._noterFraicheurMarche(context._reponse);
+context._noterFraicheurMarche(context._reponse, horloge);
 if (nb(10000) !== 1) echec('apres fraicheur ' + nb(10000));
 
 horloge = Date.parse('2026-10-03T11:00:00.000Z');
 timers.length = 0;
-context._noterFraicheurMarche(charge(120 * 1000));
+context._noterFraicheurMarche(charge(120 * 1000), horloge);
 if (nb(10000) !== 0) echec('hors seance');
 if (appels !== 1) echec('get hors seance ' + appels);
 
