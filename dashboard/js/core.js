@@ -1749,8 +1749,17 @@ function loadMarketWidget(forcer){
     _paintIndexCards();
     renderIndexTicker(d);
     if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(d);
+    window._dernierMarche = d;
+    if (typeof _noterFraicheurMarche === 'function') _noterFraicheurMarche(d);
   }).catch(e=>{
     if (generation !== _mktGeneration) return;
+    // Une relecture ratée garde l'écran : « — » et l'erreur console
+    // restent pour le premier chargement et pour « Réessayer ».
+    var precedent = window._dernierMarche;
+    if (!forcer && precedent && Array.isArray(precedent.indices) && precedent.indices.length) {
+      _promesseMarche = null;
+      return;
+    }
     var abandon = !!(e && e.name === 'AbortError');
     // L'essai unique est dans demanderMarche. L'abandon ne laisse pas d'erreur console.
     if (!abandon) console.error('[BRVM] loadMarketWidget:', e);

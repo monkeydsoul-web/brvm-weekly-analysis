@@ -641,12 +641,48 @@ function _auChangementDePageMarche() {
   if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
 }
 
+// Le serveur rend son cache puis le rafraîchit derrière. Si ce cache a
+// plus de 90 s en séance, une seule relecture part ~10 s plus tard.
+// Pas une boucle : tant que la réponse suivante est encore ancienne,
+// on n'en programme pas une autre.
+var SEUIL_FRAICHEUR_MARCHE_MS = 90 * 1000;
+var DELAI_RELECTURE_MARCHE_MS = 10 * 1000;
+var _relectureMarcheArmee = 0;
+
+function _noterFraicheurMarche(d) {
+  if (!_seanceOuverteMaintenant()) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  var brut = d && d.updated_at;
+  var instant = brut ? new Date(brut).getTime() : NaN;
+  var age = Date.now() - instant;
+  if (!(age > SEUIL_FRAICHEUR_MARCHE_MS)) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  if (_relectureMarcheArmee) return;
+  _relectureMarcheArmee = 1;
+  setTimeout(function() {
+    _promesseMarche = null;
+    if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+  }, DELAI_RELECTURE_MARCHE_MS);
+}
+
 function demanderMarche(forcer) {
   if (!forcer && _promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
     return _promesseMarche;
   }
   _promesseMarcheDepuis = Date.now();
-  _promesseMarche = _telechargerMarche(0);
+  // Un échec ne reste pas en cache 5 min : la navigation suivante
+  // et le prochain tour relisent, au lieu de rejouer la promesse rejetée.
+  var promesse = _telechargerMarche(0).then(function(d) {
+    return d;
+  }, function(e) {
+    if (_promesseMarche === promesse) _promesseMarche = null;
+    throw e;
+  });
+  _promesseMarche = promesse;
   // Le minuteur repart avec cette lecture : le prochain tour tombe
   // quand la promesse a 5 min, pas en double avec elle.
   _armerRafraichissementMarche();
