@@ -1,0 +1,11 @@
+{
+  "date": "2025-12-31",
+  "source": "https://bfin.brvm.org/boc/BOC_JOUR/BOC_20251231.pdf",
+  "document": "Bulletin Officiel de la Cote n° 249 du 31 décembre 2025",
+  "closes": {
+    "BRVM Composite": 345.75,
+    "BRVM 30": 166.24,
+    "Prestige": 144.25,
+    "Principal": 217.65
+  }
+}
