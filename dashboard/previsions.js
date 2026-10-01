@@ -18,7 +18,7 @@ async function renderPrevisionsPage() {
   container.innerHTML = `
     <div style="margin:0 0 12px">
       <div style="font-size:15px;font-weight:700;color:var(--text)">Recommandations IA</div>
-      <p style="font-size:12px;color:var(--t2);margin:4px 0 0;line-height:1.5">Prévision favorable, neutre ou défavorable. Distinct du conseil de la note.</p>
+      <p style="font-size:12px;color:var(--t2);margin:4px 0 0;line-height:1.5">Prévision favorable, neutre, faible ou défavorable. Distinct du conseil de la note.</p>
     </div>
     <div id="prev-signaux-panel"></div>`;
 

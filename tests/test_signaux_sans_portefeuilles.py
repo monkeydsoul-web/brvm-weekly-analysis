@@ -64,7 +64,11 @@ def test_le_front_ne_dessine_plus_les_portefeuilles():
     assert "Les 3 portefeuilles prévisionnels" not in src
     assert "taux sans risque 6.5%" not in src
     assert ">Recommandations IA</div>" in src
-    assert "Prévision favorable, neutre ou défavorable. Distinct du conseil de la note." in src
+    assert "Prévision favorable, neutre, faible ou défavorable. Distinct du conseil de la note." in src
+    page = _page_signaux()
+    assert "🎯 Recommandations</button>" in page
+    assert "Mes stratégies" not in page
+    assert "Prévision faible = les modèles penchent vers le bas" in page
     assert "return 'Prévision faible'" in src
     assert "return 'Prévision défavorable'" in src
     assert "['ALLÉGER','🔴 Prévision faible'" in src
@@ -94,6 +98,15 @@ def test_pdf_mensuel_sans_section_portefeuilles():
     assert "Adopter" not in texte
     assert "Taux BCEAO" not in texte
     assert "Prévisions favorables" in texte
+    assert "Prévisions faibles :" in texte
+    assert "Prévisions défavorables :" in texte
+    from datetime import datetime
+    mois = (
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+    )
+    assert "%s %d" % (mois[datetime.now().month - 1], datetime.now().year) in texte
+    assert "October" not in texte
 
 
 def test_phrase_de_signaux_nest_plus_tronquee():
@@ -294,7 +307,24 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
                 assert "Acheter" not in texte
                 assert "Vendre" not in texte
                 assert page.locator("#page-previsions-content .stock-tab").count() == 0
+                assert "Mes stratégies" not in texte
+                assert "Recommandations" in texte
                 page.screenshot(path=str(preuves / (nom + ".png")))
+                if nom == "signaux-1280-clair":
+                    page.locator("#prev-signaux-panel button", has_text="Prévision faible").click()
+                    page.wait_for_function(
+                        """() => {
+                          var rows = Array.from(document.querySelectorAll('#prev-signaux-panel tbody tr'));
+                          if (!rows.length) return false;
+                          return rows.every(function(r) {
+                            var t = r.innerText || '';
+                            return t.indexOf('Prévision faible') !== -1
+                              && t.indexOf('Prévision défavorable') === -1;
+                          });
+                        }""",
+                        timeout=5000,
+                    )
+                    page.screenshot(path=str(preuves / "signaux-1280-clair-faible.png"))
                 contexte.close()
         finally:
             navigateur.close()
@@ -307,5 +337,5 @@ def test_page_signaux_sans_section_ni_requete_portefeuille(base_url, tmp_path):
         "signaux-390-clair",
         "signaux-390-sombre",
     ]
-    for nom in ("signaux-1280-clair", "signaux-1280-sombre", "signaux-390-clair", "signaux-390-sombre"):
+    for nom in ("signaux-1280-clair", "signaux-1280-clair-faible", "signaux-1280-sombre", "signaux-390-clair", "signaux-390-sombre"):
         assert (preuves / (nom + ".png")).is_file()
