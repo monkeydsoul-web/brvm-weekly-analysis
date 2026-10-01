@@ -87,9 +87,9 @@ function _renderScreenerTable() {
     const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
     const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
     const dyC = (x.div_yield || 0) > 0 && typeof couleurDividende === 'function' ? couleurDividende(x.div_yield) : 'var(--t2)';
-    const chg = x.change_pct != null ? x.change_pct : null;
+    const chg = (typeof variationJour === 'function') ? variationJour(x.ticker).pct : null;
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
-    const chgS = chg != null ? (chg > 0 ? '+' : '') + chg.toFixed(2) + '%' : '—';
+    const chgS = (typeof baliseVariationJour === 'function') ? baliseVariationJour(x.ticker, '') : '—';
     const verd = x.pdf_verdict || '';
     const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
     const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
@@ -125,6 +125,14 @@ function _renderScreenerTable() {
 
 
 function _triScreener(a, b) {
+  if (_scrSort.col === 'change_pct' && typeof variationJour === 'function') {
+    var pa = variationJour(a.ticker).pct;
+    var pb = variationJour(b.ticker).pct;
+    if (pa == null && pb == null) return 0;
+    if (pa == null) return 1;
+    if (pb == null) return -1;
+    return _scrSort.asc ? pa - pb : pb - pa;
+  }
   if (_scrSort.col === 'composite_adj' && typeof triCommeClassement === 'function') {
     var ordre = triCommeClassement(a, b);
     return _scrSort.asc ? -ordre : ordre;
@@ -221,7 +229,11 @@ function screenerExportCSV() {
     x.pb_ref ? x.pb_ref.toFixed(2) : '',
     x.div_yield ? x.div_yield.toFixed(2) : '',
     x.roe ? x.roe.toFixed(1) : '',
-    x.change_pct != null ? x.change_pct.toFixed(2) : '',
+    (function() {
+      if (typeof variationJour !== 'function') return '';
+      var p = variationJour(x.ticker).pct;
+      return p == null ? '' : p.toFixed(2);
+    })(),
     x.price ? Math.round(x.price) : '',
     x.conseil_libelle||'',
     (x.score_graham||0).toFixed(1),

@@ -47,15 +47,43 @@ def is_market_open_at(moment):
 def is_market_open():
     return is_market_open_at(datetime.now(timezone.utc))
 
+def _seance_a_echange(prices):
+    """Vrai dès qu'un titre publié a un volume strictement positif.
+
+    Avant le premier échange, la page met les volumes (et souvent les
+    variations) à zéro : ce n'est pas une séance déjà négociée.
+    """
+    if not isinstance(prices, dict):
+        return False
+    for row in prices.values():
+        if not isinstance(row, dict) or row.get("source") == "unavailable":
+            continue
+        try:
+            volume = int(row.get("volume") or 0)
+        except (TypeError, ValueError):
+            continue
+        if volume > 0:
+            return True
+    return False
+
+
 def fetch_brvm_org():
+    """Cours, variations, date de séance et indicateur d'échange.
+
+    Retourne ``(prices, session_date, seance_ouverte)``. ``session_date``
+    est lue par ``date_entete_brvm`` sur le texte de la page des cours.
+    """
     results = {}
+    session_date = None
     try:
         r = requests.get("https://www.brvm.org/fr/cours-actions/0/appm", headers=HEADERS, timeout=15)
         soup = BeautifulSoup(r.text, "html.parser")
+        from market_data import date_entete_brvm
+        session_date = date_entete_brvm(soup.get_text(" ", strip=True))
         tables = soup.find_all("table")
         if len(tables) < 4:
             logger.warning(f"brvm.org: {len(tables)} tables seulement")
-            return results
+            return results, session_date, False
         for row in tables[3].find_all("tr")[1:]:
             cols = row.find_all(["td","th"])
             if len(cols) < 7: continue
@@ -83,7 +111,7 @@ def fetch_brvm_org():
         logger.info(f"brvm.org: {len(results)} tickers")
     except Exception as e:
         logger.warning(f"brvm.org erreur: {e}")
-    return results
+    return results, session_date, _seance_a_echange(results)
 
 def fetch_live_prices(all_tickers=None):
     if all_tickers is None:
@@ -92,15 +120,15 @@ def fetch_live_prices(all_tickers=None):
             all_tickers = list(STOCK_FUNDAMENTALS.keys())
         except: all_tickers = []
     start = time.time()
-    results = fetch_brvm_org()
+    results, session_date, seance_ouverte = fetch_brvm_org()
     for t in all_tickers:
         if t not in results:
             results[t] = {"price": None, "change_pct": 0.0, "source": "unavailable", "fetched_at": None}
     n_ok = len([v for v in results.values() if v.get("price")])
     logger.info(f"Fetch {round(time.time()-start,1)}s — {n_ok}/{len(results)} prix")
-    return results
+    return results, session_date, seance_ouverte
 
-def save_cache(prices_dict):
+def save_cache(prices_dict, session_date=None, seance_ouverte=False):
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     sources = {}
     for v in prices_dict.values():
@@ -117,7 +145,12 @@ def save_cache(prices_dict):
         _precedents = "ILLISIBLE"
     if _inconnus != _precedents:
         logger.warning("save_cache: perimetre modifie, hors perimetre : %s (cycle precedent : %s)", _inconnus, _precedents)
+    if isinstance(prices_dict, dict):
+        for row in prices_dict.values():
+            if isinstance(row, dict):
+                row["session_date"] = session_date
     payload = {"updated_at": datetime.now(timezone.utc).isoformat(), "market_open": is_market_open(),
+               "session_date": session_date, "seance_ouverte": bool(seance_ouverte),
                "prices": prices_dict, "stats": {"total": len(prices_dict),
                "with_price": len([v for v in prices_dict.values() if v.get("price")]), "sources": sources,
                "unknown_tickers": _inconnus}}
@@ -161,7 +194,8 @@ def get_live_data(force_refresh=False):
             return cache
         _FETCH_LOCK.acquire()
     try:
-        return save_cache(fetch_live_prices())
+        prices, session_date, seance_ouverte = fetch_live_prices()
+        return save_cache(prices, session_date, seance_ouverte)
     finally:
         _FETCH_LOCK.release()
 

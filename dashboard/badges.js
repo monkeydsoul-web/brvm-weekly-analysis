@@ -156,6 +156,7 @@ function onScoresRefreshed(newScores) {
   if (typeof scores !== 'undefined') scores = newScores;
   // Rafraîchir composants
   if (typeof renderRankLive === 'function') renderRankLive();
+  if (typeof redessinerVariations === 'function') redessinerVariations();
   if (typeof renderSidebarScores === 'function') renderSidebarScores(newScores);
   // Badge rang fiche ouverte
   const openTicker = window._openTicker;

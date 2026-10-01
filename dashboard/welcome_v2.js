@@ -350,7 +350,7 @@ function _htmlCarteNote(x) {
     + '</span>'
     + '<span class="accueil-mieux-cours">'
     + '<span class="accueil-mieux-prix">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
-    + '<span class="accueil-var-pill ' + _sensVariation(x.change_pct) + '">' + _echapAccueil(_fmtVariation(x.change_pct)) + '</span>'
+    + baliseVariationJour(ticker, 'accueil-var-pill ' + _sensVariation(variationJour(ticker).pct))
     + '</span>'
     + '<span class="accueil-badge ' + clsBadge + '">' + _echapAccueil(lib) + '</span>'
     + '</button>';
@@ -372,7 +372,8 @@ function _sousTitreSeance(marche, statut) {
 
 function _poserSousTitreSeance() {
   var sous = document.getElementById('accueil-seance-sous');
-  if (sous && sous.isConnected) sous.textContent = _sousTitreSeance(window._accueilMarche, window._accueilStatut);
+  if (sous && sous.isConnected) sous.textContent = 'Plus fortes variations';
+  _poserLibellesVariation();
 }
 
 function _classementAccueil() {
@@ -394,7 +395,7 @@ function _htmlLigneSeance(x) {
   if (!ticker) return '';
   var corps = '<strong class="accueil-seance-ticker">' + _echapAccueil(ticker) + '</strong>'
     + '<span class="accueil-seance-cours">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
-    + '<span class="accueil-var-pill ' + _sensVariation(x.change) + '">' + _echapAccueil(_fmtVariation(x.change)) + '</span>';
+    + baliseVariationJour(ticker, 'accueil-var-pill ' + _sensVariation(variationJour(ticker).pct));
   if (_tickerDansClassement(ticker)) {
     return '<button type="button" class="accueil-seance-ligne" data-ticker="' + _echapAccueil(ticker) + '">' + corps + '</button>';
   }
@@ -635,6 +636,189 @@ function _telechargerMarche(essai) {
 }
 
 
+// Une seule lecture de la variation du jour pour les six vues.
+// Même cache que demanderMarche : une promesse partagée pendant 60 s.
+var DELAI_VARIATION_MS = 20000;
+var _PROMESSE_VARIATION_MS = 60000;
+var _promesseVariation = null;
+var _promesseVariationDepuis = 0;
+var _variationLive = null;
+
+function demanderVariation(forcer) {
+  if (!forcer && _promesseVariation && (Date.now() - _promesseVariationDepuis) < _PROMESSE_VARIATION_MS) {
+    return _promesseVariation;
+  }
+  _promesseVariationDepuis = Date.now();
+  _promesseVariation = _telechargerVariation(0);
+  return _promesseVariation;
+}
+
+function _empreinteVariation(d) {
+  if (!d || typeof d !== 'object') return '';
+  var prices = d.prices || {};
+  var cles = Object.keys(prices).sort();
+  var morceaux = [String(d.session_date || ''), d.seance_ouverte ? '1' : '0'];
+  var i;
+  for (i = 0; i < cles.length; i++) {
+    var row = prices[cles[i]] || {};
+    morceaux.push(cles[i] + '=' + row.change_pct + '/' + row.price + '/' + row.volume);
+  }
+  return morceaux.join('|');
+}
+
+function _telechargerVariation(essai) {
+  return new Promise(function(resolve, reject) {
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var timer = setTimeout(function() { if (ctrl) ctrl.abort(); }, DELAI_VARIATION_MS);
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    fetch('/api/live', opts).then(function(r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(d) {
+      var avant = _empreinteVariation(_variationLive);
+      _variationLive = d || null;
+      if (_empreinteVariation(d) !== avant) {
+        try { redessinerVariations(); } catch (err) { /* le dessin ne casse pas la promesse */ }
+      }
+      resolve(d);
+    }).catch(function(e) {
+      clearTimeout(timer);
+      if (essai < 1) {
+        setTimeout(function() {
+          _telechargerVariation(essai + 1).then(resolve, reject);
+        }, 700);
+        return;
+      }
+      reject(e);
+    });
+  });
+}
+
+function _instantVariation() {
+  if (typeof window !== 'undefined' && typeof window._maintenantVariation === 'function') {
+    try { return window._maintenantVariation(); } catch (e) { /* horloge de test */ }
+  }
+  return new Date();
+}
+
+function _dateAbidjan(instant) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Abidjan',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(instant);
+  } catch (e) {
+    return '';
+  }
+}
+
+function variationJour(ticker) {
+  var t = String(ticker || '').toUpperCase();
+  var live = _variationLive;
+  var prices = live && live.prices ? live.prices : null;
+  var row = (prices && t) ? prices[t] : null;
+  var session = null;
+  if (row && typeof row.session_date === 'string' && row.session_date) session = row.session_date;
+  else if (live && typeof live.session_date === 'string' && live.session_date) session = live.session_date;
+  var pct = null;
+  if (row && row.price != null && row.price !== '' && row.source !== 'unavailable') {
+    if (row.change_pct != null && row.change_pct !== '' && isFinite(Number(row.change_pct))) {
+      pct = Number(row.change_pct);
+    }
+  }
+  if (live && live.seance_ouverte === false && pct === 0) pct = null;
+  return {
+    pct: pct,
+    session_date: session,
+    seance_ouverte: !!(live && live.seance_ouverte === true)
+  };
+}
+
+function texteVariationJour(ticker) {
+  return _fmtVariation(variationJour(ticker).pct);
+}
+
+function libelleSeanceVariation() {
+  var live = _variationLive;
+  if (!live || typeof live.session_date !== 'string') return '';
+  var session = live.session_date;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(session)) return '';
+  var auj = _dateAbidjan(_instantVariation());
+  var pasAujourdhui = !auj || session !== auj;
+  var pasDEchange = live.seance_ouverte !== true;
+  if (!pasAujourdhui && !pasDEchange) return '';
+  return 'séance du ' + session.slice(8, 10) + '/' + session.slice(5, 7);
+}
+
+function baliseVariationJour(ticker, classe) {
+  var t = String(ticker || '').toUpperCase();
+  var texte = texteVariationJour(t);
+  var lib = libelleSeanceVariation();
+  var attrs = ' data-var-ticker="' + _echapAccueil(t) + '" data-var-texte="' + _echapAccueil(texte) + '"';
+  if (lib) attrs += ' data-var-seance="' + _echapAccueil(lib) + '"';
+  var cls = classe ? (' class="' + classe + '"') : '';
+  return '<span' + cls + attrs + '>' + _echapAccueil(texte) + '</span>';
+}
+
+function _poserTexteEnteteVariation(el, lib, defaut) {
+  if (!el) return;
+  var ind = el.querySelector ? el.querySelector('.sort-ind') : null;
+  var fleche = ind ? ind.textContent : '';
+  el.textContent = lib || defaut;
+  if (ind && document.createElement && el.appendChild) {
+    var span = document.createElement('span');
+    span.className = 'sort-ind';
+    span.textContent = fleche;
+    el.appendChild(span);
+  }
+}
+
+function _poserLibellesVariation() {
+  var lib = libelleSeanceVariation();
+  var titre = document.getElementById('accueil-seance-titre');
+  if (titre) titre.textContent = lib || 'Séance du jour';
+  var ids = ['accueil-mieux-seance', 'rank-seance-libelle', 'heatmap-seance-libelle'];
+  var i;
+  for (i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (!el) continue;
+    el.textContent = lib;
+    el.hidden = !lib;
+  }
+  _poserTexteEnteteVariation(document.getElementById('rank-col-var'), lib, '+/- aujourd\'hui');
+  _poserTexteEnteteVariation(document.getElementById('screener-col-var'), lib, 'Var. j.');
+}
+
+function _dessinVariation(fn) {
+  try { fn(); } catch (e) { /* une vue en échec n'empêche pas les autres */ }
+}
+
+function redessinerVariations() {
+  _dessinVariation(_poserLibellesVariation);
+  var rows = (window.scores && window.scores.length) ? window.scores : [];
+  if (document.getElementById('accueil-top')) _dessinVariation(function() { _remplirTop(rows); });
+  if (document.getElementById('accueil-mvt-grille') && window._accueilMarche) {
+    _dessinVariation(function() { _remplirMouvements(window._accueilMarche); });
+  }
+  if (document.getElementById('rankBody') && typeof renderRankLive === 'function') {
+    _dessinVariation(renderRankLive);
+  }
+  if (document.getElementById('mkt-heatmap-grid') && typeof renderHeatmap === 'function') {
+    _dessinVariation(function() { renderHeatmap('mkt-heatmap-grid'); });
+  }
+  if (document.getElementById('screener-table') && typeof runScreener === 'function') {
+    _dessinVariation(runScreener);
+  }
+  var modal = document.getElementById('cmp-modal');
+  if (modal && modal.classList && modal.classList.contains('show') && typeof openCompareModal === 'function') {
+    _dessinVariation(openCompareModal);
+  }
+}
+
+
 function _texteEtatComposite() {
   var statut = window._accueilStatut;
   if (statut && statut.market_open === true) return 'Marché ouvert · Séance en cours';
@@ -676,10 +860,7 @@ function _remplirMarcheAccueil(d) {
 function _remplirLargeurLive() {
   if (window._accueilLargeurParti) return;
   window._accueilLargeurParti = 1;
-  fetch('/api/live').then(function(r) {
-    if (!r.ok) throw new Error('live');
-    return r.json();
-  }).then(function(d) {
+  demanderVariation(false).then(function(d) {
     _noterStatutLive(d);
     var el = document.getElementById('accueil-largeur-n');
     if (!el || !el.isConnected) return;
