@@ -4,6 +4,7 @@ Source : brvm.org Table 3
 """
 import json, logging, os, tempfile, time, threading
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
@@ -47,11 +48,16 @@ def is_market_open_at(moment):
 def is_market_open():
     return is_market_open_at(datetime.now(timezone.utc))
 
+def _aujourdhui_abidjan():
+    return datetime.now(ZoneInfo("Africa/Abidjan")).date().isoformat()
+
+
 def _seance_a_echange(prices):
     """Vrai dès qu'un titre publié a un volume strictement positif.
 
-    Avant le premier échange, la page met les volumes (et souvent les
-    variations) à zéro : ce n'est pas une séance déjà négociée.
+    Hors séance, la page garde les volumes de la veille : ce signal ne
+    suffit pas. Il faut aussi que la mise à jour des cours soit le jour
+    courant à Abidjan (voir ``_seance_est_ouverte``).
     """
     if not isinstance(prices, dict):
         return False
@@ -67,19 +73,28 @@ def _seance_a_echange(prices):
     return False
 
 
+def _seance_est_ouverte(session_date, prices):
+    """La séance du jour n'est ouverte que si les cours datent d'aujourd'hui
+    et qu'au moins un titre a déjà échangé.
+    """
+    auj = _aujourdhui_abidjan()
+    return session_date == auj and _seance_a_echange(prices)
+
+
 def fetch_brvm_org():
     """Cours, variations, date de séance et indicateur d'échange.
 
     Retourne ``(prices, session_date, seance_ouverte)``. ``session_date``
-    est lue par ``date_entete_brvm`` sur le texte de la page des cours.
+    est la date de « Dernière mise à jour », pas l'horloge du site.
     """
     results = {}
     session_date = None
     try:
         r = requests.get("https://www.brvm.org/fr/cours-actions/0/appm", headers=HEADERS, timeout=15)
         soup = BeautifulSoup(r.text, "html.parser")
-        from market_data import date_entete_brvm
-        session_date = date_entete_brvm(soup.get_text(" ", strip=True))
+        from market_data import date_mise_a_jour_brvm
+        texte = soup.get_text(" ", strip=True)
+        session_date = date_mise_a_jour_brvm(texte)
         tables = soup.find_all("table")
         if len(tables) < 4:
             logger.warning(f"brvm.org: {len(tables)} tables seulement")
@@ -111,7 +126,7 @@ def fetch_brvm_org():
         logger.info(f"brvm.org: {len(results)} tickers")
     except Exception as e:
         logger.warning(f"brvm.org erreur: {e}")
-    return results, session_date, _seance_a_echange(results)
+    return results, session_date, _seance_est_ouverte(session_date, results)
 
 def fetch_live_prices(all_tickers=None):
     if all_tickers is None:

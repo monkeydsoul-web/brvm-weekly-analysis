@@ -179,7 +179,7 @@ function liveIdentite() {
 function installer(live, scores) {
   context._variationLive = live;
   context.window.scores = scores;
-  context.window._maintenantVariation = function() { return new Date('2026-10-01T09:04:00Z'); };
+  context._instantVariation = function() { return new Date('2026-10-01T09:04:00Z'); };
   context.window._accueilMarche = {
     session_date: '2026-09-29',
     top5: scores.map(function(x) { return { ticker: x.ticker, price: x.price, change: 8.88 }; }),
@@ -246,6 +246,15 @@ Object.keys(vues).forEach(function(nom) {
   if (vues[nom].indexOf('8,88') >= 0 || vues[nom].indexOf('8.88') >= 0) echec(nom + ' variation du marché');
 });
 if (parId('accueil-seance-titre').textContent !== libelle) echec('titre séance ' + parId('accueil-seance-titre').textContent);
+const sous = parId('accueil-seance-sous').textContent;
+if (sous !== 'Plus fortes variations · 30 septembre 2026') echec('sous-titre ' + sous);
+const fiche = context._htmlVariationFiche('BICC');
+if (fiche.indexOf('data-var-ticker="BICC"') < 0) echec('fiche sans marque');
+if (fiche.indexOf(context.texteVariationJour('BICC')) < 0) echec('fiche texte');
+if (fiche.indexOf('séance du 30/09') < 0) echec('fiche sans date');
+if (fiche.indexOf('-6.56%') >= 0 || fiche.indexOf('9,99') >= 0 || fiche.indexOf('-1,00') >= 0) echec('fiche autre source');
+const ficheAbsente = context._htmlVariationFiche('TTLS');
+if (ficheAbsente.indexOf('—') < 0) echec('fiche absente');
 
 const avant = context.texteVariationJour('SNTS');
 const liveSuivant = liveIdentite();
@@ -291,6 +300,40 @@ function matin(session) {
 
 matin('2026-09-30');
 matin('2026-10-01');
+
+function veillePubliee(session, instant, volume, change, libelleAttendu, interdit) {
+  const live = {
+    session_date: session,
+    seance_ouverte: false,
+    market_open: false,
+    prices: {
+      BICC: { price: 32510, change_pct: change, volume: volume, source: 'brvm.org', session_date: session }
+    }
+  };
+  installer(live, [
+    ligne('BICC', 8.4, 1, 9.99),
+    ligne('SNTS', 7.1, 2, -6.56)
+  ]);
+  context._instantVariation = function() { return new Date(instant); };
+  const rendu = htmlVues();
+  const attendu = context.texteVariationJour('BICC');
+  if (attendu === '—') echec('variation de la veille effacée');
+  Object.keys(rendu).forEach(function(nom) {
+    if (rendu[nom].indexOf(libelleAttendu) < 0) echec(nom + ' sans ' + libelleAttendu);
+    if (interdit && rendu[nom].indexOf(interdit) >= 0) echec(nom + ' date de l horloge');
+    const trouves = textes(rendu[nom], 'BICC');
+    if (!trouves.length) echec(nom + ' sans BICC');
+    trouves.forEach(function(texte) {
+      if (texte !== attendu) echec(nom + ' BICC « ' + texte + ' »');
+    });
+  });
+  const sousTitre = parId('accueil-seance-sous').textContent;
+  if (sousTitre.indexOf('Plus fortes variations · ') !== 0) echec('sous-titre daté ' + sousTitre);
+}
+
+veillePubliee('2026-08-28', '2026-08-29T05:22:00Z', 150, -6.56, 'séance du 28/08', 'séance du 29/08');
+veillePubliee('2025-12-02', '2025-12-03T08:10:00Z', 420, -6.56, 'séance du 02/12', 'séance du 03/12');
+veillePubliee('2026-09-30', '2026-10-01T09:04:00Z', 4, 0, 'séance du 30/09', 'séance du 01/10');
 
 let liveFetch = 0;
 let marketFetch = 0;

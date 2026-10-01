@@ -2800,6 +2800,15 @@ function _poserUrlSociete(ticker) {
   try { history.pushState({societe: ticker}, '', cible); } catch (e) {}
 }
 
+function _htmlVariationFiche(ticker) {
+  var p = (typeof variationJour === 'function') ? variationJour(ticker).pct : null;
+  var couleur = p > 0 ? 'var(--green)' : (p < 0 ? 'var(--red)' : 'var(--t2)');
+  var marque = (typeof baliseVariationJour === 'function') ? baliseVariationJour(ticker, '') : '—';
+  var lib = (typeof libelleSeanceVariation === 'function') ? libelleSeanceVariation() : '';
+  var date = lib ? '<div style="font-size:11px;color:var(--t2)">' + lib + '</div>' : '';
+  return '<div style="font-size:12px;color:' + couleur + '">' + marque + '</div>' + date;
+}
+
 async function showStock(ticker){
   ticker = String(ticker || '').toUpperCase();
   window._ficheSeq = (window._ficheSeq || 0) + 1;
@@ -2844,7 +2853,7 @@ async function showStock(ticker){
       </div>
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
-        <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
+        ${_htmlVariationFiche(ticker)}
         ${_staticEntry.statut==='suspendu'
           ? '<span style="margin-top:4px;display:inline-block;color:var(--note-muted);font-weight:700">Cotation suspendue</span>'
           : (_v0>0?`<span class="b ${classePrincipale(_staticEntry)}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
@@ -2954,7 +2963,7 @@ async function showStock(ticker){
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
             <div>
               <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+              ${_htmlVariationFiche(s.ticker)}
             </div>
             ${s.statut==='suspendu'
               ? '<span style="color:var(--t2);font-weight:700" data-tip="Cotation suspendue">'+note10txt(s)+'/10</span>'

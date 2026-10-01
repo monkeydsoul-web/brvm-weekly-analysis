@@ -146,7 +146,7 @@ _variationLive = {
     SIVC: { price: 2005, change_pct: -6.31, volume: 10, source: 'brvm.org' }
   }
 };
-window._maintenantVariation = function() { return new Date('2026-10-01T12:00:00Z'); };
+_instantVariation = function() { return new Date('2026-10-01T12:00:00Z'); };
 const colH = _htmlColonneSeance('▲ Hausses', 'is-up', seance.top5);
 const colB = _htmlColonneSeance('▼ Baisses', 'is-down', seance.flop5);
 attend((colH.match(/accueil-seance-ligne/g) || []).length === 5, 'cinq hausses');

@@ -394,7 +394,11 @@ function _sousTitreSeance(marche, statut) {
 
 function _poserSousTitreSeance() {
   var sous = document.getElementById('accueil-seance-sous');
-  if (sous && sous.isConnected) sous.textContent = 'Plus fortes variations';
+  if (sous && sous.isConnected) {
+    var session = (_variationLive && typeof _variationLive.session_date === 'string')
+      ? _variationLive.session_date : '';
+    sous.textContent = _sousTitreSeance(session ? { session_date: session } : null);
+  }
   _poserLibellesVariation();
 }
 
@@ -740,9 +744,6 @@ function _telechargerVariation(essai) {
 }
 
 function _instantVariation() {
-  if (typeof window !== 'undefined' && typeof window._maintenantVariation === 'function') {
-    try { return window._maintenantVariation(); } catch (e) { /* horloge de test */ }
-  }
   return new Date();
 }
 
@@ -773,7 +774,7 @@ function variationJour(ticker) {
       pct = Number(row.change_pct);
     }
   }
-  if (live && live.seance_ouverte === false && pct === 0) pct = null;
+  if (row && row.volume === 0 && pct === 0) pct = null;
   return {
     pct: pct,
     session_date: session,
@@ -841,7 +842,7 @@ function _dessinVariation(fn) {
 }
 
 function redessinerVariations() {
-  _dessinVariation(_poserLibellesVariation);
+  _dessinVariation(_poserSousTitreSeance);
   var rows = (window.scores && window.scores.length) ? window.scores : [];
   if (document.getElementById('accueil-top')) _dessinVariation(function() { _remplirTop(rows); });
   if (document.getElementById('accueil-mvt-grille') && window._accueilMarche) {
