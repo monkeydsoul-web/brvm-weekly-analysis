@@ -103,7 +103,7 @@ def test_methodo_glossaire_fiche_et_partage():
     assert "À surveiller" in glossaire
     assert "Prudence" in glossaire
     prev = (ROOT / "dashboard" / "previsions.js").read_text(encoding="utf-8")
-    assert prev.count("note10txt(s)") == 2
+    assert prev.count("note10txt(s)") == 1
     ecran = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
     assert "note10num(x).toFixed(1)" in ecran
     assert "note10txt(x)" in ecran
@@ -599,7 +599,8 @@ def test_pastilles_signaux_sont_une_prevision():
     assert "return 'Prudence'" not in prev
     assert "['ACHETER','🟢 Prévision favorable'" in prev
     assert "['CONSERVER','🟡 Prévision neutre'" in prev
-    assert "['ALLÉGER','🔴 Prévision défavorable'" in prev
+    assert "return 'Prévision faible'" in prev
+    assert "['ALLÉGER','🔴 Prévision faible'" in prev
     assert "['ÉVITER','⚫ Prévision défavorable'" in prev
     assert "s.signal === _sigFilter" in prev
     assert "Prévision favorable = les modèles détectent un signal haussier" in HTML

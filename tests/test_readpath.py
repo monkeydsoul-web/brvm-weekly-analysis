@@ -364,7 +364,6 @@ def test_fichier_absent_503_sans_note_fantome(client, data_dir, monkeypatch):
         "/api/live-score/SNTS",
         "/api/stock/SNTS",
         "/api/previsions/signaux",
-        "/api/previsions/portfolios",
         "/api/previsions/backtest",
         "/api/rapport-mensuel",
     )
