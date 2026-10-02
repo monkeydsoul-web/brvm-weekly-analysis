@@ -319,33 +319,49 @@ def _verifier_page(navigateur, nom, url, selecteur, devise, code, base_url):
     }[nom]
     page.wait_for_function(pret, timeout=20000)
     page.locator('.topnav-curr [data-curr="%s"]' % devise).click()
+    if nom == "fiche":
+        page.locator('.ctab-btn[data-ctab="chiffres"]').click()
     morceaux = []
     for ticker, _montant, eur, usd in PRIX:
         if nom == "fiche" and ticker != "SMBC":
             continue
         morceaux.append(eur if code == "EUR" else usd)
+    cible = ".ctab-score-block" if nom == "fiche" else selecteur
     for morceau in morceaux:
         page.wait_for_function(
-            "(attendu) => { var el = document.querySelector(%r); return !!(el && !el.querySelector('.stock-skeleton') && el.innerText.indexOf(attendu) !== -1); }" % selecteur,
+            "(attendu) => { var el = document.querySelector(%r); return !!(el && !el.querySelector('.stock-skeleton') && el.innerText.indexOf(attendu) !== -1); }" % cible,
             arg=morceau,
             timeout=20000,
         )
     page.wait_for_timeout(1200)
     entete = _norm(page.locator("#curr-rate").inner_text())
     assert entete == ENTETE, entete
-    corps = _norm(page.locator(selecteur).inner_text())
+    corps = _norm(page.locator(cible).inner_text())
     for morceau in morceaux:
         assert morceau in corps, "%s manque dans %s (%s)" % (morceau, nom, devise)
     if code == "EUR":
         assert "25,08" not in corps
     if nom == "fiche":
-        assert "0,00 %" in corps
-        assert "0.00%" not in corps
+        en_tete = _norm(page.locator("#stockDetail .stock-main-col").inner_text())
+        assert "25,15" not in en_tete
+        assert "28,42" not in en_tete
     assert "1,73" not in entete
     assert marche["n"] == 1, "%s %s : %d GET /api/market" % (nom, devise, marche["n"])
     assert erreurs == [], erreurs
+    if nom == "fiche" and devise == "eur":
+        _capture_entete_fiche(page)
     _captures(page, nom, devise)
     contexte.close()
+
+
+def _capture_entete_fiche(page):
+    page.evaluate("() => window.scrollTo(0, 0)")
+    for largeur, px in (("1280", 1280), ("390", 390)):
+        page.set_viewport_size({"width": px, "height": 900})
+        page.wait_for_timeout(200)
+        chemin = CAPTURES / ("fiche-entete-smbc-%s.png" % largeur)
+        page.screenshot(path=str(chemin), full_page=False)
+        assert chemin.stat().st_size > 1000
 
 
 def _captures(page, nom, devise):
