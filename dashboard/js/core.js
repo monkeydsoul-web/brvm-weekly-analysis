@@ -2922,7 +2922,7 @@ async function showStock(ticker){
     const _suiteFiche=_avisFiche?('Conseil : '+_avisFiche.libelle+'.'):'Pas de conseil pour le moment.';
     const _colFiche=couleurPrincipale(s);
     document.getElementById(_stockRenderTarget).innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+      <div style="margin-bottom:12px">
         <div class="stock-main-col">
           <h2 style="font-size:20px;font-weight:700">${s.ticker}
             <button class="star ${isFav?'fav':''}" onclick="toggleFav('${s.ticker}')" style="font-size:16px">★</button>
@@ -2951,10 +2951,6 @@ async function showStock(ticker){
             <button onclick="_quickCompare('${ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">⚖️ Comparer</button>
             <button onclick="_shareStockText('${s.ticker}')" class="btn btn-o" style="font-size:11px;padding:5px 12px">📤 Partager</button>
           </div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-          <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${fmtVariationFr(s.change_pct||0)}</div>
         </div>
       </div>
       <div class="ctab-action-strip">
