@@ -7,7 +7,10 @@
       "Bash(git add . *)",
       "Bash(git commit -a *)",
       "Bash(git commit -am*)",
-      "Bash(git push*)"
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin feature/refonte-nav-v2*)"
     ]
   }
 }
