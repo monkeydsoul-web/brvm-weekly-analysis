@@ -404,7 +404,7 @@ def compute_signals(scores=None, price_history=None):
             raison = "Prévision neutre — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
         elif sp > 0.35:
             signal, emoji = "ALLÉGER", "🔴"
-            raison = "Prévision défavorable — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
+            raison = "Prévision faible — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
         else:
             signal, emoji = "ÉVITER", "⚫"
             raison = "Prévision défavorable — Note %s/10, prévision %.2f" % (_note10_txt(score), sp)
@@ -544,7 +544,6 @@ def generate_rapport_pdf(scores=None, price_history=None):
     if price_history is None:
         price_history = _load_price_history()
 
-    portfolios = generate_portfolios(scores, price_history)
     signals    = compute_signals(scores, price_history)
     buy_signals = [s for s in signals if s["signal"] == "ACHETER"]
 
@@ -561,8 +560,15 @@ def generate_rapport_pdf(scores=None, price_history=None):
     disc = ParagraphStyle("disc", parent=body, fontSize=7, textColor=colors.grey)
 
     now = datetime.now()
+    mois_fr = (
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+    )
     story = []
-    story.append(Paragraph(f"BRVM Dashboard — Rapport mensuel {now.strftime('%B %Y')}", title_sty))
+    story.append(Paragraph(
+        "BRVM Dashboard — Rapport mensuel %s %d" % (mois_fr[now.month - 1], now.year),
+        title_sty,
+    ))
     story.append(Paragraph(f"Généré le {now.strftime('%d/%m/%Y à %H:%M')}", body))
     story.append(Spacer(1, 0.4*cm))
 
@@ -570,8 +576,9 @@ def generate_rapport_pdf(scores=None, price_history=None):
     n_interessant = len([
         s for s in scores if _libelle_conseil_ligne(s) == CONSEIL_INTERESSANT
     ])
-    n_surveiller = len([s for s in signals if s["signal"] == "CONSERVER"])
-    n_prudence = len([s for s in signals if s["signal"] in ("ALLÉGER", "ÉVITER")])
+    n_neutre = len([s for s in signals if s["signal"] == "CONSERVER"])
+    n_faible = len([s for s in signals if s["signal"] == "ALLÉGER"])
+    n_defavorable = len([s for s in signals if s["signal"] == "ÉVITER"])
     top3     = sorted(scores, key=lambda x: -(x.get("composite_adj") or 0))[:3]
     story.append(Paragraph("Résumé du marché BRVM", h2))
     t = Table([[
@@ -591,8 +598,8 @@ def generate_rapport_pdf(scores=None, price_history=None):
         body
     ))
     story.append(Paragraph(
-        "Prévisions favorables : %d. Prévisions neutres : %d. Prévisions défavorables : %d." % (
-            len(buy_signals), n_surveiller, n_prudence),
+        "Prévisions favorables : %d. Prévisions neutres : %d. Prévisions faibles : %d. Prévisions défavorables : %d." % (
+            len(buy_signals), n_neutre, n_faible, n_defavorable),
         body
     ))
     story.append(Spacer(1, 0.3*cm))
@@ -618,30 +625,6 @@ def generate_rapport_pdf(scores=None, price_history=None):
     ]))
     story.append(t2)
     story.append(Spacer(1, 0.3*cm))
-
-    story.append(Paragraph("Portefeuilles prévisionnels recommandés", h2))
-    for pf in portfolios:
-        story.append(Paragraph(
-            f"<b>{pf['name']}</b> — Risque {pf['risk']} — Objectif +{pf['target_min']}% à +{pf['target_max']}%",
-            body
-        ))
-        pf_data = [["Ticker", "Poids", "Note/10", "Div%", "Momentum"]]
-        for st in pf.get("stocks", []):
-            pf_data.append([
-                st["ticker"], f"{st['weight']:.1f}%",
-                "%s/10" % _note10_txt(st.get("score")), f"{st.get('div_yield', 0):.1f}%",
-                f"{st.get('momentum', 0):+.1f}%",
-            ])
-        tp = Table(pf_data, colWidths=[2.5*cm, 2*cm, 2.5*cm, 2*cm, 2.5*cm])
-        tp.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2563EB")),
-            ("TEXTCOLOR",  (0, 0), (-1, 0), colors.white),
-            ("FONTSIZE",   (0, 0), (-1, -1), 8),
-            ("GRID",       (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-            ("PADDING",    (0, 0), (-1, -1), 4),
-        ]))
-        story.append(tp)
-        story.append(Spacer(1, 0.2*cm))
 
     story.append(Paragraph("Prévisions favorables", h2))
     sig_data = [["Ticker", "Note/10", "Prévision", "Confiance", "Raison"]]

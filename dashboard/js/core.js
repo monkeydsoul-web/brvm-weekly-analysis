@@ -1414,7 +1414,7 @@ async function init(){
     });
     // Sparklines BOC en parallèle
     fetch('/api/sparklines').then(r=>r.json()).then(sp=>{window._extSparklines=sp;renderRankLive();}).catch(e=>{console.error('[BRVM] sparklines:',e);});
-    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(loadMarketWidget,500);
+    renderTargets();loadCustomScores();loadSidebar();updateAlertBadge();loadStatus();setTimeout(function(){ loadMarketWidget(false); }, 500);
     populateSelects();
     setTimeout(_autoTooltips, 1200);
   }catch(e){
@@ -3482,12 +3482,21 @@ function renderCorrelMatrix() {
 function renderMacroPage() {
   const el = document.getElementById('macro-brvm-ytd');
   if (!el) return;
-  const all = (window.scores || scores || []);
-  if (!all.length) return;
-  const avgChg = all.reduce((s, x) => s + (x.change_pct || 0), 0) / all.length;
-  const sign = avgChg >= 0 ? '+' : '';
-  el.textContent = sign + avgChg.toFixed(2) + '%';
-  el.style.color = avgChg >= 0 ? 'var(--green)' : 'var(--red)';
+  const peindre = function(d) {
+    const texte = (typeof _texteMacroYtd === 'function') ? _texteMacroYtd(d) : '—';
+    el.textContent = texte;
+    const composite = (typeof _compositeMarche === 'function') ? _compositeMarche(d) : null;
+    const ratio = composite ? _nombreIndice(composite.ytd) : null;
+    if (ratio == null) el.style.color = 'var(--t3)';
+    else if (ratio > 0) el.style.color = 'var(--green)';
+    else if (ratio < 0) el.style.color = 'var(--red)';
+    else el.style.color = 'var(--t2)';
+  };
+  if (typeof demanderMarche !== 'function') {
+    peindre(null);
+    return;
+  }
+  demanderMarche(false).then(peindre).catch(function() { peindre(null); });
 }
 
 // ── Actualités BRVM + Google News ────────────────────────────────────────────
