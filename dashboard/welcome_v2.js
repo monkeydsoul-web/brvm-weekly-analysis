@@ -861,6 +861,16 @@ function redessinerVariations() {
   if (modal && modal.classList && modal.classList.contains('show') && typeof openCompareModal === 'function') {
     _dessinVariation(openCompareModal);
   }
+  var pageStock = document.getElementById('page-stock');
+  if (pageStock && pageStock.classList && pageStock.classList.contains('on')
+      && window._openTicker && typeof _htmlVariationFiche === 'function') {
+    _dessinVariation(function() {
+      var marque = _htmlVariationFiche(window._openTicker);
+      var els = pageStock.querySelectorAll('[data-var-ticker]');
+      var i;
+      for (i = 0; i < els.length; i++) els[i].outerHTML = marque;
+    });
+  }
 }
 
 
