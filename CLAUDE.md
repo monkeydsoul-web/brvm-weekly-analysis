@@ -3,7 +3,7 @@
 ## Contexte technique
 - App Flask + JS vanilla, Python 3.9 (INTERDIT: types `X|Y`), port 5000.
 - Relance Flask : `source ~/.zprofile; pkill -9 -f app.py; sleep 1; python3 app.py > /tmp/flask_brvm.log 2>&1 &`
-- Branche de travail : feature/refonte-nav-v2. JAMAIS de push (verrouillé par settings).
+- Branche de travail : feature/refonte-nav-v2. Push autorisé uniquement vers une branche dont le nom commence par claude/ ou cursor/, puis pull request vers feature/refonte-nav-v2. JAMAIS de push vers main ni vers feature/refonte-nav-v2. JAMAIS de --force. La fusion est toujours faite par Souleymane.
 
 ## Git
 - `git add` CIBLÉ uniquement, fichier par fichier. JAMAIS `git add -A`, `--all` ou `git add .` (verrouillés).
