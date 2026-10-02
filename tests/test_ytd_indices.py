@@ -217,7 +217,7 @@ def test_libelle_indices_en_toutes_lettres_sans_mot_ytd():
     html = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
     ancre = html.index('id="macro-brvm-ytd"')
     carte = html[html.rindex('<div class="card"', 0, ancre):html.index("</div>", ancre)]
-    assert "Depuis le 1er janvier" in carte
+    assert "BRVM-COMPOSITE depuis le&nbsp;1er&nbsp;janvier" in carte
     assert "YTD" not in carte
     assert "title=" not in carte
     assert "BRVM-COMPOSITE YTD" not in html
@@ -477,7 +477,7 @@ def test_affichage_ytd_indices_libelle_visible(tmp_path, monkeypatch):
                       };
                     }"""
                 )
-                assert "Depuis le 1er janvier" in infos["texte"]
+                assert "BRVM-COMPOSITE depuis le 1er janvier" in infos["texte"]
                 assert "YTD" not in infos["texte"]
                 assert infos["titreTitle"] == ""
                 assert infos["valeur"] == "+58,61 %"
@@ -500,10 +500,10 @@ def test_affichage_ytd_indices_libelle_visible(tmp_path, monkeypatch):
                         }"""
                     )
 
-                visible = page.locator("#page-marche").inner_text()
-                assert "Depuis le 1er janvier" in visible
+                visible = page.locator("#page-marche").inner_text().replace("\u00a0", " ").replace("\u202f", " ")
+                assert "BRVM-COMPOSITE depuis le 1er janvier" in visible
                 assert "Heatmap" not in visible
-                assert "+58,61 %" in visible.replace("\u00a0", " ").replace("\u202f", " ")
+                assert "+58,61 %" in visible
                 theme_clair()
                 cadrer_macro()
                 page.locator("#marche-tab-macro .g3").screenshot(
