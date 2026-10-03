@@ -5,7 +5,7 @@ import os
 import shutil
 import socket
 import threading
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -160,6 +160,19 @@ def _caches(historique):
         "stats": {"total": 2, "with_price": 2, "sources": {"fixture": 2}},
     })
     _ecrire("macro_cache.json", {})
+    seances = []
+    valeur = 250.0
+    jour = date(2026, 5, 20)
+    while jour <= date(2026, 10, 2):
+        if jour.weekday() < 5:
+            seances.append({
+                "date": jour.isoformat(),
+                "indices": {"BRVM-C": round(valeur, 2), "BRVM-30": round(valeur - 40, 2)},
+                "societes": [],
+            })
+            valeur += 0.25
+        jour += timedelta(days=1)
+    _ecrire("index_history.json", {"seances": seances})
 
 
 def _espaces(texte):
@@ -471,12 +484,82 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     noter(ticker, largeur, "avec-survol", "Tout", tout)
                     capturer(ticker, largeur, "avec-survol", "Tout")
 
+            page.set_viewport_size({"width": 1280, "height": 800})
+            page.goto(base + "/#marche", wait_until="load", timeout=20000)
+            page.locator("#mkt-courbe-brvm-c .ci-date").wait_for(state="visible", timeout=15000)
+            page.locator("#mkt-courbe-brvm-c .ci-svg").scroll_into_view_if_needed()
+
+            def lire_indice():
+                return page.evaluate(
+                    """() => {
+                      var el = document.getElementById('mkt-courbe-brvm-c');
+                      var vis = el._ciVisible || [];
+                      var dernier = vis.length ? vis[vis.length - 1] : null;
+                      var lecture = el.querySelector('.ci-lecture');
+                      return {
+                        date: (el.querySelector('.ci-date') || {}).textContent || '',
+                        cours: (el.querySelector('.ci-cours') || {}).textContent || '',
+                        variation: (el.querySelector('.ci-var') || {}).textContent || '',
+                        iso: lecture ? lecture.getAttribute('data-ci-date') : '',
+                        valeur: lecture ? Number(lecture.getAttribute('data-ci-valeur')) : null,
+                        debut: el.getAttribute('data-ci-debut'),
+                        fin: el.getAttribute('data-ci-fin'),
+                        n: Number(el.getAttribute('data-ci-n')),
+                        total: vis.length,
+                        dernierIso: dernier ? dernier.date : '',
+                        dernierValeur: dernier ? dernier.value : null
+                      };
+                    }"""
+                )
+
+            charge_idx = lire_indice()
+            assert charge_idx["iso"] == charge_idx["fin"] == charge_idx["dernierIso"]
+            assert charge_idx["n"] >= 2
+            milieu = page.evaluate(
+                """() => {
+                  var el = document.getElementById('mkt-courbe-brvm-c');
+                  var vis = el._ciVisible;
+                  var idx = Math.round((vis.length - 1) * 0.4);
+                  if (idx >= vis.length - 1) idx = vis.length - 2;
+                  var geom = el._ciGeom;
+                  var rect = el.querySelector('.ci-svg').getBoundingClientRect();
+                  var xView = geom.padL + (idx / (vis.length - 1)) * geom.CW;
+                  var yView = geom.padT + geom.CH * 0.55;
+                  return {
+                    date: vis[idx].date,
+                    x: rect.left + (xView / geom.W) * rect.width,
+                    y: rect.top + (yView / geom.H) * rect.height
+                  };
+                }"""
+            )
+            page.mouse.move(milieu["x"], milieu["y"])
+            page.wait_for_function(
+                "(iso) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === iso",
+                arg=milieu["date"],
+                timeout=5000,
+            )
+            assert lire_indice()["iso"] != charge_idx["fin"]
+            page.locator("#topnav").hover()
+            page.wait_for_function(
+                "(fin) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === fin",
+                arg=charge_idx["fin"],
+                timeout=5000,
+            )
+            sortie_idx = lire_indice()
+            assert sortie_idx["iso"] == sortie_idx["fin"] == charge_idx["dernierIso"]
+            assert sortie_idx["valeur"] == charge_idx["dernierValeur"]
+            assert libelle(sortie_idx) == libelle(charge_idx)
+            noter("BRVM-C", 1280, "marche", "sortie", sortie_idx)
+            page.locator("#mkt-courbe-brvm-c").screenshot(
+                path=str(tmp_path / "libelle-BRVM-C-1280-marche-sortie.png")
+            )
+
             navigateur.close()
     finally:
         serveur.shutdown()
 
     assert not erreurs, erreurs[:8]
-    assert len(historiques_servis) == 8, historiques_servis
+    assert len(historiques_servis) >= 8, historiques_servis
     preuve = {
         "lieu": "local",
         "donnees": "production /api/price-history, servies en local sur le code de la branche",
@@ -487,13 +570,14 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
     texte = json.dumps(preuve, ensure_ascii=False, indent=2)
     (tmp_path / "libelles.json").write_text(texte, encoding="utf-8")
     for ligne in rapport:
-        assert "XOF" in ligne["libelle"]
+        if ligne["ticker"] != "BRVM-C":
+            assert "XOF" in ligne["libelle"]
         assert ligne["fin"]
         fichier = tmp_path / ("libelle-%s-%d-%s-%s.png" % (
             ligne["ticker"], ligne["largeur"], ligne["sequence"], ligne["etape"],
         ))
         assert fichier.is_file() and fichier.stat().st_size > 1000
-    assert len(rapport) == 2 * 2 * 2 * 5
+    assert len(rapport) == 2 * 2 * 2 * 5 + 1
     copie = Path("/opt/cursor/artifacts/charts-fix2")
     copie.mkdir(parents=True, exist_ok=True)
 

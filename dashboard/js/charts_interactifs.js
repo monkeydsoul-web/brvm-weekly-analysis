@@ -285,8 +285,9 @@ function lierPointeur(hote) {
   });
   hote.addEventListener("pointerup", function() { doigt = false; });
   hote.addEventListener("pointercancel", function() { doigt = false; });
-  hote.addEventListener("pointerleave", function() {
+  hote.addEventListener("pointerleave", function(evt) {
     hote._ciSurCourbe = false;
+    if (!evt || evt.pointerType !== "mouse") return;
     var visible = hote._ciVisible;
     if (!visible || visible.length < 2) return;
     hote._ciDate = null;
