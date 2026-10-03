@@ -22,6 +22,7 @@ var PERIODES_COURBE = [
 ];
 
 var _promessesIndice = {};
+var DELAI_LECTURE_MS = 10000;
 
 function decalerMoisIso(iso, delta) {
   var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ""));
@@ -600,16 +601,61 @@ function seriePrixFiable(data, ticker) {
   return pointsFiables(data[ticker]);
 }
 
+function lireJson(url, contexte) {
+  return new Promise(function(resolve, reject) {
+    var ctrl = (typeof AbortController === "function") ? new AbortController() : null;
+    var timer = setTimeout(function() { if (ctrl) ctrl.abort(); }, DELAI_LECTURE_MS);
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    fetch(url, opts).then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(data) {
+      clearTimeout(timer);
+      resolve(data);
+    }).catch(function(e) {
+      clearTimeout(timer);
+      console.error("[BRVM] " + contexte, e);
+      reject(e);
+    });
+  });
+}
+
+function exigerObjet(data, contexte) {
+  if (!data || typeof data !== "object" || data.error) {
+    var e = new Error("réponse inutilisable");
+    console.error("[BRVM] " + contexte, e);
+    throw e;
+  }
+  return data;
+}
+
+function afficherPanne(hote, relancer) {
+  hote.setAttribute("data-ci-etat", "panne");
+  hote._ciComplet = [];
+  hote._ciVisible = [];
+  hote.removeAttribute("data-ci-debut");
+  hote.removeAttribute("data-ci-fin");
+  hote.removeAttribute("data-ci-n");
+  hote.innerHTML = '<p class="ci-vide" role="status">Données indisponibles</p>'
+    + '<button type="button" class="ci-reessayer">Réessayer</button>';
+  hote.querySelector(".ci-reessayer").addEventListener("click", function() {
+    if (hote.getAttribute("data-ci-etat") !== "panne") return;
+    hote.removeAttribute("data-ci-etat");
+    relancer();
+  });
+}
+
 function lireHistoriqueFiable(ticker) {
   var deja = seriePrixFiable(window._priceHistory, ticker);
   if (deja.length >= 2) return Promise.resolve(deja);
   if (window._ciHistoriquePrix) {
     return Promise.resolve(seriePrixFiable(window._ciHistoriquePrix, ticker));
   }
-  return fetch("/api/price-history").then(function(r) { return r.json(); }).then(function(data) {
-    window._ciHistoriquePrix = data && !data.error ? data : {};
+  return lireJson("/api/price-history", "cours " + ticker).then(function(data) {
+    exigerObjet(data, "cours " + ticker);
+    window._ciHistoriquePrix = data;
     return seriePrixFiable(window._ciHistoriquePrix, ticker);
-  }).catch(function() { return []; });
+  });
 }
 
 function chargerCourbeSociete(ticker, containerId) {
@@ -618,7 +664,7 @@ function chargerCourbeSociete(ticker, containerId) {
   var cle = String(ticker || "").toUpperCase();
   if (!cle) return;
   var etat = hote.getAttribute("data-ci-etat");
-  if (hote.getAttribute("data-ci-cle") === cle && (etat === "ok" || etat === "vide" || etat === "charge")) return;
+  if (hote.getAttribute("data-ci-cle") === cle && (etat === "ok" || etat === "vide" || etat === "charge" || etat === "panne")) return;
   hote.setAttribute("data-ci-cle", cle);
   hote.setAttribute("data-ci-etat", "charge");
   hote.innerHTML = '<p class="ci-vide">Chargement…</p>';
@@ -626,6 +672,9 @@ function chargerCourbeSociete(ticker, containerId) {
     if (!hote.isConnected || hote.getAttribute("data-ci-cle") !== cle) return;
     poserSerie(hote, points, { unite: "XOF" });
     hote.setAttribute("data-ci-etat", points.length >= 2 ? "ok" : "vide");
+  }, function() {
+    if (!hote.isConnected || hote.getAttribute("data-ci-cle") !== cle) return;
+    afficherPanne(hote, function() { chargerCourbeSociete(cle, containerId); });
   });
 }
 
@@ -633,23 +682,31 @@ function chargerCourbeIndice(hote) {
   var code = hote.getAttribute("data-ci-indice");
   if (!code) return;
   var etat = hote.getAttribute("data-ci-etat");
-  if (etat === "ok" || etat === "vide" || etat === "charge") return;
+  if (etat === "ok" || etat === "vide" || etat === "charge" || etat === "panne") return;
   hote.setAttribute("data-ci-etat", "charge");
   hote.innerHTML = '<p class="ci-vide">Chargement…</p>';
-  if (!_promessesIndice[code]) {
-    var url = "/api/index-history?index=" + encodeURIComponent(code) + "&range=1A";
-    _promessesIndice[code] = fetch(url).then(function(r) {
-      if (!r.ok) return [];
-      return r.json();
-    }).then(function(data) {
-      return normaliserPoints(data && data.points);
-    }).catch(function() { return []; });
-  }
-  _promessesIndice[code].then(function(points) {
+  lireIndice(code).then(function(points) {
     if (!hote.isConnected) return;
     poserSerie(hote, points, { unite: "" });
     hote.setAttribute("data-ci-etat", points.length >= 2 ? "ok" : "vide");
+  }, function() {
+    if (!hote.isConnected) return;
+    afficherPanne(hote, function() { chargerCourbeIndice(hote); });
   });
+}
+
+function lireIndice(code) {
+  if (_promessesIndice[code]) return _promessesIndice[code];
+  var url = "/api/index-history?index=" + encodeURIComponent(code) + "&range=1A";
+  var p = lireJson(url, "indice " + code).then(function(data) {
+    exigerObjet(data, "indice " + code);
+    return normaliserPoints(data.points);
+  });
+  p.catch(function() {
+    if (_promessesIndice[code] === p) delete _promessesIndice[code];
+  });
+  _promessesIndice[code] = p;
+  return p;
 }
 
 function brancherCourbesMarche() {
