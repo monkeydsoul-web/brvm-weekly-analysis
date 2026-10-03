@@ -7,10 +7,13 @@
    du JS vanilla, limité à #stockChartDiv.
 
    Accueil, Comparer et Backtest ne passent pas par drawPriceChart.
-   L'infobulle de stock_chart.js (chartHover / chartLeave) reste :
-   la surface relaie pointermove, pointerleave et le toucher vers le
-   SVG. Le doigt vertical ne fait pas preventDefault (touch-action: pan-y)
-   pour laisser défiler la page. Chaque fenêtre émet brvm:zoom.
+   chartHover n'est rebranché que s'il existe encore : la surface relaie
+   alors pointermove, pointerleave et le toucher vers le SVG. Sans
+   chartHover, le point touché (charts_interactifs.js) reçoit les
+   événements qui remontent de la surface ; on ne réécrit pas onmousemove.
+   L'en-tête « N pts · … » n'est mis à jour que s'il est là. Sinon
+   l'en-tête voisin suit brvm:zoom. Le doigt vertical ne fait pas
+   preventDefault (touch-action: pan-y).
 */
 (function () {
   if (window.__BRVM_ZOOM_PRET) return;
@@ -164,11 +167,12 @@
       couleur = last >= first ? '#4ADE80' : '#F87171';
     }
     var spans = racine.querySelectorAll('span');
-    var i, el, suivant;
+    var i, el, suivant, texte;
     for (i = 0; i < spans.length; i++) {
       el = spans[i];
       if (el.classList && el.classList.contains('brvm-zoom-plage')) continue;
-      if ((el.textContent || '').indexOf(' pts') === -1) continue;
+      texte = el.textContent || '';
+      if (texte.indexOf(' pts') === -1 || texte.indexOf('\u2192') === -1) continue;
       el.textContent = libelle;
       suivant = el.nextElementSibling;
       if (suivant && suivant.tagName === 'SPAN') {
@@ -396,7 +400,7 @@
   function onTouchMove(e) {
     var surface = e.currentTarget;
     relayerTouche(surface, e);
-    if (e.touches && e.touches.length === 1) {
+    if (survolAncien() && e.touches && e.touches.length === 1) {
       relayerSouris(surface, 'mousemove', e.touches[0].clientX, e.touches[0].clientY);
     }
     var racine = racineDe(surface);
@@ -448,7 +452,7 @@
       var t = e.changedTouches[0];
       if (Math.abs(t.clientX - p.x) < 10 && Math.abs(t.clientY - p.y) < 10) relayerClic(surface, t.clientX, t.clientY);
     }
-    if ((!e.touches || e.touches.length === 0) && e.changedTouches && e.changedTouches[0]) {
+    if (survolAncien() && (!e.touches || e.touches.length === 0) && e.changedTouches && e.changedTouches[0]) {
       relayerSouris(surface, 'mouseleave', e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     }
     if (p) p.mode = '';
@@ -512,11 +516,17 @@
     }
   }
 
+  function survolAncien() {
+    return typeof window.chartHover === 'function';
+  }
+
   function onPointerMove(e) {
+    if (!survolAncien()) return;
     relayerSouris(e.currentTarget, 'mousemove', e.clientX, e.clientY);
   }
 
   function onPointerLeave(e) {
+    if (!survolAncien()) return;
     relayerSouris(e.currentTarget, 'mouseleave', e.clientX, e.clientY);
   }
 

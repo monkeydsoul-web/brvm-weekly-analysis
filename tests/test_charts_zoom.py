@@ -52,11 +52,18 @@ def test_zoom_local_sans_cdn_ni_plugin():
     assert "removeAttribute('onmousemove')" not in source
     assert "removeAttribute('onmouseleave')" not in source
     assert "nettoyerInfobulle" not in source
+    assert "stopPropagation" not in source
+    assert "typeof window.chartHover" in source
+    assert " pts" in source
     stock = _lire("dashboard/stock_chart.js")
-    assert "function chartHover" in stock
-    assert "function chartLeave" in stock
-    assert 'onmousemove="chartHover' in stock
-    assert 'onmouseleave="chartLeave' in stock
+    if "function chartHover" in stock:
+        assert "function chartLeave" in stock
+        assert 'onmousemove="chartHover' in stock
+        assert 'onmouseleave="chartLeave' in stock
+    else:
+        assert "function chartLeave" not in stock
+        assert "onmousemove" not in stock
+        assert "survolAncien" in source
     index = _lire("dashboard/index.html")
     balise = '<script src="/js/charts_zoom.js?v={{ASSET_V}}" data-brvm-mod="js/charts_zoom.js" onerror="brvmScriptError(this)"></script>'
     assert balise in index
@@ -409,6 +416,88 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                 )
                 assert cache == "0", cache
 
+            def mode_lecture():
+                return page.evaluate(
+                    """() => {
+                      var ancien = false;
+                      var spans = document.querySelectorAll('#stockChartDiv span');
+                      var i, el, texte;
+                      for (i = 0; i < spans.length; i++) {
+                        el = spans[i];
+                        if (el.classList.contains('brvm-zoom-plage')) continue;
+                        texte = el.textContent || '';
+                        if (texte.indexOf(' pts') !== -1 && texte.indexOf('\\u2192') !== -1) ancien = true;
+                      }
+                      return {
+                        ancien: ancien,
+                        point: !!document.querySelector('#stockChartDiv .ci-lecture')
+                      };
+                    }"""
+                )
+
+            def assert_fenetre_ci(origine=None):
+                etat = page.evaluate(
+                    """() => {
+                      var el = document.getElementById('stockChartDiv');
+                      var z = el._brvmZoom;
+                      return {
+                        n: el.getAttribute('data-ci-n'),
+                        debut: el.getAttribute('data-ci-debut'),
+                        fin: el.getAttribute('data-ci-fin'),
+                        attenduN: String(z.fin - z.debut + 1),
+                        attenduDebut: String(z.labels[z.debut] || '').slice(0, 10),
+                        attenduFin: String(z.labels[z.fin] || '').slice(0, 10)
+                      };
+                    }"""
+                )
+                assert etat["n"] == etat["attenduN"], etat
+                assert etat["debut"] == etat["attenduDebut"], etat
+                assert etat["fin"] == etat["attenduFin"], etat
+                if origine is not None:
+                    assert etat["n"] == origine["n"]
+                    assert etat["debut"] == origine["debut"]
+                    assert etat["fin"] == origine["fin"]
+                return {"n": etat["n"], "debut": etat["debut"], "fin": etat["fin"]}
+
+            def point_touche():
+                boite = page.locator("#stockChartDiv .ci-svg").bounding_box()
+                assert boite and boite["width"] > 80 and boite["height"] > 40
+                x = boite["x"] + boite["width"] * 0.28
+                y = boite["y"] + min(boite["height"] * 0.45, boite["height"] - 4)
+                dessus = page.evaluate(
+                    """([x, y]) => {
+                      var el = document.elementFromPoint(x, y);
+                      return el ? String(el.className || el.tagName) : '';
+                    }""",
+                    [x, y],
+                )
+                assert "brvm-zoom-surface" in dessus, dessus
+                avant_fen = fenetre()
+                date_avant = page.locator("#stockChartDiv .ci-date").inner_text()
+                x_avant = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
+                if page.viewport_size["width"] <= 500:
+                    page.touchscreen.tap(x, y)
+                else:
+                    page.mouse.move(boite["x"] + boite["width"] * 0.62, y)
+                    page.mouse.move(x, y)
+                page.wait_for_timeout(120)
+                assert page.locator("#stockChartDiv .ci-date").inner_text() != date_avant
+                x_apres = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
+                assert x_apres != x_avant
+                assert "XOF" in page.locator("#stockChartDiv .ci-cours").inner_text()
+                lecture = page.locator("#stockChartDiv .ci-lecture").inner_text()
+                page.mouse.move(8, 8)
+                page.wait_for_timeout(80)
+                assert page.locator("#stockChartDiv .ci-lecture").inner_text() == lecture
+                apres_fen = fenetre()
+                assert apres_fen["debut"] == avant_fen["debut"]
+                assert apres_fen["fin"] == avant_fen["fin"]
+
+            def verifier_legende(origine=None):
+                if mode["ancien"]:
+                    return assert_entete(origine)
+                return assert_fenetre_ci(origine)
+
             def envelopper_externe():
                 page.evaluate(
                     """() => {
@@ -621,26 +710,37 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                 page.remove_listener("request", noter)
                 assert vus == [base + "/api/market"], vus
                 preparer_courbe()
-                origine = assert_entete()
+                mode = mode_lecture()
+                assert mode["ancien"] or mode["point"], mode
+                origine = verifier_legende()
                 ecouter_zoom()
                 envelopper_externe()
-                infobulle_survol()
+                if mode["ancien"]:
+                    infobulle_survol()
+                else:
+                    point_touche()
                 zoompe = zoom_plus()
                 assert page.evaluate("() => window.__zoomPasses") == 1
-                lu = assert_entete()
-                assert lu["pts"] != origine["pts"]
+                lu = verifier_legende()
+                if mode["ancien"]:
+                    assert lu["pts"] != origine["pts"]
+                else:
+                    assert lu["n"] != origine["n"]
                 assert_evenement(zoompe)
-                gestionnaires_survol()
-                infobulle_survol()
+                if mode["ancien"]:
+                    gestionnaires_survol()
+                    infobulle_survol()
+                else:
+                    point_touche()
                 glisser_souris()
-                assert_entete()
+                verifier_legende()
                 plein = reinitialiser()
-                assert_entete(origine)
+                verifier_legende(origine)
                 assert_evenement(plein)
                 molette_ctrl()
-                assert_entete()
+                verifier_legende()
                 plein = reinitialiser()
-                assert_entete(origine)
+                verifier_legende(origine)
                 molette_sans_ctrl_defile()
                 if largeur == 390:
                     zoom_plus()
