@@ -149,6 +149,18 @@ def test_fichier_isole_du_modal_et_du_backtest():
     assert "cmp-courbes" not in core
     assert "charts_comparaison" not in core
     assert "function openCompareModal()" in core
+    assert "observe(document.body" not in src
+    assert 'getElementById("page-stock")' in src
+    assert 'getElementById("stock-slideover")' in src
+    assert "class=\"cmp-retirer\"" in src
+    assert "Trop peu de séances en commun entre " in src
+    assert "trop court" not in src
+    css = (ROOT / "dashboard" / "css" / "app.css").read_text(encoding="utf-8")
+    fiche = css.find(".sso-disclaimer")
+    bloc = css.find("/* CHARTS-2")
+    assert 0 < fiche < bloc < fiche + 800
+    assert css.rstrip()[-40:].find("#cmp-courbes") == -1
+    assert ".cmp-retirer" in css
 
 
 def _jours_ouvres(n, fin=None):
@@ -293,13 +305,13 @@ def _autoriser_local(monkeypatch):
 
 
 @pytest.mark.skipif(_CI, reason="Playwright hors CI. Local : pytest tests/test_charts_comparaison.py -q -s")
-def test_comparer_fiche_1280_390_clair_sombre(monkeypatch):
-    """Étiquettes lisibles, une requête /api/market, message si le Composite est court."""
+def test_comparer_fiche_1280_390_clair_sombre(monkeypatch, tmp_path):
+    """Étiquettes lisibles, une requête /api/market, message si trop peu de séances communes."""
     pytest.importorskip("playwright.sync_api")
     _autoriser_local(monkeypatch)
     from playwright.sync_api import sync_playwright
 
-    preuves = Path(os.environ.get("BRVM_PREUVE_DIR") or "/opt/cursor/artifacts/screenshots")
+    preuves = Path(os.environ.get('BRVM_PREUVE_DIR') or tmp_path)
     preuves.mkdir(parents=True, exist_ok=True)
     serie = _caches(22)
     base_attendue = serie["jours"][0]
@@ -476,6 +488,7 @@ def test_comparer_fiche_1280_390_clair_sombre(monkeypatch):
             assert lu["BOAC"]["nom"] == "BOA Côte d'Ivoire"
             assert lu["BOAC"]["perf"] == "+10,5 %"
             assert page.locator("#cmp-courbes-btn").is_disabled()
+            assert page.locator("#cmp-courbes .cmp-retirer").count() >= 1
             page.click("#cmp-courbes [data-cmp-retirer='BOAC']")
             page.wait_for_function(
                 "() => document.querySelectorAll('#cmp-courbes polyline').length === 3",
@@ -505,10 +518,10 @@ def test_comparer_fiche_1280_390_clair_sombre(monkeypatch):
             ouvrir_chiffres()
             page.wait_for_selector("#cmp-courbes [data-cmp-message='court']", timeout=15000)
             message = page.locator("#cmp-courbes [data-cmp-message='court']").inner_text()
-            assert "trop court" in message
-            assert "8 séances en commun avec Sonatel" in message
-            assert "au moins 20" in message
-            assert "Aucune courbe" in message
+            assert message == (
+                "Trop peu de séances en commun entre Sonatel et le BRVM-COMPOSITE : 8, "
+                "il en faut au moins 20. Aucune courbe n'est tracée."
+            )
             assert page.locator("#cmp-courbes polyline").count() == 0
             assert page.locator("#cmp-courbes path").count() == 0
             assert page.locator("#cmp-courbes circle").count() == 0

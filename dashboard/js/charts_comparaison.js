@@ -281,11 +281,9 @@ function brvmInstallerComparaison(api) {
     var html = '<div class="ct" id="cmp-courbes-titre">Comparer</div>';
     if (!seul.ok) {
       var nom = nomDe(etat.ticker, etat.ticker);
-      var motSeance = seul.n === 1 ? "séance" : "séances";
       html += '<p class="cmp-message" role="status" data-cmp-message="court" data-cmp-n="' + seul.n + '">'
-        + 'L\'historique du BRVM-COMPOSITE est trop court : '
-        + seul.n + ' ' + motSeance + ' en commun avec ' + ech(nom)
-        + ', il en faut au moins ' + api.SEUIL + '. Aucune courbe n\'est tracée.</p>';
+        + 'Trop peu de séances en commun entre ' + ech(nom) + ' et le BRVM-COMPOSITE : '
+        + seul.n + ', il en faut au moins ' + api.SEUIL + '. Aucune courbe n\'est tracée.</p>';
       carte.innerHTML = html;
       return;
     }
@@ -321,7 +319,7 @@ function brvmInstallerComparaison(api) {
       html += '<div class="cmp-puces">';
       etat.autres.forEach(function (t) {
         html += '<span class="cmp-puce">' + ech(nomDe(t, t))
-          + ' <button type="button" data-cmp-retirer="' + ech(t) + '">Retirer</button></span>';
+          + ' <button type="button" class="cmp-retirer" data-cmp-retirer="' + ech(t) + '">Retirer</button></span>';
       });
       html += '</div>';
     }
@@ -500,14 +498,19 @@ function brvmInstallerComparaison(api) {
     }, 40);
   }
 
-  if (document.body) {
-    new MutationObserver(planifier).observe(document.body, { childList: true, subtree: true });
-  }
+  var fiche = document.getElementById("page-stock");
+  var volet = document.getElementById("stock-slideover");
+  if (fiche) new MutationObserver(planifier).observe(fiche, { childList: true, subtree: true });
+  if (volet) new MutationObserver(planifier).observe(volet, { childList: true, subtree: true });
   window.addEventListener("resize", redessiner);
-  new MutationObserver(redessiner).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   document.addEventListener("click", function (e) {
-    var btn = e.target && e.target.closest ? e.target.closest(".ctab-btn, .stock-tab") : null;
-    if (btn) setTimeout(redessiner, 30);
+    var cible = e.target && e.target.closest ? e.target : null;
+    if (!cible || !cible.closest) return;
+    if (cible.closest("[data-theme-btn]")) {
+      redessiner();
+      return;
+    }
+    if (cible.closest(".ctab-btn, .stock-tab")) setTimeout(redessiner, 30);
   });
   planifier();
 }
