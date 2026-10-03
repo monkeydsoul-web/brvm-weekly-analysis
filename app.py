@@ -1864,17 +1864,52 @@ def api_price_history_extended_top():
         return jsonify({"error": str(e)}), 500
 
 
+# SPARK-1 : (mtime, reponse) remplace en une seule affectation, sans verrou.
+_SPARKLINES_CACHE = None
+
+
+def _sparkline_points(points):
+    """30 dernieres clotures reelles : prix > 0, pas de synthetique, pas de week-end."""
+    import datetime as _dt
+    garde = []
+    for p in points or []:
+        try:
+            prix = float(p.get("price") or 0)
+            jour = _dt.date.fromisoformat(str(p.get("date", ""))[:10])
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if prix <= 0 or p.get("source") == "synthetic" or jour.weekday() >= 5:
+            continue
+        garde.append({"date": jour.isoformat(), "close": prix})
+    garde.sort(key=lambda x: x["date"])
+    return garde[-30:]
+
+
 @app.route("/api/sparklines")
 def api_sparklines():
-    """Retourne les 30 derniers jours de cotation pour toutes les actions (sparklines légères)."""
-    import datetime as _dt
-    history = _load_extended_history()
-    cutoff = (_dt.date.today() - _dt.timedelta(days=50)).isoformat()
+    """30 dernieres clotures de price_history.json par action (aucun point du jour ajoute)."""
+    global _SPARKLINES_CACHE
+    from price_history_builder import HISTORY_PATH, load_history
+    cache = _SPARKLINES_CACHE
+    try:
+        mtime = os.path.getmtime(HISTORY_PATH)
+        taille = os.path.getsize(HISTORY_PATH)
+    except OSError as e:
+        logger.warning("SPARK-1: %s inaccessible (%s), cache precedent servi", HISTORY_PATH, e)
+        return jsonify(cache[1] if cache else {})
+    if cache and cache[0] == mtime:
+        return jsonify(cache[1])
+    history = load_history()
+    if not history and taille > 100:
+        logger.warning("SPARK-1: %s illisible ou vide (%d octets), cache precedent servi", HISTORY_PATH, taille)
+        return jsonify(cache[1] if cache else {})
     result = {}
     for ticker, points in history.items():
-        recent = sorted([p for p in points if p["date"] >= cutoff], key=lambda x: x["date"])[-30:]
-        if len(recent) >= 3:
-            result[ticker] = [{"date": p["date"], "close": p["close"]} for p in recent]
+        pts = _sparkline_points(points)
+        if pts:
+            result[ticker] = pts
+    logger.info("SPARK-1: recalcul sparklines (%d tickers)", len(result))
+    _SPARKLINES_CACHE = (mtime, result)
     return jsonify(result)
 
 
