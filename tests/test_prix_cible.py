@@ -283,6 +283,22 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "fmtLibelleValeur(s.libelle_valeur)" in page
 
 
+def test_cible_douteuse_masque_montant_et_ecart():
+    """incertain : seul « Cible à vérifier ». Le calcul de prix_cible.py ne change pas."""
+    core = (ROOT / "dashboard" / "js" / "core.js").read_text(encoding="utf-8")
+    carte = core[core.index("function htmlCartePrixCible"):core.index("async function renderTargets")]
+    doute = carte.split("if(cibleDouteuse", 1)[1].split("var montant", 1)[0]
+    assert "Cible à vérifier" in doute
+    assert "fmtXOF" not in doute
+    assert "ecart_pct" not in doute
+    screener = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
+    assert "fmtConseil(x)" in screener
+    assert "douteuse ? 'Cible à vérifier'" in screener
+    page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+    assert "Le prix et l'écart restent affichés" not in page
+    assert "sans montant ni écart" in page
+
+
 def test_methodo_explique_le_calcul_actuel():
     """La carte dit le calcul en place : 0,10 et 22,5, pas une médiane de secteur."""
     page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
