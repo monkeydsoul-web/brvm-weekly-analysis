@@ -1999,6 +1999,10 @@ function filtreConseil(rows){
   });
 }
 function renderRank(){
+  var _mEx=function(row,cle){
+    if(typeof marqueExercice!=='function'||typeof anneeDuChiffre!=='function') return '';
+    return marqueExercice(anneeDuChiffre(row,cle));
+  };
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
   const verd=document.getElementById('fVerdict')?.value||'';
@@ -2056,8 +2060,8 @@ function renderRank(){
       <td>${x.price?(typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')):'N/D'}</td>
       <td style="padding:2px 4px">${spk}${var30}</td>
       <td style="color:${chgC}">${typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'}</td>
-      <td class="col-pe">${x.pe_ref||'—'}×${marqueExercice(anneeDuChiffre(x,'pe'))}</td>
-      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}${marqueExercice(anneeDuChiffre(x,'rendement'))}</td>
+      <td class="col-pe">${x.pe_ref||'—'}×${_mEx(x,'pe')}</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}${_mEx(x,'rendement')}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
       <td><span class="b ${classePrincipale(x)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=couleurNote(sv);return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
@@ -2790,6 +2794,10 @@ function buildKpiCards(s){
 }
 
 function _genVerdict(s){
+  var _exVerdict=function(cle){
+    if(typeof texteExercice!=='function'||typeof anneeDuChiffre!=='function') return '';
+    return ' — '+texteExercice(anneeDuChiffre(s,cle));
+  };
   const v=s.composite_adj||0;
   const avis=conseilAffiche(s);
   const suspendu=!!(avis&&avis.suspendu);
@@ -2815,13 +2823,13 @@ function _genVerdict(s){
 
   // Points forts
   const forts=[];
-  if(s.pe_ref&&s.pe_ref<15) forts.push(`P/E attractif (${s.pe_ref.toFixed(1)}× &lt; seuil Graham 15×) — ${texteExercice(anneeDuChiffre(s,'pe'))}`);
-  else if(s.pe_ref&&s.pe_ref<22) forts.push(`P/E raisonnable (${s.pe_ref.toFixed(1)}×) — ${texteExercice(anneeDuChiffre(s,'pe'))}`);
-  if((s.div_yield||0)>=6) forts.push(`Dividende élevé (${s.div_yield.toFixed(1)}% — revenu passif solide) — ${texteExercice(anneeDuChiffre(s,'rendement'))}`);
-  else if((s.div_yield||0)>=3) forts.push(`Dividende présent (${s.div_yield.toFixed(1)}%) — ${texteExercice(anneeDuChiffre(s,'rendement'))}`);
-  if((s.roe||0)>=15) forts.push(`ROE excellent (${s.roe}% — rentabilité supérieure à la moyenne) — ${texteExercice(anneeDuChiffre(s,'roe'))}`);
-  else if((s.roe||0)>=10) forts.push(`ROE correct (${s.roe}%) — ${texteExercice(anneeDuChiffre(s,'roe'))}`);
-  if((s.pb_ref||99)<1.2) forts.push(`Décote sur actif net (P/B ${s.pb_ref.toFixed(2)}× &lt; 1.2) — ${texteExercice(anneeDuChiffre(s,'pb'))}`);
+  if(s.pe_ref&&s.pe_ref<15) forts.push(`P/E attractif (${s.pe_ref.toFixed(1)}× &lt; seuil Graham 15×)${_exVerdict('pe')}`);
+  else if(s.pe_ref&&s.pe_ref<22) forts.push(`P/E raisonnable (${s.pe_ref.toFixed(1)}×)${_exVerdict('pe')}`);
+  if((s.div_yield||0)>=6) forts.push(`Dividende élevé (${s.div_yield.toFixed(1)}% — revenu passif solide)${_exVerdict('rendement')}`);
+  else if((s.div_yield||0)>=3) forts.push(`Dividende présent (${s.div_yield.toFixed(1)}%)${_exVerdict('rendement')}`);
+  if((s.roe||0)>=15) forts.push(`ROE excellent (${s.roe}% — rentabilité supérieure à la moyenne)${_exVerdict('roe')}`);
+  else if((s.roe||0)>=10) forts.push(`ROE correct (${s.roe}%)${_exVerdict('roe')}`);
+  if((s.pb_ref||99)<1.2) forts.push(`Décote sur actif net (P/B ${s.pb_ref.toFixed(2)}× &lt; 1.2)${_exVerdict('pb')}`);
   if(s.pdf_verdict==='POSITIF') forts.push('Rapport annuel jugé positif par l\'analyse IA');
   var _seuilFort=(typeof _seuilAffiche==='function')?_seuilAffiche('SEUIL_NOTE_HAUT', 7.5):7.5;
   if((s.score_graham||0)>=_seuilFort) forts.push(`Critères Graham validés (${s.score_graham}/10)`);
@@ -2829,10 +2837,10 @@ function _genVerdict(s){
 
   // Points de vigilance
   const vigil=[];
-  if(s.pe_ref&&s.pe_ref>25) vigil.push(`P/E élevé (${s.pe_ref.toFixed(1)}× — valorisation chère) — ${texteExercice(anneeDuChiffre(s,'pe'))}`);
+  if(s.pe_ref&&s.pe_ref>25) vigil.push(`P/E élevé (${s.pe_ref.toFixed(1)}× — valorisation chère)${_exVerdict('pe')}`);
   if(!(s.div_yield>0)) vigil.push('Pas de dividende versé');
-  if((s.roe||0)<8) vigil.push(`ROE faible (${(s.roe||0).toFixed(1)}% — rentabilité insuffisante) — ${texteExercice(anneeDuChiffre(s,'roe'))}`);
-  if((s.pb_ref||99)>2.5) vigil.push(`P/B élevé (${(s.pb_ref||0).toFixed(2)}× — prime sur actif net) — ${texteExercice(anneeDuChiffre(s,'pb'))}`);
+  if((s.roe||0)<8) vigil.push(`ROE faible (${(s.roe||0).toFixed(1)}% — rentabilité insuffisante)${_exVerdict('roe')}`);
+  if((s.pb_ref||99)>2.5) vigil.push(`P/B élevé (${(s.pb_ref||0).toFixed(2)}× — prime sur actif net)${_exVerdict('pb')}`);
   if(s.pdf_verdict==='NÉGATIF'||s.pdf_verdict==='NEGATIF') vigil.push('Rapport annuel avec signaux négatifs (IA)');
   if(v<45) vigil.push('Score composite faible — données limitées ou fondamentaux dégradés');
 
@@ -3233,11 +3241,11 @@ async function showStock(ticker){
             return `<div class="card" style="border-left:3px solid var(--amber);margin-bottom:12px"><div class="ct">💰 Dividende</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
           ${[
-            ['Par action',_amtCell,'var(--note-amber)',true],
-            ['Rendement',_yieldCell,_isExc?'var(--amber)':couleurDividende(_dy),true],
-            ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)',false],
-            ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)',false]
-          ].map(([l,vv,c,montrer])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div>${montrer?marqueExercice(anneeDuChiffre(s,l==='Rendement'?'rendement':'div')):''}</div>`).join('')}
+            ['Par action',_amtCell,'var(--note-amber)'],
+            ['Rendement',_yieldCell,_isExc?'var(--amber)':couleurDividende(_dy)],
+            ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
+            ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
+          ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div>${(l==='Par action'||l==='Rendement')?marqueExercice(anneeDuChiffre(s,l==='Rendement'?'rendement':'div')):''}</div>`).join('')}
         </div></div>`;
           })():''}
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
