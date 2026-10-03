@@ -217,25 +217,6 @@ function brvmInstallerComparaison(api) {
     return promessePrix;
   }
 
-  function attendrePrix() {
-    if (pretPrix()) return Promise.resolve(window._priceHistory);
-    return new Promise(function (resolve, reject) {
-      var essais = 0;
-      var t = setInterval(function () {
-        essais += 1;
-        if (pretPrix()) {
-          clearInterval(t);
-          resolve(window._priceHistory);
-        } else if (essais >= 40) {
-          clearInterval(t);
-          var e = new Error("historique absent");
-          console.error("[BRVM] cours pour la comparaison", e);
-          reject(e);
-        }
-      }, 100);
-    });
-  }
-
   function historiqueComposite() {
     if (cacheIndice) return Promise.resolve(cacheIndice);
     if (promesseIndice) return promesseIndice;
@@ -339,7 +320,7 @@ function brvmInstallerComparaison(api) {
     carte.innerHTML = '<div class="ct" id="cmp-courbes-titre">Comparer</div>'
       + '<p class="cmp-intro">Chargement des historiques…</p>';
     Promise.all([
-      attendrePrix().then(function (h) { return { ok: true, v: h }; }, function () { return { ok: false }; }),
+      lirePrix().then(function (h) { return { ok: true, v: h }; }, function () { return { ok: false }; }),
       historiqueComposite().then(function (d) { return { ok: true, v: d }; }, function () { return { ok: false }; })
     ]).then(function (res) {
       if (n !== seq) return;

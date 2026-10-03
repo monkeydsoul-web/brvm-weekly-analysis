@@ -50,6 +50,10 @@ def test_sources_pannes_sans_repli():
     assert "Trop peu de séances en commun" in COMPARAISON
     assert "var SEUIL = 20;" in COMPARAISON
     assert 'SEUIL_COURS_FIABLE = "2026-05-19"' in INTERACTIFS
+    assert "historique absent" not in COMPARAISON
+    assert "setInterval" not in COMPARAISON
+    assert "function attendrePrix" not in COMPARAISON
+    assert "lirePrix()" in COMPARAISON
 
 
 def _jours(n=82):
@@ -313,6 +317,7 @@ def _scenario_prix(navigateur, base, largeur):
         page.wait_for_selector("#stockChartDiv .ci-reessayer", timeout=15000)
         assert page.locator("#stockChartDiv .ci-vide").inner_text().strip() == "Données indisponibles"
         assert page.locator("#stockChartDiv .ci-reessayer").inner_text() == "Réessayer"
+        page.wait_for_timeout(400)
         avant = _compter(journal, "/api/price-history")
         assert avant >= 1
         page.wait_for_timeout(3000)
