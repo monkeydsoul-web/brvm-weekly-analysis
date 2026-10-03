@@ -6,6 +6,7 @@ Les captures vont dans tmp_path. Aucun chemin en dur.
 """
 import json
 import os
+import subprocess
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,34 +44,42 @@ def test_boutons_morts_retires_et_sidebar_encore_utilisee():
     assert "screenerExportCSV" not in core
     assert "let _scrResults = []" in screener
 
-    assert "pageValuation" not in signaux
-    assert "pageAlerts" not in signaux
-    assert "appendChild(pageValuation)" not in signaux
-    assert "injectEpurationSignaux" not in signaux
+    assert "function injectEpurationSignaux" in signaux
+    assert "appendChild(pageValuation)" in signaux
     assert "function loadSignauxValoAlertes" in signaux
-    assert "renderPrevisionsPage" in signaux
-    assert "id === 'valuation' || id === 'alerts'" in core
-    assert "return nav('signals', pushHistory);" in core
-    assert "Vérifier maintenant" not in html
+    assert "injectEpurationSignaux: \"signaux_v2.js\"" in loader
+    assert "function verifierAlertesMaintenant" in core
+    assert "Vérifier maintenant" in html
+    assert "renderSmartAlertsPanel()" not in html
     assert ">Vérifier</button>" not in html
+    assert "id === 'valuation' || id === 'alerts'" not in core
 
     assert "Activer notifications push" not in html
+    assert "arrière-plan" not in html
     assert "requestPushPermission" not in html
     assert "function requestPushPermission" not in core
     assert "function initServiceWorker" not in core
+    assert "function _updatePushUI" not in core
+    assert "function _setupSWMessaging" not in core
+    assert "function triggerSWAlertCheck" not in core
+    assert "function testPushNotification" not in core
+    assert "initServiceWorker()" not in core
+    assert "desinstallerServiceWorkerPrix" in core
     assert 'id="push-btn"' not in html
+    sw = (ROOT / "dashboard" / "sw.js").read_text(encoding="utf-8")
+    assert "skipWaiting" in sw
+    assert "brvm-sw-" in sw
+    assert "unregister" in sw
+    assert "addEventListener('fetch'" not in sw
+    assert "setInterval" not in sw
+    assert "postMessage" not in sw
+    assert "clients.openWindow" not in sw
 
-    assert "v9.0" not in html
-    assert "Mai 2026" not in html
-    assert "Changelog v9.0" not in core
-    assert ">v14.2</span>" in html
-    assert ">v14.2</div>" in html
-    assert "n'est plus tenu" in html
-
-    assert "Copiez ce texte" not in core
-    assert "navigator.share" in core
-    assert "Lien copié" in core
-    assert "function _copierLien" in core
+    assert "v9.0" in html
+    assert "Mai 2026" in html
+    assert "Changelog v9.0" in core
+    assert "Copiez ce texte" in core
+    assert "Copié !" in core
 
     # La barre latérale reste : le classement des tickers (tlItems) sert hors accueil.
     # display:none à 1280 ne concerne que l'accueil. Le mobile (≤768) la cache aussi.
@@ -312,16 +321,39 @@ def test_menu_1280_390_clair_sombre(base_url, tmp_path):
                     if ident == "screener":
                         assert "Export CSV" not in texte
                     if ident == "signals":
-                        assert "Valorisation" not in texte
-                        assert "Vérifier maintenant" not in texte
-                        assert "Alertes intelligentes" not in texte
+                        assert "Valorisation" in texte
+                        assert "Alertes" in texte
+                        assert "Vérifier maintenant" in texte
+                        assert "alerte intelligente" in texte.lower()
+                        assert page.evaluate(
+                            "() => Array.from(document.querySelectorAll('button')).every(b => b.textContent.trim() !== 'Vérifier')"
+                        )
+                        page.locator("text=Vérifier maintenant").scroll_into_view_if_needed()
                     if ident == "settings":
                         assert "v14.2" in texte
                         assert "notifications push" not in texte
                         assert "Activer notifications" not in texte
+                        assert "arrière-plan" not in texte
+                    if ident == "signals" and largeur == 1280 and theme == "clair":
+                        def _prix(route):
+                            route.fulfill(
+                                status=200,
+                                content_type="application/json",
+                                body='{"prices":{"SNTS":{"price":50000}}}',
+                            )
+                        page.route("**/api/live", _prix)
+                        page.evaluate("setAlert('SNTS', 1, 'above'); renderAlertsPanel();")
+                        page.click("text=Vérifier maintenant")
+                        page.wait_for_function(
+                            "() => { var el = document.getElementById('alertsList'); return !!(el && el.innerText.indexOf('Déclenchée') !== -1); }",
+                            timeout=10000,
+                        )
+                        page.unroute("**/api/live")
                     if largeur == 1280 and theme == "clair" and ident in ("screener", "signals", "settings"):
                         nom = "signaux" if ident == "signals" else ident
                         page.screenshot(path=str(preuves / ("apres-%s-1280-clair.png" % nom)))
+                    if largeur == 390 and theme == "clair" and ident == "signals":
+                        page.screenshot(path=str(preuves / "apres-signaux-390-clair.png"))
                     if largeur == 390 and theme == "sombre" and ident == "signals":
                         page.screenshot(path=str(preuves / "apres-signaux-390-sombre.png"))
                     if largeur == 1280 and theme == "sombre" and ident == "welcome":
@@ -340,81 +372,11 @@ def test_menu_1280_390_clair_sombre(base_url, tmp_path):
                     assert market == [base_url + "/api/market"], (ancre, market)
                     texte = page.locator("#page-signals").inner_text()
                     assert "Signaux" in texte
+                    assert "Valorisation" in texte
+                    assert "Vérifier maintenant" in texte
                     assert len(" ".join(texte.split())) > 40
-                    assert "Vérifier maintenant" not in texte
                     assert page.locator("#page-valuation.on").count() == 0
                     assert page.locator("#page-alerts.on").count() == 0
-
-                # Partager : navigator.share s'il existe, sinon le presse-papiers et « Lien copié ».
-                page.goto(base_url + "/", wait_until="load", timeout=20000)
-                page.wait_for_function("() => typeof _shareStockText === 'function'", timeout=10000)
-                partage = page.evaluate(
-                    """() => {
-                      window.scores = [{
-                        ticker: 'SNTS', name: 'Sonatel', note10: 6.8,
-                        conseil_libelle: 'À surveiller', conseil_couleur: 'orange',
-                        pdf_verdict: 'POSITIF', price: 43000, change_pct: 0.1,
-                        pe_ref: 8, div_yield: 6, roe: 20
-                      }];
-                      var appels = { share: null, copie: null, prompt: 0 };
-                      window.prompt = function() { appels.prompt += 1; return ''; };
-                      Object.defineProperty(navigator, 'share', {
-                        configurable: true,
-                        writable: true,
-                        value: function(data) {
-                          appels.share = data;
-                          return Promise.resolve();
-                        }
-                      });
-                      _shareStockText('SNTS');
-                      return appels;
-                    }"""
-                )
-                assert partage["prompt"] == 0
-                assert partage["share"]["url"].endswith("/societe/SNTS")
-                assert "6,8/10" in partage["share"]["text"]
-                copie = page.evaluate(
-                    """() => new Promise(function(ok) {
-                      var appels = { copie: null, prompt: 0, banner: '' };
-                      window.prompt = function() { appels.prompt += 1; return ''; };
-                      Object.defineProperty(navigator, 'share', {
-                        configurable: true,
-                        writable: true,
-                        value: undefined
-                      });
-                      Object.defineProperty(navigator, 'clipboard', {
-                        configurable: true,
-                        writable: true,
-                        value: {
-                          writeText: function(t) {
-                            appels.copie = t;
-                            return Promise.resolve();
-                          }
-                        }
-                      });
-                      _shareStockText('SNTS');
-                      setTimeout(function() {
-                        var el = document.getElementById('share-copie-banner');
-                        appels.banner = el ? el.textContent : '';
-                        ok(appels);
-                      }, 50);
-                    })"""
-                )
-                assert copie["prompt"] == 0
-                assert copie["copie"].endswith("/societe/SNTS")
-                assert copie["banner"] == "Lien copié"
-                if largeur == 1280 and theme == "clair":
-                    page.screenshot(path=str(preuves / "apres-lien-copie-1280-clair.png"))
-
-                # Changelog aligné sur v14.2, sans l'entrée de mai 2026.
-                page.evaluate("showChangelog()")
-                journal = page.locator("#changelog-modal").inner_text()
-                assert "v14.2" in journal
-                assert "v9.0" not in journal
-                assert "Mai 2026" not in journal
-                if largeur == 1280 and theme == "clair":
-                    page.screenshot(path=str(preuves / "apres-changelog-1280-clair.png"))
-                page.evaluate("document.getElementById('changelog-modal').style.display='none'")
 
                 # Comparer et Chercher ne vident pas la page.
                 if largeur >= 769:
@@ -443,9 +405,136 @@ def test_menu_1280_390_clair_sombre(base_url, tmp_path):
         "apres-screener-1280-clair.png",
         "apres-signaux-1280-clair.png",
         "apres-settings-1280-clair.png",
+        "apres-signaux-390-clair.png",
         "apres-signaux-390-sombre.png",
         "apres-accueil-1280-sombre.png",
-        "apres-lien-copie-1280-clair.png",
-        "apres-changelog-1280-clair.png",
     ):
         assert (preuves / nom).is_file(), nom
+
+
+def _etat_worker(page):
+    return page.evaluate(
+        """async () => {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          var cles = await caches.keys();
+          return {
+            regs: regs.map(function (r) {
+              var w = r.active || r.waiting || r.installing;
+              return w ? w.scriptURL : '';
+            }),
+            cles: cles
+          };
+        }"""
+    )
+
+
+def _afficher_etat(page, titre, etat):
+    page.evaluate(
+        """(payload) => {
+          var pre = document.getElementById('preuve-sw');
+          if (!pre) {
+            pre = document.createElement('pre');
+            pre.id = 'preuve-sw';
+            pre.style.cssText = 'position:fixed;inset:24px;z-index:99999;background:#fff;color:#111;padding:16px;font:16px/1.45 ui-monospace,monospace;overflow:auto;border:2px solid #111';
+            document.body.appendChild(pre);
+          }
+          pre.textContent = payload.titre + '\\n' + JSON.stringify(payload.etat, null, 2);
+        }""",
+        {"titre": titre, "etat": etat},
+    )
+
+
+@pytest.mark.skipif(_CI, reason="Playwright hors CI")
+def test_ancien_worker_desinstalle_et_cache_efface(base_url, tmp_path):
+    """Local : l'ancien sw.js de c370954 est installé, puis une visite le retire."""
+    from playwright.sync_api import sync_playwright
+
+    ancien = subprocess.check_output(
+        ["git", "show", "c370954:dashboard/sw.js"],
+        cwd=str(ROOT),
+    )
+    servir_ancien = {"on": True}
+    erreurs = []
+
+    with sync_playwright() as pw:
+        navigateur = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+        contexte = navigateur.new_context(viewport={"width": 1280, "height": 800})
+        page = contexte.new_page()
+        page.on("pageerror", lambda err: erreurs.append("pageerror: " + str(err)))
+        page.on("console", lambda msg: erreurs.append(msg.text) if msg.type == "error" else None)
+
+        def route(route):
+            url = route.request.url
+            if "/sw.js" in url and servir_ancien["on"]:
+                route.fulfill(
+                    status=200,
+                    content_type="application/javascript",
+                    headers={"Service-Worker-Allowed": "/"},
+                    body=ancien,
+                )
+                return
+            if "exchangerate-api.com" in url:
+                route.fulfill(
+                    status=200,
+                    content_type="application/json",
+                    body='{"rates":{"EUR":0.001524,"USD":0.0016}}',
+                )
+                return
+            if not url.startswith(base_url):
+                route.abort()
+                return
+            route.continue_()
+
+        contexte.route("**/*", route)
+        with page.expect_console_message(
+            lambda msg: "workers /sw.js désinstallés : 0" in msg.text,
+            timeout=10000,
+        ):
+            page.goto(base_url + "/", wait_until="load", timeout=20000)
+        page.wait_for_function("() => window._marketData", timeout=10000)
+        page.evaluate(
+            """async () => {
+              await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+              var cache = await caches.open('brvm-sw-v2');
+              await cache.put(location.origin + '/preuve-sw', new Response('ancien'));
+            }"""
+        )
+        page.wait_for_function(
+            """async () => {
+              var regs = await navigator.serviceWorker.getRegistrations();
+              var cles = await caches.keys();
+              return regs.some(function (r) {
+                var w = r.active || r.waiting || r.installing;
+                return w && w.scriptURL.endsWith('/sw.js');
+              }) && cles.indexOf('brvm-sw-v2') !== -1;
+            }""",
+            timeout=10000,
+        )
+        avant = _etat_worker(page)
+        (tmp_path / "sw-avant.json").write_text(
+            json.dumps(avant, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        _afficher_etat(page, "AVANT — worker c370954 installé", avant)
+        page.screenshot(path=str(tmp_path / "sw-avant.png"))
+
+        servir_ancien["on"] = False
+        with page.expect_console_message(
+            lambda msg: "workers /sw.js désinstallés : 1" in msg.text,
+            timeout=15000,
+        ):
+            page.goto(base_url + "/", wait_until="load", timeout=20000)
+        apres = _etat_worker(page)
+        (tmp_path / "sw-apres.json").write_text(
+            json.dumps(apres, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        _afficher_etat(page, "APRÈS — visite du code de la branche", apres)
+        page.screenshot(path=str(tmp_path / "sw-apres.png"))
+        navigateur.close()
+
+    assert any(url.endswith("/sw.js") for url in avant["regs"]), avant
+    assert "brvm-sw-v2" in avant["cles"], avant
+    assert apres["regs"] == [], apres
+    assert "brvm-sw-v2" not in apres["cles"], apres
+    assert erreurs == [], erreurs

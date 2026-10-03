@@ -49,6 +49,7 @@
     loadWelcomeHero: "welcome_v2.js",
     initTop3Podium: "top3_podium.js",
     loadSignauxValoAlertes: "signaux_v2.js",
+    injectEpurationSignaux: "signaux_v2.js",
     renderNewsV2: "news_v2.js",
     initScreener: "screener.js",
     runScreener: "screener.js",

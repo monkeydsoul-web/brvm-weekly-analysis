@@ -76,8 +76,7 @@ def test_methodo_glossaire_fiche_et_partage():
     assert "Verdict IA" not in partage
     assert "Rapport annuel" in partage
     assert "Pas de conseil" in partage
-    assert "Lien copié" in partage
-    assert "Copiez ce texte" not in partage
+    assert "Copié !" in partage
     assert "/10" in partage
     commodites = _entre(HTML, "function renderComm", "function _stockTab")
     assert "note10txt" in commodites
@@ -433,7 +432,7 @@ attend(texte.indexOf('À surveiller') !== -1, 'partage conseil');
 attend(texte.indexOf('Rapport annuel : positif') !== -1, 'partage rapport');
 attend(texte.indexOf('Verdict IA') === -1, 'partage sans verdict ia');
 _shareConfirme();
-attend(_els['share-copie-banner'].textContent === 'Lien copié', 'confirmation copie');
+attend(_els['share-copie-banner'].textContent === 'Copié !', 'confirmation copie');
 
 scores = [{ ticker: 'SCRC', name: 'Sucrivoire', composite_adj: 7, note10: 0.9,
   conseil_libelle: null, pdf_verdict: null, price: 1000, change_pct: 0 }];
@@ -453,7 +452,7 @@ attend(vide.indexOf('Verdict IA') === -1, 'partage vide sans verdict ia');
 
 
 def test_export_csv_screener_retire():
-    """Le bouton ne faisait rien : _scrResults est vide au chargement, la fonction s'arrêtait."""
+    """Le bouton ne faisait rien au chargement : _scrResults reste vide, la fonction s'arrêtait."""
     page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
     screener = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
     loader = (ROOT / "dashboard" / "js_loader.js").read_text(encoding="utf-8")

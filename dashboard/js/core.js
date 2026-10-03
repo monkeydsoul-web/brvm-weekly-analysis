@@ -1276,8 +1276,11 @@ function classePrincipale(row){
 }
 
 function showChangelog(){
-  var m=document.getElementById('changelog-modal');
-  if(m) m.style.display='flex';
+  var m=document.createElement('div');
+  m.style='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative"><button onclick="this.closest(\'div\').parentElement.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--t2);font-size:16px;cursor:pointer">✕</button><h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Changelog v9.0</h3><div style="font-size:12px;color:var(--t2);line-height:1.8"><strong style="color:var(--text)">Mai 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Refonte UX complète — footer, sidebar, typographie</li><li>Badges score /10 unifiés partout</li><li>Gauge signal du jour · barre statut marché</li><li>Score personnalisé : indicateur total poids</li><li>Toast notifications avec animation slideInRight</li><li>Skeleton loading · hover buttons</li></ul><strong style="color:var(--text)">Avril 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Tooltips flottants data-tip sur tout le dashboard</li><li>Boutons ← Retour sur toutes les pages secondaires</li><li>Portfolio : modal Pourquoi ce titre ?</li><li>Optimisation Markowitz intégrée</li></ul></div></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+  document.body.appendChild(m);
 }
 
 
@@ -1376,7 +1379,7 @@ async function init(){
     renderIndexFx(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();desinstallerServiceWorkerPrix();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -2517,6 +2520,15 @@ function createAlert(){
   document.getElementById('addAlertForm').style.display='none';
 }
 
+async function verifierAlertesMaintenant(){
+  try{
+    const data=await fetch('/api/live').then(r=>r.json());
+    checkAlertsWithPrices(data.prices);
+  }catch(e){}
+  renderAlertsPanel();
+}
+
+
 // ── Commodités ─────────────────────────────────────────────────────────────
 function timeAgo(iso){
   if(!iso) return '';
@@ -2706,30 +2718,17 @@ function _shareStockText(ticker){
     `Conseil : ${conseil}\n`+
     `Rapport annuel : ${annuel}\n`+
     `📈 Analysé sur BRVM Analyzer`;
-  var url=_lienPartage(s.ticker);
+  const copier=function(){_shareConfirme();};
   try{
-    if(typeof navigator!=='undefined'&&typeof navigator.share==='function'){
-      Promise.resolve(navigator.share({title:s.ticker+' — BRVM Analyzer',text:text,url:url})).catch(function(err){
-        if(err&&err.name==='AbortError') return;
-        _copierLien(url);
-      });
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(copier).catch(function(){prompt('Copiez ce texte :',text);});
     }else{
-      _copierLien(url);
+      prompt('Copiez ce texte :',text);
     }
   }catch(e){
-    _copierLien(url);
+    prompt('Copiez ce texte :',text);
   }
   return text;
-}
-function _lienPartage(ticker){
-  var origine='';
-  try{ origine=(location&&location.origin)||''; }catch(e){ origine=''; }
-  return origine+'/societe/'+encodeURIComponent(ticker);
-}
-function _copierLien(url){
-  var clip=(typeof navigator!=='undefined'&&navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(url):null;
-  if(!clip||!clip.then) return;
-  clip.then(function(){_shareConfirme();}).catch(function(){});
 }
 function _shareConfirme(){
   var el=document.getElementById('share-copie-banner');
@@ -2740,7 +2739,7 @@ function _shareConfirme(){
     el.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#166534;color:#fff;font-weight:700;font-size:14px;padding:10px 16px;border-radius:8px';
     document.body.appendChild(el);
   }
-  el.textContent='Lien copié';
+  el.textContent='Copié !';
   el.style.display='block';
   clearTimeout(window._shareCopieTimer);
   window._shareCopieTimer=setTimeout(function(){el.style.display='none';},2500);
@@ -4278,6 +4277,60 @@ function updateLiveStatus() {
     .catch(function(e){ console.warn('live status:', e); });
 }
 
+// Ancien worker d'alertes prix : une visite met à jour /sw.js (le fichier
+// se désinstalle et efface les caches brvm-sw-*), puis retire l'enregistrement.
+function _scriptWorker(reg) {
+  var w = reg.active || reg.waiting || reg.installing;
+  return (w && w.scriptURL) ? w.scriptURL : '';
+}
+function _suivreEtatWorker(reg) {
+  var worker = reg.installing || reg.waiting;
+  if (!worker || worker.state === 'activated' || worker.state === 'redundant') {
+    return Promise.resolve();
+  }
+  return new Promise(function (resolve, reject) {
+    function fini() {
+      if (worker.state === 'activated' || worker.state === 'redundant') {
+        worker.removeEventListener('statechange', fini);
+        resolve();
+      }
+    }
+    worker.addEventListener('statechange', fini);
+    fini();
+    setTimeout(function () {
+      worker.removeEventListener('statechange', fini);
+      reject(new Error('activation /sw.js sans aboutir'));
+    }, 8000);
+  });
+}
+function desinstallerServiceWorkerPrix() {
+  if (!navigator.serviceWorker || typeof navigator.serviceWorker.getRegistrations !== 'function') {
+    console.info('workers /sw.js désinstallés : 0');
+    return;
+  }
+  navigator.serviceWorker.getRegistrations().then(function (regs) {
+    var cibles = regs.filter(function (reg) { return _scriptWorker(reg).endsWith('/sw.js'); });
+    var etapes = cibles.map(function (reg) {
+      return reg.update().then(function () {
+        return _suivreEtatWorker(reg);
+      }).then(function () {
+        return reg.unregister();
+      }).then(function () {
+        return 1;
+      }, function (err) {
+        console.error('désinstallation /sw.js', err);
+        return 0;
+      });
+    });
+    return Promise.all(etapes).then(function (comptes) {
+      var n = comptes.reduce(function (s, v) { return s + v; }, 0);
+      console.info('workers /sw.js désinstallés : ' + n);
+    });
+  }).catch(function (err) {
+    console.error('désinstallation /sw.js', err);
+  });
+}
+
 // Lancement statut live + auto-refresh toutes les 5 min
 updateLiveStatus();
 setInterval(updateLiveStatus, 300000);
@@ -4686,9 +4739,6 @@ const _origNav = nav;
 nav = function(id, pushHistory) {
   // Redirect market/comm/macro vers la page unifiée Marché
   var _MARCHE_TAB = { market: 'indices', comm: 'comm', macro: 'macro' };
-  if (id === 'valuation' || id === 'alerts') {
-    return nav('signals', pushHistory);
-  }
   if (_MARCHE_TAB[id]) {
     var tab = _MARCHE_TAB[id];
     if (pushHistory !== false) navHistory.push('marche');
