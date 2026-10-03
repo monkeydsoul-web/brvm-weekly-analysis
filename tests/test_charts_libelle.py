@@ -19,26 +19,32 @@ _FIXTURE = Path(__file__).resolve().parent / "fixtures" / "price_history_snts_or
 _SEP = "\u00b7"
 
 # Libellés affichés (espaces insécables normalisés) et fenêtre visible.
+_DERNIER = {
+    "SNTS": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
+    "ORAC": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
+}
+_HUIT_SEPT = {
+    "SNTS": "8 septembre 2026 %s 39 200 XOF %s +1,29 %%" % (_SEP, _SEP),
+    "ORAC": "8 septembre 2026 %s 21 260 XOF %s -2,48 %%" % (_SEP, _SEP),
+}
 _ATTENDU = {
     "SNTS": {
-        "chargement": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
-        "plus": "8 septembre 2026 %s 39 200 XOF %s +1,29 %%" % (_SEP, _SEP),
-        "reinitialiser": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
-        "1M": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
-        "Tout": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
-        "survol": "8 septembre 2026 %s 39 200 XOF %s +1,29 %%" % (_SEP, _SEP),
-        "apres-sortie": "8 septembre 2026 %s 39 200 XOF %s +1,29 %%" % (_SEP, _SEP),
-        "reinitialiser-apres-survol": "2 octobre 2026 %s 45 000 XOF %s 0,00 %%" % (_SEP, _SEP),
+        "chargement": _DERNIER["SNTS"],
+        "plus": _HUIT_SEPT["SNTS"],
+        "reinitialiser": _DERNIER["SNTS"],
+        "1M": _DERNIER["SNTS"],
+        "Tout": _DERNIER["SNTS"],
+        "survol": _HUIT_SEPT["SNTS"],
+        "sortie": _DERNIER["SNTS"],
     },
     "ORAC": {
-        "chargement": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
-        "plus": "8 septembre 2026 %s 21 260 XOF %s -2,48 %%" % (_SEP, _SEP),
-        "reinitialiser": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
-        "1M": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
-        "Tout": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
-        "survol": "8 septembre 2026 %s 21 260 XOF %s -2,48 %%" % (_SEP, _SEP),
-        "apres-sortie": "8 septembre 2026 %s 21 260 XOF %s -2,48 %%" % (_SEP, _SEP),
-        "reinitialiser-apres-survol": "2 octobre 2026 %s 20 605 XOF %s -5,48 %%" % (_SEP, _SEP),
+        "chargement": _DERNIER["ORAC"],
+        "plus": _HUIT_SEPT["ORAC"],
+        "reinitialiser": _DERNIER["ORAC"],
+        "1M": _DERNIER["ORAC"],
+        "Tout": _DERNIER["ORAC"],
+        "survol": _HUIT_SEPT["ORAC"],
+        "sortie": _DERNIER["ORAC"],
     },
 }
 _FENETRES = {
@@ -48,13 +54,11 @@ _FENETRES = {
     "1M": ("2026-09-02", "2026-10-02", 23),
     "Tout": ("2026-05-20", "2026-10-02", 82),
     "survol": ("2026-05-20", "2026-10-02", 82),
-    "apres-sortie": ("2026-05-20", "2026-10-02", 82),
-    "reinitialiser-apres-survol": ("2026-05-20", "2026-10-02", 82),
+    "sortie": ("2026-05-20", "2026-10-02", 82),
 }
-_ISO_LECTURE = {
-    "survol": "2026-09-08",
-    "apres-sortie": "2026-09-08",
-    "reinitialiser-apres-survol": "2026-10-02",
+_SERIES = {
+    "SNTS": {"n": 82, "dernier": "2026-10-02", "cours": 45000},
+    "ORAC": {"n": 82, "dernier": "2026-10-02", "cours": 20605},
 }
 
 
@@ -166,7 +170,7 @@ def _espaces(texte):
 
 @pytest.mark.skipif(_CI, reason="Playwright hors CI")
 def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
-    """Série réelle : chargement, +, Réinitialiser, 1M, Tout, puis survol du 8 septembre."""
+    """Deux séquences sur les cours de production : sans survol, puis avec survol."""
     pytest.importorskip("playwright.sync_api")
     _autoriser_local(monkeypatch)
     from playwright.sync_api import sync_playwright
@@ -276,8 +280,8 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                 # 1M republie la fenêtre : le zoom mémorise alors ces 23 séances.
                 assert info["total"] == (23 if etape == "1M" else 82), (ticker, etape, info)
                 assert libelle(info) == _ATTENDU[ticker][etape], (ticker, etape, libelle(info), info)
-                if etape in _ISO_LECTURE:
-                    assert info["iso"] == _ISO_LECTURE[etape], (ticker, etape, info)
+                if etape == "survol":
+                    assert info["iso"] == "2026-09-08", (ticker, etape, info)
                 if dernier:
                     assert_dernier(info)
 
@@ -286,15 +290,46 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                 page.locator('.ctab-btn[data-ctab="chiffres"]').click()
                 page.locator("#stockChartDiv .ci-date").wait_for(state="visible", timeout=15000)
                 page.locator('#stockChartDiv button[data-brvm-zoom="reset"]').wait_for(state="visible")
-
-            def capturer(ticker, largeur, etape):
-                page.locator("#stockChartDiv .ci-lecture").scroll_into_view_if_needed()
-                page.locator("#stockChartDiv").screenshot(
-                    path=str(tmp_path / ("libelle-%s-%d-%s.png" % (ticker, largeur, etape)))
+                page.evaluate(
+                    """() => {
+                      window.__passesCourbe = 0;
+                      var hote = document.getElementById('stockChartDiv');
+                      hote.addEventListener('pointermove', function(evt) {
+                        var svg = hote.querySelector('.ci-svg');
+                        if (!svg) return;
+                        var rect = svg.getBoundingClientRect();
+                        if (evt.clientX < rect.left || evt.clientX > rect.right) return;
+                        if (evt.clientY < rect.top || evt.clientY > rect.bottom) return;
+                        var cible = evt.target;
+                        if (cible && cible.closest && cible.closest('button, .brvm-zoom-bar, .ci-periodes, a')) return;
+                        window.__passesCourbe += 1;
+                      }, true);
+                    }"""
                 )
 
-            def noter(ticker, largeur, etape, info):
+            def serie():
+                return page.evaluate(
+                    """() => {
+                      var el = document.getElementById('stockChartDiv');
+                      var complet = el._ciComplet || [];
+                      var dernier = complet.length ? complet[complet.length - 1] : null;
+                      return {
+                        n: complet.length,
+                        dernier: dernier ? dernier.date : '',
+                        cours: dernier ? dernier.value : null
+                      };
+                    }"""
+                )
+
+            def capturer(ticker, largeur, sequence, etape):
+                page.locator("#stockChartDiv .ci-lecture").scroll_into_view_if_needed()
+                page.locator("#stockChartDiv").screenshot(
+                    path=str(tmp_path / ("libelle-%s-%d-%s-%s.png" % (ticker, largeur, sequence, etape)))
+                )
+
+            def noter(ticker, largeur, sequence, etape, info):
                 rapport.append({
+                    "sequence": sequence,
                     "ticker": ticker,
                     "largeur": largeur,
                     "etape": etape,
@@ -304,6 +339,17 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     "n": info["n"],
                     "iso": info["iso"],
                 })
+
+            def clic(selecteur):
+                page.locator(selecteur).click()
+
+            def periode(nom, debut):
+                clic('#stockChartDiv .ci-periode[data-periode="%s"]' % nom)
+                page.wait_for_function(
+                    "(debut) => document.getElementById('stockChartDiv').getAttribute('data-ci-debut') === debut",
+                    arg=debut,
+                    timeout=5000,
+                )
 
             def point_du(iso):
                 page.locator("#stockChartDiv .ci-svg").scroll_into_view_if_needed()
@@ -330,55 +376,57 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     iso,
                 )
 
+            series = {}
             for largeur, hauteur in ((1280, 800), (390, 844)):
                 page.set_viewport_size({"width": largeur, "height": hauteur})
                 for ticker in ("SNTS", "ORAC"):
                     ouvrir(ticker)
+                    brut = serie()
+                    assert brut == _SERIES[ticker], (ticker, brut)
+                    series[ticker] = brut
+                    page.mouse.move(8, 8)
+
                     charge = lire()
                     verifier(ticker, "chargement", charge)
-                    noter(ticker, largeur, "chargement", charge)
-                    capturer(ticker, largeur, "chargement")
+                    noter(ticker, largeur, "sans-survol", "chargement", charge)
+                    capturer(ticker, largeur, "sans-survol", "chargement")
 
-                    page.locator('#stockChartDiv button[data-brvm-zoom="plus"]').click()
+                    clic('#stockChartDiv button[data-brvm-zoom="plus"]')
                     page.wait_for_function(
                         "() => document.getElementById('stockChartDiv').getAttribute('data-ci-fin') === '2026-09-08'",
                         timeout=5000,
                     )
                     zoom = lire()
                     verifier(ticker, "plus", zoom)
-                    noter(ticker, largeur, "plus", zoom)
-                    capturer(ticker, largeur, "plus")
+                    noter(ticker, largeur, "sans-survol", "plus", zoom)
+                    capturer(ticker, largeur, "sans-survol", "plus")
 
-                    page.locator('#stockChartDiv button[data-brvm-zoom="reset"]').click()
+                    clic('#stockChartDiv button[data-brvm-zoom="reset"]')
                     page.wait_for_function(
                         "() => document.getElementById('stockChartDiv').getAttribute('data-ci-fin') === '2026-10-02'",
                         timeout=5000,
                     )
                     reset = lire()
                     verifier(ticker, "reinitialiser", reset)
-                    noter(ticker, largeur, "reinitialiser", reset)
-                    capturer(ticker, largeur, "reinitialiser")
+                    noter(ticker, largeur, "sans-survol", "reinitialiser", reset)
+                    capturer(ticker, largeur, "sans-survol", "reinitialiser")
 
-                    page.locator('#stockChartDiv .ci-periode[data-periode="1M"]').click()
-                    page.wait_for_function(
-                        "() => document.getElementById('stockChartDiv').getAttribute('data-ci-debut') === '2026-09-02'",
-                        timeout=5000,
-                    )
+                    periode("1M", "2026-09-02")
                     un_mois = lire()
                     verifier(ticker, "1M", un_mois)
-                    noter(ticker, largeur, "1M", un_mois)
-                    capturer(ticker, largeur, "1M")
+                    noter(ticker, largeur, "sans-survol", "1M", un_mois)
+                    capturer(ticker, largeur, "sans-survol", "1M")
 
-                    page.locator('#stockChartDiv .ci-periode[data-periode="Tout"]').click()
-                    page.wait_for_function(
-                        "() => document.getElementById('stockChartDiv').getAttribute('data-ci-debut') === '2026-05-20'",
-                        timeout=5000,
-                    )
+                    periode("Tout", "2026-05-20")
                     tout = lire()
                     verifier(ticker, "Tout", tout)
-                    noter(ticker, largeur, "Tout", tout)
-                    capturer(ticker, largeur, "Tout")
+                    noter(ticker, largeur, "sans-survol", "Tout", tout)
+                    capturer(ticker, largeur, "sans-survol", "Tout")
+                    assert page.evaluate("() => window.__passesCourbe") == 0, (ticker, largeur)
 
+                    ouvrir(ticker)
+                    assert serie() == _SERIES[ticker]
+                    page.mouse.move(8, 8)
                     visee = point_du("2026-09-08")
                     assert visee["idx"] == 63, (ticker, visee)
                     page.mouse.move(visee["x"], visee["y"])
@@ -388,42 +436,79 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     )
                     survol = lire()
                     verifier(ticker, "survol", survol, dernier=False)
-                    noter(ticker, largeur, "survol", survol)
-                    capturer(ticker, largeur, "survol")
+                    noter(ticker, largeur, "avec-survol", "survol", survol)
+                    capturer(ticker, largeur, "avec-survol", "survol")
 
                     page.locator("#topnav").hover()
-                    page.wait_for_timeout(100)
+                    page.wait_for_function(
+                        "() => document.querySelector('#stockChartDiv .ci-lecture').getAttribute('data-ci-date') === '2026-10-02'",
+                        timeout=5000,
+                    )
                     sortie = lire()
-                    verifier(ticker, "apres-sortie", sortie, dernier=False)
-                    noter(ticker, largeur, "apres-sortie", sortie)
-                    capturer(ticker, largeur, "apres-sortie")
+                    verifier(ticker, "sortie", sortie)
+                    noter(ticker, largeur, "avec-survol", "sortie", sortie)
+                    capturer(ticker, largeur, "avec-survol", "sortie")
 
-                    page.locator('#stockChartDiv button[data-brvm-zoom="reset"]').click()
+                    clic('#stockChartDiv button[data-brvm-zoom="reset"]')
                     page.wait_for_function(
                         "() => document.querySelector('#stockChartDiv .ci-lecture').getAttribute('data-ci-date') === '2026-10-02'",
                         timeout=5000,
                     )
                     retour = lire()
-                    verifier(ticker, "reinitialiser-apres-survol", retour)
-                    noter(ticker, largeur, "reinitialiser-apres-survol", retour)
-                    capturer(ticker, largeur, "reinitialiser-apres-survol")
+                    verifier(ticker, "reinitialiser", retour)
+                    noter(ticker, largeur, "avec-survol", "reinitialiser", retour)
+                    capturer(ticker, largeur, "avec-survol", "reinitialiser")
+
+                    periode("1M", "2026-09-02")
+                    un_mois = lire()
+                    verifier(ticker, "1M", un_mois)
+                    noter(ticker, largeur, "avec-survol", "1M", un_mois)
+                    capturer(ticker, largeur, "avec-survol", "1M")
+
+                    periode("Tout", "2026-05-20")
+                    tout = lire()
+                    verifier(ticker, "Tout", tout)
+                    noter(ticker, largeur, "avec-survol", "Tout", tout)
+                    capturer(ticker, largeur, "avec-survol", "Tout")
 
             navigateur.close()
     finally:
         serveur.shutdown()
 
     assert not erreurs, erreurs[:8]
-    assert len(historiques_servis) == 4, historiques_servis
-    texte = json.dumps(rapport, ensure_ascii=False, indent=2)
+    assert len(historiques_servis) == 8, historiques_servis
+    preuve = {
+        "lieu": "local",
+        "donnees": "production /api/price-history, servies en local sur le code de la branche",
+        "erreurs_console": len(erreurs),
+        "series": series,
+        "etapes": rapport,
+    }
+    texte = json.dumps(preuve, ensure_ascii=False, indent=2)
     (tmp_path / "libelles.json").write_text(texte, encoding="utf-8")
     for ligne in rapport:
         assert "XOF" in ligne["libelle"]
         assert ligne["fin"]
-        fichier = tmp_path / ("libelle-%s-%d-%s.png" % (ligne["ticker"], ligne["largeur"], ligne["etape"]))
+        fichier = tmp_path / ("libelle-%s-%d-%s-%s.png" % (
+            ligne["ticker"], ligne["largeur"], ligne["sequence"], ligne["etape"],
+        ))
         assert fichier.is_file() and fichier.stat().st_size > 1000
-    assert len(rapport) == 2 * 2 * 8
+    assert len(rapport) == 2 * 2 * 2 * 5
     copie = Path("/opt/cursor/artifacts/charts-fix2")
     copie.mkdir(parents=True, exist_ok=True)
-    (copie / "libelles.json").write_text(texte, encoding="utf-8")
+
+    def _io(action):
+        dernier = None
+        for _essai in range(5):
+            try:
+                action()
+                return
+            except OSError as exc:
+                dernier = exc
+        raise dernier
+
+    for ancien in list(copie.glob("libelle-*.png")):
+        _io(ancien.unlink)
+    _io(lambda: (copie / "libelles.json").write_text(texte, encoding="utf-8"))
     for fichier in tmp_path.glob("libelle-*.png"):
-        shutil.copy(fichier, copie / fichier.name)
+        _io(lambda fichier=fichier: shutil.copy(fichier, copie / fichier.name))

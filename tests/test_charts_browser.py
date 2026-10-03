@@ -420,6 +420,7 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m, fi
 
         x_avant = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
         date_avant = page.locator("#stockChartDiv .ci-date").inner_text()
+        lecture_depart = page.locator("#stockChartDiv .ci-lecture").inner_text()
         _poser_doigt(page, "#stockChartDiv .ci-svg", 0.22)
         page.wait_for_timeout(150)
         x_apres = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
@@ -429,9 +430,14 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m, fi
         assert "XOF" in lecture
         assert "%" in page.locator("#stockChartDiv .ci-var").inner_text()
         garde = page.locator("#stockChartDiv .ci-lecture").inner_text()
-        page.mouse.move(2, 2)
+        assert garde != lecture_depart
+        if largeur <= 500:
+            boite = page.locator("#stockChartDiv .ci-svg").bounding_box()
+            page.mouse.move(boite["x"] + boite["width"] * 0.3, boite["y"] + boite["height"] * 0.4)
+            page.wait_for_timeout(80)
+        page.locator("#topnav").hover()
         page.wait_for_timeout(200)
-        assert page.locator("#stockChartDiv .ci-lecture").inner_text() == garde
+        assert page.locator("#stockChartDiv .ci-lecture").inner_text() == lecture_depart
 
         if largeur >= 800:
             page.mouse.move(
@@ -440,9 +446,10 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m, fi
             )
             page.wait_for_timeout(150)
             survole = page.locator("#stockChartDiv .ci-lecture").inner_text()
-            page.mouse.move(2, 2)
+            assert survole != lecture_depart
+            page.locator("#topnav").hover()
             page.wait_for_timeout(150)
-            assert page.locator("#stockChartDiv .ci-lecture").inner_text() == survole
+            assert page.locator("#stockChartDiv .ci-lecture").inner_text() == lecture_depart
 
         avant_prix = len(_historique_prix(journal))
         avant_ext = _compter(journal, "price-history-extended")
