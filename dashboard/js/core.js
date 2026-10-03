@@ -1401,7 +1401,6 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
-    chargerAnalysesPourExercice();
     if (typeof demanderVariation === 'function') {
       demanderVariation(false).catch(function() {});
     }
@@ -1933,7 +1932,7 @@ function renderSignauxParSociete(){
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
       <td><span class="b ${classePrincipale(x)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
-      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}${marqueExercice(anneeDuChiffre(x,'rendement'))}</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}${marqueExercice(anneeDuChiffre(x,'rendement'), x)}</td>
     </tr>`;
   }).join('');
 }
@@ -2001,7 +2000,7 @@ function filtreConseil(rows){
 function renderRank(){
   var _mEx=function(row,cle){
     if(typeof marqueExercice!=='function'||typeof anneeDuChiffre!=='function') return '';
-    return marqueExercice(anneeDuChiffre(row,cle));
+    return marqueExercice(anneeDuChiffre(row,cle), row);
   };
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
@@ -2192,7 +2191,7 @@ async function renderDiv(){
     const dyBg  = isExc ? 'var(--gold-dim)' : lavisDividende(dy);
     const dyLabel = isExc
       ? `<span style="font-size:11px;color:var(--exc-ink)">🔶 Exceptionnel</span>`
-      : `<span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span><span class="exercice-comptes">${texteExercice(anneeDuChiffre(x,'rendement'))}</span>`;
+      : `<span style="font-size:13px;font-weight:700;color:${dyC}">${dy.toFixed(1)}%</span><span class="exercice-comptes">${texteExercice(anneeDuChiffre(x,'rendement'), x)}</span>`;
     const divAmt = isExc ? (x.div_exceptional_value||0) : (x.div_per_share||0);
     const badge  = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(x,{short:true,hideHaute:true}) : '';
     return `<div style="padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;background:${dyBg}" onclick="_openStock('${x.ticker}')">
@@ -2207,7 +2206,7 @@ async function renderDiv(){
       <div style="font-size:10px;color:var(--t2);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap">
         <span>📅 Ex-div: <strong style="color:var(--t1)">${x.ex_div_date}</strong></span>
         <span>💰 ${fmtXOF(divAmt)}/action</span>
-        ${x.eps?`<span>BNA: ${Math.round(x.eps).toLocaleString('fr-FR')} XOF (${texteExercice(anneeDuChiffre(x,'bna'))})</span>`:''}
+        ${x.eps?`<span>BNA: ${Math.round(x.eps).toLocaleString('fr-FR')} XOF (${texteExercice(anneeDuChiffre(x,'bna'), x)})</span>`:''}
       </div>
     </div>`;
   }).join('') : '<p style="font-size:12px;color:var(--t2)">Dates à paraître.</p>';
@@ -2222,10 +2221,10 @@ async function renderDiv(){
     const badge = _confBadge(x, {short:true, hideHaute:true});
     return `<tr onclick="_openStock('${x.ticker}')" style="cursor:pointer">
       <td><strong>${x.ticker}</strong><div style="font-size:9px;color:var(--t2)">${(x.sector||'').substring(0,10)}</div></td>
-      <td style="font-weight:600">${fmtXOF(x.div_per_share)}${badge}${marqueExercice(anneeDuChiffre(x,'div'))}</td>
-      <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span>${marqueExercice(anneeDuChiffre(x,'rendement'))}</td>
+      <td style="font-weight:600">${fmtXOF(x.div_per_share)}${badge}${marqueExercice(anneeDuChiffre(x,'div'), x)}</td>
+      <td><span style="font-weight:700;color:${dyC};padding:2px 6px;border-radius:4px;background:${dyBg}">${dy.toFixed(1)}%</span>${marqueExercice(anneeDuChiffre(x,'rendement'), x)}</td>
       <td style="font-size:10px;color:var(--t2)">${x.ex_div_date||'N/D'}</td>
-      <td style="font-size:10px;color:var(--t2)">${pe}${marqueExercice(anneeDuChiffre(x,'pe'))}</td>
+      <td style="font-size:10px;color:var(--t2)">${pe}${marqueExercice(anneeDuChiffre(x,'pe'), x)}</td>
       <td><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${x.pdf_verdict==='POSITIF'?'rgba(74,222,128,0.15)':x.pdf_verdict==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${x.pdf_verdict==='POSITIF'?'var(--green)':x.pdf_verdict==='NEGATIF'?'var(--red)':'var(--amber)'}">${x.pdf_verdict||'—'}</span></td>
     </tr>`;
   }).join('')
@@ -2290,7 +2289,7 @@ async function renderTargets(){
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
-      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}${marqueExercice(anneeDuChiffre((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||{},'cible'))}</td>
+      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}${(function(){var ligne=(window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||{ticker:t.ticker};return marqueExercice(anneeDuChiffre(ligne,'cible'), ligne);})()}</td>
       <td class="${cls}" style="font-size:11px">${fmtOpp}</td>
       <td><span class="b ${classePrincipale((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
@@ -2411,7 +2410,7 @@ function simBuildSliders(){
     return`<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <span style="font-size:11px;font-weight:600;cursor:pointer;color:var(--blue)" onclick="_openStock('${x.ticker}')">${x.ticker}</span>
-        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div (${texteExercice(anneeDuChiffre(x,'rendement'))}) | note ${note10txt(x)}/10</span>
+        <span style="font-size:10px;color:var(--t2)">${(x.div_yield||0).toFixed(1)}% div (${texteExercice(anneeDuChiffre(x,'rendement'), x)}) | note ${note10txt(x)}/10</span>
         <span id="sw-${x.ticker}" style="font-size:11px;font-weight:700;color:var(--text);width:32px;text-align:right">${w}%</span>
       </div>
       <input type="range" min="0" max="100" value="${w}" oninput="simSlide('${x.ticker}',+this.value)" style="width:100%">
@@ -2663,12 +2662,30 @@ function _analyseEnCache(ticker) {
   return (a && !a.error) ? a : null;
 }
 
-function texteExercice(annee) {
+// Audit de fraîcheur des comptes du 03/10/2026 : le PDF rangé sous le ticker
+// est celui d'une autre société. Aucune année ne s'affiche.
+// ABJC : Erium (SIVC), pas Servair. CFAC : Tractafric (PRSC), pas CFAO Motors.
+// SICC : Sicable (CABC), pas SICOR.
+// /api/live-ranking n'a pas de champ qui signale cette confusion.
+var COMPTES_A_VERIFIER = { ABJC: true, CFAC: true, SICC: true };
+
+function _sujetTicker(sujet) {
+  if (!sujet) return '';
+  if (typeof sujet === 'string') return sujet.toUpperCase();
+  return String(sujet.ticker || '').toUpperCase();
+}
+
+function comptesAVerifier(sujet) {
+  return !!COMPTES_A_VERIFIER[_sujetTicker(sujet)];
+}
+
+function texteExercice(annee, sujet) {
+  if (comptesAVerifier(sujet)) return 'comptes à vérifier';
   return annee ? ('comptes ' + annee) : 'exercice non précisé';
 }
 
-function marqueExercice(annee) {
-  return '<span class="exercice-comptes">' + texteExercice(annee) + '</span>';
+function marqueExercice(annee, sujet) {
+  return '<span class="exercice-comptes">' + texteExercice(annee, sujet) + '</span>';
 }
 
 function _anneeBna(s, analyse) {
@@ -2727,8 +2744,10 @@ function _anneePrixCible(s, analyse) {
   return premier;
 }
 
-function anneeDuChiffre(s, cle) {
-  var analyse = _analyseEnCache(s && s.ticker);
+function anneeDuChiffre(s, cle, depuisFiche) {
+  // Hors fiche : seulement les champs déjà dans les scores (bna_exercice).
+  // Le document (/api/analyses) n'est lu qu'à l'ouverture d'une fiche.
+  var analyse = depuisFiche ? _analyseEnCache(s && s.ticker) : null;
   if (cle === 'pe') return _anneePe(s, analyse);
   if (cle === 'pb') return _anneePb(s, analyse);
   if (cle === 'bna') return _anneeBna(s, analyse);
@@ -2736,34 +2755,6 @@ function anneeDuChiffre(s, cle) {
   if (cle === 'div' || cle === 'rendement') return _anneeDividende(s, analyse);
   if (cle === 'cible') return _anneePrixCible(s, analyse);
   return null;
-}
-
-function chargerAnalysesPourExercice() {
-  var liste = window.scores || [];
-  window._analysesCache = window._analysesCache || {};
-  var manquants = [];
-  for (var i = 0; i < liste.length; i++) {
-    var t = liste[i] && liste[i].ticker;
-    if (t && !Object.prototype.hasOwnProperty.call(window._analysesCache, t)) manquants.push(t);
-  }
-  if (!manquants.length) return;
-  Promise.all(manquants.map(function (ticker) {
-    return fetch('/api/analyses/' + encodeURIComponent(ticker))
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        window._analysesCache[ticker] = (data && !data.error) ? data : null;
-      })
-      .catch(function () {
-        window._analysesCache[ticker] = null;
-      });
-  })).then(function () {
-    try {
-      if (document.getElementById('rankBody') && typeof renderRankLive === 'function') renderRankLive();
-      if (document.getElementById('divTable') && document.getElementById('divTable').children.length && typeof renderDiv === 'function') renderDiv();
-      if (typeof _renderScreenerTable === 'function' && typeof _scrResults !== 'undefined' && _scrResults && _scrResults.length) _renderScreenerTable();
-      if (typeof renderCompare === 'function' && typeof compareList !== 'undefined' && compareList && compareList.length >= 2) renderCompare();
-    } catch (e) {}
-  });
 }
 
 // ── Fiche action ────────────────────────────────────────────────────────────
@@ -2778,17 +2769,17 @@ function buildKpiCards(s){
   const bna=s.eps||s.bna;
   const roe=s.roe;
   const cards=[
-    pe?{l:'P/E',v:pe.toFixed(1)+'×',vc:pe<15?'var(--green)':pe<25?'var(--amber)':'var(--red)',tip:'Cours ÷ Bénéfice par action. Seuil Graham : ≤15×',ex:anneeDuChiffre(s,'pe')}:null,
-    pb?{l:'P/B',v:pb.toFixed(2)+'×',vc:pb<1?'var(--green)':pb<2?'var(--amber)':'var(--red)',tip:'Cours ÷ Valeur comptable. < 1 = décote sur actif net',ex:anneeDuChiffre(s,'pb')}:null,
-    bna?{l:'BNA',v:typeof fmtXOF==='function'?fmtXOF(Math.round(bna)):Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.',ex:anneeDuChiffre(s,'bna')}:null,
-    roe?{l:'ROE',v:roe.toFixed(1)+'%',vc:roe>=15?'var(--green)':roe>=8?'var(--amber)':'var(--red)',tip:'Return on Equity = Bénéfice net / Capitaux propres. ≥15% = excellence Buffett.',ex:anneeDuChiffre(s,'roe')}:null,
+    pe?{l:'P/E',v:pe.toFixed(1)+'×',vc:pe<15?'var(--green)':pe<25?'var(--amber)':'var(--red)',tip:'Cours ÷ Bénéfice par action. Seuil Graham : ≤15×',ex:anneeDuChiffre(s,'pe',true)}:null,
+    pb?{l:'P/B',v:pb.toFixed(2)+'×',vc:pb<1?'var(--green)':pb<2?'var(--amber)':'var(--red)',tip:'Cours ÷ Valeur comptable. < 1 = décote sur actif net',ex:anneeDuChiffre(s,'pb',true)}:null,
+    bna?{l:'BNA',v:typeof fmtXOF==='function'?fmtXOF(Math.round(bna)):Math.round(bna).toLocaleString('fr-FR')+' XOF',vc:'var(--text-1)',tip:'Bénéfice Net par Action (EPS). Profit annuel attribuable à chaque action.',ex:anneeDuChiffre(s,'bna',true)}:null,
+    roe?{l:'ROE',v:roe.toFixed(1)+'%',vc:roe>=15?'var(--green)':roe>=8?'var(--amber)':'var(--red)',tip:'Return on Equity = Bénéfice net / Capitaux propres. ≥15% = excellence Buffett.',ex:anneeDuChiffre(s,'roe',true)}:null,
   ].filter(Boolean);
   if(!cards.length) return '';
   return `<div class="expert-only" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:12px">${
     cards.map(k=>`<div class="kpi tt" data-tt="${k.tip}" style="text-align:center;padding:10px 8px">
       <div style="font-size:10px;color:var(--t2);margin-bottom:4px">${k.l}</div>
       <div style="font-size:15px;font-weight:700;color:${k.vc};font-family:var(--mono,'monospace')">${k.v}</div>
-      ${marqueExercice(k.ex)}
+      ${marqueExercice(k.ex, s)}
     </div>`).join('')
   }</div>`;
 }
@@ -2796,7 +2787,7 @@ function buildKpiCards(s){
 function _genVerdict(s){
   var _exVerdict=function(cle){
     if(typeof texteExercice!=='function'||typeof anneeDuChiffre!=='function') return '';
-    return ' — '+texteExercice(anneeDuChiffre(s,cle));
+    return ' — '+texteExercice(anneeDuChiffre(s,cle,true), s);
   };
   const v=s.composite_adj||0;
   const avis=conseilAffiche(s);
@@ -2891,9 +2882,9 @@ function _shareStockText(ticker){
   const text=`📊 *${s.ticker} — ${s.name||''}*\n`+
     `Note : ${note}/10\n`+
     `Cours : ${s.price?Math.round(s.price).toLocaleString('fr-FR')+' XOF':'N/D'} (${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%)\n`+
-    `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× ('+texteExercice(anneeDuChiffre(s,'pe'))+') | ':''}`+
-    `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% ('+texteExercice(anneeDuChiffre(s,'rendement'))+') | ':''}`+
-    `${s.roe?'ROE : '+s.roe+'% ('+texteExercice(anneeDuChiffre(s,'roe'))+')':''}\n`+
+    `${s.pe_ref?'P/E : '+s.pe_ref.toFixed(1)+'× ('+texteExercice(anneeDuChiffre(s,'pe',true), s)+') | ':''}`+
+    `${(s.div_yield||0)>0?'Div : '+s.div_yield.toFixed(1)+'% ('+texteExercice(anneeDuChiffre(s,'rendement',true), s)+') | ':''}`+
+    `${s.roe?'ROE : '+s.roe+'% ('+texteExercice(anneeDuChiffre(s,'roe',true), s)+')':''}\n`+
     `Conseil : ${conseil}\n`+
     `Rapport annuel : ${annuel}\n`+
     `📈 Analysé sur BRVM Analyzer`;
@@ -3228,7 +3219,7 @@ async function showStock(ticker){
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
-      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${fmtEcartPct(s.ecart_pct)})</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div>${marqueExercice(anneeDuChiffre(s,'cible'))}</div>`:''}
+      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${fmtEcartPct(s.ecart_pct)})</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div>${marqueExercice(anneeDuChiffre(s,'cible',true), s)}</div>`:''}
       ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
             const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
             const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
@@ -3245,7 +3236,7 @@ async function showStock(ticker){
             ['Rendement',_yieldCell,_isExc?'var(--amber)':couleurDividende(_dy)],
             ['Ex-dividende',entry?.ex_div_date||s.ex_div_date||'N/D','var(--t2)'],
             ['Perf. annuelle',entry?.var_annee!=null?(entry.var_annee>=0?'+':'')+entry.var_annee.toFixed(1)+'%':'N/D',entry?.var_annee>=0?'var(--green)':'var(--red)']
-          ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div>${(l==='Par action'||l==='Rendement')?marqueExercice(anneeDuChiffre(s,l==='Rendement'?'rendement':'div')):''}</div>`).join('')}
+          ].map(([l,vv,c])=>`<div style="text-align:center"><div style="font-size:10px;color:var(--t2)">${l}</div><div style="font-size:14px;font-weight:700;color:${c||'var(--text)'};margin-top:2px">${vv}</div>${(l==='Par action'||l==='Rendement')?marqueExercice(anneeDuChiffre(s,l==='Rendement'?'rendement':'div',true), s):''}</div>`).join('')}
         </div></div>`;
           })():''}
       <div class="beginner-only card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
@@ -3427,7 +3418,7 @@ function _loadStockAI(ticker){
     el.innerHTML=`
       <div class="card" style="margin-bottom:10px;border-left:3px solid ${vC}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="ct">🤖 Analyse IA — ${ticker} — ${texteExercice(anneeDocumentComptes(data))}</div>
+          <div class="ct">🤖 Analyse IA — ${ticker} — ${texteExercice(anneeDocumentComptes(data), ticker)}</div>
           <span style="font-size:11px;font-weight:700;color:${vC};padding:3px 10px;border-radius:10px;background:${vC==='var(--green)'?'rgba(74,222,128,.15)':vC==='var(--red)'?'rgba(248,113,113,.15)':'rgba(251,191,36,.15)'}">Verdict : ${data.verdict_investisseur||'—'}</span>
         </div>
         ${data.resume?`<p style="font-size:12px;color:var(--t1);line-height:1.7;margin-bottom:12px">${data.resume}</p>`:''}
@@ -4828,10 +4819,10 @@ function openCompareModal() {
     ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
     ['Cours', x => x.price ? fmtXOF(x.price) : '—', () => null, false],
     [libVar, x => (typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'), x => (typeof variationJour==='function'?variationJour(x.ticker).pct:null), true],
-    ['P/E', x => ((x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'pe')), x => -(x.pe_ref||x.pe_hist||999), true],
-    ['P/B', x => ((x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'pb')), x => -(x.pb_ref||x.pb_hist||999), true],
-    ['ROE', x => (x.roe ? x.roe.toFixed(1)+'%' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'roe')), x => x.roe||0, true],
-    ['Div%', x => (x.div_yield && x.div_yield > 0 ? x.div_yield.toFixed(1)+'%' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'rendement')), x => x.div_yield||0, true],
+    ['P/E', x => ((x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'pe'), x), x => -(x.pe_ref||x.pe_hist||999), true],
+    ['P/B', x => ((x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'pb'), x), x => -(x.pb_ref||x.pb_hist||999), true],
+    ['ROE', x => (x.roe ? x.roe.toFixed(1)+'%' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'roe'), x), x => x.roe||0, true],
+    ['Div%', x => (x.div_yield && x.div_yield > 0 ? x.div_yield.toFixed(1)+'%' : '—') + '<br>' + marqueExercice(anneeDuChiffre(x,'rendement'), x), x => x.div_yield||0, true],
     ['Graham /10', x => (x.score_graham||0).toFixed(1), x => x.score_graham||0, true],
     ['DCF /10', x => (x.score_dcf||0).toFixed(1), x => x.score_dcf||0, true],
     ['DDM /10', x => (x.score_ddm||0).toFixed(1), x => x.score_ddm||0, true],
@@ -5146,8 +5137,8 @@ function openWhyModal(ticker) {
   var divYield = s.div_yield ? (s.div_yield*100).toFixed(1) + '%' : (s.rendement_pct ? s.rendement_pct.toFixed(1) + '%' : '—');
   if (body) body.innerHTML =
     '<h3>🏦 L\'entreprise</h3><p>' + (s.sector||'') + (s.country?' · '+s.country:'') + '</p>' +
-    (decote ? '<h3>📊 Pourquoi elle est attractive</h3><p>Son cours (' + (s.price?fmtXOF(s.price):'—') + ') est inférieur à sa valeur estimée (' + (ciblePourquoi?fmtXOF(ciblePourquoi):'—') + ', ' + texteExercice(anneeDuChiffre(s,'cible')) + '). Vous l\'achetez environ <strong>' + decote + '%</strong> moins cher. ' + (typeof fmtLibelleValeur==='function'?fmtLibelleValeur(s.libelle_valeur):'') + '</p>' : '') +
-    '<h3>💰 Ce que ça veut dire pour vous</h3><p>En attendant une revalorisation, vous recevez un dividende de <strong>' + divYield + '</strong> par an. ' + texteExercice(anneeDuChiffre(s,'rendement')) + '</p>';
+    (decote ? '<h3>📊 Pourquoi elle est attractive</h3><p>Son cours (' + (s.price?fmtXOF(s.price):'—') + ') est inférieur à sa valeur estimée (' + (ciblePourquoi?fmtXOF(ciblePourquoi):'—') + ', ' + texteExercice(anneeDuChiffre(s,'cible'), s) + '). Vous l\'achetez environ <strong>' + decote + '%</strong> moins cher. ' + (typeof fmtLibelleValeur==='function'?fmtLibelleValeur(s.libelle_valeur):'') + '</p>' : '') +
+    '<h3>💰 Ce que ça veut dire pour vous</h3><p>En attendant une revalorisation, vous recevez un dividende de <strong>' + divYield + '</strong> par an. ' + texteExercice(anneeDuChiffre(s,'rendement'), s) + '</p>';
   if (actions) actions.innerHTML =
     '<button class="btn btn-primary" onclick="closeWhyModal();openStockDetail(\''+ticker+'\')" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px">📋 Voir la fiche complète</button>';
   modal.classList.add('open');

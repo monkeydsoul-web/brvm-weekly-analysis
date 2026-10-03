@@ -84,7 +84,7 @@ function _renderScreenerTable() {
     const scC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
     const scBarW = Math.round(Math.min(10, Math.max(0, n10)) / 10 * 100);
     const _ex = function (cle) {
-      return (typeof texteExercice === 'function') ? texteExercice(anneeDuChiffre(x, cle)) : 'exercice non précisé';
+      return (typeof texteExercice === 'function') ? texteExercice(anneeDuChiffre(x, cle), x) : (typeof comptesAVerifier === 'function' && comptesAVerifier(x) ? 'comptes à vérifier' : 'exercice non précisé');
     };
     const pe  = x.pe_ref
       ? x.pe_ref.toFixed(1) + '×<div class="exercice-comptes">' + _ex('pe') + '</div>'

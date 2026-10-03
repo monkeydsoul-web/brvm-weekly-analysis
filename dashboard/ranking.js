@@ -58,7 +58,7 @@ function renderRankCards() {
         ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR') + ' XOF')
         : 'N/D';
       const divStr = (x.div_yield || 0) > 0
-        ? 'Div ' + x.div_yield.toFixed(1) + '% (' + (typeof texteExercice === 'function' ? texteExercice(anneeDuChiffre(x, 'rendement')) : 'exercice non précisé') + ')'
+        ? 'Div ' + x.div_yield.toFixed(1) + '% (' + (typeof texteExercice === 'function' ? texteExercice(anneeDuChiffre(x, 'rendement'), x) : (typeof comptesAVerifier === 'function' && comptesAVerifier(x) ? 'comptes à vérifier' : 'exercice non précisé')) + ')'
         : '—';
       const meta   = [x.name, x.sector, x.country].filter(Boolean).join(' · ');
       return `<div role="button" tabindex="0" aria-label="${x.ticker}${x.name ? ' — ' + x.name : ''}"
