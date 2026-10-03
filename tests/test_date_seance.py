@@ -2,7 +2,8 @@
 """Date de séance affichée : réponse HTTP seulement.
 
 Le scrape écrit l'horloge du site dans market_cache.json. /api/market
-recule samedi et dimanche au vendredi, et laisse un jour ouvré tel quel.
+et /api/sector-indices reculent samedi et dimanche au vendredi, et
+laissent un jour ouvré tel quel.
 Aucun historique n'est réécrit.
 """
 import json
@@ -145,10 +146,12 @@ def test_samedi_et_dimanche_renvoient_la_derniere_seance(client, isole, monkeypa
         corps = client.get("/api/market").get_json()
         assert corps["session_date"] == "2026-10-02"
         assert isinstance(corps["session_date"], str)
+        secteurs = client.get("/api/sector-indices").get_json()
+        assert set(secteurs) == {"indices", "updated_at", "session_date"}
+        assert isinstance(secteurs["session_date"], str)
+        assert secteurs["session_date"] == corps["session_date"] == "2026-10-02"
         assert _lire(str(isole["marche"])) == avant
         assert json.loads(avant)["session_date"] == horloge_site
-        secteurs = client.get("/api/sector-indices").get_json()
-        assert secteurs["session_date"] == horloge_site
 
 
 def test_jour_ouvre_en_seance_et_apres_cloture_garde_la_date_du_jour(client, isole, monkeypatch):

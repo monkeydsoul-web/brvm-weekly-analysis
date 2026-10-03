@@ -1784,10 +1784,16 @@ def api_sector_indices():
         for item in data.get(cle) or []:
             if isinstance(item, dict) and item.get("name"):
                 indices[item["name"]] = {k: v for k, v in item.items() if k != "name"}
+    # Même correction que /api/market, sur ce dictionnaire de réponse
+    # seulement. data reste la copie YTD : le cache disque n'est pas touché.
+    session = data.get("session_date")
+    if "session_date" in data:
+        from live_data import date_derniere_seance
+        session = date_derniere_seance(session)
     return jsonify({
         "indices": indices,
         "updated_at": data.get("updated_at"),
-        "session_date": data.get("session_date"),
+        "session_date": session,
     })
 
 @app.route("/api/dividends")
