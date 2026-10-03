@@ -673,10 +673,35 @@ def api_commodities():
     return jsonify(prices)
 
 
+def _macro_date_de_seance(macro):
+    """La semaine et la date suivent la dernière séance, pas le jour de récupération.
+
+    Python ``%W`` donne 39 pour le vendredi 2 octobre 2026 comme pour le
+    samedi 3. La semaine française est la semaine ISO : 40.
+    """
+    if not isinstance(macro, dict) or "week" not in macro:
+        return macro
+    from live_data import date_derniere_seance, libelle_semaine_iso
+    publiee = macro.get("date")
+    if not isinstance(publiee, str) or not publiee.strip():
+        return macro
+    seance = date_derniere_seance(publiee)
+    semaine = libelle_semaine_iso(seance)
+    if not semaine:
+        return macro
+    if macro.get("week") == semaine and (seance == publiee or not isinstance(seance, str)):
+        return macro
+    sortie = dict(macro)
+    sortie["week"] = semaine
+    if isinstance(seance, str) and seance != publiee[:10]:
+        sortie["date"] = seance
+    return sortie
+
+
 @app.route("/api/macro")
 def api_macro():
     macro = load_macro_cache()
-    return jsonify(macro)
+    return jsonify(_macro_date_de_seance(macro))
 
 
 @app.route("/api/history/<ticker>")
@@ -760,6 +785,12 @@ def api_market():
         from market_data import appliquer_ytd_reference, get_market_data
         force = request.args.get("force", "false").lower() == "true"
         data = appliquer_ytd_reference(get_market_data(force_refresh=force))
+        if isinstance(data, dict) and "session_date" in data:
+            from live_data import date_derniere_seance
+            seance = date_derniere_seance(data.get("session_date"))
+            if seance != data.get("session_date"):
+                data = dict(data)
+                data["session_date"] = seance
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

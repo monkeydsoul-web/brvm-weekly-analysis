@@ -387,10 +387,18 @@ def fetch_all_news() -> list[dict]:
 
 
 def fetch_macro_context() -> dict:
-    """Récupère le contexte macro de la semaine"""
+    """Récupère le contexte macro de la semaine de la dernière séance.
+
+    La date n'est pas le jour de récupération : un samedi garderait
+    « Semaine 39 » avec ``%W``, alors que la séance du vendredi est
+    la semaine ISO 40.
+    """
+    from live_data import date_derniere_seance, libelle_semaine_iso
+    aujourdhui = datetime.now().strftime("%Y-%m-%d")
+    seance = date_derniere_seance(aujourdhui) or aujourdhui
     macro = {
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "week": datetime.now().strftime("Semaine %W/%Y"),
+        "date": seance,
+        "week": libelle_semaine_iso(seance) or datetime.now().strftime("Semaine %W/%Y"),
     }
 
     # Indices BRVM officiels (via market_data.py, scrapé depuis brvm.org/fr/resume)

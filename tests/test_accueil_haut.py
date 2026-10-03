@@ -238,6 +238,11 @@ var largeur = _compterLargeur({
   E: { change_pct: 3 }
 });
 attend(largeur.hausses === 1 && largeur.baisses === 1 && largeur.stables === 1 && largeur.total === 3, JSON.stringify(largeur));
+var filtre = _compterLargeur({
+  A: { price: 10, change_pct: 1.2 },
+  BBGC: { price: 8995, change_pct: 2.22 }
+}, ['A']);
+attend(filtre.hausses === 1 && filtre.baisses === 0 && filtre.total === 1, JSON.stringify(filtre));
 
 attend(_pointsHistorique(null) === null, 'hist nul');
 attend(_pointsHistorique({ series: [1] }) === null, 'un seul point');

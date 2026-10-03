@@ -2211,6 +2211,18 @@ function fmtLibelleValeur(v){
   if(v==='incertain') return 'Cible à vérifier';
   return '—';
 }
+function cibleDouteuse(v){
+  return v==='incertain'||v==='Cible à vérifier';
+}
+function htmlCartePrixCible(s){
+  if(!s||(!s.prix_cible&&!s.libelle_valeur)) return '';
+  if(cibleDouteuse(s.libelle_valeur)){
+    return '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6">Cible à vérifier</div></div>';
+  }
+  var montant=s.prix_cible?fmtXOF(s.prix_cible):'—';
+  var ecart=s.ecart_pct==null?'':' <span>('+fmtEcartPct(s.ecart_pct)+')</span>';
+  return '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>'+montant+'</strong>'+ecart+' · '+fmtLibelleValeur(s.libelle_valeur)+'</div></div>';
+}
 async function renderTargets(){
   const [targets, ratings] = await Promise.all([
     fetch('/api/targets').then(r=>r.json()),
@@ -2241,20 +2253,20 @@ async function renderTargets(){
     const up = (t.upside_pct==null) ? null : t.upside_pct;
     const cls=isUncertain?'':(up!=null&&up>=30)?'target-up':(up!=null&&up<0)?'target-dn':'';
     const vc=isUncertain?'var(--t3)':(up!=null&&up>=30)?'var(--green)':(up!=null&&up<0)?'var(--red)':'var(--amber)';
-    const fmtOpp=up==null?'—':(isUncertain?`<span style="color:var(--t3)">${fmtEcartPct(up)}</span>`:up>=30?`🟢 ${fmtEcartPct(up)} de potentiel`:up>=10?`🟡 ${fmtEcartPct(up)} de potentiel`:up<0?`🔴 ${fmtEcartPct(up)}`:`${fmtEcartPct(up)}`);
+    const fmtOpp=isUncertain||up==null?'—':(up>=30?`🟢 ${fmtEcartPct(up)} de potentiel`:up>=10?`🟡 ${fmtEcartPct(up)} de potentiel`:up<0?`🔴 ${fmtEcartPct(up)}`:`${fmtEcartPct(up)}`);
     const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
     const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
     const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
     const confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(t,{short:true,hideHaute:true}) : '';
-    const uncTip = isUncertain?` data-tip="Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours. Le chiffre reste affiché."`:'';
+    const cibleCell = isUncertain ? 'Cible à vérifier' : (t.avg_target?fmtXOF(t.avg_target):'—');
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
-      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
+      <td style="font-weight:600;color:${isUncertain?'var(--text-2)':vc}">${cibleCell}</td>
       <td class="${cls}" style="font-size:11px">${fmtOpp}</td>
       <td><span class="b ${classePrincipale((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
-      <td style="font-size:11px"${uncTip}>${fmtLibelleValeur(t.verdict)}${confBadge}</td>
+      <td style="font-size:11px">${isUncertain?'Cible à vérifier':fmtLibelleValeur(t.verdict)}${confBadge}</td>
     </tr>`;}).join('');
 }
 
@@ -3042,7 +3054,7 @@ async function showStock(ticker){
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
-      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${fmtEcartPct(s.ecart_pct)})</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div></div>`:''}
+      ${htmlCartePrixCible(s)}
       ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
             const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
             const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
@@ -3072,7 +3084,7 @@ async function showStock(ticker){
       </div>`:''}
       ${ai?`<div class="card expert-only" style="margin-bottom:12px;border-left:3px solid var(--blue)"><div class="ct">🧠 Analyse Claude</div>
         <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">${ai}</div>
-        ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong>${fi.upside_pct==null?'':` <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fmtEcartPct(fi.upside_pct)})</span>`}</div>`:''}</div>`:''}
+        ${(fi.target_price&&!cibleDouteuse(s.libelle_valeur))?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong>${fi.upside_pct==null?'':` <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fmtEcartPct(fi.upside_pct)})</span>`}</div>`:''}</div>`:''}
       ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
       <div id="stock-ratings-fundamentals-section"></div>
       <div class="g2" style="margin-bottom:12px">
@@ -3349,13 +3361,42 @@ function _paintIndexCards() {
   if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
 }
 
+function _peindreCompteursMarche(compte) {
+  if (!compte && typeof _largeurDesCotees === 'function') compte = _largeurDesCotees();
+  var upEl = document.getElementById('mkt-up');
+  var downEl = document.getElementById('mkt-down');
+  var detail = document.getElementById('mkt-largeur-detail');
+  if (!compte || !compte.total) {
+    if (upEl) upEl.textContent = '—';
+    if (downEl) downEl.textContent = '—';
+    if (detail) detail.textContent = '';
+    return null;
+  }
+  if (upEl) upEl.textContent = String(compte.hausses);
+  if (downEl) downEl.textContent = String(compte.baisses);
+  if (detail) detail.textContent = (typeof _phraseLargeur === 'function') ? _phraseLargeur(compte) : '';
+  return compte;
+}
+
 function _renderMarketPage() {
   _paintIndexCards();
   if (typeof brancherCourbesMarche === "function") brancherCourbesMarche();
-  var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
-  var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
-  if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
-  if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
+  var compte = _peindreCompteursMarche();
+  var up = compte ? compte.hausses : 0;
+  var down = compte ? compte.baisses : 0;
+  if (!compte && !window._largeurMarcheDemandee && typeof demanderVariation === 'function') {
+    window._largeurMarcheDemandee = 1;
+    demanderVariation(false).then(function(d) {
+      window._largeurMarcheDemandee = 0;
+      var page = document.getElementById('page-marche');
+      if (!(page && page.classList.contains('on'))) return;
+      // Une seule peinture : rappeler _renderMarketPage relançait la même
+      // promesse déjà résolue et bloquait la page (microtâches sans fin).
+      _peindreCompteursMarche(typeof _largeurDesCotees === 'function'
+        ? _largeurDesCotees((d && d.prices) || null)
+        : null);
+    }).catch(function() { window._largeurMarcheDemandee = 0; });
+  }
 
   // Heatmap — re-render directement dans mkt-heatmap-grid
   _renderHeatmapFilters();
@@ -3385,7 +3426,8 @@ function _renderMarketPage() {
     if (window.scores && window.scores.length) {
       var sorted = [...window.scores].sort(triCommeClassement);
       var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+note10txt(s)+'/10'; }).join(' · ');
-      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
+      var phrase = (typeof _phraseLargeur === 'function' && compte) ? _phraseLargeur(compte) : (up + ' en hausse · ' + down + ' en baisse');
+      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">'+phrase+'</div>';
     }
   }
 }
@@ -4951,7 +4993,7 @@ function openWhyModal(ticker) {
   if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
   if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + note10txt(s) + '/10';
   var decote = '';
-  var ciblePourquoi = s.prix_cible || s.target_price;
+  var ciblePourquoi = (typeof cibleDouteuse === 'function' && cibleDouteuse(s.libelle_valeur)) ? null : (s.prix_cible || s.target_price);
   if (ciblePourquoi && s.price && ciblePourquoi > s.price) {
     decote = Math.round((ciblePourquoi/s.price - 1)*100);
   }

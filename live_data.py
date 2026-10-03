@@ -3,7 +3,7 @@ live_data.py — Données live BRVM
 Source : brvm.org Table 3
 """
 import json, logging, os, tempfile, time, threading
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
@@ -79,6 +79,98 @@ def _seance_est_ouverte(session_date, prices):
     """
     auj = _aujourdhui_abidjan()
     return session_date == auj and _seance_a_echange(prices)
+
+
+def _jour_iso(valeur):
+    if not isinstance(valeur, str):
+        return None
+    brut = valeur.strip()[:10]
+    try:
+        return date.fromisoformat(brut)
+    except ValueError:
+        return None
+
+
+def _seance_des_cours():
+    """Jour ouvré publié avec les cours (page cours-actions), s'il existe."""
+    cache = load_cache() or {}
+    if not isinstance(cache, dict):
+        return None
+    jour = _jour_iso(cache.get("session_date"))
+    if jour and jour.weekday() < 5:
+        return jour
+    prices = cache.get("prices")
+    if not isinstance(prices, dict):
+        return None
+    jours = []
+    for row in prices.values():
+        if not isinstance(row, dict) or not row.get("price"):
+            continue
+        candidat = _jour_iso(row.get("session_date"))
+        if candidat and candidat.weekday() < 5:
+            jours.append(candidat)
+    return max(jours) if jours else None
+
+
+def _dernier_cours_historique(plafond):
+    """Dernier jour ouvré de l'historique réel, pas les points annuels."""
+    try:
+        from price_history_builder import load_history
+        historique = load_history() or {}
+    except Exception:
+        return None
+    if not isinstance(historique, dict):
+        return None
+    meilleur = None
+    for points in historique.values():
+        if not isinstance(points, list):
+            continue
+        for point in points:
+            if not isinstance(point, dict) or point.get("source") == "historical":
+                continue
+            jour = _jour_iso(point.get("date"))
+            prix = point.get("price")
+            if jour is None or jour.weekday() >= 5 or (plafond and jour > plafond):
+                continue
+            if isinstance(prix, bool) or not isinstance(prix, (int, float)) or prix <= 0:
+                continue
+            if meilleur is None or jour > meilleur:
+                meilleur = jour
+    return meilleur
+
+
+def date_derniere_seance(publiee):
+    """Remplace une date de récupération par le dernier jour ouvré qui a des cours.
+
+    La page résumé n'a souvent que l'horloge du site. Un samedi y devient
+    donc la date du jour, alors que les cours datent du vendredi. On ne
+    recule que de quelques jours : un cache très ancien ne réécrit pas
+    une séance de semaine déjà publiée.
+    """
+    jour = _jour_iso(publiee)
+    if jour is None:
+        return publiee
+    live = _seance_des_cours()
+    if live and live < jour and (jour - live).days <= 4:
+        return live.isoformat()
+    if jour.weekday() < 5:
+        return publiee
+    historique = _dernier_cours_historique(jour)
+    if historique and (jour - historique).days <= 4:
+        return historique.isoformat()
+    recule = jour
+    while recule.weekday() >= 5:
+        recule -= timedelta(days=1)
+    return recule.isoformat()
+
+
+def libelle_semaine_iso(jour_iso):
+    """Semaine ISO (lundi), pas le numéro Python ``%W`` qui décale d'une semaine."""
+    jour = _jour_iso(jour_iso) if not isinstance(jour_iso, date) else jour_iso
+    if jour is None:
+        return None
+    iso = jour.isocalendar()
+    return "Semaine %02d/%d" % (iso.week, iso.year)
 
 
 def fetch_brvm_org():
