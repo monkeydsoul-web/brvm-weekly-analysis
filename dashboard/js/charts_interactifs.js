@@ -268,17 +268,32 @@ function lierPointeur(hote) {
     poserIndex(hote, idx);
   }
 
+  function noterSurvol(evt) {
+    hote._ciSurCourbe = evenementSurCourbe(evt, hote);
+  }
+
   hote.addEventListener("pointerdown", function(evt) {
-    if (!evenementSurCourbe(evt, hote)) return;
+    noterSurvol(evt);
+    if (!hote._ciSurCourbe) return;
     doigt = true;
     choisir(evt);
   });
   hote.addEventListener("pointermove", function(evt) {
+    noterSurvol(evt);
     if (evt.pointerType !== "mouse" && !doigt) return;
     choisir(evt);
   });
   hote.addEventListener("pointerup", function() { doigt = false; });
   hote.addEventListener("pointercancel", function() { doigt = false; });
+  hote.addEventListener("pointerleave", function() {
+    hote._ciSurCourbe = false;
+    if (!hote._ciZoomSousPointeur) return;
+    hote._ciZoomSousPointeur = false;
+    var visible = hote._ciVisible;
+    if (!visible || visible.length < 2) return;
+    hote._ciDate = null;
+    poserIndex(hote, visible.length - 1);
+  });
 }
 
 function lierZoom(hote) {
@@ -303,6 +318,11 @@ function lierZoom(hote) {
       visible = serieZoom(hote._ciComplet, detail.debut, detail.fin);
     }
     if (visible.length < 2) return;
+    if (hote._ciSurCourbe) hote._ciZoomSousPointeur = true;
+    else {
+      hote._ciDate = null;
+      hote._ciZoomSousPointeur = false;
+    }
     peindreVisible(hote, visible);
   });
 }
