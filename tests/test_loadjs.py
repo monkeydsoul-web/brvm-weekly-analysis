@@ -11,6 +11,7 @@ MODULES = (
     "simulator.js",
     "live_score.js",
     "ranking.js",
+    "js/charts_interactifs.js",
     "stock_chart.js",
     "badges.js",
     "data_confidence.js",
