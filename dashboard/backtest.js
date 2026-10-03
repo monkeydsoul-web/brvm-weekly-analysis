@@ -65,10 +65,12 @@ function createBacktestModal() {
         style="width:100%;padding:12px;background:linear-gradient(135deg,#60A5FA,#4ADE80);border:none;border-radius:8px;color:#000;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:16px">
         📊 Lancer le backtesting
       </button>
+      <div id="bt-msg" role="status" aria-live="polite" style="display:none;margin:-8px 0 16px;padding:8px 12px;border-radius:6px;border:1px solid var(--amber);background:var(--bg3);color:var(--amber);font-size:12px"></div>
 
       <!-- Résultats -->
       <div id="bt-result" style="display:none">
         <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div id="bt-range" style="font-size:12px;color:var(--t2);margin-bottom:12px"></div>
           <!-- KPIs -->
           <div id="bt-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"></div>
           <!-- Graphique -->
@@ -105,21 +107,6 @@ function _refreshBTSelector() {
   const all = window.scores || scores || [];
   const sorted = [...all].sort(typeof triCommeClassement==='function'?triCommeClassement:(a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
 
-  const selEl = document.getElementById('bt-selected');
-  if (selEl) {
-    selEl.innerHTML = _btTickers.map(t => {
-      const s = all.find(x=>x.ticker===t);
-      const v = s?.composite_adj||0;
-      const c = (typeof couleurPrincipale==='function')?couleurPrincipale(s||{composite_adj:v}):((typeof couleurNote==='function')?couleurNote(note10num(s||{composite_adj:v})):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'));
-      const w = Math.round((_btWeights[t]||1/_btTickers.length)*100);
-      return `<span style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid ${c};border-radius:6px;padding:3px 8px;font-size:11px">
-        <strong style="color:${c}">${t}</strong>
-        <span style="color:var(--t3);font-size:10px">${w}%</span>
-        <button onclick="btRemove('${t}')" style="background:none;border:none;color:var(--red);cursor:pointer;padding:0 2px">✕</button>
-      </span>`;
-    }).join('') || '<span style="color:var(--t3);font-size:11px">Sélectionnez des actions</span>';
-  }
-
   const picker = document.getElementById('bt-picker');
   if (picker) {
     picker.innerHTML = sorted.map(x => {
@@ -148,6 +135,33 @@ function _refreshBTSelector() {
       </div>`).join('');
     btUpdateWeights();
   }
+  _btRenderChips();
+  if (_btTickers.length >= 2) _btMsg('');
+}
+
+function _btRenderChips() {
+  const all = window.scores || scores || [];
+  const selEl = document.getElementById('bt-selected');
+  if (selEl) {
+    selEl.innerHTML = _btTickers.map(t => {
+      const s = all.find(x=>x.ticker===t);
+      const v = s?.composite_adj||0;
+      const c = (typeof couleurPrincipale==='function')?couleurPrincipale(s||{composite_adj:v}):((typeof couleurNote==='function')?couleurNote(note10num(s||{composite_adj:v})):(v>=60?'var(--green)':v>=40?'var(--amber)':'var(--red)'));
+      const w = Math.round(((t in _btWeights) ? _btWeights[t] : 1/_btTickers.length)*100);
+      return `<span style="display:flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid ${c};border-radius:6px;padding:3px 8px;font-size:11px">
+        <strong style="color:${c}">${t}</strong>
+        <span style="color:var(--t3);font-size:10px">${w}%</span>
+        <button onclick="btRemove('${t}')" style="background:none;border:none;color:var(--red);cursor:pointer;padding:0 2px">✕</button>
+      </span>`;
+    }).join('') || '<span style="color:var(--t3);font-size:11px">Sélectionnez des actions</span>';
+  }
+}
+
+function _btMsg(txt) {
+  const el = document.getElementById('bt-msg');
+  if (!el) return;
+  el.textContent = txt;
+  el.style.display = txt ? 'block' : 'none';
 }
 
 function btUpdateWeights() {
@@ -161,6 +175,7 @@ function btUpdateWeights() {
   if (total > 0 && Math.abs(total - 100) > 1) {
     _btTickers.forEach(t => { _btWeights[t] = _btWeights[t] / (total/100); });
   }
+  _btRenderChips();
 }
 
 function btToggle(t) {
@@ -189,7 +204,12 @@ function setBTPeriod(p) {
 function closeBT() { const m = document.getElementById('bt-modal'); if (m) m.style.display='none'; }
 
 async function launchBacktest() {
-  if (_btTickers.length < 2) { return; }
+  if (_btTickers.length < 2) {
+    document.getElementById('bt-result').style.display = 'none';
+    _btMsg('Choisissez au moins 2 sociétés pour lancer le backtest.');
+    return;
+  }
+  _btMsg('');
   btUpdateWeights();
   const resultDiv = document.getElementById('bt-result');
   document.getElementById('bt-kpis').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--t2)">⏳ Calcul en cours...</div>';
@@ -224,6 +244,8 @@ function _renderBTResult(d) {
     <div style="font-size:16px;font-weight:700;color:${c}">${v}</div>
   </div>`).join('');
 
+  _renderBTRange(d);
+
   // Graphique SVG
   _drawBTChart(d);
 
@@ -241,6 +263,30 @@ function _renderBTResult(d) {
       <td style="padding:5px 6px;text-align:right;color:var(--t3)">${r.nb_points}</td>
     </tr>`;
   }).join('');
+}
+
+// Étendue réelle des données utilisées, lue dans la réponse (aucune extrapolation)
+function _renderBTRange(d) {
+  const el = document.getElementById('bt-range');
+  if (!el) return;
+  const rs = d.results || [];
+  if (!rs.length) { el.textContent = ''; return; }
+  const debut = rs.map(r => r.start_date).sort()[0];
+  const fin = rs.map(r => r.end_date).sort().slice(-1)[0];
+  const pts = rs.map(r => r.nb_points);
+  const minP = Math.min(...pts), maxP = Math.max(...pts);
+  const ptsTxt = minP === maxP ? `${maxP} points` : `${minP} à ${maxP} points selon le titre`;
+  let html = `Données utilisées : du <strong>${debut}</strong> au <strong>${fin}</strong> (${ptsTxt}).`;
+  if (maxP > 60) html += ' Le graphique montre les 60 derniers points.';
+  const jours = {'1an':365,'3ans':1095,'5ans':1825}[d.period];
+  if (jours) {
+    const demande = new Date(Date.now() - jours*86400000).toISOString().slice(0,10);
+    const ecart = (new Date(debut) - new Date(demande)) / 86400000;
+    if (ecart > 10) {
+      html += `<div style="margin-top:6px;padding:8px 12px;border-radius:6px;border:1px solid var(--amber);color:var(--amber)">La période « ${d.period} » demandée commence le ${demande}, mais les données disponibles ne remontent qu'au ${debut}. Les résultats ne couvrent que cette durée.</div>`;
+    }
+  }
+  el.innerHTML = html;
 }
 
 function _drawBTChart(d) {
