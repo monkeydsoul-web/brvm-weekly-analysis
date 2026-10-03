@@ -284,15 +284,17 @@ def _ouvrir(navigateur, url, largeur):
 
 
 def _poser_doigt(page, selecteur, ratio):
+    """Clic aux coordonnées de la courbe, même si une couche couvre le SVG."""
     cible = page.locator(selecteur)
+    cible.scroll_into_view_if_needed()
     boite = cible.bounding_box()
     assert boite and boite["width"] > 80, selecteur
-    x = boite["width"] * ratio
-    y = boite["height"] * 0.45
+    x = boite["x"] + boite["width"] * ratio
+    y = boite["y"] + min(boite["height"] * 0.45, boite["height"] - 4)
     if page.viewport_size["width"] <= 500:
-        cible.tap(position={"x": x, "y": y})
+        page.touchscreen.tap(x, y)
     else:
-        cible.click(position={"x": x, "y": y})
+        page.mouse.click(x, y)
 
 
 def test_fiche_et_marche(base_url):
