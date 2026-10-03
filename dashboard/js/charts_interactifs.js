@@ -6,6 +6,12 @@
 //   performance.js (base 100), markowitz.js
 // La série complète est lue une fois. Un changement de période ne relance
 // aucune requête et n'ajoute aucun point.
+// CHARTS-FIX-1 : la fiche n'utilise plus l'historique étendu. Il est faux
+// jusqu'au 18/05/2026 (cours arrondi, volume qui porte le vrai prix,
+// séances du 18/05/2026 incorrectes, divisions non corrigées). Seul
+// /api/price-history compte, et seulement à partir du 19/05/2026.
+
+var SEUIL_COURS_FIABLE = "2026-05-19";
 
 var PERIODES_COURBE = [
   { id: "1M", mois: 1 },
@@ -579,15 +585,30 @@ function pointsDepuisHistorique(lignes) {
   return normaliserPoints(lignes);
 }
 
-function secoursPrix(ticker) {
-  var local = pointsDepuisHistorique(window._priceHistory && window._priceHistory[ticker]);
-  if (local.length >= 2) return Promise.resolve(local);
+function pointsFiables(lignes) {
+  var serie = normaliserPoints(lignes);
+  var garde = [];
+  var i;
+  for (i = 0; i < serie.length; i++) {
+    if (serie[i].date >= SEUIL_COURS_FIABLE) garde.push(serie[i]);
+  }
+  return garde;
+}
+
+function seriePrixFiable(data, ticker) {
+  if (!data || data.error || !ticker) return [];
+  return pointsFiables(data[ticker]);
+}
+
+function lireHistoriqueFiable(ticker) {
+  var deja = seriePrixFiable(window._priceHistory, ticker);
+  if (deja.length >= 2) return Promise.resolve(deja);
   if (window._ciHistoriquePrix) {
-    return Promise.resolve(pointsDepuisHistorique(window._ciHistoriquePrix[ticker]));
+    return Promise.resolve(seriePrixFiable(window._ciHistoriquePrix, ticker));
   }
   return fetch("/api/price-history").then(function(r) { return r.json(); }).then(function(data) {
     window._ciHistoriquePrix = data && !data.error ? data : {};
-    return pointsDepuisHistorique(window._ciHistoriquePrix[ticker]);
+    return seriePrixFiable(window._ciHistoriquePrix, ticker);
   }).catch(function() { return []; });
 }
 
@@ -601,27 +622,10 @@ function chargerCourbeSociete(ticker, containerId) {
   hote.setAttribute("data-ci-cle", cle);
   hote.setAttribute("data-ci-etat", "charge");
   hote.innerHTML = '<p class="ci-vide">Chargement…</p>';
-  var url = "/api/price-history-extended/" + encodeURIComponent(cle) + "?period=tout";
-  fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+  lireHistoriqueFiable(cle).then(function(points) {
     if (!hote.isConnected || hote.getAttribute("data-ci-cle") !== cle) return;
-    var points = normaliserPoints(data && data.points);
-    if (points.length >= 2) {
-      poserSerie(hote, points, { unite: "XOF" });
-      hote.setAttribute("data-ci-etat", "ok");
-      return;
-    }
-    return secoursPrix(cle).then(function(alt) {
-      if (!hote.isConnected || hote.getAttribute("data-ci-cle") !== cle) return;
-      poserSerie(hote, alt, { unite: "XOF" });
-      hote.setAttribute("data-ci-etat", alt.length >= 2 ? "ok" : "vide");
-    });
-  }).catch(function() {
-    if (!hote.isConnected) return;
-    return secoursPrix(cle).then(function(alt) {
-      if (!hote.isConnected || hote.getAttribute("data-ci-cle") !== cle) return;
-      poserSerie(hote, alt, { unite: "XOF" });
-      hote.setAttribute("data-ci-etat", alt.length >= 2 ? "ok" : "vide");
-    });
+    poserSerie(hote, points, { unite: "XOF" });
+    hote.setAttribute("data-ci-etat", points.length >= 2 ? "ok" : "vide");
   });
 }
 
@@ -673,6 +677,7 @@ if (typeof window !== "undefined") {
   window.serieZoom = serieZoom;
   window.periodeDuVisible = periodeDuVisible;
   window.unitesEtiquette = unitesEtiquette;
+  window.pointsFiables = pointsFiables;
   window.peindreSerie = peindreSerie;
   window.peindreAppel = peindreAppel;
   window.chargerCourbeSociete = chargerCourbeSociete;

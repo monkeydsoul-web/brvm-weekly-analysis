@@ -155,9 +155,14 @@ def _ecrire_fixtures():
         })
     with open(os.path.join(dossier, "price_history_extended.json"), "w", encoding="utf-8") as f:
         json.dump({"SMBC": cours}, f)
+    # Points faux, du type de ceux vus en prod : la courbe ne doit pas les montrer.
+    empoisonnes = [
+        {"date": "2025-06-03", "price": 16000, "source": "live", "volume": 15775},
+        {"date": "2026-05-18", "price": 13000, "source": "live", "volume": 12370},
+    ]
     with open(os.path.join(dossier, "price_history.json"), "w", encoding="utf-8") as f:
         json.dump({
-            "SMBC": [{"date": p["date"], "price": p["close"], "source": "live"} for p in cours],
+            "SMBC": [{"date": p["date"], "price": p["close"], "source": "live"} for p in cours] + empoisonnes,
         }, f)
     with open(os.path.join(dossier, "index_history.json"), "w", encoding="utf-8") as f:
         json.dump({"seances": seances}, f)
@@ -251,6 +256,17 @@ def _compter(journal, morceau):
     return sum(1 for url in journal if morceau in url)
 
 
+def _historique_prix(journal):
+    """GET /api/price-history, sans l'historique étendu."""
+    return [u for u in journal if u.split("?", 1)[0] == "/api/price-history"]
+
+
+def _serie_fiable(jours):
+    """Même filtre que la courbe : séances de la fixture à partir du 19/05/2026."""
+    seuil = "2026-05-19"
+    return [(jour.isoformat(), 15000 + i * 25) for i, jour in enumerate(jours) if jour.isoformat() >= seuil]
+
+
 def _indices_module(journal):
     """BRVM-C et BRVM-30 seulement. BRVM-COMPOSITE (comparaison) ne compte pas."""
     return [u for u in journal if "index=BRVM-C&" in u or "index=BRVM-30" in u]
@@ -289,7 +305,12 @@ def _ouvrir(navigateur, url, largeur):
         if req.method != "GET":
             return
         u = urlparse(req.url)
-        if u.path == "/api/market" or u.path == "/api/index-history" or u.path.startswith("/api/price-history-extended/"):
+        if (
+            u.path == "/api/market"
+            or u.path == "/api/index-history"
+            or u.path == "/api/price-history"
+            or u.path.startswith("/api/price-history-extended/")
+        ):
             journal.append(u.path + (("?" + u.query) if u.query else ""))
 
     page.on("request", _note)
@@ -324,6 +345,7 @@ def test_fiche_et_marche(base_url):
     url, jours = base_url
     fin = jours[-1]
     seuil_1m = _decaler_mois(fin, -1).isoformat()
+    fiable = _serie_fiable(jours)
     os.makedirs(CAPTURES, exist_ok=True)
     with sync_playwright() as pw:
         navigateur = pw.chromium.launch(
@@ -334,13 +356,13 @@ def test_fiche_et_marche(base_url):
         try:
             for largeur, nom_l in ((1280, "1280"), (390, "390")):
                 for sombre, nom_t in ((False, "clair"), (True, "sombre")):
-                    _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m)
+                    _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m, fiable)
                     _verifier_marche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m)
         finally:
             navigateur.close()
 
 
-def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
+def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m, fiable):
     contexte, page, erreurs, journal = _ouvrir(navigateur, url, largeur)
     try:
         page.goto(url + "/societe/SMBC", wait_until="domcontentloaded", timeout=20000)
@@ -371,9 +393,30 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
         boutons = page.locator("#stockChartDiv .ci-periode").all_inner_texts()
         assert boutons == ["1M", "3M", "Tout"], boutons
         assert _compter(journal, "/api/market") == 1, journal
-        assert _compter(journal, "price-history-extended") == 1, journal
-        assert "period=tout" in journal[-1] or any("period=tout" in u for u in journal)
+        assert _historique_prix(journal) == ["/api/price-history"], journal
+        assert _compter(journal, "price-history-extended") == 0, journal
         assert _indices_module(journal) == []
+        trace = page.evaluate(
+            """() => {
+              var hote = document.getElementById('stockChartDiv');
+              var serie = hote._ciComplet || [];
+              return {
+                debut: hote.getAttribute('data-ci-debut'),
+                fin: hote.getAttribute('data-ci-fin'),
+                dates: serie.map(function(p) { return p.date; }),
+                valeurs: serie.map(function(p) { return p.value; })
+              };
+            }"""
+        )
+        assert trace["dates"], trace
+        assert all(d >= "2026-05-19" for d in trace["dates"]), trace["dates"][:3]
+        assert "2025-06-03" not in trace["dates"]
+        assert "2026-05-18" not in trace["dates"]
+        assert trace["debut"] == fiable[0][0] == trace["dates"][0]
+        assert trace["fin"] == fiable[-1][0] == trace["dates"][-1]
+        assert trace["valeurs"][0] == fiable[0][1]
+        assert trace["valeurs"][-1] == fiable[-1][1]
+        assert trace["dates"] == [d for d, _v in fiable]
 
         x_avant = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
         date_avant = page.locator("#stockChartDiv .ci-date").inner_text()
@@ -401,6 +444,7 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
             page.wait_for_timeout(150)
             assert page.locator("#stockChartDiv .ci-lecture").inner_text() == survole
 
+        avant_prix = len(_historique_prix(journal))
         avant_ext = _compter(journal, "price-history-extended")
         avant_marche = _compter(journal, "/api/market")
         page.locator('#stockChartDiv .ci-periode[data-periode="1M"]').click()
@@ -410,6 +454,7 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
             timeout=5000,
         )
         page.wait_for_timeout(400)
+        assert len(_historique_prix(journal)) == avant_prix, journal
         assert _compter(journal, "price-history-extended") == avant_ext, journal
         assert _compter(journal, "/api/market") == avant_marche, journal
         assert _indices_module(journal) == []

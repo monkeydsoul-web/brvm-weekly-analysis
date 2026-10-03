@@ -33,7 +33,10 @@ def test_branchements_fiche_et_marche_seulement():
     assert "accueil-courbe" not in JS
     assert "openBacktest" not in JS
     assert "/api/index-history" in JS
-    assert "period=tout" in JS
+    assert "/api/price-history" in JS
+    assert "price-history-extended" not in JS
+    assert 'SEUIL_COURS_FIABLE = "2026-05-19"' in JS
+    assert "openCompareModal" not in JS
     assert "var SEUIL_SEANCES_COURBE = 20;" in ACCUEIL
     chargeur = ACCUEIL[ACCUEIL.index("function _chargerCourbeComposite"):ACCUEIL.index("function _remplirMontants")]
     assert "/api/index-history" not in chargeur
@@ -102,6 +105,22 @@ attend(periodeDuVisible(serie, unMois, '3M') === '3M', '3M garde le choix si mem
 attend(unitesEtiquette(346) * 346 / 640 >= 10, '10 px a 346');
 attend(unitesEtiquette(0) * 346 / 640 >= 10, 'repli mobile');
 attend(unitesEtiquette(900) === 11, 'ecran large');
+var brut = [
+  { date: '2025-06-03', close: 16000 },
+  { date: '2026-05-18', price: 15050 },
+  { date: '2026-05-20', price: 15790 },
+  { date: '2026-10-02', close: 20605 }
+];
+var fiable = pointsFiables(brut);
+attend(fiable.length === 2, 'deux seances fiables ' + fiable.length);
+attend(fiable[0].date === '2026-05-20' && fiable[0].value === 15790, 'premier fiable');
+attend(fiable[1].date === '2026-10-02' && fiable[1].value === 20605, 'dernier fiable');
+attend(fiable.every(function(p) { return p.date >= '2026-05-19'; }), 'rien avant le 19 mai');
+var couvert = periodesCouvertes(fiable);
+attend(couvert.join(',') === 'Tout', 'moins de trois mois ' + couvert.join(','));
+var longFiable = pointsFiables(serie);
+attend(longFiable[0].date === '2026-07-01', 'mai retire ' + longFiable[0].date);
+attend(periodesCouvertes(longFiable).join(',') === '1M,3M,Tout', 'periodes sur serie fiable ' + periodesCouvertes(longFiable).join(','));
 """
     resultat = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=False)
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout

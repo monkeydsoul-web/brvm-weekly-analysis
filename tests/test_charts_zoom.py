@@ -130,10 +130,45 @@ def _autoriser_local(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
 
 
+_FICHIERS_ZOOM = (
+    "price_history_extended.json",
+    "price_history.json",
+    "live_ranking.json",
+    "market_cache.json",
+    "live_cache.json",
+    "macro_cache.json",
+)
+
+
 def _ecrire(nom, payload):
     chemin = os.path.join(os.environ["BRVM_DATA_DIR"], nom)
     with open(chemin, "w", encoding="utf-8") as f:
         json.dump(payload, f)
+
+
+def _sauver_zoom():
+    dossier = os.environ["BRVM_DATA_DIR"]
+    sauve = {}
+    for nom in _FICHIERS_ZOOM:
+        chemin = os.path.join(dossier, nom)
+        if os.path.isfile(chemin):
+            with open(chemin, "rb") as f:
+                sauve[nom] = f.read()
+        else:
+            sauve[nom] = None
+    return sauve
+
+
+def _rendre_zoom(sauve):
+    dossier = os.environ["BRVM_DATA_DIR"]
+    for nom, contenu in sauve.items():
+        chemin = os.path.join(dossier, nom)
+        if contenu is None:
+            if os.path.isfile(chemin):
+                os.remove(chemin)
+        else:
+            with open(chemin, "wb") as f:
+                f.write(contenu)
 
 
 def _serie():
@@ -158,8 +193,16 @@ def _serie():
 def _caches():
     maintenant = datetime.now(timezone.utc).isoformat()
     points = _serie()
+    # La courbe de fiche ne lit plus l'étendu : même série, via /api/price-history.
+    # Le décompte attendu est celui des séances à partir du 19/05/2026.
+    fiables = [p for p in points if p["date"] >= "2026-05-19"]
     _ecrire("price_history_extended.json", {"SNTS": points})
-    _ecrire("price_history.json", {})
+    _ecrire("price_history.json", {
+        "SNTS": [
+            {"date": p["date"], "price": p["close"], "volume": p["volume"], "source": "live"}
+            for p in points
+        ],
+    })
     _ecrire("live_ranking.json", {
         "updated_at": maintenant,
         "market_open": False,
@@ -211,7 +254,7 @@ def _caches():
         "stats": {"total": 1, "with_price": 1, "sources": {"fixture": 1}},
     })
     _ecrire("macro_cache.json", {})
-    return len(points)
+    return len(fiables)
 
 
 @pytest.mark.skipif(_CI, reason="Playwright hors CI. Local : pytest tests/test_charts_zoom.py -q -s")
@@ -221,6 +264,7 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
     _autoriser_local(monkeypatch)
     from playwright.sync_api import sync_playwright
 
+    sauve = _sauver_zoom()
     n_points = _caches()
     assert n_points >= 40
     import market_data
@@ -759,6 +803,8 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
             navigateur.close()
     finally:
         serveur.shutdown()
+        _rendre_zoom(sauve)
+        market_data._memoire = None
 
     assert not erreurs, erreurs[:8]
     for largeur in (1280, 390):
