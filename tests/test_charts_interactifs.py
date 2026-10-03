@@ -15,6 +15,13 @@ ACCUEIL = (ROOT / "dashboard" / "welcome_v2.js").read_text(encoding="utf-8")
 
 def test_branchements_fiche_et_marche_seulement():
     assert 'src="/js/charts_interactifs.js?v={{ASSET_V}}"' in PAGE
+    assert PAGE.index('src="/stock_chart.js?v={{ASSET_V}}"') < PAGE.index('src="/js/charts_interactifs.js?v={{ASSET_V}}"')
+    assert 'hote.addEventListener("pointerdown"' in JS
+    assert 'addEventListener("brvm:zoom"' in JS
+    assert "periodeDuVisible" in JS
+    assert "precedente(container, labels, prices, ticker)" in JS
+    assert "function drawPriceChart" in STOCK
+    assert "peindreAppel" in STOCK
     assert 'data-ci-indice="BRVM-C"' in PAGE
     assert 'data-ci-indice="BRVM-30"' in PAGE
     assert 'id="mkt-courbe-brvm-c"' in PAGE
@@ -84,6 +91,14 @@ var doublon = normaliserPoints([
 attend(doublon.length === 2 && doublon[0].value === 4, 'doublon');
 var tout = filtrerPeriode(serie, 'Tout');
 attend(tout.length === 4, 'tout garde les seances reelles');
+var unMois = filtrerPeriode(serie, '1M');
+attend(periodeDuVisible(serie, serie, 'Tout') === 'Tout', 'tout visible');
+attend(periodeDuVisible(serie, unMois, '1M') === '1M', '1M choisi');
+attend(periodeDuVisible(serie, unMois, 'Tout') === '1M', 'zoom pile sur 1M');
+var custom = serieZoom(serie, 0, 1);
+attend(custom.length === 2 && custom[0].date === '2026-05-04', 'fenetre zoom');
+attend(periodeDuVisible(serie, custom, 'Tout') === '', 'zoom libre ' + periodeDuVisible(serie, custom, 'Tout'));
+attend(periodeDuVisible(serie, unMois, '3M') === '3M', '3M garde le choix si meme fenetre');
 """
     resultat = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=False)
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout

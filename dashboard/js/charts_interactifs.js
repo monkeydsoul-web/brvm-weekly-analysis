@@ -160,38 +160,119 @@ function classeVariation(pct) {
 
 function assurerSquelette(hote) {
   if (hote.querySelector(".ci-svg")) return;
+  var svg = '<svg class="ci-svg" role="img" aria-label="Historique du cours" viewBox="0 0 640 208" width="100%" height="208"></svg>';
+  var milieu = hote.id === "stockChartDiv"
+    ? '<div id="stockChartDiv_svg">' + svg + '</div>'
+    : svg;
   hote.innerHTML = ''
     + '<p class="ci-lecture" aria-live="polite">'
     + '<span class="ci-date"></span>'
     + '<span class="ci-cours"></span>'
     + '<span class="ci-var"></span>'
     + '</p>'
-    + '<svg class="ci-svg" role="img" aria-label="Historique du cours" viewBox="0 0 640 208" width="100%" height="208"></svg>'
+    + milieu
     + '<div class="ci-periodes" role="group" aria-label="Période"></div>';
   lierPointeur(hote);
+  lierZoom(hote);
+}
+
+function memeFenetre(a, b) {
+  if (!a || !b || !a.length || a.length !== b.length) return false;
+  return a[0].date === b[0].date && a[a.length - 1].date === b[b.length - 1].date;
+}
+
+function serieZoom(points, debut, fin) {
+  var serie = normaliserPoints(points);
+  if (serie.length < 2 || debut == null || fin == null || debut === "" || fin === "") return serie;
+  debut = Math.round(Number(debut));
+  fin = Math.round(Number(fin));
+  if (!isFinite(debut) || !isFinite(fin)) return serie;
+  if (debut < 0) debut = 0;
+  if (fin > serie.length - 1) fin = serie.length - 1;
+  if (fin < debut) return serie;
+  return serie.slice(debut, fin + 1);
+}
+
+function periodeDuVisible(complet, visible, preferee) {
+  var base = normaliserPoints(complet);
+  var vue = normaliserPoints(visible);
+  if (vue.length < 2 || base.length < 2) return "";
+  var filtre;
+  if (preferee) {
+    filtre = preferee === "Tout" ? base : filtrerPeriode(base, preferee);
+    if (memeFenetre(filtre, vue)) return preferee;
+  }
+  var ids = periodesCouvertes(base);
+  var i;
+  for (i = 0; i < ids.length; i++) {
+    if (ids[i] === "Tout") continue;
+    if (memeFenetre(filtrerPeriode(base, ids[i]), vue)) return ids[i];
+  }
+  if (memeFenetre(base, vue)) return "Tout";
+  return "";
+}
+
+function evenementSurCourbe(evt, hote) {
+  var cible = evt.target;
+  if (cible && cible.closest && cible.closest(".ci-periodes, .brvm-zoom-bar, button, a")) return false;
+  var svg = hote.querySelector(".ci-svg");
+  if (!svg) return false;
+  var rect = svg.getBoundingClientRect();
+  if (!rect.width || !rect.height) return false;
+  if (evt.clientX < rect.left || evt.clientX > rect.right) return false;
+  if (evt.clientY < rect.top || evt.clientY > rect.bottom) return false;
+  return true;
 }
 
 function lierPointeur(hote) {
-  var svg = hote.querySelector(".ci-svg");
-  if (!svg || svg.getAttribute("data-ci-lie")) return;
-  svg.setAttribute("data-ci-lie", "1");
+  if (!hote || hote.getAttribute("data-ci-lie")) return;
+  hote.setAttribute("data-ci-lie", "1");
   var doigt = false;
 
   function choisir(evt) {
+    if (!evenementSurCourbe(evt, hote)) return;
     var idx = indexAuPointeur(evt, hote);
     if (idx < 0) return;
     poserIndex(hote, idx);
   }
 
-  svg.addEventListener("pointerdown", function(evt) {
+  hote.addEventListener("pointerdown", function(evt) {
+    if (!evenementSurCourbe(evt, hote)) return;
     doigt = true;
     choisir(evt);
   });
-  svg.addEventListener("pointermove", function(evt) {
-    if (evt.pointerType === "mouse" || doigt) choisir(evt);
+  hote.addEventListener("pointermove", function(evt) {
+    if (evt.pointerType !== "mouse" && !doigt) return;
+    choisir(evt);
   });
-  svg.addEventListener("pointerup", function() { doigt = false; });
-  svg.addEventListener("pointercancel", function() { doigt = false; });
+  hote.addEventListener("pointerup", function() { doigt = false; });
+  hote.addEventListener("pointercancel", function() { doigt = false; });
+}
+
+function lierZoom(hote) {
+  if (!hote || hote.id !== "stockChartDiv" || hote.getAttribute("data-ci-zoom")) return;
+  hote.setAttribute("data-ci-zoom", "1");
+  hote.addEventListener("brvm:zoom", function(evt) {
+    var detail = (evt && evt.detail) || {};
+    var zoom = hote._brvmZoom;
+    var visible;
+    if (zoom && zoom.labels && zoom.prices) {
+      var brut = [];
+      var i;
+      var debut = Math.round(Number(detail.debut));
+      var fin = Math.round(Number(detail.fin));
+      if (!isFinite(debut) || !isFinite(fin)) return;
+      for (i = debut; i <= fin && i < zoom.labels.length; i++) {
+        if (i < 0) continue;
+        brut.push({ date: zoom.labels[i], value: zoom.prices[i] });
+      }
+      visible = normaliserPoints(brut);
+    } else {
+      visible = serieZoom(hote._ciComplet, detail.debut, detail.fin);
+    }
+    if (visible.length < 2) return;
+    peindreVisible(hote, visible);
+  });
 }
 
 function indexAuPointeur(evt, hote) {
@@ -253,12 +334,30 @@ function redessiner(hote, periode) {
     return;
   }
   if (couvertes.indexOf(periode) < 0) periode = couvertes.indexOf("Tout") >= 0 ? "Tout" : couvertes[0];
+  hote._ciChoix = periode;
   var visible = filtrerPeriode(complet, periode);
   if (visible.length < 2) {
     hote.innerHTML = '<p class="ci-vide">Historique insuffisant</p>';
     hote._ciVisible = [];
     return;
   }
+  if (hote.id === "stockChartDiv") {
+    assurerSquelette(hote);
+    publierSociete(hote, visible);
+    return;
+  }
+  peindreVisible(hote, visible);
+}
+
+function peindreVisible(hote, visible) {
+  var complet = hote._ciComplet || visible;
+  var couvertes = periodesCouvertes(complet);
+  if (!visible || visible.length < 2) {
+    hote.innerHTML = '<p class="ci-vide">Historique insuffisant</p>';
+    hote._ciVisible = [];
+    return;
+  }
+  var periode = periodeDuVisible(complet, visible, hote._ciChoix);
   assurerSquelette(hote);
   hote._ciVisible = visible;
   hote._ciPeriode = periode;
@@ -345,8 +444,7 @@ function redessiner(hote, periode) {
       btn.setAttribute("aria-pressed", id === periode ? "true" : "false");
       btn.textContent = id;
       btn.addEventListener("click", function() {
-        if (hote._ciPeriode === id) return;
-        redessiner(hote, id);
+        choisirPeriode(hote, id);
       });
       box.appendChild(btn);
     })(couvertes[i]);
@@ -361,11 +459,64 @@ function redessiner(hote, periode) {
   poserIndex(hote, idx);
 }
 
+function choisirPeriode(hote, id) {
+  var visible = filtrerPeriode(hote._ciComplet || [], id);
+  if (visible.length < 2) return;
+  hote._ciChoix = id;
+  hote._ciDate = null;
+  if (hote.id === "stockChartDiv") {
+    assurerSquelette(hote);
+    publierSociete(hote, visible);
+    return;
+  }
+  peindreVisible(hote, visible);
+}
+
+function publierSociete(hote, visible) {
+  var host = document.getElementById("stockChartDiv_svg");
+  if (!host || typeof window.drawPriceChart !== "function" || hote._ciDansDraw) {
+    peindreVisible(hote, visible);
+    return;
+  }
+  var labels = [];
+  var prices = [];
+  var i;
+  for (i = 0; i < visible.length; i++) {
+    labels.push(visible[i].date);
+    prices.push(visible[i].value);
+  }
+  hote._ciDansDraw = true;
+  try {
+    window.drawPriceChart(host, labels, prices, hote._ciTicker || "");
+  } finally {
+    hote._ciDansDraw = false;
+  }
+}
+
+function peindreAppel(container, labels, prices, ticker) {
+  var points = [];
+  var i;
+  for (i = 0; i < (prices || []).length; i++) {
+    points.push({ date: labels && labels[i] ? labels[i] : "", value: prices[i] });
+  }
+  points = normaliserPoints(points);
+  if (container && container.id === "stockChartDiv_svg") {
+    var hote = document.getElementById("stockChartDiv");
+    if (!hote) return;
+    if (ticker) hote._ciTicker = ticker;
+    if (!hote._ciComplet || hote._ciComplet.length < points.length) hote._ciComplet = points;
+    peindreVisible(hote, points);
+    return;
+  }
+  if (container) peindreSerie(container, points, { unite: "XOF" });
+}
+
 function poserSerie(hote, points, options) {
   if (!hote) return;
   options = options || {};
   hote._ciUnite = options.unite || "";
   hote._ciComplet = normaliserPoints(points);
+  hote._ciChoix = "Tout";
   hote._ciDate = null;
   if (hote._ciComplet.length < 2) {
     hote.innerHTML = '<p class="ci-vide">Historique insuffisant</p>';
@@ -460,12 +611,27 @@ function brancherCourbesMarche() {
   for (i = 0; i < noeuds.length; i++) chargerCourbeIndice(noeuds[i]);
 }
 
+function enchainerDrawPriceChart() {
+  if (typeof window === "undefined" || typeof window.drawPriceChart !== "function") return;
+  if (window.drawPriceChart._ciEnveloppe) return;
+  var precedente = window.drawPriceChart;
+  function enveloppe(container, labels, prices, ticker) {
+    return precedente(container, labels, prices, ticker);
+  }
+  enveloppe._ciEnveloppe = true;
+  window.drawPriceChart = enveloppe;
+}
+
 if (typeof window !== "undefined") {
   window.decalerMoisIso = decalerMoisIso;
   window.normaliserPoints = normaliserPoints;
   window.filtrerPeriode = filtrerPeriode;
   window.periodesCouvertes = periodesCouvertes;
+  window.serieZoom = serieZoom;
+  window.periodeDuVisible = periodeDuVisible;
   window.peindreSerie = peindreSerie;
+  window.peindreAppel = peindreAppel;
   window.chargerCourbeSociete = chargerCourbeSociete;
   window.brancherCourbesMarche = brancherCourbesMarche;
+  enchainerDrawPriceChart();
 }

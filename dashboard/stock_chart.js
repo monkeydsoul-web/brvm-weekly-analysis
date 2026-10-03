@@ -10,7 +10,11 @@ function loadPriceChart(ticker, containerId) {
   chargerCourbeSociete(ticker, containerId);
 }
 
-function drawPriceChart(container, labels, prices) {
+function drawPriceChart(container, labels, prices, ticker) {
+  if (typeof peindreAppel === "function") {
+    peindreAppel(container, labels, prices, ticker);
+    return;
+  }
   if (!container || typeof peindreSerie !== "function") return;
   var points = [];
   var i;
