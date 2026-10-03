@@ -87,6 +87,33 @@ def _payload_classement():
     return data
 
 
+def _dater_variations(lignes):
+    """Pose ``session_date`` à côté de ``change_pct``, sans recalculer.
+
+    La date vient du cache live déjà collecté. Les notes, conseils et
+    prix cibles du classement ne sont ni relus ni modifiés.
+    """
+    if not isinstance(lignes, list):
+        return lignes
+    try:
+        from live_data import load_cache
+        cache = load_cache() or {}
+    except Exception:
+        return lignes
+    session = cache.get("session_date") if isinstance(cache, dict) else None
+    if not isinstance(session, str) or not session:
+        return lignes
+    sortie = []
+    for row in lignes:
+        if isinstance(row, dict):
+            copie = dict(row)
+            copie["session_date"] = session
+            sortie.append(copie)
+        else:
+            sortie.append(row)
+    return sortie
+
+
 def load_latest_scores():
     data = _payload_classement()
     if not data:
@@ -558,7 +585,7 @@ def api_scores():
     if not data:
         logger.error("/api/scores — %s", _LIVE_UNAVAIL_MSG)
         return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
-    return jsonify(data["ranking"])
+    return jsonify(_dater_variations(data["ranking"]))
 
 
 @app.route("/api/top3-constance")
@@ -948,7 +975,7 @@ def api_live_scores_all():
     if not data:
         logger.error("/api/live-scores — %s", _LIVE_UNAVAIL_MSG)
         return jsonify({"error": _LIVE_UNAVAIL_MSG}), 503
-    r = data["ranking"]
+    r = _dater_variations(data["ranking"])
     return jsonify({
         "scores":     r,
         "ranking":    r,

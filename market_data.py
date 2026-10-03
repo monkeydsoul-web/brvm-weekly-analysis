@@ -144,10 +144,9 @@ def appliquer_ytd_reference(data):
 
 
 def date_entete_brvm(texte):
-    """Date de l'en-tête brvm.org (« Mercredi, 30 septembre, 2026 - 11:02 »).
+    """Date lue dans un fragment (« Mercredi, 30 septembre, 2026 - 11:02 »).
 
-    La page résumé ne publie pas de date de séance distincte de cette
-    horloge. On la retient telle quelle, au format AAAA-MM-JJ.
+    Retourne AAAA-MM-JJ, ou None si le fragment n'a pas de date.
     """
     if not isinstance(texte, str):
         return None
@@ -161,6 +160,20 @@ def date_entete_brvm(texte):
         return datetime(int(motif.group(3)), mois, int(motif.group(1))).date().isoformat()
     except ValueError:
         return None
+
+
+def date_mise_a_jour_brvm(texte):
+    """Date de la ligne « Dernière mise à jour », pas celle de l'horloge du site.
+
+    L'horloge (« Samedi, 29 août, 2026 - 05:22 ») avance même hors séance.
+    Les cours restent ceux de la mise à jour précédente.
+    """
+    if not isinstance(texte, str):
+        return None
+    motif = re.search(r"Derni[eè]re mise [àa] jour\s*:\s*(.{0,60})", texte)
+    if not motif:
+        return None
+    return date_entete_brvm(motif.group(1))
 
 def fetch_market_data():
     """Scrape brvm.org/fr/resume — 6 tables de données marché"""
@@ -177,7 +190,13 @@ def fetch_market_data():
         r = requests.get("https://www.brvm.org/fr/resume", headers=HEADERS, timeout=15)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "html.parser")
-        result["session_date"] = date_entete_brvm(soup.get_text(" ", strip=True))
+        # La page résumé (vérifiée le 01/10/2026) n'a que l'horloge du site,
+        # pas de ligne « Dernière mise à jour ». Si cette ligne apparaît,
+        # elle prime, comme sur la page des cours. Le fichier d'historique
+        # des indices n'est pas concerné : seul le champ session_date change.
+        texte = soup.get_text(" ", strip=True)
+        mise_a_jour = date_mise_a_jour_brvm(texte)
+        result["session_date"] = mise_a_jour if mise_a_jour else date_entete_brvm(texte)
         tables = soup.find_all("table")
 
         # Table 0 : Activités du marché

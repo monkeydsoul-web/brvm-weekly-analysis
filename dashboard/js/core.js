@@ -1323,6 +1323,9 @@ async function init(){
       _cachedFetch('/api/top_performers').catch(()=>[]),
     ]);
     scores=s;window.scores=s;comms=c;topPerf=tp;
+    if (typeof demanderVariation === 'function') {
+      demanderVariation(false).catch(function() {});
+    }
     if (document.getElementById('page-welcome')?.classList.contains('on') && typeof renderAccueil === 'function') renderAccueil();
     renderMacro(m);
     renderIndexFx(m);
@@ -1491,7 +1494,8 @@ function setHeatmapFilter(sector){
 function renderHeatmap(containerId){
   const grid=document.getElementById(containerId||'heatmap-grid');
   if(!grid)return;
-  let all=[...scores].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
+  const _baseChaleur=(window.scores&&window.scores.length)?window.scores:(typeof scores!=='undefined'?scores:[]);
+  let all=[..._baseChaleur].sort((a,b)=>(b.composite_adj||0)-(a.composite_adj||0));
   if(_heatmapFilter) all=all.filter(x=>(x.sector||'').toLowerCase().includes(_heatmapFilter.toLowerCase()));
   if(!all.length){grid.innerHTML='<p style="color:var(--t2);font-size:12px;padding:12px">Aucune société dans ce secteur.</p>';return;}
 
@@ -1506,23 +1510,25 @@ function renderHeatmap(containerId){
   // Animation fade-in par vague
   grid.style.opacity='0';
   grid.innerHTML=all.map((x,i)=>{
-    const chg=x.change_pct||0;
+    const vu=(typeof variationJour==='function')?variationJour(x.ticker):{pct:null};
+    const chg=vu.pct;
+    const texteVar=(typeof texteVariationJour==='function')?texteVariationJour(x.ticker):'—';
     const sc=x.composite_adj||0;
     const cap=caps[i];
     const sz=Math.round(44+(cap-minCap)/capRange*46); // 44-90px selon capitalisation (HEATMOB-1 : case tactile >= 44 px)
 
     let bg,borderCol;
-    if(chg>=2){bg='rgba(34,197,94,0.88)';borderCol='#22c55e';}
+    if(chg==null){bg='rgba(100,116,139,0.25)';borderCol='#475569';}
+    else if(chg>=2){bg='rgba(34,197,94,0.88)';borderCol='#22c55e';}
     else if(chg>0){bg='rgba(74,222,128,0.72)';borderCol='#4ade80';}
     else if(chg===0){bg='rgba(100,116,139,0.4)';borderCol='#475569';}
     else if(chg>-2){bg='rgba(248,113,113,0.65)';borderCol='#f87171';}
     else{bg='rgba(239,68,68,0.88)';borderCol='#ef4444';}
 
-    const textColor=Math.abs(chg)>=1?'#fff':'var(--text)';
-    const sign=chg>0?'+':'';
+    const textColor=chg!=null&&Math.abs(chg)>=1?'#fff':'var(--text)';
     const capFmt=cap>1e12?`${(cap/1e12).toFixed(1)}T`:cap>1e9?`${(cap/1e9).toFixed(1)}Md`:`${(cap/1e6).toFixed(0)}M`;
     const capStr=(x.price&&x.shares)?` | Cap: ${capFmt} XOF`:'';
-    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${sign}${chg.toFixed(2)}% | Note: ${note10txt(x)}/10`;
+    const tip=`${x.ticker} — ${x.name||''} | Cours: ${x.price?x.price.toLocaleString('fr-FR')+' XOF':'N/D'}${capStr} | Var: ${texteVar} | Note: ${note10txt(x)}/10`;
     const delay=i*18; // vague d'animation
     return `<div onclick="_openStock('${x.ticker}')"
       data-tip="${tip}"
@@ -1530,7 +1536,7 @@ function renderHeatmap(containerId){
       onmouseenter="this.style.transform='scale(1.12)';this.style.zIndex='10';this.style.boxShadow='0 6px 20px rgba(0,0,0,.55)'"
       onmouseleave="this.style.transform='scale(1)';this.style.zIndex='';this.style.boxShadow=''">
       <span style="font-size:${Math.max(11,sz/6.5)}px;font-weight:700;color:${textColor};line-height:1.1;text-align:center;padding:0 2px">${x.ticker}</span>
-      <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${sign}${chg.toFixed(1)}%</span>
+      <span style="font-size:${Math.max(11,sz/8)}px;color:${textColor};opacity:.9">${typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):texteVar}</span>
       ${sz>=52?`<span style="font-size:${Math.max(11,sz/10)}px;color:${textColor};opacity:.7;margin-top:1px">${note10txt(x)}</span>`:''}
     </div>`;
   }).join('');
@@ -1912,7 +1918,8 @@ function renderRank(){
   const sec=document.getElementById('fSec')?.value||'';
   const srt=document.getElementById('fSort')?.value||'composite_adj';
   const verd=document.getElementById('fVerdict')?.value||'';
-  let d=[...scores];
+  const base=(window.scores&&window.scores.length)?window.scores:(typeof scores!=='undefined'?scores:[]);
+  let d=[...base];
   if(sec)d=d.filter(x=>x.sector===sec);
   if(verd)d=filtreTendance(d, verd);
   d=filtreConseil(d);
@@ -1922,7 +1929,7 @@ function renderRank(){
 
   // Contre
   const ctr=document.getElementById('rank-counter');
-  if(ctr) ctr.textContent=`Affichage : ${d.length} / ${scores.length} sociétés`;
+  if(ctr) ctr.textContent=`Affichage : ${d.length} / ${base.length} sociétés`;
 
   const ph=window._priceHistory||{};
   const extSp=window._extSparklines||{};
@@ -1933,7 +1940,9 @@ function renderRank(){
     document.getElementById('rankBody').innerHTML = '<tr><td colspan="19" style="text-align:center;color:var(--t2);padding:20px;font-size:12px">Aucun favori pour le moment — désactivez le filtre et cliquez sur ★ pour en ajouter</td></tr>';
   } else {
   document.getElementById('rankBody').innerHTML=d.map((x,i)=>{
-    const v=x.composite_adj||0,chg=x.change_pct||0,chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
+    const v=x.composite_adj||0;
+    const chg=(typeof variationJour==='function')?variationJour(x.ticker).pct:null;
+    const chgC=chg>0?'var(--green)':chg<0?'var(--red)':'var(--t2)';
     const isFav=favorites.includes(x.ticker);
     // Préférer sparklines étendu (BOC quotidien) si disponible
     const _extPts=extSp[x.ticker];
@@ -1962,7 +1971,7 @@ function renderRank(){
       <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${x.name||''}</td>
       <td>${x.price?(typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')):'N/D'}</td>
       <td style="padding:2px 4px">${spk}${var30}</td>
-      <td style="color:${chgC}">${x.change_pct!=null?chg.toFixed(1)+'%'+(chg===0&&_isWeekend?' '+_staleLbl:''):'—'}</td>
+      <td style="color:${chgC}">${typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'}</td>
       <td class="col-pe">${x.pe_ref||'—'}×</td>
       <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
@@ -2805,6 +2814,15 @@ function _poserUrlSociete(ticker) {
   try { history.pushState({societe: ticker}, '', cible); } catch (e) {}
 }
 
+function _htmlVariationFiche(ticker) {
+  var p = (typeof variationJour === 'function') ? variationJour(ticker).pct : null;
+  var couleur = p > 0 ? 'var(--green)' : (p < 0 ? 'var(--red)' : 'var(--t2)');
+  var marque = (typeof baliseVariationJour === 'function') ? baliseVariationJour(ticker, '') : '—';
+  var lib = (typeof libelleSeanceVariation === 'function') ? libelleSeanceVariation() : '';
+  var date = lib ? '<div style="font-size:11px;color:var(--t2)">' + lib + '</div>' : '';
+  return '<div style="font-size:12px;color:' + couleur + '">' + marque + '</div>' + date;
+}
+
 async function showStock(ticker){
   ticker = String(ticker || '').toUpperCase();
   window._ficheSeq = (window._ficheSeq || 0) + 1;
@@ -2849,7 +2867,7 @@ async function showStock(ticker){
       </div>
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:700">${_staticEntry.price?fmtXOF(_staticEntry.price):'…'}</div>
-        <div style="font-size:12px;color:${(_staticEntry.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(_staticEntry.change_pct||0)>=0?'+':''}${(_staticEntry.change_pct||0).toFixed(2)}%</div>
+        ${_htmlVariationFiche(ticker)}
         ${_staticEntry.statut==='suspendu'
           ? '<span style="margin-top:4px;display:inline-block;color:var(--note-muted);font-weight:700">Cotation suspendue</span>'
           : (_v0>0?`<span class="b ${classePrincipale(_staticEntry)}" style="margin-top:4px;display:inline-block">${note10txt(_staticEntry)}/10</span>`:'')}
@@ -2959,7 +2977,7 @@ async function showStock(ticker){
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
             <div>
               <div style="font-size:22px;font-weight:700">${s.price?fmtXOF(s.price):'N/D'}</div>
-              <div style="font-size:12px;color:${(s.change_pct||0)>=0?'var(--green)':'var(--red)'}">${(s.change_pct||0)>=0?'+':''}${(s.change_pct||0).toFixed(2)}%</div>
+              ${_htmlVariationFiche(s.ticker)}
             </div>
             ${s.statut==='suspendu'
               ? '<span style="color:var(--t2);font-weight:700" data-tip="Cotation suspendue">'+note10txt(s)+'/10</span>'
@@ -4532,7 +4550,7 @@ function toggleHelpDrawer() {
 }
 
 // ── Comparaison rapide sidebar ──────────────────────────────────────────────
-let _cmpSelected = new Set();
+var _cmpSelected = new Set();
 
 function toggleCompare(ticker) {
   if (_cmpSelected.has(ticker)) {
@@ -4572,10 +4590,11 @@ function openCompareModal() {
   if (!rows.length) return;
   rows.sort(triCommeClassement);
 
+  const libVar = (typeof libelleSeanceVariation === 'function' && libelleSeanceVariation()) || 'Var%';
   const kpis = [
     ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
     ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
-    ['Var%', x => x.change_pct != null ? (x.change_pct > 0 ? '+' : '')+x.change_pct.toFixed(2)+'%' : '—', x => x.change_pct||0, true],
+    [libVar, x => (typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'), x => (typeof variationJour==='function'?variationJour(x.ticker).pct:null), true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
     ['P/B', x => (x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—', x => -(x.pb_ref||x.pb_hist||999), true],
     ['ROE', x => x.roe ? x.roe.toFixed(1)+'%' : '—', x => x.roe||0, true],

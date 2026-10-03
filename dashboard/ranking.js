@@ -48,9 +48,9 @@ function renderRankCards() {
       const v10    = (typeof note10txt==='function') ? note10txt(x) : v10fmt(v).replace('.',',');
       const n10    = (typeof note10num==='function') ? note10num(x) : (Math.round(v/8*10)/10);
       const scoreC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
-      const chg    = x.change_pct || 0;
+      const chg    = (typeof variationJour === 'function') ? variationJour(x.ticker).pct : null;
       const chgC   = chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)';
-      const chgStr = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
+      const chgStr = (typeof baliseVariationJour === 'function') ? baliseVariationJour(x.ticker, '') : '—';
       const verd      = x.pdf_verdict || '';
       const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
       const verdClr   = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
@@ -102,7 +102,9 @@ function startAutoRefresh() {
         } else {
           window.scores = arr; scores = arr;
           renderRankLive();
+          if (typeof redessinerVariations === 'function') redessinerVariations();
         }
+        if (typeof demanderVariation === 'function') demanderVariation(true);
         const dot = document.getElementById('liveDot');
         if (dot) { dot.style.background = 'var(--green)'; setTimeout(() => { dot.style.background = ''; }, 2000); }
         console.log('[AutoRefresh] scores mis a jour', new Date().toLocaleTimeString());
