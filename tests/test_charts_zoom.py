@@ -45,7 +45,18 @@ def test_zoom_local_sans_cdn_ni_plugin():
     assert "e.ctrlKey" in source
     assert "p.mode = 'scroll'" in source
     assert "api/market" not in source
-    assert "onmousemove" in source
+    assert "brvm:zoom" in source
+    assert "pointermove" in source
+    assert "pointerleave" in source
+    assert "_brvmPrecedente" in source
+    assert "removeAttribute('onmousemove')" not in source
+    assert "removeAttribute('onmouseleave')" not in source
+    assert "nettoyerInfobulle" not in source
+    stock = _lire("dashboard/stock_chart.js")
+    assert "function chartHover" in stock
+    assert "function chartLeave" in stock
+    assert 'onmousemove="chartHover' in stock
+    assert 'onmouseleave="chartLeave' in stock
     index = _lire("dashboard/index.html")
     balise = '<script src="/js/charts_zoom.js?v={{ASSET_V}}" data-brvm-mod="js/charts_zoom.js" onerror="brvmScriptError(this)"></script>'
     assert balise in index
@@ -286,10 +297,94 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                 assert boite and boite["width"] > 80 and boite["height"] > 40
                 return boite["x"] + boite["width"] / 2, boite["y"] + boite["height"] / 2, boite
 
-            def infobulle_absente():
-                x, y, _boite = centre_svg()
-                page.mouse.move(x - 40, y)
-                page.mouse.move(x + 30, y)
+            def lire_entete():
+                return page.evaluate(
+                    """() => {
+                      var spans = document.querySelectorAll('#stockChartDiv span');
+                      var i, el, suivant;
+                      for (i = 0; i < spans.length; i++) {
+                        el = spans[i];
+                        if (el.classList.contains('brvm-zoom-plage')) continue;
+                        if ((el.textContent || '').indexOf(' pts') === -1) continue;
+                        suivant = el.nextElementSibling;
+                        return {
+                          pts: el.textContent,
+                          perf: suivant ? suivant.textContent : '',
+                          couleur: suivant ? (suivant.style.color || '') : ''
+                        };
+                      }
+                      return {pts: '', perf: '', couleur: ''};
+                    }"""
+                )
+
+            def entete_attendu():
+                return page.evaluate(
+                    """() => {
+                      var z = document.getElementById('stockChartDiv')._brvmZoom;
+                      var first = z.prices[z.debut];
+                      var last = z.prices[z.fin];
+                      var n = z.fin - z.debut + 1;
+                      var a = String(z.labels[z.debut] || '').substring(0, 7);
+                      var b = String(z.labels[z.fin] || '').substring(0, 7);
+                      var arrondi = ((last - first) / first * 100).toFixed(1);
+                      var signe = last >= first ? '+' : '';
+                      return {
+                        pts: n + ' pts · ' + a + '\\u2192' + b,
+                        perf: signe + arrondi + '%',
+                        hausse: last >= first
+                      };
+                    }"""
+                )
+
+            def assert_entete(origine=None):
+                lu = lire_entete()
+                attendu = entete_attendu()
+                assert lu["pts"] == attendu["pts"], (lu, attendu)
+                assert lu["perf"] == attendu["perf"], (lu, attendu)
+                if attendu["hausse"]:
+                    assert lu["couleur"] in ("#4ADE80", "rgb(74, 222, 128)"), lu
+                else:
+                    assert lu["couleur"] in ("#F87171", "rgb(248, 113, 113)"), lu
+                if origine is not None:
+                    assert lu == origine
+                return lu
+
+            def ecouter_zoom():
+                page.evaluate(
+                    """() => {
+                      var el = document.getElementById('stockChartDiv');
+                      window.__brvmZoomEvt = [];
+                      el.addEventListener('brvm:zoom', function (e) {
+                        window.__brvmZoomEvt.push({
+                          debut: e.detail ? e.detail.debut : null,
+                          fin: e.detail ? e.detail.fin : null
+                        });
+                      });
+                    }"""
+                )
+
+            def assert_evenement(info):
+                recu = page.evaluate("() => (window.__brvmZoomEvt || []).slice(-1)[0] || null")
+                assert recu == {"debut": info["debut"], "fin": info["fin"]}, recu
+
+            def gestionnaires_survol():
+                attrs = page.evaluate(
+                    """() => {
+                      var svg = document.querySelector('#stockChartDiv svg');
+                      return {
+                        move: svg ? (svg.getAttribute('onmousemove') || '') : '',
+                        leave: svg ? (svg.getAttribute('onmouseleave') || '') : ''
+                      };
+                    }"""
+                )
+                assert "chartHover" in attrs["move"]
+                assert "chartLeave" in attrs["leave"]
+
+            def infobulle_survol():
+                gestionnaires_survol()
+                _x, y, boite = centre_svg()
+                page.mouse.move(boite["x"] + boite["width"] * 0.42, y)
+                page.mouse.move(boite["x"] + boite["width"] * 0.68, y)
                 etat = page.evaluate(
                     """() => {
                       var prix = document.querySelector('#stockChartDiv svg text[id$="_price"]');
@@ -301,9 +396,30 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                       };
                     }"""
                 )
-                assert etat["opacity"] in ("0", "absent", None)
-                assert etat["texte"] == ""
+                assert etat["opacity"] == "1", etat
+                assert "XOF" in etat["texte"], etat
                 assert float(etat["flottant"]) == 0
+                bouton = page.locator('#stockChartDiv button[data-brvm-zoom="reset"]').bounding_box()
+                page.mouse.move(bouton["x"] + 4, bouton["y"] + 4)
+                cache = page.evaluate(
+                    """() => {
+                      var prix = document.querySelector('#stockChartDiv svg text[id$="_price"]');
+                      return prix ? prix.getAttribute('opacity') : 'absent';
+                    }"""
+                )
+                assert cache == "0", cache
+
+            def envelopper_externe():
+                page.evaluate(
+                    """() => {
+                      window.__zoomPasses = 0;
+                      var precedente = window.drawPriceChart;
+                      window.drawPriceChart = function (container, labels, prices, ticker) {
+                        window.__zoomPasses += 1;
+                        return precedente(container, labels, prices, ticker);
+                      };
+                    }"""
+                )
 
             def zoom_plus():
                 avant = fenetre()
@@ -505,12 +621,26 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                 page.remove_listener("request", noter)
                 assert vus == [base + "/api/market"], vus
                 preparer_courbe()
-                infobulle_absente()
-                zoom_plus()
+                origine = assert_entete()
+                ecouter_zoom()
+                envelopper_externe()
+                infobulle_survol()
+                zoompe = zoom_plus()
+                assert page.evaluate("() => window.__zoomPasses") == 1
+                lu = assert_entete()
+                assert lu["pts"] != origine["pts"]
+                assert_evenement(zoompe)
+                gestionnaires_survol()
+                infobulle_survol()
                 glisser_souris()
-                reinitialiser()
+                assert_entete()
+                plein = reinitialiser()
+                assert_entete(origine)
+                assert_evenement(plein)
                 molette_ctrl()
-                reinitialiser()
+                assert_entete()
+                plein = reinitialiser()
+                assert_entete(origine)
                 molette_sans_ctrl_defile()
                 if largeur == 390:
                     zoom_plus()

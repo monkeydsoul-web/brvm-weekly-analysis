@@ -7,16 +7,16 @@
    du JS vanilla, limité à #stockChartDiv.
 
    Accueil, Comparer et Backtest ne passent pas par drawPriceChart.
-   Pas d'infobulle au survol : les attributs onmousemove / onmouseleave
-   posés par le tracé sont retirés. Le doigt vertical ne fait pas
-   preventDefault (touch-action: pan-y) pour laisser défiler la page.
+   L'infobulle de stock_chart.js (chartHover / chartLeave) reste :
+   la surface relaie pointermove, pointerleave et le toucher vers le
+   SVG. Le doigt vertical ne fait pas preventDefault (touch-action: pan-y)
+   pour laisser défiler la page. Chaque fenêtre émet brvm:zoom.
 */
 (function () {
   if (window.__BRVM_ZOOM_PRET) return;
   window.__BRVM_ZOOM_PRET = 1;
 
   var HOTE = 'stockChartDiv';
-  var original = null;
 
   function racineDe(el) {
     var n = el;
@@ -111,16 +111,6 @@
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  function nettoyerInfobulle(svg) {
-    svg.removeAttribute('onmousemove');
-    svg.removeAttribute('onmouseleave');
-    svg.onmousemove = null;
-    svg.onmouseleave = null;
-    var noeuds = svg.querySelectorAll('[id$="_vline"],[id$="_dot"],[id$="_bg"],[id$="_price"],[id$="_date"]');
-    var i;
-    for (i = 0; i < noeuds.length; i++) noeuds[i].setAttribute('opacity', '0');
-  }
-
   function lisibilite(svg) {
     svg.style.color = 'var(--t2)';
     var noeuds = svg.querySelectorAll('text, line');
@@ -154,6 +144,39 @@
     host.setAttribute('data-zoom-debut', String(etat.debut));
     host.setAttribute('data-zoom-fin', String(etat.fin));
     host.setAttribute('data-zoom-total', String(etat.prices.length));
+  }
+
+  function majEntete(racine) {
+    var etat = racine._brvmZoom;
+    if (!etat || etat.fin < etat.debut) return;
+    var first = etat.prices[etat.debut];
+    var last = etat.prices[etat.fin];
+    var n = etat.fin - etat.debut + 1;
+    var a = String(etat.labels[etat.debut] || '').substring(0, 7);
+    var b = String(etat.labels[etat.fin] || '').substring(0, 7);
+    var libelle = n + ' pts · ' + a + '\u2192' + b;
+    var perf = '';
+    var couleur = '';
+    if (isFinite(first) && first !== 0 && isFinite(last)) {
+      var arrondi = ((last - first) / first * 100).toFixed(1);
+      var signe = last >= first ? '+' : '';
+      perf = signe + arrondi + '%';
+      couleur = last >= first ? '#4ADE80' : '#F87171';
+    }
+    var spans = racine.querySelectorAll('span');
+    var i, el, suivant;
+    for (i = 0; i < spans.length; i++) {
+      el = spans[i];
+      if (el.classList && el.classList.contains('brvm-zoom-plage')) continue;
+      if ((el.textContent || '').indexOf(' pts') === -1) continue;
+      el.textContent = libelle;
+      suivant = el.nextElementSibling;
+      if (suivant && suivant.tagName === 'SPAN') {
+        suivant.textContent = perf;
+        if (couleur) suivant.style.color = couleur;
+      }
+      return;
+    }
   }
 
   function onClickBarre(e) {
@@ -230,7 +253,6 @@
     var racine = racineDe(container);
     var svg = container.querySelector('svg');
     if (svg) {
-      nettoyerInfobulle(svg);
       lisibilite(svg);
       svg.style.touchAction = 'pan-y';
     }
@@ -240,6 +262,10 @@
     assurerBarre(racine);
     majPlage(racine);
     marquer(racine);
+    racine.dispatchEvent(new CustomEvent('brvm:zoom', {
+      bubbles: true,
+      detail: { debut: racine._brvmZoom.debut, fin: racine._brvmZoom.fin }
+    }));
   }
 
   function redessiner(racine) {
@@ -254,6 +280,7 @@
     } finally {
       racine._brvmZoomInterne = false;
     }
+    majEntete(racine);
   }
 
   function onWheel(e) {
@@ -317,6 +344,7 @@
 
   function onTouchStart(e) {
     var surface = e.currentTarget;
+    relayerTouche(surface, e);
     var racine = racineDe(surface);
     if (!racine || !racine._brvmZoom) return;
     var p = racine._brvmPointeur || (racine._brvmPointeur = {});
@@ -332,6 +360,10 @@
 
   function onTouchMove(e) {
     var surface = e.currentTarget;
+    relayerTouche(surface, e);
+    if (e.touches && e.touches.length === 1) {
+      relayerSouris(surface, 'mousemove', e.touches[0].clientX, e.touches[0].clientY);
+    }
     var racine = racineDe(surface);
     var etat = racine && racine._brvmZoom;
     var p = racine && racine._brvmPointeur;
@@ -373,6 +405,7 @@
 
   function onTouchEnd(e) {
     var surface = e.currentTarget;
+    relayerTouche(surface, e);
     var racine = racineDe(surface);
     var p = racine && racine._brvmPointeur;
     if (e.touches && e.touches.length > 0) return;
@@ -380,12 +413,83 @@
       var t = e.changedTouches[0];
       if (Math.abs(t.clientX - p.x) < 10 && Math.abs(t.clientY - p.y) < 10) relayerClic(surface, t.clientX, t.clientY);
     }
+    if ((!e.touches || e.touches.length === 0) && e.changedTouches && e.changedTouches[0]) {
+      relayerSouris(surface, 'mouseleave', e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }
     if (p) p.mode = '';
+  }
+
+  function svgDu(surface) {
+    var cadre = surface.parentElement;
+    if (!cadre) return null;
+    return cadre.querySelector('svg');
+  }
+
+  function relayerSouris(surface, type, clientX, clientY) {
+    var svg = svgDu(surface);
+    if (!svg) return;
+    svg.dispatchEvent(new MouseEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: clientX,
+      clientY: clientY,
+      view: window
+    }));
+  }
+
+  function copieTouches(liste, svg) {
+    var out = [];
+    var i, src;
+    for (i = 0; i < liste.length; i++) {
+      src = liste[i];
+      out.push(new Touch({
+        identifier: src.identifier,
+        target: svg,
+        clientX: src.clientX,
+        clientY: src.clientY,
+        pageX: src.pageX,
+        pageY: src.pageY,
+        screenX: src.screenX,
+        screenY: src.screenY,
+        radiusX: src.radiusX || 0,
+        radiusY: src.radiusY || 0,
+        rotationAngle: src.rotationAngle || 0,
+        force: src.force || 0
+      }));
+    }
+    return out;
+  }
+
+  function relayerTouche(surface, e) {
+    var svg = svgDu(surface);
+    if (!svg || typeof Touch !== 'function' || typeof TouchEvent !== 'function') return;
+    try {
+      svg.dispatchEvent(new TouchEvent(e.type, {
+        bubbles: true,
+        cancelable: true,
+        touches: copieTouches(e.touches, svg),
+        targetTouches: copieTouches(e.touches, svg),
+        changedTouches: copieTouches(e.changedTouches, svg),
+        view: window
+      }));
+    } catch (err) {
+      /* Le constructeur Touch manque : pointermove couvre l'infobulle. */
+    }
+  }
+
+  function onPointerMove(e) {
+    relayerSouris(e.currentTarget, 'mousemove', e.clientX, e.clientY);
+  }
+
+  function onPointerLeave(e) {
+    relayerSouris(e.currentTarget, 'mouseleave', e.clientX, e.clientY);
   }
 
   function brancherSurface(surface) {
     surface.addEventListener('wheel', onWheel, { passive: false });
     surface.addEventListener('mousedown', onMouseDown);
+    surface.addEventListener('pointermove', onPointerMove);
+    surface.addEventListener('pointerleave', onPointerLeave);
     surface.addEventListener('touchstart', onTouchStart, { passive: true });
     surface.addEventListener('touchmove', onTouchMove, { passive: false });
     surface.addEventListener('touchend', onTouchEnd);
@@ -403,35 +507,32 @@
     };
   }
 
-  function enveloppe(container, labels, prices, ticker) {
-    if (!container || container.id !== HOTE + '_svg') {
-      if (original) return original(container, labels, prices, ticker);
-      return;
-    }
-    var racine = racineDe(container);
-    if (racine && racine._brvmZoomInterne) {
-      if (original) original(container, labels, prices, ticker);
-      habiller(container);
-      return;
-    }
-    var serie = normaliser(labels, prices);
-    if (serie.prices.length < 2) {
-      if (original) original(container, labels, prices, ticker);
-      return;
-    }
-    if (racine) memoriser(racine, serie.labels, serie.prices, ticker);
-    if (original) original(container, serie.labels, serie.prices, ticker);
-    habiller(container);
-  }
-  enveloppe._brvmZoom = true;
-
-  window.brvmZoomCourbe = enveloppe;
-
   function brancher() {
     if (typeof window.drawPriceChart !== 'function') return false;
     if (window.drawPriceChart._brvmZoom) return true;
-    original = window.drawPriceChart;
+    var precedente = window.drawPriceChart;
+    function enveloppe(container, labels, prices, ticker) {
+      if (!container || container.id !== HOTE + '_svg') {
+        return precedente(container, labels, prices, ticker);
+      }
+      var racine = racineDe(container);
+      if (racine && racine._brvmZoomInterne) {
+        precedente(container, labels, prices, ticker);
+        habiller(container);
+        return;
+      }
+      var serie = normaliser(labels, prices);
+      if (serie.prices.length < 2) {
+        return precedente(container, labels, prices, ticker);
+      }
+      if (racine) memoriser(racine, serie.labels, serie.prices, ticker);
+      precedente(container, serie.labels, serie.prices, ticker);
+      habiller(container);
+    }
+    enveloppe._brvmZoom = true;
+    enveloppe._brvmPrecedente = precedente;
     window.drawPriceChart = enveloppe;
+    window.brvmZoomCourbe = enveloppe;
     return true;
   }
 
