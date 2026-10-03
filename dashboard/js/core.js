@@ -3351,6 +3351,7 @@ function _paintIndexCards() {
 
 function _renderMarketPage() {
   _paintIndexCards();
+  if (typeof brancherCourbesMarche === "function") brancherCourbesMarche();
   var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
   var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
   if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
