@@ -91,12 +91,18 @@ function _renderScreenerTable() {
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
     const chgS = (typeof baliseVariationJour === 'function') ? baliseVariationJour(x.ticker, '') : '—';
     // Même prix, même écart, même libellé que le serveur (prix_cible.py).
+    // Un libellé « incertain » masque le montant : pas de liste de tickers.
+    const masque = (typeof cibleIncertaine === 'function')
+      ? cibleIncertaine(x)
+      : x.libelle_valeur === 'incertain';
     const target = x.prix_cible || 0;
     const ecart = (typeof x.ecart_pct === 'number') ? x.ecart_pct : null;
-    const targetStr = target > 0 ? fmtXOF(target) : '—';
-    const mots = (typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—');
-    const targetC = ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
-    const ecartStr = ecart == null ? '' : fmtEcartPct(ecart);
+    const targetStr = masque
+      ? ((typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur('incertain') : 'Prix cible non affiché : comptes à vérifier')
+      : (target > 0 ? fmtXOF(target) : '—');
+    const mots = masque ? '' : ((typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—'));
+    const targetC = masque ? 'var(--text-2)' : (ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)')));
+    const ecartStr = (masque || ecart == null) ? '' : fmtEcartPct(ecart);
 
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td style="padding:8px 12px">
@@ -108,7 +114,7 @@ function _renderScreenerTable() {
         <span style="font-weight:700;color:${scC}">${sc10}/10</span>
         <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:2px"><div style="height:100%;width:${scBarW}%;background:${scC};border-radius:2px"></div></div>
       </td>
-      <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${target>0?'600':'400'}">${targetStr}${ecartStr?`<div style="font-size:9px">${ecartStr}</div>`:''}<div style="font-size:9px;font-weight:400">${mots}</div></td>
+      <td style="padding:8px 12px;text-align:right;font-size:11px;color:${targetC};font-weight:${masque?'500':(target>0?'600':'400')}">${targetStr}${ecartStr?`<div style="font-size:9px">${ecartStr}</div>`:''}${mots?`<div style="font-size:9px;font-weight:400">${mots}</div>`:''}</td>
       <td style="padding:8px 12px;text-align:right;color:var(--t1)">${pe}</td>
       <td style="padding:8px 12px;text-align:right;font-weight:600;color:${dyC}">${dy}</td>
       <td style="padding:8px 12px;text-align:right;color:${chgC};font-weight:600">${chgS}</td>
