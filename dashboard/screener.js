@@ -91,16 +91,12 @@ function _renderScreenerTable() {
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
     const chgS = (typeof baliseVariationJour === 'function') ? baliseVariationJour(x.ticker, '') : '—';
     // Même prix, même écart, même libellé que le serveur (prix_cible.py).
-    // Une cible douteuse n'affiche ni montant ni écart : seulement « Cible à vérifier ».
-    const douteuse = (typeof cibleDouteuse === 'function')
-      ? cibleDouteuse(x.libelle_valeur)
-      : (x.libelle_valeur === 'incertain');
-    const target = douteuse ? 0 : (x.prix_cible || 0);
-    const ecart = douteuse ? null : ((typeof x.ecart_pct === 'number') ? x.ecart_pct : null);
-    const targetStr = douteuse ? 'Cible à vérifier' : (target > 0 ? fmtXOF(target) : '—');
-    const mots = douteuse ? '' : ((typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—'));
-    const targetC = douteuse || ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
-    const ecartStr = douteuse || ecart == null ? '' : fmtEcartPct(ecart);
+    const target = x.prix_cible || 0;
+    const ecart = (typeof x.ecart_pct === 'number') ? x.ecart_pct : null;
+    const targetStr = target > 0 ? fmtXOF(target) : '—';
+    const mots = (typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—');
+    const targetC = ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
+    const ecartStr = ecart == null ? '' : fmtEcartPct(ecart);
 
     return `<tr onclick="showStock('${x.ticker}')" style="cursor:pointer">
       <td style="padding:8px 12px">

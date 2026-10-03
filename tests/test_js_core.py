@@ -34,9 +34,7 @@ def test_source_pointe_core_et_garde_la_carte_prix_cible():
         core = f.read()
     assert "function(){ if(typeof loadRankDash==='function') loadRankDash(); }" in core
     assert "function(){ if(typeof loadSignauxValoAlertes==='function') loadSignauxValoAlertes(); }" in core
-    assert "function htmlCartePrixCible" in core
-    assert "Cible à vérifier" in core
-    assert "Le chiffre reste affiché" not in core
+    assert "Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours." in core
     assert "async function init()" in core
 
 
