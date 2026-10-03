@@ -114,15 +114,6 @@ def date_derniere_seance(publiee):
     return recule.isoformat()
 
 
-def libelle_semaine_iso(jour_iso):
-    """Semaine ISO (lundi), pas le numéro Python ``%W`` qui décale d'une semaine."""
-    jour = jour_iso if isinstance(jour_iso, date) else _jour_iso(jour_iso)
-    if jour is None:
-        return None
-    iso = jour.isocalendar()
-    return "Semaine %02d/%d" % (iso.week, iso.year)
-
-
 def fetch_brvm_org():
     """Cours, variations, date de séance et indicateur d'échange.
 

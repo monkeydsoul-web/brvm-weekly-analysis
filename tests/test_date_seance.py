@@ -195,39 +195,6 @@ def test_session_date_absente_n_est_pas_ajoutee(client, isole, monkeypatch):
     assert "session_date" not in corps
 
 
-def test_macro_semaine_iso_sans_rewrire_le_fichier(client, isole, monkeypatch):
-    _geler(monkeypatch, SAMEDI)
-    _ecrire(str(isole["macro"]), {
-        "date": "2026-10-03",
-        "week": "Semaine 39/2026",
-        "BRVM_30": 264.57,
-        "BRVM_COMPOSITE": 546.78,
-    })
-    avant = _lire(str(isole["macro"]))
-    corps = client.get("/api/macro").get_json()
-    assert corps["date"] == "2026-10-02"
-    assert corps["week"] == "Semaine 40/2026"
-    assert corps["BRVM_30"] == 264.57
-    assert _lire(str(isole["macro"])) == avant
-
-    _geler(monkeypatch, VENDREDI_SEANCE)
-    _ecrire(str(isole["macro"]), {
-        "date": "2026-10-02",
-        "week": "Semaine 39/2026",
-        "FCFA_per_USD": 580.49,
-    })
-    avant = _lire(str(isole["macro"]))
-    corps = client.get("/api/macro").get_json()
-    assert corps["date"] == "2026-10-02"
-    assert corps["week"] == "Semaine 40/2026"
-    assert _lire(str(isole["macro"])) == avant
-
-    # Fixture sans clé week (devises) : rien n'est réécrit.
-    brut = {"date": "2026-10-03T12:00:00+00:00", "FCFA_per_EUR": 655.957}
-    _ecrire(str(isole["macro"]), brut)
-    assert client.get("/api/macro").get_json() == brut
-
-
 def test_historiques_ecrivent_la_meme_date_qu_avant(client, isole, monkeypatch):
     """Jour ouvré : les trois jobs de 18h écrivent la date du jour, comme avant."""
     _geler(monkeypatch, VENDREDI_18H)

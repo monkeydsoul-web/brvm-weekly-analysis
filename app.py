@@ -673,36 +673,10 @@ def api_commodities():
     return jsonify(prices)
 
 
-def _macro_date_de_seance(macro):
-    """Semaine et date de la réponse : dernière séance, pas le jour de récupération.
-
-    Le fichier macro_cache.json n'est pas modifié. Python ``%W`` donne 39
-    pour le vendredi 2 octobre 2026 comme pour le samedi 3. La semaine
-    affichée est la semaine ISO : 40.
-    """
-    if not isinstance(macro, dict) or "week" not in macro:
-        return macro
-    from live_data import date_derniere_seance, libelle_semaine_iso
-    publiee = macro.get("date")
-    if not isinstance(publiee, str) or not publiee.strip():
-        return macro
-    seance = date_derniere_seance(publiee)
-    semaine = libelle_semaine_iso(seance)
-    if not semaine:
-        return macro
-    if macro.get("week") == semaine and (seance == publiee or not isinstance(seance, str)):
-        return macro
-    sortie = dict(macro)
-    sortie["week"] = semaine
-    if isinstance(seance, str) and seance != publiee[:10]:
-        sortie["date"] = seance
-    return sortie
-
-
 @app.route("/api/macro")
 def api_macro():
     macro = load_macro_cache()
-    return jsonify(_macro_date_de_seance(macro))
+    return jsonify(macro)
 
 
 @app.route("/api/history/<ticker>")
