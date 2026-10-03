@@ -19,8 +19,15 @@ _REEL_DNS = socket.getaddrinfo
 _FIXTURE = Path(__file__).resolve().parent / "fixtures" / "price_history_snts_orac.json"
 _INDICE = Path(__file__).resolve().parent / "fixtures" / "index_history_brvm_c_1a.json"
 _SEP = "\u00b7"
-# Réponse figée de
-# https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A
+# Corps exact de
+# https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-COMPOSITE&range=1A
+# L'API normalise l'index en BRVM-C. L'historique commence le 2026-09-30.
+_URL_COMPOSITE = (
+    "https://brvm-weekly-analysis.onrender.com/api/index-history"
+    "?index=BRVM-COMPOSITE&range=1A"
+)
+_TRENTE_SEPT = "30 septembre 2026 %s 548,38 %s \u2014" % (_SEP, _SEP)
+_SORTIE_COMPOSITE = "2 octobre 2026 %s 546,78" % _SEP
 _COMPOSITE = "2 octobre 2026 %s 546,78 %s -0,41 %%" % (_SEP, _SEP)
 
 # Libellés affichés (espaces insécables normalisés) et fenêtre visible.
@@ -191,6 +198,11 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
     points_indice = indice["points"]
     dates_indice = [p[0] for p in points_indice]
     assert indice["index"] == "BRVM-C" and indice["range"] == "1A"
+    assert points_indice == [
+        ["2026-09-30", 548.38],
+        ["2026-10-01", 549.02],
+        ["2026-10-02", 546.78],
+    ]
     assert len(points_indice) == len(set(dates_indice))
     assert all(datetime.strptime(d, "%Y-%m-%d").weekday() < 5 for d in dates_indice)
     _caches(historique)
@@ -533,30 +545,42 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                 assert charge_idx["fin"] == points_indice[-1][0], charge_idx
                 assert charge_idx["dernierValeur"] == points_indice[-1][1], charge_idx
                 assert charge_idx["iso"] == charge_idx["fin"] == charge_idx["dernierIso"]
-                milieu = page.evaluate(
-                    """() => {
+                visee = page.evaluate(
+                    """(iso) => {
                       var el = document.getElementById('mkt-courbe-brvm-c');
-                      var vis = el._ciVisible;
-                      var idx = Math.round((vis.length - 1) * 0.4);
-                      if (idx >= vis.length - 1) idx = vis.length - 2;
+                      var vis = el._ciVisible || [];
+                      var idx = -1;
+                      var i;
+                      for (i = 0; i < vis.length; i++) {
+                        if (vis[i].date === iso) idx = i;
+                      }
                       var geom = el._ciGeom;
                       var rect = el.querySelector('.ci-svg').getBoundingClientRect();
                       var xView = geom.padL + (idx / (vis.length - 1)) * geom.CW;
                       var yView = geom.padT + geom.CH * 0.55;
                       return {
-                        date: vis[idx].date,
+                        idx: idx,
+                        date: idx < 0 ? '' : vis[idx].date,
                         x: rect.left + (xView / geom.W) * rect.width,
                         y: rect.top + (yView / geom.H) * rect.height
                       };
-                    }"""
+                    }""",
+                    "2026-09-30",
                 )
-                page.mouse.move(milieu["x"], milieu["y"])
+                assert visee["idx"] == 0, visee
+                page.mouse.move(visee["x"], visee["y"])
                 page.wait_for_function(
-                    "(iso) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === iso",
-                    arg=milieu["date"],
+                    "() => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === '2026-09-30'",
                     timeout=5000,
                 )
-                assert lire_indice()["iso"] != charge_idx["fin"]
+                survol_idx = lire_indice()
+                assert survol_idx["iso"] == "2026-09-30"
+                assert survol_idx["valeur"] == 548.38
+                assert libelle(survol_idx) == _TRENTE_SEPT, libelle(survol_idx)
+                noter("BRVM-C", largeur, "marche", "survol", survol_idx)
+                page.locator("#mkt-courbe-brvm-c").screenshot(
+                    path=str(tmp_path / ("libelle-BRVM-C-%d-marche-survol.png" % largeur))
+                )
                 page.locator("#topnav").hover()
                 page.wait_for_function(
                     "(fin) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === fin",
@@ -565,8 +589,9 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                 )
                 sortie_idx = lire_indice()
                 assert sortie_idx["iso"] == sortie_idx["fin"] == charge_idx["dernierIso"]
-                assert sortie_idx["valeur"] == charge_idx["dernierValeur"]
+                assert sortie_idx["valeur"] == charge_idx["dernierValeur"] == 546.78
                 assert sortie_idx["n"] == len(points_indice)
+                assert libelle(sortie_idx).startswith(_SORTIE_COMPOSITE), libelle(sortie_idx)
                 assert libelle(sortie_idx) == _COMPOSITE, libelle(sortie_idx)
                 noter("BRVM-C", largeur, "marche", "sortie", sortie_idx)
                 page.locator("#mkt-courbe-brvm-c").screenshot(
@@ -588,15 +613,15 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
         "lieu": "local",
         "donnees": (
             "SNTS et ORAC : production /api/price-history, servie en local. "
-            "BRVM-C : corps exact de "
-            "https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A "
+            "BRVM Composite : corps exact de " + _URL_COMPOSITE + " "
             ", servi par la route Playwright sur le code de la branche. "
-            "Pas le site en direct, pas la série synthétique précédente."
+            "L'historique des indices commence le 2026-09-30. "
+            "Pas le site en direct, pas la série de 98 points écrite par le test."
         ),
         "erreurs_console": len(erreurs),
         "series": series,
         "indice": {
-            "url": "https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A",
+            "url": _URL_COMPOSITE,
             "n": len(points_indice),
             "premiere": points_indice[0][0],
             "derniere": points_indice[-1][0],
@@ -618,7 +643,7 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
             ligne["ticker"], ligne["largeur"], ligne["sequence"], ligne["etape"],
         ))
         assert fichier.is_file() and fichier.stat().st_size > 1000
-    assert len(rapport) == 2 * 2 * 2 * 5 + 2
+    assert len(rapport) == 2 * 2 * 2 * 5 + 4
     copie = Path("/opt/cursor/artifacts/charts-fix2")
     copie.mkdir(parents=True, exist_ok=True)
 
