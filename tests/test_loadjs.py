@@ -13,6 +13,7 @@ MODULES = (
     "ranking.js",
     "stock_chart.js",
     "js/charts_interactifs.js",
+    "js/charts_zoom.js",
     "badges.js",
     "data_confidence.js",
     "compare.js",
