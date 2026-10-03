@@ -782,6 +782,7 @@ if (window.ResizeObserver) {
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { fitTopnav(); });
 window.addEventListener('load', function() { fitTopnav(); });
 function navCompare() {
+  _cmpDeclencheur = document.activeElement;
   var plus = document.getElementById('tab-plus');
   if (plus) plus.classList.remove('open');
   _fermerPlusHaut();
@@ -801,6 +802,7 @@ function _openComparePicker() {
   overlay.id = 'nav-cmp-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:5800;background:var(--overlay-45);display:flex;align-items:center;justify-content:center';
   document.body.appendChild(overlay);
+  _cmpArmerEchap();
   function dessiner() {
     var all = window.scores || [];
     var titre = ancre ? ('Comparer ' + ancre + ' avec…') : 'Choisir une société à comparer';
@@ -825,6 +827,7 @@ function _openComparePicker() {
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay || e.target.closest('[data-cmp-cancel]')) {
       overlay.remove();
+      _cmpApresFermeture();
       return;
     }
     var choix = e.target.closest('[data-cmp]');
@@ -839,6 +842,38 @@ function _openComparePicker() {
     _pickQCmp(ancre, ticker);
     if (typeof _refreshCmpCheckboxes === 'function') _refreshCmpCheckboxes();
   });
+}
+// COMPARE-1 : Echap ferme la liste puis la fenetre de comparaison, rien d'autre.
+// Un seul ecouteur nomme, en capture : arme a l'ouverture, retire quand plus rien n'est ouvert.
+var _cmpDeclencheur = null;
+function _cmpOuvert() {
+  var modal = document.getElementById('cmp-modal');
+  return !!document.getElementById('nav-cmp-overlay') || !!(modal && modal.classList.contains('show'));
+}
+function _cmpEchap(e) {
+  if (e.key !== 'Escape') return;
+  var liste = document.getElementById('nav-cmp-overlay');
+  var modal = document.getElementById('cmp-modal');
+  if (liste) liste.remove();
+  else if (modal && modal.classList.contains('show')) modal.classList.remove('show');
+  else { _cmpApresFermeture(); return; }
+  e.preventDefault();
+  e.stopPropagation();
+  _cmpApresFermeture();
+}
+function _cmpArmerEchap() {
+  if (!_cmpDeclencheur) _cmpDeclencheur = document.activeElement;
+  document.addEventListener('keydown', _cmpEchap, true);
+}
+function _cmpApresFermeture() {
+  if (_cmpOuvert()) return;
+  document.removeEventListener('keydown', _cmpEchap, true);
+  var el = _cmpDeclencheur;
+  _cmpDeclencheur = null;
+  if (!el || !el.isConnected || el === document.body) return;
+  if (el.closest('#topnav-more-menu')) el = document.getElementById('topnav-more-btn') || el;
+  else if (el.closest('#tab-plus')) el = document.querySelector('#tabbar [data-nav="apprendre"]') || el;
+  el.focus();
 }
 document.addEventListener('click', function(e) {
   var plus = document.getElementById('tab-plus');
@@ -4696,10 +4731,12 @@ function openCompareModal() {
 
   document.getElementById('cmp-modal-content').innerHTML = html;
   document.getElementById('cmp-modal').classList.add('show');
+  _cmpArmerEchap();
 }
 
 function closeCompareModal() {
   document.getElementById('cmp-modal').classList.remove('show');
+  _cmpApresFermeture();
 }
 document.getElementById('cmp-modal').addEventListener('click', function(e){
   if(e.target===this) closeCompareModal();
