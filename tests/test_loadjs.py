@@ -12,6 +12,7 @@ MODULES = (
     "live_score.js",
     "ranking.js",
     "stock_chart.js",
+    "js/charts_interactifs.js",
     "badges.js",
     "data_confidence.js",
     "compare.js",
