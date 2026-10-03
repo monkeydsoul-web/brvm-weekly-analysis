@@ -766,3 +766,14 @@ html.fiche-directe #page-stock{display:block}
 @media(min-width:769px){
   #app-footer,.sb.compact~.main #app-footer{position:static;left:auto}
 }
+/* CHARTS-2 : comparaison base 100, lisible à 390 px */
+#cmp-courbes{min-width:0;max-width:100%}
+#cmp-courbes .ct{font-size:14px;color:var(--text-1);letter-spacing:.04em}
+#cmp-courbes .cmp-choix{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
+#cmp-courbes .cmp-choix label{font-size:13px;color:var(--text-2)}
+#cmp-courbes .cmp-choix select{flex:1 1 140px;min-width:0;max-width:100%;min-height:44px;font-size:14px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+#cmp-courbes .cmp-choix button,.cmp-puce button{min-height:44px}
+#cmp-courbes .cmp-intro,#cmp-courbes .cmp-message{font-size:14px;line-height:1.45;color:var(--text-1);margin:6px 0 8px}
+#cmp-courbes .cmp-note{font-size:13px;line-height:1.45;color:var(--text-2);margin:4px 0 8px}
+#cmp-courbes .cmp-puce{display:inline-flex;align-items:center;gap:6px;margin:0 8px 8px 0;font-size:13px;color:var(--text-1)}
+#cmp-courbes svg{display:block;width:100%;height:auto;max-width:100%}
