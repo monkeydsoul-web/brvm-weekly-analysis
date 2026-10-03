@@ -90,9 +90,6 @@ function _renderScreenerTable() {
     const chg = (typeof variationJour === 'function') ? variationJour(x.ticker).pct : null;
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
     const chgS = (typeof baliseVariationJour === 'function') ? baliseVariationJour(x.ticker, '') : '—';
-    const verd = x.pdf_verdict || '';
-    const verdLabel = typeof fmtVerdict === 'function' ? fmtVerdict(verd) : verd || '—';
-    const verdC = verd === 'POSITIF' ? 'var(--green)' : verd === 'NEGATIF' ? 'var(--red)' : 'var(--amber)';
     // Même prix, même écart, même libellé que le serveur (prix_cible.py).
     const target = x.prix_cible || 0;
     const ecart = (typeof x.ecart_pct === 'number') ? x.ecart_pct : null;
@@ -116,7 +113,7 @@ function _renderScreenerTable() {
       <td style="padding:8px 12px;text-align:right;font-weight:600;color:${dyC}">${dy}</td>
       <td style="padding:8px 12px;text-align:right;color:${chgC};font-weight:600">${chgS}</td>
       <td style="padding:8px 12px;text-align:center;white-space:nowrap">
-        <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${verd==='POSITIF'?'rgba(74,222,128,0.15)':verd==='NEGATIF'?'rgba(248,113,113,0.15)':'rgba(251,191,36,0.15)'};color:${verdC}">${verdLabel}</span>
+        <span style="font-size:10px">${fmtConseil(x)}</span>
         <button onclick="event.stopPropagation();showStock('${x.ticker}')" style="background:none;border:1px solid var(--border-1);color:var(--text-2);font-size:11px;padding:2px 7px;border-radius:var(--radius-sm);cursor:pointer;margin-left:4px">Fiche →</button>
       </td>
     </tr>`;
