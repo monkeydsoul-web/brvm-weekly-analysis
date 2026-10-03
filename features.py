@@ -161,15 +161,6 @@ def _texte_valeur_api(valeur):
     return str(valeur)
 
 
-def _prix_cible_export(ligne):
-    """Vide si le classement marque déjà la cible comme douteuse."""
-    if not isinstance(ligne, dict):
-        return ""
-    if ligne.get("libelle_valeur") == "incertain":
-        return ""
-    return _texte_valeur_api(ligne.get("prix_cible"))
-
-
 _CONSEILS_OFFICIELS = ("Intéressant", "À surveiller", "Prudence")
 
 
@@ -223,8 +214,8 @@ def export_csv() -> str:
     """Colonnes du bouton Classement, dans l'ordre de /api/live-ranking.
 
     La note suit v10fmt. Le conseil est le libellé du Classement.
-    Le prix cible douteux reste dans le classement : il sort seulement
-    de ce fichier. Le fichier ``live_ranking.json`` n'est pas réécrit.
+    Le prix cible est celui du classement, y compris s'il est marqué
+    incertain. Le fichier ``live_ranking.json`` n'est pas réécrit.
     """
     scores = _load_scores()
     buf = io.StringIO()
@@ -245,7 +236,7 @@ def export_csv() -> str:
             "variation": _texte_valeur_api(ligne.get("change_pct")),
             "note /10": _note_v10fmt(ligne),
             "conseil": _conseil_comme_classement(ligne),
-            "prix cible": _prix_cible_export(ligne),
+            "prix cible": _texte_valeur_api(ligne.get("prix_cible")),
             "rendement": _texte_valeur_api(ligne.get("div_yield")),
         })
     return buf.getvalue()

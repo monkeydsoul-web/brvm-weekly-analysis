@@ -73,7 +73,7 @@ def _lire_csv(texte):
     return list(csv.reader(io.StringIO(texte)))
 
 
-def test_csv_reprend_la_note_dix_et_vide_la_cible_douteuse(classement):
+def test_csv_reprend_la_note_dix_et_le_prix_cible(classement):
     chemin, payload = classement
     avant = chemin.read_bytes()
     texte = features.export_csv()
@@ -86,21 +86,21 @@ def test_csv_reprend_la_note_dix_et_vide_la_cible_douteuse(classement):
         "note /10", "conseil", "prix cible", "rendement",
     ]
     assert lignes[1] == [
-        "UNLC", "Unilever CI", "Consommation", "50900", "-1.2", "4.1", "—", "", "0",
+        "UNLC", "Unilever CI", "Consommation", "50900", "-1.2", "4.1", "—", "930", "0",
     ]
     assert lignes[2] == [
         "SMBC", "SMB CI", "Industriel", "16450", "0.24", "8.4", "Intéressant", "25440", "4.28",
     ]
     assert lignes[3] == [
-        "SICC", "SICOR", "Industrie", "8400", "0", "6.1", PHRASE_SUSPENDUE, "", "1.5",
+        "SICC", "SICOR", "Industrie", "8400", "0", "6.1", PHRASE_SUSPENDUE, "856", "1.5",
     ]
     assert lignes[4] == [
         "HUIT", "Pile", "Test", "1000", "0", "8.0", "Prudence", "1200", "1.5",
     ]
     assert lignes[4][5] == "8.0"
     assert "67" not in texte
-    assert "930" not in texte
-    assert "856" not in texte
+    assert "930" in texte
+    assert "856" in texte
     assert payload["ranking"][0]["prix_cible"] == 930
     assert payload["ranking"][1]["note10"] == 8.4
     assert payload["ranking"][1]["composite_adj"] == 67.0
@@ -119,7 +119,7 @@ def test_route_csv_alignee_sur_live_ranking(classement):
         assert ligne_csv[5] != features._texte_valeur_api(ligne_api["composite_adj"])
         assert ligne_csv[6] == features._conseil_comme_classement(ligne_api)
     assert api["ranking"][0]["prix_cible"] == 930
-    assert corps[1][7] == ""
+    assert corps[1][7] == "930"
 
 
 def _entre(texte, debut, fin):
