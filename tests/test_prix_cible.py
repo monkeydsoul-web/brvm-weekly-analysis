@@ -274,7 +274,8 @@ def test_les_pages_ne_recalculent_plus_graham_ou_epv():
     assert "Décote modérée" in bloc
     assert "Proche du prix cible" in bloc
     assert "Au-dessus du prix cible" in bloc
-    assert "Cible à vérifier" in bloc
+    assert "Prix cible non affiché : comptes à vérifier" in bloc
+    assert "if(v==='incertain')" in bloc
     for mot in ("Bonne affaire", "Trop cher", "À surveiller"):
         assert mot not in bloc
         assert mot not in (ROOT / "prix_cible.py").read_text(encoding="utf-8")
@@ -296,7 +297,7 @@ def test_methodo_explique_le_calcul_actuel():
         "Repères enregistrés",
         "moins du tiers",
         "3 fois le cours",
-        "Cible à vérifier",
+        "Prix cible non affiché : comptes à vérifier",
         "0,10",
         "22,5",
         "Sans bénéfice ni ROE exploitables, il n'y a pas de prix cible.",

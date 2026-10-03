@@ -2243,8 +2243,13 @@ async function renderDiv(){
 function fmtLibelleValeur(v){
   if(v==='Forte décote'||v==='Décote modérée'||v==='Proche du prix cible'||v==='Au-dessus du prix cible') return v;
   if(v==='exceptional_div') return 'Div. exceptionnel';
-  if(v==='incertain') return 'Cible à vérifier';
+  if(v==='incertain') return 'Prix cible non affiché : comptes à vérifier';
   return '—';
+}
+function cibleIncertaine(row){
+  if(!row || typeof row !== 'object') return false;
+  if(row.libelle_valeur != null && row.libelle_valeur !== '') return row.libelle_valeur === 'incertain';
+  return row.verdict === 'incertain';
 }
 async function renderTargets(){
   const [targets, ratings] = await Promise.all([
@@ -2272,20 +2277,21 @@ async function renderTargets(){
   if (filterRated) rows = rows.filter(t => ratedTickers.includes(t.ticker));
 
   document.getElementById('targetsTable').innerHTML=rows.map(t=>{
-    const isUncertain = t.verdict==='incertain';
+    const isUncertain = cibleIncertaine(t);
     const up = (t.upside_pct==null) ? null : t.upside_pct;
     const cls=isUncertain?'':(up!=null&&up>=30)?'target-up':(up!=null&&up<0)?'target-dn':'';
-    const vc=isUncertain?'var(--t3)':(up!=null&&up>=30)?'var(--green)':(up!=null&&up<0)?'var(--red)':'var(--amber)';
-    const fmtOpp=up==null?'—':(isUncertain?`<span style="color:var(--t3)">${fmtEcartPct(up)}</span>`:up>=30?`🟢 ${fmtEcartPct(up)} de potentiel`:up>=10?`🟡 ${fmtEcartPct(up)} de potentiel`:up<0?`🔴 ${fmtEcartPct(up)}`:`${fmtEcartPct(up)}`);
+    const vc=isUncertain?'var(--t2)':(up!=null&&up>=30)?'var(--green)':(up!=null&&up<0)?'var(--red)':'var(--amber)';
+    const fmtOpp=isUncertain||up==null?'—':(up>=30?`🟢 ${fmtEcartPct(up)} de potentiel`:up>=10?`🟡 ${fmtEcartPct(up)} de potentiel`:up<0?`🔴 ${fmtEcartPct(up)}`:`${fmtEcartPct(up)}`);
     const rList = (ratings[t.ticker]||[]).filter(r=>r.note);
     const bestR = rList.sort((a,b)=>(b.score_notation||0)-(a.score_notation||0))[0];
     const ratingCell = bestR ? `<td style="white-space:nowrap">${_ratingBadge(bestR.note)}<div style="font-size:9px;color:var(--t3);margin-top:2px">${bestR.agence||''}</div></td>` : '<td style="color:var(--t3);font-size:11px">—</td>';
     const confBadge = typeof getDivConfidenceBadge==='function' ? getDivConfidenceBadge(t,{short:true,hideHaute:true}) : '';
-    const uncTip = isUncertain?` data-tip="Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours. Le chiffre reste affiché."`:'';
+    const uncTip = isUncertain?` data-tip="Prix cible inférieur au tiers du cours, ou supérieur à 3 fois le cours."`:'';
+    const montantCible = isUncertain ? fmtLibelleValeur('incertain') : (t.avg_target?fmtXOF(t.avg_target):'—');
     return`<tr onclick="_openStock('${t.ticker}')">
       <td><strong>${t.ticker}</strong></td><td style="color:var(--t2);font-size:11px">${t.name||''}</td>
       <td>${fmtXOF(t.current_price)}</td>
-      <td style="font-weight:600;color:${vc}">${t.avg_target?fmtXOF(t.avg_target):'—'}</td>
+      <td style="font-weight:${isUncertain?'500':'600'};color:${vc}">${montantCible}</td>
       <td class="${cls}" style="font-size:11px">${fmtOpp}</td>
       <td><span class="b ${classePrincipale((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt((window.scores||scores||[]).find(function(s){return s.ticker===t.ticker;})||t)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       ${ratingCell}
@@ -3077,7 +3083,7 @@ async function showStock(ticker){
       </div>
       <div id="stab-general" class="stock-tab-panel active">
       ${buildKpiCards(s)}
-      ${(s.prix_cible||s.libelle_valeur)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${fmtEcartPct(s.ecart_pct)})</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div></div>`:''}
+      ${(s.prix_cible||s.libelle_valeur)?(cibleIncertaine(s)?`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6">${fmtLibelleValeur('incertain')}</div></div>`:`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)"><div class="ct">Prix cible</div><div style="font-size:13px;line-height:1.6"><strong>${s.prix_cible?fmtXOF(s.prix_cible):'—'}</strong>${s.ecart_pct==null?'':` <span>(${fmtEcartPct(s.ecart_pct)})</span>`} · ${fmtLibelleValeur(s.libelle_valeur)}</div></div>`):''}
       ${(s.div_per_share&&s.div_per_share>0)||(s.div_exceptional_value&&s.div_exceptional_value>0)||(entry&&entry.div_per_share>0)?(()=>{
             const _isExc = !!(s.div_is_exceptional || s.div_flag==='exceptionnel_non_recurrent');
             const _rawAmt = _isExc ? (s.div_exceptional_value||0) : (s.div_per_share||entry?.div_per_share||0);
@@ -3107,7 +3113,7 @@ async function showStock(ticker){
       </div>`:''}
       ${ai?`<div class="card expert-only" style="margin-bottom:12px;border-left:3px solid var(--blue)"><div class="ct">🧠 Analyse Claude</div>
         <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">${ai}</div>
-        ${fi.target_price?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong>${fi.upside_pct==null?'':` <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fmtEcartPct(fi.upside_pct)})</span>`}</div>`:''}</div>`:''}
+        ${(fi.target_price&&!cibleIncertaine(s))?`<div style="margin-top:8px;font-size:12px">Prix cible : <strong style="color:var(--amber)">${fi.target_price.toLocaleString('fr-FR')} XOF</strong>${fi.upside_pct==null?'':` <span style="color:${fi.upside_pct>=0?'var(--green)':'var(--red)'}">(${fmtEcartPct(fi.upside_pct)})</span>`}</div>`:(cibleIncertaine(s)?'':'')}</div>`:''}
       ${s.sentiment_resume&&s.sentiment_resume.length>10&&!s.sentiment_resume.includes('Aucune')?`<div class="card" style="margin-bottom:12px;border-left:3px solid ${(s.sentiment_score||0)>0?'var(--green)':(s.sentiment_score||0)<0?'var(--red)':'var(--amber)'}"><div class="ct">📊 Sentiment IA — ${s.sentiment_label||'Neutre'}</div><p style="font-size:12px;color:var(--t2);line-height:1.6">${s.sentiment_resume}</p></div>`:''}
       <div id="stock-ratings-fundamentals-section"></div>
       <div class="g2" style="margin-bottom:12px">
@@ -4988,9 +4994,12 @@ function openWhyModal(ticker) {
   if (title) title.textContent = '💡 Pourquoi ' + ticker + ' est une bonne idée ?';
   if (cours) cours.textContent = (s.name||ticker) + ' · ' + (s.price ? fmtXOF(s.price) : '—') + ' · Note ' + note10txt(s) + '/10';
   var decote = '';
-  var ciblePourquoi = s.prix_cible || s.target_price;
-  if (ciblePourquoi && s.price && ciblePourquoi > s.price) {
-    decote = Math.round((ciblePourquoi/s.price - 1)*100);
+  var ciblePourquoi = null;
+  if (!cibleIncertaine(s)) {
+    ciblePourquoi = s.prix_cible || s.target_price;
+    if (ciblePourquoi && s.price && ciblePourquoi > s.price) {
+      decote = Math.round((ciblePourquoi/s.price - 1)*100);
+    }
   }
   var divYield = s.div_yield ? (s.div_yield*100).toFixed(1) + '%' : (s.rendement_pct ? s.rendement_pct.toFixed(1) + '%' : '—');
   if (body) body.innerHTML =
