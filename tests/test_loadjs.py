@@ -31,6 +31,7 @@ MODULES = (
     "welcome_v2.js",
     "top3_podium.js",
     "screener_lazy.js",
+    "js/charts_comparaison.js",
     "js/core.js",
 )
 

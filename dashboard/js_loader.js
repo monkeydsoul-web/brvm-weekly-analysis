@@ -40,7 +40,8 @@
     "rank_v2.js": "page-rank",
     "welcome_v2.js": "page-welcome",
     "top3_podium.js": "page-rank",
-    "screener_lazy.js": "page-screener"
+    "screener_lazy.js": "page-screener",
+    "js/charts_comparaison.js": "page-stock"
   };
 
   var SYMBOL_FILE = {

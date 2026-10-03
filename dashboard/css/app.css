@@ -358,6 +358,19 @@ input[type=range]{padding:0;height:20px}
 .analyst-verdict{padding:var(--space-10px) var(--space-14px);border-radius:var(--radius-8);font-size:12px;line-height:1.6;margin-bottom:var(--space-12px)}
 /* ── Disclaimer légal fiche société ───────────────────────────────────── */
 .sso-disclaimer{margin-top:var(--space-2);border-top:1px solid var(--border-1);color:var(--text-2);font-size:12px;line-height:1.6;padding:var(--space-2);border-radius:var(--radius-sm)}
+/* CHARTS-2 : comparaison base 100, lisible à 390 px */
+#cmp-courbes{min-width:0;max-width:100%}
+#cmp-courbes .ct{font-size:14px;color:var(--text-1);letter-spacing:.04em}
+#cmp-courbes .cmp-choix{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
+#cmp-courbes .cmp-choix label{font-size:13px;color:var(--text-2)}
+#cmp-courbes .cmp-choix select{flex:1 1 140px;min-width:0;max-width:100%;min-height:44px;font-size:14px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+#cmp-courbes .cmp-choix button,#cmp-courbes .cmp-retirer{min-height:44px}
+#cmp-courbes .cmp-retirer{padding:4px 10px;font-size:13px;font-weight:600;color:var(--text-1);background:var(--bg3);border:1px solid var(--border);border-radius:6px;cursor:pointer}
+#cmp-courbes .cmp-retirer:hover{border-color:var(--accent);color:var(--accent)}
+#cmp-courbes .cmp-intro,#cmp-courbes .cmp-message{font-size:14px;line-height:1.45;color:var(--text-1);margin:6px 0 8px}
+#cmp-courbes .cmp-note{font-size:13px;line-height:1.45;color:var(--text-2);margin:4px 0 8px}
+#cmp-courbes .cmp-puce{display:inline-flex;align-items:center;gap:6px;margin:0 8px 8px 0;font-size:13px;color:var(--text-1)}
+#cmp-courbes svg{display:block;width:100%;height:auto;max-width:100%}
 /* ── Raccourcis clavier ────────────────────────────────────────────────── */
 #kbd-hint{position:fixed;bottom:8px;right:8px;font-size:9px;color:var(--t3);pointer-events:none;z-index:50}
 /* ══ Responsive ══════════════════════════════════════════════════════════════ */
