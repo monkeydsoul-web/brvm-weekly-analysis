@@ -27,11 +27,11 @@ function renderCompare() {
 
   const metrics = [
     ['Score /10',    x => (typeof note10txt==='function'?note10txt(x):v10fmt(x.composite_adj||0).replace('.',',')),   x => (typeof note10num==='function'?note10num(x):0),  true],
-    ['P/E',         x => x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—', x => -(x.pe_ref||999),    true],
-    ['P/B',         x => x.pb_ref ? x.pb_ref.toFixed(1)+'×' : '—', x => -(x.pb_ref||999),    true],
-    ['ROE %',       x => x.roe ? x.roe.toFixed(1)+'%' : '—',        x => x.roe||0,             true],
-    ['Div %',       x => x.div_yield ? x.div_yield.toFixed(1)+'%':'—', x => x.div_yield||0,   true],
-    ['BNA (F)',     x => x.eps ? Math.round(x.eps).toLocaleString('fr-FR'):'—', x => x.eps||0, true],
+    ['P/E',         x => (x.pe_ref ? x.pe_ref.toFixed(1)+'×' : '—') + (typeof marqueExercice==='function'?marqueExercice(anneeDuChiffre(x,'pe')):''), x => -(x.pe_ref||999),    true],
+    ['P/B',         x => (x.pb_ref ? x.pb_ref.toFixed(1)+'×' : '—') + (typeof marqueExercice==='function'?marqueExercice(anneeDuChiffre(x,'pb')):''), x => -(x.pb_ref||999),    true],
+    ['ROE %',       x => (x.roe ? x.roe.toFixed(1)+'%' : '—') + (typeof marqueExercice==='function'?marqueExercice(anneeDuChiffre(x,'roe')):''),        x => x.roe||0,             true],
+    ['Div %',       x => (x.div_yield ? x.div_yield.toFixed(1)+'%':'—') + (typeof marqueExercice==='function'?marqueExercice(anneeDuChiffre(x,'rendement')):''), x => x.div_yield||0,   true],
+    ['BNA (F)',     x => (x.eps ? Math.round(x.eps).toLocaleString('fr-FR'):'—') + (typeof marqueExercice==='function'?marqueExercice(anneeDuChiffre(x,'bna')):''), x => x.eps||0, true],
     ['Cours (' + (window._currency || 'XOF') + ')', x => x.price ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR')) : '—', x => 0, false],
     ['Verdict PDF', x => x.pdf_verdict||'—',                         x => 0,                   false],
     ['Secteur',     x => x.sector||'—',                              x => 0,                   false],

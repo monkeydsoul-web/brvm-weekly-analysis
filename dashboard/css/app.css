@@ -218,6 +218,7 @@ body{font-family:var(--font-sans);background:var(--bg-base);color:var(--text-1);
 html[data-mode="beginner"] .kpi-expert{display:none!important}
 html[data-mode="beginner"] #simPortCard{display:none!important}
 .kl{font-size:11px;color:var(--text-3);margin-bottom:var(--space-6px);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.exercice-comptes{display:block;margin-top:3px;font-size:11px;font-weight:700;line-height:1.25;color:var(--t1);text-transform:none;letter-spacing:0;white-space:normal}
 .kv{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:var(--font-mono)}
 /* D.14a — lifting cartes indices Accueil (cible #market-indices-kpis uniquement) */
 #market-indices-kpis .kpi{border-left:3px solid var(--accent);padding-left:var(--space-17px)}

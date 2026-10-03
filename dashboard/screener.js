@@ -83,9 +83,15 @@ function _renderScreenerTable() {
     const sc10 = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
     const scC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
     const scBarW = Math.round(Math.min(10, Math.max(0, n10)) / 10 * 100);
-    const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
-    const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
-    const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
+    const _ex = function (cle) {
+      return (typeof texteExercice === 'function') ? texteExercice(anneeDuChiffre(x, cle)) : 'exercice non précisé';
+    };
+    const pe  = x.pe_ref
+      ? x.pe_ref.toFixed(1) + '×<div class="exercice-comptes">' + _ex('pe') + '</div>'
+      : '—';
+    const dy  = (x.div_yield || 0) > 0
+      ? x.div_yield.toFixed(1) + '%<div class="exercice-comptes">' + _ex('rendement') + '</div>'
+      : '—';
     const dyC = (x.div_yield || 0) > 0 && typeof couleurDividende === 'function' ? couleurDividende(x.div_yield) : 'var(--t2)';
     const chg = (typeof variationJour === 'function') ? variationJour(x.ticker).pct : null;
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';
@@ -93,7 +99,9 @@ function _renderScreenerTable() {
     // Même prix, même écart, même libellé que le serveur (prix_cible.py).
     const target = x.prix_cible || 0;
     const ecart = (typeof x.ecart_pct === 'number') ? x.ecart_pct : null;
-    const targetStr = target > 0 ? fmtXOF(target) : '—';
+    const targetStr = target > 0
+      ? fmtXOF(target) + '<div class="exercice-comptes">' + _ex('cible') + '</div>'
+      : '—';
     const mots = (typeof fmtLibelleValeur === 'function') ? fmtLibelleValeur(x.libelle_valeur) : (x.libelle_valeur || '—');
     const targetC = ecart == null ? 'var(--text-2)' : (ecart > 10 ? 'var(--bull)' : (ecart < -10 ? 'var(--bear)' : 'var(--amber)'));
     const ecartStr = ecart == null ? '' : fmtEcartPct(ecart);
