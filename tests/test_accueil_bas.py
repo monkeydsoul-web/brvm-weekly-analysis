@@ -134,6 +134,20 @@ attend(_sousTitreSeance(seance) === 'Plus fortes variations', 'updated_at ignore
 attend(_sousTitreSeance({ session_date: '2026-09-29', updated_at: seance.updated_at }) === 'Plus fortes variations · 29 septembre 2026', 'session_date marche');
 attend(_sousTitreSeance({ updated_at: seance.updated_at }, { session_date: '2026-09-28' }) === 'Plus fortes variations · 28 septembre 2026', 'session_date statut');
 attend(_sousTitreSeance(null, { updated_at: seance.updated_at, market_open: false }) === 'Plus fortes variations', 'statut sans session_date');
+_variationLive = {
+  session_date: '2026-10-01',
+  seance_ouverte: true,
+  prices: {
+    BBGC: { price: 9675, change_pct: 7.5, volume: 10, source: 'brvm.org' },
+    SNTS: { price: 44995, change_pct: 4.65, volume: 10, source: 'brvm.org' },
+    NSBC: { price: 22500, change_pct: 4.65, volume: 10, source: 'brvm.org' },
+    BICB: { price: 8940, change_pct: 4.44, volume: 10, source: 'brvm.org' },
+    BOAB: { price: 9800, change_pct: 4.26, volume: 10, source: 'brvm.org' },
+    BICC: { price: 32510, change_pct: -6.83, volume: 10, source: 'brvm.org' },
+    SIVC: { price: 2005, change_pct: -6.31, volume: 10, source: 'brvm.org' }
+  }
+};
+_instantVariation = function() { return new Date('2026-10-01T12:00:00Z'); };
 const colH = _htmlColonneSeance('▲ Hausses', 'is-up', seance.top5);
 const colB = _htmlColonneSeance('▼ Baisses', 'is-down', seance.flop5);
 attend((colH.match(/accueil-seance-ligne/g) || []).length === 5, 'cinq hausses');

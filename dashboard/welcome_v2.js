@@ -189,10 +189,18 @@ function _ecartPoints(item) {
   return courant - veille;
 }
 
+// ytd des indices : fraction renvoyée par /api/market
+// (cours / clôture du 31/12/2025 − 1). L'affichage multiplie par 100 une seule fois.
 function _texteYtdIndice(ratio) {
   var n = _nombreAccueil(ratio);
   if (n == null) return '—';
   return _avecSigne(n * 100, 2) + '\u00a0%';
+}
+
+function _phraseDepuisJanvier(ratio) {
+  var valeur = _texteYtdIndice(ratio);
+  if (valeur === '—') return 'depuis\u00a0le\u00a01er\u00a0janvier\u00a0:\u00a0—';
+  return 'depuis\u00a0le\u00a01er\u00a0janvier\u00a0:\u00a0' + valeur;
 }
 
 function _compositeMarche(d) {
@@ -217,8 +225,7 @@ function _ligneSeanceIndice(item) {
   var ytd = _nombreAccueil(item.ytd);
   if (pts == null && ytd == null) return '—';
   var gauche = pts == null ? '— pts sur la séance' : (_avecSigne(pts, 2) + ' pts sur la séance');
-  var droite = ytd == null ? 'YTD —' : ('YTD ' + _texteYtdIndice(ytd));
-  return gauche + ' · ' + droite;
+  return gauche + ' · ' + _phraseDepuisJanvier(ytd);
 }
 
 function _pointsHistorique(d) {
@@ -372,7 +379,7 @@ function _htmlCarteNote(x) {
     + '</span>'
     + '<span class="accueil-mieux-cours">'
     + '<span class="accueil-mieux-prix">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
-    + '<span class="accueil-var-pill ' + _sensVariation(x.change_pct) + '">' + _echapAccueil(_fmtVariation(x.change_pct)) + '</span>'
+    + baliseVariationJour(ticker, 'accueil-var-pill ' + _sensVariation(variationJour(ticker).pct))
     + '</span>'
     + '<span class="accueil-badge ' + clsBadge + '">' + _echapAccueil(lib) + '</span>'
     + '</button>';
@@ -394,7 +401,12 @@ function _sousTitreSeance(marche, statut) {
 
 function _poserSousTitreSeance() {
   var sous = document.getElementById('accueil-seance-sous');
-  if (sous && sous.isConnected) sous.textContent = _sousTitreSeance(window._accueilMarche, window._accueilStatut);
+  if (sous && sous.isConnected) {
+    var session = (_variationLive && typeof _variationLive.session_date === 'string')
+      ? _variationLive.session_date : '';
+    sous.textContent = _sousTitreSeance(session ? { session_date: session } : null);
+  }
+  _poserLibellesVariation();
 }
 
 function _classementAccueil() {
@@ -416,7 +428,7 @@ function _htmlLigneSeance(x) {
   if (!ticker) return '';
   var corps = '<strong class="accueil-seance-ticker">' + _echapAccueil(ticker) + '</strong>'
     + '<span class="accueil-seance-cours">' + _echapAccueil(_fmtCours(x.price)) + '</span>'
-    + '<span class="accueil-var-pill ' + _sensVariation(x.change) + '">' + _echapAccueil(_fmtVariation(x.change)) + '</span>';
+    + baliseVariationJour(ticker, 'accueil-var-pill ' + _sensVariation(variationJour(ticker).pct));
   if (_tickerDansClassement(ticker)) {
     return '<button type="button" class="accueil-seance-ligne" data-ticker="' + _echapAccueil(ticker) + '">' + corps + '</button>';
   }
@@ -640,19 +652,100 @@ function _remplirMontants(act) {
 
 
 // Une seule requête /api/market pour le bandeau et l'accueil.
-// Conservée 60 s (même ordre que le cache serveur en séance) : les appels
-// du chargement de page partagent la promesse, y compris son délai.
+// La promesse est gardée 5 min : chargement, navigation et minuteur
+// de la même période partagent un seul GET. Le serveur, lui, reste
+// plus court (60 s en séance) ; le front ne le relit qu'à cette cadence.
 var DELAI_MARCHE_MS = 20000;
-var _PROMESSE_MARCHE_MS = 60000;
+var PERIODE_MARCHE_MS = 5 * 60 * 1000;
+var _PROMESSE_MARCHE_MS = PERIODE_MARCHE_MS;
 var _promesseMarche = null;
 var _promesseMarcheDepuis = 0;
+var _timerMarche = 0;
+
+// Même fenêtre que live_data.is_market_open_at : lun–ven, 09:00 inclus,
+// 15:30 exclus, en UTC. L'horloge du navigateur décide ; pas de second
+// appel /api/status pour savoir s'il faut relire /api/market.
+function _seanceOuverteMaintenant() {
+  var d = new Date();
+  var wd = d.getUTCDay();
+  if (wd === 0 || wd === 6) return false;
+  var mins = d.getUTCHours() * 60 + d.getUTCMinutes();
+  return mins >= 9 * 60 && mins < 15 * 60 + 30;
+}
+
+function _tickMarcheSeance() {
+  if (!_seanceOuverteMaintenant()) return;
+  if (_promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
+    // Le minuteur peut parler quelques centaines de ms avant les 5 min
+    // (il est armé au chargement, la première lecture part juste après).
+    var reste = _PROMESSE_MARCHE_MS - (Date.now() - _promesseMarcheDepuis);
+    if (reste > 0 && reste <= 2000) setTimeout(_tickMarcheSeance, reste);
+    return;
+  }
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+}
+
+function _armerRafraichissementMarche() {
+  if (typeof setInterval !== 'function') return;
+  if (_timerMarche && typeof clearInterval === 'function') clearInterval(_timerMarche);
+  _timerMarche = setInterval(_tickMarcheSeance, PERIODE_MARCHE_MS);
+}
+
+function _auChangementDePageMarche() {
+  if (!_seanceOuverteMaintenant()) return;
+  if (_promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) return;
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+}
+
+// Le serveur rend son cache puis le rafraîchit derrière. Si ce cache a
+// plus de 90 s en séance, une seule relecture part ~10 s plus tard.
+// Pas une boucle : tant que la réponse suivante est encore ancienne,
+// on n'en programme pas une autre.
+var SEUIL_FRAICHEUR_MARCHE_MS = 90 * 1000;
+var DELAI_RELECTURE_MARCHE_MS = 10 * 1000;
+var _relectureMarcheArmee = 0;
+
+function _noterFraicheurMarche(d, depuis) {
+  if (!_seanceOuverteMaintenant()) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  var brut = d && d.updated_at;
+  var instant = brut ? new Date(brut).getTime() : NaN;
+  // Âge au moment de l'appel réseau, pas à la reprise de la promesse :
+  // un retour sur l'accueil 2 min plus tard ne vieillit pas une réponse fraîche.
+  var age = depuis - instant;
+  if (!(age > SEUIL_FRAICHEUR_MARCHE_MS)) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  if (_relectureMarcheArmee) return;
+  _relectureMarcheArmee = 1;
+  setTimeout(function() {
+    _promesseMarche = null;
+    if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+  }, DELAI_RELECTURE_MARCHE_MS);
+}
 
 function demanderMarche(forcer) {
   if (!forcer && _promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
     return _promesseMarche;
   }
   _promesseMarcheDepuis = Date.now();
-  _promesseMarche = _telechargerMarche(0);
+  var depuis = _promesseMarcheDepuis;
+  // Un échec ne reste pas en cache 5 min : la navigation suivante
+  // et le prochain tour relisent, au lieu de rejouer la promesse rejetée.
+  var promesse = _telechargerMarche(0).then(function(d) {
+    _noterFraicheurMarche(d, depuis);
+    return d;
+  }, function(e) {
+    if (_promesseMarche === promesse) _promesseMarche = null;
+    throw e;
+  });
+  _promesseMarche = promesse;
+  // Le minuteur repart avec cette lecture : le prochain tour tombe
+  // quand la promesse a 5 min, pas en double avec elle.
+  _armerRafraichissementMarche();
   return _promesseMarche;
 }
 
@@ -676,6 +769,196 @@ function _telechargerMarche(essai) {
       reject(e);
     });
   });
+}
+
+
+// Une seule lecture de la variation du jour pour les six vues.
+// Même cache que demanderMarche : une promesse partagée pendant 60 s.
+var DELAI_VARIATION_MS = 20000;
+var _PROMESSE_VARIATION_MS = 60000;
+var _promesseVariation = null;
+var _promesseVariationDepuis = 0;
+var _variationLive = null;
+
+function demanderVariation(forcer) {
+  if (!forcer && _promesseVariation && (Date.now() - _promesseVariationDepuis) < _PROMESSE_VARIATION_MS) {
+    return _promesseVariation;
+  }
+  _promesseVariationDepuis = Date.now();
+  _promesseVariation = _telechargerVariation(0);
+  return _promesseVariation;
+}
+
+function _empreinteVariation(d) {
+  if (!d || typeof d !== 'object') return '';
+  var prices = d.prices || {};
+  var cles = Object.keys(prices).sort();
+  var morceaux = [String(d.session_date || ''), d.seance_ouverte ? '1' : '0'];
+  var i;
+  for (i = 0; i < cles.length; i++) {
+    var row = prices[cles[i]] || {};
+    morceaux.push(cles[i] + '=' + row.change_pct + '/' + row.price + '/' + row.volume);
+  }
+  return morceaux.join('|');
+}
+
+function _telechargerVariation(essai) {
+  return new Promise(function(resolve, reject) {
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var timer = setTimeout(function() { if (ctrl) ctrl.abort(); }, DELAI_VARIATION_MS);
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    fetch('/api/live', opts).then(function(r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(d) {
+      var avant = _empreinteVariation(_variationLive);
+      _variationLive = d || null;
+      if (_empreinteVariation(d) !== avant) {
+        try { redessinerVariations(); } catch (err) { /* le dessin ne casse pas la promesse */ }
+      }
+      resolve(d);
+    }).catch(function(e) {
+      clearTimeout(timer);
+      if (essai < 1) {
+        setTimeout(function() {
+          _telechargerVariation(essai + 1).then(resolve, reject);
+        }, 700);
+        return;
+      }
+      reject(e);
+    });
+  });
+}
+
+function _instantVariation() {
+  return new Date();
+}
+
+function _dateAbidjan(instant) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Abidjan',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(instant);
+  } catch (e) {
+    return '';
+  }
+}
+
+function variationJour(ticker) {
+  var t = String(ticker || '').toUpperCase();
+  var live = _variationLive;
+  var prices = live && live.prices ? live.prices : null;
+  var row = (prices && t) ? prices[t] : null;
+  var session = null;
+  if (row && typeof row.session_date === 'string' && row.session_date) session = row.session_date;
+  else if (live && typeof live.session_date === 'string' && live.session_date) session = live.session_date;
+  var pct = null;
+  if (row && row.price != null && row.price !== '' && row.source !== 'unavailable') {
+    if (row.change_pct != null && row.change_pct !== '' && isFinite(Number(row.change_pct))) {
+      pct = Number(row.change_pct);
+    }
+  }
+  if (row && row.volume === 0 && pct === 0) pct = null;
+  return {
+    pct: pct,
+    session_date: session,
+    seance_ouverte: !!(live && live.seance_ouverte === true)
+  };
+}
+
+function texteVariationJour(ticker) {
+  return _fmtVariation(variationJour(ticker).pct);
+}
+
+function libelleSeanceVariation() {
+  var live = _variationLive;
+  if (!live || typeof live.session_date !== 'string') return '';
+  var session = live.session_date;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(session)) return '';
+  var auj = _dateAbidjan(_instantVariation());
+  var pasAujourdhui = !auj || session !== auj;
+  var pasDEchange = live.seance_ouverte !== true;
+  if (!pasAujourdhui && !pasDEchange) return '';
+  return 'séance du ' + session.slice(8, 10) + '/' + session.slice(5, 7);
+}
+
+function baliseVariationJour(ticker, classe) {
+  var t = String(ticker || '').toUpperCase();
+  var texte = texteVariationJour(t);
+  var lib = libelleSeanceVariation();
+  var attrs = ' data-var-ticker="' + _echapAccueil(t) + '" data-var-texte="' + _echapAccueil(texte) + '"';
+  if (lib) attrs += ' data-var-seance="' + _echapAccueil(lib) + '"';
+  var cls = classe ? (' class="' + classe + '"') : '';
+  return '<span' + cls + attrs + '>' + _echapAccueil(texte) + '</span>';
+}
+
+function _poserTexteEnteteVariation(el, lib, defaut) {
+  if (!el) return;
+  var ind = el.querySelector ? el.querySelector('.sort-ind') : null;
+  var fleche = ind ? ind.textContent : '';
+  el.textContent = lib || defaut;
+  if (ind && document.createElement && el.appendChild) {
+    var span = document.createElement('span');
+    span.className = 'sort-ind';
+    span.textContent = fleche;
+    el.appendChild(span);
+  }
+}
+
+function _poserLibellesVariation() {
+  var lib = libelleSeanceVariation();
+  var titre = document.getElementById('accueil-seance-titre');
+  if (titre) titre.textContent = lib || 'Séance du jour';
+  var ids = ['accueil-mieux-seance', 'rank-seance-libelle', 'heatmap-seance-libelle'];
+  var i;
+  for (i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (!el) continue;
+    el.textContent = lib;
+    el.hidden = !lib;
+  }
+  _poserTexteEnteteVariation(document.getElementById('rank-col-var'), lib, '+/- aujourd\'hui');
+  _poserTexteEnteteVariation(document.getElementById('screener-col-var'), lib, 'Var. j.');
+}
+
+function _dessinVariation(fn) {
+  try { fn(); } catch (e) { /* une vue en échec n'empêche pas les autres */ }
+}
+
+function redessinerVariations() {
+  _dessinVariation(_poserSousTitreSeance);
+  var rows = (window.scores && window.scores.length) ? window.scores : [];
+  if (document.getElementById('accueil-top')) _dessinVariation(function() { _remplirTop(rows); });
+  if (document.getElementById('accueil-mvt-grille') && window._accueilMarche) {
+    _dessinVariation(function() { _remplirMouvements(window._accueilMarche); });
+  }
+  if (document.getElementById('rankBody') && typeof renderRankLive === 'function') {
+    _dessinVariation(renderRankLive);
+  }
+  if (document.getElementById('mkt-heatmap-grid') && typeof renderHeatmap === 'function') {
+    _dessinVariation(function() { renderHeatmap('mkt-heatmap-grid'); });
+  }
+  if (document.getElementById('screener-table') && typeof runScreener === 'function') {
+    _dessinVariation(runScreener);
+  }
+  var modal = document.getElementById('cmp-modal');
+  if (modal && modal.classList && modal.classList.contains('show') && typeof openCompareModal === 'function') {
+    _dessinVariation(openCompareModal);
+  }
+  var pageStock = document.getElementById('page-stock');
+  if (pageStock && pageStock.classList && pageStock.classList.contains('on')
+      && window._openTicker && typeof _htmlVariationFiche === 'function') {
+    _dessinVariation(function() {
+      var marque = _htmlVariationFiche(window._openTicker);
+      var els = pageStock.querySelectorAll('[data-var-ticker]');
+      var i;
+      for (i = 0; i < els.length; i++) els[i].outerHTML = marque;
+    });
+  }
 }
 
 
@@ -720,10 +1003,7 @@ function _remplirMarcheAccueil(d) {
 function _remplirLargeurLive() {
   if (window._accueilLargeurParti) return;
   window._accueilLargeurParti = 1;
-  fetch('/api/live').then(function(r) {
-    if (!r.ok) throw new Error('live');
-    return r.json();
-  }).then(function(d) {
+  demanderVariation(false).then(function(d) {
     _noterStatutLive(d);
     var el = document.getElementById('accueil-largeur-n');
     if (!el || !el.isConnected) return;
@@ -737,9 +1017,14 @@ function _remplirLargeurLive() {
 function _remplirIndices() {
   if (window._accueilIndicesParti) return;
   window._accueilIndicesParti = 1;
-  demanderMarche(false).then(_remplirMarcheAccueil).catch(function() {
-    _remplirMarcheAccueil(null);
-  });
+  // Le bandeau et la carte passent par le même peintre : une navigation
+  // qui relit l'accueil ne laisse plus le bandeau sur l'ancienne réponse.
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+  else {
+    demanderMarche(false).then(_remplirMarcheAccueil).catch(function() {
+      _remplirMarcheAccueil(null);
+    });
+  }
   _remplirLargeurLive();
 }
 

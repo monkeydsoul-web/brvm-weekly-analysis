@@ -185,7 +185,7 @@ def _ecrire_fixtures():
             "sector_indices": [],
             "total_return": {},
         }, f)
-    prix = {ligne["ticker"]: {"price": ligne["price"], "change_pct": 0, "volume": 0, "source": "fixture"} for ligne in rangs}
+    prix = {ligne["ticker"]: {"price": ligne["price"], "change_pct": 0, "volume": 100, "source": "fixture"} for ligne in rangs}
     with open(os.path.join(dossier, "live_cache.json"), "w", encoding="utf-8") as f:
         json.dump({
             "updated_at": maintenant,

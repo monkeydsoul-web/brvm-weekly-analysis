@@ -225,7 +225,8 @@ attend(_choisirTexteActivite(act, 'echange') === '2 000 000 000', 'cle echange a
 attend(_choisirTexteActivite({}, 'cap') === '', 'cap absente');
 
 var ligne = _ligneSeanceIndice({ current: 540.78, prev: 531.63, change: 1.72, ytd: null });
-attend(plat(ligne) === '+9,15 pts sur la séance · YTD —', JSON.stringify(ligne));
+attend(plat(ligne) === '+9,15 pts sur la séance · depuis le 1er janvier : —', JSON.stringify(ligne));
+attend(ligne.indexOf('YTD') < 0, 'mot YTD');
 attend(_ligneSeanceIndice(null) === '—', 'seance vide');
 attend(_ligneSeanceIndice({ current: 10 }) === '—', 'sans veille ni ytd');
 
