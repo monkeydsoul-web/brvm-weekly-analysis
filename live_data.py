@@ -3,7 +3,7 @@ live_data.py — Données live BRVM
 Source : brvm.org Table 3
 """
 import json, logging, os, tempfile, time, threading
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
@@ -79,6 +79,48 @@ def _seance_est_ouverte(session_date, prices):
     """
     auj = _aujourdhui_abidjan()
     return session_date == auj and _seance_a_echange(prices)
+
+
+def _jour_iso(valeur):
+    if not isinstance(valeur, str):
+        return None
+    brut = valeur.strip()[:10]
+    try:
+        return date.fromisoformat(brut)
+    except ValueError:
+        return None
+
+
+def date_derniere_seance(publiee):
+    """Date affichée : le jour publié s'il est ouvré, sinon le vendredi précédent.
+
+    La page résumé n'a souvent que l'horloge du site. Un samedi ou un
+    dimanche y devient donc la date du jour, alors que la dernière séance
+    est le vendredi. Un jour ouvré, en séance ou après 15h30 UTC, reste
+    la date publiée : on ne la recule pas, même si le cache des cours
+    est encore à la veille.
+
+    Ne lit ni n'écrit aucun fichier. Le cache marché, les historiques
+    et le job de 18h00 gardent la date qu'ils avaient.
+    """
+    jour = _jour_iso(publiee)
+    if jour is None:
+        return publiee
+    if jour.weekday() < 5:
+        return publiee
+    recule = jour
+    while recule.weekday() >= 5:
+        recule -= timedelta(days=1)
+    return recule.isoformat()
+
+
+def libelle_semaine_iso(jour_iso):
+    """Semaine ISO (lundi), pas le numéro Python ``%W`` qui décale d'une semaine."""
+    jour = jour_iso if isinstance(jour_iso, date) else _jour_iso(jour_iso)
+    if jour is None:
+        return None
+    iso = jour.isocalendar()
+    return "Semaine %02d/%d" % (iso.week, iso.year)
 
 
 def fetch_brvm_org():
