@@ -40,6 +40,7 @@ def test_fixtures_anonymes(fixtures_dir):
         "boc_lignes.json",
         "live_cache.json",
         "live_ranking.json",
+        "price_history_snts_orac.json",
         "ratings_emetteurs.json",
         "susp_actif.json",
         "susp_fin_passee.json",
