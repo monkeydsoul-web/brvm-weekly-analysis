@@ -760,6 +760,14 @@ def api_market():
         from market_data import appliquer_ytd_reference, get_market_data
         force = request.args.get("force", "false").lower() == "true"
         data = appliquer_ytd_reference(get_market_data(force_refresh=force))
+        # Copie de la réponse seulement. Le cache disque (et donc le job
+        # de 18h00, qui lit ce fichier) garde la date écrite par le scrape.
+        if isinstance(data, dict) and "session_date" in data:
+            from live_data import date_derniere_seance
+            seance = date_derniere_seance(data.get("session_date"))
+            if seance != data.get("session_date"):
+                data = dict(data)
+                data["session_date"] = seance
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1776,10 +1784,16 @@ def api_sector_indices():
         for item in data.get(cle) or []:
             if isinstance(item, dict) and item.get("name"):
                 indices[item["name"]] = {k: v for k, v in item.items() if k != "name"}
+    # Même correction que /api/market, sur ce dictionnaire de réponse
+    # seulement. data reste la copie YTD : le cache disque n'est pas touché.
+    session = data.get("session_date")
+    if "session_date" in data:
+        from live_data import date_derniere_seance
+        session = date_derniere_seance(session)
     return jsonify({
         "indices": indices,
         "updated_at": data.get("updated_at"),
-        "session_date": data.get("session_date"),
+        "session_date": session,
     })
 
 @app.route("/api/dividends")
