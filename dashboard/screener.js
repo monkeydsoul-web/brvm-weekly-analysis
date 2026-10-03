@@ -214,41 +214,6 @@ function screenerReset() {
   runScreener();
 }
 
-function screenerExportCSV() {
-  if (!_scrResults.length) { return; }
-  const cols = ['Ticker','Nom','Secteur','Score/10','P/E','P/B','Div%','ROE%','Var%','Cours XOF','Conseil','Graham/10','DCF/10','DDM/10','EPV/10','Buffett/10'];
-  const rows = _scrResults.map(x => [
-    x.ticker,
-    (x.name||'').replace(/,/g,''),
-    (x.sector||'').replace(/,/g,''),
-    (typeof note10num==='function'?note10num(x).toFixed(1):v10fmt(x.composite_adj||0)),
-    x.pe_ref ? x.pe_ref.toFixed(2) : '',
-    x.pb_ref ? x.pb_ref.toFixed(2) : '',
-    x.div_yield ? x.div_yield.toFixed(2) : '',
-    x.roe ? x.roe.toFixed(1) : '',
-    (function() {
-      if (typeof variationJour !== 'function') return '';
-      var p = variationJour(x.ticker).pct;
-      return p == null ? '' : p.toFixed(2);
-    })(),
-    x.price ? Math.round(x.price) : '',
-    x.conseil_libelle||'',
-    (x.score_graham||0).toFixed(1),
-    (x.score_dcf||0).toFixed(1),
-    (x.score_ddm||0).toFixed(1),
-    (x.score_epv||0).toFixed(1),
-    (x.score_buffett||0).toFixed(1),
-  ]);
-  const csv = [cols, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8' }); // BOM pour Excel
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `BRVM_Screener_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 async function screenerAnalyseAI() {
   const checked = [...document.querySelectorAll('.sc-chk:checked')].map(el => el.value);
   const tickers = checked.length ? checked : _scrResults.slice(0, 6).map(x => x.ticker);

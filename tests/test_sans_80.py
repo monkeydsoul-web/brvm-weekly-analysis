@@ -105,7 +105,7 @@ def test_methodo_glossaire_fiche_et_partage():
     prev = (ROOT / "dashboard" / "previsions.js").read_text(encoding="utf-8")
     assert prev.count("note10txt(s)") == 1
     ecran = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
-    assert "note10num(x).toFixed(1)" in ecran
+    assert "note10num(x)" in ecran
     assert "note10txt(x)" in ecran
     assert "/80*10" not in ecran
     aide = _entre(HTML, "🚀 Pour commencer", "function closeHelpDrawer")
@@ -451,60 +451,16 @@ attend(vide.indexOf('Verdict IA') === -1, 'partage vide sans verdict ia');
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout
 
 
-@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
-def test_csv_screener_autant_de_cellules_que_d_en_tetes():
-    """Une note 7.3 ne doit pas couper la ligne CSV sur la virgule."""
-    helpers = _entre(HTML, "function note10num", "function rapportAnnuelTxt")
-    export = _entre(
-        (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8"),
-        "function screenerExportCSV",
-        "async function screenerAnalyseAI",
-    )
-    script = helpers + export + r"""
-var csvTexte = null;
-function Blob(parts) { csvTexte = parts.join(''); }
-var URL = { createObjectURL: function() { return 'blob:x'; }, revokeObjectURL: function() {} };
-var document = { createElement: function() { return { click: function() {} }; } };
-var _scrResults = [
-  { ticker: 'SNTS', name: 'Societe, Test', sector: 'Banque', note10: 7.3,
-    composite_adj: 58, pe_ref: 8.25, pb_ref: 1.1, div_yield: 6.5, roe: 12.4,
-    change_pct: -1.25, price: 15000, pdf_verdict: 'POSITIF',
-    score_graham: 7.1, score_dcf: 6, score_ddm: 5, score_epv: 4, score_buffett: 8 },
-  { ticker: 'SCRC', name: 'Sucrivoire', sector: 'Agro', composite_adj: 7,
-    pe_ref: null, pb_ref: null, div_yield: 0, roe: null, change_pct: null,
-    price: null, pdf_verdict: '', score_graham: 0, score_dcf: 0, score_ddm: 0,
-    score_epv: 0, score_buffett: 0 }
-];
-screenerExportCSV();
-if (!csvTexte) { console.error('csv vide'); process.exit(1); }
-var brut = csvTexte.replace(/^\uFEFF/, '');
-var lignes = brut.split('\n').filter(function(l) { return l.length; });
-var n = lignes[0].split(',').length;
-if (n !== 16) { console.error('en-tetes ' + n); process.exit(1); }
-lignes.forEach(function(l, i) {
-  var cells = l.split(',');
-  if (cells.length !== n) {
-    console.error('ligne ' + i + ' : ' + cells.length + ' cellules / ' + n + ' : ' + l);
-    process.exit(1);
-  }
-});
-if (lignes[1].split(',')[3] !== '7.3') {
-  console.error('score ' + lignes[1].split(',')[3]);
-  process.exit(1);
-}
-if (brut.indexOf('7,3') !== -1) { console.error('virgule dans le csv'); process.exit(1); }
-if (lignes[2].split(',')[3] !== '0.9') {
-  console.error('repli ' + lignes[2].split(',')[3]);
-  process.exit(1);
-}
-"""
-    resultat = subprocess.run(
-        ["node", "-e", script],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert resultat.returncode == 0, resultat.stderr or resultat.stdout
+def test_export_csv_screener_retire():
+    """Le bouton ne faisait rien au chargement : _scrResults reste vide, la fonction s'arrêtait."""
+    page = (ROOT / "dashboard" / "index.html").read_text(encoding="utf-8")
+    screener = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
+    loader = (ROOT / "dashboard" / "js_loader.js").read_text(encoding="utf-8")
+    assert "Export CSV" not in page
+    assert "screenerExportCSV" not in page
+    assert "function screenerExportCSV" not in screener
+    assert "screenerExportCSV" not in loader
+    assert "let _scrResults = []" in screener
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node absent")

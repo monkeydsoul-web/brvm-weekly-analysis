@@ -179,7 +179,7 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
  'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
  'simBuildSliders','simCalc',
  'loadRankDash','loadSignauxValoAlertes','loadWelcomeHero','initTop3Podium','renderNewsV2',
- 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerExportCSV','screenerAnalyseAI',
+ 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerAnalyseAI',
  'renderPrevisionsPage','loadPriceChart','fetchLiveScore','loadLiveRank','renderLiveRankBadge','renderRankCards',
  'openMarkowitz','launchMarkowitz','initCompanyTabs','getDivConfidenceBadge','getDivYieldHtml',
  'openCompare','renderCompare',
@@ -1414,7 +1414,7 @@ async function init(){
     renderIndexFx(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();initServiceWorker();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();desinstallerServiceWorkerPrix();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -4312,78 +4312,58 @@ function updateLiveStatus() {
     .catch(function(e){ console.warn('live status:', e); });
 }
 
-// ── Service Worker — Notifications Push ────────────────────────────────────
-let _swReg = null;
-
-async function initServiceWorker() {
-  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-  // Afficher le bouton d'activation
-  document.getElementById('push-notif-bar').style.display = 'block';
-  // Vérifier si déjà accordé
-  if (Notification.permission === 'granted') {
-    _updatePushUI('granted');
-    try {
-      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      _setupSWMessaging();
-    } catch(e) { console.warn('SW register:', e); }
-  } else if (Notification.permission !== 'denied') {
-    _updatePushUI('default');
-  } else {
-    _updatePushUI('denied');
-  }
+// Ancien worker d'alertes prix : une visite met à jour /sw.js (le fichier
+// se désinstalle et efface les caches brvm-sw-*), puis retire l'enregistrement.
+function _scriptWorker(reg) {
+  var w = reg.active || reg.waiting || reg.installing;
+  return (w && w.scriptURL) ? w.scriptURL : '';
 }
-
-async function requestPushPermission() {
-  if (!('Notification' in window)) return;
-  const perm = await Notification.requestPermission();
-  _updatePushUI(perm);
-  if (perm === 'granted') {
-    try {
-      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      _setupSWMessaging();
-    } catch(e) { console.warn('SW register:', e); }
+function _suivreEtatWorker(reg) {
+  var worker = reg.installing || reg.waiting;
+  if (!worker || worker.state === 'activated' || worker.state === 'redundant') {
+    return Promise.resolve();
   }
-}
-
-function _updatePushUI(perm) {
-  const btn = document.getElementById('push-btn');
-  const st = document.getElementById('push-status');
-  if (perm === 'granted') {
-    if (btn) { btn.textContent = '🔔 Notifications actives'; btn.disabled = true; btn.style.color = 'var(--green)'; }
-    if (st) st.textContent = 'Alertes prix en arrière-plan activées';
-  } else if (perm === 'denied') {
-    if (btn) { btn.textContent = '🔕 Notifications bloquées'; btn.disabled = true; btn.style.color = 'var(--red)'; }
-    if (st) st.textContent = 'Autoriser dans les réglages navigateur';
-  } else {
-    if (btn) { btn.textContent = '🔔 Activer notifications push'; btn.disabled = false; }
-  }
-}
-
-function _setupSWMessaging() {
-  if (!_swReg) return;
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'SW_TRIGGER_CHECK') triggerSWAlertCheck();
-    if (e.data?.type === 'OPEN_TICKER') showStock(e.data.ticker);
+  return new Promise(function (resolve, reject) {
+    function fini() {
+      if (worker.state === 'activated' || worker.state === 'redundant') {
+        worker.removeEventListener('statechange', fini);
+        resolve();
+      }
+    }
+    worker.addEventListener('statechange', fini);
+    fini();
+    setTimeout(function () {
+      worker.removeEventListener('statechange', fini);
+      reject(new Error('activation /sw.js sans aboutir'));
+    }, 8000);
   });
-  // Démarrer la vérification périodique dans le SW (toutes les 5min)
-  _swReg.active?.postMessage({ type: 'SCHEDULE_CHECK', intervalMs: 300000 });
-  console.log('[SW] Messaging set up — periodic check every 5min');
 }
-
-function triggerSWAlertCheck() {
-  if (!_swReg?.active) return;
-  const alerts = (window._priceAlerts || []).filter(a => a.active !== false);
-  if (!alerts.length) return;
-  fetch('/api/live').then(r => r.json()).then(d => {
-    _swReg.active.postMessage({ type: 'CHECK_ALERTS', alerts, prices: d.prices || {} });
-  }).catch(() => {});
-}
-
-// Tester une notification push (debug)
-function testPushNotification() {
-  if (Notification.permission === 'granted') {
-    new Notification('📈 BRVM Test', { body: 'Les notifications push fonctionnent !', icon: '/favicon.ico' });
+function desinstallerServiceWorkerPrix() {
+  if (!navigator.serviceWorker || typeof navigator.serviceWorker.getRegistrations !== 'function') {
+    console.info('workers /sw.js désinstallés : 0');
+    return;
   }
+  navigator.serviceWorker.getRegistrations().then(function (regs) {
+    var cibles = regs.filter(function (reg) { return _scriptWorker(reg).endsWith('/sw.js'); });
+    var etapes = cibles.map(function (reg) {
+      return reg.update().then(function () {
+        return _suivreEtatWorker(reg);
+      }).then(function () {
+        return reg.unregister();
+      }).then(function () {
+        return 1;
+      }, function (err) {
+        console.error('désinstallation /sw.js', err);
+        return 0;
+      });
+    });
+    return Promise.all(etapes).then(function (comptes) {
+      var n = comptes.reduce(function (s, v) { return s + v; }, 0);
+      console.info('workers /sw.js désinstallés : ' + n);
+    });
+  }).catch(function (err) {
+    console.error('désinstallation /sw.js', err);
+  });
 }
 
 // Lancement statut live + auto-refresh toutes les 5 min

@@ -56,7 +56,6 @@
     screenerReset: "screener.js",
     screenerPreset: "screener.js",
     screenerSortBy: "screener.js",
-    screenerExportCSV: "screener.js",
     screenerAnalyseAI: "screener.js",
     renderPerfPage: "performance.js",
     renderPrevisionsPage: "previsions.js",
