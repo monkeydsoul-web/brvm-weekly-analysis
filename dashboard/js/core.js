@@ -3384,13 +3384,42 @@ function _paintIndexCards() {
   if (_bChg && _b30.change != null) { var _bs=_b30.change>=0?'+':''; _bChg.textContent=_bs+Number(_b30.change).toFixed(2)+'%'; _bChg.style.color=_b30.change>=0?'var(--bull)':'var(--bear)'; }
 }
 
+function _peindreCompteursMarche(compte) {
+  if (!compte && typeof _largeurDesCotees === 'function') compte = _largeurDesCotees();
+  var upEl = document.getElementById('mkt-up');
+  var downEl = document.getElementById('mkt-down');
+  var detail = document.getElementById('mkt-largeur-detail');
+  if (!compte || !compte.total) {
+    if (upEl) upEl.textContent = '—';
+    if (downEl) downEl.textContent = '—';
+    if (detail) detail.textContent = '';
+    return null;
+  }
+  if (upEl) upEl.textContent = String(compte.hausses);
+  if (downEl) downEl.textContent = String(compte.baisses);
+  if (detail) detail.textContent = (typeof _phraseLargeur === 'function') ? _phraseLargeur(compte) : '';
+  return compte;
+}
+
 function _renderMarketPage() {
   _paintIndexCards();
   if (typeof brancherCourbesMarche === "function") brancherCourbesMarche();
-  var up = (window.scores||[]).filter(function(s){return (s.change_pct||0)>0;}).length;
-  var down = (window.scores||[]).filter(function(s){return (s.change_pct||0)<0;}).length;
-  if (document.getElementById('mkt-up')) document.getElementById('mkt-up').textContent = up;
-  if (document.getElementById('mkt-down')) document.getElementById('mkt-down').textContent = down;
+  var compte = _peindreCompteursMarche();
+  var up = compte ? compte.hausses : 0;
+  var down = compte ? compte.baisses : 0;
+  if (!compte && !window._largeurMarcheDemandee && typeof demanderVariation === 'function') {
+    window._largeurMarcheDemandee = 1;
+    demanderVariation(false).then(function(d) {
+      window._largeurMarcheDemandee = 0;
+      var page = document.getElementById('page-marche');
+      if (!(page && page.classList.contains('on'))) return;
+      // Une seule peinture : rappeler _renderMarketPage relançait la même
+      // promesse déjà résolue et bloquait la page (microtâches sans fin).
+      _peindreCompteursMarche(typeof _largeurDesCotees === 'function'
+        ? _largeurDesCotees((d && d.prices) || null)
+        : null);
+    }).catch(function() { window._largeurMarcheDemandee = 0; });
+  }
 
   // Heatmap — re-render directement dans mkt-heatmap-grid
   _renderHeatmapFilters();
@@ -3420,7 +3449,8 @@ function _renderMarketPage() {
     if (window.scores && window.scores.length) {
       var sorted = [...window.scores].sort(triCommeClassement);
       var top3 = sorted.slice(0,3).map(function(s){ return '<span style="font-weight:700;color:var(--accent)">'+s.ticker+'</span> '+note10txt(s)+'/10'; }).join(' · ');
-      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">🟢 '+up+' en hausse · 🔴 '+down+' en baisse</div>';
+      var phrase = (typeof _phraseLargeur === 'function' && compte) ? _phraseLargeur(compte) : (up + ' en hausse · ' + down + ' en baisse');
+      insDst.innerHTML = '<div style="font-size:12px;color:var(--text-2);padding:4px 0">🏆 Top 3 : '+top3+'</div><div style="font-size:12px;color:var(--text-2);padding:4px 0">'+phrase+'</div>';
     }
   }
 }

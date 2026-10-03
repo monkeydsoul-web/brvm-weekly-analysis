@@ -163,12 +163,22 @@ function _choisirTexteActivite(act, genre) {
   return choix;
 }
 
-function _compterLargeur(prices) {
+function _compterLargeur(prices, univers) {
   var h = 0;
   var b = 0;
   var s = 0;
   var dict = prices || {};
+  var filtre = null;
+  if (univers) {
+    filtre = {};
+    var liste = Array.isArray(univers) ? univers : Object.keys(univers);
+    var i;
+    for (i = 0; i < liste.length; i++) {
+      if (liste[i]) filtre[String(liste[i]).toUpperCase()] = 1;
+    }
+  }
   Object.keys(dict).forEach(function(k) {
+    if (filtre && !filtre[String(k).toUpperCase()]) return;
     var row = dict[k];
     if (!row || row.change_pct == null || row.change_pct === '') return;
     var ch = Number(row.change_pct);
@@ -179,6 +189,35 @@ function _compterLargeur(prices) {
     else s += 1;
   });
   return { hausses: h, baisses: b, stables: s, total: h + b + s };
+}
+
+function _largeurDesCotees(prices) {
+  var rows = (window.scores && window.scores.length) ? window.scores : [];
+  var univers = [];
+  var i;
+  for (i = 0; i < rows.length; i++) {
+    if (rows[i] && rows[i].ticker) univers.push(String(rows[i].ticker).toUpperCase());
+  }
+  if (!univers.length) return null;
+  var source = prices || null;
+  if (!source) {
+    var live = (typeof _variationLive !== 'undefined') ? _variationLive : null;
+    if (live && live.prices) source = live.prices;
+    else if (window._livePrices) source = window._livePrices;
+  }
+  if (!source) return null;
+  var compte = _compterLargeur(source, univers);
+  if (!compte.total) return null;
+  return compte;
+}
+
+function _phraseLargeur(compte) {
+  if (!compte || !compte.total) return '';
+  var stables = compte.stables.toLocaleString('fr-FR') + (compte.stables > 1 ? ' stables' : ' stable');
+  return compte.hausses.toLocaleString('fr-FR') + ' en hausse · '
+    + stables + ' · '
+    + compte.baisses.toLocaleString('fr-FR') + ' en baisse'
+    + ', sur ' + compte.total.toLocaleString('fr-FR') + ' sociétés cotées';
 }
 
 function _ecartPoints(item) {
@@ -931,6 +970,11 @@ function _dessinVariation(fn) {
 
 function redessinerVariations() {
   _dessinVariation(_poserSousTitreSeance);
+  _dessinVariation(function() {
+    var compte = _largeurDesCotees();
+    if (document.getElementById('accueil-largeur-n')) _remplirLargeur(compte);
+    if (typeof _peindreCompteursMarche === 'function') _peindreCompteursMarche(compte);
+  });
   var rows = (window.scores && window.scores.length) ? window.scores : [];
   if (document.getElementById('accueil-top')) _dessinVariation(function() { _remplirTop(rows); });
   if (document.getElementById('accueil-mvt-grille') && window._accueilMarche) {
@@ -1007,7 +1051,7 @@ function _remplirLargeurLive() {
     _noterStatutLive(d);
     var el = document.getElementById('accueil-largeur-n');
     if (!el || !el.isConnected) return;
-    _remplirLargeur(_compterLargeur((d && d.prices) || {}));
+    _remplirLargeur(_largeurDesCotees((d && d.prices) || null));
   }).catch(function() {
     var el = document.getElementById('accueil-largeur-n');
     if (el && el.isConnected) _remplirLargeur(null);

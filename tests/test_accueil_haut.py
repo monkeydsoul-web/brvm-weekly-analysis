@@ -78,6 +78,20 @@ def _balise(html, identifiant):
     return trouve.group(0)
 
 
+def test_compteur_hausses_unique():
+    """Accueil et Marché comptent le même univers : les sociétés notées."""
+    core = (ROOT / "dashboard" / "js" / "core.js").read_text(encoding="utf-8")
+    assert 'id="mkt-largeur-detail"' in PAGE
+    bloc = _entre(core, "function _renderMarketPage", "function _syncMktHeatmap")
+    assert "change_pct" not in bloc
+    assert "_peindreCompteursMarche" in bloc
+    apres = bloc.split("demanderVariation", 1)[-1]
+    assert "_renderMarketPage(" not in apres
+    assert "function _largeurDesCotees" in JS
+    assert "sociétés cotées" in JS
+    assert "_remplirLargeur(_largeurDesCotees" in JS
+
+
 def test_hero_textes_et_ancrage_glossaire():
     haut = _entre(PAGE, 'id="accueil"', 'id="accueil-cartes"')
     assert "BOURSE RÉGIONALE UEMOA" in haut
@@ -238,6 +252,11 @@ var largeur = _compterLargeur({
   E: { change_pct: 3 }
 });
 attend(largeur.hausses === 1 && largeur.baisses === 1 && largeur.stables === 1 && largeur.total === 3, JSON.stringify(largeur));
+var filtre = _compterLargeur({
+  A: { price: 10, change_pct: 1.2 },
+  BBGC: { price: 8995, change_pct: 2.22 }
+}, ['A']);
+attend(filtre.hausses === 1 && filtre.baisses === 0 && filtre.total === 1, JSON.stringify(filtre));
 
 attend(_pointsHistorique(null) === null, 'hist nul');
 attend(_pointsHistorique({ series: [1] }) === null, 'un seul point');
