@@ -179,7 +179,7 @@ const COLORS=['#4ADE80','#60A5FA','#FBBF24','#F87171','#C084FC','#34D399','#FB92
  'initScreener','renderCorrelMatrix','openBacktest','openCompareAnalysis',
  'simBuildSliders','simCalc',
  'loadRankDash','loadSignauxValoAlertes','loadWelcomeHero','initTop3Podium','renderNewsV2',
- 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerExportCSV','screenerAnalyseAI',
+ 'runScreener','screenerReset','screenerPreset','screenerSortBy','screenerAnalyseAI',
  'renderPrevisionsPage','loadPriceChart','fetchLiveScore','loadLiveRank','renderLiveRankBadge','renderRankCards',
  'openMarkowitz','launchMarkowitz','initCompanyTabs','getDivConfidenceBadge','getDivYieldHtml',
  'openCompare','renderCompare',
@@ -1276,11 +1276,8 @@ function classePrincipale(row){
 }
 
 function showChangelog(){
-  var m=document.createElement('div');
-  m.style='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';
-  m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative"><button onclick="this.closest(\'div\').parentElement.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--t2);font-size:16px;cursor:pointer">✕</button><h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Changelog v9.0</h3><div style="font-size:12px;color:var(--t2);line-height:1.8"><strong style="color:var(--text)">Mai 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Refonte UX complète — footer, sidebar, typographie</li><li>Badges score /10 unifiés partout</li><li>Gauge signal du jour · barre statut marché</li><li>Score personnalisé : indicateur total poids</li><li>Toast notifications avec animation slideInRight</li><li>Skeleton loading · hover buttons</li></ul><strong style="color:var(--text)">Avril 2026</strong><ul style="margin:6px 0 10px;padding-left:16px"><li>Tooltips flottants data-tip sur tout le dashboard</li><li>Boutons ← Retour sur toutes les pages secondaires</li><li>Portfolio : modal Pourquoi ce titre ?</li><li>Optimisation Markowitz intégrée</li></ul></div></div>';
-  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
-  document.body.appendChild(m);
+  var m=document.getElementById('changelog-modal');
+  if(m) m.style.display='flex';
 }
 
 
@@ -1379,7 +1376,7 @@ async function init(){
     renderIndexFx(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();initServiceWorker();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -2520,15 +2517,6 @@ function createAlert(){
   document.getElementById('addAlertForm').style.display='none';
 }
 
-async function verifierAlertesMaintenant(){
-  try{
-    const data=await fetch('/api/live').then(r=>r.json());
-    checkAlertsWithPrices(data.prices);
-  }catch(e){}
-  renderAlertsPanel();
-}
-
-
 // ── Commodités ─────────────────────────────────────────────────────────────
 function timeAgo(iso){
   if(!iso) return '';
@@ -2718,17 +2706,30 @@ function _shareStockText(ticker){
     `Conseil : ${conseil}\n`+
     `Rapport annuel : ${annuel}\n`+
     `📈 Analysé sur BRVM Analyzer`;
-  const copier=function(){_shareConfirme();};
+  var url=_lienPartage(s.ticker);
   try{
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(copier).catch(function(){prompt('Copiez ce texte :',text);});
+    if(typeof navigator!=='undefined'&&typeof navigator.share==='function'){
+      Promise.resolve(navigator.share({title:s.ticker+' — BRVM Analyzer',text:text,url:url})).catch(function(err){
+        if(err&&err.name==='AbortError') return;
+        _copierLien(url);
+      });
     }else{
-      prompt('Copiez ce texte :',text);
+      _copierLien(url);
     }
   }catch(e){
-    prompt('Copiez ce texte :',text);
+    _copierLien(url);
   }
   return text;
+}
+function _lienPartage(ticker){
+  var origine='';
+  try{ origine=(location&&location.origin)||''; }catch(e){ origine=''; }
+  return origine+'/societe/'+encodeURIComponent(ticker);
+}
+function _copierLien(url){
+  var clip=(typeof navigator!=='undefined'&&navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(url):null;
+  if(!clip||!clip.then) return;
+  clip.then(function(){_shareConfirme();}).catch(function(){});
 }
 function _shareConfirme(){
   var el=document.getElementById('share-copie-banner');
@@ -2739,7 +2740,7 @@ function _shareConfirme(){
     el.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#166534;color:#fff;font-weight:700;font-size:14px;padding:10px 16px;border-radius:8px';
     document.body.appendChild(el);
   }
-  el.textContent='Copié !';
+  el.textContent='Lien copié';
   el.style.display='block';
   clearTimeout(window._shareCopieTimer);
   window._shareCopieTimer=setTimeout(function(){el.style.display='none';},2500);
@@ -4277,80 +4278,6 @@ function updateLiveStatus() {
     .catch(function(e){ console.warn('live status:', e); });
 }
 
-// ── Service Worker — Notifications Push ────────────────────────────────────
-let _swReg = null;
-
-async function initServiceWorker() {
-  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-  // Afficher le bouton d'activation
-  document.getElementById('push-notif-bar').style.display = 'block';
-  // Vérifier si déjà accordé
-  if (Notification.permission === 'granted') {
-    _updatePushUI('granted');
-    try {
-      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      _setupSWMessaging();
-    } catch(e) { console.warn('SW register:', e); }
-  } else if (Notification.permission !== 'denied') {
-    _updatePushUI('default');
-  } else {
-    _updatePushUI('denied');
-  }
-}
-
-async function requestPushPermission() {
-  if (!('Notification' in window)) return;
-  const perm = await Notification.requestPermission();
-  _updatePushUI(perm);
-  if (perm === 'granted') {
-    try {
-      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      _setupSWMessaging();
-    } catch(e) { console.warn('SW register:', e); }
-  }
-}
-
-function _updatePushUI(perm) {
-  const btn = document.getElementById('push-btn');
-  const st = document.getElementById('push-status');
-  if (perm === 'granted') {
-    if (btn) { btn.textContent = '🔔 Notifications actives'; btn.disabled = true; btn.style.color = 'var(--green)'; }
-    if (st) st.textContent = 'Alertes prix en arrière-plan activées';
-  } else if (perm === 'denied') {
-    if (btn) { btn.textContent = '🔕 Notifications bloquées'; btn.disabled = true; btn.style.color = 'var(--red)'; }
-    if (st) st.textContent = 'Autoriser dans les réglages navigateur';
-  } else {
-    if (btn) { btn.textContent = '🔔 Activer notifications push'; btn.disabled = false; }
-  }
-}
-
-function _setupSWMessaging() {
-  if (!_swReg) return;
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'SW_TRIGGER_CHECK') triggerSWAlertCheck();
-    if (e.data?.type === 'OPEN_TICKER') showStock(e.data.ticker);
-  });
-  // Démarrer la vérification périodique dans le SW (toutes les 5min)
-  _swReg.active?.postMessage({ type: 'SCHEDULE_CHECK', intervalMs: 300000 });
-  console.log('[SW] Messaging set up — periodic check every 5min');
-}
-
-function triggerSWAlertCheck() {
-  if (!_swReg?.active) return;
-  const alerts = (window._priceAlerts || []).filter(a => a.active !== false);
-  if (!alerts.length) return;
-  fetch('/api/live').then(r => r.json()).then(d => {
-    _swReg.active.postMessage({ type: 'CHECK_ALERTS', alerts, prices: d.prices || {} });
-  }).catch(() => {});
-}
-
-// Tester une notification push (debug)
-function testPushNotification() {
-  if (Notification.permission === 'granted') {
-    new Notification('📈 BRVM Test', { body: 'Les notifications push fonctionnent !', icon: '/favicon.ico' });
-  }
-}
-
 // Lancement statut live + auto-refresh toutes les 5 min
 updateLiveStatus();
 setInterval(updateLiveStatus, 300000);
@@ -4759,6 +4686,9 @@ const _origNav = nav;
 nav = function(id, pushHistory) {
   // Redirect market/comm/macro vers la page unifiée Marché
   var _MARCHE_TAB = { market: 'indices', comm: 'comm', macro: 'macro' };
+  if (id === 'valuation' || id === 'alerts') {
+    return nav('signals', pushHistory);
+  }
   if (_MARCHE_TAB[id]) {
     var tab = _MARCHE_TAB[id];
     if (pushHistory !== false) navHistory.push('marche');

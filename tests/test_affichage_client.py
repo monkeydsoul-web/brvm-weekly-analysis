@@ -36,9 +36,11 @@ def test_sources_lisent_la_note_du_serveur():
     screener = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
     assert "note10txt(x)" in screener
     assert "v10fmt(sc)" not in screener
-    assert "'Conseil'" in screener
     assert "Verdict IA" not in screener
-    assert "x.conseil_libelle" in screener
+    # L'en-tête Conseil reste dans le tableau. Le libellé du CSV vivait
+    # seulement dans screenerExportCSV, retiré parce qu'il ne faisait rien.
+    assert ">Conseil</th>" in HTML
+    assert "screenerExportCSV" not in screener
 
     live = (ROOT / "dashboard" / "live_score.js").read_text(encoding="utf-8")
     assert "note10:          r.note10" in live
@@ -167,4 +169,5 @@ def test_libelles_flux_et_csv():
     assert "Argent qui sort, par action" in HTML
     screener = (ROOT / "dashboard" / "screener.js").read_text(encoding="utf-8")
     assert "Verdict IA" not in screener
-    assert "'Conseil'" in screener
+    assert ">Conseil</th>" in HTML
+    assert "screenerExportCSV" not in screener
