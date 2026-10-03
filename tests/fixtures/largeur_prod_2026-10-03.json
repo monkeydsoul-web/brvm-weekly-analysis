@@ -1,0 +1,343 @@
+{
+  "source": "https://brvm-weekly-analysis.onrender.com/api/live",
+  "session_live": "2026-10-02",
+  "classement": 47,
+  "titres": [
+    {
+      "ticker": "ABJC",
+      "price": 3500.0,
+      "change_pct": 3.86,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BBGC",
+      "price": 8995.0,
+      "change_pct": 2.22,
+      "dans_classement": false,
+      "statut": null
+    },
+    {
+      "ticker": "BICB",
+      "price": 8800.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BICC",
+      "price": 33800.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BNBC",
+      "price": 1950.0,
+      "change_pct": 2.63,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOAB",
+      "price": 9435.0,
+      "change_pct": 0.53,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOABF",
+      "price": 8240.0,
+      "change_pct": 3.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOAC",
+      "price": 11450.0,
+      "change_pct": -0.35,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOAM",
+      "price": 6100.0,
+      "change_pct": 0.16,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOAN",
+      "price": 4950.0,
+      "change_pct": -1.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "BOAS",
+      "price": 8290.0,
+      "change_pct": 1.41,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "CABC",
+      "price": 3350.0,
+      "change_pct": -1.33,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "CBIBF",
+      "price": 31500.0,
+      "change_pct": 3.96,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "CFAC",
+      "price": 1450.0,
+      "change_pct": -4.61,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "CIEC",
+      "price": 6450.0,
+      "change_pct": -0.77,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "ECOC",
+      "price": 17100.0,
+      "change_pct": 1.82,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "ETIT",
+      "price": 67.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "FTSC",
+      "price": 1980.0,
+      "change_pct": -0.75,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "LNBB",
+      "price": 3825.0,
+      "change_pct": -1.67,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "NEIC",
+      "price": 2235.0,
+      "change_pct": -0.45,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "NSBC",
+      "price": 22000.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "NTLC",
+      "price": 14910.0,
+      "change_pct": 0.07,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "ONTBF",
+      "price": 2920.0,
+      "change_pct": -0.51,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "ORAC",
+      "price": 20605.0,
+      "change_pct": -5.48,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "ORGT",
+      "price": 2900.0,
+      "change_pct": -3.33,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "PALC",
+      "price": 8345.0,
+      "change_pct": 0.54,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "PRSC",
+      "price": 3900.0,
+      "change_pct": -0.13,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SAFC",
+      "price": 4385.0,
+      "change_pct": -1.46,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SCRC",
+      "price": 2760.0,
+      "change_pct": -1.08,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SDCC",
+      "price": 12980.0,
+      "change_pct": 0.31,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SDSC",
+      "price": 2950.0,
+      "change_pct": 1.2,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SEMC",
+      "price": 1495.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "suspendu"
+    },
+    {
+      "ticker": "SGBC",
+      "price": 39995.0,
+      "change_pct": 2.55,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SHEC",
+      "price": 2290.0,
+      "change_pct": -0.43,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SIBC",
+      "price": 9185.0,
+      "change_pct": 0.27,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SICC",
+      "price": 8400.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "suspendu"
+    },
+    {
+      "ticker": "SIVC",
+      "price": 1995.0,
+      "change_pct": -0.25,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SLBC",
+      "price": 37300.0,
+      "change_pct": 0.81,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SMBC",
+      "price": 16450.0,
+      "change_pct": 0.24,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SNTS",
+      "price": 45000.0,
+      "change_pct": 0.0,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SOGC",
+      "price": 7950.0,
+      "change_pct": 0.13,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "SPHC",
+      "price": 7900.0,
+      "change_pct": 0.13,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "STAC",
+      "price": 2200.0,
+      "change_pct": 2.33,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "STBC",
+      "price": 21800.0,
+      "change_pct": -0.77,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "TTLC",
+      "price": 3025.0,
+      "change_pct": 0.5,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "TTLS",
+      "price": 3700.0,
+      "change_pct": 0.27,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "UNLC",
+      "price": 50900.0,
+      "change_pct": -0.2,
+      "dans_classement": true,
+      "statut": "cote"
+    },
+    {
+      "ticker": "UNXC",
+      "price": 2270.0,
+      "change_pct": -3.81,
+      "dans_classement": true,
+      "statut": "cote"
+    }
+  ]
+}

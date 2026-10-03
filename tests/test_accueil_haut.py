@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Haut de l'accueil : héros, indice, chiffres. Aucun cours inventé."""
+import json
 import re
 import shutil
 import subprocess
@@ -79,7 +80,7 @@ def _balise(html, identifiant):
 
 
 def test_compteur_hausses_unique():
-    """Accueil et Marché comptent le même univers : les sociétés notées."""
+    """Un seul calcul, le périmètre est écrit : hausses + baisses + stables = total."""
     core = (ROOT / "dashboard" / "js" / "core.js").read_text(encoding="utf-8")
     assert 'id="mkt-largeur-detail"' in PAGE
     bloc = _entre(core, "function _renderMarketPage", "function _syncMktHeatmap")
@@ -87,9 +88,37 @@ def test_compteur_hausses_unique():
     assert "_peindreCompteursMarche" in bloc
     apres = bloc.split("demanderVariation", 1)[-1]
     assert "_renderMarketPage(" not in apres
-    assert "function _largeurDesCotees" in JS
-    assert "sociétés cotées" in JS
+    compteur = _entre(JS, "function _compterLargeur", "function _largeurDesCotees")
+    assert "window.scores" not in compteur
+    largeur = _entre(JS, "function _largeurDesCotees", "function _phraseLargeur")
+    assert "window.scores" not in largeur
+    assert "titres cotés" in JS
+    assert "sociétés cotées" not in JS
     assert "_remplirLargeur(_largeurDesCotees" in JS
+    assert "sEl.textContent = _phraseLargeur(compte)" in JS
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
+def test_perimetre_prod_48_titres_cotes():
+    """Instantané production du 2026-10-03 : un seul calcul, 22 + 19 + 7 = 48."""
+    brut = json.loads((ROOT / "tests" / "fixtures" / "largeur_prod_2026-10-03.json").read_text(encoding="utf-8"))
+    titres = brut["titres"]
+    assert len(titres) == 48
+    assert brut["classement"] == 47
+    par = {t["ticker"]: t for t in titres}
+    assert par["BBGC"]["dans_classement"] is False
+    assert par["BBGC"]["change_pct"] > 0
+    assert par["SICC"]["statut"] == "suspendu" and par["SICC"]["change_pct"] == 0
+    assert par["SEMC"]["statut"] == "suspendu" and par["SEMC"]["change_pct"] == 0
+    prices = {t["ticker"]: {"price": t["price"], "change_pct": t["change_pct"]} for t in titres}
+    _node(_fonctions() + """
+function attend(cond, msg) { if (!cond) { console.error(msg); process.exit(1); } }
+var prices = %s;
+var compte = _compterLargeur(prices);
+attend(compte.hausses === 22 && compte.baisses === 19 && compte.stables === 7 && compte.total === 48, JSON.stringify(compte));
+attend(compte.hausses + compte.baisses + compte.stables === compte.total, 'somme');
+attend(_phraseLargeur(compte) === '22 en hausse · 7 stables · 19 en baisse, sur 48 titres cotés', _phraseLargeur(compte));
+""" % json.dumps(prices))
 
 
 def test_hero_textes_et_ancrage_glossaire():
@@ -252,11 +281,15 @@ var largeur = _compterLargeur({
   E: { change_pct: 3 }
 });
 attend(largeur.hausses === 1 && largeur.baisses === 1 && largeur.stables === 1 && largeur.total === 3, JSON.stringify(largeur));
-var filtre = _compterLargeur({
+var cotees = _compterLargeur({
   A: { price: 10, change_pct: 1.2 },
-  BBGC: { price: 8995, change_pct: 2.22 }
-}, ['A']);
-attend(filtre.hausses === 1 && filtre.baisses === 0 && filtre.total === 1, JSON.stringify(filtre));
+  BBGC: { price: 8995, change_pct: 2.22 },
+  SICC: { price: 8400, change_pct: 0 },
+  SEMC: { price: 1495, change_pct: 0 }
+});
+attend(cotees.hausses === 2 && cotees.baisses === 0 && cotees.stables === 2 && cotees.total === 4, JSON.stringify(cotees));
+attend(cotees.hausses + cotees.baisses + cotees.stables === cotees.total, 'somme');
+attend(_phraseLargeur(cotees) === '2 en hausse · 2 stables · 0 en baisse, sur 4 titres cotés', _phraseLargeur(cotees));
 
 attend(_pointsHistorique(null) === null, 'hist nul');
 attend(_pointsHistorique({ series: [1] }) === null, 'un seul point');

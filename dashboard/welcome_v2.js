@@ -163,22 +163,12 @@ function _choisirTexteActivite(act, genre) {
   return choix;
 }
 
-function _compterLargeur(prices, univers) {
+function _compterLargeur(prices) {
   var h = 0;
   var b = 0;
   var s = 0;
   var dict = prices || {};
-  var filtre = null;
-  if (univers) {
-    filtre = {};
-    var liste = Array.isArray(univers) ? univers : Object.keys(univers);
-    var i;
-    for (i = 0; i < liste.length; i++) {
-      if (liste[i]) filtre[String(liste[i]).toUpperCase()] = 1;
-    }
-  }
   Object.keys(dict).forEach(function(k) {
-    if (filtre && !filtre[String(k).toUpperCase()]) return;
     var row = dict[k];
     if (!row || row.change_pct == null || row.change_pct === '') return;
     var ch = Number(row.change_pct);
@@ -192,13 +182,6 @@ function _compterLargeur(prices, univers) {
 }
 
 function _largeurDesCotees(prices) {
-  var rows = (window.scores && window.scores.length) ? window.scores : [];
-  var univers = [];
-  var i;
-  for (i = 0; i < rows.length; i++) {
-    if (rows[i] && rows[i].ticker) univers.push(String(rows[i].ticker).toUpperCase());
-  }
-  if (!univers.length) return null;
   var source = prices || null;
   if (!source) {
     var live = (typeof _variationLive !== 'undefined') ? _variationLive : null;
@@ -206,7 +189,7 @@ function _largeurDesCotees(prices) {
     else if (window._livePrices) source = window._livePrices;
   }
   if (!source) return null;
-  var compte = _compterLargeur(source, univers);
+  var compte = _compterLargeur(source);
   if (!compte.total) return null;
   return compte;
 }
@@ -217,7 +200,7 @@ function _phraseLargeur(compte) {
   return compte.hausses.toLocaleString('fr-FR') + ' en hausse · '
     + stables + ' · '
     + compte.baisses.toLocaleString('fr-FR') + ' en baisse'
-    + ', sur ' + compte.total.toLocaleString('fr-FR') + ' sociétés cotées';
+    + ', sur ' + compte.total.toLocaleString('fr-FR') + ' titres cotés';
 }
 
 function _ecartPoints(item) {
@@ -567,10 +550,7 @@ function _remplirLargeur(compte) {
       + '<span class="is-stable" style="flex:' + compte.stables + ' 1 0"></span>'
       + '<span class="is-baisse" style="flex:' + compte.baisses + ' 1 0"></span>';
   }
-  if (sEl) {
-    var mot = compte.stables > 1 ? ' stables' : ' stable';
-    sEl.textContent = compte.stables.toLocaleString('fr-FR') + mot;
-  }
+  if (sEl) sEl.textContent = _phraseLargeur(compte);
 }
 
 function _texteActiviteAccueil(v) {

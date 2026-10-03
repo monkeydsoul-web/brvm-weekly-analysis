@@ -38,6 +38,7 @@ def test_fixtures_anonymes(fixtures_dir):
         "bna_cas.json",
         "bna_univers.json",
         "boc_lignes.json",
+        "largeur_prod_2026-10-03.json",
         "live_cache.json",
         "live_ranking.json",
         "ratings_emetteurs.json",
