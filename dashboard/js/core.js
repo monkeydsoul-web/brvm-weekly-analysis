@@ -1748,12 +1748,26 @@ function loadMarketWidget(forcer){
     if(flop5) flop5.innerHTML=(d.flop5||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)"><span style="cursor:pointer;color:var(--t1)" onclick="_openStock('${x.ticker}')">${x.ticker}</span><span style="color:var(--red)">${x.change.toFixed(2)}%</span></div>`).join('');
     _paintIndexCards();
     renderIndexTicker(d);
+    if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(d);
+    window._dernierMarche = d;
   }).catch(e=>{
     if (generation !== _mktGeneration) return;
+    // Une relecture ratée garde l'écran : « — » et l'erreur console
+    // restent pour le premier chargement et pour « Réessayer ».
+    var precedent = window._dernierMarche;
+    if (!forcer && precedent && Array.isArray(precedent.indices) && precedent.indices.length) {
+      _promesseMarche = null;
+      return;
+    }
     var abandon = !!(e && e.name === 'AbortError');
     // L'essai unique est dans demanderMarche. L'abandon ne laisse pas d'erreur console.
-    if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
+    // La promesse est partagée : le même échec ne s'écrit qu'une fois.
+    if (!(e && e._journalMarche)) {
+      if (e && typeof e === 'object') e._journalMarche = 1;
+      if (!abandon) console.error('[BRVM] loadMarketWidget:', e);
+    }
     renderIndexTicker(null);
+    if (typeof _remplirMarcheAccueil === 'function') _remplirMarcheAccueil(null);
     if (_mktErrEl) _mktErrEl.style.display = 'flex';
     var msbComp2=document.getElementById('msb-composite');
     var msbB302=document.getElementById('msb-brvm30');
@@ -4275,6 +4289,7 @@ function testPushNotification() {
 // Lancement statut live + auto-refresh toutes les 5 min
 updateLiveStatus();
 setInterval(updateLiveStatus, 300000);
+if (typeof _armerRafraichissementMarche === 'function') _armerRafraichissementMarche();
 
 // ── Glossaire financier ────────────────────────────────────────────────────
 const _glossTerms = [
@@ -4702,6 +4717,7 @@ nav = function(id, pushHistory) {
     }
     _updateBackLabels();
     if (typeof syncChromeNav === 'function') syncChromeNav('marche');
+    if (typeof _auChangementDePageMarche === 'function') _auChangementDePageMarche();
     return;
   }
   if (pushHistory !== false) navHistory.push(id);
@@ -4711,6 +4727,7 @@ nav = function(id, pushHistory) {
   if (typeof pageLoaders !== 'undefined' && pageLoaders[id]) pageLoaders[id]();
   _updateBackLabels();
   if (typeof syncChromeNav === 'function') syncChromeNav(id);
+  if (typeof _auChangementDePageMarche === 'function') _auChangementDePageMarche();
 };
 function navBack() {
   navHistory.pop();

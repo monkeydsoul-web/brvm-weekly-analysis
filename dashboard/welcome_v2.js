@@ -640,19 +640,100 @@ function _remplirMontants(act) {
 
 
 // Une seule requête /api/market pour le bandeau et l'accueil.
-// Conservée 60 s (même ordre que le cache serveur en séance) : les appels
-// du chargement de page partagent la promesse, y compris son délai.
+// La promesse est gardée 5 min : chargement, navigation et minuteur
+// de la même période partagent un seul GET. Le serveur, lui, reste
+// plus court (60 s en séance) ; le front ne le relit qu'à cette cadence.
 var DELAI_MARCHE_MS = 20000;
-var _PROMESSE_MARCHE_MS = 60000;
+var PERIODE_MARCHE_MS = 5 * 60 * 1000;
+var _PROMESSE_MARCHE_MS = PERIODE_MARCHE_MS;
 var _promesseMarche = null;
 var _promesseMarcheDepuis = 0;
+var _timerMarche = 0;
+
+// Même fenêtre que live_data.is_market_open_at : lun–ven, 09:00 inclus,
+// 15:30 exclus, en UTC. L'horloge du navigateur décide ; pas de second
+// appel /api/status pour savoir s'il faut relire /api/market.
+function _seanceOuverteMaintenant() {
+  var d = new Date();
+  var wd = d.getUTCDay();
+  if (wd === 0 || wd === 6) return false;
+  var mins = d.getUTCHours() * 60 + d.getUTCMinutes();
+  return mins >= 9 * 60 && mins < 15 * 60 + 30;
+}
+
+function _tickMarcheSeance() {
+  if (!_seanceOuverteMaintenant()) return;
+  if (_promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
+    // Le minuteur peut parler quelques centaines de ms avant les 5 min
+    // (il est armé au chargement, la première lecture part juste après).
+    var reste = _PROMESSE_MARCHE_MS - (Date.now() - _promesseMarcheDepuis);
+    if (reste > 0 && reste <= 2000) setTimeout(_tickMarcheSeance, reste);
+    return;
+  }
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+}
+
+function _armerRafraichissementMarche() {
+  if (typeof setInterval !== 'function') return;
+  if (_timerMarche && typeof clearInterval === 'function') clearInterval(_timerMarche);
+  _timerMarche = setInterval(_tickMarcheSeance, PERIODE_MARCHE_MS);
+}
+
+function _auChangementDePageMarche() {
+  if (!_seanceOuverteMaintenant()) return;
+  if (_promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) return;
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+}
+
+// Le serveur rend son cache puis le rafraîchit derrière. Si ce cache a
+// plus de 90 s en séance, une seule relecture part ~10 s plus tard.
+// Pas une boucle : tant que la réponse suivante est encore ancienne,
+// on n'en programme pas une autre.
+var SEUIL_FRAICHEUR_MARCHE_MS = 90 * 1000;
+var DELAI_RELECTURE_MARCHE_MS = 10 * 1000;
+var _relectureMarcheArmee = 0;
+
+function _noterFraicheurMarche(d, depuis) {
+  if (!_seanceOuverteMaintenant()) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  var brut = d && d.updated_at;
+  var instant = brut ? new Date(brut).getTime() : NaN;
+  // Âge au moment de l'appel réseau, pas à la reprise de la promesse :
+  // un retour sur l'accueil 2 min plus tard ne vieillit pas une réponse fraîche.
+  var age = depuis - instant;
+  if (!(age > SEUIL_FRAICHEUR_MARCHE_MS)) {
+    _relectureMarcheArmee = 0;
+    return;
+  }
+  if (_relectureMarcheArmee) return;
+  _relectureMarcheArmee = 1;
+  setTimeout(function() {
+    _promesseMarche = null;
+    if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+  }, DELAI_RELECTURE_MARCHE_MS);
+}
 
 function demanderMarche(forcer) {
   if (!forcer && _promesseMarche && (Date.now() - _promesseMarcheDepuis) < _PROMESSE_MARCHE_MS) {
     return _promesseMarche;
   }
   _promesseMarcheDepuis = Date.now();
-  _promesseMarche = _telechargerMarche(0);
+  var depuis = _promesseMarcheDepuis;
+  // Un échec ne reste pas en cache 5 min : la navigation suivante
+  // et le prochain tour relisent, au lieu de rejouer la promesse rejetée.
+  var promesse = _telechargerMarche(0).then(function(d) {
+    _noterFraicheurMarche(d, depuis);
+    return d;
+  }, function(e) {
+    if (_promesseMarche === promesse) _promesseMarche = null;
+    throw e;
+  });
+  _promesseMarche = promesse;
+  // Le minuteur repart avec cette lecture : le prochain tour tombe
+  // quand la promesse a 5 min, pas en double avec elle.
+  _armerRafraichissementMarche();
   return _promesseMarche;
 }
 
@@ -737,9 +818,14 @@ function _remplirLargeurLive() {
 function _remplirIndices() {
   if (window._accueilIndicesParti) return;
   window._accueilIndicesParti = 1;
-  demanderMarche(false).then(_remplirMarcheAccueil).catch(function() {
-    _remplirMarcheAccueil(null);
-  });
+  // Le bandeau et la carte passent par le même peintre : une navigation
+  // qui relit l'accueil ne laisse plus le bandeau sur l'ancienne réponse.
+  if (typeof loadMarketWidget === 'function') loadMarketWidget(false);
+  else {
+    demanderMarche(false).then(_remplirMarcheAccueil).catch(function() {
+      _remplirMarcheAccueil(null);
+    });
+  }
   _remplirLargeurLive();
 }
 
