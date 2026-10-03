@@ -99,6 +99,9 @@ var custom = serieZoom(serie, 0, 1);
 attend(custom.length === 2 && custom[0].date === '2026-05-04', 'fenetre zoom');
 attend(periodeDuVisible(serie, custom, 'Tout') === '', 'zoom libre ' + periodeDuVisible(serie, custom, 'Tout'));
 attend(periodeDuVisible(serie, unMois, '3M') === '3M', '3M garde le choix si meme fenetre');
+attend(unitesEtiquette(346) * 346 / 640 >= 10, '10 px a 346');
+attend(unitesEtiquette(0) * 346 / 640 >= 10, 'repli mobile');
+attend(unitesEtiquette(900) === 11, 'ecran large');
 """
     resultat = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=False)
     assert resultat.returncode == 0, resultat.stderr or resultat.stdout

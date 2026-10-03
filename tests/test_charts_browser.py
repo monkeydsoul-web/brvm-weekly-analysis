@@ -10,6 +10,7 @@ import calendar
 import json
 import os
 import socket
+import tempfile
 import threading
 from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlparse
@@ -29,7 +30,7 @@ pytestmark = pytest.mark.skipif(
 
 pytest.importorskip("playwright.sync_api")
 
-CAPTURES = "/opt/cursor/artifacts/screenshots/apres"
+CAPTURES = os.environ.get("BRVM_CAPTURES") or tempfile.mkdtemp(prefix="charts_")
 
 
 def _decaler_mois(jour, delta):
@@ -250,6 +251,26 @@ def _compter(journal, morceau):
     return sum(1 for url in journal if morceau in url)
 
 
+def _indices_module(journal):
+    """BRVM-C et BRVM-30 seulement. BRVM-COMPOSITE (comparaison) ne compte pas."""
+    return [u for u in journal if "index=BRVM-C&" in u or "index=BRVM-30" in u]
+
+
+def _taille_axe(page, selecteur):
+    """Taille écran des graduations, en px, après le passage du viewBox."""
+    return page.evaluate(
+        """(sel) => {
+          var t = document.querySelector(sel + ' .ci-svg text');
+          if (!t) return 0;
+          var ctm = t.getScreenCTM();
+          var taille = parseFloat(t.getAttribute('font-size')) || 0;
+          if (!ctm || !taille) return 0;
+          return Math.abs(taille * ctm.a);
+        }""",
+        selecteur,
+    )
+
+
 def _ouvrir(navigateur, url, largeur):
     from playwright.sync_api import expect  # noqa: F401
 
@@ -352,7 +373,7 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
         assert _compter(journal, "/api/market") == 1, journal
         assert _compter(journal, "price-history-extended") == 1, journal
         assert "period=tout" in journal[-1] or any("period=tout" in u for u in journal)
-        assert _compter(journal, "/api/index-history") == 0
+        assert _indices_module(journal) == []
 
         x_avant = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
         date_avant = page.locator("#stockChartDiv .ci-date").inner_text()
@@ -391,7 +412,9 @@ def _verifier_fiche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
         page.wait_for_timeout(400)
         assert _compter(journal, "price-history-extended") == avant_ext, journal
         assert _compter(journal, "/api/market") == avant_marche, journal
-        assert _compter(journal, "/api/index-history") == 0
+        assert _indices_module(journal) == []
+        if largeur <= 500:
+            assert _taille_axe(page, "#stockChartDiv") >= 10
         assert page.locator('#stockChartDiv .ci-periode[data-periode="1M"]').get_attribute("aria-pressed") == "true"
         page.locator("#stockChartDiv").scroll_into_view_if_needed()
         page.locator("#stockChartDiv").screenshot(path=os.path.join(CAPTURES, "fiche-%s-%s.png" % (nom_l, nom_t)))
@@ -419,7 +442,7 @@ def _verifier_marche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
         assert page.locator("#mkt-courbe-brvm-30 .ci-periode").all_inner_texts() == boutons
         assert "XOF" not in _norm(page.locator("#mkt-courbe-brvm-c .ci-lecture").inner_text())
         assert _compter(journal, "/api/market") == 1, journal
-        urls_idx = [u for u in journal if "/api/index-history" in u]
+        urls_idx = _indices_module(journal)
         assert len(urls_idx) == 2, urls_idx
         assert any("BRVM-C" in u and "range=1A" in u for u in urls_idx), urls_idx
         assert any("BRVM-30" in u and "range=1A" in u for u in urls_idx), urls_idx
@@ -443,7 +466,10 @@ def _verifier_marche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
             timeout=5000,
         )
         page.wait_for_timeout(400)
-        assert _compter(journal, "/api/index-history") == avant_idx, journal
+        assert len(_indices_module(journal)) == avant_idx, journal
+        if largeur <= 500:
+            assert _taille_axe(page, "#mkt-courbe-brvm-c") >= 10
+            assert _taille_axe(page, "#mkt-courbe-brvm-30") >= 10
         assert _compter(journal, "/api/market") == avant_marche, journal
         assert _compter(journal, "price-history-extended") == 0
         page.locator("#mkt-indices-courbes").scroll_into_view_if_needed()

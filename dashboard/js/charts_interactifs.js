@@ -174,6 +174,32 @@ function assurerSquelette(hote) {
     + '<div class="ci-periodes" role="group" aria-label="Période"></div>';
   lierPointeur(hote);
   lierZoom(hote);
+  lierMesure(hote);
+}
+
+function unitesEtiquette(largeur) {
+  var base = largeur >= 80 ? largeur : 280;
+  return Math.max(11, (11 * 640) / base);
+}
+
+function largeurCourbe(hote) {
+  var svg = hote.querySelector(".ci-svg");
+  var largeur = svg ? svg.getBoundingClientRect().width : 0;
+  if (largeur < 80) largeur = hote.getBoundingClientRect().width;
+  return largeur || 0;
+}
+
+function lierMesure(hote) {
+  if (!hote || hote._ciObserve || typeof ResizeObserver !== "function") return;
+  hote._ciObserve = true;
+  var obs = new ResizeObserver(function() {
+    var largeur = largeurCourbe(hote);
+    if (largeur < 80) return;
+    if (Math.round(largeur) === hote._ciLargeur) return;
+    if (!hote._ciVisible || hote._ciVisible.length < 2) return;
+    peindreVisible(hote, hote._ciVisible);
+  });
+  obs.observe(hote);
 }
 
 function memeFenetre(a, b) {
@@ -366,14 +392,16 @@ function peindreVisible(hote, visible) {
   hote.setAttribute("data-ci-n", String(visible.length));
   hote.setAttribute("data-ci-periode", periode);
 
+  var largeur = largeurCourbe(hote);
+  if (largeur >= 80) hote._ciLargeur = Math.round(largeur);
+  var unites = unitesEtiquette(largeur);
   var W = 640;
   var H = 208;
   var padL = 56;
   var padR = 12;
   var padT = 16;
   var padB = 28;
-  var CW = W - padL - padR;
-  var CH = H - padT - padB;
+  var nGrad = !largeur || largeur < 480 ? 3 : 4;
   var minV = visible[0].value;
   var maxV = visible[0].value;
   var i;
@@ -392,6 +420,23 @@ function peindreVisible(hote, visible) {
     maxP += marge;
   }
   var range = (maxP - minP) || 1;
+  var etiquettes = [];
+  var plusLong = 0;
+  var g, v, texte;
+  for (g = 0; g < nGrad; g++) {
+    v = minP + range * g / (nGrad - 1);
+    texte = v >= 1000
+      ? Math.round(v).toLocaleString("fr-FR")
+      : v.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+    etiquettes.push(texte);
+    if (texte.length > plusLong) plusLong = texte.length;
+  }
+  var besoin = Math.ceil(unites * 0.62 * plusLong) + 10;
+  if (besoin > padL) padL = besoin;
+  if (padL > 168) padL = 168;
+  if (unites > 14) padB = Math.max(padB, Math.ceil(unites) + 12);
+  var CW = W - padL - padR;
+  var CH = H - padT - padB;
   hote._ciGeom = { W: W, H: H, padL: padL, padT: padT, CW: CW, CH: CH, minP: minP, range: range };
 
   function xDe(iPoint) {
@@ -409,14 +454,12 @@ function peindreVisible(hote, visible) {
   }
   var aire = xDe(0).toFixed(1) + "," + (padT + CH).toFixed(1) + " " + pts.join(" ") + " " + xDe(visible.length - 1).toFixed(1) + "," + (padT + CH).toFixed(1);
   var html = '<rect class="ci-hit" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"></rect>';
-  for (var g = 0; g < 4; g++) {
-    var v = minP + range * g / 3;
+  var taille = unites.toFixed(1);
+  for (g = 0; g < etiquettes.length; g++) {
+    v = minP + range * g / (nGrad - 1);
     var y = yDe(v);
-    var etiquette = v >= 1000
-      ? Math.round(v).toLocaleString("fr-FR")
-      : v.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
     html += '<line class="ci-grille" x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (padL + CW) + '" y2="' + y.toFixed(1) + '"/>';
-    html += '<text class="ci-label" x="' + (padL - 6) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end">' + etiquette + '</text>';
+    html += '<text class="ci-label" font-size="' + taille + '" x="' + (padL - 6) + '" y="' + (y + unites * 0.3).toFixed(1) + '" text-anchor="end">' + etiquettes[g] + '</text>';
   }
   var marques = visible.length === 2 ? [0, 1] : [0, Math.round((visible.length - 1) / 2), visible.length - 1];
   var deja = {};
@@ -425,7 +468,7 @@ function peindreVisible(hote, visible) {
     if (deja[k]) continue;
     deja[k] = 1;
     var ancre = k === 0 ? "start" : (k === visible.length - 1 ? "end" : "middle");
-    html += '<text class="ci-label" x="' + xDe(k).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + ancre + '">' + fmtDateCourte(visible[k].date) + '</text>';
+    html += '<text class="ci-label" font-size="' + taille + '" x="' + xDe(k).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + ancre + '">' + fmtDateCourte(visible[k].date) + '</text>';
   }
   html += '<polygon class="ci-aire ' + sens + '" points="' + aire + '"/>';
   html += '<polyline class="ci-trait ' + sens + '" points="' + pts.join(" ") + '" fill="none"/>';
@@ -629,6 +672,7 @@ if (typeof window !== "undefined") {
   window.periodesCouvertes = periodesCouvertes;
   window.serieZoom = serieZoom;
   window.periodeDuVisible = periodeDuVisible;
+  window.unitesEtiquette = unitesEtiquette;
   window.peindreSerie = peindreSerie;
   window.peindreAppel = peindreAppel;
   window.chargerCourbeSociete = chargerCourbeSociete;

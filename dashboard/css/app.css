@@ -776,7 +776,7 @@ html.fiche-directe #page-stock{display:block}
 .ci-var.is-flat{color:var(--t2)}
 .ci-svg{display:block;width:100%;height:auto;touch-action:manipulation;cursor:crosshair;user-select:none}
 .ci-grille{stroke:var(--border);stroke-width:1}
-.ci-svg text{font-family:var(--font-sans);font-size:11px;fill:var(--t3)}
+.ci-svg text{font-family:var(--font-sans);fill:var(--t3)}
 .ci-aire.is-hausse{fill:var(--note-green);opacity:.14}
 .ci-aire.is-baisse{fill:var(--note-red);opacity:.14}
 .ci-trait{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
