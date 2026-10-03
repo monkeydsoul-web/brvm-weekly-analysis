@@ -1,0 +1,844 @@
+{
+  "SNTS": [
+    {
+      "date": "2026-05-18",
+      "price": 28850.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-20",
+      "price": 28900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-21",
+      "price": 28900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-22",
+      "price": 28500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-29",
+      "price": 28395.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-01",
+      "price": 28400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-02",
+      "price": 28300.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-03",
+      "price": 30000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-04",
+      "price": 29490.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-05",
+      "price": 28500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-08",
+      "price": 28500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-09",
+      "price": 28420.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-10",
+      "price": 28250.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-11",
+      "price": 28400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-19",
+      "price": 28150.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-22",
+      "price": 28450.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-02",
+      "price": 29485.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-03",
+      "price": 29500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-06",
+      "price": 29485.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-07",
+      "price": 29505.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-08",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-09",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-10",
+      "price": 30900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-13",
+      "price": 30900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-14",
+      "price": 31505.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-15",
+      "price": 32500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-16",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-17",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-20",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-21",
+      "price": 31500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-22",
+      "price": 31500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-23",
+      "price": 31800.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-24",
+      "price": 31495.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-27",
+      "price": 31010.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-28",
+      "price": 31005.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-29",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-30",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-31",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-03",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-04",
+      "price": 31400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-05",
+      "price": 30200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-06",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-07",
+      "price": 31000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-10",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-11",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-12",
+      "price": 32000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-13",
+      "price": 31995.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-14",
+      "price": 31900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-17",
+      "price": 31900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-18",
+      "price": 32500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-19",
+      "price": 34400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-20",
+      "price": 34400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-21",
+      "price": 36980.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-24",
+      "price": 36500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-25",
+      "price": 36500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-26",
+      "price": 34600.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-27",
+      "price": 36000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-28",
+      "price": 36700.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-31",
+      "price": 36600.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-01",
+      "price": 37000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-02",
+      "price": 37150.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-03",
+      "price": 38000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-04",
+      "price": 38500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-07",
+      "price": 38700.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-08",
+      "price": 39200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-09",
+      "price": 38800.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-10",
+      "price": 39005.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-11",
+      "price": 39275.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-14",
+      "price": 39240.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-15",
+      "price": 39245.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-16",
+      "price": 38800.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-17",
+      "price": 39250.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-18",
+      "price": 42190.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-21",
+      "price": 42000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-22",
+      "price": 41985.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-23",
+      "price": 41000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-24",
+      "price": 41890.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-25",
+      "price": 42500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-28",
+      "price": 43000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-29",
+      "price": 42995.0,
+      "source": "live",
+      "volume": 19815
+    },
+    {
+      "date": "2026-09-30",
+      "price": 45000.0,
+      "source": "live",
+      "volume": 22678
+    },
+    {
+      "date": "2026-10-01",
+      "price": 45000.0,
+      "source": "live",
+      "volume": 18702
+    },
+    {
+      "date": "2026-10-02",
+      "price": 45000.0,
+      "source": "live",
+      "volume": 36615
+    }
+  ],
+  "ORAC": [
+    {
+      "date": "2026-05-18",
+      "price": 15050.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-20",
+      "price": 15790.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-21",
+      "price": 15650.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-22",
+      "price": 15550.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-05-29",
+      "price": 16000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-01",
+      "price": 15950.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-02",
+      "price": 15705.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-03",
+      "price": 16200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-04",
+      "price": 16975.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-05",
+      "price": 16605.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-08",
+      "price": 16000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-09",
+      "price": 15950.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-10",
+      "price": 15900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-11",
+      "price": 15555.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-19",
+      "price": 16695.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-06-22",
+      "price": 16700.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-02",
+      "price": 16700.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-03",
+      "price": 16900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-06",
+      "price": 16900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-07",
+      "price": 16300.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-08",
+      "price": 16400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-09",
+      "price": 16395.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-10",
+      "price": 16495.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-13",
+      "price": 16000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-14",
+      "price": 16160.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-15",
+      "price": 15800.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-16",
+      "price": 16165.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-17",
+      "price": 16160.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-20",
+      "price": 16150.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-21",
+      "price": 16000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-22",
+      "price": 16005.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-23",
+      "price": 16300.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-24",
+      "price": 16725.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-27",
+      "price": 16725.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-28",
+      "price": 16725.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-29",
+      "price": 16750.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-30",
+      "price": 16760.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-07-31",
+      "price": 16995.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-03",
+      "price": 17000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-04",
+      "price": 17000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-05",
+      "price": 17175.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-06",
+      "price": 17175.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-07",
+      "price": 17175.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-10",
+      "price": 17000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-11",
+      "price": 17050.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-12",
+      "price": 17255.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-13",
+      "price": 18000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-14",
+      "price": 18000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-17",
+      "price": 18550.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-18",
+      "price": 19000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-19",
+      "price": 19510.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-20",
+      "price": 20205.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-21",
+      "price": 21015.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-24",
+      "price": 21200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-25",
+      "price": 21200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-26",
+      "price": 20795.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-27",
+      "price": 21200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-28",
+      "price": 21400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-08-31",
+      "price": 21005.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-01",
+      "price": 21500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-02",
+      "price": 21010.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-03",
+      "price": 21155.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-04",
+      "price": 21010.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-07",
+      "price": 21800.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-08",
+      "price": 21260.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-09",
+      "price": 21900.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-10",
+      "price": 22450.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-11",
+      "price": 22450.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-14",
+      "price": 22500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-15",
+      "price": 22500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-16",
+      "price": 22395.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-17",
+      "price": 22200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-18",
+      "price": 22200.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-21",
+      "price": 21000.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-22",
+      "price": 20700.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-23",
+      "price": 20400.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-24",
+      "price": 21450.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-25",
+      "price": 21295.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-28",
+      "price": 21500.0,
+      "source": "live"
+    },
+    {
+      "date": "2026-09-29",
+      "price": 21805.0,
+      "source": "live",
+      "volume": 5732
+    },
+    {
+      "date": "2026-09-30",
+      "price": 21500.0,
+      "source": "live",
+      "volume": 2465
+    },
+    {
+      "date": "2026-10-01",
+      "price": 21800.0,
+      "source": "live",
+      "volume": 2476
+    },
+    {
+      "date": "2026-10-02",
+      "price": 20605.0,
+      "source": "live",
+      "volume": 3193
+    }
+  ]
+}
