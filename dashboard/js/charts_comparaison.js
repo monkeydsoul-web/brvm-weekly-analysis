@@ -169,37 +169,101 @@ function brvmInstallerComparaison(api) {
     return Math.ceil(ctx.measureText(String(texte || "")).width);
   }
 
-  function attendrePrix() {
-    function pret() {
-      return window._priceHistory && Object.keys(window._priceHistory).length;
-    }
-    if (pret()) return Promise.resolve(window._priceHistory);
-    return new Promise(function (resolve) {
-      var essais = 0;
-      var t = setInterval(function () {
-        essais += 1;
-        if (pret()) {
-          clearInterval(t);
-          resolve(window._priceHistory);
-        } else if (essais >= 40) {
-          clearInterval(t);
-          fetch("/api/price-history").then(function (r) { return r.json(); }).then(function (d) {
-            if (d && typeof d === "object" && !d.error) window._priceHistory = d;
-            resolve(window._priceHistory || {});
-          }).catch(function () { resolve(window._priceHistory || {}); });
-        }
-      }, 100);
+  var DELAI_LECTURE_MS = 10000;
+  var promessePrix = null;
+  var promesseIndice = null;
+
+  function pretPrix() {
+    return window._priceHistory && Object.keys(window._priceHistory).length;
+  }
+
+  function lireJson(url, contexte) {
+    return new Promise(function (resolve, reject) {
+      var ctrl = (typeof AbortController === "function") ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, DELAI_LECTURE_MS);
+      var opts = ctrl ? { signal: ctrl.signal } : {};
+      fetch(url, opts).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }).then(function (data) {
+        clearTimeout(timer);
+        resolve(data);
+      }).catch(function (e) {
+        clearTimeout(timer);
+        console.error("[BRVM] " + contexte, e);
+        reject(e);
+      });
     });
+  }
+
+  function exigerObjet(data, contexte) {
+    if (!data || typeof data !== "object" || Array.isArray(data) || data.error) {
+      var e = new Error("réponse inutilisable");
+      console.error("[BRVM] " + contexte, e);
+      throw e;
+    }
+    return data;
+  }
+
+  function lirePrix() {
+    if (pretPrix()) return Promise.resolve(window._priceHistory);
+    if (promessePrix) return promessePrix;
+    promessePrix = lireJson("/api/price-history", "cours pour la comparaison").then(function (d) {
+      exigerObjet(d, "cours pour la comparaison");
+      window._priceHistory = d;
+      return d;
+    });
+    promessePrix.catch(function () { promessePrix = null; });
+    return promessePrix;
   }
 
   function historiqueComposite() {
     if (cacheIndice) return Promise.resolve(cacheIndice);
-    return fetch("/api/index-history?index=BRVM-COMPOSITE&range=1A").then(function (r) {
-      if (!r.ok) throw new Error("index");
-      return r.json();
-    }).then(function (data) {
-      cacheIndice = data || { points: [] };
+    if (promesseIndice) return promesseIndice;
+    promesseIndice = lireJson("/api/index-history?index=BRVM-COMPOSITE&range=1A", "indice BRVM-COMPOSITE").then(function (data) {
+      exigerObjet(data, "indice BRVM-COMPOSITE");
+      cacheIndice = data;
       return cacheIndice;
+    });
+    promesseIndice.catch(function () { promesseIndice = null; });
+    return promesseIndice;
+  }
+
+  function afficherPanneComparer(carte) {
+    carte.setAttribute("data-cmp-etat", "panne");
+    carte.innerHTML = '<div class="ct" id="cmp-courbes-titre">Comparer</div>'
+      + '<p class="cmp-message" role="status">Données indisponibles</p>'
+      + '<button type="button" class="ci-reessayer">Réessayer</button>';
+    carte.querySelector(".ci-reessayer").addEventListener("click", function () {
+      if (carte.getAttribute("data-cmp-etat") !== "panne") return;
+      carte.setAttribute("data-cmp-etat", "charge");
+      relancerComparer(carte);
+    });
+  }
+
+  function relancerComparer(carte) {
+    var etat = carte._cmp;
+    if (!etat) return;
+    var manquant = !etat.hist ? "prix" : (!etat.indice ? "indice" : "");
+    if (!manquant) {
+      carte.setAttribute("data-cmp-etat", "ok");
+      peindre(carte);
+      return;
+    }
+    var job = manquant === "prix" ? lirePrix() : historiqueComposite();
+    job.then(function (val) {
+      if (!carte.isConnected) return;
+      if (manquant === "prix") etat.hist = val;
+      else etat.indice = val;
+      if (etat.hist && etat.indice) {
+        carte.setAttribute("data-cmp-etat", "ok");
+        peindre(carte);
+      } else {
+        afficherPanneComparer(carte);
+      }
+    }, function () {
+      if (!carte.isConnected) return;
+      afficherPanneComparer(carte);
     });
   }
 
@@ -255,19 +319,21 @@ function brvmInstallerComparaison(api) {
     carte._cmp = { ticker: ticker, autres: [], note: "" };
     carte.innerHTML = '<div class="ct" id="cmp-courbes-titre">Comparer</div>'
       + '<p class="cmp-intro">Chargement des historiques…</p>';
-    Promise.all([attendrePrix(), historiqueComposite()]).then(function (res) {
+    Promise.all([
+      lirePrix().then(function (h) { return { ok: true, v: h }; }, function () { return { ok: false }; }),
+      historiqueComposite().then(function (d) { return { ok: true, v: d }; }, function () { return { ok: false }; })
+    ]).then(function (res) {
       if (n !== seq) return;
       var hote = document.getElementById("cmp-courbes");
       if (!hote || hote.getAttribute("data-ticker") !== ticker) return;
-      hote._cmp.hist = res[0];
-      hote._cmp.indice = res[1];
-      peindre(hote);
-    }).catch(function () {
-      if (n !== seq) return;
-      var hote = document.getElementById("cmp-courbes");
-      if (!hote) return;
-      hote.innerHTML = '<div class="ct">Comparer</div>'
-        + '<p class="cmp-message" role="status">L\'historique n\'a pas pu être lu. Aucune courbe n\'est tracée.</p>';
+      if (res[0].ok) hote._cmp.hist = res[0].v;
+      if (res[1].ok) hote._cmp.indice = res[1].v;
+      if (hote._cmp.hist && hote._cmp.indice) {
+        hote.setAttribute("data-cmp-etat", "ok");
+        peindre(hote);
+      } else {
+        afficherPanneComparer(hote);
+      }
     });
   }
 
