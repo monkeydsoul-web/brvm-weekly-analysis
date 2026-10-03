@@ -147,19 +147,60 @@ def get_price_targets() -> list:
     return targets
 
 # ── Export ─────────────────────────────────────────────────────────────────
+def _texte_valeur_api(valeur):
+    """Reprend le nombre du classement, sans le reformater ni le recalculer."""
+    if valeur is None or isinstance(valeur, bool):
+        return ""
+    if isinstance(valeur, float):
+        if valeur != valeur or valeur in (float("inf"), float("-inf")):
+            return ""
+        texte = ("%f" % valeur).rstrip("0").rstrip(".")
+        return texte or "0"
+    if isinstance(valeur, int):
+        return str(valeur)
+    return str(valeur)
+
+
+def _prix_cible_export(ligne):
+    """Vide si le classement marque déjà la cible comme douteuse."""
+    if not isinstance(ligne, dict):
+        return ""
+    if ligne.get("libelle_valeur") == "incertain":
+        return ""
+    return _texte_valeur_api(ligne.get("prix_cible"))
+
+
 def export_csv() -> str:
+    """Colonnes du bouton Classement, dans l'ordre de /api/live-ranking.
+
+    La note est ``note10``, pas l'ancienne note interne. Le prix cible
+    douteux reste dans le classement : il sort seulement de ce fichier.
+    """
     scores = _load_scores()
     buf = io.StringIO()
-    if not scores: return ""
-    fields = ["ticker","name","sector","country","price","change_pct","div_yield",
-              "div_per_share","pe_ref","pb_ref","roe","eps_est",
-              "composite_adj","score_graham","score_dcf","score_ddm","score_epv",
-              "score_buffett","score_rev_dcf","score_relatif","score_technique",
-              "ex_div_date","pay_div_date"]
-    w = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore")
-    w.writeheader()
-    for s in sorted(scores, key=cle_tri_note, reverse=True):
-        w.writerow(s)
+    fields = [
+        "ticker", "nom", "secteur", "cours", "variation",
+        "note /10", "conseil", "prix cible", "rendement",
+    ]
+    writer = csv.DictWriter(buf, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for ligne in scores:
+        if not isinstance(ligne, dict):
+            continue
+        conseil = ligne.get("conseil_libelle")
+        if conseil not in ("Intéressant", "À surveiller", "Prudence"):
+            conseil = ""
+        writer.writerow({
+            "ticker": ligne.get("ticker") or "",
+            "nom": ligne.get("name") or "",
+            "secteur": ligne.get("sector") or "",
+            "cours": _texte_valeur_api(ligne.get("price")),
+            "variation": _texte_valeur_api(ligne.get("change_pct")),
+            "note /10": _texte_valeur_api(ligne.get("note10")),
+            "conseil": conseil,
+            "prix cible": _prix_cible_export(ligne),
+            "rendement": _texte_valeur_api(ligne.get("div_yield")),
+        })
     return buf.getvalue()
 
 # ── AI Chat ────────────────────────────────────────────────────────────────
