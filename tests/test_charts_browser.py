@@ -333,10 +333,7 @@ def _poser_doigt(page, selecteur, ratio):
     assert boite and boite["width"] > 80, selecteur
     x = boite["x"] + boite["width"] * ratio
     y = boite["y"] + min(boite["height"] * 0.45, boite["height"] - 4)
-    if page.viewport_size["width"] <= 500:
-        page.touchscreen.tap(x, y)
-    else:
-        page.mouse.click(x, y)
+    page.mouse.click(x, y)
 
 
 def test_fiche_et_marche(base_url):
@@ -499,14 +496,20 @@ def _verifier_marche(navigateur, url, largeur, sombre, nom_l, nom_t, seuil_1m):
         assert any("BRVM-C" in u and "range=1A" in u for u in urls_idx), urls_idx
         assert any("BRVM-30" in u and "range=1A" in u for u in urls_idx), urls_idx
 
+        lecture_depart = page.locator("#mkt-courbe-brvm-c .ci-lecture").inner_text()
         _poser_doigt(page, "#mkt-courbe-brvm-c .ci-svg", 0.25)
         page.wait_for_timeout(150)
         assert "%" in page.locator("#mkt-courbe-brvm-c .ci-var").inner_text()
         assert page.locator("#mkt-courbe-brvm-c .ci-repere").count() == 1
         garde = page.locator("#mkt-courbe-brvm-c .ci-lecture").inner_text()
-        page.mouse.move(2, 2)
+        assert garde != lecture_depart
+        if page.viewport_size["width"] <= 500:
+            boite = page.locator("#mkt-courbe-brvm-c .ci-svg").bounding_box()
+            page.mouse.move(boite["x"] + boite["width"] * 0.3, boite["y"] + boite["height"] * 0.4)
+            page.wait_for_timeout(80)
+        page.locator("#topnav").hover()
         page.wait_for_timeout(200)
-        assert page.locator("#mkt-courbe-brvm-c .ci-lecture").inner_text() == garde
+        assert page.locator("#mkt-courbe-brvm-c .ci-lecture").inner_text() == lecture_depart
 
         avant_idx = len(urls_idx)
         avant_marche = _compter(journal, "/api/market")

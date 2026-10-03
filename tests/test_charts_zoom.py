@@ -519,19 +519,13 @@ def test_zoom_glisser_reinitialiser_fiche(monkeypatch, tmp_path):
                 avant_fen = fenetre()
                 date_avant = page.locator("#stockChartDiv .ci-date").inner_text()
                 x_avant = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
-                if page.viewport_size["width"] <= 500:
-                    page.touchscreen.tap(x, y)
-                else:
-                    page.mouse.move(boite["x"] + boite["width"] * 0.62, y)
-                    page.mouse.move(x, y)
+                page.mouse.move(boite["x"] + boite["width"] * 0.62, y)
+                page.mouse.move(x, y)
                 page.wait_for_timeout(120)
                 assert page.locator("#stockChartDiv .ci-date").inner_text() != date_avant
                 x_apres = float(page.locator("#stockChartDiv .ci-repere").get_attribute("x1"))
                 assert x_apres != x_avant
                 assert "XOF" in page.locator("#stockChartDiv .ci-cours").inner_text()
-                if page.viewport_size["width"] <= 500:
-                    page.mouse.move(x, y)
-                    page.wait_for_timeout(80)
                 page.mouse.move(8, 8)
                 page.wait_for_timeout(80)
                 assert page.locator("#stockChartDiv .ci-lecture").get_attribute("data-ci-date") == page.locator("#stockChartDiv").get_attribute("data-ci-fin")

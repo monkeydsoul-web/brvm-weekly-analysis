@@ -285,11 +285,8 @@ function lierPointeur(hote) {
   });
   hote.addEventListener("pointerup", function() { doigt = false; });
   hote.addEventListener("pointercancel", function() { doigt = false; });
-  hote.addEventListener("pointerleave", function(evt) {
+  hote.addEventListener("pointerleave", function() {
     hote._ciSurCourbe = false;
-    var souris = !evt.pointerType || evt.pointerType === "mouse";
-    if (!(hote.id === "stockChartDiv" && souris) && !hote._ciZoomSousPointeur) return;
-    hote._ciZoomSousPointeur = false;
     var visible = hote._ciVisible;
     if (!visible || visible.length < 2) return;
     hote._ciDate = null;
@@ -319,11 +316,7 @@ function lierZoom(hote) {
       visible = serieZoom(hote._ciComplet, detail.debut, detail.fin);
     }
     if (visible.length < 2) return;
-    if (hote._ciSurCourbe) hote._ciZoomSousPointeur = true;
-    else {
-      hote._ciDate = null;
-      hote._ciZoomSousPointeur = false;
-    }
+    if (!hote._ciSurCourbe) hote._ciDate = null;
     peindreVisible(hote, visible);
   });
 }
