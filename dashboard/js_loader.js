@@ -22,6 +22,7 @@
     "live_score.js": "page-stock",
     "ranking.js": "rank-table-wrap",
     "stock_chart.js": "page-stock",
+    "js/charts_zoom.js": "page-stock",
     "badges.js": "rank-table-wrap",
     "data_confidence.js": "rank-table-wrap",
     "compare.js": "page-rank",
