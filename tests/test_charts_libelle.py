@@ -5,7 +5,8 @@ import os
 import shutil
 import socket
 import threading
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
+from urllib.parse import parse_qs, urlparse
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,11 @@ _REEL_CONNECT_EX = socket.socket.connect_ex
 _REEL_CREATE = socket.create_connection
 _REEL_DNS = socket.getaddrinfo
 _FIXTURE = Path(__file__).resolve().parent / "fixtures" / "price_history_snts_orac.json"
+_INDICE = Path(__file__).resolve().parent / "fixtures" / "index_history_brvm_c_1a.json"
 _SEP = "\u00b7"
+# Réponse figée de
+# https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A
+_COMPOSITE = "2 octobre 2026 %s 546,78 %s -0,41 %%" % (_SEP, _SEP)
 
 # Libellés affichés (espaces insécables normalisés) et fenêtre visible.
 _DERNIER = {
@@ -160,19 +165,9 @@ def _caches(historique):
         "stats": {"total": 2, "with_price": 2, "sources": {"fixture": 2}},
     })
     _ecrire("macro_cache.json", {})
-    seances = []
-    valeur = 250.0
-    jour = date(2026, 5, 20)
-    while jour <= date(2026, 10, 2):
-        if jour.weekday() < 5:
-            seances.append({
-                "date": jour.isoformat(),
-                "indices": {"BRVM-C": round(valeur, 2), "BRVM-30": round(valeur - 40, 2)},
-                "societes": [],
-            })
-            valeur += 0.25
-        jour += timedelta(days=1)
-    _ecrire("index_history.json", {"seances": seances})
+    # L'historique local des indices reste vide : la courbe Composite est servie
+    # par la route Playwright, avec le corps de production, pas par ce fichier.
+    _ecrire("index_history.json", {"seances": []})
 
 
 def _espaces(texte):
@@ -191,6 +186,13 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
     historique = _historique_reel()
     assert len([p for p in historique["SNTS"] if p["date"] >= "2026-05-19"]) == 82
     corps = json.dumps(historique).encode("utf-8")
+    corps_indice = _INDICE.read_bytes()
+    indice = json.loads(corps_indice)
+    points_indice = indice["points"]
+    dates_indice = [p[0] for p in points_indice]
+    assert indice["index"] == "BRVM-C" and indice["range"] == "1A"
+    assert len(points_indice) == len(set(dates_indice))
+    assert all(datetime.strptime(d, "%Y-%m-%d").weekday() < 5 for d in dates_indice)
     _caches(historique)
     import market_data
     market_data._memoire = None
@@ -204,6 +206,7 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
     erreurs = []
     rapport = []
     historiques_servis = []
+    indices_servis = []
     try:
         with sync_playwright() as pw:
             navigateur = pw.chromium.launch(
@@ -232,6 +235,18 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                         body=corps,
                     )
                     return
+                if chemin.endswith("/api/index-history"):
+                    q = parse_qs(urlparse(route.request.url).query)
+                    code = (q.get("index") or q.get("indice") or [""])[0]
+                    plage = (q.get("range") or q.get("periode") or [""])[0]
+                    if code in ("BRVM-C", "BRVM-COMPOSITE") and plage == "1A":
+                        indices_servis.append(route.request.url)
+                        route.fulfill(
+                            status=200,
+                            content_type="application/json",
+                            body=corps_indice,
+                        )
+                        return
                 route.continue_()
 
             page.route("**/*", route)
@@ -484,11 +499,6 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     noter(ticker, largeur, "avec-survol", "Tout", tout)
                     capturer(ticker, largeur, "avec-survol", "Tout")
 
-            page.set_viewport_size({"width": 1280, "height": 800})
-            page.goto(base + "/#marche", wait_until="load", timeout=20000)
-            page.locator("#mkt-courbe-brvm-c .ci-date").wait_for(state="visible", timeout=15000)
-            page.locator("#mkt-courbe-brvm-c .ci-svg").scroll_into_view_if_needed()
-
             def lire_indice():
                 return page.evaluate(
                     """() => {
@@ -512,47 +522,59 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
                     }"""
                 )
 
-            charge_idx = lire_indice()
-            assert charge_idx["iso"] == charge_idx["fin"] == charge_idx["dernierIso"]
-            assert charge_idx["n"] >= 2
-            milieu = page.evaluate(
-                """() => {
-                  var el = document.getElementById('mkt-courbe-brvm-c');
-                  var vis = el._ciVisible;
-                  var idx = Math.round((vis.length - 1) * 0.4);
-                  if (idx >= vis.length - 1) idx = vis.length - 2;
-                  var geom = el._ciGeom;
-                  var rect = el.querySelector('.ci-svg').getBoundingClientRect();
-                  var xView = geom.padL + (idx / (vis.length - 1)) * geom.CW;
-                  var yView = geom.padT + geom.CH * 0.55;
-                  return {
-                    date: vis[idx].date,
-                    x: rect.left + (xView / geom.W) * rect.width,
-                    y: rect.top + (yView / geom.H) * rect.height
-                  };
-                }"""
-            )
-            page.mouse.move(milieu["x"], milieu["y"])
-            page.wait_for_function(
-                "(iso) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === iso",
-                arg=milieu["date"],
-                timeout=5000,
-            )
-            assert lire_indice()["iso"] != charge_idx["fin"]
-            page.locator("#topnav").hover()
-            page.wait_for_function(
-                "(fin) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === fin",
-                arg=charge_idx["fin"],
-                timeout=5000,
-            )
-            sortie_idx = lire_indice()
-            assert sortie_idx["iso"] == sortie_idx["fin"] == charge_idx["dernierIso"]
-            assert sortie_idx["valeur"] == charge_idx["dernierValeur"]
-            assert libelle(sortie_idx) == libelle(charge_idx)
-            noter("BRVM-C", 1280, "marche", "sortie", sortie_idx)
-            page.locator("#mkt-courbe-brvm-c").screenshot(
-                path=str(tmp_path / "libelle-BRVM-C-1280-marche-sortie.png")
-            )
+            def prouver_composite(largeur, hauteur):
+                page.set_viewport_size({"width": largeur, "height": hauteur})
+                page.goto(base + "/#marche", wait_until="load", timeout=20000)
+                page.locator("#mkt-courbe-brvm-c .ci-date").wait_for(state="visible", timeout=15000)
+                page.locator("#mkt-courbe-brvm-c .ci-svg").scroll_into_view_if_needed()
+                charge_idx = lire_indice()
+                assert charge_idx["n"] == len(points_indice), charge_idx
+                assert charge_idx["debut"] == points_indice[0][0], charge_idx
+                assert charge_idx["fin"] == points_indice[-1][0], charge_idx
+                assert charge_idx["dernierValeur"] == points_indice[-1][1], charge_idx
+                assert charge_idx["iso"] == charge_idx["fin"] == charge_idx["dernierIso"]
+                milieu = page.evaluate(
+                    """() => {
+                      var el = document.getElementById('mkt-courbe-brvm-c');
+                      var vis = el._ciVisible;
+                      var idx = Math.round((vis.length - 1) * 0.4);
+                      if (idx >= vis.length - 1) idx = vis.length - 2;
+                      var geom = el._ciGeom;
+                      var rect = el.querySelector('.ci-svg').getBoundingClientRect();
+                      var xView = geom.padL + (idx / (vis.length - 1)) * geom.CW;
+                      var yView = geom.padT + geom.CH * 0.55;
+                      return {
+                        date: vis[idx].date,
+                        x: rect.left + (xView / geom.W) * rect.width,
+                        y: rect.top + (yView / geom.H) * rect.height
+                      };
+                    }"""
+                )
+                page.mouse.move(milieu["x"], milieu["y"])
+                page.wait_for_function(
+                    "(iso) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === iso",
+                    arg=milieu["date"],
+                    timeout=5000,
+                )
+                assert lire_indice()["iso"] != charge_idx["fin"]
+                page.locator("#topnav").hover()
+                page.wait_for_function(
+                    "(fin) => document.querySelector('#mkt-courbe-brvm-c .ci-lecture').getAttribute('data-ci-date') === fin",
+                    arg=charge_idx["fin"],
+                    timeout=5000,
+                )
+                sortie_idx = lire_indice()
+                assert sortie_idx["iso"] == sortie_idx["fin"] == charge_idx["dernierIso"]
+                assert sortie_idx["valeur"] == charge_idx["dernierValeur"]
+                assert sortie_idx["n"] == len(points_indice)
+                assert libelle(sortie_idx) == _COMPOSITE, libelle(sortie_idx)
+                noter("BRVM-C", largeur, "marche", "sortie", sortie_idx)
+                page.locator("#mkt-courbe-brvm-c").screenshot(
+                    path=str(tmp_path / ("libelle-BRVM-C-%d-marche-sortie.png" % largeur))
+                )
+
+            prouver_composite(1280, 800)
+            prouver_composite(390, 844)
 
             navigateur.close()
     finally:
@@ -560,11 +582,30 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
 
     assert not erreurs, erreurs[:8]
     assert len(historiques_servis) >= 8, historiques_servis
+    assert len(indices_servis) >= 2, indices_servis
+    assert all("index=BRVM-C" in u and "range=1A" in u for u in indices_servis)
     preuve = {
         "lieu": "local",
-        "donnees": "production /api/price-history, servies en local sur le code de la branche",
+        "donnees": (
+            "SNTS et ORAC : production /api/price-history, servie en local. "
+            "BRVM-C : corps exact de "
+            "https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A "
+            ", servi par la route Playwright sur le code de la branche. "
+            "Pas le site en direct, pas la série synthétique précédente."
+        ),
         "erreurs_console": len(erreurs),
         "series": series,
+        "indice": {
+            "url": "https://brvm-weekly-analysis.onrender.com/api/index-history?index=BRVM-C&range=1A",
+            "n": len(points_indice),
+            "premiere": points_indice[0][0],
+            "derniere": points_indice[-1][0],
+            "derniere_valeur": points_indice[-1][1],
+            "doublons": len(dates_indice) - len(set(dates_indice)),
+            "weekends": sum(
+                1 for d in dates_indice if datetime.strptime(d, "%Y-%m-%d").weekday() >= 5
+            ),
+        },
         "etapes": rapport,
     }
     texte = json.dumps(preuve, ensure_ascii=False, indent=2)
@@ -577,7 +618,7 @@ def test_libelle_dernier_point_fenetre(monkeypatch, tmp_path):
             ligne["ticker"], ligne["largeur"], ligne["sequence"], ligne["etape"],
         ))
         assert fichier.is_file() and fichier.stat().st_size > 1000
-    assert len(rapport) == 2 * 2 * 2 * 5 + 1
+    assert len(rapport) == 2 * 2 * 2 * 5 + 2
     copie = Path("/opt/cursor/artifacts/charts-fix2")
     copie.mkdir(parents=True, exist_ok=True)
 
