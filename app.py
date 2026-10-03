@@ -673,10 +673,38 @@ def api_commodities():
     return jsonify(prices)
 
 
+def _semaine_iso_affichee(date_iso):
+    """Semaine ISO du champ date déjà écrit. Ne lit aucun fichier."""
+    if not isinstance(date_iso, str) or not date_iso.strip():
+        return None
+    try:
+        jour = datetime.fromisoformat(date_iso.strip()[:10]).date()
+    except ValueError:
+        return None
+    iso = jour.isocalendar()
+    return "Semaine %02d/%d" % (iso.week, iso.year)
+
+
+def _macro_semaine_iso(macro):
+    """Remplace le numéro ``%W`` par la semaine ISO, sur une copie.
+
+    Le fichier macro_cache.json garde la semaine écrite par le job.
+    La clé ``date`` n'est pas modifiée.
+    """
+    if not isinstance(macro, dict) or "week" not in macro:
+        return macro
+    semaine = _semaine_iso_affichee(macro.get("date"))
+    if not semaine or macro.get("week") == semaine:
+        return macro
+    sortie = dict(macro)
+    sortie["week"] = semaine
+    return sortie
+
+
 @app.route("/api/macro")
 def api_macro():
     macro = load_macro_cache()
-    return jsonify(macro)
+    return jsonify(_macro_semaine_iso(macro))
 
 
 @app.route("/api/history/<ticker>")
