@@ -1750,13 +1750,37 @@ def api_backtest():
 
 @app.route("/api/sector-indices")
 def api_sector_indices():
+    """Indices (principaux et sectoriels) de la meme source et du meme cache que /api/market.
+
+    SECTIDX-1 : plus de lecture de sector_indices.json. Valeurs, ytd et session_date
+    sont ceux de /api/market, sans second calcul ; pas de champ « sector ».
+    Source absente ou illisible : 503. ?force=true inchange (mission FORCE-1).
+    """
+    if request.args.get("force", "false").lower() == "true":
+        try:
+            from brvm_data_scraper import scrape_sector_indices
+            return jsonify(scrape_sector_indices())
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     try:
-        from brvm_data_scraper import get_sector_indices, scrape_sector_indices
-        force = request.args.get("force","false").lower() == "true"
-        data = scrape_sector_indices() if force else get_sector_indices()
-        return jsonify(data)
+        from market_data import appliquer_ytd_reference, get_market_data
+        data = appliquer_ytd_reference(get_market_data())
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.warning("SECTIDX-1: source marche illisible (%s), 503", e)
+        return jsonify({"error": "indices sectoriels indisponibles : source marche illisible"}), 503
+    if not isinstance(data, dict) or not (data.get("indices") or data.get("sector_indices")):
+        logger.warning("SECTIDX-1: source marche absente ou vide, 503")
+        return jsonify({"error": "indices sectoriels indisponibles : source marche absente"}), 503
+    indices = {}
+    for cle in ("indices", "sector_indices"):
+        for item in data.get(cle) or []:
+            if isinstance(item, dict) and item.get("name"):
+                indices[item["name"]] = {k: v for k, v in item.items() if k != "name"}
+    return jsonify({
+        "indices": indices,
+        "updated_at": data.get("updated_at"),
+        "session_date": data.get("session_date"),
+    })
 
 @app.route("/api/dividends")
 def api_dividends():
