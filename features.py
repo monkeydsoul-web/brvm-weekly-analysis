@@ -10,7 +10,7 @@ BRVM Features — Modules additionnels
 Portfolio · Alertes prix · Score personnalisé · Export · Chat IA · Prévisions
 """
 
-import os, json, logging, csv, io
+import os, json, logging, csv, io, math, re
 from datetime import datetime
 from flask import jsonify, request, Response
 
@@ -170,11 +170,61 @@ def _prix_cible_export(ligne):
     return _texte_valeur_api(ligne.get("prix_cible"))
 
 
+_CONSEILS_OFFICIELS = ("Intéressant", "À surveiller", "Prudence")
+
+
+def _note_v10fmt(ligne):
+    """Note /10 sur une décimale. Seul arrondi : v10fmt (composite / 8)."""
+    if not isinstance(ligne, dict):
+        return ""
+    brut = ligne.get("composite_adj")
+    if brut is None or brut == "":
+        brut = ligne.get("score")
+    from verdict import note10
+    note = note10(brut)
+    if note is None:
+        return ""
+    dixiemes = int(math.floor(note * 10.0 + 0.5))
+    return "%d.%d" % (dixiemes // 10, abs(dixiemes) % 10)
+
+
+def _conseil_comme_classement(ligne):
+    """Même libellé que le Classement, sans la pastille.
+
+    Société cotée : ``conseil_libelle``. Cotation suspendue : la phrase
+    affichée par ``conseilAffiche`` (``dashboard/js/core.js``).
+    """
+    if not isinstance(ligne, dict):
+        return "—"
+    if ligne.get("statut") == "suspendu":
+        depuis = str(ligne.get("statut_depuis") or "")
+        trouve = re.match(r"^(\d{4})-(\d{2})-(\d{2})", depuis)
+        if trouve:
+            return "Cotation suspendue depuis le %s/%s/%s" % (
+                trouve.group(3), trouve.group(2), trouve.group(1))
+        return "Cotation suspendue"
+    libelle = ligne.get("conseil_libelle")
+    jeton = ligne.get("conseil")
+    if libelle not in _CONSEILS_OFFICIELS:
+        if jeton in ("acheter", "Intéressant"):
+            libelle = "Intéressant"
+        elif jeton in ("attendre", "À surveiller"):
+            libelle = "À surveiller"
+        elif jeton in ("eviter", "Prudence"):
+            libelle = "Prudence"
+        else:
+            libelle = ""
+    if libelle not in _CONSEILS_OFFICIELS:
+        return "—"
+    return libelle
+
+
 def export_csv() -> str:
     """Colonnes du bouton Classement, dans l'ordre de /api/live-ranking.
 
-    La note est ``note10``, pas l'ancienne note interne. Le prix cible
-    douteux reste dans le classement : il sort seulement de ce fichier.
+    La note suit v10fmt. Le conseil est le libellé du Classement.
+    Le prix cible douteux reste dans le classement : il sort seulement
+    de ce fichier. Le fichier ``live_ranking.json`` n'est pas réécrit.
     """
     scores = _load_scores()
     buf = io.StringIO()
@@ -187,17 +237,14 @@ def export_csv() -> str:
     for ligne in scores:
         if not isinstance(ligne, dict):
             continue
-        conseil = ligne.get("conseil_libelle")
-        if conseil not in ("Intéressant", "À surveiller", "Prudence"):
-            conseil = ""
         writer.writerow({
             "ticker": ligne.get("ticker") or "",
             "nom": ligne.get("name") or "",
             "secteur": ligne.get("sector") or "",
             "cours": _texte_valeur_api(ligne.get("price")),
             "variation": _texte_valeur_api(ligne.get("change_pct")),
-            "note /10": _texte_valeur_api(ligne.get("note10")),
-            "conseil": conseil,
+            "note /10": _note_v10fmt(ligne),
+            "conseil": _conseil_comme_classement(ligne),
             "prix cible": _prix_cible_export(ligne),
             "rendement": _texte_valeur_api(ligne.get("div_yield")),
         })
