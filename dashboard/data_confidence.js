@@ -13,7 +13,7 @@ function _divConf(sc) {
  * Badge compact de confiance dividende.
  * Retourne une string HTML (<span>) à insérer inline.
  * @param {object} sc   - entrée scores du ticker
- * @param {object} opts - { short: bool } — court = juste l'icône, long = icône+texte
+ * @param {object} opts - { short: bool } — court = icône + court libellé visible, long = icône + texte
  */
 function getDivConfidenceBadge(sc, opts) {
   if (!sc) return '';
@@ -40,13 +40,13 @@ function getDivConfidenceBadge(sc, opts) {
   } else if (conf === 'moyenne') {
     icon  = '~';
     color = 'var(--amber)';
-    label = opts.short ? '' : ' À vérifier';
-    title = `Source unique ou divergence modérée · ${src}${ecart ? ' · écart BOC/PDF ' + ecart : ''}`;
+    label = opts.short ? ' une source' : ' À vérifier';
+    title = `Source unique ou divergence modérée · ${src}${ecart ? ' · écart BOC/PDF ' + String(ecart).replace('.', ',') : ''}`;
   } else if (conf === 'faible') {
     icon  = '⚠';
     color = '#f97316';
-    label = opts.short ? '' : ' À vérifier';
-    title = `Sources divergentes (>${(sc.div_ecart_boc_pdf || 30).toFixed(0)}% d'écart) · BOC retenu · ${src}`;
+    label = opts.short ? ' à recouper' : ' À vérifier';
+    title = `Sources divergentes (>${String((sc.div_ecart_boc_pdf || 30).toFixed(0)).replace('.', ',')}% d'écart) · BOC retenu · ${src}`;
   } else {
     icon  = '?';
     color = 'var(--t3)';
@@ -76,10 +76,10 @@ function getDivYieldHtml(sc, opts) {
   // Valeur affichée : pour l'exceptionnel, on montre le brut barré + 🔶, pas le 0%
   let yText;
   if (flag === 'exceptionnel_non_recurrent' && excV > 0) {
-    const excYield = sc.price > 0 ? (excV / sc.price * 100).toFixed(1) : '?';
+    const excYield = sc.price > 0 ? (excV / sc.price * 100).toFixed(1).replace('.', ',') : '?';
     yText = `<span style="text-decoration:line-through;color:var(--t3)">${excYield}%</span>`;
   } else if (dy > 0) {
-    yText = dy.toFixed(1) + '%';
+    yText = dy.toFixed(1).replace('.', ',') + '%';
   } else {
     yText = opts.zeroLabel || '—';
   }

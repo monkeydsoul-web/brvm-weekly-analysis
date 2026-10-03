@@ -83,9 +83,9 @@ function _renderScreenerTable() {
     const sc10 = (typeof note10txt==='function') ? note10txt(x) : n10.toFixed(1).replace('.',',');
     const scC = (typeof couleurPrincipale==='function') ? couleurPrincipale(x) : couleurNote(n10);
     const scBarW = Math.round(Math.min(10, Math.max(0, n10)) / 10 * 100);
-    const pe  = x.pe_ref ? x.pe_ref.toFixed(1) + '×' : '—';
-    const pb  = x.pb_ref ? x.pb_ref.toFixed(2) + '×' : '—';
-    const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1) + '%' : '—';
+    const pe  = x.pe_ref ? x.pe_ref.toFixed(1).replace('.', ',') + '×' : '—';
+    const pb  = x.pb_ref ? x.pb_ref.toFixed(2).replace('.', ',') + '×' : '—';
+    const dy  = (x.div_yield || 0) > 0 ? x.div_yield.toFixed(1).replace('.', ',') + '%' : '—';
     const dyC = (x.div_yield || 0) > 0 && typeof couleurDividende === 'function' ? couleurDividende(x.div_yield) : 'var(--t2)';
     const chg = (typeof variationJour === 'function') ? variationJour(x.ticker).pct : null;
     const chgC = chg != null ? (chg > 0 ? 'var(--green)' : chg < 0 ? 'var(--red)' : 'var(--t2)') : 'var(--t2)';

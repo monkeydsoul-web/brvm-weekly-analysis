@@ -364,11 +364,11 @@
   <div class="card" style="padding:0;overflow-x:auto" id="rank-table-wrap">
     <table><thead><tr>
       <th>#</th><th>⭐</th><th>Ticker</th><th>Société</th>
-      <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à gauche">Prix</th>
+      <th class="tt" data-tt="Cours de clôture officiel BOC BRVM · Basculez XOF / EUR / USD en haut à droite">Prix</th>
       <th class="tt" data-tt="Évolution du cours sur 30 jours · 💡 Tendance graphique des prix réels BOC">1 mois</th>
       <th class="tt" id="rank-col-var" data-tt="Variation de la séance publiée. Si la date n'est pas aujourd'hui, ou si aucun échange n'a eu lieu, la séance est datée.">+/- aujourd'hui</th>
-      <th class="tt col-pe" data-tt="Prix divisé par bénéfice · &lt; 10 = bon marché · &gt; 25 = cher">P/E 📖</th>
-      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · 💡 Revenu passif direct pour l'actionnaire">Dividende/an 💰</th>
+      <th class="tt col-pe" data-tt="Prix divisé par bénéfice · en dessous de 10, le cours est plutôt bon marché · au-dessus de 25, il est cher">P/E 📖</th>
+      <th class="tt" data-tt="Dividende annuel ÷ cours actuel · vert à partir de 6 %, orange à partir de 3 %">Dividende/an 💰</th>
       <th class="tt" data-tt="Conseil lié à la note sur 10 · ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Conseil</th>
       <th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th>
       <th class="adv-col expert-only" data-tip="Graham /10 — sous-évaluation + solidité financière (Graham)">G</th>
@@ -383,6 +383,7 @@
     <tbody id="rankBody"></tbody></table>
   </div>
   <div id="rank-cards"></div>
+  <p class="aide-legende" id="rank-aide-legende">Prix : cours de clôture. La devise (francs CFA, euro ou dollar) se change avec les boutons en haut à droite. 1 mois : tendance des 30 derniers jours. P/E : cours divisé par le bénéfice ; en dessous de 10, le cours est plutôt bon marché. Dividende : vert à partir de 6 %, orange à partir de 3 %.</p>
   <div id="top3-podium" hidden></div>
 </div>
 
@@ -415,6 +416,7 @@
     <div class="card" style="padding:0;overflow-x:auto">
       <table><thead><tr><th>Ticker</th><th>Société</th><th>Prix actuel</th><th data-tip="Moyenne Graham, EPV et P/B · le même chiffre sur toutes les pages">Prix juste estimé</th><th data-tip="Écart entre le cours et ce prix cible · le libellé de la dernière colonne lit ce même écart">Opportunité</th><th data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">Note /10</th><th data-tip="Notation Bloomfield / GCR · note de crédit financière indépendante">Notation</th><th data-tip="Lit l'écart de la colonne Opportunité · plus de +30 % Forte décote · de +10 % à +30 % Décote modérée · de −10 % à +10 % Proche du prix cible · en dessous de −10 % Au-dessus du prix cible">Avis</th></tr></thead>
       <tbody id="targetsTable"></tbody></table></div>
+    <p class="aide-legende" id="cibles-aide-legende">~ une source : le dividende ne vient que d'une source. ⚠ à recouper : les sources ne donnent pas le même chiffre. « Cible à vérifier » : le prix cible vaut moins du tiers du cours, ou plus de 3 fois le cours. Le prix reste affiché. Il ne change ni la note ni le conseil.</p>
   </div>
   <div class="tab-content" id="valuation-tab-perf">
     <details style="margin:0 0 10px;background:var(--bg-elevated);border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:0">
@@ -904,9 +906,9 @@
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Score min /10</label>
         <input id="sc-score" type="number" placeholder="ex: 6" min="0" max="10" step="0.5" oninput="runScreener()"
-          title="Score minimum /10 · 💡 ≥ 7 = signal fort, ≥ 5 = correct"
+          title="Score minimum /10 · ≥ 7,5 = signal fort, ≥ 5 = correct"
           style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
-        <div class="help-text">≥ 7 = signal fort · ≥ 5 = correct</div>
+        <div class="help-text">≥ 7,5 = signal fort · ≥ 5 = correct</div>
       </div>
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">P/E max</label>
@@ -918,9 +920,9 @@
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Dividende% min</label>
         <input id="sc-div" type="number" placeholder="ex: 5" min="0" oninput="runScreener()"
-          title="Rendement dividende minimum en % · 💡 ≥ 5% = bon revenu passif annuel"
+          title="Rendement dividende minimum en % · vert à partir de 6 %, orange à partir de 3 %"
           style="width:100%;padding:7px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;box-sizing:border-box">
-        <div class="help-text">Revenu passif · ≥ 5% = excellent</div>
+        <div class="help-text">Vert à partir de 6 % · orange à partir de 3 %</div>
       </div>
       <div>
         <label style="font-size:10px;color:var(--t2);display:block;margin-bottom:4px">Secteur</label>
@@ -930,6 +932,7 @@
         </select>
       </div>
     </div>
+    <p class="aide-legende" id="screener-aide-legende">Note : verte à partir de 7,5, orange à partir de 5. Rendement : vert à partir de 6 %, orange à partir de 3 %.</p>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div id="sc-count"><span style="font-size:15px;font-weight:700;color:var(--accent)">—</span> <span style="font-size:12px;color:var(--text-2)">sociétés correspondent à vos critères</span></div>
       <div style="display:flex;gap:8px;align-items:center">
