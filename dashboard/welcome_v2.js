@@ -189,10 +189,18 @@ function _ecartPoints(item) {
   return courant - veille;
 }
 
+// ytd des indices : fraction renvoyée par /api/market
+// (cours / clôture du 31/12/2025 − 1). L'affichage multiplie par 100 une seule fois.
 function _texteYtdIndice(ratio) {
   var n = _nombreAccueil(ratio);
   if (n == null) return '—';
   return _avecSigne(n * 100, 2) + '\u00a0%';
+}
+
+function _phraseDepuisJanvier(ratio) {
+  var valeur = _texteYtdIndice(ratio);
+  if (valeur === '—') return 'depuis\u00a0le\u00a01er\u00a0janvier\u00a0:\u00a0—';
+  return 'depuis\u00a0le\u00a01er\u00a0janvier\u00a0:\u00a0' + valeur;
 }
 
 function _compositeMarche(d) {
@@ -217,8 +225,7 @@ function _ligneSeanceIndice(item) {
   var ytd = _nombreAccueil(item.ytd);
   if (pts == null && ytd == null) return '—';
   var gauche = pts == null ? '— pts sur la séance' : (_avecSigne(pts, 2) + ' pts sur la séance');
-  var droite = ytd == null ? 'YTD —' : ('YTD ' + _texteYtdIndice(ytd));
-  return gauche + ' · ' + droite;
+  return gauche + ' · ' + _phraseDepuisJanvier(ytd);
 }
 
 function _pointsHistorique(d) {
