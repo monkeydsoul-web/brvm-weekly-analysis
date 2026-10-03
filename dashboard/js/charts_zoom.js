@@ -249,12 +249,47 @@
     return cadre;
   }
 
+  // innerHTML coupe onmousemove au premier " des dates : on réécrit
+  // l'appel à chartHover / chartLeave pour que le relais puisse l'exécuter.
+  function retablirSurvol(svg, racine) {
+    var etat = racine && racine._brvmZoom;
+    var noeud = svg.querySelector('[id$="_price"]');
+    if (!etat || !noeud || typeof window.chartHover !== 'function') return;
+    var id = noeud.id.slice(0, -'_price'.length);
+    var labels = etat.labels.slice(etat.debut, etat.fin + 1);
+    var prices = etat.prices.slice(etat.debut, etat.fin + 1);
+    if (prices.length < 2) return;
+    var vb = svg.viewBox && svg.viewBox.baseVal;
+    var W = vb && vb.width ? vb.width : 500;
+    var H = vb && vb.height ? vb.height : 200;
+    var padL = 52;
+    var padR = 12;
+    var padT = 16;
+    var padB = 32;
+    var CW = W - padL - padR;
+    var CH = H - padT - padB;
+    var minP = prices[0];
+    var maxP = prices[0];
+    var i, v;
+    for (i = 1; i < prices.length; i++) {
+      v = prices[i];
+      if (v < minP) minP = v;
+      if (v > maxP) maxP = v;
+    }
+    minP = minP * 0.98;
+    maxP = maxP * 1.02;
+    var range = maxP - minP || 1;
+    svg.setAttribute('onmousemove', "chartHover(event,'" + id + "'," + JSON.stringify(prices) + "," + JSON.stringify(labels) + "," + padL + "," + CW + "," + padT + "," + CH + "," + minP + "," + range + ")");
+    svg.setAttribute('onmouseleave', "chartLeave('" + id + "')");
+  }
+
   function habiller(container) {
     var racine = racineDe(container);
     var svg = container.querySelector('svg');
     if (svg) {
       lisibilite(svg);
       svg.style.touchAction = 'pan-y';
+      retablirSurvol(svg, racine);
     }
     if (!racine || !racine._brvmZoom) return;
     injecterStyle();
