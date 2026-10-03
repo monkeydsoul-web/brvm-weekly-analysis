@@ -1897,7 +1897,7 @@ function renderSignauxParSociete(){
       <td style="color:var(--t2);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.name||''}</td>
       <td><span class="b ${classePrincipale(x)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
       <td style="font-size:11px">${fmtConseil(x)}</td>
-      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1).replace('.',',')+'%':'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -1941,7 +1941,7 @@ function _sparklineDots(hist30, w, h){
   const dot=`<circle cx="${lx}" cy="${ly}" r="1.8" fill="${col}"/>`;
   const perf=vals[0]>0?((vals[vals.length-1]-vals[0])/vals[0]*100):0;
   const sign=perf>=0?'+':'';
-  const tip=`Min: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mn)):Math.round(mn).toLocaleString('fr-FR')} · Max: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mx)):Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1)}%`;
+  const tip=`Min: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mn)):Math.round(mn).toLocaleString('fr-FR')} · Max: ${typeof fmtXOF==='function'?fmtXOF(Math.round(mx)):Math.round(mx).toLocaleString('fr-FR')} · 30j: ${sign}${perf.toFixed(1).replace('.',',')}%`;
   return `<span data-tip="${tip}" style="display:inline-block;cursor:default"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="overflow:visible;display:block">${line}${dot}</svg></span>`;
 }
 
@@ -1999,7 +1999,7 @@ function renderRank(){
       :(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
     const spk=hist30.length>=3?_sparklineDots(hist30,88,28):`<span style="color:var(--t3);font-size:9px;width:88px;display:inline-block">${_isWeekend?_staleLbl:'—'}</span>`;
     let var30='';
-    if(hist30.length>=2){const first=hist30[0].price,last=hist30[hist30.length-1].price;if(first>0){const p=((last-first)/first*100);var30=`<span style="font-size:10px;color:${p>=0?'var(--green)':'var(--red)'};font-family:var(--font-mono);margin-left:4px">${p>=0?'+':''}${p.toFixed(1)}%</span>`;}}
+    if(hist30.length>=2){const first=hist30[0].price,last=hist30[hist30.length-1].price;if(first>0){const p=((last-first)/first*100);var30=`<span style="font-size:10px;color:${p>=0?'var(--green)':'var(--red)'};font-family:var(--font-mono);margin-left:4px">${p>=0?'+':''}${p.toFixed(1).replace('.',',')}%</span>`;}}
 
     // Momentum badge (5j vs 20j) — utiliser extended si dispo
     const _boc20src=_extPts&&_extPts.length>=6?_extPts.map(p=>({price:p.close})):(ph[x.ticker]||[]).filter(p=>p.price&&p.source!=='synthetic').sort((a,b)=>a.date.localeCompare(b.date));
@@ -2020,11 +2020,11 @@ function renderRank(){
       <td>${x.price?(typeof fmtXOF==='function'?fmtXOF(x.price):x.price.toLocaleString('fr-FR')):'N/D'}</td>
       <td style="padding:2px 4px">${spk}${var30}</td>
       <td style="color:${chgC}">${typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'}</td>
-      <td class="col-pe">${x.pe_ref||'—'}×</td>
-      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1)+'%':'—'}</td>
+      <td class="col-pe">${String(x.pe_ref||'—').replace('.',',')}×</td>
+      <td style="color:${(x.div_yield||0)>0?couleurDividende(x.div_yield):'var(--t2)'}">${(x.div_yield||0)>0?x.div_yield.toFixed(1).replace('.',',')+'%':'—'}</td>
       <td style="font-size:10px">${fmtConseil(x)}</td>
       <td><span class="b ${classePrincipale(x)}" data-tip="Note ≥ 7,5 = Intéressant · ≥ 5 et &lt; 7,5 = À surveiller · &lt; 5 = Prudence">${note10txt(x)}<span style="font-size:9px;opacity:0.55">/10</span></span></td>
-      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=couleurNote(sv);return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1)}</td>`;}).join('')}
+      ${['score_graham','score_dcf','score_ddm','score_epv','score_buffett','score_rev_dcf','score_relatif','score_technique'].map(k=>{const sv=x[k]||0;const sc=couleurNote(sv);return`<td class="adv-col" style="color:${sc};font-weight:600">${sv.toFixed(1).replace('.',',')}</td>`;}).join('')}
     </tr>`;}).join('');
   }
   // Masquer par défaut les colonnes avancées
@@ -4431,6 +4431,44 @@ function renderGlossaire() {
 // ── Aide contextuelle — contenu par page ───────────────────────────────────
 const _helpContent = {
   _default: {
+    title: 'Aide',
+    sections: [
+      { h: 'Comment lire les couleurs', p: 'La note sur 10 est verte à partir de 7,5 et orange à partir de 5. Le rendement du dividende est vert à partir de 6 % et orange à partir de 3 %.' },
+      { tip: 'Cliquez sur une société pour ouvrir sa fiche. Ce n\'est pas un conseil en investissement.' },
+    ]
+  },
+  marche: {
+    title: 'Marché',
+    sections: [
+      { h: 'Ce que montre cette page', p: 'Les indices de la Bourse, les matières premières, quelques chiffres de l\'économie, et les dividendes annoncés.' },
+      { h: 'La note sur 10', p: 'Chaque société a une note de 0 à 10. Elle est verte à partir de 7,5 et orange à partir de 5. En dessous de 5, elle est rouge.' },
+      { h: 'Le rendement du dividende', p: 'C\'est le dividende de l\'année divisé par le cours. Il est vert à partir de 6 % et orange à partir de 3 %.' },
+      { h: 'La carte des cours', p: 'Chaque case est une société. Vert : le cours a monté. Rouge : le cours a baissé. Cliquez sur une case pour ouvrir la fiche.' },
+      { tip: 'Ces couleurs aident à lire la page. Ce n\'est pas un conseil en investissement.' },
+    ]
+  },
+  signals: {
+    title: 'Signaux',
+    sections: [
+      { h: 'Les prévisions', p: 'Favorable : les modèles voient un mouvement vers le haut. Neutre : les signaux se mélangent. Faible : les modèles penchent vers le bas, sans aller jusqu\'à défavorable. Défavorable : le cours paraît cher, ou les comptes sont fragiles.' },
+      { h: 'La note sur 10', p: 'Verte à partir de 7,5, orange à partir de 5. En dessous de 5, elle est rouge.' },
+      { h: 'Le rendement', p: 'Vert à partir de 6 %, orange à partir de 3 %.' },
+      { h: 'Le prix cible', p: 'C\'est une estimation du prix juste. « Cible à vérifier » veut dire que ce prix vaut moins du tiers du cours, ou plus de 3 fois le cours. Le chiffre reste affiché. Il ne change ni la note ni le conseil.' },
+      { h: 'Les pastilles du dividende', p: '~ une source : le dividende ne vient que d\'une source. ⚠ à recouper : les sources ne donnent pas le même chiffre.' },
+      { tip: 'Ces prévisions aident à lire les modèles. Ce n\'est pas un conseil en investissement.' },
+    ]
+  },
+  stock: {
+    title: 'Fiche société',
+    sections: [
+      { h: 'Ce que montre la fiche', p: 'Le cours, la note sur 10, le conseil, le dividende et le prix cible de cette société.' },
+      { h: 'La note', p: 'Verte à partir de 7,5, orange à partir de 5. En dessous de 5, elle est rouge.' },
+      { h: 'Le dividende', p: 'Le rendement est vert à partir de 6 % et orange à partir de 3 %. ~ une source : un seul chiffre. ⚠ à recouper : les sources ne sont pas d\'accord.' },
+      { h: 'Le prix cible', p: '« Cible à vérifier » : le prix cible vaut moins du tiers du cours, ou plus de 3 fois le cours. Le chiffre reste affiché. Il ne change ni la note ni le conseil.' },
+      { tip: 'La fiche reprend les chiffres déjà calculés. Ce n\'est pas un conseil en investissement.' },
+    ]
+  },
+  news: {
     title: 'Tableau de bord',
     sections: [
       { h: '🏠 Vue d\'ensemble', p: 'Ici vous voyez un résumé de tout le marché BRVM en un coup d\'œil. Toutes les données sont mises à jour automatiquement.' },
@@ -4499,9 +4537,9 @@ const _helpContent = {
     title: 'Screener',
     sections: [
       { h: '🔍 Le screener, c\'est quoi ?', p: 'Un screener est un outil de filtrage. Vous définissez vos critères et il vous liste instantanément toutes les sociétés qui correspondent à votre profil d\'investisseur.' },
-      { h: '⚙️ Les filtres disponibles', p: '• Score min : 55 pour les meilleures sociétés seulement\n• P/E max : 10 pour les actions pas chères par rapport aux bénéfices\n• Dividende min% : 5 pour un rendement attrayant\n• ROE min% : 15 pour les sociétés très rentables\n• Secteur : filtrer par domaine d\'activité' },
-      { tip: '💡 Recette "pépites BRVM" : Score ≥ 55 + Dividende ≥ 5% + P/E ≤ 10 → les meilleures opportunités selon nos modèles.' },
-      { ex: '📌 Exemple : Score ≥ 60 + ROE ≥ 15% → vous obtenez les sociétés à la fois excellentes et très rentables. Exportez en CSV pour analyser dans Excel.' },
+      { h: '⚙️ Les filtres disponibles', p: '• Score min : 7,5 pour les sociétés les mieux notées, 5 pour élargir\n• P/E max : 10 pour les actions pas chères par rapport aux bénéfices\n• Dividende min % : 6 pour un rendement dans le vert, 3 pour l\'orange\n• ROE min % : 15 pour les sociétés très rentables\n• Secteur : filtrer par domaine d\'activité' },
+      { tip: '💡 Recette simple : Score ≥ 7,5 + Dividende ≥ 6 % + P/E ≤ 10. La note est verte dès 7,5 et orange dès 5. Le rendement est vert dès 6 % et orange dès 3 %.' },
+      { ex: '📌 Exemple : Score ≥ 7,5 et ROE ≥ 15 % retient les sociétés bien notées et très rentables. Le bouton Export CSV enregistre le tableau.' },
       { h: '⚖️ Étape 2 — Composer son portefeuille', p: 'Une fois vos actions repérées, l\'Étape 2 vous aide à les combiner intelligemment pour réduire le risque sans sacrifier le rendement.' },
       { h: '📐 Markowitz — le père de la diversification', p: 'Harry Markowitz (Prix Nobel 1990) a prouvé mathématiquement qu\'on peut réduire le risque en combinant des actions qui ne bougent pas toujours dans le même sens.' },
       { h: '🏆 Max Sharpe (recommandé pour débuter)', p: 'Le ratio de Sharpe mesure le rendement par unité de risque. "Max Sharpe" = le meilleur équilibre. Sharpe ≥ 2 = excellent, ≥ 1 = bien, < 1 = médiocre.' },

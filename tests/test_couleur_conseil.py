@@ -176,7 +176,7 @@ attend(orac.indexOf('class="b br"') !== -1 && orac.indexOf('5,1') !== -1, 'class
 attend(sicc.indexOf('class="b bx"') !== -1, 'classement SICC gris');
 attend(semc.indexOf('class="b bx"') !== -1, 'classement SEMC gris');
 const graham = etit.split('adv-col')[1];
-attend(graham.indexOf('note-amber') !== -1 && graham.indexOf('7.3') !== -1, 'barre Graham reste sur la note');
+attend(graham.indexOf('note-amber') !== -1 && graham.indexOf('7,3') !== -1, 'barre Graham reste sur la note');
 
 loadSidebar();
 const side = nodes.tlItems.innerHTML;

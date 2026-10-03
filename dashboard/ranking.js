@@ -57,7 +57,7 @@ function renderRankCards() {
       const priceStr  = x.price
         ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR') + ' XOF')
         : 'N/D';
-      const divStr = (x.div_yield || 0) > 0 ? 'Div ' + x.div_yield.toFixed(1) + '%' : '—';
+      const divStr = (x.div_yield || 0) > 0 ? 'Div ' + x.div_yield.toFixed(1).replace('.', ',') + '%' : '—';
       const meta   = [x.name, x.sector, x.country].filter(Boolean).join(' · ');
       return `<div role="button" tabindex="0" aria-label="${x.ticker}${x.name ? ' — ' + x.name : ''}"
         onclick="_openStock('${x.ticker}')"
