@@ -927,7 +927,6 @@ def api_company(ticker):
     """Fiche société enrichie : activité, produits, marchés, rapports"""
     try:
         from company_data import get_company
-        import anthropic, os
         t = ticker.upper()
         company = get_company(t)
 

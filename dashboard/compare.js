@@ -32,7 +32,7 @@ function renderCompare() {
     ['ROE %',       x => x.roe ? x.roe.toFixed(1)+'%' : '—',        x => x.roe||0,             true],
     ['Div %',       x => x.div_yield ? x.div_yield.toFixed(1)+'%':'—', x => x.div_yield||0,   true],
     ['BNA (F)',     x => x.eps ? Math.round(x.eps).toLocaleString('fr-FR'):'—', x => x.eps||0, true],
-    ['Cours (XOF)', x => x.price ? x.price.toLocaleString('fr-FR'):'—', x => 0,               false],
+    ['Cours (' + (window._currency || 'XOF') + ')', x => x.price ? (typeof fmtXOF === 'function' ? fmtXOF(x.price) : x.price.toLocaleString('fr-FR')) : '—', x => 0, false],
     ['Verdict PDF', x => x.pdf_verdict||'—',                         x => 0,                   false],
     ['Secteur',     x => x.sector||'—',                              x => 0,                   false],
     ['Rang',        x => '#'+(x.rank||'?'),                          x => -(x.rank||99),        true],

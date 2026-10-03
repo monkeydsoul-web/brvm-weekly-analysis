@@ -63,7 +63,7 @@ function _renderLiveScore(ticker, d){
   const chg=d.live_change_pct||0;
   const chgCol=chg>=0?'var(--green)':'var(--red)';
   const chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
-  const price=d.live_price?d.live_price.toLocaleString('fr-FR')+' XOF':'N/D';
+  const price=d.live_price?(typeof fmtXOF==='function'?fmtXOF(d.live_price):d.live_price.toLocaleString('fr-FR')+' XOF'):'N/D';
   const badge=d.live_source!=='static'?'<span style="background:#00c07620;color:#00c076;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">LIVE</span>':'';
   const models=[['Graham',d.score_graham],['DCF',d.score_dcf],['DDM',d.score_ddm],['EPV',d.score_epv],['Buffett',d.score_buffett],['RevDCF',d.score_rev_dcf],['Relatif',d.score_relatif],['Tech.',d.score_technique]];
   const bars=models.map(function(m){

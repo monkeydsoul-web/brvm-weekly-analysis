@@ -41,6 +41,10 @@ attend(fmtEcartPct(0) === '0,0\u00a0%', JSON.stringify(fmtEcartPct(0)));
 attend(fmtEcartPct(162.8) === '+162,8\u00a0%', JSON.stringify(fmtEcartPct(162.8)));
 attend(fmtEcartPct(null) === '\u2014', 'nul');
 attend(fmtEcartPct(94.2).indexOf('.') === -1, 'pas de point');
+attend(fmtVariationFr(-0.58) === '-0,58\u00a0%', JSON.stringify(fmtVariationFr(-0.58)));
+attend(fmtVariationFr(1.2) === '+1,20\u00a0%', JSON.stringify(fmtVariationFr(1.2)));
+attend(fmtVariationFr(0) === '0,00\u00a0%', JSON.stringify(fmtVariationFr(0)));
+attend(fmtVariationFr(-0.58).indexOf('.') === -1, 'variation sans point');
 """)
 
 

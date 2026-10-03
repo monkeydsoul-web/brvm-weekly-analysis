@@ -55,7 +55,7 @@ window.TERMS = {
   'Capitalisation': {short:'Valeur totale de la société en bourse',long:'Cours × nombre d\'actions. Indique la taille de la société.'},
   'Dividende': {short:'Part des bénéfices distribuée',long:'Argent versé par la société à ses actionnaires, généralement une fois par an.'},
   'Rendement': {short:'Dividende en % du cours',long:'Dividende annuel divisé par le cours. 4% = 4 FCFA reçus pour 100 FCFA investis.'},
-  'XOF': {short:'Franc CFA Ouest',long:'Devise officielle de l\'UEMOA (Sénégal, Côte d\'Ivoire, etc.). 1 EUR ≈ 656 XOF.'},
+  'XOF': {short:'Franc CFA Ouest',long:'Devise officielle de l\'UEMOA (Sénégal, Côte d\'Ivoire, etc.). Parité fixe avec l\'euro.'},
   'UEMOA': {short:'Union économique',long:'Union Économique et Monétaire Ouest-Africaine : 8 pays qui partagent le franc CFA.'},
   'BCEAO': {short:'Banque centrale',long:'Banque Centrale des États de l\'Afrique de l\'Ouest. Émet le franc CFA et fixe les taux.'},
   'AGO': {short:'Assemblée Générale Ordinaire',long:'AG annuelle de routine (résultats, dividendes, etc.).'},
@@ -269,27 +269,38 @@ function fmtEcartPct(n){
   var corps=v.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
   return (v>0?'+':'')+corps+'\u00a0%';
 }
+function fmtVariationFr(n){
+  if(n==null||n===''||!isFinite(Number(n))) return '—';
+  var v=Number(n);
+  if(v===0) v=0;
+  var corps=v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (v>0?'+':'')+corps+'\u00a0%';
+}
 
 // ── Convertisseur de devises ───────────────────────────────────────────────
+// EUR : une seule parité fixe. USD : FCFA_per_USD de /api/macro, sans taux de repli.
+// L'en-tête divise 1 000 par ce taux (pas un cours externe arrondi à l'envers).
+var XOF_PAR_EUR = 655.957;
 window._currency = 'XOF';
-window._rates = { EUR: null, USD: null };
+window._rates = { EUR: 1 / XOF_PAR_EUR, USD: null };
+window._xofParUsd = null;
 
-function fetchExchangeRates() {
-  fetch('https://api.exchangerate-api.com/v4/latest/XOF')
-    .then(r => r.json())
-    .then(d => {
-      window._rates.EUR = d.rates.EUR;
-      window._rates.USD = d.rates.USD;
-      _updateCurrencyUI();
-    })
-    .catch(() => {
-      // Taux de secours BCEAO (1 EUR ≈ 655.96 XOF)
-      window._rates.EUR = 1 / 655.96;
-      window._rates.USD = 1 / 600;
-      _updateCurrencyUI();
-    });
-  // Rafraîchir toutes les heures
-  setTimeout(fetchExchangeRates, 3600000);
+function appliquerTauxMacro(m) {
+  var n = null;
+  if (m && typeof m.FCFA_per_USD === 'number' && isFinite(m.FCFA_per_USD) && m.FCFA_per_USD > 0) {
+    n = m.FCFA_per_USD;
+  }
+  window._xofParUsd = n;
+  window._rates.EUR = 1 / XOF_PAR_EUR;
+  window._rates.USD = n ? (1 / n) : null;
+  _ecrirePariteFixe();
+  _updateCurrencyUI();
+}
+
+function _ecrirePariteFixe() {
+  var el = document.getElementById('parite-xof-eur');
+  if (!el) return;
+  el.textContent = XOF_PAR_EUR.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3});
 }
 
 function _fmtTaux(n) {
@@ -297,15 +308,15 @@ function _fmtTaux(n) {
 }
 function _updateCurrencyUI() {
   const el = document.getElementById('curr-rate');
-  if (el && window._rates.EUR) {
-    const eur = _fmtTaux(1000 * window._rates.EUR);
-    const usd = window._rates.USD ? _fmtTaux(1000 * window._rates.USD) : '?';
-    el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
-  }
+  if (!el) return;
+  const eur = _fmtTaux(1000 / XOF_PAR_EUR);
+  const usd = window._xofParUsd ? _fmtTaux(1000 / window._xofParUsd) : '—';
+  el.textContent = `1 000 XOF = ${eur} € / ${usd} $`;
 }
 
 function setCurrency(c) {
   window._currency = c;
+  try { localStorage.setItem('brvm_currency', c); } catch (e) {}
   var code = String(c || '').toLowerCase();
   ['xof','eur','usd'].forEach(id => {
     const btn = document.getElementById('cb-' + id);
@@ -317,18 +328,41 @@ function setCurrency(c) {
   // Re-rendu de la page active
   const active = document.querySelector('.page.on')?.id?.replace('page-','');
   if (active === 'rank') renderRankLive();
-  else if (active === 'welcome' && typeof renderAccueil === 'function') renderAccueil();
+  else if (active === 'welcome' && typeof renderAccueil === 'function') {
+    renderAccueil();
+    if (typeof _remplirMouvements === 'function') _remplirMouvements(window._accueilMarche);
+  }
   else if (active === 'income') renderDiv();
   else if (active === 'valuation') renderTargets();
   else if (active === 'stock' && window._openTicker) showStock(window._openTicker);
+  var cmpModal = document.getElementById('cmp-modal');
+  if (cmpModal && cmpModal.classList && typeof cmpModal.classList.contains === 'function' && cmpModal.classList.contains('show')) {
+    openCompareModal();
+  }
+  var cmpAlt = document.getElementById('compare-modal');
+  if (cmpAlt && cmpAlt.style && cmpAlt.style.display === 'flex' && typeof renderCompare === 'function') {
+    renderCompare();
+  }
+  var pageScr = document.getElementById('page-screener');
+  if (pageScr && pageScr.classList && typeof pageScr.classList.contains === 'function' && pageScr.classList.contains('on') && typeof runScreener === 'function') {
+    runScreener();
+  } else if (typeof _renderScreenerTable === 'function' && typeof _scrResults !== 'undefined' && _scrResults.length) {
+    _renderScreenerTable();
+  }
+}
+
+function _baseXof(devise) {
+  if (devise === 'EUR') return XOF_PAR_EUR;
+  if (devise === 'USD') return window._xofParUsd || null;
+  return null;
 }
 
 function convertXOF(n) {
   const num = Number(n);
   if (!num || isNaN(num)) return num;
-  if (window._currency === 'EUR' && window._rates.EUR) return num * window._rates.EUR;
-  if (window._currency === 'USD' && window._rates.USD) return num * window._rates.USD;
-  return num;
+  const base = _baseXof(window._currency);
+  if (!base) return num;
+  return num / base;
 }
 
 function currencySymbol() {
@@ -337,17 +371,26 @@ function currencySymbol() {
   return 'XOF';
 }
 
-// Formate un montant XOF dans la devise active
-function fmtXOF(n) {
+function fmtMontant(n, devise) {
   if (n == null) return '—';
   const raw = Number(n);
-  const sym = currencySymbol();
-  if (sym === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
-  const val = convertXOF(raw);
+  if (!isFinite(raw)) return '—';
+  const code = devise || 'XOF';
+  if (code === 'XOF') return raw.toLocaleString('fr-FR') + ' XOF';
+  const base = _baseXof(code);
+  if (!base) return '—';
+  const val = raw / base;
   const str = val >= 100
     ? val.toLocaleString('fr-FR', {maximumFractionDigits: 0})
     : val.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  return sym === '€' ? str + ' €' : '$ ' + str;
+  if (code === 'EUR') return str + ' €';
+  if (code === 'USD') return str + ' $';
+  return str;
+}
+
+// Formate un montant XOF dans la devise active
+function fmtXOF(n) {
+  return fmtMontant(n, window._currency || 'XOF');
 }
 
 // ── Mobile menu ────────────────────────────────────────────────────────────
@@ -1326,12 +1369,17 @@ async function init(){
     if (typeof demanderVariation === 'function') {
       demanderVariation(false).catch(function() {});
     }
+    appliquerTauxMacro(m);
+    try {
+      var _deviseSauvee = localStorage.getItem('brvm_currency');
+      if (_deviseSauvee === 'EUR' || _deviseSauvee === 'USD') setCurrency(_deviseSauvee);
+    } catch (e) {}
     if (document.getElementById('page-welcome')?.classList.contains('on') && typeof renderAccueil === 'function') renderAccueil();
     renderMacro(m);
     renderIndexFx(m);
     try{favorites=JSON.parse(localStorage.getItem('brvm_favorites')||'[]');}catch{favorites=[];}
     if(document.readyState==='loading') await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));
-    loadAlertsLocal();updateAlertBadge();initRankHistory();fetchExchangeRates();initServiceWorker();
+    loadAlertsLocal();updateAlertBadge();initRankHistory();initServiceWorker();
     window._priceHistory={};
     window._extSparklines={};
     // Charger stories storytelling (Sprint 9B) — fire-and-forget, pas bloquant
@@ -2388,9 +2436,7 @@ function simCalc(){
   // KPIs
   const kpiEl=document.getElementById('simKPIs');
   if(kpiEl){
-    const cur=_simCur;
-    const r=window._rates||{EUR:1/655,USD:1/615};
-    const toDisp=v=>_simCur==='XOF'?fmtXOF(v):_simCur==='EUR'?'€'+Math.round(v*(r.EUR||1/655)).toLocaleString('fr-FR'):'$'+Math.round(v*(r.USD||1/615)).toLocaleString('fr-FR');
+    const toDisp=v=>fmtMontant(v,_simCur);
     kpiEl.innerHTML=[
       ['Dividendes annuels', toDisp(divAn1), 'var(--amber)'],
       ['Par mois (an 1)',     toDisp(divAn1/12), 'var(--amber)'],
@@ -4593,7 +4639,7 @@ function openCompareModal() {
   const libVar = (typeof libelleSeanceVariation === 'function' && libelleSeanceVariation()) || 'Var%';
   const kpis = [
     ['Score /10', x => note10txt(x)+'/10', x => note10num(x), true],
-    ['Cours', x => x.price ? (x.price).toLocaleString('fr-FR')+' XOF' : '—', () => null, false],
+    ['Cours', x => x.price ? fmtXOF(x.price) : '—', () => null, false],
     [libVar, x => (typeof baliseVariationJour==='function'?baliseVariationJour(x.ticker,''):'—'), x => (typeof variationJour==='function'?variationJour(x.ticker).pct:null), true],
     ['P/E', x => (x.pe_ref||x.pe_hist) ? (x.pe_ref||x.pe_hist).toFixed(1)+'×' : '—', x => -(x.pe_ref||x.pe_hist||999), true],
     ['P/B', x => (x.pb_ref||x.pb_hist) ? (x.pb_ref||x.pb_hist).toFixed(1)+'×' : '—', x => -(x.pb_ref||x.pb_hist||999), true],

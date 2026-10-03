@@ -73,12 +73,13 @@ def test_styles_carrousel_seance_et_pied_dans_le_flux():
 @pytest.mark.skipif(shutil.which("node") is None, reason="node absent")
 def test_quatre_cartes_par_note_et_conseil_existant():
     source = _entre(CORE, "function note10num", "function rapportAnnuelTxt")
-    source += _entre(CORE, "function convertXOF", "function toggleMobMenu")
+    source += _entre(CORE, "function _baseXof", "function toggleMobMenu")
     source += _entre(CORE, "function conseilAffiche", "function showChangelog")
     source += JS
     script = source + r"""
 function attend(cond, msg) { if (!cond) { console.error(msg); process.exit(1); } }
-global.window = { _currency: 'XOF', _rates: { EUR: null, USD: null } };
+var XOF_PAR_EUR = 655.957;
+global.window = { _currency: 'XOF', _xofParUsd: null, _rates: { EUR: null, USD: null } };
 const rows = [
   { ticker: 'BAS', name: 'Bas Societe', sector: 'Banque', note10: 4.2, price: 1000, change_pct: -1.5, rank: 30,
     conseil: 'eviter', conseil_libelle: 'Prudence', conseil_couleur: 'rouge', statut: 'cote' },
@@ -164,7 +165,6 @@ attend(colB.indexOf('data-ticker="BICC"') !== -1, 'bicc cliquable');
 attend(colB.indexOf('data-ticker="SIVC"') === -1, 'sivc hors classement');
 attend(_sousTitreSeance(null) === 'Plus fortes variations', 'sans date inventee');
 window._currency = 'EUR';
-window._rates.EUR = 1 / 655.96;
 const eur = _fmtCours(65596);
 attend(eur.indexOf('€') !== -1, 'suit EUR ' + eur);
 attend(eur.indexOf('FCFA') === -1 && eur.indexOf('XOF') === -1, 'EUR sans XOF');
